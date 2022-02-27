@@ -1,0 +1,8 @@
+
+#define MATRIX_TRANSFORM_SEGMENT                0xC
+#define MATRIX_TRANSFORM_SEGMENT_ADDRESS        (MATRIX_TRANSFORM_SEGMENT << 24)
+
+#define CHARACTER_ANIMATION_SEGMENT             0xD
+#define CHARACTER_ANIMATION_SEGMENT_ADDRESS     (CHARACTER_ANIMATION_SEGMENT << 24)
+
+#define ANIM_DATA_ROM_ADDRESS(segmentStart, segmentedAddress) ((void*)((u32)(segmentedAddress) - CHARACTER_ANIMATION_SEGMENT_ADDRESS + (u32)segmentStart))
