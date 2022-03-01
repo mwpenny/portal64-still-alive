@@ -25,3 +25,10 @@ void matrixPerspective(float matrix[4][4], unsigned short* perspNorm, float l, f
 	    }
 	}
 }
+
+void matrixVec3Mul(float matrix[4][4], struct Vector3* input, struct Vector4* output) {
+    output->x = matrix[0][0] * input->x + matrix[1][0] * input->y + matrix[2][0] * input->z + matrix[3][0];
+    output->y = matrix[0][1] * input->x + matrix[1][1] * input->y + matrix[2][1] * input->z + matrix[3][1];
+    output->z = matrix[0][2] * input->x + matrix[1][2] * input->y + matrix[2][2] * input->z + matrix[3][2];
+    output->w = matrix[0][3] * input->x + matrix[1][3] * input->y + matrix[2][3] * input->z + matrix[3][3];
+}

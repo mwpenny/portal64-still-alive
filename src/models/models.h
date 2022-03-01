@@ -4,4 +4,4 @@
 #include "subject.h"
 #include "sphere.h"
 
-extern Gfx portal_mask_Plane_mesh[];
+extern Gfx portal_mask_Circle_mesh[];

@@ -5,6 +5,7 @@
 struct Vector2 gRight2 = {1.0f, 0.0f};
 struct Vector2 gUp2 = {0.0f, 1.0f};
 struct Vector2 gZeroVec2 = {0.0f, 0.0f};
+struct Vector2 gOneVec2 = {1.0f, 1.0f};
 
 void vector2ComplexMul(struct Vector2* a, struct Vector2* b, struct Vector2* out) {
     float x = a->x * b->x - a->y * b->y;

@@ -8,6 +8,7 @@ struct Vector2 {
 extern struct Vector2 gRight2;
 extern struct Vector2 gUp2;
 extern struct Vector2 gZeroVec2;
+extern struct Vector2 gOneVec2;
 
 void vector2ComplexMul(struct Vector2* a, struct Vector2* b, struct Vector2* out);
 void vector2ComplexConj(struct Vector2* a, struct Vector2* out);

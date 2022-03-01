@@ -6,11 +6,13 @@
 #include "shadow_renderer.h"
 #include "shadow_map.h"
 #include "point_light.h"
+#include "portal.h"
 #include "../player/player.h"
 
 struct Scene {
     struct Camera camera;
     struct Player player;
+    struct Portal portals[2];
 };
 
 struct GraphicsTask;
