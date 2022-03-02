@@ -149,6 +149,20 @@ void screenClipperBoundingPoints(struct ScreenClipper* clipper, struct Vector3* 
 
         if (!isClipped) {
             screenClipperIncludePoint(&transformedPoint, output);
+        } else {
+            if (!(isClipped & ClipperBoundsW)) {
+                if (isClipped & ClipperBoundsLeft) {
+                    output->min.x = -1.0f;
+                } else if (isClipped & ClipperBoundsRight) {
+                    output->max.x = 1.0f;
+                } 
+
+                if (isClipped & ClipperBoundsDown) {
+                    output->min.y = -1.0f;
+                } else if (isClipped & ClipperBoundsUp) {
+                    output->max.y = 1.0f;
+                } 
+            }
         }
 
         previousPoint = transformedPoint;

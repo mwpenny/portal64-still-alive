@@ -8,9 +8,9 @@ void playerInit(struct Player* player) {
     transformInitIdentity(&player->transform);
 }
 
-#define PLAYER_SPEED    (SCENE_SCALE * 5.0f)
+#define PLAYER_SPEED    (SCENE_SCALE * 2.0f)
 
-#define ROTATE_RATE     (M_PI)
+#define ROTATE_RATE     (M_PI * 0.25f)
 
 void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Vector3 forward;

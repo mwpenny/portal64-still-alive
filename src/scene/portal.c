@@ -18,6 +18,8 @@ struct Vector3 gPortalOutline[] = {
     {-0.353553f * SCENE_SCALE, 0.707107f * SCENE_SCALE, 0.0f},
 };
 
+struct Quaternion gVerticalFlip = {0.0f, 1.0f, 0.0f, 0.0f};
+
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState) {
     props->camera = *camera;
     props->aspectRatio = aspectRatio;
@@ -59,14 +61,28 @@ void portalInit(struct Portal* portal, enum PortalFlags flags) {
 
 void portalRender(struct Portal* portal, struct Portal* otherPortal, struct RenderProps* props, SceneRenderCallback sceneRenderer, void* data, struct RenderState* renderState) {
     if (props->currentDepth == 0) {
-        // TODO render non see through portal
+        Mtx* matrix = renderStateRequestMatrices(renderState, 1);
+
+        transformToMatrixL(&portal->transform, matrix);
+        gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
+        gDPSetPrimColor(renderState->dl++, 0, 0, 255, 128, 0, 255);
+        gSPDisplayList(renderState->dl++, portal_outline_portal_outline_mesh);
+        gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
         return;
     }
     
     struct ScreenClipper clipper;
     float portalTransform[4][4];
 
-    transformToMatrix(&portal->transform, portalTransform);
+    struct Transform finalTransform;
+
+    finalTransform = portal->transform;
+
+    if (portal->flags & PortalFlagsOddParity) {
+        quatMultiply(&portal->transform.rotation, &gVerticalFlip, &finalTransform.rotation);
+    }
+    
+    transformToMatrix(&finalTransform, portalTransform);
 
     screenClipperInitWithCamera(&clipper, &props->camera, (float)SCREEN_WD / (float)SCREEN_HT, portalTransform);
 
@@ -74,7 +90,7 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
 
     screenClipperBoundingPoints(&clipper, gPortalOutline, sizeof(gPortalOutline) / sizeof(*gPortalOutline), &clippingBounds);
 
-    if (clippingBounds.min.x < clippingBounds.max.x) {
+    if (clippingBounds.min.x < clippingBounds.max.x && clippingBounds.min.y < clippingBounds.max.y) {
         int minX = CALC_SCREEN_SPACE(clippingBounds.min.x, SCREEN_WD);
         int maxX = CALC_SCREEN_SPACE(clippingBounds.max.x, SCREEN_WD);
         int minY = CALC_SCREEN_SPACE(-clippingBounds.max.y, SCREEN_HT);
@@ -94,6 +110,12 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
         guMtxF2L(portalTransform, matrix);
         gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
         gSPDisplayList(renderState->dl++, portal_mask_Circle_mesh);
+        if (portal->flags & PortalFlagsOddParity) {
+            gDPSetPrimColor(renderState->dl++, 0, 0, 0, 128, 255, 255);
+        } else {
+            gDPSetPrimColor(renderState->dl++, 0, 0, 255, 128, 0, 255);
+        }
+        gSPDisplayList(renderState->dl++, portal_outline_portal_outline_mesh);
         gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
     }
 
