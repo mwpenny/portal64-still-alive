@@ -34,7 +34,7 @@ Gfx mat_portal_mask_portal_mask[] = {
 	gsDPPipeSync(),
     gsDPSetRenderMode(RM_UPDATE_Z(1), RM_UPDATE_Z(2)),
 	gsDPSetCombineLERP(0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE),
-	gsDPSetPrimColor(0, 0, 255, 128, 0, 128),
+	gsDPSetPrimColor(0, 0, 255, 128, 0, 0),
 	gsSPEndDisplayList(),
 };
 
@@ -43,7 +43,7 @@ Gfx portal_mask_Circle_mesh[] = {
 	gsSPDisplayList(portal_mask_Circle_mesh_tri_0),
 	gsDPPipeSync(),
     gsSPGeometryMode(G_CULL_BACK, G_CULL_FRONT),
-	gsDPSetPrimColor(0, 0, 0, 128, 255, 128),
+	gsDPSetPrimColor(0, 0, 0, 128, 255, 0),
 	gsSP1Triangle(0, 1, 2, 0),
 	gsSP1Triangle(0, 2, 3, 0),
 	gsSP1Triangle(2, 4, 3, 0),

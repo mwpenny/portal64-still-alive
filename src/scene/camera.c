@@ -26,11 +26,11 @@ void cameraBuildProjectionMatrix(struct Camera* camera, float matrix[4][4], u16*
     guPerspectiveF(matrix, perspectiveNormalize, camera->fov, aspectRatio, camera->nearPlane * planeScalar, camera->farPlane * planeScalar, 1.0f);
 }
 
-void cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, float aspectRatio) {
+Mtx* cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, float aspectRatio, u16* perspNorm) {
     Mtx* viewProjMatrix = renderStateRequestMatrices(renderState, 2);
     
     if (!viewProjMatrix) {
-        return;
+        return NULL;
     }
 
     guMtxIdent(&viewProjMatrix[0]);
@@ -48,4 +48,10 @@ void cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState,
 
     gSPMatrix(renderState->dl++, osVirtualToPhysical(&viewProjMatrix[1]), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPPerspNormalize(renderState->dl++, perspectiveNormalize);
+
+    if (perspNorm) {
+        *perspNorm = perspectiveNormalize;
+    }
+
+    return &viewProjMatrix[1];
 }

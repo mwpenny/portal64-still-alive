@@ -39,14 +39,25 @@ void sceneInit(struct Scene* scene) {
     quatAxisAngle(&gUp, M_PI * 0.5f, &scene->portals[1].transform.rotation);
 }
 
-void sceneRender(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
-    cameraSetupMatrices(&scene->camera, renderState, (float)SCREEN_WD / (float)SCREEN_HT);
+void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {
+    struct Scene* scene = (struct Scene*)data;
+
+    portalRender(&scene->portals[0], &scene->portals[1], properties, sceneRenderWithProperties, data, renderState);
+    portalRender(&scene->portals[1], &scene->portals[0], properties, sceneRenderWithProperties, data, renderState);
+
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+    gSPDisplayList(renderState->dl++, test_chamber_00_0_test_chamber_00_0_mesh);
+}
 
-    portalRender(&scene->portals[0], &scene->portals[1], &scene->camera, renderState);
-    portalRender(&scene->portals[1], &scene->portals[2], &scene->camera, renderState);
+void sceneRender(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
+    struct RenderProps renderProperties;
 
-    // gSPDisplayList(renderState->dl++, test_chamber_00_0_test_chamber_00_0_mesh);
+    renderPropsInit(&renderProperties, &scene->camera, (float)SCREEN_WD / (float)SCREEN_HT, renderState);
+
+    renderProperties.camera = scene->camera;
+    renderProperties.currentDepth = STARTING_RENDER_DEPTH;
+
+    sceneRenderWithProperties(scene, &renderProperties, renderState);
 }
 
 unsigned ignoreInputFrames = 10;
