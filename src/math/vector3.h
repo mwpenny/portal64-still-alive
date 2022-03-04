@@ -16,6 +16,8 @@ extern struct Vector3 gForward;
 extern struct Vector3 gZeroVec;
 extern struct Vector3 gOneVec;
 
+#define VECTOR3_AS_ARRAY(vector) ((float*)(vector))
+
 void vector3Negate(struct Vector3* in, struct Vector3* out);
 void vector3Scale(struct Vector3* in, struct Vector3* out, float scale);
 void vector3Add(struct Vector3* a, struct Vector3* b, struct Vector3* out);

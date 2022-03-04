@@ -1,0 +1,1 @@
+#include "static_scene.h"

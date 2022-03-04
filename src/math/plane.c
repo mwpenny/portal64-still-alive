@@ -12,3 +12,13 @@ int planeRayIntersection(struct Plane* plane, struct Vector3* rayOrigin, struct 
 
     return 1;
 }
+
+
+float planePointDistance(struct Plane* plane, struct Vector3* point) {
+    return vector3Dot(&plane->normal, point) + plane->d;
+}
+
+void planeProjectPoint(struct Plane* plane, struct Vector3* point, struct Vector3* output) {
+    float distance = planePointDistance(plane, point);
+    vector3AddScaled(point, &plane->normal, distance, output);
+}
