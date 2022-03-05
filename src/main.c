@@ -105,7 +105,8 @@ static void gameProc(void* arg) {
         (void *)(scheduleStack + OS_SC_STACKSIZE/8),
         SCHEDULER_PRIORITY,
         schedulerMode,
-        1
+        // 30 fps
+        2
     );
 
     schedulerCommandQueue = osScGetCmdQ(&scheduler);

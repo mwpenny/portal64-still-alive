@@ -11,8 +11,7 @@ struct CollisionBox {
     struct Vector3 sideLength;
 };
 
+int collisionBoxCollidePlane(struct CollisionBox* box, struct Transform* boxTransform, struct Plane* plane, struct ContactPoint* output);
 void collisionBoxCollideQuad(struct CollisionBox* box, struct Transform* boxTransform, struct CollisionQuad* quad);
-
-void collisionBoxCollidePlane(struct CollisionBox* box, struct Transform* boxTransform, struct Plane* plane, ContactCallback callback, void* callbackData);
 
 #endif

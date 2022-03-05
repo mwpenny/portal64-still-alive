@@ -99,6 +99,13 @@ void quatMultiply(struct Quaternion* a, struct Quaternion* b, struct Quaternion*
     out->w = a->w*b->w - a->x*b->x - a->y*b->y - a->z*b->z;
 }
 
+void quatAdd(struct Quaternion* a, struct Quaternion* b, struct Quaternion* out) {
+    out->x = a->x + b->x;
+    out->x = a->y + b->y;
+    out->x = a->z + b->z;
+    out->x = a->w + b->w;
+}
+
 void quatToMatrix(struct Quaternion* q, float out[4][4]) {
     float xx = q->x*q->x;
     float yy = q->y*q->y;
@@ -194,4 +201,18 @@ void quatLerp(struct Quaternion* a, struct Quaternion* b, float t, struct Quater
     out->w = tInv * a->w + t * b->w;
 
     quatNormalize(out, out);
+}
+
+void quatApplyAngularVelocity(struct Quaternion* input, struct Vector3* w, float timeStep, struct Quaternion* output) {
+    struct Quaternion velocityAsQuat;
+    velocityAsQuat.w = 0.0f;
+    velocityAsQuat.x = w->x * timeStep * 0.5f;
+    velocityAsQuat.y = w->y * timeStep * 0.5f;
+    velocityAsQuat.z = w->z * timeStep * 0.5f;
+
+    struct Quaternion intermediate;
+    quatMultiply(&velocityAsQuat, input, &intermediate);
+
+    quatAdd(&intermediate, input, output);
+    quatNormalize(output, output);
 }

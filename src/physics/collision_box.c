@@ -4,17 +4,6 @@
 
 #define NORMAL_ZERO_BIAS    0.001f
 
-void collisionBoxCollideQuad(struct CollisionBox* box, struct Transform* boxTransform, struct CollisionQuad* quad) {
-    struct Quaternion inverseBoxRotation;
-
-    quatConjugate(&boxTransform->rotation, &inverseBoxRotation);
-
-    struct Vector3 normalInBoxSpace;
-
-    quatMultVector(&inverseBoxRotation, &quad->normal, &normalInBoxSpace);
-
-}
-
 int _collsionBuildPlaneContact(struct Transform* boxTransform, struct Plane* plane, struct Vector3* point, struct ContactPoint* contact) {
     transformPoint(boxTransform, point, &contact->point);
 
@@ -24,17 +13,19 @@ int _collsionBuildPlaneContact(struct Transform* boxTransform, struct Plane* pla
         return 0;
     }
 
+    contact->normal = plane->normal;
+
     vector3AddScaled(&contact->point, &plane->normal, -contact->intersectionDepth, &contact->point);
     return 1;
 }
 
 
-void collisionBoxCollidePlane(struct CollisionBox* box, struct Transform* boxTransform, struct Plane* plane, ContactCallback callback, void* callbackData) {
+int collisionBoxCollidePlane(struct CollisionBox* box, struct Transform* boxTransform, struct Plane* plane, struct ContactPoint* output) {
     float boxDistance = planePointDistance(plane, &boxTransform->position);
     float maxBoxReach = vector3MagSqrd(&box->sideLength);
 
     if (boxDistance > maxBoxReach || boxDistance < 0.0f) {
-        return;
+        return 0;
     }
 
     struct Quaternion inverseBoxRotation;
@@ -62,52 +53,64 @@ void collisionBoxCollidePlane(struct CollisionBox* box, struct Transform* boxTra
         }
     }
 
-    struct ContactPoint contact;
-    contact.normal = plane->normal;
+    int contactIndex = 0;
     if (splitAxisCount == 0) {
-        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &contact)) {
-            return;
+        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output[contactIndex])) {
+            return contactIndex;
         }
-        callback(callbackData, &contact);
+        ++contactIndex;
     } else if (splitAxisCount == 1) {
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[0]] = VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[0]];
-        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &contact)) {
-            return;
+        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output[contactIndex])) {
+            return contactIndex;
         }
-        callback(callbackData, &contact);
+        ++contactIndex;
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[0]] = -VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[0]];
-        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &contact)) {
-            return;
+        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output[contactIndex])) {
+            return contactIndex;
         }
-        callback(callbackData, &contact);
+        ++contactIndex;
     } else if (splitAxisCount == 2) {
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[0]] = VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[0]];
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[1]] = VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[1]];
-        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &contact)) {
-            return;
+        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output[contactIndex])) {
+            return contactIndex;
         }
-        callback(callbackData, &contact);
+        ++contactIndex;
 
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[0]] = -VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[0]];
-        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &contact)) {
-            return;
+        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output[contactIndex])) {
+            return contactIndex;
         }
-        callback(callbackData, &contact);
+        ++contactIndex;
 
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[0]] = VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[0]];
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[1]] = -VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[1]];
-        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &contact)) {
-            return;
+        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output[contactIndex])) {
+            return contactIndex;
         }
-        callback(callbackData, &contact);
+        ++contactIndex;
 
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[0]] = -VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[0]];
-        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &contact)) {
-            return;
+        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output[contactIndex])) {
+            return contactIndex;
         }
-        callback(callbackData, &contact);
+        ++contactIndex;
     } else {
         // should not happen
-        return;
+        return contactIndex;
     }
+
+    return contactIndex;
+}
+
+void collisionBoxCollideQuad(struct CollisionBox* box, struct Transform* boxTransform, struct CollisionQuad* quad) {
+    struct Quaternion inverseBoxRotation;
+
+    quatConjugate(&boxTransform->rotation, &inverseBoxRotation);
+
+    struct Vector3 normalInBoxSpace;
+
+    quatMultVector(&inverseBoxRotation, &quad->normal, &normalInBoxSpace);
+
 }
