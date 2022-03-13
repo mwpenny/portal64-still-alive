@@ -8,7 +8,7 @@ void playerInit(struct Player* player) {
     transformInitIdentity(&player->transform);
 }
 
-#define PLAYER_SPEED    (SCENE_SCALE * 2.0f)
+#define PLAYER_SPEED    (2.0f)
 
 #define ROTATE_RATE     (M_PI * 0.25f)
 
@@ -27,15 +27,15 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
     OSContPad* controllerInput = controllersGetControllerData(0);
 
-    vector3AddScaled(&player->transform.position, &forward, -controllerInput->stick_y * gTimeDelta * PLAYER_SPEED / 80.0f, &player->transform.position);
-    vector3AddScaled(&player->transform.position, &right, controllerInput->stick_x * gTimeDelta * PLAYER_SPEED / 80.0f, &player->transform.position);
+    vector3AddScaled(&player->transform.position, &forward, -controllerInput->stick_y * FIXED_DELTA_TIME * PLAYER_SPEED / 80.0f, &player->transform.position);
+    vector3AddScaled(&player->transform.position, &right, controllerInput->stick_x * FIXED_DELTA_TIME * PLAYER_SPEED / 80.0f, &player->transform.position);
 
     float rotate = 0.0f;
 
     if (controllerGetButton(0, L_CBUTTONS)) {
-        rotate += ROTATE_RATE * gTimeDelta;
+        rotate += ROTATE_RATE * FIXED_DELTA_TIME;
     } else if (controllerGetButton(0, R_CBUTTONS)) {
-        rotate -= ROTATE_RATE * gTimeDelta;
+        rotate -= ROTATE_RATE * FIXED_DELTA_TIME;
     }
 
     if (rotate) {

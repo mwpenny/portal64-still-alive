@@ -111,3 +111,11 @@ char floatTos8norm(float input) {
         return (char)result;
     }
 }
+
+float safeInvert(float input) {
+    if (input == 0.0f) {
+        return 0.0f;
+    }
+
+    return 1.0f / input;
+}

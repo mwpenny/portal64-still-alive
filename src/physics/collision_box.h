@@ -6,12 +6,17 @@
 #include "../math/vector3.h"
 #include "../math/transform.h"
 #include "../math/plane.h"
+#include "contact_solver.h"
 
 struct CollisionBox {
     struct Vector3 sideLength;
 };
 
-int collisionBoxCollidePlane(struct CollisionBox* box, struct Transform* boxTransform, struct Plane* plane, struct ContactPoint* output);
+extern struct ColliderCallbacks gCollisionBoxCallbacks;
+
+int collisionBoxCollidePlane(void* data, struct Transform* boxTransform, struct Plane* plane, struct ContactConstraintState* contact);
 void collisionBoxCollideQuad(struct CollisionBox* box, struct Transform* boxTransform, struct CollisionQuad* quad);
+
+float collisionBoxSolidMofI(struct ColliderTypeData* typeData, float mass);
 
 #endif

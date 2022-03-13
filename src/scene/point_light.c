@@ -39,7 +39,7 @@ void pointLightSetColor(struct PointLight* pointLight, struct Coloru8* color) {
 }
 
 void pointLightAttenuate(struct PointLight* pointLight, float distnaceSq, struct Coloru8* output) {
-    float factor = pointLight->intensity * (SCENE_SCALE * SCENE_SCALE) / distnaceSq;
+    float factor = pointLight->intensity / distnaceSq;
 
     factor = MIN(factor, pointLight->maxFactor);
     colorU8Lerp(&gColorBlack, &pointLight->color, factor, output);
@@ -152,8 +152,8 @@ void pointLightableMeshInit(struct PointLightableMesh* mesh, Vtx* inputVertices,
     }
 }
 
-#define RENDERED_LIGHT_HEIGHT       (0.5f * SCENE_SCALE)
-#define RENDERED_LIGHT_TEX_SIZE     (4.0f * SCENE_SCALE)
+#define RENDERED_LIGHT_HEIGHT       (0.5f)
+#define RENDERED_LIGHT_TEX_SIZE     (4.0f)
 #define RENDERED_LIGHT_TEX_UV_SIZE  4096
 
 void pointLightableCalc(struct PointLightableMesh* mesh, struct Transform* meshTransform, struct PointLight* pointLight) {

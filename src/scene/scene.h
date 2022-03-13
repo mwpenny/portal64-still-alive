@@ -8,11 +8,13 @@
 #include "point_light.h"
 #include "portal.h"
 #include "../player/player.h"
+#include "cube.h"
 
 struct Scene {
     struct Camera camera;
     struct Player player;
     struct Portal portals[2];
+    struct Cube cube;
 };
 
 struct GraphicsTask;

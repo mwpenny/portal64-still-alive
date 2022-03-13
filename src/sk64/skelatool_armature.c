@@ -36,7 +36,7 @@ void skRenderObject(struct SKArmature* object, struct RenderState* intoState) {
 
 void skCalculateTransforms(struct SKArmature* object, Mtx* into) {
     for (int i = 0; i < object->numberOfBones; ++i) {
-        transformToMatrixL(&object->boneTransforms[i], &into[i]);
+        transformToMatrixL(&object->boneTransforms[i], &into[i], 1.0f);
     }
 }
 

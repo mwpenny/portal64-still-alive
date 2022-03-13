@@ -63,7 +63,7 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
     if (props->currentDepth == 0) {
         Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
-        transformToMatrixL(&portal->transform, matrix);
+        transformToMatrixL(&portal->transform, matrix, SCENE_SCALE);
         gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
         gDPSetPrimColor(renderState->dl++, 0, 0, 255, 128, 0, 255);
         gSPDisplayList(renderState->dl++, portal_outline_portal_outline_mesh);
@@ -82,7 +82,7 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
         quatMultiply(&portal->transform.rotation, &gVerticalFlip, &finalTransform.rotation);
     }
     
-    transformToMatrix(&finalTransform, portalTransform);
+    transformToMatrix(&finalTransform, portalTransform, SCENE_SCALE);
 
     screenClipperInitWithCamera(&clipper, &props->camera, (float)SCREEN_WD / (float)SCREEN_HT, portalTransform);
 

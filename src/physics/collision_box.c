@@ -4,23 +4,40 @@
 
 #define NORMAL_ZERO_BIAS    0.001f
 
-int _collsionBuildPlaneContact(struct Transform* boxTransform, struct Plane* plane, struct Vector3* point, struct ContactPoint* contact) {
-    transformPoint(boxTransform, point, &contact->point);
+struct ColliderCallbacks gCollisionBoxCallbacks = {
+    collisionBoxCollidePlane,
+    collisionBoxSolidMofI,
+};
 
-    contact->intersectionDepth = -planePointDistance(plane, &contact->point);
+int _collsionBuildPlaneContact(struct Transform* boxTransform, struct Plane* plane, struct Vector3* point, struct ContactState* contact) {
+    quatMultVector(&boxTransform->rotation, point, &contact->rb);
 
-    if (contact->intersectionDepth <= 0.0f) {
+    struct Vector3 worldPoint;
+    vector3Add(&contact->rb, &boxTransform->position, &worldPoint);
+
+    contact->ra = gZeroVec;
+
+    contact->penetration = planePointDistance(plane, &worldPoint);
+
+    if (contact->penetration >= 0.0f) {
         return 0;
     }
 
-    contact->normal = plane->normal;
+    contact->normalImpulse = 0.0f;
+    contact->tangentImpulse[0] = 0.0f;
+    contact->tangentImpulse[1] = 0.0f;
+    contact->bias = 0;
+    contact->normalMass = 0;
+    contact->tangentMass[0] = 0.0f;
+    contact->tangentMass[1] = 0.0f;
 
-    vector3AddScaled(&contact->point, &plane->normal, -contact->intersectionDepth, &contact->point);
     return 1;
 }
 
 
-int collisionBoxCollidePlane(struct CollisionBox* box, struct Transform* boxTransform, struct Plane* plane, struct ContactPoint* output) {
+int collisionBoxCollidePlane(void* data, struct Transform* boxTransform, struct Plane* plane, struct ContactConstraintState* output) {
+    struct CollisionBox* box = (struct CollisionBox*)data;
+
     float boxDistance = planePointDistance(plane, &boxTransform->position);
     float maxBoxReach = vector3MagSqrd(&box->sideLength);
 
@@ -53,55 +70,63 @@ int collisionBoxCollidePlane(struct CollisionBox* box, struct Transform* boxTran
         }
     }
 
-    int contactIndex = 0;
+    output->contactCount = 0;
+    output->normal = plane->normal;
+    // TODO actually calculate tangent 
+    output->tangentVectors[0] = gRight;
+    output->tangentVectors[1] = gForward;
+
+    output->restitution = 0.0f;
+    output->friction = 1.0f;
+
     if (splitAxisCount == 0) {
-        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output[contactIndex])) {
-            return contactIndex;
+        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output->contacts[output->contactCount])) {
+            return output->contactCount;
         }
-        ++contactIndex;
+        ++output->contactCount;
     } else if (splitAxisCount == 1) {
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[0]] = VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[0]];
-        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output[contactIndex])) {
-            return contactIndex;
+        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output->contacts[output->contactCount])) {
+            return output->contactCount;
         }
-        ++contactIndex;
+        ++output->contactCount;
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[0]] = -VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[0]];
-        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output[contactIndex])) {
-            return contactIndex;
+        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output->contacts[output->contactCount])) {
+            return output->contactCount;
         }
-        ++contactIndex;
+        ++output->contactCount;
     } else if (splitAxisCount == 2) {
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[0]] = VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[0]];
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[1]] = VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[1]];
-        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output[contactIndex])) {
-            return contactIndex;
+        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output->contacts[output->contactCount])) {
+            return output->contactCount;
         }
-        ++contactIndex;
+        ++output->contactCount;
 
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[0]] = -VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[0]];
-        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output[contactIndex])) {
-            return contactIndex;
+        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output->contacts[output->contactCount])) {
+            return output->contactCount;
         }
-        ++contactIndex;
+        ++output->contactCount;
 
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[0]] = VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[0]];
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[1]] = -VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[1]];
-        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output[contactIndex])) {
-            return contactIndex;
+        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output->contacts[output->contactCount])) {
+            return output->contactCount;
         }
-        ++contactIndex;
+        ++output->contactCount;
 
         VECTOR3_AS_ARRAY(&deepestCorner)[splitAxis[0]] = -VECTOR3_AS_ARRAY(&box->sideLength)[splitAxis[0]];
-        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output[contactIndex])) {
-            return contactIndex;
+        if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, &output->contacts[output->contactCount])) {
+            return output->contactCount;
         }
-        ++contactIndex;
+        ++output->contactCount;
     } else {
         // should not happen
-        return contactIndex;
+        return output->contactCount;
     }
 
-    return contactIndex;
+    return output->contactCount;
 }
 
 void collisionBoxCollideQuad(struct CollisionBox* box, struct Transform* boxTransform, struct CollisionQuad* quad) {
@@ -113,4 +138,9 @@ void collisionBoxCollideQuad(struct CollisionBox* box, struct Transform* boxTran
 
     quatMultVector(&inverseBoxRotation, &quad->normal, &normalInBoxSpace);
 
+}
+
+float collisionBoxSolidMofI(struct ColliderTypeData* typeData, float mass) {
+    float singleSide = sqrtf(vector3MagSqrd(&((struct CollisionBox*)typeData->data)->sideLength));
+    return mass * singleSide * singleSide * (1.0f / 6.0f);
 }

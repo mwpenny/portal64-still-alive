@@ -4,6 +4,7 @@
 #include "math/matrix.h"
 #include "graphics/graphics.h"
 #include "math/plane.h"
+#include "defs.h"
 
 #define SHADOW_MAP_WIDTH    64
 #define SHADOW_MAP_HEIGHT   64
@@ -148,12 +149,12 @@ void shadowMapRender(struct ShadowMap* shadowMap, struct RenderState* renderStat
     struct Transform povInverse;
     transformInvert(&lightPovTransform, &povInverse);
     float cameraView[4][4];
-    transformToMatrix(&povInverse, cameraView);
+    transformToMatrix(&povInverse, cameraView, SCENE_SCALE);
     float viewProj[4][4];
     guMtxCatF(cameraView, projMatrix, viewProj);
 
     float subjectMatrix[4][4];
-    transformToMatrix(subjectTransform, subjectMatrix);
+    transformToMatrix(subjectTransform, subjectMatrix, SCENE_SCALE);
     guMtxCatF(subjectMatrix, viewProj, projMatrix);
 
     Mtx* lightMtx = renderStateRequestMatrices(renderState, 1);

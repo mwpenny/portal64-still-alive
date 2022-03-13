@@ -4,12 +4,8 @@
 #include "../math/transform.h"
 #include "collision.h"
 
-#define MAX_CONTACT_POINT_COUNT 8
-
 struct RigidBody {
-    enum CollisionShapeType collisionType;
-    void* collisionShape;
-    struct ContactPoint gContactList[MAX_CONTACT_POINT_COUNT];
+    struct ColliderTypeData* collider;
 
     struct Transform transform;
     struct Vector3 velocity;
@@ -27,7 +23,13 @@ struct RigidBody {
 };
 
 void rigidBodyInit(struct RigidBody* rigidBody, struct ColliderTypeData* collider, float mass);
-
 void rigidBodyAppyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* impulse);
+void rigidBodyUpdate(struct RigidBody* rigidBody);
+void rigidBodyVelocityAtLocalPoint(struct RigidBody* rigidBody, struct Vector3* localPoint, struct Vector3* worldVelocity);
+void rigidBodyVelocityAtWorldPoint(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* worldVelocity);
+
+void rigidBodyResolveContact(struct RigidBody* bodyA, struct RigidBody* bodyB, struct ContactPoint* contactPoint);
+
+void rigidBodyCollideWithPlane(struct RigidBody* rigidBody, struct Plane* plane, struct ContactSolver* contactSolver);
 
 #endif

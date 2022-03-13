@@ -28,6 +28,8 @@ float maxf(float a, float b);
 
 char floatTos8norm(float input);
 
+float safeInvert(float input);
+
 #define isnan(a) ((a) != (a))
 
 #endif

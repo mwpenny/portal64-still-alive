@@ -157,7 +157,7 @@ void shadowRendererRender(
 
     for (unsigned i = 0; i < recieverCount; ++i) {
         struct ShadowReceiver* reciever = &recievers[i];
-        transformToMatrixL(&reciever->transform, &recieverMatrices[i]);
+        transformToMatrixL(&reciever->transform, &recieverMatrices[i], SCENE_SCALE);
 
         if (reciever->flags & ShadowReceiverFlagsUseLight) {
             ++lightCount;
@@ -189,7 +189,7 @@ void shadowRendererRender(
 
     // calculate position of top and bottom of shadow
     Mtx* shadowMatrices = renderStateRequestMatrices(renderState, 2);
-    transformToMatrixL(&shadowRenderer->casterTransform, &shadowMatrices[TOP_MATRIX_INDEX]);
+    transformToMatrixL(&shadowRenderer->casterTransform, &shadowMatrices[TOP_MATRIX_INDEX], SCENE_SCALE);
 
     struct Vector3 lightOffset;
     vector3Sub(&shadowRenderer->casterTransform.position, &fromLight->position, &lightOffset);
@@ -209,7 +209,7 @@ void shadowRendererRender(
         &shadowEnd.position
     );
     vector3Scale(&gOneVec, &shadowEnd.scale, (lightDistance + shadowRenderer->shadowLength) / lightDistance);
-    transformToMatrixL(&shadowEnd, &shadowMatrices[BOTTOM_MATRIX_INDEX]);
+    transformToMatrixL(&shadowEnd, &shadowMatrices[BOTTOM_MATRIX_INDEX], SCENE_SCALE);
 
     // render back of shadows
     gDPPipeSync(renderState->dl++);
@@ -302,7 +302,7 @@ void shadowRendererRenderProjection(
 
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
-    transformToMatrixL(&finalTransform, matrix);
+    transformToMatrixL(&finalTransform, matrix, SCENE_SCALE);
     
     gSPMatrix(renderState->dl++, matrix, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     gSPDisplayList(renderState->dl++, shadowRenderer->shadowProfile);

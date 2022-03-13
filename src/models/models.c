@@ -8,3 +8,4 @@
 #include "sphere_geo.inc.h"
 #include "portal_mask.inc.h"
 #include "portal_outline.inc.h"
+#include "cube.inc.h"

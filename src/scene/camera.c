@@ -1,6 +1,7 @@
 
 #include "camera.h"
 #include "math/transform.h"
+#include "defs.h"
 
 void cameraInit(struct Camera* camera, float fov, float near, float far) {
     transformInitIdentity(&camera->transform);
@@ -11,9 +12,10 @@ void cameraInit(struct Camera* camera, float fov, float near, float far) {
 
 void cameraBuildViewMatrix(struct Camera* camera, float matrix[4][4]) {
     struct Transform cameraTransCopy = camera->transform;
+    vector3Scale(&cameraTransCopy.position, &cameraTransCopy.position, SCENE_SCALE);
     struct Transform inverse;
     transformInvert(&cameraTransCopy, &inverse);
-    transformToMatrix(&inverse, matrix);
+    transformToMatrix(&inverse, matrix, 1.0f);
 }
 
 void cameraBuildProjectionMatrix(struct Camera* camera, float matrix[4][4], u16* perspectiveNormalize, float aspectRatio) {

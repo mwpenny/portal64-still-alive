@@ -101,9 +101,9 @@ void quatMultiply(struct Quaternion* a, struct Quaternion* b, struct Quaternion*
 
 void quatAdd(struct Quaternion* a, struct Quaternion* b, struct Quaternion* out) {
     out->x = a->x + b->x;
-    out->x = a->y + b->y;
-    out->x = a->z + b->z;
-    out->x = a->w + b->w;
+    out->y = a->y + b->y;
+    out->z = a->z + b->z;
+    out->w = a->w + b->w;
 }
 
 void quatToMatrix(struct Quaternion* q, float out[4][4]) {

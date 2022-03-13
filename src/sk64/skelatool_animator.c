@@ -432,7 +432,7 @@ void skAnimatorUpdate(struct SKAnimator* animator, struct Transform* transforms,
     
     animator->currTick = animator->nextTick;
     float currTick = animator->currentTime * animator->currentAnimation->ticksPerSecond;
-    animator->currentTime += gTimeDelta * timeScale;
+    animator->currentTime += FIXED_DELTA_TIME * timeScale;
     animator->nextTick = (u16)(animator->currentTime * animator->currentAnimation->ticksPerSecond);
 
     if (animator->currTick <= animator->currentAnimation->maxTicks && transforms) {
