@@ -3,9 +3,15 @@
 
 #include "../math/transform.h"
 #include "../graphics/renderstate.h"
+#include "../physics/rigid_body.h"
 
 struct Player {
     struct Transform transform;
+    struct RigidBody* grabbing;
+    float pitch;
+    float pitchVelocity;
+    float yaw;
+    float yawVelocity;
 };
 
 void playerInit(struct Player* player);

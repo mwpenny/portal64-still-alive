@@ -12,12 +12,12 @@
 #include "sk64/skelatool_defs.h"
 #include "controls/controller.h"
 #include "shadow_map.h"
+#include "../physics/point_constraint.h"
+#include "../controls/controller.h"
 
 #include "../levels/test_chamber_00_0/header.h"
 
 struct Vector3 gStartPosition = {5.0f, 0.0f, -5.0f};
-
-struct Vector3 gCameraOffset = {0.0f, 1.2f, 0.0f};
 
 void sceneInit(struct Scene* scene) {
     cameraInit(&scene->camera, 45.0f, 0.25f * SCENE_SCALE, 80.0f * SCENE_SCALE);
@@ -46,7 +46,7 @@ void sceneInit(struct Scene* scene) {
     scene->cube.rigidBody.transform.position.z = -1.0f;
 
     quatAxisAngle(&gRight, M_PI * 0.125f, &scene->cube.rigidBody.transform.rotation);
-    // scene->cube.rigidBody.angularVelocity = gOneVec;
+    scene->cube.rigidBody.angularVelocity = gOneVec;
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {
@@ -75,9 +75,14 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 unsigned ignoreInputFrames = 10;
 
 void sceneUpdate(struct Scene* scene) {
-    transformPoint(&scene->player.transform, &gCameraOffset, &scene->camera.transform.position);
-    scene->camera.transform.rotation = scene->player.transform.rotation;
-
     playerUpdate(&scene->player, &scene->camera.transform);
     cubeUpdate(&scene->cube);
+
+    if (controllerGetButtonDown(0, B_BUTTON)) {
+        if (scene->player.grabbing) {
+            scene->player.grabbing = NULL;
+        } else {
+            scene->player.grabbing = &scene->cube.rigidBody;
+        }
+    }
 }

@@ -3,6 +3,7 @@
 #include <ultra64.h>
 #include <assert.h>
 #include "mathf.h"
+#include <math.h>
 
 void quatIdent(struct Quaternion* q) {
     q->x = 0.0f;
@@ -215,4 +216,22 @@ void quatApplyAngularVelocity(struct Quaternion* input, struct Vector3* w, float
 
     quatAdd(&intermediate, input, output);
     quatNormalize(output, output);
+}
+
+
+void quatDecompose(struct Quaternion* input, struct Vector3* axis, float* angle) {
+    float axisMag = sqrtf(input->x * input->x + input->y * input->y + input->z * input->z);
+
+    if (axisMag < 0.0001f) {
+        *axis = gUp;
+        *angle = 0.0f;
+        return;
+    }
+
+    float magInv = 1.0f / axisMag;
+
+    axis->x = input->x * magInv;
+    axis->y = input->y * magInv;
+    axis->z = input->z * magInv;
+    *angle = sinf(axisMag) * 2.0f;
 }

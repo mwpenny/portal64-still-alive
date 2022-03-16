@@ -24,13 +24,13 @@ void cubeInit(struct Cube* cube) {
 }
 
 void cubeUpdate(struct Cube* cube) {
-    rigidBodyUpdate(&cube->rigidBody);
-
     gContactSolver.contactCount = 0;
 
     rigidBodyCollideWithPlane(&cube->rigidBody, &gFloor, &gContactSolver);
 
     contactSolverSolve(&gContactSolver);
+
+    rigidBodyUpdate(&cube->rigidBody);
 }
 
 void cubeRender(struct Cube* cube, struct RenderState* renderState) {

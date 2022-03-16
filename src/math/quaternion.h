@@ -25,5 +25,6 @@ void quatEulerAngles(struct Vector3* angles, struct Quaternion* out);
 // cheap approximation of slerp
 void quatLerp(struct Quaternion* a, struct Quaternion* b, float t, struct Quaternion* out);
 void quatApplyAngularVelocity(struct Quaternion* input, struct Vector3* w, float timeStep, struct Quaternion* output);
+void quatDecompose(struct Quaternion* input, struct Vector3* axis, float* angle);
 
 #endif
