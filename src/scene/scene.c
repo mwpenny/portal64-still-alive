@@ -13,6 +13,7 @@
 #include "controls/controller.h"
 #include "shadow_map.h"
 #include "../physics/point_constraint.h"
+#include "../physics/debug_renderer.h"
 #include "../controls/controller.h"
 
 #include "../levels/test_chamber_00_0/header.h"
@@ -82,6 +83,8 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     gDPPipeSync(renderState->dl++);
     gDPSetEnvColor(renderState->dl++, 32, 255, 32, 255);
     gSPTextureRectangle(renderState->dl++, 33 << 2, 33 << 2, (32 + 254 * scene->cpuTime / scene->lastFrameTime) << 2, (32 + 14) << 2, 0, 0, 0, 1, 1);
+
+    contactSolverDebugDraw(&gContactSolver, renderState);
 }
 
 unsigned ignoreInputFrames = 10;

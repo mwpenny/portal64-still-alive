@@ -11,7 +11,7 @@ struct ColliderCallbacks gCollisionBoxCallbacks = {
     collisionBoxSolidMofI,
 };
 
-void _collsionBuildPlaneContact(struct Transform* boxTransform, struct Plane* plane, struct Vector3* point, struct ContactConstraintState* output, int id) {
+int _collsionBuildPlaneContact(struct Transform* boxTransform, struct Plane* plane, struct Vector3* point, struct ContactConstraintState* output, int id) {
     struct Vector3 worldPoint;
     struct ContactState* contact = &output->contacts[output->contactCount];
 
@@ -20,11 +20,10 @@ void _collsionBuildPlaneContact(struct Transform* boxTransform, struct Plane* pl
     float penetration = planePointDistance(plane, &worldPoint);
 
     if (penetration >= NEGATIVE_PENETRATION_BIAS) {
-        return;
+        return 0;
     }
 
-
-    vector3AddScaled(&worldPoint, &plane->normal, penetration, &contact->ra);
+    vector3AddScaled(&worldPoint, &plane->normal, -penetration, &contact->ra);
 
     ++output->contactCount;
     contact->id = id;
@@ -33,6 +32,11 @@ void _collsionBuildPlaneContact(struct Transform* boxTransform, struct Plane* pl
     contact->normalMass = 0;
     contact->tangentMass[0] = 0.0f;
     contact->tangentMass[1] = 0.0f;
+    contact->normalImpulse = 0.0f;
+    contact->tangentImpulse[0] = 0.0f;
+    contact->tangentImpulse[1] = 0.0f;
+
+    return 1;
 }
 
 
@@ -77,7 +81,49 @@ int collisionBoxCollidePlane(void* data, struct Transform* boxTransform, struct 
     output->restitution = 0.0f;
     output->friction = 1.0f;
 
-    _collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, output, id);
+    if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, output, id)) {
+        return 0;
+    }
+
+    struct Vector3 sideLengthProjected;
+    vector3Multiply(&box->sideLength, &normalInBoxSpace, &sideLengthProjected);
+
+    int minAxis = 0;
+    float minAxisDistnace = fabsf(sideLengthProjected.x);
+    int maxAxis = 0;
+    float maxAxisDistnace = minAxisDistnace;
+
+    for (int axis = 1; axis < 3; ++axis) {
+        float length = fabsf(VECTOR3_AS_ARRAY(&sideLengthProjected)[axis]);
+
+        if (length < minAxisDistnace) {
+            minAxisDistnace = length;
+            minAxis = axis;
+        }
+
+        if (length > maxAxisDistnace) {
+            maxAxisDistnace = length;
+            maxAxis = axis;
+        }
+    }
+
+    int midAxis = 3 - maxAxis - minAxis;
+
+    struct Vector3 nextFurthestPoint = deepestCorner;
+    int nextId = id ^ (1 << minAxis);
+    VECTOR3_AS_ARRAY(&nextFurthestPoint)[minAxis] = -VECTOR3_AS_ARRAY(&nextFurthestPoint)[minAxis];
+
+    if (!_collsionBuildPlaneContact(boxTransform, plane, &nextFurthestPoint, output, nextId)) {
+        return 1;
+    }
+
+    nextId = nextId ^ (1 << midAxis);
+    VECTOR3_AS_ARRAY(&nextFurthestPoint)[midAxis] = -VECTOR3_AS_ARRAY(&nextFurthestPoint)[midAxis];
+    _collsionBuildPlaneContact(boxTransform, plane, &nextFurthestPoint, output, nextId);
+
+    nextId = nextId ^ (1 << minAxis);
+    VECTOR3_AS_ARRAY(&nextFurthestPoint)[minAxis] = -VECTOR3_AS_ARRAY(&nextFurthestPoint)[minAxis];
+    _collsionBuildPlaneContact(boxTransform, plane, &nextFurthestPoint, output, nextId);
 
     return 1;
 }

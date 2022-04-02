@@ -5,12 +5,6 @@
 
 struct CollisionObject;
 
-#define Q3_BAUMGARTE 0.2f
-
-#define Q3_PENETRATION_SLOP 0.01f
-
-#define ENABLE_FRICTION 1
-
 struct VelocityState
 {
 	struct Vector3 w;

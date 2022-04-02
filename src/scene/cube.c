@@ -36,9 +36,11 @@ void cubeInit(struct Cube* cube) {
 
 void cubeUpdate(struct Cube* cube) {
     collisionObjectCollideWithPlane(&cube->collisionObject, &gFloorObject, &gContactSolver);
-
     contactSolverSolve(&gContactSolver);
+    rigidBodyUpdate(&cube->rigidBody);
 
+    collisionObjectCollideWithPlane(&cube->collisionObject, &gFloorObject, &gContactSolver);
+    contactSolverSolve(&gContactSolver);
     rigidBodyUpdate(&cube->rigidBody);
 }
 

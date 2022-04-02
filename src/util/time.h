@@ -6,7 +6,7 @@
 extern float gTimePassed;
 extern OSTime gLastTime;
 
-#define FIXED_DELTA_TIME    (1.0f / 60.0f)
+#define FIXED_DELTA_TIME    (1.0f / 120.0f)
 
 void timeUpdateDelta();
 
