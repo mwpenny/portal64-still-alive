@@ -3,28 +3,48 @@
 #include "../util/time.h"
 #include "../math/mathf.h"
 #include "rigid_body.h"
+#include "collision_object.h"
+
+#include <string.h>
+
+struct ContactSolver gContactSolver;
+
+void contactSolverInit(struct ContactSolver* contactSolver) {
+	memset(contactSolver, 0, sizeof(struct ContactSolver));
+
+	contactSolver->contactCapacity = MAX_CONTACT_COUNT;
+
+	contactSolver->unusedContacts = &contactSolver->contacts[0];
+
+	for (int i = 1; i < MAX_CONTACT_COUNT; ++i) {
+		contactSolver->contacts[i-1].next = &contactSolver->contacts[i];
+	}
+}
 
 void contactSolverPreSolve(struct ContactSolver* contactSolver) {
-	for ( int i = 0; i < contactSolver->contactCount; ++i )
+	struct ContactConstraintState *cs = contactSolver->activeContacts;
+	
+    while (cs)
 	{
-		struct ContactConstraintState *cs = contactSolver->contacts + i;
-
 		struct Vector3* vA;
 		struct Vector3* wA;
 		struct Vector3* vB;
 		struct Vector3* wB;
 
-		if (cs->bodyA) {
-			vA = &cs->bodyA->velocity;
-			wA = &cs->bodyA->angularVelocity;
+		struct RigidBody* bodyA = cs->shapeA->body;
+		struct RigidBody* bodyB = cs->shapeB->body;
+
+		if (bodyA) {
+			vA = &bodyA->velocity;
+			wA = &bodyA->angularVelocity;
 		} else {
 			vA = NULL;
 			wA = NULL;
 		}
 
-		if (cs->bodyB) {
-			vB = &cs->bodyB->velocity;
-			wB = &cs->bodyB->angularVelocity;
+		if (bodyB) {
+			vB = &bodyB->velocity;
+			wB = &bodyB->angularVelocity;
 		} else {
 			vB = NULL;
 			wB = NULL;
@@ -41,24 +61,24 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
             vector3Cross(&c->rb, &cs->normal, &rbCn);
 			float nm = 0;
 			
-			if (cs->bodyA) {
-				nm += cs->bodyA->massInv;
+			if (bodyA) {
+				nm += bodyA->massInv;
 			}
 
-			if (cs->bodyB) {
-				nm += cs->bodyB->massInv;
+			if (bodyB) {
+				nm += bodyB->massInv;
 			}
 
 			float tm[ 2 ];
 			tm[ 0 ] = nm;
 			tm[ 1 ] = nm;
 
-			if (cs->bodyA) {
-				nm += cs->bodyA->momentOfInertiaInv * vector3MagSqrd(&raCn);
+			if (bodyA) {
+				nm += bodyA->momentOfInertiaInv * vector3MagSqrd(&raCn);
 			}
 
-			if (cs->bodyB) {
-				nm += cs->bodyB->momentOfInertiaInv * vector3MagSqrd(&rbCn);
+			if (bodyB) {
+				nm += bodyB->momentOfInertiaInv * vector3MagSqrd(&rbCn);
 			}
 
 			c->normalMass = safeInvert( nm );
@@ -70,11 +90,11 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 				struct Vector3 rbCt;
                 vector3Cross(&cs->tangentVectors[ i ], &c->rb, &rbCt);
 
-				if (cs->bodyA) {
-					tm[ i ] += cs->bodyA->momentOfInertiaInv * vector3MagSqrd(&raCt);
+				if (bodyA) {
+					tm[ i ] += bodyA->momentOfInertiaInv * vector3MagSqrd(&raCt);
 				}
-				if (cs->bodyB) {
-					tm[ i ] += cs->bodyB->momentOfInertiaInv * vector3MagSqrd(&rbCt);
+				if (bodyB) {
+					tm[ i ] += bodyB->momentOfInertiaInv * vector3MagSqrd(&rbCt);
 				}
 
 				c->tangentMass[ i ] = safeInvert( tm[ i ] );
@@ -82,7 +102,7 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 
 			// Precalculate bias factor
 			c->bias = -Q3_BAUMGARTE * (1.0f / FIXED_DELTA_TIME) * minf(0.0f, c->penetration + Q3_PENETRATION_SLOP);
-
+			
 			// Warm start contact
 			struct Vector3 P;
             vector3Scale(&cs->normal, &P, c->normalImpulse);
@@ -95,16 +115,16 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 
             struct Vector3 w;
 
-			if (cs->bodyA) {
-				vector3AddScaled(vA, &P, -cs->bodyA->massInv, vA);
+			if (bodyA) {
+				vector3AddScaled(vA, &P, -bodyA->massInv, vA);
 				vector3Cross(&c->ra, &P, &w);
-				vector3AddScaled(wA, &w, -cs->bodyA->momentOfInertiaInv, wA);
+				vector3AddScaled(wA, &w, -bodyA->momentOfInertiaInv, wA);
 			}
 
-			if (cs->bodyB) {
-				vector3AddScaled(vB, &P, cs->bodyB->massInv, vB);
+			if (bodyB) {
+				vector3AddScaled(vB, &P, bodyB->massInv, vB);
 				vector3Cross(&c->rb, &P, &w);
-				vector3AddScaled(wB, &w, cs->bodyB->momentOfInertiaInv, wB);
+				vector3AddScaled(wB, &w, bodyB->momentOfInertiaInv, wB);
 			}
 
             struct Vector3 velocity;
@@ -128,30 +148,35 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 			if ( dv < -1.0f )
 				c->bias += -(cs->restitution) * dv;
 		}
+
+		cs = cs->next;
 	}
 }
 
 void contactSolverIterate(struct ContactSolver* contactSolver) {
-    for ( int i = 0; i < contactSolver->contactCount; ++i )
-	{
-		struct ContactConstraintState *cs = contactSolver->contacts + i;
+	struct ContactConstraintState *cs = contactSolver->activeContacts;
 
+    while (cs)
+	{
 		struct Vector3* vA;
 		struct Vector3* wA;
 		struct Vector3* vB;
 		struct Vector3* wB;
 
-		if (cs->bodyA) {
-			vA = &cs->bodyA->velocity;
-			wA = &cs->bodyA->angularVelocity;
+		struct RigidBody* bodyA = cs->shapeA->body;
+		struct RigidBody* bodyB = cs->shapeB->body;
+
+		if (bodyA) {
+			vA = &bodyA->velocity;
+			wA = &bodyA->angularVelocity;
 		} else {
 			vA = NULL;
 			wA = NULL;
 		}
 
-		if (cs->bodyB) {
-			vB = &cs->bodyB->velocity;
-			wB = &cs->bodyB->angularVelocity;
+		if (bodyB) {
+			vB = &bodyB->velocity;
+			wB = &bodyB->angularVelocity;
 		} else {
 			vB = NULL;
 			wB = NULL;
@@ -199,15 +224,15 @@ void contactSolverIterate(struct ContactSolver* contactSolver) {
 
                     struct Vector3 w;
 					if (vA) {
-						vector3AddScaled(vA, &impulse, -cs->bodyA->massInv, vA);
+						vector3AddScaled(vA, &impulse, -bodyA->massInv, vA);
 						vector3Cross(&c->ra, &impulse, &w);
-						vector3AddScaled(wA, &w, -cs->bodyA->momentOfInertiaInv, wA);
+						vector3AddScaled(wA, &w, -bodyA->momentOfInertiaInv, wA);
 					}
 
 					if (vB) {
-						vector3AddScaled(vB, &impulse, cs->bodyB->massInv, vB);
+						vector3AddScaled(vB, &impulse, bodyB->massInv, vB);
 						vector3Cross(&c->rb, &impulse, &w);
-						vector3AddScaled(wB, &w, cs->bodyB->momentOfInertiaInv, wB);
+						vector3AddScaled(wB, &w, bodyB->momentOfInertiaInv, wB);
 					}
 				}
 			}
@@ -244,18 +269,20 @@ void contactSolverIterate(struct ContactSolver* contactSolver) {
 
                 struct Vector3 w;
 				if (vA) {
-					vector3AddScaled(vA, &impulse, -cs->bodyA->massInv, vA);
+					vector3AddScaled(vA, &impulse, -bodyA->massInv, vA);
 					vector3Cross(&c->ra, &impulse, &w);
-					vector3AddScaled(wA, &w, -cs->bodyA->momentOfInertiaInv, wA);
+					vector3AddScaled(wA, &w, -bodyA->momentOfInertiaInv, wA);
 				}
 
 				if (vB) {
-					vector3AddScaled(vB, &impulse, cs->bodyB->massInv, vB);
+					vector3AddScaled(vB, &impulse, bodyB->massInv, vB);
 					vector3Cross(&c->rb, &impulse, &w);
-					vector3AddScaled(wB, &w, cs->bodyB->momentOfInertiaInv, wB);
+					vector3AddScaled(wB, &w, bodyB->momentOfInertiaInv, wB);
 				}
 			}
 		}
+
+		cs = cs->next;
     }
 }
 
@@ -265,4 +292,113 @@ void contactSolverSolve(struct ContactSolver* solver) {
 	contactSolverIterate(solver);
 	contactSolverIterate(solver);
 	// contactSolverIterate(solver);
+}
+
+struct ContactConstraintState* contactSolverPeekContact(struct ContactSolver* solver, struct CollisionObject* shapeA, struct CollisionObject* shapeB) {
+	struct ContactConstraintState* curr = solver->activeContacts;
+
+	while (curr) {
+		if ((curr->shapeA == shapeA && curr->shapeB == shapeB) || (curr->shapeA == shapeB && curr->shapeB == shapeA)) {
+			return curr;
+		}
+
+		curr = curr->next;
+	}
+
+	struct ContactConstraintState* result = solver->unusedContacts;
+
+	if (result) {
+		result->shapeA = shapeA;
+		result->shapeB = shapeB;
+		result->contactCount = 0;
+
+		solver->unusedContacts = result->next;
+		result->next = solver->activeContacts;
+		solver->activeContacts = result;
+	}
+
+	return result;
+}
+
+void contactSolverRemoveContact(struct ContactSolver* solver, struct ContactConstraintState* toRemove) {
+	struct ContactConstraintState* curr = solver->activeContacts;
+	struct ContactConstraintState* prev = NULL;
+
+	while (curr) {
+		if (curr == toRemove) {
+			break;
+		}
+
+		prev = curr;
+		curr = curr->next;
+	}
+
+	if (!curr) {
+		return;
+	}
+
+	if (prev) {
+		prev->next = curr->next;
+	} else {
+		solver->activeContacts = curr->next;
+	}
+
+	curr->next = solver->unusedContacts;
+	solver->unusedContacts = curr;
+}
+
+struct ContactState* contactSolverGetContact(struct ContactConstraintState* contact, int id) {
+	int i;
+
+	for (i = 0; i < contact->contactCount; ++i) {
+		if (contact->contacts[i].id == id) {
+			return &contact->contacts[i];
+		}
+	}
+
+	if (i == MAX_CONTACTS_PER_MANIFOLD) {
+		return NULL;
+	}
+
+	struct ContactState* result = &contact->contacts[i];
+
+	result->normalImpulse = 0.0f;
+	result->tangentImpulse[0] = 0.0f;
+	result->tangentImpulse[1] = 0.0f;
+	result->id = id;
+
+	++contact->contactCount;
+	
+	return result;
+}
+
+void contactSolverAssign(struct ContactConstraintState* into, struct ContactConstraintState* from) {
+	for (int sourceIndex = 0; sourceIndex < from->contactCount; ++sourceIndex) {
+		int targetIndex;
+
+		struct ContactState* sourceContact = &from->contacts[sourceIndex];
+
+		for (targetIndex = 0; targetIndex < into->contactCount; ++targetIndex) {
+			struct ContactState* targetContact = &into->contacts[targetIndex];
+
+			if (sourceContact->id == targetContact->id) {
+				sourceContact->normalImpulse = targetContact->normalImpulse;
+				// TODO reproject tangents
+				sourceContact->tangentImpulse[0] = targetContact->tangentImpulse[0];
+				sourceContact->tangentImpulse[1] = targetContact->tangentImpulse[1];
+				break;
+			}
+		}
+	}
+
+	for (int sourceIndex = 0; sourceIndex < from->contactCount; ++sourceIndex) {
+		into->contacts[sourceIndex] = from->contacts[sourceIndex];
+	}
+
+	into->contactCount = from->contactCount;
+	into->tangentVectors[0] = from->tangentVectors[0];
+	into->tangentVectors[1] = from->tangentVectors[1];
+	into->normal = from->normal;
+	into->restitution = from->restitution;
+	into->friction = from->friction;
 }

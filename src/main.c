@@ -126,6 +126,7 @@ static void gameProc(void* arg) {
 
     heapInit(_heapStart, memoryEnd);
 
+    contactSolverInit(&gContactSolver);
     sceneInit(&gScene);
     romInit();
     controllersInit();

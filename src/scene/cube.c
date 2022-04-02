@@ -9,7 +9,18 @@ struct CollisionBox gCubeCollisionBox = {
 
 struct Plane gFloor = {{0.0f, 1.0f, 0.0f}, 0.0f};
 
-struct ContactSolver gContactSolver;
+struct ColliderTypeData gFloorColliderType = {
+    CollisionShapeTypeQuad,
+    &gFloor,
+    0.0f,
+    1.0f,
+    NULL,
+};
+
+struct CollisionObject gFloorObject = {
+    &gFloorColliderType,
+    NULL,
+};
 
 struct ColliderTypeData gCubeCollider = {
     CollisionShapeTypeBox,
@@ -20,13 +31,11 @@ struct ColliderTypeData gCubeCollider = {
 };
 
 void cubeInit(struct Cube* cube) {
-    rigidBodyInit(&cube->rigidBody, &gCubeCollider, 1.0f);
+    collisionObjectInit(&cube->collisionObject, &gCubeCollider, &cube->rigidBody, 1.0f);
 }
 
 void cubeUpdate(struct Cube* cube) {
-    gContactSolver.contactCount = 0;
-
-    rigidBodyCollideWithPlane(&cube->rigidBody, &gFloor, &gContactSolver);
+    collisionObjectCollideWithPlane(&cube->collisionObject, &gFloorObject, &gContactSolver);
 
     contactSolverSolve(&gContactSolver);
 

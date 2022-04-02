@@ -13,6 +13,7 @@ float mathfBounceBackLerp(float t);
 float mathfRandomFloat();
 float mathfMod(float input, float divisor);
 float clampf(float input, float min, float max);
+float signf(float input);
 
 float sqrtf(float in);
 float powf(float base, float exp);

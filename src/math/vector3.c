@@ -8,6 +8,12 @@ struct Vector3 gForward = {0.0f, 0.0f, 1.0f};
 struct Vector3 gZeroVec = {0.0f, 0.0f, 0.0f};
 struct Vector3 gOneVec = {1.0f, 1.0f, 1.0f};
 
+void vector3Abs(struct Vector3* in, struct Vector3* out) {
+    out->x = fabsf(in->x);
+    out->y = fabsf(in->y);
+    out->z = fabsf(in->z);
+}
+
 void vector3Negate(struct Vector3* in, struct Vector3* out) {
     out->x = -in->x;
     out->y = -in->y;

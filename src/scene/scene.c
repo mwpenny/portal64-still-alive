@@ -24,7 +24,7 @@ void sceneInit(struct Scene* scene) {
     playerInit(&scene->player);
 
     scene->player.transform.position = gStartPosition;
-    quatAxisAngle(&gUp, M_PI, &scene->player.transform.rotation);
+    scene->player.yaw = M_PI;
 
     portalInit(&scene->portals[0], 0);
     portalInit(&scene->portals[1], PortalFlagsOddParity);
@@ -61,6 +61,8 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
     cubeRender(&scene->cube, renderState);
 }
 
+#define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
+
 void sceneRender(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
     struct RenderProps renderProperties;
 
@@ -70,11 +72,24 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     renderProperties.currentDepth = STARTING_RENDER_DEPTH;
 
     sceneRenderWithProperties(scene, &renderProperties, renderState);
+
+    gDPPipeSync(renderState->dl++);
+    gDPSetCycleType(renderState->dl++, G_CYC_1CYCLE);
+    gDPSetFillColor(renderState->dl++, (GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1)));
+    gDPSetCombineMode(renderState->dl++, SOLID_COLOR, SOLID_COLOR);
+    // gDPSetEnvColor(renderState->dl++, 32, 32, 32, 255);
+    // gSPTextureRectangle(renderState->dl++, 32 << 2, 32 << 2, (32 + 256) << 2, (32 + 16) << 2, 0, 0, 0, 1, 1);
+    gDPPipeSync(renderState->dl++);
+    gDPSetEnvColor(renderState->dl++, 32, 255, 32, 255);
+    gSPTextureRectangle(renderState->dl++, 33 << 2, 33 << 2, (32 + 254 * scene->cpuTime / scene->lastFrameTime) << 2, (32 + 14) << 2, 0, 0, 0, 1, 1);
 }
 
 unsigned ignoreInputFrames = 10;
 
 void sceneUpdate(struct Scene* scene) {
+    OSTime frameStart = osGetTime();
+    scene->lastFrameTime = frameStart - scene->lastFrameStart;
+
     playerUpdate(&scene->player, &scene->camera.transform);
     cubeUpdate(&scene->cube);
 
@@ -85,4 +100,7 @@ void sceneUpdate(struct Scene* scene) {
             scene->player.grabbing = &scene->cube.rigidBody;
         }
     }
+
+    scene->cpuTime = osGetTime() - frameStart;
+    scene->lastFrameStart = frameStart;
 }

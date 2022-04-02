@@ -92,6 +92,16 @@ float clampf(float input, float min, float max) {
     return input;
 }
 
+float signf(float input) {
+    if (input > 0.0f) {
+        return 1.0f;
+    } else if (input < 0.0f) {
+        return -1.0f;
+    } else {
+        return 0.0f;
+    }
+}
+
 float minf(float a, float b) {
     return a < b ? a : b;
 }

@@ -8,6 +8,7 @@
 struct Player {
     struct Transform transform;
     struct RigidBody* grabbing;
+    struct Vector3 velocity;
     float pitch;
     float pitchVelocity;
     float yaw;

@@ -3,11 +3,11 @@
 
 #include "../math/vector3.h"
 
-struct RigidBody;
+struct CollisionObject;
 
 #define Q3_BAUMGARTE 0.2f
 
-#define Q3_PENETRATION_SLOP 0.05f
+#define Q3_PENETRATION_SLOP 0.01f
 
 #define ENABLE_FRICTION 1
 
@@ -19,6 +19,7 @@ struct VelocityState
 
 struct ContactState
 {
+	int id;
 	struct Vector3 ra;					// Vector from C.O.M to contact position
 	struct Vector3 rb;					// Vector from C.O.M to contact position
 	float penetration;			// Depth of penetration from collision
@@ -29,26 +30,43 @@ struct ContactState
 	float tangentMass[ 2 ];		// Tangent constraint mass
 };
 
+#define MAX_CONTACTS_PER_MANIFOLD	8
+
 struct ContactConstraintState
 {
-	struct ContactState contacts[ 8 ];
+	struct ContactState contacts[ MAX_CONTACTS_PER_MANIFOLD ];
 	int contactCount;
 	struct Vector3 tangentVectors[ 2 ];	// Tangent vectors
 	struct Vector3 normal;				// From A to B
 	float restitution;
 	float friction;
-	struct RigidBody* bodyA;
-	struct RigidBody* bodyB;
+	struct CollisionObject* shapeA;
+	struct CollisionObject* shapeB;
+	struct ContactConstraintState* next;
 };
 
 #define MAX_CONTACT_COUNT	8
 
 struct ContactSolver {
     struct ContactConstraintState contacts[MAX_CONTACT_COUNT];
-    int contactCount;
+	struct ContactConstraintState* unusedContacts;
+	struct ContactConstraintState* activeContacts;
 	int contactCapacity;
 };
 
+extern struct ContactSolver gContactSolver;
+
+void contactSolverInit(struct ContactSolver* contactSolver);
+
 void contactSolverSolve(struct ContactSolver* solver);
 
+struct ContactConstraintState* contactSolverPeekContact(struct ContactSolver* solver, struct CollisionObject* shapeA, struct CollisionObject* shapeB);
+
+void contactSolverRemoveContact(struct ContactSolver* solver, struct ContactConstraintState* toRemove);
+
+struct ContactState* contactSolverGetContact(struct ContactConstraintState* contact, int id);
+
+void contactSolverAssign(struct ContactConstraintState* into, struct ContactConstraintState* from);
+
 #endif
+

@@ -16,10 +16,13 @@ void playerInit(struct Player* player) {
     player->pitch = 0.0f;
 }
 
-#define PLAYER_SPEED    (2.0f)
+#define PLAYER_SPEED    (5.0f)
+#define PLAYER_ACCEL    (40.0f)
+#define PLAYER_STOP_ACCEL    (80.0f)
 
 #define ROTATE_RATE     (M_PI * 2.0f)
 #define ROTATE_RATE_DELTA     (M_PI * 0.25f)
+#define ROTATE_RATE_STOP_DELTA (M_PI * 0.25f)
 
 void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Vector3 forward;
@@ -36,8 +39,18 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
     OSContPad* controllerInput = controllersGetControllerData(0);
 
-    vector3AddScaled(&player->transform.position, &forward, -controllerInput->stick_y * FIXED_DELTA_TIME * PLAYER_SPEED / 80.0f, &player->transform.position);
-    vector3AddScaled(&player->transform.position, &right, controllerInput->stick_x * FIXED_DELTA_TIME * PLAYER_SPEED / 80.0f, &player->transform.position);
+    struct Vector3 targetVelocity;
+
+    vector3Scale(&forward, &targetVelocity, -controllerInput->stick_y * PLAYER_SPEED / 80.0f);
+    vector3AddScaled(&targetVelocity, &right, controllerInput->stick_x * PLAYER_SPEED / 80.0f, &targetVelocity);
+
+    vector3MoveTowards(
+        &player->velocity, 
+        &targetVelocity, 
+        vector3Dot(&player->velocity, &targetVelocity) > 0.0f ? PLAYER_ACCEL * FIXED_DELTA_TIME : PLAYER_STOP_ACCEL * FIXED_DELTA_TIME, 
+        &player->velocity
+    );
+    vector3AddScaled(&player->transform.position, &player->velocity, FIXED_DELTA_TIME, &player->transform.position);
 
     float targetYaw = 0.0f;
     float targetPitch = 0.0f;
@@ -49,13 +62,21 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     }
 
     if (controllerGetButton(0, U_CBUTTONS)) {
-        targetPitch -= ROTATE_RATE;
-    } else if (controllerGetButton(0, D_CBUTTONS)) {
         targetPitch += ROTATE_RATE;
+    } else if (controllerGetButton(0, D_CBUTTONS)) {
+        targetPitch -= ROTATE_RATE;
     }
 
-    player->yawVelocity = mathfMoveTowards(player->yawVelocity, targetYaw, ROTATE_RATE_DELTA);
-    player->pitchVelocity = mathfMoveTowards(player->pitchVelocity, targetPitch, ROTATE_RATE_DELTA);
+    player->yawVelocity = mathfMoveTowards(
+        player->yawVelocity, 
+        targetYaw, 
+        player->yawVelocity * targetYaw > 0.0f ? ROTATE_RATE_DELTA : ROTATE_RATE_STOP_DELTA
+    );
+    player->pitchVelocity = mathfMoveTowards(
+        player->pitchVelocity, 
+        targetPitch, 
+        player->pitchVelocity * targetPitch > 0.0f ? ROTATE_RATE_DELTA : ROTATE_RATE_STOP_DELTA
+    );
 
     player->yaw += player->yawVelocity * FIXED_DELTA_TIME;
     player->pitch = clampf(player->pitch + player->pitchVelocity * FIXED_DELTA_TIME, -M_PI * 0.5f, M_PI * 0.5f);
@@ -71,7 +92,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     if (player->grabbing) {
         struct Vector3 grabPoint;
         transformPoint(cameraTransform, &gGrabDistance, &grabPoint);
-        pointConstraintMoveToPoint(player->grabbing, &grabPoint, 5.0f);
+        pointConstraintMoveToPoint(player->grabbing, &grabPoint, 20.0f);
         pointConstraintRotateTo(player->grabbing, &cameraTransform->rotation, 5.0f);
     }
 }

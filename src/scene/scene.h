@@ -15,6 +15,9 @@ struct Scene {
     struct Player player;
     struct Portal portals[2];
     struct Cube cube;
+    OSTime cpuTime;
+    OSTime lastFrameStart;
+    OSTime lastFrameTime;
 };
 
 struct GraphicsTask;
