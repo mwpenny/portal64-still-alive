@@ -15,7 +15,6 @@ struct CollisionBox {
 extern struct ColliderCallbacks gCollisionBoxCallbacks;
 
 int collisionBoxCollidePlane(void* data, struct Transform* boxTransform, struct Plane* plane, struct ContactConstraintState* contact);
-void collisionBoxCollideQuad(struct CollisionBox* box, struct Transform* boxTransform, struct CollisionQuad* quad);
 
 float collisionBoxSolidMofI(struct ColliderTypeData* typeData, float mass);
 

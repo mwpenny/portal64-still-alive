@@ -2,10 +2,6 @@
 
 #include <math.h>
 
-#define NORMAL_ZERO_BIAS    0.001f
-
-#define NEGATIVE_PENETRATION_BIAS   0.1f
-
 struct ColliderCallbacks gCollisionBoxCallbacks = {
     collisionBoxCollidePlane,
     collisionBoxSolidMofI,
@@ -78,8 +74,8 @@ int collisionBoxCollidePlane(void* data, struct Transform* boxTransform, struct 
     output->tangentVectors[0] = gRight;
     output->tangentVectors[1] = gForward;
 
-    output->restitution = 0.0f;
-    output->friction = 1.0f;
+    output->restitution = 0.1f;
+    output->friction = 0.5f;
 
     if (!_collsionBuildPlaneContact(boxTransform, plane, &deepestCorner, output, id)) {
         return 0;
@@ -126,16 +122,6 @@ int collisionBoxCollidePlane(void* data, struct Transform* boxTransform, struct 
     _collsionBuildPlaneContact(boxTransform, plane, &nextFurthestPoint, output, nextId);
 
     return 1;
-}
-
-void collisionBoxCollideQuad(struct CollisionBox* box, struct Transform* boxTransform, struct CollisionQuad* quad) {
-    struct Quaternion inverseBoxRotation;
-
-    quatConjugate(&boxTransform->rotation, &inverseBoxRotation);
-
-    struct Vector3 normalInBoxSpace;
-
-    quatMultVector(&inverseBoxRotation, &quad->normal, &normalInBoxSpace);
 }
 
 float collisionBoxSolidMofI(struct ColliderTypeData* typeData, float mass) {

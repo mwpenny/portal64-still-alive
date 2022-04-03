@@ -26,6 +26,8 @@ struct ContactState
 
 #define MAX_CONTACTS_PER_MANIFOLD	8
 
+#define NEGATIVE_PENETRATION_BIAS   0.00001f
+
 struct ContactConstraintState
 {
 	struct ContactState contacts[ MAX_CONTACTS_PER_MANIFOLD ];

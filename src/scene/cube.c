@@ -38,10 +38,6 @@ void cubeUpdate(struct Cube* cube) {
     collisionObjectCollideWithPlane(&cube->collisionObject, &gFloorObject, &gContactSolver);
     contactSolverSolve(&gContactSolver);
     rigidBodyUpdate(&cube->rigidBody);
-
-    collisionObjectCollideWithPlane(&cube->collisionObject, &gFloorObject, &gContactSolver);
-    contactSolverSolve(&gContactSolver);
-    rigidBodyUpdate(&cube->rigidBody);
 }
 
 void cubeRender(struct Cube* cube, struct RenderState* renderState) {
