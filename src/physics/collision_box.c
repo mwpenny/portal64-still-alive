@@ -4,6 +4,7 @@
 
 struct ColliderCallbacks gCollisionBoxCallbacks = {
     collisionBoxCollidePlane,
+    collisionBoxCollideQuad,
     collisionBoxSolidMofI,
 };
 

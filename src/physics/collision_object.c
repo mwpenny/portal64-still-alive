@@ -30,3 +30,27 @@ void collisionObjectCollideWithPlane(struct CollisionObject* object, struct Coll
         contactSolverRemoveContact(contactSolver, contact);
     }
 }
+
+void collisionObjectCollideWithQuad(struct CollisionObject* object, struct CollisionObject* quad, struct ContactSolver* contactSolver) {
+    CollideWithQuad quadCollider = object->collider->callbacks->collideWithQuad;
+
+    if (!quadCollider) {
+        return;
+    }
+
+    struct ContactConstraintState localContact;
+    localContact.contactCount = 0;
+
+    struct ContactConstraintState* contact = contactSolverPeekContact(contactSolver, quad, object);
+    
+    if (quadCollider(object->collider->data, &object->body->transform, quad->collider->data, &localContact)) {
+
+        if (!contact) {
+            return;
+        }
+        
+        contactSolverAssign(contact, &localContact);
+    } else if (contact) {
+        contactSolverRemoveContact(contactSolver, contact);
+    }
+}

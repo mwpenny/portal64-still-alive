@@ -90,8 +90,8 @@ char secondOtherAxis[] = {
     1,
 };
 
-#define ID_FROM_AXIS_DIRS(positiveX, positiveY, positiveZ) (((positiveX) ? 0 : 1) | ((positiveY) ? 0 : 2) | ((positiveZ) ? 0 : 4))
-#define ID_SEGEMENT_FROM_AXIS(axisNumber, isPositive) ((isPositive) ? (1 << axisNumber) : 0)
+#define ID_FROM_AXIS_DIRS(positiveX, positiveY, positiveZ) (((positiveX) ? 1 : 0) | ((positiveY) ? 2 : 0) | ((positiveZ) ? 4 : 0))
+#define ID_SEGEMENT_FROM_AXIS(axisNumber, isPositive) ((isPositive) ? 0 : (1 << axisNumber))
 
 struct CollisionEdge {
     struct Vector3 origin;
@@ -162,7 +162,7 @@ void _collisionBoxCollideEdge(struct CollisionBox* box, struct Transform* boxTra
         cubeEdge.length = VECTOR3_AS_ARRAY(&box->sideLength)[axis] * 2.0f;
 
         int firstAxis = otherAxis[axis];
-        int secondAxis = otherAxis[axis];
+        int secondAxis = secondOtherAxis[axis];
 
         VECTOR3_AS_ARRAY(&cubeEdge.origin)[axis] = -VECTOR3_AS_ARRAY(&box->sideLength)[axis];
 
@@ -171,7 +171,7 @@ void _collisionBoxCollideEdge(struct CollisionBox* box, struct Transform* boxTra
             int isSecondPositive = corner & 2;
             int cornerID = ID_SEGEMENT_FROM_AXIS(firstAxis, isFirstPositive) | ID_SEGEMENT_FROM_AXIS(secondAxis, isSecondPositive);
 
-            int cornerIDMask = (1 << cornerID) | (1 << (cornerID | ID_SEGEMENT_FROM_AXIS(axis, 0)));
+            int cornerIDMask = (1 << cornerID) | (1 << (cornerID | ID_SEGEMENT_FROM_AXIS(axis, 1)));
             if ((cornerIDMask & cornerIds) == 0) {
                 continue;
             }
@@ -201,10 +201,11 @@ void _collisionBoxCollideEdge(struct CollisionBox* box, struct Transform* boxTra
                 }
 
                 quatMultVector(&boxTransform->rotation, &output->normal, &output->normal);
+                output->tangentVectors[0] = edge->direction;
+                vector3Cross(&output->normal, &edge->direction, &output->tangentVectors[1]);
             }
 
-            // TODO transform contact back into world space
-
+            // rotate from cube space to world space
             quatMultVector(&boxTransform->rotation, &contact->ra, &contact->ra);
             quatMultVector(&boxTransform->rotation, &contact->rb, &contact->rb);
 
@@ -213,7 +214,8 @@ void _collisionBoxCollideEdge(struct CollisionBox* box, struct Transform* boxTra
                 return;
             }
 
-            vector3Add(&boxTransform->position, &contact->rb, &contact->rb);
+            // move edge contact to world space
+            vector3Add(&boxTransform->position, &contact->ra, &contact->ra);
 
             ++output->contactCount;
             contact->id = 8 + axis + corner * 4;
@@ -266,8 +268,8 @@ int collisionBoxCollideQuad(void* data, struct Transform* boxTransform, struct C
     output->contactCount = 0;
     output->normal = quad->plane.normal;
     // TODO actually calculate tangent 
-    output->tangentVectors[0] = gRight;
-    output->tangentVectors[1] = gForward;
+    output->tangentVectors[0] = quad->edgeA;
+    output->tangentVectors[1] = quad->edgeB;
 
     output->restitution = 0.0f;
     output->friction = 1.0f;
@@ -312,25 +314,25 @@ int collisionBoxCollideQuad(void* data, struct Transform* boxTransform, struct C
     int nextId = id ^ (1 << minAxis);
     VECTOR3_AS_ARRAY(&nextFurthestPoint)[minAxis] = -VECTOR3_AS_ARRAY(&nextFurthestPoint)[minAxis];
     int pointEdges = _collsionBuildQuadContact(boxTransform, quad, &nextFurthestPoint, output, nextId);
-    edges |= pointEdges;
     if (pointEdges > 0) {
-        cornerIds |= (1 << id);
+        edges |= pointEdges;
+        cornerIds |= (1 << nextId);
     }
 
     nextId = nextId ^ (1 << midAxis);
     VECTOR3_AS_ARRAY(&nextFurthestPoint)[midAxis] = -VECTOR3_AS_ARRAY(&nextFurthestPoint)[midAxis];
     pointEdges =_collsionBuildQuadContact(boxTransform, quad, &nextFurthestPoint, output, nextId);
-    edges |= pointEdges;
     if (pointEdges > 0) {
-        cornerIds |= (1 << id);
+        edges |= pointEdges;
+        cornerIds |= (1 << nextId);
     }
 
     nextId = nextId ^ (1 << minAxis);
     VECTOR3_AS_ARRAY(&nextFurthestPoint)[minAxis] = -VECTOR3_AS_ARRAY(&nextFurthestPoint)[minAxis];
     pointEdges = _collsionBuildQuadContact(boxTransform, quad, &nextFurthestPoint, output, nextId);
-    edges |= pointEdges;
     if (pointEdges > 0) {
-        cornerIds |= (1 << id);
+        edges |= pointEdges;
+        cornerIds |= (1 << nextId);
     }
 
     edges &= quad->enabledEdges;
@@ -346,7 +348,7 @@ int collisionBoxCollideQuad(void* data, struct Transform* boxTransform, struct C
         quatMultVector(&inverseBoxRotation, &quad->edgeA, &localEdgeA);
         quatMultVector(&inverseBoxRotation, &quad->edgeB, &localEdgeB);
 
-        vector3Sub(&edge.origin, &boxTransform->position, &localOrigin);
+        vector3Sub(&quad->corner, &boxTransform->position, &localOrigin);
         quatMultVector(&inverseBoxRotation, &localOrigin, &localOrigin);
 
         if (edges & (1 << 0)) {

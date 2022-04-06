@@ -5,6 +5,7 @@
 #include "../math/transform.h"
 #include "../math/plane.h"
 #include "contact_solver.h"
+#include "collision_quad.h"
 
 enum CollisionShapeType {
     CollisionShapeTypeBox,
@@ -22,9 +23,11 @@ struct ColliderTypeData;
 typedef float (*MomentOfInertiaCalculator)(struct ColliderTypeData* typeData, float mass);
 
 typedef int (*CollideWithPlane)(void* data, struct Transform* transform, struct Plane* plane, struct ContactConstraintState* contact);
+typedef int (*CollideWithQuad)(void* data, struct Transform* transform, struct CollisionQuad* quad, struct ContactConstraintState* contact);
 
 struct ColliderCallbacks {
     CollideWithPlane collideWithPlane;
+    CollideWithQuad collideWithQuad;
     MomentOfInertiaCalculator mofICalculator;
 };
 
