@@ -171,7 +171,7 @@ void _collisionBoxCollideEdge(struct CollisionBox* box, struct Transform* boxTra
             int isSecondPositive = corner & 2;
             int cornerID = ID_SEGEMENT_FROM_AXIS(firstAxis, isFirstPositive) | ID_SEGEMENT_FROM_AXIS(secondAxis, isSecondPositive);
 
-            int cornerIDMask = (1 << cornerID) | (1 << (cornerID | ID_SEGEMENT_FROM_AXIS(axis, 1)));
+            int cornerIDMask = (1 << cornerID) | (1 << (cornerID | ID_SEGEMENT_FROM_AXIS(axis, 0)));
             if ((cornerIDMask & cornerIds) == 0) {
                 continue;
             }
@@ -186,9 +186,9 @@ void _collisionBoxCollideEdge(struct CollisionBox* box, struct Transform* boxTra
             }
 
             // check if contact point is inside of box
-            if (fabsf(contact->ra.x) > box->sideLength.x ||
-                fabsf(contact->ra.y) > box->sideLength.y ||
-                fabsf(contact->ra.z) > box->sideLength.z) {
+            if (fabsf(contact->ra.x) > box->sideLength.x + NEGATIVE_PENETRATION_BIAS ||
+                fabsf(contact->ra.y) > box->sideLength.y + NEGATIVE_PENETRATION_BIAS ||
+                fabsf(contact->ra.z) > box->sideLength.z + NEGATIVE_PENETRATION_BIAS) {
                 continue;
             }
 
@@ -205,14 +205,19 @@ void _collisionBoxCollideEdge(struct CollisionBox* box, struct Transform* boxTra
                 vector3Cross(&output->normal, &edge->direction, &output->tangentVectors[1]);
             }
 
+            if (vector3Dot(&contact->ra, edgeDirection) - vector3Dot(&contact->rb, edgeDirection) > 0) {
+                continue;
+            }
+
             // rotate from cube space to world space
             quatMultVector(&boxTransform->rotation, &contact->ra, &contact->ra);
             quatMultVector(&boxTransform->rotation, &contact->rb, &contact->rb);
 
             contact->penetration = vector3Dot(&contact->ra, &output->normal) - vector3Dot(&contact->rb, &output-> normal);
             if (contact->penetration >= NEGATIVE_PENETRATION_BIAS) {
-                return;
+                continue;
             }
+
 
             // move edge contact to world space
             vector3Add(&boxTransform->position, &contact->ra, &contact->ra);
@@ -231,6 +236,79 @@ void _collisionBoxCollideEdge(struct CollisionBox* box, struct Transform* boxTra
     }
 
     return;
+}
+
+void _collisionBoxCollidePoint(struct CollisionBox* box, struct Transform* boxTransform, struct Vector3* localPoint, int id, struct ContactConstraintState* output) {
+    float minDepth = localPoint->x > 0.0f ? localPoint->x - box->sideLength.x : (-box->sideLength.x - localPoint->x);
+    int minAxis = 0;
+
+    if (minDepth > NEGATIVE_PENETRATION_BIAS) {
+        return;
+    }
+
+    float check = localPoint->y > 0.0f ? localPoint->y - box->sideLength.y : (-box->sideLength.y - localPoint->y);
+
+    if (check > NEGATIVE_PENETRATION_BIAS) {
+        return;
+    }
+
+    if (check > minDepth) {
+        minDepth = check;
+        minAxis = 1;
+    }
+
+
+    check = localPoint->z > 0.0f ? localPoint->z - box->sideLength.z : (-box->sideLength.z - localPoint->z);
+
+    if (check > NEGATIVE_PENETRATION_BIAS) {
+        return;
+    }
+
+    if (check > minDepth) {
+        minDepth = check;
+        minAxis = 2;
+    }
+
+
+    if (output->contactCount == MAX_CONTACTS_PER_MANIFOLD) {
+        return;
+    }
+
+    struct ContactState* contact = &output->contacts[output->contactCount];
+
+    int positiveAxis = VECTOR3_AS_ARRAY(localPoint)[minAxis] > 0.0f;
+
+    contact->rb = *localPoint;
+    contact->ra = *localPoint;
+    VECTOR3_AS_ARRAY(&contact->ra)[minAxis] = positiveAxis ? VECTOR3_AS_ARRAY(&box->sideLength)[minAxis] : -VECTOR3_AS_ARRAY(&box->sideLength)[minAxis];
+
+    if (output->contactCount == 0) {
+        output->normal = gZeroVec;
+        VECTOR3_AS_ARRAY(&output->normal)[minAxis] = positiveAxis ? 1.0f : -1.0f;
+        quatMultVector(&boxTransform->rotation, &output->normal, &output->normal);
+    }
+
+    // rotate from cube space to world space
+    quatMultVector(&boxTransform->rotation, &contact->ra, &contact->ra);
+    quatMultVector(&boxTransform->rotation, &contact->rb, &contact->rb);
+
+    contact->penetration = vector3Dot(&contact->ra, &output->normal) - vector3Dot(&contact->rb, &output-> normal);
+    if (contact->penetration >= NEGATIVE_PENETRATION_BIAS) {
+        return;
+    }
+
+    // move edge contact to world space
+    vector3Add(&boxTransform->position, &contact->ra, &contact->ra);
+
+    ++output->contactCount;
+    contact->id = 24 + minAxis + positiveAxis * 3 + id * 6;
+    contact->bias = 0;
+    contact->normalMass = 0;
+    contact->tangentMass[0] = 0.0f;
+    contact->tangentMass[1] = 0.0f;
+    contact->normalImpulse = 0.0f;
+    contact->tangentImpulse[0] = 0.0f;
+    contact->tangentImpulse[1] = 0.0f;
 }
 
 int collisionBoxCollideQuad(void* data, struct Transform* boxTransform, struct CollisionQuad* quad, struct ContactConstraintState* output) {
@@ -351,6 +429,15 @@ int collisionBoxCollideQuad(void* data, struct Transform* boxTransform, struct C
         vector3Sub(&quad->corner, &boxTransform->position, &localOrigin);
         quatMultVector(&inverseBoxRotation, &localOrigin, &localOrigin);
 
+        /**
+         *        -------
+         *        |  3  |
+         *      ^ |0   2|
+         *      | |  1  |
+         * edge b -------
+         * edge a -->
+         */
+
         if (edges & (1 << 0)) {
             edge.origin = localOrigin;
             edge.direction = localEdgeB;
@@ -374,11 +461,34 @@ int collisionBoxCollideQuad(void* data, struct Transform* boxTransform, struct C
             _collisionBoxCollideEdge(box, boxTransform, cornerIds, &edge, &localEdgeA, output);
         }
 
-        if (edges & (1 << 2)) {
+        if (edges & (1 << 3)) {
             vector3AddScaled(&localOrigin, &localEdgeB, quad->edgeBLength, &edge.origin);
             edge.direction = localEdgeA;
             edge.length = quad->edgeALength;
             _collisionBoxCollideEdge(box, boxTransform, cornerIds, &edge, &localEdgeB, output);
+        }
+
+        if (edges & ((1 << 0) | (1 << 1))) {
+            _collisionBoxCollidePoint(box, boxTransform, &localOrigin, 0, output);
+        }
+
+        if (edges & ((1 << 1) | (1 << 2))) {
+            struct Vector3 origin;
+            vector3AddScaled(&localOrigin, &localEdgeA, quad->edgeALength, &origin);
+            _collisionBoxCollidePoint(box, boxTransform, &origin, 1, output);
+        }
+
+        if (edges & ((1 << 2) | (1 << 3))) {
+            struct Vector3 origin;
+            vector3AddScaled(&localOrigin, &localEdgeA, quad->edgeALength, &origin);
+            vector3AddScaled(&origin, &localEdgeB, quad->edgeBLength, &origin);
+            _collisionBoxCollidePoint(box, boxTransform, &origin, 2, output);
+        }
+
+        if (edges & ((1 << 3) | (1 << 0))) {
+            struct Vector3 origin;
+            vector3AddScaled(&localOrigin, &localEdgeB, quad->edgeBLength, &origin);
+            _collisionBoxCollidePoint(box, boxTransform, &origin, 3, output);
         }
     }
 
