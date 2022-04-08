@@ -87,6 +87,19 @@ src/models/sphere.h src/models/sphere_geo.inc.h: assets/fbx/Sphere.fbx
 	skeletool64 -s 100 -r 0,0,0 -n sphere -o src/models/sphere.h assets/fbx/Sphere.fbx
 
 ####################
+## Test Chambers
+####################
+
+TEST_CHAMBERS = $(shell find assets/test_chambers -type f -name '*.blend')
+
+build/%.fbx: %.blend
+	@mkdir -p $(@D)
+	$(BLENDER_2_9) $< --background --python tools/export_fbx.py -- $@
+
+build/assets/test_chambers/%.h: build/assets/test_chambers/%.fbx
+	$(SKELATOOL64) -s 256 -n $(<:build/assets/test_chambers/%.fbx=%) -o $@ $<
+
+####################
 ## Linking
 ####################
 
