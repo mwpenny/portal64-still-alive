@@ -3,6 +3,7 @@
 #include "../models/models.h"
 #include "defs.h"
 #include "../graphics/debug_render.h"
+#include "levels/levels.h"
 
 struct CollisionBox gCubeCollisionBox = {
     {0.3165f, 0.3165f, 0.3165f}
@@ -60,8 +61,16 @@ void cubeInit(struct Cube* cube) {
 }
 
 void cubeUpdate(struct Cube* cube) {
-    collisionObjectCollideWithPlane(&cube->collisionObject, &gFloorObject, &gContactSolver);
-    collisionObjectCollideWithQuad(&cube->collisionObject, &gFloatingQuadObject, &gContactSolver);
+    // collisionObjectCollideWithPlane(&cube->collisionObject, &gFloorObject, &gContactSolver);
+    // collisionObjectCollideWithQuad(&cube->collisionObject, &gFloatingQuadObject, &gContactSolver);
+
+    int colliderCount = levelsGetCollisionObjectCount();
+    struct CollisionObject* objects = levelsGetCollisionObjects();
+
+    for (int i = 0; i < colliderCount; ++i) {
+        collisionObjectCollideWithQuad(&cube->collisionObject, &objects[i], &gContactSolver);
+    }
+
     contactSolverSolve(&gContactSolver);
     rigidBodyUpdate(&cube->rigidBody);
 }

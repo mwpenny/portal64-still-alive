@@ -31,8 +31,6 @@ ASMOBJECTS  =	$(patsubst %.s, build/%.o, $(ASMFILES))
 
 CODEFILES = $(shell find src/ -type f -name '*.c')
 
-CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES))
-
 CODESEGMENT =	build/codesegment
 
 BOOT		=	/usr/lib/n64/PR/bootcode/boot.6102
@@ -92,12 +90,31 @@ src/models/sphere.h src/models/sphere_geo.inc.h: assets/fbx/Sphere.fbx
 
 TEST_CHAMBERS = $(shell find assets/test_chambers -type f -name '*.blend')
 
+TEST_CHAMBER_HEADERS = $(TEST_CHAMBERS:%.blend=build/%.h)
+TEST_CHAMBER_OBJECTS = $(TEST_CHAMBERS:%.blend=build/%_geo.o)
+
 build/%.fbx: %.blend
 	@mkdir -p $(@D)
 	$(BLENDER_2_9) $< --background --python tools/export_fbx.py -- $@
 
-build/assets/test_chambers/%.h: build/assets/test_chambers/%.fbx
-	$(SKELATOOL64) -s 256 -n $(<:build/assets/test_chambers/%.fbx=%) -o $@ $<
+build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c: build/assets/test_chambers/%.fbx $(SKELATOOL64)
+	$(SKELATOOL64) -l -s 2.56 -c 0.01 -n $(<:build/assets/test_chambers/%.fbx=%) -o $(<:%.fbx=%.h) $<
+
+build/assets/test_chambers/%.o: build/assets/test_chambers/%.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -MM $^ -MF "$(@:.o=.d)" -MT"$@"
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+levels: $(TEST_CHAMBER_HEADERS)
+	echo $(TEST_CHAMBER_HEADERS)
+
+build/assets/test_chambers/level_list.h: $(TEST_CHAMBER_HEADERS)
+	@mkdir -p $(@D)
+	node tools/generate_level_list.js $@ $(TEST_CHAMBER_HEADERS)
+
+build/src/levels/levels.o: build/assets/test_chambers/level_list.h
+
+.PHONY: levels
 
 ####################
 ## Linking
@@ -107,6 +124,8 @@ $(BOOT_OBJ): $(BOOT)
 	$(OBJCOPY) -I binary -B mips -O elf32-bigmips $< $@
 
 # without debugger
+
+CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) $(TEST_CHAMBER_OBJECTS)
 
 CODEOBJECTS_NO_DEBUG = $(CODEOBJECTS)
 
@@ -146,3 +165,5 @@ $(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(CP_LD_SCRIPT)
 
 clean:
 	rm -rf build
+
+.SECONDARY:
