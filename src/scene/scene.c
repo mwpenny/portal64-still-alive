@@ -21,10 +21,10 @@
 struct Vector3 gStartPosition = {5.0f, 0.0f, -5.0f};
 
 void sceneInit(struct Scene* scene) {
-    cameraInit(&scene->camera, 45.0f, 0.25f * SCENE_SCALE, 80.0f * SCENE_SCALE);
+    cameraInit(&scene->camera, 45.0f, 0.125f * SCENE_SCALE, 80.0f * SCENE_SCALE);
     playerInit(&scene->player);
 
-    scene->player.transform.position = gStartPosition;
+    scene->player.body.transform.position = gStartPosition;
     scene->player.yaw = M_PI;
 
     portalInit(&scene->portals[0], 0);

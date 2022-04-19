@@ -5,12 +5,26 @@
 #include "../defs.h"
 #include "../physics/point_constraint.h"
 #include "../math/mathf.h"
+#include "physics/collision_sphere.h"
+#include "physics/collision_scene.h"
 
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -2.5f};
 struct Vector3 gCameraOffset = {0.0f, 1.2f, 0.0f};
 
+struct CollisionSphere gPlayerCollider = {
+    0.25f,
+};
+
+struct ColliderTypeData gPlayerColliderData = {
+    CollisionShapeTypeSphere,
+    &gPlayerCollider,
+    0.1f,
+    0.5f,
+    &gCollisionSphereCallbacks,
+};
+
 void playerInit(struct Player* player) {
-    transformInitIdentity(&player->transform);
+    collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f);
     player->grabbing = NULL;
     player->yaw = 0.0f;
     player->pitch = 0.0f;
@@ -24,12 +38,27 @@ void playerInit(struct Player* player) {
 #define ROTATE_RATE_DELTA     (M_PI * 0.25f)
 #define ROTATE_RATE_STOP_DELTA (M_PI * 0.25f)
 
+void playerHandleCollision(void* data, struct ContactConstraintState* contact) {
+    struct Player* player = (struct Player*)data;
+
+    if (contact->contactCount == 1 && contact->contacts[0].penetration < 0.0f) {
+        vector3AddScaled(
+            &player->body.transform.position, 
+            &contact->normal, 
+            -contact->contacts[0].penetration, 
+            &player->body.transform.position
+        );
+    }
+}
+
 void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Vector3 forward;
     struct Vector3 right;
 
-    quatMultVector(&player->transform.rotation, &gForward, &forward);
-    quatMultVector(&player->transform.rotation, &gRight, &right);
+    struct Transform* transform = &player->body.transform;
+
+    quatMultVector(&transform->rotation, &gForward, &forward);
+    quatMultVector(&transform->rotation, &gRight, &right);
 
     forward.y = 0.0f;
     right.y = 0.0f;
@@ -50,7 +79,9 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         vector3Dot(&player->velocity, &targetVelocity) > 0.0f ? PLAYER_ACCEL * FIXED_DELTA_TIME : PLAYER_STOP_ACCEL * FIXED_DELTA_TIME, 
         &player->velocity
     );
-    vector3AddScaled(&player->transform.position, &player->velocity, FIXED_DELTA_TIME, &player->transform.position);
+    vector3AddScaled(&transform->position, &player->velocity, FIXED_DELTA_TIME, &transform->position);
+
+    collisionObjectQueryScene(&player->collisionObject, &gCollisionScene, player, playerHandleCollision);
 
     float targetYaw = 0.0f;
     float targetPitch = 0.0f;
@@ -81,13 +112,13 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     player->yaw += player->yawVelocity * FIXED_DELTA_TIME;
     player->pitch = clampf(player->pitch + player->pitchVelocity * FIXED_DELTA_TIME, -M_PI * 0.5f, M_PI * 0.5f);
 
-    quatAxisAngle(&gUp, player->yaw, &player->transform.rotation);
+    quatAxisAngle(&gUp, player->yaw, &transform->rotation);
 
     struct Quaternion pitch;
     quatAxisAngle(&gRight, player->pitch, &pitch);
-    quatMultiply(&player->transform.rotation, &pitch, &cameraTransform->rotation);
+    quatMultiply(&transform->rotation, &pitch, &cameraTransform->rotation);
 
-    transformPoint(&player->transform, &gCameraOffset, &cameraTransform->position);
+    transformPoint(transform, &gCameraOffset, &cameraTransform->position);
 
     if (player->grabbing) {
         struct Vector3 grabPoint;

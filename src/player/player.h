@@ -4,9 +4,11 @@
 #include "../math/transform.h"
 #include "../graphics/renderstate.h"
 #include "../physics/rigid_body.h"
+#include "../physics/collision_object.h"
 
 struct Player {
-    struct Transform transform;
+    struct CollisionObject collisionObject;
+    struct RigidBody body;
     struct RigidBody* grabbing;
     struct Vector3 velocity;
     float pitch;

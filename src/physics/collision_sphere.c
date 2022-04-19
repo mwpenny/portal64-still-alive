@@ -24,13 +24,13 @@ int collisionSphereCollideQuad(void* data, struct Transform* boxTransform, struc
     vector3AddScaled(&quad->corner, &quad->edgeA, aLerp, &contact->ra);
     vector3AddScaled(&contact->ra, &quad->edgeB, bLerp, &contact->ra);
 
-    vector3Sub(&boxTransform->position, &contact->rb, &output->normal);
+    vector3Sub(&boxTransform->position, &contact->ra, &output->normal);
 
     float outputLength = vector3MagSqrd(&output->normal);
 
     float extraRadius = sphere->radius + NEGATIVE_PENETRATION_BIAS;
 
-    if (outputLength * outputLength > extraRadius * extraRadius || vector3Dot(&output->normal, &quad->plane.normal) < 0.0f) {
+    if (outputLength * outputLength > extraRadius * extraRadius || vector3Dot(&output->normal, &quad->plane.normal) <= 0.0f) {
         return 0;
     }
 

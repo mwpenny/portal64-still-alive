@@ -12,3 +12,21 @@ void collisionObjectCollideWithScene(struct CollisionObject* object, struct Coll
         collisionObjectCollideWithQuad(object, &scene->quads[i], contactSolver);
     }
 }
+
+void collisionObjectQueryScene(struct CollisionObject* object, struct CollisionScene* scene, void* data, ManifoldCallback callback) {
+    CollideWithQuad quadCollider = object->collider->callbacks->collideWithQuad;
+
+    if (!quadCollider) {
+        return;
+    }
+
+    struct ContactConstraintState localContact;
+
+    for (int i = 0; i < scene->quadCount; ++i) {
+        localContact.contactCount = 0;
+
+        if (quadCollider(object->collider->data, &object->body->transform, scene->quads[i].collider->data, &localContact)) {
+            callback(data, &localContact);
+        }
+    }
+}
