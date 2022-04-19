@@ -17,20 +17,9 @@
  * edge a -->
  */
 
-int _collsionBuildQuadContact(struct Transform* boxTransform, struct CollisionQuad* quad, struct Vector3* point, struct ContactConstraintState* output, int id) {
-    struct Vector3 worldPoint;
-    struct ContactState* contact = &output->contacts[output->contactCount];
-
-    quatMultVector(&boxTransform->rotation, point, &contact->rb);
-    vector3Add(&contact->rb, &boxTransform->position, &worldPoint);
-    float penetration = planePointDistance(&quad->plane, &worldPoint);
-
-    if (penetration >= NEGATIVE_PENETRATION_BIAS) {
-        return POINT_NO_OVERLAP;
-    }
-
+int collisionQuadDetermineEdges(struct Vector3* worldPoint, struct CollisionQuad* quad) {
     struct Vector3 relative;
-    vector3Sub(&worldPoint, &quad->corner, &relative);
+    vector3Sub(worldPoint, &quad->corner, &relative);
     float edgeDistance = vector3Dot(&relative, &quad->edgeA);
 
     int edgeMask = 0;
@@ -52,6 +41,23 @@ int _collsionBuildQuadContact(struct Transform* boxTransform, struct CollisionQu
     if (edgeDistance > quad->edgeBLength + EDGE_ZERO_BIAS) {
         edgeMask |= 1 << 3;
     }
+
+    return edgeMask;
+}
+
+int _collsionBuildQuadContact(struct Transform* boxTransform, struct CollisionQuad* quad, struct Vector3* point, struct ContactConstraintState* output, int id) {
+    struct Vector3 worldPoint;
+    struct ContactState* contact = &output->contacts[output->contactCount];
+
+    quatMultVector(&boxTransform->rotation, point, &contact->rb);
+    vector3Add(&contact->rb, &boxTransform->position, &worldPoint);
+    float penetration = planePointDistance(&quad->plane, &worldPoint);
+
+    if (penetration >= NEGATIVE_PENETRATION_BIAS) {
+        return POINT_NO_OVERLAP;
+    }
+
+    int edgeMask = collisionQuadDetermineEdges(&worldPoint, quad);
 
     if (edgeMask) {
         return edgeMask;
@@ -389,6 +395,7 @@ int collisionBoxCollideQuad(void* data, struct Transform* boxTransform, struct C
 
     struct Vector3 nextFurthestPoint = deepestCorner;
 
+    // TODO roll up into a loop
     int nextId = id ^ (1 << minAxis);
     VECTOR3_AS_ARRAY(&nextFurthestPoint)[minAxis] = -VECTOR3_AS_ARRAY(&nextFurthestPoint)[minAxis];
     int pointEdges = _collsionBuildQuadContact(boxTransform, quad, &nextFurthestPoint, output, nextId);
@@ -438,6 +445,7 @@ int collisionBoxCollideQuad(void* data, struct Transform* boxTransform, struct C
          * edge a -->
          */
 
+        // TODO roll up into a loop
         if (edges & (1 << 0)) {
             edge.origin = localOrigin;
             edge.direction = localEdgeB;

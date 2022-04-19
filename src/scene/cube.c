@@ -4,6 +4,7 @@
 #include "defs.h"
 #include "../graphics/debug_render.h"
 #include "levels/levels.h"
+#include "physics/collision_scene.h"
 
 struct CollisionBox gCubeCollisionBox = {
     {0.3165f, 0.3165f, 0.3165f}
@@ -64,12 +65,7 @@ void cubeUpdate(struct Cube* cube) {
     // collisionObjectCollideWithPlane(&cube->collisionObject, &gFloorObject, &gContactSolver);
     // collisionObjectCollideWithQuad(&cube->collisionObject, &gFloatingQuadObject, &gContactSolver);
 
-    int colliderCount = levelsGetCollisionObjectCount();
-    struct CollisionObject* objects = levelsGetCollisionObjects();
-
-    for (int i = 0; i < colliderCount; ++i) {
-        collisionObjectCollideWithQuad(&cube->collisionObject, &objects[i], &gContactSolver);
-    }
+    collisionObjectCollideWithScene(&cube->collisionObject, &gCollisionScene, &gContactSolver);
 
     contactSolverSolve(&gContactSolver);
     rigidBodyUpdate(&cube->rigidBody);

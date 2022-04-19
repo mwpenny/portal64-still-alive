@@ -11,6 +11,8 @@
 #include "string.h"
 #include "controls/controller.h"
 
+#include "levels/levels.h"
+
 #ifdef WITH_DEBUGGER
 #include "../debugger/debugger.h"
 #endif
@@ -130,6 +132,7 @@ static void gameProc(void* arg) {
     sceneInit(&gScene);
     romInit();
     controllersInit();
+    levelLoadCollisionScene();
 #ifdef WITH_DEBUGGER
     OSThread* debugThreads[2];
     debugThreads[0] = &gameThread;

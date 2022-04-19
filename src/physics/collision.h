@@ -10,6 +10,7 @@
 enum CollisionShapeType {
     CollisionShapeTypeBox,
     CollisionShapeTypeQuad,
+    CollisionShapeTypeSphere,
 };
 
 struct ContactPoint {

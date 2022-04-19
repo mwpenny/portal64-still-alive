@@ -3,7 +3,6 @@
 
 #include "physics/collision_object.h"
 
-struct CollisionObject* levelsGetCollisionObjects();
-int levelsGetCollisionObjectCount();
+void levelLoadCollisionScene();
 
 #endif
