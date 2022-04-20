@@ -74,14 +74,16 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     vector3AddScaled(&targetVelocity, &right, controllerInput->stick_x * PLAYER_SPEED / 80.0f, &targetVelocity);
 
     vector3MoveTowards(
-        &player->velocity, 
+        &player->body.velocity, 
         &targetVelocity, 
-        vector3Dot(&player->velocity, &targetVelocity) > 0.0f ? PLAYER_ACCEL * FIXED_DELTA_TIME : PLAYER_STOP_ACCEL * FIXED_DELTA_TIME, 
-        &player->velocity
+        vector3Dot(&player->body.velocity, &targetVelocity) > 0.0f ? PLAYER_ACCEL * FIXED_DELTA_TIME : PLAYER_STOP_ACCEL * FIXED_DELTA_TIME, 
+        &player->body.velocity
     );
-    vector3AddScaled(&transform->position, &player->velocity, FIXED_DELTA_TIME, &transform->position);
+    vector3AddScaled(&transform->position, &player->body.velocity, FIXED_DELTA_TIME, &transform->position);
 
     collisionObjectQueryScene(&player->collisionObject, &gCollisionScene, player, playerHandleCollision);
+
+    rigidBodyCheckPortals(&player->body);
 
     float targetYaw = 0.0f;
     float targetPitch = 0.0f;
@@ -109,14 +111,27 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         player->pitchVelocity * targetPitch > 0.0f ? ROTATE_RATE_DELTA : ROTATE_RATE_STOP_DELTA
     );
 
-    player->yaw += player->yawVelocity * FIXED_DELTA_TIME;
-    player->pitch = clampf(player->pitch + player->pitchVelocity * FIXED_DELTA_TIME, -M_PI * 0.5f, M_PI * 0.5f);
+    struct Quaternion deltaRotate;
+    quatAxisAngle(&gUp, player->yawVelocity * FIXED_DELTA_TIME, &deltaRotate);
 
-    quatAxisAngle(&gUp, player->yaw, &transform->rotation);
+    struct Quaternion tempRotation;
+    quatMultiply(&deltaRotate, &player->body.transform.rotation, &tempRotation);
 
-    struct Quaternion pitch;
-    quatAxisAngle(&gRight, player->pitch, &pitch);
-    quatMultiply(&transform->rotation, &pitch, &cameraTransform->rotation);
+    quatAxisAngle(&gRight, player->pitchVelocity * FIXED_DELTA_TIME, &deltaRotate);
+
+    quatMultiply(&tempRotation, &deltaRotate, &player->body.transform.rotation);
+
+
+    // player->yaw += player->yawVelocity * FIXED_DELTA_TIME;
+    // player->pitch = clampf(player->pitch + player->pitchVelocity * FIXED_DELTA_TIME, -M_PI * 0.5f, M_PI * 0.5f);
+
+    // quatAxisAngle(&gUp, player->yaw, &transform->rotation);
+
+    // struct Quaternion pitch;
+    // quatAxisAngle(&gRight, player->pitch, &pitch);
+    // quatMultiply(&transform->rotation, &pitch, &cameraTransform->rotation);
+
+    cameraTransform->rotation = player->body.transform.rotation;
 
     transformPoint(transform, &gCameraOffset, &cameraTransform->position);
 

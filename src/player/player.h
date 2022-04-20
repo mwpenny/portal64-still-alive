@@ -10,7 +10,6 @@ struct Player {
     struct CollisionObject collisionObject;
     struct RigidBody body;
     struct RigidBody* grabbing;
-    struct Vector3 velocity;
     float pitch;
     float pitchVelocity;
     float yaw;

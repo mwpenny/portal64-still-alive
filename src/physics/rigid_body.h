@@ -4,6 +4,12 @@
 #include "../math/transform.h"
 #include "collision.h"
 
+enum RigidBodyFlags {
+    RigidBodyFlagsInFrontPortal0 = (1 << 0),
+    RigidBodyFlagsInFrontPortal1 = (1 << 1),
+    RigidBodyFlagsPortalsInactive = (1 << 2),
+};
+
 struct RigidBody {
     struct Transform transform;
     struct Vector3 velocity;
@@ -18,6 +24,8 @@ struct RigidBody {
     // for sphere 2/5 * m * r * r
     float momentOfInertia;
     float momentOfInertiaInv;
+    
+    enum RigidBodyFlags flags;
 };
 
 void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniteria);
@@ -25,6 +33,8 @@ void rigidBodyAppyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoin
 void rigidBodyUpdate(struct RigidBody* rigidBody);
 void rigidBodyVelocityAtLocalPoint(struct RigidBody* rigidBody, struct Vector3* localPoint, struct Vector3* worldVelocity);
 void rigidBodyVelocityAtWorldPoint(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* worldVelocity);
+
+int rigidBodyCheckPortals(struct RigidBody* rigidBody);
 
 
 #endif

@@ -67,7 +67,8 @@ int collisionSceneIsTouchingPortal(struct Vector3* contactPoint) {
             continue;
         }
 
-        localPoint.x *= 2.0f;
+        localPoint.x *= (1.0f / PORTAL_X_RADIUS);
+        localPoint.z = 0.0f;
 
         if (vector3MagSqrd(&localPoint) < 1.0f) {
             return 1;

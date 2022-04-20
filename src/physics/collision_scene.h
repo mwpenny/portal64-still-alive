@@ -3,7 +3,8 @@
 
 #include "collision_object.h"
 
-#define PORTAL_THICKNESS    0.11f
+#define PORTAL_THICKNESS        0.11f
+#define PORTAL_X_RADIUS         0.5f
 
 struct CollisionScene {
     struct CollisionObject* quads;

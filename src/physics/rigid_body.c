@@ -2,6 +2,7 @@
 #include "../util/time.h"
 #include "../physics/config.h"
 #include "contact_solver.h"
+#include "collision_scene.h"
 #include "defs.h"
 #include <math.h>
 
@@ -15,6 +16,8 @@ void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniter
 
     rigidBody->momentOfInertia = momentOfIniteria;
     rigidBody->momentOfInertiaInv = 1.0f / rigidBody->momentOfInertia;
+
+    rigidBody->flags = 0;
 }
 
 void rigidBodyAppyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* impulse) {
@@ -56,4 +59,85 @@ float rigidBodyMassInverseAtLocalPoint(struct RigidBody* rigidBody, struct Vecto
     struct Vector3 crossPoint;
     vector3Cross(localPoint, normal, &crossPoint);
     return rigidBody->massInv + rigidBody->momentOfInertiaInv * vector3MagSqrd(&crossPoint);
+}
+
+
+int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
+    if (!gCollisionScene.portalTransforms[0] || !gCollisionScene.portalTransforms[1]) {
+        rigidBody->flags &= ~(RigidBodyFlagsInFrontPortal0 | RigidBodyFlagsInFrontPortal1);
+        rigidBody->flags |= RigidBodyFlagsPortalsInactive;
+        return 0;
+    }
+
+    struct Vector3 localPoint;
+
+    enum RigidBodyFlags newFlags = 0;
+
+    int didTeleport = 0;
+
+    for (int i = 0; i < 2; ++i) {
+        transformPointInverse(gCollisionScene.portalTransforms[i], &rigidBody->transform.position, &localPoint);
+
+        int mask = (1 << i);
+
+        if (localPoint.z < 0.0f) {
+            newFlags |= mask;
+        }
+
+        // skip checking if portal was crossed if this is the
+        // first frame portals were active
+        if (rigidBody->flags & RigidBodyFlagsPortalsInactive || didTeleport) {
+            continue;
+        }
+
+        // 0 !newFlags & flags
+        // 1 newFlags & !flags
+
+        // the xorMask changes which direction
+        // each portal needs to be crossed in 
+        // order to transmit an object
+        int xorMask = i == 0 ? 0 : mask;
+
+        // check if the body crossed the portal
+        if (!((~newFlags ^ xorMask) & (rigidBody->flags ^ xorMask))) {
+            continue;
+        }
+
+        struct Vector3 scaledPoint;
+
+        scaledPoint.x = localPoint.x * (1.0f / PORTAL_X_RADIUS);
+        scaledPoint.y = localPoint.y;
+        scaledPoint.z = 0.0f;
+
+        if (vector3MagSqrd(&scaledPoint) > 1.0f) {
+            continue;
+        }
+
+        struct Transform* otherPortal = gCollisionScene.portalTransforms[1 - i];
+
+        transformPoint(otherPortal, &localPoint, &rigidBody->transform.position);
+
+        struct Quaternion inverseARotation;
+        quatConjugate(&gCollisionScene.portalTransforms[i]->rotation, &inverseARotation);
+
+        struct Quaternion rotationTransfer;
+        quatMultiply(&inverseARotation, &otherPortal->rotation, &rotationTransfer);
+
+        quatMultVector(&rotationTransfer, &rigidBody->velocity, &rigidBody->velocity);
+        quatMultVector(&rotationTransfer, &rigidBody->angularVelocity, &rigidBody->angularVelocity);
+
+        struct Quaternion newRotation;
+
+        quatMultiply(&rotationTransfer, &rigidBody->transform.rotation, &newRotation);
+
+        rigidBody->transform.rotation = newRotation;
+
+        didTeleport = 1;
+        newFlags |= RigidBodyFlagsPortalsInactive;
+    }
+
+    rigidBody->flags &= ~(RigidBodyFlagsInFrontPortal0 | RigidBodyFlagsInFrontPortal1 | RigidBodyFlagsPortalsInactive);
+    rigidBody->flags |= newFlags;
+
+    return didTeleport;
 }
