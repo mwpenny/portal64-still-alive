@@ -4,6 +4,7 @@
 #include "../math/mathf.h"
 #include "rigid_body.h"
 #include "collision_object.h"
+#include "collision_scene.h"
 
 #include <string.h>
 
@@ -378,7 +379,7 @@ struct ContactState* contactSolverGetContact(struct ContactConstraintState* cont
 	return result;
 }
 
-void contactSolverAssign(struct ContactConstraintState* into, struct ContactConstraintState* from) {
+void contactSolverAssign(struct ContactConstraintState* into, struct ContactConstraintState* from, int filterPortalContacts) {
 	for (int sourceIndex = 0; sourceIndex < from->contactCount; ++sourceIndex) {
 		int targetIndex;
 
@@ -397,11 +398,18 @@ void contactSolverAssign(struct ContactConstraintState* into, struct ContactCons
 		}
 	}
 
+	int copiedCount = 0;
+
 	for (int sourceIndex = 0; sourceIndex < from->contactCount; ++sourceIndex) {
-		into->contacts[sourceIndex] = from->contacts[sourceIndex];
+		if (filterPortalContacts && collisionSceneIsTouchingPortal(&from->contacts[sourceIndex].ra)) {
+			continue;
+		}
+
+		into->contacts[copiedCount] = from->contacts[sourceIndex];
+		++copiedCount;
 	}
 
-	into->contactCount = from->contactCount;
+	into->contactCount = copiedCount;
 	into->tangentVectors[0] = from->tangentVectors[0];
 	into->tangentVectors[1] = from->tangentVectors[1];
 	into->normal = from->normal;

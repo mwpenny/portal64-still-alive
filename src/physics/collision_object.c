@@ -25,7 +25,7 @@ void collisionObjectCollideWithPlane(struct CollisionObject* object, struct Coll
             return;
         }
         
-        contactSolverAssign(contact, &localContact);
+        contactSolverAssign(contact, &localContact, 1);
     } else if (contact) {
         contactSolverRemoveContact(contactSolver, contact);
     }
@@ -44,12 +44,11 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
     struct ContactConstraintState* contact = contactSolverPeekContact(contactSolver, quad, object);
     
     if (quadCollider(object->collider->data, &object->body->transform, quad->collider->data, &localContact)) {
-
         if (!contact) {
             return;
         }
         
-        contactSolverAssign(contact, &localContact);
+        contactSolverAssign(contact, &localContact, 1);
     } else if (contact) {
         contactSolverRemoveContact(contactSolver, contact);
     }

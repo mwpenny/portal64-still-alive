@@ -15,10 +15,11 @@
 #include "../physics/point_constraint.h"
 #include "../physics/debug_renderer.h"
 #include "../controls/controller.h"
+#include "../physics/collision_scene.h"
 
 #include "../levels/test_chamber_00_0/header.h"
 
-struct Vector3 gStartPosition = {5.0f, 0.0f, -5.0f};
+struct Vector3 gStartPosition = {5.0f, 1.2f, -5.0f};
 
 void sceneInit(struct Scene* scene) {
     cameraInit(&scene->camera, 45.0f, 0.125f * SCENE_SCALE, 80.0f * SCENE_SCALE);
@@ -37,6 +38,9 @@ void sceneInit(struct Scene* scene) {
     scene->portals[1].transform.position.x = 0.1f;
     scene->portals[1].transform.position.y = 1.0f;
     scene->portals[1].transform.position.z = -6.0f;
+
+    gCollisionScene.portalTransforms[0] = &scene->portals[0].transform;
+    gCollisionScene.portalTransforms[1] = &scene->portals[1].transform;
 
     quatAxisAngle(&gUp, M_PI * 0.5f, &scene->portals[1].transform.rotation);
 

@@ -9,7 +9,7 @@
 #include "physics/collision_scene.h"
 
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -2.5f};
-struct Vector3 gCameraOffset = {0.0f, 1.2f, 0.0f};
+struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
 
 struct CollisionSphere gPlayerCollider = {
     0.25f,
