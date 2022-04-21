@@ -81,3 +81,23 @@ int collisionSceneIsTouchingPortal(struct Vector3* contactPoint) {
 int collisionSceneIsPortalOpen() {
     return gCollisionScene.portalTransforms[0] != NULL && gCollisionScene.portalTransforms[1] != NULL;
 }
+
+#define NO_RAY_HIT_DISTANCE 1000000000000.0f
+
+int collisionSceneRayTrace(struct CollisionScene* scene, struct Vector3* at, struct Vector3* dir, int passThroughPortals, struct RayTraceHit* hit) {
+    hit->distance = NO_RAY_HIT_DISTANCE;
+    
+    for (int i = 0; i < scene->quadCount; ++i) {
+        struct RayTraceHit hitTest;
+
+        if (rayTraceQuad(at, dir, scene->quads[i].collider->data, &hitTest) && hitTest.distance < hit->distance) {
+
+            hit->at = hitTest.at;
+            hit->normal = hitTest.normal;
+            hit->distance = hitTest.distance;
+            hit->object = &scene->quads[i];
+        }
+    }
+
+    return hit->distance != NO_RAY_HIT_DISTANCE;
+}

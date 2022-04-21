@@ -2,6 +2,7 @@
 #define __COLLISION_SCENE_H__
 
 #include "collision_object.h"
+#include "ray_tracing.h"
 
 #define PORTAL_THICKNESS        0.11f
 #define PORTAL_X_RADIUS         0.5f
@@ -23,5 +24,7 @@ int collisionSceneIsTouchingPortal(struct Vector3* contactPoint);
 int collisionSceneIsPortalOpen();
 
 void collisionObjectQueryScene(struct CollisionObject* object, struct CollisionScene* scene, void* data, ManifoldCallback callback);
+
+int collisionSceneRayTrace(struct CollisionScene* scene, struct Vector3* at, struct Vector3* dir, int passThroughPortals, struct RayTraceHit* hit);
 
 #endif
