@@ -127,12 +127,12 @@ static void gameProc(void* arg) {
     u16* memoryEnd = graphicsLayoutScreenBuffers((u16*)PHYS_TO_K0(osMemSize));
 
     heapInit(_heapStart, memoryEnd);
+    romInit();
 
     contactSolverInit(&gContactSolver);
-    sceneInit(&gScene);
-    romInit();
-    controllersInit();
     levelLoadCollisionScene();
+    sceneInit(&gScene);
+    controllersInit();
 #ifdef WITH_DEBUGGER
     OSThread* debugThreads[2];
     debugThreads[0] = &gameThread;

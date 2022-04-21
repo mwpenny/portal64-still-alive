@@ -7,6 +7,10 @@ struct CollisionScene gCollisionScene;
 void collisionSceneInit(struct CollisionScene* scene, struct CollisionObject* quads, int quadCount) {
     scene->quads = quads;
     scene->quadCount = quadCount;
+
+    scene->dynamicObjectCount = 0;
+    scene->portalTransforms[0] = NULL;
+    scene->portalTransforms[1] = NULL;
 }
 
 void collisionObjectCollideWithScene(struct CollisionObject* object, struct CollisionScene* scene, struct ContactSolver* contactSolver) {
@@ -138,4 +142,42 @@ void collisionSceneGetPortalTransform(int fromPortal, struct Transform* out) {
     struct Transform inverseA;
     transformInvert(gCollisionScene.portalTransforms[fromPortal], &inverseA);
     transformConcat(gCollisionScene.portalTransforms[1 - fromPortal], &inverseA, out);
+}
+
+void collisionSceneAddDynamicObject(struct CollisionObject* object) {
+    if (gCollisionScene.dynamicObjectCount < MAX_DYNAMIC_OBJECTS) {
+        gCollisionScene.dynamicObjects[gCollisionScene.dynamicObjectCount] = object;
+        ++gCollisionScene.dynamicObjectCount;
+    }
+}
+
+void collisionSceneRemoveDynamicObject(struct CollisionObject* object) {
+    int found = 0;
+
+    for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
+        if (object == gCollisionScene.dynamicObjects[i]) {
+            found = 1;
+        }
+
+        if (found && i + 1 < gCollisionScene.dynamicObjectCount) {
+            gCollisionScene.dynamicObjects[i] = gCollisionScene.dynamicObjects[i + 1];
+        }
+    }
+
+    if (found) {
+        --gCollisionScene.dynamicObjectCount;
+    }
+}
+
+void collisionSceneUpdateDynamics() {
+    for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
+        collisionObjectCollideWithScene(gCollisionScene.dynamicObjects[i], &gCollisionScene, &gContactSolver);
+    }
+
+    contactSolverSolve(&gContactSolver);
+
+    for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
+        rigidBodyUpdate(gCollisionScene.dynamicObjects[i]->body);
+        rigidBodyCheckPortals(gCollisionScene.dynamicObjects[i]->body);
+    }
 }

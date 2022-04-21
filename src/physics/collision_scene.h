@@ -7,10 +7,14 @@
 #define PORTAL_THICKNESS        0.11f
 #define PORTAL_X_RADIUS         0.5f
 
+#define MAX_DYNAMIC_OBJECTS     16
+
 struct CollisionScene {
     struct CollisionObject* quads;
-    int quadCount;
-    struct Transform* portalTransforms[0];
+    struct Transform* portalTransforms[2];
+    struct CollisionObject* dynamicObjects[MAX_DYNAMIC_OBJECTS];
+    u16 dynamicObjectCount;
+    u16 quadCount;
 };
 
 typedef void (*ManifoldCallback)(void* data, struct ContactConstraintState* contact);
@@ -28,5 +32,10 @@ void collisionObjectQueryScene(struct CollisionObject* object, struct CollisionS
 int collisionSceneRaycast(struct CollisionScene* scene, struct Vector3* at, struct Vector3* dir, float maxDistance, int passThroughPortals, struct RaycastHit* hit);
 
 void collisionSceneGetPortalTransform(int fromPortal, struct Transform* out);
+
+void collisionSceneAddDynamicObject(struct CollisionObject* object);
+void collisionSceneRemoveDynamicObject(struct CollisionObject* object);
+
+void collisionSceneUpdateDynamics();
 
 #endif

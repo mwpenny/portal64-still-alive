@@ -59,18 +59,11 @@ struct ColliderTypeData gCubeCollider = {
 
 void cubeInit(struct Cube* cube) {
     collisionObjectInit(&cube->collisionObject, &gCubeCollider, &cube->rigidBody, 1.0f);
+    collisionSceneAddDynamicObject(&cube->collisionObject);
 }
 
 void cubeUpdate(struct Cube* cube) {
-    // collisionObjectCollideWithPlane(&cube->collisionObject, &gFloorObject, &gContactSolver);
-    // collisionObjectCollideWithQuad(&cube->collisionObject, &gFloatingQuadObject, &gContactSolver);
-
-    collisionObjectCollideWithScene(&cube->collisionObject, &gCollisionScene, &gContactSolver);
-
-    contactSolverSolve(&gContactSolver);
-    rigidBodyUpdate(&cube->rigidBody);
-
-    rigidBodyCheckPortals(&cube->rigidBody);
+    
 }
 
 void cubeRender(struct Cube* cube, struct RenderState* renderState) {

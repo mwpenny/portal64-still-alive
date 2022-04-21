@@ -26,10 +26,12 @@ void sceneInit(struct Scene* scene) {
     playerInit(&scene->player);
 
     scene->player.body.transform.position = gStartPosition;
-    scene->player.yaw = M_PI;
+    quatAxisAngle(&gUp, M_PI, &scene->player.body.transform.rotation);
 
     portalInit(&scene->portals[0], 0);
     portalInit(&scene->portals[1], PortalFlagsOddParity);
+    gCollisionScene.portalTransforms[0] = &scene->portals[0].transform;
+    gCollisionScene.portalTransforms[1] = &scene->portals[1].transform;
 
     scene->portals[0].transform.position.x = 5.0f;
     scene->portals[0].transform.position.y = 1.0f;
@@ -39,8 +41,6 @@ void sceneInit(struct Scene* scene) {
     scene->portals[1].transform.position.y = 1.0f;
     scene->portals[1].transform.position.z = -6.0f;
 
-    gCollisionScene.portalTransforms[0] = &scene->portals[0].transform;
-    gCollisionScene.portalTransforms[1] = &scene->portals[1].transform;
 
     quatAxisAngle(&gUp, M_PI * 0.5f, &scene->portals[1].transform.rotation);
 
@@ -103,7 +103,8 @@ void sceneUpdate(struct Scene* scene) {
     scene->lastFrameTime = frameStart - scene->lastFrameStart;
 
     playerUpdate(&scene->player, &scene->camera.transform);
-    cubeUpdate(&scene->cube);
+    
+    collisionSceneUpdateDynamics();
 
     if (controllerGetButtonDown(0, B_BUTTON)) {
         if (scene->player.grabbing) {
