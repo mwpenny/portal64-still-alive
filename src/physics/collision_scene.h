@@ -20,6 +20,7 @@ void collisionSceneInit(struct CollisionScene* scene, struct CollisionObject* qu
 void collisionObjectCollideWithScene(struct CollisionObject* object, struct CollisionScene* scene, struct ContactSolver* contactSolver);
 
 int collisionSceneIsTouchingPortal(struct Vector3* contactPoint);
+int collisionSceneIsPortalOpen();
 
 void collisionObjectQueryScene(struct CollisionObject* object, struct CollisionScene* scene, void* data, ManifoldCallback callback);
 

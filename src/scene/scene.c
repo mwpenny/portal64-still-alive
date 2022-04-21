@@ -110,6 +110,7 @@ void sceneUpdate(struct Scene* scene) {
             scene->player.grabbing = NULL;
         } else {
             scene->player.grabbing = &scene->cube.rigidBody;
+            scene->player.grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
         }
     }
 

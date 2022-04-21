@@ -6,9 +6,12 @@
 #include "../physics/rigid_body.h"
 #include "../physics/collision_object.h"
 
+#define PLAYER_GRABBING_THROUGH_NOTHING -1
+
 struct Player {
     struct CollisionObject collisionObject;
     struct RigidBody body;
+    short grabbingThroughPortal;
     struct RigidBody* grabbing;
     float pitch;
     float pitchVelocity;

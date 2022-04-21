@@ -69,6 +69,8 @@ void cubeUpdate(struct Cube* cube) {
 
     contactSolverSolve(&gContactSolver);
     rigidBodyUpdate(&cube->rigidBody);
+
+    rigidBodyCheckPortals(&cube->rigidBody);
 }
 
 void cubeRender(struct Cube* cube, struct RenderState* renderState) {

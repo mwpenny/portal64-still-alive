@@ -8,6 +8,8 @@ enum RigidBodyFlags {
     RigidBodyFlagsInFrontPortal0 = (1 << 0),
     RigidBodyFlagsInFrontPortal1 = (1 << 1),
     RigidBodyFlagsPortalsInactive = (1 << 2),
+    RigidBodyFlagsCrossedPortal0 = (1 << 3),
+    RigidBodyFlagsCrossedPortal1 = (1 << 4),
 };
 
 struct RigidBody {
@@ -34,7 +36,7 @@ void rigidBodyUpdate(struct RigidBody* rigidBody);
 void rigidBodyVelocityAtLocalPoint(struct RigidBody* rigidBody, struct Vector3* localPoint, struct Vector3* worldVelocity);
 void rigidBodyVelocityAtWorldPoint(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* worldVelocity);
 
-int rigidBodyCheckPortals(struct RigidBody* rigidBody);
+void rigidBodyCheckPortals(struct RigidBody* rigidBody);
 
 
 #endif

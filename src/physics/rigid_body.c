@@ -62,18 +62,16 @@ float rigidBodyMassInverseAtLocalPoint(struct RigidBody* rigidBody, struct Vecto
 }
 
 
-int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
+void rigidBodyCheckPortals(struct RigidBody* rigidBody) {
     if (!gCollisionScene.portalTransforms[0] || !gCollisionScene.portalTransforms[1]) {
         rigidBody->flags &= ~(RigidBodyFlagsInFrontPortal0 | RigidBodyFlagsInFrontPortal1);
         rigidBody->flags |= RigidBodyFlagsPortalsInactive;
-        return 0;
+        return;
     }
 
     struct Vector3 localPoint;
 
     enum RigidBodyFlags newFlags = 0;
-
-    int didTeleport = 0;
 
     for (int i = 0; i < 2; ++i) {
         transformPointInverse(gCollisionScene.portalTransforms[i], &rigidBody->transform.position, &localPoint);
@@ -85,8 +83,13 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
         }
 
         // skip checking if portal was crossed if this is the
-        // first frame portals were active
-        if (rigidBody->flags & RigidBodyFlagsPortalsInactive || didTeleport) {
+        // first frame portals were active or the object was
+        // just teleported
+        if (rigidBody->flags & (
+            RigidBodyFlagsPortalsInactive | 
+            (RigidBodyFlagsCrossedPortal0 << (1 - i))) ||
+            (newFlags & RigidBodyFlagsCrossedPortal0)
+        ) {
             continue;
         }
 
@@ -132,12 +135,15 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
 
         rigidBody->transform.rotation = newRotation;
 
-        didTeleport = 1;
-        newFlags |= RigidBodyFlagsPortalsInactive;
+        newFlags |= RigidBodyFlagsCrossedPortal0 << i;
     }
 
-    rigidBody->flags &= ~(RigidBodyFlagsInFrontPortal0 | RigidBodyFlagsInFrontPortal1 | RigidBodyFlagsPortalsInactive);
+    rigidBody->flags &= ~(
+        RigidBodyFlagsInFrontPortal0 | 
+        RigidBodyFlagsInFrontPortal1 | 
+        RigidBodyFlagsPortalsInactive |
+        RigidBodyFlagsCrossedPortal0 |
+        RigidBodyFlagsCrossedPortal1
+    );
     rigidBody->flags |= newFlags;
-
-    return didTeleport;
 }

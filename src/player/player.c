@@ -28,6 +28,8 @@ void playerInit(struct Player* player) {
     player->grabbing = NULL;
     player->yaw = 0.0f;
     player->pitch = 0.0f;
+
+    player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
 }
 
 #define PLAYER_SPEED    (5.0f)
@@ -48,6 +50,60 @@ void playerHandleCollision(void* data, struct ContactConstraintState* contact) {
             -contact->contacts[0].penetration, 
             &player->body.transform.position
         );
+    }
+}
+
+void playerApplyPortalGrab(struct Player* player, int portalIndex) {
+    if (player->grabbingThroughPortal == PLAYER_GRABBING_THROUGH_NOTHING) {
+        player->grabbingThroughPortal = portalIndex;
+    } else if (player->grabbingThroughPortal != portalIndex) {
+        player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
+    }
+}
+
+void playerUpdateGrabbedObject(struct Player* player) {
+    if (player->grabbing) {
+        if (player->body.flags & RigidBodyFlagsCrossedPortal0) {
+            playerApplyPortalGrab(player, 1);
+        }
+
+        if (player->body.flags & RigidBodyFlagsCrossedPortal1) {
+            playerApplyPortalGrab(player, 0);
+        }
+
+        if (player->grabbing->flags & RigidBodyFlagsCrossedPortal0) {
+            playerApplyPortalGrab(player, 0);
+        }
+
+        if (player->grabbing->flags & RigidBodyFlagsCrossedPortal1) {
+            playerApplyPortalGrab(player, 1);
+        }
+
+        struct Vector3 grabPoint;
+        struct Quaternion grabRotation = player->body.transform.rotation;
+
+        transformPoint(&player->body.transform, &gGrabDistance, &grabPoint);
+
+        if (player->grabbingThroughPortal != PLAYER_GRABBING_THROUGH_NOTHING) {
+            if (!collisionSceneIsPortalOpen()) {
+                // portal was closed while holding object through it
+                player->grabbing = NULL;
+                return;
+            }
+
+            struct Transform inverseA;
+            transformInvert(gCollisionScene.portalTransforms[player->grabbingThroughPortal], &inverseA);
+            struct Transform pointTransform;
+            transformConcat(gCollisionScene.portalTransforms[1 - player->grabbingThroughPortal], &inverseA, &pointTransform);
+
+            transformPoint(&pointTransform, &grabPoint, &grabPoint);
+            struct Quaternion finalRotation;
+            quatMultiply(&pointTransform.rotation, &grabRotation, &finalRotation);
+            grabRotation = finalRotation;
+        }
+
+        pointConstraintMoveToPoint(player->grabbing, &grabPoint, 20.0f);
+        pointConstraintRotateTo(player->grabbing, &grabRotation, 5.0f);
     }
 }
 
@@ -121,24 +177,9 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
     quatMultiply(&tempRotation, &deltaRotate, &player->body.transform.rotation);
 
-
-    // player->yaw += player->yawVelocity * FIXED_DELTA_TIME;
-    // player->pitch = clampf(player->pitch + player->pitchVelocity * FIXED_DELTA_TIME, -M_PI * 0.5f, M_PI * 0.5f);
-
-    // quatAxisAngle(&gUp, player->yaw, &transform->rotation);
-
-    // struct Quaternion pitch;
-    // quatAxisAngle(&gRight, player->pitch, &pitch);
-    // quatMultiply(&transform->rotation, &pitch, &cameraTransform->rotation);
-
     cameraTransform->rotation = player->body.transform.rotation;
 
     transformPoint(transform, &gCameraOffset, &cameraTransform->position);
 
-    if (player->grabbing) {
-        struct Vector3 grabPoint;
-        transformPoint(cameraTransform, &gGrabDistance, &grabPoint);
-        pointConstraintMoveToPoint(player->grabbing, &grabPoint, 20.0f);
-        pointConstraintRotateTo(player->grabbing, &cameraTransform->rotation, 5.0f);
-    }
+    playerUpdateGrabbedObject(player);
 }

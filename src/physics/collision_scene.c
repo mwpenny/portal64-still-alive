@@ -55,7 +55,7 @@ void collisionObjectQueryScene(struct CollisionObject* object, struct CollisionS
 }
 
 int collisionSceneIsTouchingPortal(struct Vector3* contactPoint) {
-    if (!gCollisionScene.portalTransforms[0] || !gCollisionScene.portalTransforms[1]) {
+    if (!collisionSceneIsPortalOpen()) {
         return 0;
     }
 
@@ -76,4 +76,8 @@ int collisionSceneIsTouchingPortal(struct Vector3* contactPoint) {
     }
 
     return 0;
+}
+
+int collisionSceneIsPortalOpen() {
+    return gCollisionScene.portalTransforms[0] != NULL && gCollisionScene.portalTransforms[1] != NULL;
 }
