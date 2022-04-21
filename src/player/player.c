@@ -91,10 +91,8 @@ void playerUpdateGrabbedObject(struct Player* player) {
                 return;
             }
 
-            struct Transform inverseA;
-            transformInvert(gCollisionScene.portalTransforms[player->grabbingThroughPortal], &inverseA);
             struct Transform pointTransform;
-            transformConcat(gCollisionScene.portalTransforms[1 - player->grabbingThroughPortal], &inverseA, &pointTransform);
+            collisionSceneGetPortalTransform(player->grabbingThroughPortal, &pointTransform);
 
             transformPoint(&pointTransform, &grabPoint, &grabPoint);
             struct Quaternion finalRotation;
@@ -138,6 +136,15 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     vector3AddScaled(&transform->position, &player->body.velocity, FIXED_DELTA_TIME, &transform->position);
 
     collisionObjectQueryScene(&player->collisionObject, &gCollisionScene, player, playerHandleCollision);
+
+    struct RaycastHit hit;
+    struct Vector3 down;
+    vector3Scale(&gUp, &down, -1.0f);
+    if (collisionSceneRaycast(&gCollisionScene, &player->body.transform.position, &down, PLAYER_HEAD_HEIGHT, 1, &hit)) {
+        vector3AddScaled(&hit.at, &gUp, PLAYER_HEAD_HEIGHT, &player->body.transform.position);
+
+        player->body.velocity.y = 0.0f;
+    }
 
     rigidBodyCheckPortals(&player->body);
 

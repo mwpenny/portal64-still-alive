@@ -8,6 +8,8 @@
 
 #define PLAYER_GRABBING_THROUGH_NOTHING -1
 
+#define PLAYER_HEAD_HEIGHT              1.2f
+
 struct Player {
     struct CollisionObject collisionObject;
     struct RigidBody body;

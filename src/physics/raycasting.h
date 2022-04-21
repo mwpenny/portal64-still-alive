@@ -4,13 +4,14 @@
 #include "collision_quad.h"
 #include "collision_object.h"
 
-struct RayTraceHit {
+struct RaycastHit {
     struct Vector3 at;
     struct Vector3 normal;
     float distance;
     struct CollisionObject* object;
+    struct Transform* throughPortal;
 };
 
-int rayTraceQuad(struct Vector3* from, struct Vector3* dir, struct CollisionQuad* quad, struct RayTraceHit* contact);
+int raycastQuad(struct Vector3* from, struct Vector3* dir, float maxDistance, struct CollisionQuad* quad, struct RaycastHit* contact);
 
 #endif
