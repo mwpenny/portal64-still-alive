@@ -90,44 +90,57 @@ int collisionSceneIsPortalOpen() {
     return gCollisionScene.portalTransforms[0] != NULL && gCollisionScene.portalTransforms[1] != NULL;
 }
 
-#define NO_RAY_HIT_DISTANCE 1000000000000.0f
-
-int collisionSceneRaycast(struct CollisionScene* scene, struct Vector3* at, struct Vector3* dir, float maxDistance, int passThroughPortals, struct RaycastHit* hit) {
-    hit->distance = NO_RAY_HIT_DISTANCE;
+int collisionSceneRaycast(struct CollisionScene* scene, struct Ray* ray, float maxDistance, int passThroughPortals, struct RaycastHit* hit) {
+    hit->distance = maxDistance;
     hit->throughPortal = NULL;
     
     for (int i = 0; i < scene->quadCount; ++i) {
         struct RaycastHit hitTest;
 
-        if (raycastQuad(at, dir, maxDistance, scene->quads[i].collider->data, &hitTest) && hitTest.distance < hit->distance) {
+        if (raycastQuad(&scene->quads[i], ray, hit->distance, &hitTest) && hitTest.distance < hit->distance) {
             hit->at = hitTest.at;
             hit->normal = hitTest.normal;
             hit->distance = hitTest.distance;
-            hit->object = &scene->quads[i];
+            hit->object = hitTest.object;
+        }
+    }
+
+    for (int i = 0; i < scene->dynamicObjectCount; ++i) {
+        struct RaycastHit hitTest;
+
+        struct CollisionObject* object = scene->dynamicObjects[i];
+
+        if (object->collider->callbacks->raycast && 
+            object->collider->callbacks->raycast(object, ray, hit->distance, &hitTest) &&
+            hitTest.distance < hit->distance) {
+            hit->at = hitTest.at;
+            hit->normal = hitTest.normal;
+            hit->distance = hitTest.distance;
+            hit->object = hitTest.object;
         }
     }
 
     if (passThroughPortals && 
-        hit->distance != NO_RAY_HIT_DISTANCE &&
+        hit->distance != maxDistance &&
         collisionSceneIsPortalOpen()) {
         for (int i = 0; i < 2; ++i) {
             if (collisionSceneIsTouchingSinglePortal(&hit->at, gCollisionScene.portalTransforms[i])) {
                 struct Transform portalTransform;
                 collisionSceneGetPortalTransform(i, &portalTransform);
 
-                struct Vector3 newStart;
-                struct Vector3 newDir;
+                struct Ray newRay;
 
-                transformPoint(&portalTransform, &hit->at, &newStart);
-                quatMultVector(&portalTransform.rotation, dir, &newDir);
+                transformPoint(&portalTransform, &hit->at, &newRay.origin);
+                quatMultVector(&portalTransform.rotation, &ray->dir, &newRay.dir);
 
                 struct RaycastHit newHit;
 
-                int result = collisionSceneRaycast(scene, &newStart, &newDir, maxDistance - hit->distance, 0, &newHit);
+                int result = collisionSceneRaycast(scene, &newRay, maxDistance - hit->distance, 0, &newHit);
 
                 if (result) {
                     newHit.distance += hit->distance;
                     newHit.throughPortal = gCollisionScene.portalTransforms[i];
+                    *hit = newHit;
                 }
 
                 return result;
@@ -135,7 +148,7 @@ int collisionSceneRaycast(struct CollisionScene* scene, struct Vector3* at, stru
         }
     }
 
-    return hit->distance != NO_RAY_HIT_DISTANCE;
+    return hit->distance != maxDistance;
 }
 
 void collisionSceneGetPortalTransform(int fromPortal, struct Transform* out) {

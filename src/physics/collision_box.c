@@ -1,10 +1,13 @@
 #include "collision_box.h"
 
+#include "raycasting.h"
+
 #include <math.h>
 
 struct ColliderCallbacks gCollisionBoxCallbacks = {
     collisionBoxCollidePlane,
     collisionBoxCollideQuad,
+    raycastBox,
     collisionBoxSolidMofI,
 };
 

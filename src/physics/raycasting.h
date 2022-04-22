@@ -3,6 +3,7 @@
 
 #include "collision_quad.h"
 #include "collision_object.h"
+#include "../math/ray.h"
 
 struct RaycastHit {
     struct Vector3 at;
@@ -12,6 +13,7 @@ struct RaycastHit {
     struct Transform* throughPortal;
 };
 
-int raycastQuad(struct Vector3* from, struct Vector3* dir, float maxDistance, struct CollisionQuad* quad, struct RaycastHit* contact);
+int raycastQuad(struct CollisionObject* quadObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact);
+int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact);
 
 #endif

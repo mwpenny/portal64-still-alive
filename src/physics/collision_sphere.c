@@ -101,5 +101,6 @@ float collisionSphereSolidMofI(struct ColliderTypeData* typeData, float mass) {
 struct ColliderCallbacks gCollisionSphereCallbacks = {
     collisionSphereCollidePlane,
     collisionSphereCollideQuad,
+    NULL, // TODO
     collisionSphereSolidMofI,
 };

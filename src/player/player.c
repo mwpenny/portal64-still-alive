@@ -7,6 +7,7 @@
 #include "../math/mathf.h"
 #include "physics/collision_sphere.h"
 #include "physics/collision_scene.h"
+#include "physics/config.h"
 
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -2.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
@@ -127,20 +128,26 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     vector3Scale(&forward, &targetVelocity, -controllerInput->stick_y * PLAYER_SPEED / 80.0f);
     vector3AddScaled(&targetVelocity, &right, controllerInput->stick_x * PLAYER_SPEED / 80.0f, &targetVelocity);
 
+    targetVelocity.y = player->body.velocity.y;
+
     vector3MoveTowards(
         &player->body.velocity, 
         &targetVelocity, 
         vector3Dot(&player->body.velocity, &targetVelocity) > 0.0f ? PLAYER_ACCEL * FIXED_DELTA_TIME : PLAYER_STOP_ACCEL * FIXED_DELTA_TIME, 
         &player->body.velocity
     );
+
+    player->body.velocity.y += GRAVITY_CONSTANT * FIXED_DELTA_TIME;
+
     vector3AddScaled(&transform->position, &player->body.velocity, FIXED_DELTA_TIME, &transform->position);
 
     collisionObjectQueryScene(&player->collisionObject, &gCollisionScene, player, playerHandleCollision);
 
     struct RaycastHit hit;
-    struct Vector3 down;
-    vector3Scale(&gUp, &down, -1.0f);
-    if (collisionSceneRaycast(&gCollisionScene, &player->body.transform.position, &down, PLAYER_HEAD_HEIGHT, 1, &hit)) {
+    struct Ray ray;
+    ray.origin = player->body.transform.position;
+    vector3Scale(&gUp, &ray.dir, -1.0f);
+    if (collisionSceneRaycast(&gCollisionScene, &ray, PLAYER_HEAD_HEIGHT, 1, &hit)) {
         vector3AddScaled(&hit.at, &gUp, PLAYER_HEAD_HEIGHT, &player->body.transform.position);
 
         player->body.velocity.y = 0.0f;

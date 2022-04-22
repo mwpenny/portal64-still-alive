@@ -3,6 +3,7 @@
 
 #include "collision_object.h"
 #include "raycasting.h"
+#include "../math/ray.h"
 
 #define PORTAL_THICKNESS        0.11f
 #define PORTAL_X_RADIUS         0.5f
@@ -29,7 +30,7 @@ int collisionSceneIsPortalOpen();
 
 void collisionObjectQueryScene(struct CollisionObject* object, struct CollisionScene* scene, void* data, ManifoldCallback callback);
 
-int collisionSceneRaycast(struct CollisionScene* scene, struct Vector3* at, struct Vector3* dir, float maxDistance, int passThroughPortals, struct RaycastHit* hit);
+int collisionSceneRaycast(struct CollisionScene* scene, struct Ray* ray, float maxDistance, int passThroughPortals, struct RaycastHit* hit);
 
 void collisionSceneGetPortalTransform(int fromPortal, struct Transform* out);
 
