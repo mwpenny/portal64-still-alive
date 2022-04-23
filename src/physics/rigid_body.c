@@ -102,7 +102,7 @@ void rigidBodyCheckPortals(struct RigidBody* rigidBody) {
         int xorMask = i == 0 ? 0 : mask;
 
         // check if the body crossed the portal
-        if (!((~newFlags ^ xorMask) & (rigidBody->flags ^ xorMask))) {
+        if (!((~newFlags ^ xorMask) & (rigidBody->flags ^ xorMask) & mask)) {
             continue;
         }
 

@@ -60,6 +60,8 @@ struct ColliderTypeData gCubeCollider = {
 void cubeInit(struct Cube* cube) {
     collisionObjectInit(&cube->collisionObject, &gCubeCollider, &cube->rigidBody, 1.0f);
     collisionSceneAddDynamicObject(&cube->collisionObject);
+
+    cube->collisionObject.body->flags |= RigidBodyFlagsGrabbable;
 }
 
 void cubeUpdate(struct Cube* cube) {

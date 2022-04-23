@@ -9,6 +9,8 @@
 #include "physics/collision_scene.h"
 #include "physics/config.h"
 
+#define GRAB_RAYCAST_DISTANCE   3.5f
+
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -2.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
 
@@ -26,11 +28,11 @@ struct ColliderTypeData gPlayerColliderData = {
 
 void playerInit(struct Player* player) {
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f);
-    player->grabbing = NULL;
-    player->yaw = 0.0f;
-    player->pitch = 0.0f;
-
     player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
+    player->grabbing = NULL;
+    player->pitchVelocity = 0.0f;
+    player->yawVelocity = 0.0f;
+    player->flags = 0;
 }
 
 #define PLAYER_SPEED    (5.0f)
@@ -40,6 +42,8 @@ void playerInit(struct Player* player) {
 #define ROTATE_RATE     (M_PI * 2.0f)
 #define ROTATE_RATE_DELTA     (M_PI * 0.25f)
 #define ROTATE_RATE_STOP_DELTA (M_PI * 0.25f)
+
+#define JUMP_IMPULSE   3.2f
 
 void playerHandleCollision(void* data, struct ContactConstraintState* contact) {
     struct Player* player = (struct Player*)data;
@@ -63,6 +67,30 @@ void playerApplyPortalGrab(struct Player* player, int portalIndex) {
 }
 
 void playerUpdateGrabbedObject(struct Player* player) {
+    if (controllerGetButtonDown(0, B_BUTTON)) {
+        if (player->grabbing) {
+            player->grabbing = NULL;
+        } else {
+            struct Ray ray;
+
+            ray.origin = player->body.transform.position;
+            quatMultVector(&player->body.transform.rotation, &gForward, &ray.dir);
+            vector3Negate(&ray.dir, &ray.dir);
+            
+            struct RaycastHit hit;
+
+            if (collisionSceneRaycast(&gCollisionScene, &ray, GRAB_RAYCAST_DISTANCE, 1, &hit) && hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable)) {
+                player->grabbing = hit.object->body;
+
+                if (hit.throughPortal) {
+                    player->grabbingThroughPortal = hit.throughPortal == gCollisionScene.portalTransforms[0] ? 0 : 1;
+                } else {
+                    player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
+                }
+            }
+        }
+    }
+
     if (player->grabbing) {
         if (player->body.flags & RigidBodyFlagsCrossedPortal0) {
             playerApplyPortalGrab(player, 1);
@@ -121,6 +149,11 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     vector3Normalize(&gForward, &gForward);
     vector3Normalize(&gRight, &gRight);
 
+
+    if ((player->flags & PlayerFlagsGrounded) && controllerGetButtonDown(0, A_BUTTON)) {
+        player->body.velocity.y = JUMP_IMPULSE;
+    }
+
     OSContPad* controllerInput = controllersGetControllerData(0);
 
     struct Vector3 targetVelocity;
@@ -151,6 +184,9 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         vector3AddScaled(&hit.at, &gUp, PLAYER_HEAD_HEIGHT, &player->body.transform.position);
 
         player->body.velocity.y = 0.0f;
+        player->flags |= PlayerFlagsGrounded;
+    } else {
+        player->flags &= ~PlayerFlagsGrounded;
     }
 
     rigidBodyCheckPortals(&player->body);

@@ -68,6 +68,18 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
 
 #define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
 
+void sceneRenderPerformanceMetrics(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
+    gDPSetCycleType(renderState->dl++, G_CYC_1CYCLE);
+    gDPSetFillColor(renderState->dl++, (GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1)));
+    gDPSetCombineMode(renderState->dl++, SOLID_COLOR, SOLID_COLOR);
+    gDPSetEnvColor(renderState->dl++, 32, 32, 32, 255);
+    gSPTextureRectangle(renderState->dl++, 32 << 2, 32 << 2, (32 + 256) << 2, (32 + 16) << 2, 0, 0, 0, 1, 1);
+    gDPPipeSync(renderState->dl++);
+    gDPSetEnvColor(renderState->dl++, 32, 255, 32, 255);
+    gSPTextureRectangle(renderState->dl++, 33 << 2, 33 << 2, (32 + 254 * scene->cpuTime / scene->lastFrameTime) << 2, (32 + 14) << 2, 0, 0, 0, 1, 1);
+    gDPPipeSync(renderState->dl++);
+}
+
 void sceneRender(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
     struct RenderProps renderProperties;
 
@@ -83,17 +95,9 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
 
-    gDPSetCycleType(renderState->dl++, G_CYC_1CYCLE);
-    gDPSetFillColor(renderState->dl++, (GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1)));
-    gDPSetCombineMode(renderState->dl++, SOLID_COLOR, SOLID_COLOR);
-    gDPSetEnvColor(renderState->dl++, 32, 32, 32, 255);
-    gSPTextureRectangle(renderState->dl++, 32 << 2, 32 << 2, (32 + 256) << 2, (32 + 16) << 2, 0, 0, 0, 1, 1);
-    gDPPipeSync(renderState->dl++);
-    gDPSetEnvColor(renderState->dl++, 32, 255, 32, 255);
-    gSPTextureRectangle(renderState->dl++, 33 << 2, 33 << 2, (32 + 254 * scene->cpuTime / scene->lastFrameTime) << 2, (32 + 14) << 2, 0, 0, 0, 1, 1);
-    gDPPipeSync(renderState->dl++);
+    // sceneRenderPerformanceMetrics(scene, renderState, task);
 
-    contactSolverDebugDraw(&gContactSolver, renderState);
+    // contactSolverDebugDraw(&gContactSolver, renderState);
 }
 
 unsigned ignoreInputFrames = 10;
@@ -105,15 +109,6 @@ void sceneUpdate(struct Scene* scene) {
     playerUpdate(&scene->player, &scene->camera.transform);
     
     collisionSceneUpdateDynamics();
-
-    if (controllerGetButtonDown(0, B_BUTTON)) {
-        if (scene->player.grabbing) {
-            scene->player.grabbing = NULL;
-        } else {
-            scene->player.grabbing = &scene->cube.rigidBody;
-            scene->player.grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
-        }
-    }
 
     scene->cpuTime = osGetTime() - frameStart;
     scene->lastFrameStart = frameStart;

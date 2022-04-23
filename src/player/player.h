@@ -10,15 +10,18 @@
 
 #define PLAYER_HEAD_HEIGHT              1.2f
 
+enum PlayerFlags {
+    PlayerFlagsGrounded = (1 << 0),
+};
+
 struct Player {
     struct CollisionObject collisionObject;
     struct RigidBody body;
     short grabbingThroughPortal;
     struct RigidBody* grabbing;
-    float pitch;
     float pitchVelocity;
-    float yaw;
     float yawVelocity;
+    enum PlayerFlags flags;
 };
 
 void playerInit(struct Player* player);
