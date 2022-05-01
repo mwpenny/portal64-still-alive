@@ -3,9 +3,14 @@
 *.elf
 *.map
 *.z64
+*.blend1
 
 build/
 debugger
-assets/
+assets_working/
+vpk/
+portal_pak_dir/
+portal_pak_modified/
 
 tools/skeletool64
+tools/vtf2png

@@ -11,6 +11,7 @@ include /usr/include/n64/make/PRdefs
 MIDICVT:=tools/midicvt
 SFZ2N64:=tools/sfz2n64
 SKELATOOL64:=tools/skeletool64
+VTF2PNG:=tools/vtf2png
 
 OPTIMIZER		:= -O0
 LCDEFS			:= -DDEBUG -g -Isrc/ -I/usr/include/n64/nustd -Werror -Wall
@@ -83,6 +84,36 @@ src/models/subject.h src/models/subject_geo.inc.h: assets/fbx/Subject.fbx
 
 src/models/sphere.h src/models/sphere_geo.inc.h: assets/fbx/Sphere.fbx
 	skeletool64 -s 100 -r 0,0,0 -n sphere -o src/models/sphere.h assets/fbx/Sphere.fbx
+
+
+####################
+## vpk extraction
+####################
+
+portal_pak_dir: vpk/portal_pak_dir.vpk
+	vpk -x portal_pak_dir vpk/portal_pak_dir.vpk
+
+	portal_pak_dir/materials/concrete/concrete_modular_wall001d.png
+
+
+TEXTURE_SCRIPTS = $(shell find assets/ -type f -name '*.ims')
+TEXTURE_IMAGES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_modified/%.png)
+
+%.png: %.vtf
+	$(VTF2PNG) $< $@
+
+portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims
+	@mkdir -p $(@D)
+	convert $< `cat $(@:portal_pak_modified/%.png=assets/%.ims)` $@
+
+
+####################
+## Materials
+####################
+
+build/assets/materials/materials.h: assets/materials/materials.yaml $(TEXTURE_IMAGES)
+	@mkdir -p $(@D)
+	$(SKELATOOL64) -n materials -m $< -M $@
 
 ####################
 ## Test Chambers
