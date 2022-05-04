@@ -111,9 +111,11 @@ portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims
 ## Materials
 ####################
 
-build/assets/materials/materials.h: assets/materials/materials.yaml $(TEXTURE_IMAGES)
+build/assets/materials/static.h: assets/materials/static.skm.yaml $(TEXTURE_IMAGES)
 	@mkdir -p $(@D)
-	$(SKELATOOL64) -n materials -m $< -M $@
+	$(SKELATOOL64) -n static -m $< -M $@
+
+src/levels/level_def_gen.h: build/assets/materials/static.h
 
 ####################
 ## Test Chambers
@@ -128,10 +130,10 @@ build/%.fbx: %.blend
 	@mkdir -p $(@D)
 	$(BLENDER_2_9) $< --background --python tools/export_fbx.py -- $@
 
-build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c: build/assets/test_chambers/%.fbx $(SKELATOOL64)
-	$(SKELATOOL64) -l -s 2.56 -c 0.01 -n $(<:build/assets/test_chambers/%.fbx=%) -o $(<:%.fbx=%.h) $<
+build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c: build/assets/test_chambers/%.fbx $(SKELATOOL64) build/assets/materials/static.h
+	$(SKELATOOL64) -l -s 2.56 -c 0.01 -n $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
 
-build/assets/test_chambers/%.o: build/assets/test_chambers/%.c
+build/assets/test_chambers/%.o: build/assets/test_chambers/%.c build/assets/materials/static.h
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -MM $^ -MF "$(@:.o=.d)" -MT"$@"
 	$(CC) $(CFLAGS) -c -o $@ $<

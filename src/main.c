@@ -159,15 +159,6 @@ static void gameProc(void* arg) {
                 sceneUpdate(&gScene);
                 timeUpdateDelta();
 
-                char msg[64];
-                sprintf(msg, "current=%x start=%x end=%x dpstat=%x spstat=%x\n",
-                    IO_READ(DPC_CURRENT_REG),					
-                    IO_READ(DPC_START_REG),						
-                    IO_READ(DPC_END_REG),						
-                    IO_READ(DPC_STATUS_REG),					
-                    IO_READ(SP_STATUS_REG));
-
-
                 break;
 
             case (OS_SC_DONE_MSG):

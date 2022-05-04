@@ -2,5 +2,5 @@ materials:
   concrete_modular_wall001d:
     gDPSetTile: 
       filename: ../../portal_pak_modified/materials/concrete/concrete_modular_wall001d.png
-      fmt: G_IM_FMT_I
       siz: G_IM_SIZ_4b
+      twoTone: true
