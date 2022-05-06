@@ -4,3 +4,45 @@ materials:
       filename: ../../portal_pak_modified/materials/concrete/concrete_modular_wall001d.png
       siz: G_IM_SIZ_4b
       twoTone: true
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+
+    properties:
+      tileSizeS: 1
+      tileSizeT: 2
+
+  metalwall048b:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalwall048b.png
+      siz: G_IM_SIZ_16b
+    
+    gDPSetCombineMode: G_CC_DECALRGB
+    gsDPSetCycleType: G_CYC_1CYCLE
+
+    properties:
+      tileSizeS: 0.5
+      tileSizeT: 0.5
+
+  concrete_modular_ceiling001a:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/concrete/concrete_modular_ceiling001a.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode: G_CC_DECALRGB
+    gsDPSetCycleType: G_CYC_1CYCLE
+
+    properties:
+      tileSizeS: 0.5
+      tileSizeT: 0.5
+
+  concrete_modular_floor001a:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/concrete/concrete_modular_floor001a.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode: G_CC_DECALRGB
+    gsDPSetCycleType: G_CYC_1CYCLE
+
+    properties:
+      tileSizeS: 0.5
+      tileSizeT: 0.5

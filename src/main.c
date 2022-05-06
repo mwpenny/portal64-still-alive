@@ -130,7 +130,7 @@ static void gameProc(void* arg) {
     romInit();
 
     contactSolverInit(&gContactSolver);
-    levelLoadCollisionScene();
+    levelLoad(0);
     sceneInit(&gScene);
     controllersInit();
 #ifdef WITH_DEBUGGER

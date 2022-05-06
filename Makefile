@@ -137,15 +137,20 @@ build/assets/test_chambers/%.o: build/assets/test_chambers/%.c build/assets/mate
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -MM $^ -MF "$(@:.o=.d)" -MT"$@"
 	$(CC) $(CFLAGS) -c -o $@ $<
+	
+build/assets/materials/static_mat.o: build/assets/materials/static_mat.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -MM $^ -MF "$(@:.o=.d)" -MT"$@"
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 levels: $(TEST_CHAMBER_HEADERS)
 	echo $(TEST_CHAMBER_HEADERS)
 
-build/assets/test_chambers/level_list.h: $(TEST_CHAMBER_HEADERS)
+build/assets/test_chambers/level_list.h: $(TEST_CHAMBER_HEADERS) tools/generate_level_list.js
 	@mkdir -p $(@D)
 	node tools/generate_level_list.js $@ $(TEST_CHAMBER_HEADERS)
 
-build/src/levels/levels.o: build/assets/test_chambers/level_list.h
+build/src/levels/levels.o: build/assets/test_chambers/level_list.h build/assets/materials/static.h
 
 .PHONY: levels
 
@@ -158,7 +163,7 @@ $(BOOT_OBJ): $(BOOT)
 
 # without debugger
 
-CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) $(TEST_CHAMBER_OBJECTS)
+CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) $(TEST_CHAMBER_OBJECTS) build/assets/materials/static_mat.o
 
 CODEOBJECTS_NO_DEBUG = $(CODEOBJECTS)
 

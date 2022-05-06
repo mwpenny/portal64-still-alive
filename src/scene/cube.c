@@ -75,6 +75,4 @@ void cubeRender(struct Cube* cube, struct RenderState* renderState) {
     gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
     gSPDisplayList(renderState->dl++, cube_CubeSimpleBevel_mesh);
     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
-
-    debugRenderQuad(&gFloatingQuad.corner, &gFloatingQuad.edgeA, &gFloatingQuad.edgeB, gFloatingQuad.edgeALength, gFloatingQuad.edgeBLength, renderState);
 }

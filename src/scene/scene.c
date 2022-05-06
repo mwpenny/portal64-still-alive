@@ -16,8 +16,7 @@
 #include "../physics/debug_renderer.h"
 #include "../controls/controller.h"
 #include "../physics/collision_scene.h"
-
-#include "../levels/test_chamber_00_0/header.h"
+#include "../levels/static_render.h"
 
 struct Vector3 gStartPosition = {5.0f, 1.2f, -5.0f};
 
@@ -61,7 +60,8 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
     portalRender(&scene->portals[1], &scene->portals[0], properties, sceneRenderWithProperties, data, renderState);
 
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
-    gSPDisplayList(renderState->dl++, test_chamber_00_0_test_chamber_00_0_mesh);
+
+    staticRender(renderState);
 
     cubeRender(&scene->cube, renderState);
 }

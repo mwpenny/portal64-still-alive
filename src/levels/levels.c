@@ -1,9 +1,44 @@
 #include "levels.h"
 
 #include "../build/assets/test_chambers/level_list.h"
+#include "../build/assets/materials/static.h"
 
 #include "physics/collision_scene.h"
+#include "static_render.h"
 
-void levelLoadCollisionScene() {
-    collisionSceneInit(&gCollisionScene, test_chamber_00_test_chamber_00_0_collision_objects, TEST_CHAMBER_00_TEST_CHAMBER_00_0_QUAD_COLLIDERS_COUNT);
+struct LevelDefinition* gCurrentLevel;
+
+int levelCount() {
+    return LEVEL_COUNT;
+}
+
+void levelLoad(int index) {
+    if (index < 0 || index >= LEVEL_COUNT) {
+        return;
+    }
+
+    gCurrentLevel = gLevelList[index];
+
+    collisionSceneInit(&gCollisionScene, gCurrentLevel->collisionQuads, gCurrentLevel->collisionQuadCount);
+    staticRenderInit();
+}
+
+int levelMaterialCount() {
+    return STATIC_MATERIAL_COUNT;
+}
+
+Gfx* levelMaterial(int index) {
+    if (index < 0 || index >= STATIC_MATERIAL_COUNT) {
+        return NULL;
+    }
+
+    return static_material_list[index];
+}
+
+Gfx* levelMaterialRevert(int index) {
+    if (index < 0 || index >= STATIC_MATERIAL_COUNT) {
+        return NULL;
+    }
+
+    return static_material_revert_list[index];
 }
