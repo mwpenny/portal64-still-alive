@@ -17,6 +17,9 @@
 #include "../controls/controller.h"
 #include "../physics/collision_scene.h"
 #include "../levels/static_render.h"
+#include "../levels/levels.h"
+#include "../scene/portal_surface.h"
+#include "../math/mathf.h"
 
 struct Vector3 gStartPosition = {5.0f, 1.2f, -5.0f};
 
@@ -112,4 +115,53 @@ void sceneUpdate(struct Scene* scene) {
 
     scene->cpuTime = osGetTime() - frameStart;
     scene->lastFrameStart = frameStart;
+}
+
+int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex) {
+    struct RaycastHit hit;
+
+    if (!collisionSceneRaycast(&gCollisionScene, ray, 1000000.0f, 0, &hit)) {
+        return 0;
+    }
+
+    int quadIndex = levelQuadIndex(hit.object);
+
+    if (quadIndex == -1) {
+        return 0;
+    }
+
+    struct Transform portalLocation;
+
+    struct Vector3 hitDirection = hit.normal;
+
+    if (portalIndex == 1) {
+        vector3Negate(&hitDirection, &hitDirection);
+    }
+
+    portalLocation.position = hit.at;
+    portalLocation.scale = gOneVec;
+    if (fabsf(hit.normal.y) < 0.8) {
+        quatLook(&hitDirection, &gUp, &portalLocation.rotation);
+    } else {
+        quatLook(&hitDirection, playerUp, &portalLocation.rotation);
+    }
+
+    // TODO remove once there is a hole in the wall
+    vector3AddScaled(&portalLocation.position, &hit.normal, 0.1f, &portalLocation.position);
+
+    return sceneOpenPortal(scene, &portalLocation, portalIndex, quadIndex);
+}
+
+int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, int quadIndex) {
+    struct PortalSurfaceMapping surfaceMapping = gCurrentLevel->portalSurfaceMapping[quadIndex];
+
+    for (int i = surfaceMapping.minPortalIndex; i < surfaceMapping.maxPortalIndex; ++i) {
+        if (portalSurfaceGenerate(&gCurrentLevel->portalSurfaces[i], at, NULL, NULL)) {
+            scene->portals[portalIndex].transform = *at;
+            gCollisionScene.portalTransforms[portalIndex] = &scene->portals[portalIndex].transform;
+            return 1;
+        }
+    }
+
+    return 0;
 }

@@ -42,3 +42,11 @@ Gfx* levelMaterialRevert(int index) {
 
     return static_material_revert_list[index];
 }
+
+int levelQuadIndex(struct CollisionObject* pointer) {
+    if (pointer < gCollisionScene.quads || pointer >= gCollisionScene.quads + gCollisionScene.quadCount) {
+        return -1;
+    }
+
+    return pointer - gCollisionScene.quads;
+}

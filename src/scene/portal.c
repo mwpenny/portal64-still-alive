@@ -7,7 +7,7 @@
 
 #define CALC_SCREEN_SPACE(clip_space, screen_size) ((clip_space + 1.0f) * ((screen_size) / 2))
 
-struct Vector3 gPortalOutline[] = {
+struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE] = {
     {0.0f, 1.0f * SCENE_SCALE, 0.0f},
     {0.353553f * SCENE_SCALE, 0.707107f * SCENE_SCALE, 0.0f},
     {0.5f * SCENE_SCALE, 0.0f, 0.0f},
@@ -16,6 +16,17 @@ struct Vector3 gPortalOutline[] = {
     {-0.353553f * SCENE_SCALE, -0.707107f * SCENE_SCALE, 0.0f},
     {-0.5f * SCENE_SCALE, 0.0f, 0.0f},
     {-0.353553f * SCENE_SCALE, 0.707107f * SCENE_SCALE, 0.0f},
+};
+
+struct Vector3 gPortalOutlineUnscaled[PORTAL_LOOP_SIZE] = {
+    {0.0f, 1.0f, 0.0f},
+    {0.353553f, 0.707107f, 0.0f},
+    {0.5f, 0.0f, 0.0f},
+    {0.353553f, -0.707107f, 0.0f},
+    {0.0f, -1.0f, 0.0f},
+    {-0.353553f, -0.707107f, 0.0f},
+    {-0.5f, 0.0f, 0.0f},
+    {-0.353553f, 0.707107f, 0.0f},
 };
 
 struct Quaternion gVerticalFlip = {0.0f, 1.0f, 0.0f, 0.0f};

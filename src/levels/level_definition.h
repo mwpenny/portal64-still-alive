@@ -2,6 +2,7 @@
 #define __LEVEL_DEFINITION_H__
 
 #include "../physics/collision_scene.h"
+#include "../scene/portal_surface.h"
 
 struct StaticContentElement {
     Gfx* displayList;
@@ -11,8 +12,12 @@ struct StaticContentElement {
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
+    struct PortalSurface* portalSurfaces;
+    // maps index of a collisionQuads to indices in portalSurfaces
+    struct PortalSurfaceMapping* portalSurfaceMapping;
     short collisionQuadCount;
     short staticContentCount;
+    short portalSurfaceCount;
 };
 
 #endif

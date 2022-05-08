@@ -13,4 +13,6 @@ int levelMaterialCount();
 Gfx* levelMaterial(int index);
 Gfx* levelMaterialRevert(int index);
 
+int levelQuadIndex(struct CollisionObject* pointer);
+
 #endif
