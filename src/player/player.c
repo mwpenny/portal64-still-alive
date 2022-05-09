@@ -143,6 +143,13 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     quatMultVector(&transform->rotation, &gForward, &forward);
     quatMultVector(&transform->rotation, &gRight, &right);
 
+    if (forward.y > 0.7f) {
+        quatMultVector(&transform->rotation, &gUp, &forward);
+        vector3Negate(&forward, &forward);
+    } else if (forward.y < -0.7f) {
+        quatMultVector(&transform->rotation, &gUp, &forward);
+    }
+
     forward.y = 0.0f;
     right.y = 0.0f;
 
@@ -220,24 +227,44 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Vector3 lookingForward;
     vector3Negate(&gForward, &lookingForward);
     quatMultVector(&player->body.transform.rotation, &lookingForward, &lookingForward);
-    struct Quaternion upRotation;
-    quatLook(&lookingForward, &gUp, &upRotation);
-    quatLerp(&upRotation, &player->body.transform.rotation, 0.9f, &player->body.transform.rotation);
+
+    // if player is looking close to directly up or down, don't correct the rotation
+    if (fabsf(lookingForward.y) < 0.99f) {
+        struct Quaternion upRotation;
+        quatLook(&lookingForward, &gUp, &upRotation);
+        quatLerp(&upRotation, &player->body.transform.rotation, 0.9f, &player->body.transform.rotation);
+    }
     
 
+    // yaw
     struct Quaternion deltaRotate;
     quatAxisAngle(&gUp, player->yawVelocity * FIXED_DELTA_TIME, &deltaRotate);
-
     struct Quaternion tempRotation;
     quatMultiply(&deltaRotate, &player->body.transform.rotation, &tempRotation);
 
+    // pitch
     quatAxisAngle(&gRight, player->pitchVelocity * FIXED_DELTA_TIME, &deltaRotate);
-
     quatMultiply(&tempRotation, &deltaRotate, &player->body.transform.rotation);
 
+    // prevent player from looking too far up or down
+    vector3Negate(&gForward, &lookingForward);
+    quatMultVector(&tempRotation, &lookingForward, &lookingForward);
+    struct Vector3 newLookingForward;
+    vector3Negate(&gForward, &newLookingForward);
+    quatMultVector(&player->body.transform.rotation, &newLookingForward, &newLookingForward);
+
+    float pitchSign = signf(player->pitchVelocity);
+
+    if (lookingForward.y * pitchSign > newLookingForward.y * pitchSign) {
+        struct Vector3 newForward = gZeroVec;
+        newForward.y = pitchSign;
+        struct Vector3 newUp;
+        quatMultVector(&tempRotation, &gUp, &newUp);
+        quatLook(&newForward, &newUp, &player->body.transform.rotation);
+        player->pitchVelocity = 0.0f;
+    }
+
     cameraTransform->rotation = player->body.transform.rotation;
-
     transformPoint(transform, &gCameraOffset, &cameraTransform->position);
-
     playerUpdateGrabbedObject(player);
 }

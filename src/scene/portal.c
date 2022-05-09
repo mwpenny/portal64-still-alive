@@ -71,17 +71,6 @@ void portalInit(struct Portal* portal, enum PortalFlags flags) {
 }
 
 void portalRender(struct Portal* portal, struct Portal* otherPortal, struct RenderProps* props, SceneRenderCallback sceneRenderer, void* data, struct RenderState* renderState) {
-    if (props->currentDepth == 0) {
-        Mtx* matrix = renderStateRequestMatrices(renderState, 1);
-
-        transformToMatrixL(&portal->transform, matrix, SCENE_SCALE);
-        gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
-        gDPSetPrimColor(renderState->dl++, 0, 0, 255, 128, 0, 255);
-        gSPDisplayList(renderState->dl++, portal_outline_portal_outline_mesh);
-        gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
-        return;
-    }
-    
     struct ScreenClipper clipper;
     float portalTransform[4][4];
 
@@ -94,6 +83,22 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
     }
     
     transformToMatrix(&finalTransform, portalTransform, SCENE_SCALE);
+
+    if (props->currentDepth == 0) {
+        Mtx* matrix = renderStateRequestMatrices(renderState, 1);
+
+        guMtxF2L(portalTransform, matrix);
+        gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
+        gDPPipeSync(renderState->dl++);
+        if (portal->flags & PortalFlagsOddParity) {
+            gDPSetPrimColor(renderState->dl++, 0, 0, 0, 128, 255, 255);
+        } else {
+            gDPSetPrimColor(renderState->dl++, 0, 0, 255, 128, 0, 255);
+        }
+        gSPDisplayList(renderState->dl++, portal_outline_portal_outline_mesh);
+        gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
+        return;
+    }
 
     screenClipperInitWithCamera(&clipper, &props->camera, (float)SCREEN_WD / (float)SCREEN_HT, portalTransform);
 
@@ -121,6 +126,7 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
         guMtxF2L(portalTransform, matrix);
         gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
         gSPDisplayList(renderState->dl++, portal_mask_Circle_mesh);
+        gDPPipeSync(renderState->dl++);
         if (portal->flags & PortalFlagsOddParity) {
             gDPSetPrimColor(renderState->dl++, 0, 0, 0, 128, 255, 255);
         } else {

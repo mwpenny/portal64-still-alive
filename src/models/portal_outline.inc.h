@@ -85,7 +85,7 @@ Gfx mat_portal_outline_portal_outline[] = {
 	gsSPSetGeometryMode(G_SHADE),
 	gsSPClearGeometryMode(G_LIGHTING),
     gsDPSetRenderMode(G_RM_XLU_SURF, G_RM_XLU_SURF2),
-	gsDPSetCombineLERP(0, 0, 0, PRIMITIVE, 0, 0, 0, SHADE, 0, 0, 0, PRIMITIVE, 0, 0, 0, SHADE),
+	gsDPSetCombineLERP(0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE),
 	gsSPTexture(65535, 65535, 0, 0, 1),
 	gsSPEndDisplayList(),
 };
