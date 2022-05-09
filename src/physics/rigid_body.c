@@ -124,7 +124,7 @@ void rigidBodyCheckPortals(struct RigidBody* rigidBody) {
         quatConjugate(&gCollisionScene.portalTransforms[i]->rotation, &inverseARotation);
 
         struct Quaternion rotationTransfer;
-        quatMultiply(&inverseARotation, &otherPortal->rotation, &rotationTransfer);
+        quatMultiply(&otherPortal->rotation, &inverseARotation, &rotationTransfer);
 
         quatMultVector(&rotationTransfer, &rigidBody->velocity, &rigidBody->velocity);
         quatMultVector(&rotationTransfer, &rigidBody->angularVelocity, &rigidBody->angularVelocity);

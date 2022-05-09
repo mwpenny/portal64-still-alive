@@ -217,6 +217,14 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         player->pitchVelocity * targetPitch > 0.0f ? ROTATE_RATE_DELTA : ROTATE_RATE_STOP_DELTA
     );
 
+    struct Vector3 lookingForward;
+    vector3Negate(&gForward, &lookingForward);
+    quatMultVector(&player->body.transform.rotation, &lookingForward, &lookingForward);
+    struct Quaternion upRotation;
+    quatLook(&lookingForward, &gUp, &upRotation);
+    quatLerp(&upRotation, &player->body.transform.rotation, 0.9f, &player->body.transform.rotation);
+    
+
     struct Quaternion deltaRotate;
     quatAxisAngle(&gUp, player->yawVelocity * FIXED_DELTA_TIME, &deltaRotate);
 

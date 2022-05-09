@@ -48,11 +48,11 @@ int portalSurfaceIsInside(struct PortalSurface* surface, struct Transform* porta
             continue;
         }
 
-        int yIntersection = (int)(a.y - b.y) * (portalPosition.x - b.x) / (a.x - b.x);
+        int yIntersection = (int)(a.y - b.y) * (portalPosition.x - b.x) / (a.x - b.x) + b.y;
 
-        if (yIntersection > 0) {
+        if (yIntersection > portalPosition.y) {
             ++intersectionCount;
-        } else if (yIntersection == 0) {
+        } else if (yIntersection == portalPosition.y) {
             // portal is on an edge exit early
             return 0;
         }
@@ -88,7 +88,7 @@ void portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform
     halfSize.x = (maxPortal.x - minPortal.x) >> 1;
     halfSize.y = (maxPortal.y - minPortal.y) >> 1;
 
-    for (int i = 0; i < 2; ++i) {
+    for (int interation = 0; interation < 2; ++interation) {
         int minOverlap = NO_OVERLAP;
         struct Vector2s16 minOverlapOffset;
 
@@ -136,11 +136,11 @@ void portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform
             if (abs(offset.x) > abs(offset.y)) {
                 lineAxis = 0;
                 crossAxis = 1;
-                crossDirection = sign(offset.x);
+                crossDirection = -sign(offset.x);
             } else {
                 lineAxis = 1;
                 crossAxis = 0;
-                crossDirection = -sign(offset.y);
+                crossDirection = sign(offset.y);
             }
 
             int portalPosLineAxis = VECTOR2s16_AS_ARRAY(output)[lineAxis];
@@ -153,14 +153,14 @@ void portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform
             int boxPosition = VECTOR2s16_AS_ARRAY(output)[crossAxis] + crossDirection * VECTOR2s16_AS_ARRAY(&halfSize)[crossAxis];
             int distance = (boxPosition - VECTOR2s16_AS_ARRAY(&a)[crossAxis]) * crossDirection;
 
-            if (distance <= 0) {
+            if (distance <= 0 && distance < VECTOR2s16_AS_ARRAY(&halfSize)[crossAxis]) {
                 continue;
             }
 
             if (distance < minOverlap) {
                 minOverlap = distance;
                 VECTOR2s16_AS_ARRAY(&minOverlapOffset)[lineAxis] = 0;
-                VECTOR2s16_AS_ARRAY(&minOverlapOffset)[crossAxis] = distance * crossDirection;
+                VECTOR2s16_AS_ARRAY(&minOverlapOffset)[crossAxis] = -distance * crossDirection;
             }
         }
 

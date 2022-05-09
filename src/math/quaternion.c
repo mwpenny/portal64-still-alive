@@ -165,28 +165,49 @@ void quatRandom(struct Quaternion* q) {
 }
 
 void quatLook(struct Vector3* lookDir, struct Vector3* up, struct Quaternion* out) {
-    struct Vector3 horizontal;
-    horizontal = *lookDir;
-    horizontal.y = 0.0f;
-    vector3Normalize(&horizontal, &horizontal);
+    // calculate orthonormal basis
+    struct Vector3 zDir;
+    vector3Normalize(lookDir, &zDir);
+    vector3Negate(&zDir, &zDir);
 
-    struct Vector2 complex;
-    complex.x = -horizontal.z;
-    complex.y = -horizontal.x;
+    struct Vector3 yDir;
+    vector3AddScaled(up, &zDir, -vector3Dot(&zDir, up), &yDir);
+    vector3Normalize(&yDir, &yDir);
 
-    struct Quaternion yaw;
-    quatAxisComplex(&gUp, &complex, &yaw);
+    struct Vector3 xDir;
+    vector3Cross(&yDir, &zDir, &xDir);
 
-    struct Vector3 lookNormalized;
-    vector3Normalize(lookDir, &lookNormalized);
-
-    complex.y = lookNormalized.y;
-    complex.x = sqrtf(1.0f - complex.y * complex.y);
-
-    struct Quaternion pitch;
-    quatAxisComplex(&gRight, &complex, &pitch);
-
-    quatMultiply(&yaw, &pitch, out);
+    // convert orthonormal basis to a quaternion
+    float trace = xDir.x + yDir.y + zDir.z;
+    if (trace > 0) { 
+        float sqrtResult = sqrtf(trace+1.0f) * 2.0f;
+        float invSqrtResult = 1.0f / sqrtResult;
+        out->w = 0.25 * sqrtResult;
+        out->x = (yDir.z - zDir.y) * invSqrtResult;
+        out->y = (zDir.x - xDir.z) * invSqrtResult; 
+        out->z = (xDir.y - yDir.x) * invSqrtResult; 
+    } else if ((xDir.x > yDir.y) && (xDir.x > zDir.z)) { 
+        float sqrtResult = sqrtf(1.0 + xDir.x - yDir.y - zDir.z) * 2.0f;
+        float invSqrtResult = 1.0f / sqrtResult;
+        out->w = (yDir.z - zDir.y) * invSqrtResult;
+        out->x = 0.25 * sqrtResult;
+        out->y = (yDir.x + xDir.y) * invSqrtResult; 
+        out->z = (zDir.x + xDir.z) * invSqrtResult; 
+    } else if (yDir.y > zDir.z) { 
+        float sqrtResult = sqrtf(1.0 + yDir.y - xDir.x - zDir.z) * 2.0f;
+        float invSqrtResult = 1.0f / sqrtResult;
+        out->w = (zDir.x - xDir.z) * invSqrtResult;
+        out->x = (yDir.x + xDir.y) * invSqrtResult; 
+        out->y = 0.25 * sqrtResult;
+        out->z = (zDir.y + yDir.z) * invSqrtResult; 
+    } else { 
+        float sqrtResult = sqrtf(1.0 + zDir.z - xDir.x - yDir.y) * 2.0f;
+        float invSqrtResult = 1.0f / sqrtResult;
+        out->w = (xDir.y - yDir.x) * invSqrtResult;
+        out->x = (zDir.x + xDir.z) * invSqrtResult;
+        out->y = (zDir.y + yDir.z) * invSqrtResult;
+        out->z = 0.25 * sqrtResult;
+    }
 }
 
 void quatLerp(struct Quaternion* a, struct Quaternion* b, float t, struct Quaternion* out) {

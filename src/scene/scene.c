@@ -103,13 +103,29 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     // contactSolverDebugDraw(&gContactSolver, renderState);
 }
 
-unsigned ignoreInputFrames = 10;
+void sceneCheckPortals(struct Scene* scene) {
+    struct Ray raycastRay;
+    struct Vector3 playerUp;
+    raycastRay.origin = scene->player.body.transform.position;
+    vector3Negate(&gForward, &raycastRay.dir);
+    quatMultVector(&scene->player.body.transform.rotation, &raycastRay.dir, &raycastRay.dir);
+    quatMultVector(&scene->player.body.transform.rotation, &gUp, &playerUp);
+
+    if (controllerGetButtonDown(0, Z_TRIG)) {
+        sceneFirePortal(scene, &raycastRay, &playerUp, 0);
+    }
+
+    if (controllerGetButtonDown(0, R_TRIG)) {
+        sceneFirePortal(scene, &raycastRay, &playerUp, 1);
+    }
+}
 
 void sceneUpdate(struct Scene* scene) {
     OSTime frameStart = osGetTime();
     scene->lastFrameTime = frameStart - scene->lastFrameStart;
 
     playerUpdate(&scene->player, &scene->camera.transform);
+    sceneCheckPortals(scene);
     
     collisionSceneUpdateDynamics();
 
@@ -146,9 +162,6 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
         quatLook(&hitDirection, playerUp, &portalLocation.rotation);
     }
 
-    // TODO remove once there is a hole in the wall
-    vector3AddScaled(&portalLocation.position, &hit.normal, 0.1f, &portalLocation.position);
-
     return sceneOpenPortal(scene, &portalLocation, portalIndex, quadIndex);
 }
 
@@ -157,6 +170,11 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
 
     for (int i = surfaceMapping.minPortalIndex; i < surfaceMapping.maxPortalIndex; ++i) {
         if (portalSurfaceGenerate(&gCurrentLevel->portalSurfaces[i], at, NULL, NULL)) {
+            struct Vector3 portalForward;
+            quatMultVector(&at->rotation, &gForward, &portalForward);
+            // TODO remove once there is a hole in the wall
+            vector3AddScaled(&at->position, &portalForward, (portalIndex == 0) ? -0.1f : 0.1f, &at->position);
+            
             scene->portals[portalIndex].transform = *at;
             gCollisionScene.portalTransforms[portalIndex] = &scene->portals[portalIndex].transform;
             return 1;
