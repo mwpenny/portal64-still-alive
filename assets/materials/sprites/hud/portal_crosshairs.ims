@@ -1,0 +1,1 @@
+-alpha extract -fill black -draw 'rectangle 47,0 49,64' -draw 'rectangle 95,0 97,64' -draw 'rectangle 143,0 145,64' -draw 'rectangle 191,0 193,64' -draw 'rectangle 223,0 225,64' -resize 128x32 -level 0%,50%

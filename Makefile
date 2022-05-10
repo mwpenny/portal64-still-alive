@@ -104,7 +104,7 @@ TEXTURE_IMAGES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_modified/%.png)
 
 portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims
 	@mkdir -p $(@D)
-	convert $< `cat $(@:portal_pak_modified/%.png=assets/%.ims)` $@
+	convert $< $(shell cat $(@:portal_pak_modified/%.png=assets/%.ims)) $@
 
 
 ####################
@@ -115,7 +115,13 @@ build/assets/materials/static.h: assets/materials/static.skm.yaml $(TEXTURE_IMAG
 	@mkdir -p $(@D)
 	$(SKELATOOL64) -n static -m $< -M $@
 
+build/assets/materials/hud.h: assets/materials/hud.skm.yaml $(TEXTURE_IMAGES)
+	@mkdir -p $(@D)
+	$(SKELATOOL64) -n hud -m $< -M $@
+
 src/levels/level_def_gen.h: build/assets/materials/static.h
+
+build/src/scene/hud.o: build/assets/materials/hud.h
 
 ####################
 ## Test Chambers
@@ -138,7 +144,7 @@ build/assets/test_chambers/%.o: build/assets/test_chambers/%.c build/assets/mate
 	$(CC) $(CFLAGS) -MM $^ -MF "$(@:.o=.d)" -MT"$@"
 	$(CC) $(CFLAGS) -c -o $@ $<
 	
-build/assets/materials/static_mat.o: build/assets/materials/static_mat.c
+build/assets/materials/%_mat.o: build/assets/materials/%_mat.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -MM $^ -MF "$(@:.o=.d)" -MT"$@"
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -163,7 +169,7 @@ $(BOOT_OBJ): $(BOOT)
 
 # without debugger
 
-CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) $(TEST_CHAMBER_OBJECTS) build/assets/materials/static_mat.o
+CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) $(TEST_CHAMBER_OBJECTS) build/assets/materials/static_mat.o build/assets/materials/hud_mat.o
 
 CODEOBJECTS_NO_DEBUG = $(CODEOBJECTS)
 

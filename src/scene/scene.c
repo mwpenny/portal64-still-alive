@@ -20,6 +20,7 @@
 #include "../levels/levels.h"
 #include "../scene/portal_surface.h"
 #include "../math/mathf.h"
+#include "./hud.h"
 
 struct Vector3 gStartPosition = {5.0f, 1.2f, -5.0f};
 
@@ -97,6 +98,8 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
+
+    hudRender(renderState);
 
     // sceneRenderPerformanceMetrics(scene, renderState, task);
 
