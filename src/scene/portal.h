@@ -26,6 +26,7 @@ struct RenderProps {
     struct Camera camera;
     float aspectRatio;
     Mtx* perspectiveMatrix;
+    Vp* viewport;
     u16 perspectiveCorrect;
     short currentDepth;
 
@@ -38,7 +39,7 @@ struct RenderProps {
 #define STARTING_RENDER_DEPTH       1
 
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState);
-void renderPropsNext(struct RenderProps* current, struct RenderProps* next, struct Transform* fromPortal, struct Transform* toPortal, short minX, short minY, short maxX, short maxY, struct RenderState* renderState);
+void renderPropsNext(struct RenderProps* current, struct RenderProps* next, struct Transform* fromPortal, struct Transform* toPortal, struct RenderState* renderState);
 
 void portalInit(struct Portal* portal, enum PortalFlags flags);
 

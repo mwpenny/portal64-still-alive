@@ -379,7 +379,7 @@ struct ContactState* contactSolverGetContact(struct ContactConstraintState* cont
 	return result;
 }
 
-void contactSolverAssign(struct ContactConstraintState* into, struct ContactConstraintState* from, int filterPortalContacts) {
+int contactSolverAssign(struct ContactConstraintState* into, struct ContactConstraintState* from, int filterPortalContacts) {
 	for (int sourceIndex = 0; sourceIndex < from->contactCount; ++sourceIndex) {
 		int targetIndex;
 
@@ -399,9 +399,11 @@ void contactSolverAssign(struct ContactConstraintState* into, struct ContactCons
 	}
 
 	int copiedCount = 0;
+	int result = 0;
 
 	for (int sourceIndex = 0; sourceIndex < from->contactCount; ++sourceIndex) {
 		if (filterPortalContacts && collisionSceneIsTouchingPortal(&from->contacts[sourceIndex].ra)) {
+			result = 1;
 			continue;
 		}
 
@@ -415,4 +417,6 @@ void contactSolverAssign(struct ContactConstraintState* into, struct ContactCons
 	into->normal = from->normal;
 	into->restitution = from->restitution;
 	into->friction = from->friction;
+	
+	return result;
 }

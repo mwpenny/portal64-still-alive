@@ -73,6 +73,10 @@ void rigidBodyCheckPortals(struct RigidBody* rigidBody) {
 
     enum RigidBodyFlags newFlags = 0;
 
+    if (rigidBody->flags & RigidBodyIsTouchingPortal) {
+        newFlags |= RigidBodyWasTouchingPortal;
+    }
+
     for (int i = 0; i < 2; ++i) {
         transformPointInverse(gCollisionScene.portalTransforms[i], &rigidBody->transform.position, &localPoint);
 
@@ -143,7 +147,9 @@ void rigidBodyCheckPortals(struct RigidBody* rigidBody) {
         RigidBodyFlagsInFrontPortal1 | 
         RigidBodyFlagsPortalsInactive |
         RigidBodyFlagsCrossedPortal0 |
-        RigidBodyFlagsCrossedPortal1
+        RigidBodyFlagsCrossedPortal1 |
+        RigidBodyIsTouchingPortal |
+        RigidBodyWasTouchingPortal
     );
     rigidBody->flags |= newFlags;
 }

@@ -10,6 +10,7 @@
 #include "util/memory.h"
 #include "string.h"
 #include "controls/controller.h"
+#include "scene/dynamic_scene.h"
 
 #include "levels/levels.h"
 
@@ -129,6 +130,7 @@ static void gameProc(void* arg) {
     heapInit(_heapStart, memoryEnd);
     romInit();
 
+    dynamicSceneInit();
     contactSolverInit(&gContactSolver);
     levelLoad(0);
     sceneInit(&gScene);

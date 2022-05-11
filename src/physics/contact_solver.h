@@ -62,7 +62,7 @@ void contactSolverRemoveContact(struct ContactSolver* solver, struct ContactCons
 
 struct ContactState* contactSolverGetContact(struct ContactConstraintState* contact, int id);
 
-void contactSolverAssign(struct ContactConstraintState* into, struct ContactConstraintState* from, int filterPortalContacts);
+int contactSolverAssign(struct ContactConstraintState* into, struct ContactConstraintState* from, int filterPortalContacts);
 
 #endif
 

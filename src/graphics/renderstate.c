@@ -2,29 +2,32 @@
 
 void renderStateInit(struct RenderState* renderState) {
     renderState->dl = renderState->glist;
-    renderState->currentMatrix = 0;
-    renderState->currentLight = 0;
+    renderState->currentMemoryChunk = 0;
     renderState->currentChunkEnd = MAX_DL_LENGTH;
 }
 
-Mtx* renderStateRequestMatrices(struct RenderState* renderState, unsigned count) {
-    if (renderState->currentMatrix + count <= MAX_ACTIVE_TRANSFORMS) {
-        Mtx* result = &renderState->matrices[renderState->currentMatrix];
-        renderState->currentMatrix += count;
+void* renderStateRequestMemory(struct RenderState* renderState, unsigned size) {
+    unsigned memorySlots = (size + 7) >> 3;
+
+    if (renderState->currentMemoryChunk + memorySlots <= MAX_RENDER_STATE_MEMORY_CHUNKS) {
+        void* result = &renderState->renderStateMemory[renderState->currentMemoryChunk];
+        renderState->currentMemoryChunk += memorySlots;
         return result;
     }
 
     return 0;
 }
 
-Light* renderStateRequestLights(struct RenderState* renderState, unsigned count) {
-    if (renderState->currentLight + count <= MAX_ACTIVE_TRANSFORMS) {
-        Light* result = &renderState->lights[renderState->currentLight];
-        renderState->currentLight += count;
-        return result;
-    }
+Mtx* renderStateRequestMatrices(struct RenderState* renderState, unsigned count) {
+    return renderStateRequestMemory(renderState, sizeof(Mtx) * count);
+}
 
-    return 0;
+Light* renderStateRequestLights(struct RenderState* renderState, unsigned count) {
+    return renderStateRequestMemory(renderState, sizeof(Light) * count);
+}
+
+Vp* renderStateRequestViewport(struct RenderState* renderState) {
+    return renderStateRequestMemory(renderState, sizeof(Vp));
 }
 
 void renderStateFlushCache(struct RenderState* renderState) {

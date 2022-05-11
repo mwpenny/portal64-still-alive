@@ -5,6 +5,7 @@
 #include "../graphics/debug_render.h"
 #include "levels/levels.h"
 #include "physics/collision_scene.h"
+#include "dynamic_scene.h"
 
 struct CollisionBox gCubeCollisionBox = {
     {0.3165f, 0.3165f, 0.3165f}
@@ -57,22 +58,29 @@ struct ColliderTypeData gCubeCollider = {
     &gCollisionBoxCallbacks,  
 };
 
-void cubeInit(struct Cube* cube) {
-    collisionObjectInit(&cube->collisionObject, &gCubeCollider, &cube->rigidBody, 1.0f);
-    collisionSceneAddDynamicObject(&cube->collisionObject);
-
-    cube->collisionObject.body->flags |= RigidBodyFlagsGrabbable;
-}
-
-void cubeUpdate(struct Cube* cube) {
-    
-}
-
-void cubeRender(struct Cube* cube, struct RenderState* renderState) {
+void cubeRender(void* data, struct RenderState* renderState) {
+    struct Cube* cube = (struct Cube*)data;
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
     transformToMatrixL(&cube->rigidBody.transform, matrix, SCENE_SCALE);
 
     gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
     gSPDisplayList(renderState->dl++, cube_CubeSimpleBevel_mesh);
     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
+}
+
+void cubeInit(struct Cube* cube) {
+    collisionObjectInit(&cube->collisionObject, &gCubeCollider, &cube->rigidBody, 1.0f);
+    collisionSceneAddDynamicObject(&cube->collisionObject);
+
+    cube->collisionObject.body->flags |= RigidBodyFlagsGrabbable;
+
+    cube->dynamicId = dynamicSceneAdd(cube, cubeRender);
+}
+
+void cubeUpdate(struct Cube* cube) {
+    if (cube->rigidBody.flags & (RigidBodyIsTouchingPortal | RigidBodyWasTouchingPortal)) {
+        dynamicSceneSetFlags(cube->dynamicId, DYNAMIC_SCENE_OBJECT_FLAGS_TOUCHING_PORTAL);
+    } else {
+        dynamicSceneClearFlags(cube->dynamicId, DYNAMIC_SCENE_OBJECT_FLAGS_TOUCHING_PORTAL);
+    }
 }

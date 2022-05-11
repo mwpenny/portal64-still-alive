@@ -21,6 +21,7 @@
 #include "../scene/portal_surface.h"
 #include "../math/mathf.h"
 #include "./hud.h"
+#include "dynamic_scene.h"
 
 struct Vector3 gStartPosition = {5.0f, 1.2f, -5.0f};
 
@@ -67,7 +68,7 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
 
     staticRender(renderState);
 
-    cubeRender(&scene->cube, renderState);
+    dynamicSceneRender(renderState, 0);
 }
 
 #define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
@@ -91,6 +92,10 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     renderProperties.camera = scene->camera;
     renderProperties.currentDepth = STARTING_RENDER_DEPTH;
+
+    gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+
+    dynamicSceneRender(renderState, 1);
 
     sceneRenderWithProperties(scene, &renderProperties, renderState);
 
@@ -129,6 +134,8 @@ void sceneUpdate(struct Scene* scene) {
 
     playerUpdate(&scene->player, &scene->camera.transform);
     sceneCheckPortals(scene);
+
+    cubeUpdate(&scene->cube);
     
     collisionSceneUpdateDynamics();
 

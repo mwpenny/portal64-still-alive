@@ -4,6 +4,7 @@
 #include "../graphics/screen_clipper.h"
 #include "../graphics/graphics.h"
 #include "../defs.h"
+#include "dynamic_scene.h"
 
 #define CALC_SCREEN_SPACE(clip_space, screen_size) ((clip_space + 1.0f) * ((screen_size) / 2))
 
@@ -34,7 +35,8 @@ struct Quaternion gVerticalFlip = {0.0f, 1.0f, 0.0f, 0.0f};
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState) {
     props->camera = *camera;
     props->aspectRatio = aspectRatio;
-    props->perspectiveMatrix = cameraSetupMatrices(camera, renderState, aspectRatio, &props->perspectiveCorrect);
+    props->perspectiveMatrix = cameraSetupMatrices(camera, renderState, aspectRatio, &props->perspectiveCorrect, &fullscreenViewport);
+    props->viewport = &fullscreenViewport;
     props->currentDepth = STARTING_RENDER_DEPTH;
 
     props->minX = 0;
@@ -43,7 +45,7 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
     props->maxY = SCREEN_HT;
 }
 
-void renderPropsNext(struct RenderProps* current, struct RenderProps* next, struct Transform* fromPortal, struct Transform* toPortal, short minX, short minY, short maxX, short maxY, struct RenderState* renderState) {
+void renderPropsNext(struct RenderProps* current, struct RenderProps* next, struct Transform* fromPortal, struct Transform* toPortal, struct RenderState* renderState) {
     struct Transform otherInverse;
     transformInvert(fromPortal, &otherInverse);
     struct Transform portalCombined;
@@ -53,16 +55,30 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
     next->aspectRatio = current->aspectRatio;
     transformConcat(&portalCombined, &current->camera.transform, &next->camera.transform);
 
-    next->perspectiveMatrix = cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect);
+    // render any objects halfway through portals
+    cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, current->viewport);
+    dynamicSceneRender(renderState, 1);
+
+    Vp* viewport = renderStateRequestViewport(renderState);
+
+    viewport->vp.vscale[0] = (next->maxX - next->minX) << 1;
+    viewport->vp.vscale[1] = (next->maxY - next->minY) << 1;
+    viewport->vp.vscale[2] = G_MAXZ/2;
+    viewport->vp.vscale[3] = 0;
+
+    viewport->vp.vtrans[0] = (next->maxX + next->minX) << 1;
+    viewport->vp.vtrans[1] = (next->maxY + next->minY) << 1;
+    viewport->vp.vtrans[2] = G_MAXZ/2;
+    viewport->vp.vtrans[3] = 0;
+
+    next->viewport = viewport;
+
+    next->perspectiveMatrix = cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, viewport);
 
     next->currentDepth = current->currentDepth - 1;
 
-    next->minX = minX;
-    next->minY = minY;
-    next->maxX = maxX;
-    next->maxY = maxY;
-
-    gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, minX, minY, maxX, maxY);
+    gSPViewport(renderState->dl++, viewport);
+    gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, next->minX, next->minY, next->maxX, next->maxY);
 }
 
 void portalInit(struct Portal* portal, enum PortalFlags flags) {
@@ -107,19 +123,26 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
     screenClipperBoundingPoints(&clipper, gPortalOutline, sizeof(gPortalOutline) / sizeof(*gPortalOutline), &clippingBounds);
 
     if (clippingBounds.min.x < clippingBounds.max.x && clippingBounds.min.y < clippingBounds.max.y) {
-        int minX = CALC_SCREEN_SPACE(clippingBounds.min.x, SCREEN_WD);
-        int maxX = CALC_SCREEN_SPACE(clippingBounds.max.x, SCREEN_WD);
-        int minY = CALC_SCREEN_SPACE(-clippingBounds.max.y, SCREEN_HT);
-        int maxY = CALC_SCREEN_SPACE(-clippingBounds.min.y, SCREEN_HT);
-
         struct RenderProps nextProps;
-        renderPropsNext(props, &nextProps, &portal->transform, &otherPortal->transform, minX, minY, maxX, maxY, renderState);
+
+        nextProps.minX = CALC_SCREEN_SPACE(clippingBounds.min.x, SCREEN_WD);
+        nextProps.maxX = CALC_SCREEN_SPACE(clippingBounds.max.x, SCREEN_WD);
+        nextProps.minY = CALC_SCREEN_SPACE(-clippingBounds.max.y, SCREEN_HT);
+        nextProps.maxY = CALC_SCREEN_SPACE(-clippingBounds.min.y, SCREEN_HT);
+
+        nextProps.minX = MAX(nextProps.minX, props->minX);
+        nextProps.maxX = MIN(nextProps.maxX, props->maxX);
+        nextProps.minY = MAX(nextProps.minY, props->minY);
+        nextProps.maxY = MIN(nextProps.maxY, props->maxY);
+
+        renderPropsNext(props, &nextProps, &portal->transform, &otherPortal->transform, renderState);
         sceneRenderer(data, &nextProps, renderState);
 
         // revert to previous state
         gSPMatrix(renderState->dl++, osVirtualToPhysical(props->perspectiveMatrix), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
         gSPPerspNormalize(renderState->dl++, props->perspectiveCorrect);
         gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, props->minX, props->minY, props->maxX, props->maxY);       
+        gSPViewport(renderState->dl++, props->viewport);
 
         Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 

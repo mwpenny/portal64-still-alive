@@ -11,6 +11,8 @@ enum RigidBodyFlags {
     RigidBodyFlagsCrossedPortal0 = (1 << 3),
     RigidBodyFlagsCrossedPortal1 = (1 << 4),
     RigidBodyFlagsGrabbable = (1 << 5),
+    RigidBodyIsTouchingPortal = (1 << 6),
+    RigidBodyWasTouchingPortal = (1 << 7),
 };
 
 struct RigidBody {

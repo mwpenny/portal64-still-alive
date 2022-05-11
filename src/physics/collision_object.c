@@ -48,7 +48,9 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
             return;
         }
         
-        contactSolverAssign(contact, &localContact, 1);
+        if (contactSolverAssign(contact, &localContact, 1) && object->body) {
+            object->body->flags |= RigidBodyIsTouchingPortal;
+        }
     } else if (contact) {
         contactSolverRemoveContact(contactSolver, contact);
     }

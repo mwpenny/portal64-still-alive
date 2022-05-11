@@ -8,10 +8,10 @@
 struct Cube {
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
+    short dynamicId;
 };
 
 void cubeInit(struct Cube* cube);
 void cubeUpdate(struct Cube* cube);
-void cubeRender(struct Cube* cube, struct RenderState* renderState);
 
 #endif
