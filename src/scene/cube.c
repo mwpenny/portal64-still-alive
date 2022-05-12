@@ -64,7 +64,7 @@ void cubeRender(void* data, struct RenderState* renderState) {
     transformToMatrixL(&cube->rigidBody.transform, matrix, SCENE_SCALE);
 
     gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
-    gSPDisplayList(renderState->dl++, cube_CubeSimpleBevel_mesh);
+    gSPDisplayList(renderState->dl++, cube_gfx);
     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
 }
 

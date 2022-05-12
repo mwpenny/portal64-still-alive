@@ -24,6 +24,11 @@
 #include "dynamic_scene.h"
 
 struct Vector3 gStartPosition = {5.0f, 1.2f, -5.0f};
+struct Vector3 gPortalGunOffset = {0.100957, -0.113587, -0.28916};
+struct Vector3 gPortalGunForward = {0.1f, -0.1f, 1.0f};
+struct Vector3 gPortalGunUp = {0.0f, 1.0f, 0.0f};
+
+Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 
 void sceneInit(struct Scene* scene) {
     cameraInit(&scene->camera, 45.0f, 0.125f * SCENE_SCALE, 80.0f * SCENE_SCALE);
@@ -85,7 +90,24 @@ void sceneRenderPerformanceMetrics(struct Scene* scene, struct RenderState* rend
     gDPPipeSync(renderState->dl++);
 }
 
+void sceneRenderPortalGun(struct Scene* scene, struct RenderState* renderState) {
+    struct Transform gunTransform;
+    transformPoint(&scene->player.body.transform, &gPortalGunOffset, &gunTransform.position);
+    struct Quaternion relativeRotation;
+    quatLook(&gPortalGunForward, &gPortalGunUp, &relativeRotation);
+    quatMultiply(&scene->player.body.transform.rotation, &relativeRotation, &gunTransform.rotation);
+    gunTransform.scale = gOneVec;
+    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
+    transformToMatrixL(&gunTransform, matrix, SCENE_SCALE);
+
+    gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
+    gSPDisplayList(renderState->dl++, v_portal_gun_gfx);
+    gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
+}
+
 void sceneRender(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
+    gSPSetLights1(renderState->dl++, gSceneLights);
+    
     struct RenderProps renderProperties;
 
     renderPropsInit(&renderProperties, &scene->camera, (float)SCREEN_WD / (float)SCREEN_HT, renderState);
@@ -99,10 +121,12 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     sceneRenderWithProperties(scene, &renderProperties, renderState);
 
-    gDPPipeSync(renderState->dl++);
+    sceneRenderPortalGun(scene, renderState);
 
+    gDPPipeSync(renderState->dl++);
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
+
 
     hudRender(renderState);
 

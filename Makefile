@@ -111,17 +111,35 @@ portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims
 ## Materials
 ####################
 
-build/assets/materials/static.h: assets/materials/static.skm.yaml $(TEXTURE_IMAGES)
+build/assets/materials/static.h build/assets/materials/static_mat.c: assets/materials/static.skm.yaml $(TEXTURE_IMAGES)
 	@mkdir -p $(@D)
-	$(SKELATOOL64) -n static -m $< -M $@
+	$(SKELATOOL64) -n static -m $< -M build/assets/materials/static.h
 
-build/assets/materials/hud.h: assets/materials/hud.skm.yaml $(TEXTURE_IMAGES)
+build/assets/materials/hud.h build/assets/materials/hud_mat.c: assets/materials/hud.skm.yaml $(TEXTURE_IMAGES)
 	@mkdir -p $(@D)
-	$(SKELATOOL64) -n hud -m $< -M $@
+	$(SKELATOOL64) -n hud -m $< -M build/assets/materials/hud.h
 
 src/levels/level_def_gen.h: build/assets/materials/static.h
 
 build/src/scene/hud.o: build/assets/materials/hud.h
+
+####################
+## Models
+####################
+#
+# Source engine scale is 64x
+#
+
+MODEL_LIST = assets/models/cube/cube.blend \
+	assets/models/portal_gun/v_portalgun.blend
+
+MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
+MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)
+
+build/assets/models/%.h build/assets/models/%_geo.c: build/assets/models/%.fbx assets/materials/objects.skm.yaml
+	$(SKELATOOL64) -s 2.56 -n $(<:build/assets/models/%.fbx=%) -m assets/materials/objects.skm.yaml -o $(<:%.fbx=%.h) $<
+
+build/src/models/models.o: $(MODEL_HEADERS)
 
 ####################
 ## Test Chambers
@@ -169,7 +187,7 @@ $(BOOT_OBJ): $(BOOT)
 
 # without debugger
 
-CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) $(TEST_CHAMBER_OBJECTS) build/assets/materials/static_mat.o build/assets/materials/hud_mat.o
+CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) $(TEST_CHAMBER_OBJECTS) $(MODEL_OBJECTS) build/assets/materials/static_mat.o build/assets/materials/hud_mat.o
 
 CODEOBJECTS_NO_DEBUG = $(CODEOBJECTS)
 
