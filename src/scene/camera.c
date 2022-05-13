@@ -29,7 +29,14 @@ void cameraBuildProjectionMatrix(struct Camera* camera, float matrix[4][4], u16*
     guPerspectiveF(matrix, perspectiveNormalize, camera->fov, aspectRatio, camera->nearPlane * planeScalar, camera->farPlane * planeScalar, 1.0f);
 }
 
-Mtx* cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, float aspectRatio, u16* perspNorm, Vp* viewport) {
+void cameraExtractClippingPlane(float viewPersp[4][4], struct Plane* output, int axis, float direction) {
+    output->normal.x = viewPersp[0][axis] * direction + viewPersp[0][3];
+    output->normal.y = viewPersp[1][axis] * direction + viewPersp[1][3];
+    output->normal.z = viewPersp[2][axis] * direction + viewPersp[2][3];
+    output->d = viewPersp[3][axis] * direction + viewPersp[3][3];
+}
+
+Mtx* cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, float aspectRatio, u16* perspNorm, Vp* viewport, struct FrustrumCullingInformation* clippingInfo) {
     Mtx* viewProjMatrix = renderStateRequestMatrices(renderState, 2);
     
     if (!viewProjMatrix) {
@@ -57,6 +64,14 @@ Mtx* cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState,
     cameraBuildViewMatrix(camera, view);
     guMtxCatF(view, persp, combined);
     guMtxF2L(combined, &viewProjMatrix[1]);
+
+    if (clippingInfo) {
+        cameraExtractClippingPlane(combined, &clippingInfo->clippingPlanes[0], 0, 1.0f);
+        cameraExtractClippingPlane(combined, &clippingInfo->clippingPlanes[1], 0, -1.0f);
+        cameraExtractClippingPlane(combined, &clippingInfo->clippingPlanes[2], 1, 1.0f);
+        cameraExtractClippingPlane(combined, &clippingInfo->clippingPlanes[3], 1, -1.0f);
+        cameraExtractClippingPlane(combined, &clippingInfo->clippingPlanes[4], 2, 1.0f);
+    }
 
     gSPMatrix(renderState->dl++, osVirtualToPhysical(&viewProjMatrix[1]), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     gSPPerspNormalize(renderState->dl++, perspectiveNormalize);

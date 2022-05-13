@@ -35,7 +35,7 @@ struct Quaternion gVerticalFlip = {0.0f, 1.0f, 0.0f, 0.0f};
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState) {
     props->camera = *camera;
     props->aspectRatio = aspectRatio;
-    props->perspectiveMatrix = cameraSetupMatrices(camera, renderState, aspectRatio, &props->perspectiveCorrect, &fullscreenViewport);
+    props->perspectiveMatrix = cameraSetupMatrices(camera, renderState, aspectRatio, &props->perspectiveCorrect, &fullscreenViewport, &props->cullingInfo);
     props->viewport = &fullscreenViewport;
     props->currentDepth = STARTING_RENDER_DEPTH;
 
@@ -85,14 +85,14 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
     transformConcat(&portalCombined, &current->camera.transform, &next->camera.transform);
 
     // render any objects halfway through portals
-    cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, current->viewport);
+    cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, current->viewport, NULL);
     dynamicSceneRender(renderState, 1);
 
     Vp* viewport = renderPropsBuildViewport(next, renderState);
 
     next->viewport = viewport;
 
-    next->perspectiveMatrix = cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, viewport);
+    next->perspectiveMatrix = cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, viewport, &next->cullingInfo);
 
     next->currentDepth = current->currentDepth - 1;
 

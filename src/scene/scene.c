@@ -66,8 +66,10 @@ void sceneInit(struct Scene* scene) {
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {
     struct Scene* scene = (struct Scene*)data;
 
-    portalRender(&scene->portals[0], &scene->portals[1], properties, sceneRenderWithProperties, data, renderState);
-    portalRender(&scene->portals[1], &scene->portals[0], properties, sceneRenderWithProperties, data, renderState);
+    int closerPortal = vector3DistSqrd(&properties->camera.transform.position, &scene->portals[0].transform.position) > vector3DistSqrd(&properties->camera.transform.position, &scene->portals[1].transform.position) ? 0 : 1;
+
+    portalRender(&scene->portals[closerPortal], &scene->portals[1 - closerPortal], properties, sceneRenderWithProperties, data, renderState);
+    portalRender(&scene->portals[1 - closerPortal], &scene->portals[closerPortal], properties, sceneRenderWithProperties, data, renderState);
 
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 

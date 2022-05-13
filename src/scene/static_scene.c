@@ -1,18 +1,31 @@
 #include "static_scene.h"
 
 #include "defs.h"
+#include "../math/box3d.h"
 
-int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingSphere* boundingSphere) {
-    struct Vector3 spherePos;
+int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingSphere) {
+    struct Box3D boxAsFloat;
 
-    spherePos.x = boundingSphere->x * (1.0f / SCENE_SCALE);
-    spherePos.y = boundingSphere->y * (1.0f / SCENE_SCALE);
-    spherePos.z = boundingSphere->z * (1.0f / SCENE_SCALE);
+    boxAsFloat.min.x = boundingSphere->minX  * (1.0f / SCENE_SCALE);
+    boxAsFloat.min.y = boundingSphere->minY  * (1.0f / SCENE_SCALE);
+    boxAsFloat.min.z = boundingSphere->minZ  * (1.0f / SCENE_SCALE);
 
-    vector3Sub(&spherePos, &frustrum->cameraPosition, &spherePos);
-    struct Vector3 crossDirection;
-    vector3Cross(&frustrum->frustrumDirection, &spherePos, &crossDirection);
+    boxAsFloat.max.x = boundingSphere->maxX  * (1.0f / SCENE_SCALE);
+    boxAsFloat.max.y = boundingSphere->maxY  * (1.0f / SCENE_SCALE);
+    boxAsFloat.max.z = boundingSphere->maxZ  * (1.0f / SCENE_SCALE);
 
-    float distance = sqrtf(vector3MagSqrd(&crossDirection)) * frustrum->cosFrustumAngle - vector3Dot(&frustrum->frustrumDirection, &crossDirection) * frustrum->sinFrustrumAngle;
-    return distance > boundingSphere->radius * (1.0f / SCENE_SCALE);
+    for (int i = 0; i < CLIPPING_PLANE_COUNT; ++i) {
+        struct Vector3 closestPoint;
+
+        closestPoint.x = frustrum->clippingPlanes[i].normal.x > 0.0f ? boxAsFloat.min.x : boxAsFloat.max.x;
+        closestPoint.y = frustrum->clippingPlanes[i].normal.y > 0.0f ? boxAsFloat.min.y : boxAsFloat.max.y;
+        closestPoint.z = frustrum->clippingPlanes[i].normal.z > 0.0f ? boxAsFloat.min.z : boxAsFloat.max.z;
+
+        if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.0f) {
+            return 1;
+        }
+    }
+
+
+    return 0;
 }

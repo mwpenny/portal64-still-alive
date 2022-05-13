@@ -14,6 +14,11 @@ struct BoundingSphere {
     short radius;
 };
 
+struct BoundingBoxs16 {
+    short minX, minY, minZ;
+    short maxX, maxY, maxZ;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
