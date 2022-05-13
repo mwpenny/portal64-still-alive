@@ -9,9 +9,15 @@ struct StaticContentElement {
     u8 materialIndex;
 };
 
+struct BoundingSphere {
+    short x, y, z;
+    short radius;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
+    struct BoundingSphere* boundingSpheres;
     struct PortalSurface* portalSurfaces;
     // maps index of a collisionQuads to indices in portalSurfaces
     struct PortalSurfaceMapping* portalSurfaceMapping;

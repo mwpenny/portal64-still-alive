@@ -5,6 +5,7 @@
 #include <ultra64.h>
 #include "../math/transform.h"
 #include "../math/box3d.h"
+#include "../levels/level_definition.h"
 
 enum StaticSceneEntryFlags {
     StaticSceneEntryFlagsHidden,
@@ -30,6 +31,16 @@ struct StaticScene {
     u16 gridHeight;
 };
 
+struct FrustrumCullingInformation {
+    struct Plane nearPlane;
+    struct Vector3 frustrumDirection;
+    struct Vector3 cameraPosition;
+    float cosFrustumAngle;
+    float sinFrustrumAngle;
+};
+
 void staticSceneInit();
+
+int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingSphere* boundingSphere);
 
 #endif

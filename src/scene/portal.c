@@ -45,6 +45,35 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
     props->maxY = SCREEN_HT;
 }
 
+#define MIN_VP_WIDTH 40
+
+Vp* renderPropsBuildViewport(struct RenderProps* props, struct RenderState* renderState) {
+    int minX = props->minX;
+    int maxX = props->maxX;
+
+    if (maxX < MIN_VP_WIDTH) {
+        maxX = MIN_VP_WIDTH;
+    }
+
+    if (minX > SCREEN_WD - MIN_VP_WIDTH) {
+        minX = SCREEN_WD - MIN_VP_WIDTH;
+    }
+
+    Vp* viewport = renderStateRequestViewport(renderState);
+
+    viewport->vp.vscale[0] = (maxX - minX) << 1;
+    viewport->vp.vscale[1] = (props->maxY - props->minY) << 1;
+    viewport->vp.vscale[2] = G_MAXZ/2;
+    viewport->vp.vscale[3] = 0;
+
+    viewport->vp.vtrans[0] = (maxX + minX) << 1;
+    viewport->vp.vtrans[1] = (props->maxY + props->minY) << 1;
+    viewport->vp.vtrans[2] = G_MAXZ/2;
+    viewport->vp.vtrans[3] = 0;
+
+    return viewport;
+}
+
 void renderPropsNext(struct RenderProps* current, struct RenderProps* next, struct Transform* fromPortal, struct Transform* toPortal, struct RenderState* renderState) {
     struct Transform otherInverse;
     transformInvert(fromPortal, &otherInverse);
@@ -59,17 +88,7 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
     cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, current->viewport);
     dynamicSceneRender(renderState, 1);
 
-    Vp* viewport = renderStateRequestViewport(renderState);
-
-    viewport->vp.vscale[0] = (next->maxX - next->minX) << 1;
-    viewport->vp.vscale[1] = (next->maxY - next->minY) << 1;
-    viewport->vp.vscale[2] = G_MAXZ/2;
-    viewport->vp.vscale[3] = 0;
-
-    viewport->vp.vtrans[0] = (next->maxX + next->minX) << 1;
-    viewport->vp.vtrans[1] = (next->maxY + next->minY) << 1;
-    viewport->vp.vtrans[2] = G_MAXZ/2;
-    viewport->vp.vtrans[3] = 0;
+    Vp* viewport = renderPropsBuildViewport(next, renderState);
 
     next->viewport = viewport;
 

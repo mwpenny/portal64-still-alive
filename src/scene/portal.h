@@ -2,8 +2,11 @@
 #define __PORTAL_H__
 
 #include "../math/transform.h"
+#include "../math/plane.h"
 #include "../graphics/renderstate.h"
 #include "camera.h"
+#include "static_scene.h"
+
 
 #define PORTAL_LOOP_SIZE    8
 
@@ -27,6 +30,8 @@ struct RenderProps {
     float aspectRatio;
     Mtx* perspectiveMatrix;
     Vp* viewport;
+    struct FrustrumCullingInformation cullingInfo;
+
     u16 perspectiveCorrect;
     short currentDepth;
 
@@ -34,6 +39,7 @@ struct RenderProps {
     short minY;
     short maxX;
     short maxY;
+
 };
 
 #define STARTING_RENDER_DEPTH       1
