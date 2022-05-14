@@ -66,29 +66,43 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
     props->maxY = SCREEN_HT;
 }
 
-#define MIN_VP_WIDTH 40
+#define MIN_VP_WIDTH 42
+
+void renderPropscheckViewportSize(int* min, int* max, int screenSize) {
+    if (*max < MIN_VP_WIDTH) {
+        *max = MIN_VP_WIDTH;
+    }
+
+    if (*min > screenSize - MIN_VP_WIDTH) {
+        *min = screenSize - MIN_VP_WIDTH;
+    }
+
+    int widthGrowBy = MIN_VP_WIDTH - (*max - *min);
+
+    if (widthGrowBy > 0) {
+        *min -= widthGrowBy >> 1;
+        *max += (widthGrowBy + 1) >> 1;
+    }
+}
 
 Vp* renderPropsBuildViewport(struct RenderProps* props, struct RenderState* renderState) {
     int minX = props->minX;
     int maxX = props->maxX;
+    int minY = props->minY;
+    int maxY = props->maxY;
 
-    if (maxX < MIN_VP_WIDTH) {
-        maxX = MIN_VP_WIDTH;
-    }
-
-    if (minX > SCREEN_WD - MIN_VP_WIDTH) {
-        minX = SCREEN_WD - MIN_VP_WIDTH;
-    }
+    renderPropscheckViewportSize(&minX, &maxX, SCREEN_WD);
+    renderPropscheckViewportSize(&minY, &maxY, SCREEN_HT);
 
     Vp* viewport = renderStateRequestViewport(renderState);
 
     viewport->vp.vscale[0] = (maxX - minX) << 1;
-    viewport->vp.vscale[1] = (props->maxY - props->minY) << 1;
+    viewport->vp.vscale[1] = (maxY - minY) << 1;
     viewport->vp.vscale[2] = G_MAXZ/2;
     viewport->vp.vscale[3] = 0;
 
     viewport->vp.vtrans[0] = (maxX + minX) << 1;
-    viewport->vp.vtrans[1] = (props->maxY + props->minY) << 1;
+    viewport->vp.vtrans[1] = (maxY + minY) << 1;
     viewport->vp.vtrans[2] = G_MAXZ/2;
     viewport->vp.vtrans[3] = 0;
 
