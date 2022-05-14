@@ -73,7 +73,7 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
 
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 
-    staticRender(renderState);
+    staticRender(&properties->cullingInfo, renderState);
 
     dynamicSceneRender(renderState, 0);
 }
@@ -128,7 +128,6 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     gDPPipeSync(renderState->dl++);
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
-
 
     hudRender(renderState);
 

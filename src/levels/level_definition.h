@@ -22,7 +22,7 @@ struct BoundingBoxs16 {
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
-    struct BoundingSphere* boundingSpheres;
+    struct BoundingBoxs16* staticBoundingBoxes;
     struct PortalSurface* portalSurfaces;
     // maps index of a collisionQuads to indices in portalSurfaces
     struct PortalSurfaceMapping* portalSurfaceMapping;

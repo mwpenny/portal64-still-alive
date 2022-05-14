@@ -94,6 +94,13 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
 
     next->perspectiveMatrix = cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, viewport, &next->cullingInfo);
 
+    // set the near clipping plane to be the exit portal surface
+    quatMultVector(&toPortal->rotation, &gForward, &next->cullingInfo.clippingPlanes[4].normal);
+    if (toPortal < fromPortal) {
+        vector3Negate(&next->cullingInfo.clippingPlanes[4].normal, &next->cullingInfo.clippingPlanes[4].normal);
+    }
+    next->cullingInfo.clippingPlanes[4].d = -vector3Dot(&next->cullingInfo.clippingPlanes[4].normal, &toPortal->position) * SCENE_SCALE;
+
     next->currentDepth = current->currentDepth - 1;
 
     gSPViewport(renderState->dl++, viewport);

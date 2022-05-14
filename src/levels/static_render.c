@@ -62,7 +62,24 @@ void staticRenderSort(int min, int max) {
     }
 }
 
-void staticRender(struct RenderState* renderState) {
+int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox) {
+    for (int i = 0; i < CLIPPING_PLANE_COUNT; ++i) {
+        struct Vector3 closestPoint;
+
+        closestPoint.x = frustrum->clippingPlanes[i].normal.x < 0.0f ? boundingBox->minX : boundingBox->maxX;
+        closestPoint.y = frustrum->clippingPlanes[i].normal.y < 0.0f ? boundingBox->minY : boundingBox->maxY;
+        closestPoint.z = frustrum->clippingPlanes[i].normal.z < 0.0f ? boundingBox->minZ : boundingBox->maxZ;
+
+        if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.0f) {
+            return 1;
+        }
+    }
+
+
+    return 0;
+}
+
+void staticRender(struct FrustrumCullingInformation* cullingInfo, struct RenderState* renderState) {
     if (!gCurrentLevel) {
         return;
     }
@@ -70,9 +87,13 @@ void staticRender(struct RenderState* renderState) {
     int renderCount = 0;
 
     for (int i = 0; i < gCurrentLevel->staticContentCount; ++i) {
+        if (isOutsideFrustrum(cullingInfo, &gCurrentLevel->staticBoundingBoxes[i])) {
+            continue;
+        }
+
         // TODO filter
-        gRenderOrder[i] = i;
-        gSortKey[i] = staticRenderGenerateSortKey(i);
+        gRenderOrder[renderCount] = i;
+        gSortKey[renderCount] = staticRenderGenerateSortKey(i);
         ++renderCount;
     }
 
@@ -81,7 +102,7 @@ void staticRender(struct RenderState* renderState) {
     int prevMaterial = -1;
     
     for (int i = 0; i < renderCount; ++i) {
-        struct StaticContentElement* element = &gCurrentLevel->staticContent[i];
+        struct StaticContentElement* element = &gCurrentLevel->staticContent[gRenderOrder[i]];
         
         if (element->materialIndex != prevMaterial) {
             if (prevMaterial != -1) {

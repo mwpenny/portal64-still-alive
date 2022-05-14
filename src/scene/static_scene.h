@@ -34,6 +34,4 @@ struct StaticScene {
 
 void staticSceneInit();
 
-int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox);
-
 #endif
