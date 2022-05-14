@@ -30,7 +30,18 @@ struct Vector3 gPortalOutlineUnscaled[PORTAL_LOOP_SIZE] = {
     {-0.353553f, 0.707107f, 0.0f},
 };
 
+#define SHOW_EXTERNAL_VIEW  0
+
+#if SHOW_EXTERNAL_VIEW
+
+struct Vector3 externalCameraPos = {16.0f, 8.0f, -16.0f};
+struct Vector3 externalLook = {4.0f, 2.0f, -4.0f};
+
+#endif
+
 struct Quaternion gVerticalFlip = {0.0f, 1.0f, 0.0f, 0.0f};
+
+#define STARTING_RENDER_DEPTH       2
 
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState) {
     props->camera = *camera;
@@ -38,6 +49,16 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
     props->perspectiveMatrix = cameraSetupMatrices(camera, renderState, aspectRatio, &props->perspectiveCorrect, &fullscreenViewport, &props->cullingInfo);
     props->viewport = &fullscreenViewport;
     props->currentDepth = STARTING_RENDER_DEPTH;
+    props->fromPortalIndex = NO_PORTAL;
+
+#if SHOW_EXTERNAL_VIEW
+    struct Camera externalCamera = *camera;
+    externalCamera.transform.position = externalCameraPos;
+    struct Vector3 offset;
+    vector3Sub(&externalLook, &externalCameraPos, &offset);
+    quatLook(&offset, &gUp, &externalCamera.transform.rotation);
+    props->perspectiveMatrix = cameraSetupMatrices(&externalCamera, renderState, aspectRatio, &props->perspectiveCorrect, &fullscreenViewport, NULL);
+#endif
 
     props->minX = 0;
     props->minY = 0;
@@ -94,6 +115,18 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
 
     next->perspectiveMatrix = cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, viewport, &next->cullingInfo);
 
+#if SHOW_EXTERNAL_VIEW
+    struct Transform externalTransform;
+    externalTransform.position = externalCameraPos;
+    externalTransform.scale = gOneVec;
+    struct Vector3 offset;
+    vector3Sub(&externalLook, &externalCameraPos, &offset);
+    quatLook(&offset, &gUp, &externalTransform.rotation);
+    struct Camera externalCamera = current->camera;
+    transformConcat(&portalCombined, &externalTransform, &externalCamera.transform);
+    next->perspectiveMatrix = cameraSetupMatrices(&externalCamera, renderState, (float)SCREEN_WD / (float)SCREEN_HT, &next->perspectiveCorrect, &fullscreenViewport, NULL);
+#endif
+
     // set the near clipping plane to be the exit portal surface
     quatMultVector(&toPortal->rotation, &gForward, &next->cullingInfo.clippingPlanes[4].normal);
     if (toPortal < fromPortal) {
@@ -102,9 +135,12 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
     next->cullingInfo.clippingPlanes[4].d = -vector3Dot(&next->cullingInfo.clippingPlanes[4].normal, &toPortal->position) * SCENE_SCALE;
 
     next->currentDepth = current->currentDepth - 1;
+    next->fromPortalIndex = toPortal < fromPortal ? 0 : 1;
 
+#if !SHOW_EXTERNAL_VIEW
     gSPViewport(renderState->dl++, viewport);
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, next->minX, next->minY, next->maxX, next->maxY);
+#endif
 }
 
 void portalInit(struct Portal* portal, enum PortalFlags flags) {
@@ -138,6 +174,7 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
             gDPSetPrimColor(renderState->dl++, 0, 0, 255, 128, 0, 255);
         }
         gSPDisplayList(renderState->dl++, portal_outline_portal_outline_mesh);
+        gSPDisplayList(renderState->dl++, portal_mask_Circle_mesh_tri_0);
         gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
         return;
     }
@@ -148,18 +185,19 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
 
     screenClipperBoundingPoints(&clipper, gPortalOutline, sizeof(gPortalOutline) / sizeof(*gPortalOutline), &clippingBounds);
 
-    if (clippingBounds.min.x < clippingBounds.max.x && clippingBounds.min.y < clippingBounds.max.y) {
-        struct RenderProps nextProps;
+    struct RenderProps nextProps;
 
-        nextProps.minX = CALC_SCREEN_SPACE(clippingBounds.min.x, SCREEN_WD);
-        nextProps.maxX = CALC_SCREEN_SPACE(clippingBounds.max.x, SCREEN_WD);
-        nextProps.minY = CALC_SCREEN_SPACE(-clippingBounds.max.y, SCREEN_HT);
-        nextProps.maxY = CALC_SCREEN_SPACE(-clippingBounds.min.y, SCREEN_HT);
+    nextProps.minX = CALC_SCREEN_SPACE(clippingBounds.min.x, SCREEN_WD);
+    nextProps.maxX = CALC_SCREEN_SPACE(clippingBounds.max.x, SCREEN_WD);
+    nextProps.minY = CALC_SCREEN_SPACE(-clippingBounds.max.y, SCREEN_HT);
+    nextProps.maxY = CALC_SCREEN_SPACE(-clippingBounds.min.y, SCREEN_HT);
 
-        nextProps.minX = MAX(nextProps.minX, props->minX);
-        nextProps.maxX = MIN(nextProps.maxX, props->maxX);
-        nextProps.minY = MAX(nextProps.minY, props->minY);
-        nextProps.maxY = MIN(nextProps.maxY, props->maxY);
+    nextProps.minX = MAX(nextProps.minX, props->minX);
+    nextProps.maxX = MIN(nextProps.maxX, props->maxX);
+    nextProps.minY = MAX(nextProps.minY, props->minY);
+    nextProps.maxY = MIN(nextProps.maxY, props->maxY);
+
+    if (nextProps.minX < nextProps.maxX && nextProps.minY < nextProps.maxY) {
 
         renderPropsNext(props, &nextProps, &portal->transform, &otherPortal->transform, renderState);
         sceneRenderer(data, &nextProps, renderState);

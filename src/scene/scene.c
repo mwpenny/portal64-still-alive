@@ -68,8 +68,12 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
 
     int closerPortal = vector3DistSqrd(&properties->camera.transform.position, &scene->portals[0].transform.position) > vector3DistSqrd(&properties->camera.transform.position, &scene->portals[1].transform.position) ? 0 : 1;
 
-    portalRender(&scene->portals[closerPortal], &scene->portals[1 - closerPortal], properties, sceneRenderWithProperties, data, renderState);
-    portalRender(&scene->portals[1 - closerPortal], &scene->portals[closerPortal], properties, sceneRenderWithProperties, data, renderState);
+    if (properties->fromPortalIndex != closerPortal) {
+        portalRender(&scene->portals[closerPortal], &scene->portals[1 - closerPortal], properties, sceneRenderWithProperties, data, renderState);
+    }
+    if (properties->fromPortalIndex != 1 - closerPortal) {
+        portalRender(&scene->portals[1 - closerPortal], &scene->portals[closerPortal], properties, sceneRenderWithProperties, data, renderState);
+    }
 
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 
@@ -115,7 +119,6 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     renderPropsInit(&renderProperties, &scene->camera, (float)SCREEN_WD / (float)SCREEN_HT, renderState);
 
     renderProperties.camera = scene->camera;
-    renderProperties.currentDepth = STARTING_RENDER_DEPTH;
 
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 

@@ -25,6 +25,8 @@ struct RenderProps;
 
 typedef void SceneRenderCallback(void* data, struct RenderProps* properties, struct RenderState* renderState);
 
+#define NO_PORTAL 0xFF
+
 struct RenderProps {
     struct Camera camera;
     float aspectRatio;
@@ -33,16 +35,14 @@ struct RenderProps {
     struct FrustrumCullingInformation cullingInfo;
 
     u16 perspectiveCorrect;
-    short currentDepth;
+    u8 currentDepth;
+    u8 fromPortalIndex;
 
     short minX;
     short minY;
     short maxX;
     short maxY;
-
 };
-
-#define STARTING_RENDER_DEPTH       1
 
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState);
 void renderPropsNext(struct RenderProps* current, struct RenderProps* next, struct Transform* fromPortal, struct Transform* toPortal, struct RenderState* renderState);
