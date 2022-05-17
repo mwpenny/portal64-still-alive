@@ -20,7 +20,6 @@ Install vtf2png and skeletool64
 echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" | tee /etc/apt/sources.list.d/lambertjamesd.list
 sudo apt install vtf2png skeletool64
 ```
-Build and install [vtf2png](https://github.com/eXeC64/vtf2png)
 
 Install image magic
 
