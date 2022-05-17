@@ -14,12 +14,31 @@ You will need to install python vpk
 pip install vpk
 ```
 
+Install vtf2png and skeletool64
+
+```
+echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" | tee /etc/apt/sources.list.d/lambertjamesd.list
+sudo apt install vtf2png skeletool64
+```
 Build and install [vtf2png](https://github.com/eXeC64/vtf2png)
 
 Install image magic
 
 ```
-sudo apt install imagemagic
+sudo apt install imagemagick
+```
+
+You then need to add the following files from where portal is installed to the folder `vpk`
+
+```
+portal_pak_000.vpk  
+portal_pak_001.vpk  
+portal_pak_002.vpk  
+portal_pak_003.vpk  
+portal_pak_004.vpk  
+portal_pak_005.vpk  
+portal_pak_dir.vpk
 ```
 
 Finally run `make` to build the project
+

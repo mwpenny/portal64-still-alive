@@ -8,10 +8,8 @@
 # --------------------------------------------------------------------
 include /usr/include/n64/make/PRdefs
 
-MIDICVT:=tools/midicvt
-SFZ2N64:=tools/sfz2n64
-SKELATOOL64:=tools/skeletool64
-VTF2PNG:=tools/vtf2png
+SKELATOOL64:=skeletool64
+VTF2PNG:=vtf2png
 
 OPTIMIZER		:= -O0
 LCDEFS			:= -DDEBUG -g -Isrc/ -I/usr/include/n64/nustd -Werror -Wall
@@ -93,11 +91,11 @@ src/models/sphere.h src/models/sphere_geo.inc.h: assets/fbx/Sphere.fbx
 portal_pak_dir: vpk/portal_pak_dir.vpk
 	vpk -x portal_pak_dir vpk/portal_pak_dir.vpk
 
-	portal_pak_dir/materials/concrete/concrete_modular_wall001d.png
-
 
 TEXTURE_SCRIPTS = $(shell find assets/ -type f -name '*.ims')
 TEXTURE_IMAGES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_modified/%.png)
+
+$(TEXTURE_IMAGES): portal_pak_dir
 
 %.png: %.vtf
 	$(VTF2PNG) $< $@
@@ -154,7 +152,7 @@ build/%.fbx: %.blend
 	@mkdir -p $(@D)
 	$(BLENDER_2_9) $< --background --python tools/export_fbx.py -- $@
 
-build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c: build/assets/test_chambers/%.fbx $(SKELATOOL64) build/assets/materials/static.h
+build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c: build/assets/test_chambers/%.fbx build/assets/materials/static.h
 	$(SKELATOOL64) -l -s 2.56 -c 0.01 -n $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
 
 build/assets/test_chambers/%.o: build/assets/test_chambers/%.c build/assets/materials/static.h
