@@ -18,12 +18,12 @@ RUN dpkg --add-architecture i386
 RUN apt install -y binutils-mips-n64 \
     gcc-mips-n64 \
     n64sdk \
+    libnustd \
     makemask \
     root-compatibility-environment \
     build-essential \
     libmpc-dev \
     vtf2png \
-    skeletool64 \
     libxi6 \
     libxxf86vm-dev \
     libxfixes3 \
@@ -31,7 +31,30 @@ RUN apt install -y binutils-mips-n64 \
     libgl1 \
     python3 \
     pip \
-    imagemagick
+    imagemagick \
+    libpng-dev \
+    libtiff-dev \
+    libassimp-dev \
+    git \
+    cmake \
+    build-essential \
+    wget \
+    unzip
+
+COPY skelatool64/src skelatool64/src
+COPY skelatool64/main.cpp skelatool64/main.cpp
+COPY skelatool64/makefile skelatool64/makefile
+
+RUN git clone https://github.com/jbeder/yaml-cpp.git skelatool64/yaml-cpp
+
+RUN cmake -S skelatool64/yaml-cpp -B skelatool64/yaml-cpp
+RUN make -C skelatool64/yaml-cpp
+
+RUN wget http://cimg.eu/files/CImg_latest.zip
+RUN unzip CImg_latest.zip
+RUN mv CImg-3.1.3_pre051622 skelatool64/cimg
+
+RUN make -C skelatool64
 
 RUN pip install vpk
 
@@ -41,6 +64,6 @@ COPY tools/generate_level_list.js tools/generate_level_list.js
 COPY asm asm
 COPY assets assets
 COPY src src
-copy portal.ld portal.ld
+COPY portal.ld portal.ld
 
 CMD make

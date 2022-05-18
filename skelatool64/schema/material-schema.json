@@ -1,0 +1,695 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "Schema for an N64 material",
+    "definitions": {
+        "renderBlendModes": {
+            "type": "array",
+            "items": [
+                {
+                    "enum": [
+                        "G_BL_CLR_IN",
+                        "G_BL_CLR_MEM",
+                        "G_BL_CLR_BL",
+                        "G_BL_CLR_FOG"
+                    ]
+                },
+                {
+                    "enum": [
+                        "G_BL_A_IN",
+                        "G_BL_A_FOG",
+                        "G_BL_A_SHADE",
+                        "G_BL_0"
+                    ]
+                },
+                {
+                    "enum": [
+                        "G_BL_CLR_IN",
+                        "G_BL_CLR_MEM",
+                        "G_BL_CLR_BL",
+                        "G_BL_CLR_FOG"
+                    ]
+                },
+                {
+                    "enum": [
+                        "G_BL_1MA",
+                        "G_BL_A_MEM",
+                        "G_BL_1",
+                        "G_BL_0"
+                    ]
+                }
+            ]
+        },
+        "renderMode": {
+            "type": "object",
+            "properties": {
+                "flags": {
+                    "type": "array",
+                    "items": {
+                        "enum": [
+                            "AA_EN",
+                            "Z_CMP",
+                            "Z_UPD",
+                            "IM_RD",
+                            "CLR_ON_CVG",
+                            "CVG_X_ALPHA",
+                            "ALPHA_CVG_SEL",
+                            "FORCE_BL",
+                            "CVG_DST_CLAMP",
+                            "CVG_DST_WRAP",
+                            "CVG_DST_FULL",
+                            "CVG_DST_SAVE",
+                            "ZMODE_OPA",
+                            "ZMODE_INTER",
+                            "ZMODE_XLU",
+                            "ZMODE_DEC"
+                        ]
+                    },
+                    "uniqueItems": true
+                },
+                "cycle1": {
+                    "$ref": "#/definitions/renderBlendModes"
+                },
+                "cycle2": {
+                    "$ref": "#/definitions/renderBlendModes"
+                }
+            }
+        },
+        "geometryModeArray": {
+            "type": "array",
+            "items": {
+                "enum": [
+                    "G_ZBUFFER",
+                    "G_SHADE",
+                    "G_TEXTURE_ENABLE",
+                    "G_SHADING_SMOOTH",
+                    "G_CULL_FRONT",
+                    "G_CULL_BACK",
+                    "G_FOG",
+                    "G_LIGHTING",
+                    "G_TEXTURE_GEN",
+                    "G_TEXTURE_GEN_LINEAR",
+                    "G_LOD",
+                    "G_CLIPPING"
+                ]
+            },
+            "uniqueItems": true
+        },
+        "combineMode": {
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "color": {
+                            "type": "array",
+                            "items": [
+                                {
+                                    "enum": [
+                                        "COMBINED",
+                                        "TEXEL0",
+                                        "TEXEL1",
+                                        "PRIMITIVE",
+                                        "SHADE",
+                                        "ENVIRONMENT",
+                                        "NOISE",
+                                        "1",
+                                        "0"
+                                    ]
+                                },
+                                {
+                                    "enum": [
+                                        "COMBINED",
+                                        "TEXEL0",
+                                        "TEXEL1",
+                                        "PRIMITIVE",
+                                        "SHADE",
+                                        "ENVIRONMENT",
+                                        "CENTER",
+                                        "K4",
+                                        "0"
+                                    ]
+                                },
+                                {
+                                    "enum": [
+                                        "COMBINED",
+                                        "TEXEL0",
+                                        "TEXEL1",
+                                        "PRIMITIVE",
+                                        "SHADE",
+                                        "ENVIRONMENT",
+                                        "SCALE",
+                                        "COMBINED_ALPHA",
+                                        "TEXEL0_ALPHA",
+                                        "TEXEL1_ALPHA",
+                                        "PRIMITIVE_ALPHA",
+                                        "SHADED_ALPHA",
+                                        "ENVIRONMENT_ALPHA",
+                                        "LOD_FRACTION",
+                                        "PRIM_LOD_FRAC",
+                                        "K5",
+                                        "0"
+                                    ]
+                                },
+                                {
+                                    "enum": [
+                                        "COMBINED",
+                                        "TEXEL0",
+                                        "TEXEL1",
+                                        "PRIMITIVE",
+                                        "SHADE",
+                                        "ENVIRONMENT",
+                                        "1",
+                                        "0"
+                                    ]
+                                }
+                            ]
+                        },
+                        "alpha": {
+                            "type": "array",
+                            "items": [
+                                {
+                                    "enum": [
+                                        "COMBINED",
+                                        "TEXEL0",
+                                        "TEXEL1",
+                                        "PRIMITIVE",
+                                        "SHADE",
+                                        "ENVIRONMENT",
+                                        "1",
+                                        "0"
+                                    ]
+                                },
+                                {
+                                    "enum": [
+                                        "COMBINED",
+                                        "TEXEL0",
+                                        "TEXEL1",
+                                        "PRIMITIVE",
+                                        "SHADE",
+                                        "ENVIRONMENT",
+                                        "1",
+                                        "0"
+                                    ]
+                                },
+                                {
+                                    "enum": [
+                                        "TEXEL0",
+                                        "TEXEL1",
+                                        "PRIMITIVE",
+                                        "SHADE",
+                                        "ENVIRONMENT",
+                                        "LOD_FRACTION",
+                                        "PRIM_LOD_FRAC",
+                                        "0"
+                                    ]
+                                },
+                                {
+                                    "enum": [
+                                        "COMBINED",
+                                        "TEXEL0",
+                                        "TEXEL1",
+                                        "PRIMITIVE",
+                                        "SHADE",
+                                        "ENVIRONMENT",
+                                        "1",
+                                        "0"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "enum": [
+                        "G_CC_PRIMITIVE",
+                        "G_CC_SHADE",
+                        "G_CC_MODULATEI",
+                        "G_CC_MODULATEIA",
+                        "G_CC_MODULATEIDECALA",
+                        "G_CC_MODULATERGB",
+                        "G_CC_MODULATERGBA",
+                        "G_CC_MODULATERGBDECALA",
+                        "G_CC_MODULATEI_PRIM",
+                        "G_CC_MODULATEIA_PRIM",
+                        "G_CC_MODULATEIDECALA_PRIM",
+                        "G_CC_MODULATERGB_PRIM",
+                        "G_CC_MODULATERGBA_PRIM",
+                        "G_CC_MODULATERGBDECALA_PRIM",
+                        "G_CC_DECALRGB",
+                        "G_CC_DECALRGBA",
+                        "G_CC_BLENDI",
+                        "G_CC_BLENDIA",
+                        "G_CC_BLENDIDECALA",
+                        "G_CC_BLENDRGBA",
+                        "G_CC_BLENDRGBDECALA",
+                        "G_CC_ADDRGB",
+                        "G_CC_ADDRGBDECALA",
+                        "G_CC_REFLECTRGB",
+                        "G_CC_REFLECTRGBDECALA",
+                        "G_CC_HILITERGB",
+                        "G_CC_HILITERGBA",
+                        "G_CC_HILITERGBDECALA",
+                        "G_CC_SHADEDECALA",
+                        "G_CC_BLENDPE",
+                        "G_CC_BLENDPEDECALA",
+                        "_G_CC_BLENDPE",
+                        "_G_CC_BLENDPEDECALA",
+                        "_G_CC_TWOCOLORTEX",
+                        "_G_CC_SPARSEST",
+                        "G_CC_TEMPLERP",
+                        "G_CC_TRILERP",
+                        "G_CC_INTERFERENCE",
+                        "G_CC_1CYUV2RGB",
+                        "G_CC_YUV2RGB",
+                        "G_CC_PASS2",
+                        "G_CC_MODULATEI2",
+                        "G_CC_MODULATEIA2",
+                        "G_CC_MODULATERGB2",
+                        "G_CC_MODULATERGBA2",
+                        "G_CC_MODULATEI_PRIM2",
+                        "G_CC_MODULATEIA_PRIM2",
+                        "G_CC_MODULATERGB_PRIM2",
+                        "G_CC_MODULATERGBA_PRIM2",
+                        "G_CC_DECALRGB2",
+                        "G_CC_BLENDI2",
+                        "G_CC_BLENDIA2",
+                        "G_CC_CHROMA_KEY2",
+                        "G_CC_HILITERGB2",
+                        "G_CC_HILITERGBA2",
+                        "G_CC_HILITERGBDECALA2",
+                        "G_CC_HILITERGBPASSA2"
+                    ]
+                }
+            ]
+        },
+        "color": {
+            "type": "object",
+            "properties": {
+                "r": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 255
+                },
+                "g": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 255
+                },
+                "b": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 255
+                },
+                "a": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 255
+                }
+            },
+            "required": [
+                "r",
+                "g",
+                "b"
+            ]
+        },
+        "textureCoordinateSettings": {
+            "type": "object",
+            "properties": {
+                "wrap": {
+                    "type": "boolean"
+                },
+                "mirror": {
+                    "type": "boolean"
+                },
+                "mask": {
+                    "type": "integer"
+                },
+                "shift": {
+                    "type": "integer"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "limit": {
+                    "type": "integer"
+                }
+            }
+        },
+        "textureSettings": {
+            "type": "object",
+            "properties": {
+                "sc": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 65535
+                },
+                "tc": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 65535
+                },
+                "level": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 7
+                },
+                "tile": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 7
+                },
+                "s": {
+                    "$ref": "#/definitions/textureCoordinateSettings"
+                },
+                "t": {
+                    "$ref": "#/definitions/textureCoordinateSettings"
+                }
+            }
+        },
+        "tileSettings": {
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "filename": {
+                            "type": "string"
+                        },
+                        "fmt": {
+                            "enum": [
+                                "G_IM_FMT_RGBA",
+                                "G_IM_FMT_YUV",
+                                "G_IM_FMT_CI",
+                                "G_IM_FMT_I",
+                                "G_IM_FMT_IA"
+                            ]
+                        },
+                        "siz": {
+                            "enum": [
+                                "G_IM_SIZ_4b",
+                                "G_IM_SIZ_8b",
+                                "G_IM_SIZ_16b",
+                                "G_IM_SIZ_32b"
+                            ]
+                        },
+                        "tmem": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 511
+                        },
+                        "pallete": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 15
+                        },
+                        "twoTone": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "filename"
+                    ]
+                }
+            ]
+        },
+        "material": {
+            "type": "object",
+            "properties": {
+                "gDPPipelineMode": {
+                    "enum": [
+                        "Unknown",
+                        "G_PM_1PRIMITIVE",
+                        "G_PM_NPRIMITIVE"
+                    ]
+                },
+                "gDPSetCycleType": {
+                    "enum": [
+                        "Unknown",
+                        "G_CYC_1CYCLE",
+                        "G_CYC_2CYCLE",
+                        "G_CYC_COPY",
+                        "G_CYC_FILL"
+                    ]
+                },
+                "gDPSetTexturePersp": {
+                    "enum": [
+                        "Unknown",
+                        "G_TP_NONE",
+                        "G_TP_PERSP"
+                    ]
+                },
+                "gDPSetTextureDetail": {
+                    "enum": [
+                        "Unknown",
+                        "G_TD_CLAMP",
+                        "G_TD_SHARPEN",
+                        "G_TD_DETAIL"
+                    ]
+                },
+                "gDPSetTextureLOD": {
+                    "enum": [
+                        "Unknown",
+                        "G_TL_TILE",
+                        "G_TL_LOD"
+                    ]
+                },
+                "gDPSetTextureLUT": {
+                    "enum": [
+                        "Unknown",
+                        "G_TT_NONE",
+                        "G_TT_RGBA16",
+                        "G_TT_IA16"
+                    ]
+                },
+                "gDPSetTextureFilter": {
+                    "enum": [
+                        "Unknown",
+                        "G_TF_POINT",
+                        "G_TF_AVERAGE",
+                        "G_TF_BILERP"
+                    ]
+                },
+                "gDPSetTextureConvert": {
+                    "enum": [
+                        "Unknown",
+                        "G_TC_CONV",
+                        "G_TC_FILTCONV",
+                        "G_TC_FILT"
+                    ]
+                },
+                "gDPSetCombineKey": {
+                    "enum": [
+                        "Unknown",
+                        "G_CK_NONE",
+                        "G_CK_KEY"
+                    ]
+                },
+                "gDPSetColorDither": {
+                    "enum": [
+                        "Unknown",
+                        "G_CD_MAGICSQ",
+                        "G_CD_BAYER",
+                        "G_CD_NOISE",
+                        "G_CD_DISABLE"
+                    ]
+                },
+                "gDPSetAlphaDither": {
+                    "enum": [
+                        "Unknown",
+                        "G_AD_PATTERN",
+                        "G_AD_NOTPATTERN",
+                        "G_AD_NOISE",
+                        "G_AD_DISABLE"
+                    ]
+                },
+                "gDPSetAlphaCompare": {
+                    "enum": [
+                        "Unknown",
+                        "G_AC_NONE",
+                        "G_AC_THRESHOLD",
+                        "G_AC_DITHER"
+                    ]
+                },
+                "gDPSetDepthSource": {
+                    "enum": [
+                        "Unknown",
+                        "G_ZS_PIXEL",
+                        "G_ZS_PRIM"
+                    ]
+                },
+                "gDPSetRenderMode": {
+                    "anyOf": [
+                        {
+                            "enum": [
+                                "G_RM_AA_ZB_OPA_SURF",
+                                "G_RM_RA_ZB_OPA_SURF",
+                                "G_RM_AA_ZB_XLU_SURF",
+                                "G_RM_AA_ZB_OPA_DECAL",
+                                "G_RM_RA_ZB_OPA_DECAL",
+                                "G_RM_AA_ZB_XLU_DECAL",
+                                "G_RM_AA_ZB_OPA_INTER",
+                                "G_RM_RA_ZB_OPA_INTER",
+                                "G_RM_AA_ZB_XLU_INTER",
+                                "G_RM_AA_ZB_XLU_LINE",
+                                "G_RM_AA_ZB_DEC_LINE",
+                                "G_RM_AA_ZB_TEX_EDGE",
+                                "G_RM_AA_ZB_TEX_INTER",
+                                "G_RM_AA_ZB_SUB_SURF",
+                                "G_RM_AA_ZB_PCL_SURF",
+                                "G_RM_AA_ZB_OPA_TERR",
+                                "G_RM_AA_ZB_TEX_TERR",
+                                "G_RM_AA_ZB_SUB_TERR",
+                                "G_RM_AA_OPA_SURF",
+                                "G_RM_RA_OPA_SURF",
+                                "G_RM_AA_XLU_SURF",
+                                "G_RM_AA_XLU_LINE",
+                                "G_RM_AA_DEC_LINE",
+                                "G_RM_AA_TEX_EDGE",
+                                "G_RM_AA_SUB_SURF",
+                                "G_RM_AA_PCL_SURF",
+                                "G_RM_AA_OPA_TERR",
+                                "G_RM_AA_TEX_TERR",
+                                "G_RM_AA_SUB_TERR",
+                                "G_RM_ZB_OPA_SURF",
+                                "G_RM_ZB_XLU_SURF",
+                                "G_RM_ZB_OPA_DECAL",
+                                "G_RM_ZB_XLU_DECAL",
+                                "G_RM_ZB_CLD_SURF",
+                                "G_RM_ZB_OVL_SURF",
+                                "G_RM_ZB_PCL_SURF",
+                                "G_RM_OPA_SURF",
+                                "G_RM_XLU_SURF",
+                                "G_RM_TEX_EDGE",
+                                "G_RM_CLD_SURF",
+                                "G_RM_PCL_SURF",
+                                "G_RM_ADD",
+                                "G_RM_NOOP",
+                                "G_RM_VISCVG",
+                                "G_RM_OPA_CI",
+                                "G_RM_FOG_SHADE_A",
+                                "G_RM_FOG_PRIM_A",
+                                "G_RM_PASS"
+                            ]
+                        },
+                        {
+                            "$ref": "#/definitions/renderMode"
+                        }
+                    ]
+                },
+                "gDPSetCombineMode": {
+                    "anyOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/combineMode"
+                            },
+                            "maxLength": 2,
+                            "minLength": 2
+                        },
+                        {
+                            "$ref": "#/definitions/combineMode"
+                        }
+                    ]
+                },
+                "gSPGeometryMode": {
+                    "type": "object",
+                    "properties": {
+                        "clear": {
+                            "$ref": "#/definitions/geometryModeArray"
+                        },
+                        "set": {
+                            "$ref": "#/definitions/geometryModeArray"
+                        }
+                    }
+                },
+                "gSPTexture": {
+                    "$ref": "#/definitions/textureSettings"
+                },
+                "gDPSetTile": {
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/tileSettings"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "oneOf": [
+                                    {
+                                        "type": "null"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/tileSettings"
+                                    }
+                                ]
+                            },
+                            "maxLength": 8,
+                            "minLength": 1
+                        }
+                    ]
+                },
+                "gDPSetPrimColor": {
+                    "type": "object",
+                    "r": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 255
+                    },
+                    "g": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 255
+                    },
+                    "b": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 255
+                    },
+                    "a": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 255
+                    },
+                    "l": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 255
+                    },
+                    "m": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 255
+                    }
+                },
+                "gDPSetEnvColor": {
+                    "$ref": "#/definitions/color"
+                },
+                "gDPSetFogColor": {
+                    "$ref": "#/definitions/color"
+                },
+                "gDPSetBlendColor": {
+                    "$ref": "#/definitions/color"
+                },
+                "properties": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "oneOf": [{
+                            "type": "number"
+                        }, {
+                            "type": "string"
+                        }]
+                    }
+                }
+            }
+        }
+    },
+    "type": "object",
+    "properties": {
+        "materials": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/material"
+            }
+        }
+    }
+}

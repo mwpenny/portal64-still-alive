@@ -8,8 +8,11 @@
 # --------------------------------------------------------------------
 include /usr/include/n64/make/PRdefs
 
-SKELATOOL64:=skeletool64
+SKELATOOL64:=skelatool64/skeletool64
 VTF2PNG:=vtf2png
+
+$(SKELATOOL64):
+	make -C skelatool64
 
 OPTIMIZER		:= -O0
 LCDEFS			:= -DDEBUG -g -Isrc/ -I/usr/include/n64/nustd -Werror -Wall
@@ -94,13 +97,14 @@ portal_pak_dir: vpk/portal_pak_dir.vpk
 
 TEXTURE_SCRIPTS = $(shell find assets/ -type f -name '*.ims')
 TEXTURE_IMAGES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_modified/%.png)
+TEXTURE_VTF_SOURCES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_dir/%.vtf)
 
-$(TEXTURE_IMAGES): portal_pak_dir
+$(TEXTURE_VTF_SOURCES): portal_pak_dir
 
 %.png: %.vtf
 	$(VTF2PNG) $< $@
 
-portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims
+portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims 
 	@mkdir -p $(@D)
 	convert $< $(shell cat $(@:portal_pak_modified/%.png=assets/%.ims)) $@
 
@@ -109,11 +113,11 @@ portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims
 ## Materials
 ####################
 
-build/assets/materials/static.h build/assets/materials/static_mat.c: assets/materials/static.skm.yaml $(TEXTURE_IMAGES)
+build/assets/materials/static.h build/assets/materials/static_mat.c: assets/materials/static.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
 	@mkdir -p $(@D)
 	$(SKELATOOL64) -n static -m $< -M build/assets/materials/static.h
 
-build/assets/materials/hud.h build/assets/materials/hud_mat.c: assets/materials/hud.skm.yaml $(TEXTURE_IMAGES)
+build/assets/materials/hud.h build/assets/materials/hud_mat.c: assets/materials/hud.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
 	@mkdir -p $(@D)
 	$(SKELATOOL64) -n hud -m $< -M build/assets/materials/hud.h
 
@@ -134,7 +138,7 @@ MODEL_LIST = assets/models/cube/cube.blend \
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
 MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)
 
-build/assets/models/%.h build/assets/models/%_geo.c: build/assets/models/%.fbx assets/materials/objects.skm.yaml
+build/assets/models/%.h build/assets/models/%_geo.c: build/assets/models/%.fbx assets/materials/objects.skm.yaml $(SKELATOOL64)
 	$(SKELATOOL64) -s 2.56 -n $(<:build/assets/models/%.fbx=%) -m assets/materials/objects.skm.yaml -o $(<:%.fbx=%.h) $<
 
 build/src/models/models.o: $(MODEL_HEADERS)
@@ -152,7 +156,7 @@ build/%.fbx: %.blend
 	@mkdir -p $(@D)
 	$(BLENDER_2_9) $< --background --python tools/export_fbx.py -- $@
 
-build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c: build/assets/test_chambers/%.fbx build/assets/materials/static.h
+build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c: build/assets/test_chambers/%.fbx build/assets/materials/static.h $(SKELATOOL64) $(TEXTURE_IMAGES)
 	$(SKELATOOL64) -l -s 2.56 -c 0.01 -n $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
 
 build/assets/test_chambers/%.o: build/assets/test_chambers/%.c build/assets/materials/static.h
