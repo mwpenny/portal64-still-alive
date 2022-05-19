@@ -4,11 +4,11 @@
 #include "level_definition.h"
 #include "graphics/renderstate.h"
 #include "scene/camera.h"
+#include "../scene/dynamic_scene.h"
 
 void staticRenderInit();
 
+int staticRenderSorkKeyFromMaterial(int materialIndex, float distanceScaled);
 void staticRender(struct FrustrumCullingInformation* cullingInfo, struct RenderState* renderState);
-
-int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox);
 
 #endif

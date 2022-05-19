@@ -13,6 +13,7 @@ struct CommandLineArguments {
     std::string mMaterialOutput;
     std::string mPrefix;
     std::vector<std::string> mMaterialFiles;
+    std::string mDefaultMaterial;
     float mGraphicsScale;
     float mCollisionScale;
     bool mExportAnimation;

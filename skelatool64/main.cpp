@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    auto defaultMaterial = settings.mMaterials.find("default");
+    auto defaultMaterial = settings.mMaterials.find(args.mDefaultMaterial);
 
     if (defaultMaterial != settings.mMaterials.end()) {
         settings.mDefaultMaterialState = defaultMaterial->second->mState;

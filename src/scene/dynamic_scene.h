@@ -2,6 +2,8 @@
 #define __DYNAMIC_SCENE_H__
 
 #include "../graphics/renderstate.h"
+#include "../math/transform.h"
+#include "../scene/camera.h"
 
 typedef void (*DynamicRender)(void* data, struct RenderState* renderState);
 
@@ -16,7 +18,10 @@ typedef void (*DynamicRender)(void* data, struct RenderState* renderState);
 struct DynamicSceneObject {
     void* data;
     DynamicRender renderCallback;
-    int flags;
+    struct Transform* transform;
+    float scaledRadius;
+    u16 materialIndex;
+    u16 flags;
 };
 
 struct DynamicScene {
@@ -25,11 +30,16 @@ struct DynamicScene {
 
 void dynamicSceneInit();
 
-void dynamicSceneRender(struct RenderState* renderState, int touchingPortals);
+void dynamicSceneRenderTouchingPortal(struct RenderState* renderState);
 
-int dynamicSceneAdd(void* data, DynamicRender renderCallback);
+int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Transform* transform, float radius, u16 materialIndex);
 void dynamicSceneRemove(int id);
 void dynamicSceneSetFlags(int id, int flags);
 void dynamicSceneClearFlags(int id, int flags);
+
+int dynamicScenePopulate(struct FrustrumCullingInformation* cullingInfo, int currentObjectCount, int staticObjectCount, int* sortKey, u16* renderOrder);
+
+void dynamicSceneRenderObject(int index, struct RenderState* renderState);
+int dynamicSceneObjectMaterialIndex(int objectIndex);
 
 #endif

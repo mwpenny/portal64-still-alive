@@ -121,7 +121,7 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
 
     // render any objects halfway through portals
     cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, current->viewport, NULL);
-    dynamicSceneRender(renderState, 1);
+    dynamicSceneRenderTouchingPortal(renderState);
 
     Vp* viewport = renderPropsBuildViewport(next, renderState);
 

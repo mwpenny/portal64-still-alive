@@ -66,12 +66,22 @@ materials:
     gSPGeometryMode:
       clear: [G_CULL_BACK, G_CULL_FRONT]
 
-    gDPSetPrimColor:
-      r: 128
-      g: 0
-      b: 0
-      a: 128
-
     properties:
-      tileSizeS: 0.03125
+      tileSizeS: 0.0625
       tileSizeT: 2
+
+    
+  cube:
+    gDPSetTile: 
+      filename:
+        ../images/cube.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      s:
+        mirror: true
+      t:
+        mirror: true
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "TEXEL0", "0"]

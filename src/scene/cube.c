@@ -74,7 +74,7 @@ void cubeInit(struct Cube* cube) {
 
     cube->collisionObject.body->flags |= RigidBodyFlagsGrabbable;
 
-    cube->dynamicId = dynamicSceneAdd(cube, cubeRender);
+    cube->dynamicId = dynamicSceneAdd(cube, cubeRender, &cube->rigidBody.transform, sqrtf(vector3MagSqrd(&gCubeCollisionBox.sideLength)), cube_material_index);
 }
 
 void cubeUpdate(struct Cube* cube) {

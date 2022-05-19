@@ -78,8 +78,6 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 
     staticRender(&properties->cullingInfo, renderState);
-
-    dynamicSceneRender(renderState, 0);
 }
 
 #define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
@@ -122,7 +120,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 
-    dynamicSceneRender(renderState, 1);
+    dynamicSceneRenderTouchingPortal(renderState);
 
     sceneRenderWithProperties(scene, &renderProperties, renderState);
 

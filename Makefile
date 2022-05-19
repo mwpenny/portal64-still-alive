@@ -144,7 +144,7 @@ MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
 MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)
 
 build/assets/models/%.h build/assets/models/%_geo.c: build/assets/models/%.fbx assets/materials/objects.skm.yaml $(SKELATOOL64)
-	$(SKELATOOL64) -s 2.56 -n $(<:build/assets/models/%.fbx=%) -m assets/materials/objects.skm.yaml -o $(<:%.fbx=%.h) $<
+	$(SKELATOOL64) -s 2.56 -n $(<:build/assets/models/%.fbx=%) $(shell cat $(<:build/assets/models/%.fbx=assets/models/%.flags)) -o $(<:%.fbx=%.h) $<
 
 build/src/models/models.o: $(MODEL_HEADERS)
 

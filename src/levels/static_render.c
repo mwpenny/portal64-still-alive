@@ -11,7 +11,18 @@ int* gSortKey;
 void staticRenderInit() {
     gRenderOrder = malloc(sizeof(u16) * gCurrentLevel->staticContentCount);
     gRenderOrderCopy = malloc(sizeof(u16) * gCurrentLevel->staticContentCount);
-    gSortKey = malloc(sizeof(int) * gCurrentLevel->staticContentCount);
+    gSortKey = malloc(sizeof(int) * (gCurrentLevel->staticContentCount + MAX_DYNAMIC_OBJECTS));
+}
+
+int staticRenderSorkKeyFromMaterial(int materialIndex, float distanceScaled) {
+    int distance = (int)distanceScaled;
+
+    // sort transparent surfaces from back to front
+    if (materialIndex >= levelMaterialTransparentStart()) {
+        distance = 0x1000000 - distance;
+    }
+
+    return (materialIndex << 23) | (distance & 0x7FFFFF);
 }
 
 int staticRenderGenerateSortKey(int index, struct FrustrumCullingInformation* cullingInfo) {
@@ -23,12 +34,7 @@ int staticRenderGenerateSortKey(int index, struct FrustrumCullingInformation* cu
 
     int distance = (int)sqrtf(vector3DistSqrd(&boxCenter, &cullingInfo->cameraPosScaled));
 
-    // sort transparent surfaces from back to front
-    if (gCurrentLevel->staticContent[index].materialIndex >= levelMaterialTransparentStart()) {
-        distance = 0x1000000 - distance;
-    }
-
-    return ((int)gCurrentLevel->staticContent[index].materialIndex << 23) | (distance & 0x7FFFFF);
+    return staticRenderSorkKeyFromMaterial(gCurrentLevel->staticContent[index].materialIndex, distance);
 }
 
 void staticRenderSort(int min, int max) {
@@ -75,23 +81,6 @@ void staticRenderSort(int min, int max) {
     }
 }
 
-int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox) {
-    for (int i = 0; i < CLIPPING_PLANE_COUNT; ++i) {
-        struct Vector3 closestPoint;
-
-        closestPoint.x = frustrum->clippingPlanes[i].normal.x < 0.0f ? boundingBox->minX : boundingBox->maxX;
-        closestPoint.y = frustrum->clippingPlanes[i].normal.y < 0.0f ? boundingBox->minY : boundingBox->maxY;
-        closestPoint.z = frustrum->clippingPlanes[i].normal.z < 0.0f ? boundingBox->minZ : boundingBox->maxZ;
-
-        if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.0f) {
-            return 1;
-        }
-    }
-
-
-    return 0;
-}
-
 void staticRender(struct FrustrumCullingInformation* cullingInfo, struct RenderState* renderState) {
     if (!gCurrentLevel) {
         return;
@@ -109,6 +98,8 @@ void staticRender(struct FrustrumCullingInformation* cullingInfo, struct RenderS
         ++renderCount;
     }
 
+    renderCount = dynamicScenePopulate(cullingInfo, renderCount, gCurrentLevel->staticContentCount, gSortKey, gRenderOrder);
+
     staticRenderSort(0, renderCount);
 
     int prevMaterial = -1;
@@ -116,19 +107,31 @@ void staticRender(struct FrustrumCullingInformation* cullingInfo, struct RenderS
     gSPDisplayList(renderState->dl++, levelMaterialDefault());
     
     for (int i = 0; i < renderCount; ++i) {
-        struct StaticContentElement* element = &gCurrentLevel->staticContent[gRenderOrder[i]];
-        
-        if (element->materialIndex != prevMaterial) {
+        int renderIndex = gRenderOrder[i];
+
+        int materialIndex;
+
+        if (renderIndex < gCurrentLevel->staticContentCount) {
+            materialIndex = gCurrentLevel->staticContent[renderIndex].materialIndex;
+        } else {
+            materialIndex = dynamicSceneObjectMaterialIndex(renderIndex - gCurrentLevel->staticContentCount);
+        }
+    
+        if (materialIndex != prevMaterial && materialIndex != -1) {
             if (prevMaterial != -1) {
                 gSPDisplayList(renderState->dl++, levelMaterialRevert(prevMaterial));
             }
 
-            gSPDisplayList(renderState->dl++, levelMaterial(element->materialIndex));
+            gSPDisplayList(renderState->dl++, levelMaterial(materialIndex));
 
-            prevMaterial = element->materialIndex;
+            prevMaterial = materialIndex;
         }
 
-        gSPDisplayList(renderState->dl++, element->displayList);
+        if (renderIndex < gCurrentLevel->staticContentCount) {
+            gSPDisplayList(renderState->dl++, gCurrentLevel->staticContent[renderIndex].displayList);
+        } else {
+            dynamicSceneRenderObject(renderIndex - gCurrentLevel->staticContentCount, renderState);
+        }
     }
 
     if (prevMaterial != -1) {

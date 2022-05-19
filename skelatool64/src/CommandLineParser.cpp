@@ -20,6 +20,7 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
     output.mIsLevel = false;
     output.mIsLevelDef = false;
     output.mEulerAngles = aiVector3D(0.0f, 0.0f, 0.0f);
+    output.mDefaultMaterial = "default";
 
     char lastParameter = '\0';
     bool hasError = false;
@@ -54,6 +55,9 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
                     break;
                 case 'r':
                     parseEulerAngles(curr, output.mEulerAngles);
+                    break;
+                case 'D':
+                    output.mDefaultMaterial = curr;
                     break;
             }
 
@@ -100,6 +104,10 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
             strcmp(curr, "--level-def") == 0) {
                     output.mIsLevelDef = true;
                     output.mExportAnimation = false;
+        } else if (
+            strcmp(curr, "-D") == 0 || 
+            strcmp(curr, "--default-material") == 0) {
+            lastParameter = 'D';
         } else {
             if (curr[0] == '-') {
                 hasError = true;

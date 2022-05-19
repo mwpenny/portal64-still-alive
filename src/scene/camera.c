@@ -4,6 +4,33 @@
 #include "defs.h"
 #include "../graphics/graphics.h"
 
+int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox) {
+    for (int i = 0; i < CLIPPING_PLANE_COUNT; ++i) {
+        struct Vector3 closestPoint;
+
+        closestPoint.x = frustrum->clippingPlanes[i].normal.x < 0.0f ? boundingBox->minX : boundingBox->maxX;
+        closestPoint.y = frustrum->clippingPlanes[i].normal.y < 0.0f ? boundingBox->minY : boundingBox->maxY;
+        closestPoint.z = frustrum->clippingPlanes[i].normal.z < 0.0f ? boundingBox->minZ : boundingBox->maxZ;
+
+        if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.0f) {
+            return 1;
+        }
+    }
+
+
+    return 0;
+}
+
+int isSphereOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Vector3* scaledCenter, float scaledRadius) {
+        for (int i = 0; i < CLIPPING_PLANE_COUNT; ++i) {
+        if (planePointDistance(&frustrum->clippingPlanes[i], scaledCenter) < -scaledRadius) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 void cameraInit(struct Camera* camera, float fov, float near, float far) {
     transformInitIdentity(&camera->transform);
     camera->fov = fov;

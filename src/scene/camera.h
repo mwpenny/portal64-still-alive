@@ -8,6 +8,7 @@
 #include "math/transform.h"
 #include "math/plane.h"
 #include "graphics/renderstate.h"
+#include "../math/boxs16.h"
 
 #define CLIPPING_PLANE_COUNT    5
 
@@ -23,6 +24,9 @@ struct FrustrumCullingInformation {
 
     struct Vector3 cameraPosScaled;
 };
+
+int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox);
+int isSphereOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Vector3* scaledCenter, float scaledRadius);
 
 void cameraInit(struct Camera* camera, float fov, float near, float far);
 void cameraBuildViewMatrix(struct Camera* camera, float matrix[4][4]);

@@ -3,6 +3,7 @@
 
 #include "../physics/collision_scene.h"
 #include "../scene/portal_surface.h"
+#include "../math/boxs16.h"
 
 struct StaticContentElement {
     Gfx* displayList;
@@ -12,11 +13,6 @@ struct StaticContentElement {
 struct BoundingSphere {
     short x, y, z;
     short radius;
-};
-
-struct BoundingBoxs16 {
-    short minX, minY, minZ;
-    short maxX, maxY, maxZ;
 };
 
 struct LevelDefinition {
