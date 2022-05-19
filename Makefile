@@ -99,10 +99,15 @@ TEXTURE_SCRIPTS = $(shell find assets/ -type f -name '*.ims')
 TEXTURE_IMAGES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_modified/%.png)
 TEXTURE_VTF_SOURCES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_dir/%.vtf)
 
+ALL_VTF_IMAGES = $(shell find portal_pak_dir/ -type f -name '*.vtf')
+ALL_PNG_IMAGES = $(ALL_VTF_IMAGES:%.vtf=%.png)
+
 $(TEXTURE_VTF_SOURCES): portal_pak_dir
 
 %.png: %.vtf
 	$(VTF2PNG) $< $@
+
+convert_all_png: $(ALL_PNG_IMAGES)
 
 portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims 
 	@mkdir -p $(@D)

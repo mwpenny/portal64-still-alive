@@ -27,12 +27,20 @@ int levelMaterialCount() {
     return STATIC_MATERIAL_COUNT;
 }
 
+int levelMaterialTransparentStart() {
+    return STATIC_TRANSPARENT_START;
+}
+
 Gfx* levelMaterial(int index) {
     if (index < 0 || index >= STATIC_MATERIAL_COUNT) {
         return NULL;
     }
 
     return static_material_list[index];
+}
+
+Gfx* levelMaterialDefault() {
+    return static_material_list[DEFAULT_INDEX];
 }
 
 Gfx* levelMaterialRevert(int index) {

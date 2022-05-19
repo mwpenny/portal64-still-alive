@@ -11,15 +11,17 @@
 
 #define CLIPPING_PLANE_COUNT    5
 
-struct FrustrumCullingInformation {
-    struct Plane clippingPlanes[CLIPPING_PLANE_COUNT];
-};
-
 struct Camera {
     struct Transform transform;
     float nearPlane;
     float farPlane;
     float fov;
+};
+
+struct FrustrumCullingInformation {
+    struct Plane clippingPlanes[CLIPPING_PLANE_COUNT];
+
+    struct Vector3 cameraPosScaled;
 };
 
 void cameraInit(struct Camera* camera, float fov, float near, float far);

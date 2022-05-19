@@ -115,6 +115,10 @@ bool RenderModeState::operator==(const RenderModeState& other) const {
     return data == other.data;
 }
 
+int RenderModeState::GetZMode() const {
+    return data & ZMODE_MASK;
+}
+
 #define DEFINE_RENDER_MODE_ENTRY(name)  std::make_pair(std::string(#name), RenderModeState(name))
 
 std::pair<std::string, RenderModeState> gRenderModes[] = {

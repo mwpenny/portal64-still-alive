@@ -75,6 +75,8 @@ public:
     RenderModeState(int data);
 
     bool operator==(const RenderModeState& other) const;
+
+    int GetZMode() const;
     
     int data;
 };

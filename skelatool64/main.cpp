@@ -116,6 +116,12 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    auto defaultMaterial = settings.mMaterials.find("default");
+
+    if (defaultMaterial != settings.mMaterials.end()) {
+        settings.mDefaultMaterialState = defaultMaterial->second->mState;
+    }
+
     const aiScene* scene = NULL;
 
     if (args.mInputFile.length()) {

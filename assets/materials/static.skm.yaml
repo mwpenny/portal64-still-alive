@@ -1,4 +1,11 @@
 materials:
+  default:
+    gDPSetRenderMode: G_RM_ZB_OPA_SURF
+
+    gSPGeometryMode:
+      set: [G_CULL_BACK, G_ZBUFFER]
+      clear: [G_CULL_FRONT]
+
   concrete_modular_wall001d:
     gDPSetTile: 
       filename: ../../portal_pak_modified/materials/concrete/concrete_modular_wall001d.png
@@ -17,7 +24,7 @@ materials:
       siz: G_IM_SIZ_16b
     
     gDPSetCombineMode: G_CC_DECALRGB
-    gsDPSetCycleType: G_CYC_1CYCLE
+    gDPSetCycleType: G_CYC_1CYCLE
 
     properties:
       tileSizeS: 0.5
@@ -29,7 +36,7 @@ materials:
       siz: G_IM_SIZ_16b
 
     gDPSetCombineMode: G_CC_DECALRGB
-    gsDPSetCycleType: G_CYC_1CYCLE
+    gDPSetCycleType: G_CYC_1CYCLE
 
     properties:
       tileSizeS: 0.5
@@ -41,8 +48,30 @@ materials:
       siz: G_IM_SIZ_16b
 
     gDPSetCombineMode: G_CC_DECALRGB
-    gsDPSetCycleType: G_CYC_1CYCLE
+    gDPSetCycleType: G_CYC_1CYCLE
 
     properties:
       tileSizeS: 0.5
       tileSizeT: 0.5
+
+  glasswindow_frosted_002:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/glass/glasswindow_frosted_002.png
+      siz: G_IM_SIZ_32b
+
+    gDPSetCombineMode: G_CC_DECALRGBA
+    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetRenderMode: G_RM_ZB_XLU_SURF
+    gDPSetTextureFilter: G_TF_POINT
+    gSPGeometryMode:
+      clear: [G_CULL_BACK, G_CULL_FRONT]
+
+    gDPSetPrimColor:
+      r: 128
+      g: 0
+      b: 0
+      a: 128
+
+    properties:
+      tileSizeS: 0.03125
+      tileSizeT: 2

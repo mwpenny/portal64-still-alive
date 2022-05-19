@@ -10,7 +10,9 @@ void levelLoad(int index);
 extern struct LevelDefinition* gCurrentLevel;
 
 int levelMaterialCount();
+int levelMaterialTransparentStart();
 Gfx* levelMaterial(int index);
+Gfx* levelMaterialDefault();
 Gfx* levelMaterialRevert(int index);
 
 int levelQuadIndex(struct CollisionObject* pointer);

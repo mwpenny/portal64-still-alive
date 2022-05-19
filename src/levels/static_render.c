@@ -2,6 +2,7 @@
 
 #include "levels.h"
 #include "util/memory.h"
+#include "defs.h"
 
 u16* gRenderOrder;
 u16* gRenderOrderCopy;
@@ -13,9 +14,21 @@ void staticRenderInit() {
     gSortKey = malloc(sizeof(int) * gCurrentLevel->staticContentCount);
 }
 
-int staticRenderGenerateSortKey(int index) {
-    // TODO determine distance
-    return (int)gCurrentLevel->staticContent[index].materialIndex << 23;
+int staticRenderGenerateSortKey(int index, struct FrustrumCullingInformation* cullingInfo) {
+    struct BoundingBoxs16* box = &gCurrentLevel->staticBoundingBoxes[index];
+    struct Vector3 boxCenter;
+    boxCenter.x = (box->minX + box->maxX) >> 1;
+    boxCenter.y = (box->minY + box->maxY) >> 1;
+    boxCenter.z = (box->minZ + box->maxZ) >> 1;
+
+    int distance = (int)sqrtf(vector3DistSqrd(&boxCenter, &cullingInfo->cameraPosScaled));
+
+    // sort transparent surfaces from back to front
+    if (gCurrentLevel->staticContent[index].materialIndex >= levelMaterialTransparentStart()) {
+        distance = 0x1000000 - distance;
+    }
+
+    return ((int)gCurrentLevel->staticContent[index].materialIndex << 23) | (distance & 0x7FFFFF);
 }
 
 void staticRenderSort(int min, int max) {
@@ -91,15 +104,16 @@ void staticRender(struct FrustrumCullingInformation* cullingInfo, struct RenderS
             continue;
         }
 
-        // TODO filter
         gRenderOrder[renderCount] = i;
-        gSortKey[renderCount] = staticRenderGenerateSortKey(i);
+        gSortKey[i] = staticRenderGenerateSortKey(i, cullingInfo);
         ++renderCount;
     }
 
     staticRenderSort(0, renderCount);
 
     int prevMaterial = -1;
+
+    gSPDisplayList(renderState->dl++, levelMaterialDefault());
     
     for (int i = 0; i < renderCount; ++i) {
         struct StaticContentElement* element = &gCurrentLevel->staticContent[gRenderOrder[i]];
