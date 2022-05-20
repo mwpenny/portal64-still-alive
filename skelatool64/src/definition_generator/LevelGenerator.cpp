@@ -13,8 +13,9 @@ std::set<std::string> gPortalableSurfaces = {
 LevelGenerator::LevelGenerator(
     const DisplayListSettings& settings,
     const StaticGeneratorOutput& staticOutput,
-    const CollisionGeneratorOutput& collisionOutput
-) : mSettings(settings), mStaticOutput(staticOutput), mCollisionOutput(collisionOutput) {}
+    const CollisionGeneratorOutput& collisionOutput,
+        const TriggerGeneratorOutput& triggerOutput
+) : mSettings(settings), mStaticOutput(staticOutput), mCollisionOutput(collisionOutput), mTriggerOutput(triggerOutput) {}
 
 
 int levelEdgeKey(int a, int b) {
@@ -175,6 +176,23 @@ void LevelGenerator::CalculateBoundingBoxes(const aiScene* scene, CFileDefinitio
     fileDefinition.AddDefinition(std::move(boundingBoxDef));
 }
 
+void LevelGenerator::CalculateTriggers(const aiScene* scene, CFileDefinition& fileDefinition, std::string& triggersName) {
+    std::unique_ptr<StructureDataChunk> triggers(new StructureDataChunk());
+
+    for (auto& trigger : mTriggerOutput.triggers) {
+        std::unique_ptr<StructureDataChunk> triggerData(new StructureDataChunk());
+
+        triggerData->AddPrimitive(trigger->name);
+        triggerData->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(trigger->bb)));
+
+        triggers->Add(std::move(triggerData));
+    }
+
+    triggersName = fileDefinition.GetUniqueName("triggers");
+    std::unique_ptr<FileDefinition> triggersDef(new DataFileDefinition("struct Trigger", triggersName, true, "_geo", std::move(triggers)));
+    fileDefinition.AddDefinition(std::move(triggersDef));
+}
+
 void LevelGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) {
     std::string portalSurfaces;
     std::string portalSurfaceMapping;
@@ -182,6 +200,9 @@ void LevelGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& 
 
     std::string boundingBoxes;
     CalculateBoundingBoxes(scene, fileDefinition, boundingBoxes);
+
+    std::string triggers;
+    CalculateTriggers(scene, fileDefinition, triggers);
     
     std::unique_ptr<StructureDataChunk> levelDef(new StructureDataChunk());
 
@@ -190,9 +211,11 @@ void LevelGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& 
     levelDef->AddPrimitive(boundingBoxes);
     levelDef->AddPrimitive(portalSurfaces);
     levelDef->AddPrimitive(portalSurfaceMapping);
+    levelDef->AddPrimitive(triggers);
     levelDef->AddPrimitive(mCollisionOutput.quads.size());
     levelDef->AddPrimitive(mStaticOutput.staticMeshes.size());
     levelDef->AddPrimitive(portalSurfacesCount);
+    levelDef->AddPrimitive(mTriggerOutput.triggers.size());
 
     fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct LevelDefinition", fileDefinition.GetUniqueName("level"), false, "_geo", std::move(levelDef))));
 }

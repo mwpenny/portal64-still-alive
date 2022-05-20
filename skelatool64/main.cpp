@@ -20,6 +20,7 @@
 #include "src/definition_generator/MaterialGenerator.h"
 #include "src/definition_generator/StaticGenerator.h"
 #include "src/definition_generator/LevelGenerator.h"
+#include "src/definition_generator/TriggerGenerator.h"
 #include "src/materials/MaterialState.h"
 
 void handler(int sig) {
@@ -156,8 +157,17 @@ int main(int argc, char *argv[]) {
             staticGenerator.TraverseScene(scene);
             staticGenerator.GenerateDefinitions(scene, fileDef);
 
+            TriggerGenerator triggerGenerator(settings);
+            triggerGenerator.TraverseScene(scene);
+            triggerGenerator.GenerateDefinitions(scene, fileDef);
+
             std::cout << "Generating level definitions" << std::endl;
-            LevelGenerator levelGenerator(settings, staticGenerator.GetOutput(), colliderGenerator.GetOutput());
+            LevelGenerator levelGenerator(
+                settings, 
+                staticGenerator.GetOutput(), 
+                colliderGenerator.GetOutput(),
+                triggerGenerator.GetOutput()
+            );
             levelGenerator.GenerateDefinitions(scene, fileDef);
         }
 

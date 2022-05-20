@@ -192,18 +192,19 @@ build/src/levels/levels.o: build/assets/test_chambers/level_list.h build/assets/
 
 SOUND_ATTRIBUTES = $(shell find assets/ -type f -name '*.sox')
 
-SOUND_CLIPS = $(SOUND_ATTRIBUTES:%.sox=build/%.wav)
+SOUND_CLIPS = $(SOUND_ATTRIBUTES:%.sox=build/%.aifc)
 
-build/%.wav: %.sox portal_pak_dir
+build/%.aifc: %.sox portal_pak_dir
 	@mkdir -p $(@D)
-	sox $(<:assets/%.sox=portal_pak_dir/%.wav) $(shell cat $<) $@
+	sox $(<:assets/%.sox=portal_pak_dir/%.wav) $(shell cat $<) $(@:%.aifc=%.wav)
+	$(SFZ2N64) -o $@ $(@:%.aifc=%.wav)
 
 build/assets/sound/sounds.sounds build/assets/sound/sounds.sounds.tbl: $(SOUND_CLIPS)
 	@mkdir -p $(@D)
 	$(SFZ2N64) --compress -o $@ $^
 
 
-asm/sound_data.s: build/assets/sound/sounds.sounds \
+build/asm/sound_data.o: build/assets/sound/sounds.sounds \
 	build/assets/sound/sounds.sounds.tbl
 
 build/src/audio/clips.h: tools/generate_sound_ids.js $(SOUND_CLIPS)

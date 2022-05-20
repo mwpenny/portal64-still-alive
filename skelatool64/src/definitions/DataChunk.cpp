@@ -89,6 +89,12 @@ StructureDataChunk::StructureDataChunk(const aiQuaternion& quat) : StructureData
 }
 
 
+StructureDataChunk::StructureDataChunk(const aiAABB& bb) : StructureDataChunk() {
+    Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(bb.mMin)));
+    Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(bb.mMax)));
+}
+
+
 void StructureDataChunk::Add(std::unique_ptr<DataChunk> entry) {
     mChildren.push_back(std::move(entry));
 }

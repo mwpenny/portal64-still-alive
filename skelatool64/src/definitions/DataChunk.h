@@ -8,6 +8,7 @@
 
 #include <assimp/vector3.h>
 #include <assimp/quaternion.h>
+#include <assimp/aabb.h>
 
 class DataChunk {
 public:
@@ -76,6 +77,7 @@ public:
     StructureDataChunk();
     StructureDataChunk(const aiVector3D& vector);
     StructureDataChunk(const aiQuaternion& quat);
+    StructureDataChunk(const aiAABB& bb);
 
     void Add(std::unique_ptr<DataChunk> entry);
 
