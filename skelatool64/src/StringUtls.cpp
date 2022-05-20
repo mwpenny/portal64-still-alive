@@ -118,3 +118,19 @@ bool StartsWith(const std::string& input, const std::string& prefix) {
 
     return true;
 }
+
+void SplitString(const std::string& input, char delimeter, std::vector<std::string>& output) {
+    std::size_t lastStart = 0;
+    std::size_t curr = 0;
+
+    while (curr < input.size()) {
+        if (input[curr] == delimeter) {
+            output.push_back(input.substr(lastStart, curr - lastStart));
+            lastStart = curr + 1;
+        }
+
+        ++curr;
+    }
+
+    output.push_back(input.substr(lastStart, curr - lastStart));
+}

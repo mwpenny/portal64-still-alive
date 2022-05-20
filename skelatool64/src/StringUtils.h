@@ -2,6 +2,7 @@
 #define _STRING_UTILS_H
 
 #include <string>
+#include <vector>
 
 std::string FindAndReplace(const std::string& source, const std::string& searchString, const std::string& replaceString, bool wholeWord = false);
 
@@ -12,5 +13,7 @@ std::string Trim(const std::string& input);
 void makeCCompatible(std::string& target);
 
 bool StartsWith(const std::string& input, const std::string& prefix);
+
+void SplitString(const std::string& input, char delimeter, std::vector<std::string>& output);
 
 #endif
