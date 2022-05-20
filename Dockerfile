@@ -23,6 +23,7 @@ RUN apt install -y binutils-mips-n64 \
     root-compatibility-environment \
     build-essential \
     libmpc-dev \
+    sfz2n64 \
     vtf2png \
     libxi6 \
     libxxf86vm-dev \

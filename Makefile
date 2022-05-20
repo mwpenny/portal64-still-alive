@@ -10,6 +10,7 @@ include /usr/include/n64/make/PRdefs
 
 SKELATOOL64:=skelatool64/skeletool64
 VTF2PNG:=vtf2png
+SFZ2N64:=sfz2n64
 
 $(SKELATOOL64):
 	make -C skelatool64
@@ -184,6 +185,32 @@ build/assets/test_chambers/level_list.h: $(TEST_CHAMBER_HEADERS) tools/generate_
 build/src/levels/levels.o: build/assets/test_chambers/level_list.h build/assets/materials/static.h
 
 .PHONY: levels
+
+####################
+## Sounds
+####################
+
+SOUND_ATTRIBUTES = $(shell find assets/ -type f -name '*.sox')
+
+SOUND_CLIPS = $(SOUND_ATTRIBUTES:%.sox=build/%.wav)
+
+build/%.wav: %.sox portal_pak_dir
+	@mkdir -p $(@D)
+	sox $(<:assets/%.sox=portal_pak_dir/%.wav) $(shell cat $<) $@
+
+build/assets/sound/sounds.sounds build/assets/sound/sounds.sounds.tbl: $(SOUND_CLIPS)
+	@mkdir -p $(@D)
+	$(SFZ2N64) --compress -o $@ $^
+
+
+asm/sound_data.s: build/assets/sound/sounds.sounds \
+	build/assets/sound/sounds.sounds.tbl
+
+build/src/audio/clips.h: tools/generate_sound_ids.js $(SOUND_CLIPS)
+	@mkdir -p $(@D)
+	node tools/generate_sound_ids.js -o $@ -p SOUNDS_ $(SOUND_CLIPS)
+
+build/src/audio/clips.o: build/src/audio/clips.h
 
 ####################
 ## Linking

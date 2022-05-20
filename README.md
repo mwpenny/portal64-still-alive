@@ -14,11 +14,11 @@ You will need to install python vpk
 pip install vpk
 ```
 
-Install vtf2png and skeletool64
+Install vtf2png, sfz2n64 and skeletool64
 
 ```
 echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" | tee /etc/apt/sources.list.d/lambertjamesd.list
-sudo apt install vtf2png skeletool64
+sudo apt install vtf2png sfz2n64 skeletool64
 ```
 
 Install image magic

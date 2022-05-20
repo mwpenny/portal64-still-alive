@@ -22,6 +22,8 @@
 #include "../math/mathf.h"
 #include "./hud.h"
 #include "dynamic_scene.h"
+#include "../audio/soundplayer.h"
+#include "../audio/clips.h"
 
 struct Vector3 gStartPosition = {5.0f, 1.2f, -5.0f};
 struct Vector3 gPortalGunOffset = {0.100957, -0.113587, -0.28916};
@@ -74,8 +76,6 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
     if (properties->fromPortalIndex != 1 - closerPortal) {
         portalRender(&scene->portals[1 - closerPortal], &scene->portals[closerPortal], properties, sceneRenderWithProperties, data, renderState);
     }
-
-    gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 
     staticRender(&properties->cullingInfo, renderState);
 }
@@ -210,6 +210,8 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
             quatMultVector(&at->rotation, &gForward, &portalForward);
             // TODO remove once there is a hole in the wall
             vector3AddScaled(&at->position, &portalForward, (portalIndex == 0) ? -0.1f : 0.1f, &at->position);
+
+            soundPlayerPlay(soundsPortalEnter, 1.0f, 1.0f);
             
             scene->portals[portalIndex].transform = *at;
             gCollisionScene.portalTransforms[portalIndex] = &scene->portals[portalIndex].transform;

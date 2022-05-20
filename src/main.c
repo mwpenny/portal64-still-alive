@@ -11,6 +11,8 @@
 #include "string.h"
 #include "controls/controller.h"
 #include "scene/dynamic_scene.h"
+#include "audio/soundplayer.h"
+#include "audio/audio.h"
 
 #include "levels/levels.h"
 
@@ -36,7 +38,7 @@ static OSMesg           gfxFrameMsgBuf[MAX_FRAME_BUFFER_MESGS];
 static OSScClient       gfxClient;
 
 
-static OSSched scheduler;
+OSSched scheduler;
 u64            scheduleStack[OS_SC_STACKSIZE/8];
 OSMesgQueue	*schedulerCommandQueue;
 
@@ -127,6 +129,10 @@ static void gameProc(void* arg) {
 
     u16* memoryEnd = graphicsLayoutScreenBuffers((u16*)PHYS_TO_K0(osMemSize));
 
+    gAudioHeapBuffer = (u8*)memoryEnd - AUDIO_HEAP_SIZE;
+
+    memoryEnd = (u16*)gAudioHeapBuffer;
+
     heapInit(_heapStart, memoryEnd);
     romInit();
 
@@ -135,6 +141,8 @@ static void gameProc(void* arg) {
     levelLoad(0);
     sceneInit(&gScene);
     controllersInit();
+    initAudio();
+    soundPlayerInit();
 #ifdef WITH_DEBUGGER
     OSThread* debugThreads[2];
     debugThreads[0] = &gameThread;
@@ -160,6 +168,7 @@ static void gameProc(void* arg) {
                 controllersTriggerRead();
                 sceneUpdate(&gScene);
                 timeUpdateDelta();
+                soundPlayerUpdate();
 
                 break;
 

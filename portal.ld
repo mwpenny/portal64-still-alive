@@ -63,6 +63,13 @@ SECTIONS
 
    . = 0x80200000;
 
+   BEGIN_SEG(sound_data, __romPos)
+   {
+      build/asm/sound_data.o(.data);
+      build/asm/sound_data.o(.bss);
+   }
+   END_SEG(sound_data)
+
    /* Discard everything not specifically mentioned above. */
    /DISCARD/ :
    {
