@@ -9,6 +9,6 @@
 void staticRenderInit();
 
 int staticRenderSorkKeyFromMaterial(int materialIndex, float distanceScaled);
-void staticRender(struct FrustrumCullingInformation* cullingInfo, struct RenderState* renderState);
+void staticRender(struct FrustrumCullingInformation* cullingInfo, u16 startingRoom, struct RenderState* renderState);
 
 #endif

@@ -70,3 +70,11 @@ void levelCheckTriggers(struct Vector3* playerPos) {
         }
     }
 }
+
+struct Location* levelGetLocation(short index) {
+    if (index < 0 || index >= gCurrentLevel->locationCount) {
+        return NULL;
+    }
+
+    return &gCurrentLevel->locations[index];
+}

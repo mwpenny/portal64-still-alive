@@ -6,7 +6,7 @@
 #include "MaterialGenerator.h"
 #include "../RenderChunk.h"
 
-StaticGenerator::StaticGenerator(const DisplayListSettings& settings) : DefinitionGenerator(), mSettings(settings) {
+StaticGenerator::StaticGenerator(const DisplayListSettings& settings, const RoomGeneratorOutput& roomMapping) : DefinitionGenerator(), mSettings(settings), mRoomMapping(roomMapping) {
 
 }
 
@@ -19,6 +19,8 @@ void StaticGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition&
     settings.mMaterials.clear();
 
     std::vector<StaticContentElement> elements;
+
+    sortNodesByRoom(mIncludedNodes, mRoomMapping);
 
     for (auto node = mIncludedNodes.begin(); node != mIncludedNodes.end(); ++node) {
         std::vector<RenderChunk> renderChunks;
@@ -56,8 +58,29 @@ void StaticGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition&
 
     std::unique_ptr<FileDefinition> fileDef(new DataFileDefinition("struct StaticContentElement", mOutput.staticContentName, true, "_geo", std::move(staticContentList)));
     fileDef->AddTypeHeader("\"levels/level_def_gen.h\"");
+
     fileDefinition.AddDefinition(std::move(fileDef));
 
+    std::unique_ptr<StructureDataChunk> roomToStaticMapping(new StructureDataChunk());
+    int prevIndex = 0;
+    for (int roomIndex = 0; roomIndex < mRoomMapping.roomCount; ++roomIndex) {
+        std::unique_ptr<StructureDataChunk> singleMapping(new StructureDataChunk());
+
+        int currentIndex = prevIndex;
+        while (currentIndex < (int)mIncludedNodes.size() && mRoomMapping.roomIndexMapping[mIncludedNodes[currentIndex]] <= roomIndex) {
+            ++currentIndex;
+        }
+
+        singleMapping->AddPrimitive(prevIndex);
+        singleMapping->AddPrimitive(currentIndex);
+
+        prevIndex = currentIndex;
+
+        roomToStaticMapping->Add(std::move(singleMapping));
+    }
+
+    mOutput.roomMappingName = fileDefinition.GetUniqueName("static_room_mapping");
+    fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct Rangeu16", mOutput.roomMappingName, true, "_geo", std::move(roomToStaticMapping))));
 }
 
 const StaticGeneratorOutput& StaticGenerator::GetOutput() const {

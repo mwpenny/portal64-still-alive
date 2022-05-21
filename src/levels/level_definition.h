@@ -51,18 +51,32 @@ struct Trigger {
     struct Box3D box;
 };
 
+struct Rangeu16 {
+    short min;
+    short max;
+};
+
+struct Location {
+    struct Transform transform;
+    short roomIndex;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
+    struct Rangeu16 *roomStaticMapping;
     struct BoundingBoxs16* staticBoundingBoxes;
     struct PortalSurface* portalSurfaces;
     // maps index of a collisionQuads to indices in portalSurfaces
     struct PortalSurfaceMapping* portalSurfaceMapping;
     struct Trigger* triggers;
+    struct Location* locations;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
     short triggerCount;
+    short locationCount;
+    short startLocation;
 };
 
 #endif

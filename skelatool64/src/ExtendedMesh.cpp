@@ -20,6 +20,7 @@ aiMesh* copyMesh(aiMesh* mesh) {
 
     result->mNumFaces = mesh->mNumFaces;
     result->mFaces = new aiFace[mesh->mNumFaces];
+    result->mAABB = mesh->mAABB;
     std::copy(mesh->mFaces, mesh->mFaces + result->mNumFaces, result->mFaces);
 
     for (int i = 0; i < 8; ++i) {

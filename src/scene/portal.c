@@ -43,13 +43,14 @@ struct Quaternion gVerticalFlip = {0.0f, 1.0f, 0.0f, 0.0f};
 
 #define STARTING_RENDER_DEPTH       2
 
-void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState) {
+void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex) {
     props->camera = *camera;
     props->aspectRatio = aspectRatio;
     props->perspectiveMatrix = cameraSetupMatrices(camera, renderState, aspectRatio, &props->perspectiveCorrect, &fullscreenViewport, &props->cullingInfo);
     props->viewport = &fullscreenViewport;
     props->currentDepth = STARTING_RENDER_DEPTH;
     props->fromPortalIndex = NO_PORTAL;
+    props->fromRoom = roomIndex;
 
 #if SHOW_EXTERNAL_VIEW
     struct Camera externalCamera = *camera;
@@ -150,6 +151,8 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
 
     next->currentDepth = current->currentDepth - 1;
     next->fromPortalIndex = toPortal < fromPortal ? 0 : 1;
+    // TODO
+    next->fromRoom = current->fromRoom;
 
 #if !SHOW_EXTERNAL_VIEW
     gSPViewport(renderState->dl++, viewport);

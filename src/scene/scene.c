@@ -26,7 +26,6 @@
 #include "../audio/clips.h"
 #include "../levels/cutscene_runner.h"
 
-struct Vector3 gStartPosition = {5.0f, 1.2f, -5.0f};
 struct Vector3 gPortalGunOffset = {0.100957, -0.113587, -0.28916};
 struct Vector3 gPortalGunForward = {0.1f, -0.1f, 1.0f};
 struct Vector3 gPortalGunUp = {0.0f, 1.0f, 0.0f};
@@ -35,10 +34,7 @@ Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 
 void sceneInit(struct Scene* scene) {
     cameraInit(&scene->camera, 45.0f, 0.125f * SCENE_SCALE, 80.0f * SCENE_SCALE);
-    playerInit(&scene->player);
-
-    scene->player.body.transform.position = gStartPosition;
-    quatAxisAngle(&gUp, M_PI, &scene->player.body.transform.rotation);
+    playerInit(&scene->player, levelGetLocation(gCurrentLevel->startLocation));
 
     portalInit(&scene->portals[0], 0);
     portalInit(&scene->portals[1], PortalFlagsOddParity);
@@ -78,7 +74,7 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
         portalRender(&scene->portals[1 - closerPortal], &scene->portals[closerPortal], properties, sceneRenderWithProperties, data, renderState);
     }
 
-    staticRender(&properties->cullingInfo, renderState);
+    staticRender(&properties->cullingInfo, properties->fromRoom, renderState);
 }
 
 #define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
@@ -115,7 +111,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     
     struct RenderProps renderProperties;
 
-    renderPropsInit(&renderProperties, &scene->camera, (float)SCREEN_WD / (float)SCREEN_HT, renderState);
+    renderPropsInit(&renderProperties, &scene->camera, (float)SCREEN_WD / (float)SCREEN_HT, renderState, scene->player.currentRoom);
 
     renderProperties.camera = scene->camera;
 

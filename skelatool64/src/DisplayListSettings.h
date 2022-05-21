@@ -26,6 +26,7 @@ struct DisplayListSettings {
     bool mIncludeCulling;
 
     aiMatrix4x4 CreateGlobalTransform();
+    aiMatrix4x4 CreateCollisionTransform();
 };
 
 #endif

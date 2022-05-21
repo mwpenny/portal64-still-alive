@@ -81,14 +81,16 @@ void staticRenderSort(int min, int max) {
     }
 }
 
-void staticRender(struct FrustrumCullingInformation* cullingInfo, struct RenderState* renderState) {
+void staticRender(struct FrustrumCullingInformation* cullingInfo, u16 startingRoom, struct RenderState* renderState) {
     if (!gCurrentLevel) {
         return;
     }
 
     int renderCount = 0;
 
-    for (int i = 0; i < gCurrentLevel->staticContentCount; ++i) {
+    struct Rangeu16 staticRange = gCurrentLevel->roomStaticMapping[startingRoom];
+
+    for (int i = staticRange.min; i < staticRange.max; ++i) {
         if (isOutsideFrustrum(cullingInfo, &gCurrentLevel->staticBoundingBoxes[i])) {
             continue;
         }

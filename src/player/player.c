@@ -26,13 +26,22 @@ struct ColliderTypeData gPlayerColliderData = {
     &gCollisionSphereCallbacks,
 };
 
-void playerInit(struct Player* player) {
+void playerInit(struct Player* player, struct Location* startLocation) {
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f);
     player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
     player->grabbing = NULL;
     player->pitchVelocity = 0.0f;
     player->yawVelocity = 0.0f;
     player->flags = 0;
+
+    if (startLocation) {
+        player->body.transform = startLocation->transform;
+        player->body.transform.position.y += PLAYER_HEAD_HEIGHT;
+    } else {
+        transformInitIdentity(&player->body.transform);
+        player->currentRoom = 0;
+    }
+    player->currentRoom = startLocation->roomIndex;
 }
 
 #define PLAYER_SPEED    (5.0f)

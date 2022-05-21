@@ -147,13 +147,18 @@ int main(int argc, char *argv[]) {
 
 
         if (args.mIsLevel) {
+            std::cout << "Grouping objects by room" << std::endl;
+            RoomGenerator roomGenerator;
+            roomGenerator.TraverseScene(scene);
+            roomGenerator.GenerateDefinitions(scene, fileDef);
+
             std::cout << "Generating collider definitions" << std::endl;
             CollisionGenerator colliderGenerator(settings);
             colliderGenerator.TraverseScene(scene);
             colliderGenerator.GenerateDefinitions(scene, fileDef);
 
             std::cout << "Generating static definitions" << std::endl;
-            StaticGenerator staticGenerator(settings);
+            StaticGenerator staticGenerator(settings, roomGenerator.GetOutput());
             staticGenerator.TraverseScene(scene);
             staticGenerator.GenerateDefinitions(scene, fileDef);
 
@@ -166,7 +171,8 @@ int main(int argc, char *argv[]) {
                 settings, 
                 staticGenerator.GetOutput(), 
                 colliderGenerator.GetOutput(),
-                triggerGenerator.GetOutput()
+                triggerGenerator.GetOutput(),
+                roomGenerator.GetOutput()
             );
             levelGenerator.GenerateDefinitions(scene, fileDef);
         }

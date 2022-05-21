@@ -19,4 +19,6 @@ int levelQuadIndex(struct CollisionObject* pointer);
 
 void levelCheckTriggers(struct Vector3* playerPos);
 
+struct Location* levelGetLocation(short index);
+
 #endif

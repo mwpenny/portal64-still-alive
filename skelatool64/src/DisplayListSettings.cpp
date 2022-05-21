@@ -23,3 +23,11 @@ aiMatrix4x4 DisplayListSettings::CreateGlobalTransform() {
     
     return rotation * scale;
 }
+
+aiMatrix4x4 DisplayListSettings::CreateCollisionTransform() {
+    aiMatrix4x4 scale;
+    aiMatrix4x4::Scaling(aiVector3D(1, 1, 1) * mCollisionScale, scale);
+    aiMatrix4x4 rotation(mRotateModel.GetMatrix());
+    
+    return rotation * scale;
+}

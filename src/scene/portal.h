@@ -38,13 +38,15 @@ struct RenderProps {
     u8 currentDepth;
     u8 fromPortalIndex;
 
+    u16 fromRoom;
+
     short minX;
     short minY;
     short maxX;
     short maxY;
 };
 
-void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState);
+void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex);
 void renderPropsNext(struct RenderProps* current, struct RenderProps* next, struct Transform* fromPortal, struct Transform* toPortal, struct RenderState* renderState);
 
 void portalInit(struct Portal* portal, enum PortalFlags flags);

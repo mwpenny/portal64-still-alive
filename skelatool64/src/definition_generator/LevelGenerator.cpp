@@ -14,8 +14,14 @@ LevelGenerator::LevelGenerator(
     const DisplayListSettings& settings,
     const StaticGeneratorOutput& staticOutput,
     const CollisionGeneratorOutput& collisionOutput,
-        const TriggerGeneratorOutput& triggerOutput
-) : mSettings(settings), mStaticOutput(staticOutput), mCollisionOutput(collisionOutput), mTriggerOutput(triggerOutput) {}
+    const TriggerGeneratorOutput& triggerOutput,
+    const RoomGeneratorOutput& roomOutput
+) : 
+    mSettings(settings), 
+    mStaticOutput(staticOutput), 
+    mCollisionOutput(collisionOutput), 
+    mTriggerOutput(triggerOutput),
+    mRoomOutput(roomOutput) {}
 
 
 int levelEdgeKey(int a, int b) {
@@ -198,6 +204,37 @@ void LevelGenerator::CalculateTriggers(const aiScene* scene, CFileDefinition& fi
     fileDefinition.AddDefinition(std::move(triggersDef));
 }
 
+void LevelGenerator::CalculateLocations(const aiScene* scene, CFileDefinition& fileDefinition, std::string& locationsName) {
+    aiMatrix4x4 baseTransfrom = mSettings.CreateCollisionTransform();
+
+    std::unique_ptr<StructureDataChunk> locations(new StructureDataChunk());
+
+    for (auto& location : mRoomOutput.namedLocations) {
+        aiMatrix4x4 nodeTransform = baseTransfrom * location.node->mTransformation;
+
+        aiVector3D position;
+        aiQuaternion rotation;
+        aiVector3D scale;
+        nodeTransform.Decompose(scale, rotation, position);
+
+        std::unique_ptr<StructureDataChunk> locationData(new StructureDataChunk());
+
+        std::unique_ptr<StructureDataChunk> transform(new StructureDataChunk());
+        transform->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(position)));
+        transform->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(rotation)));
+        transform->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(scale)));
+        locationData->Add(std::move(transform));
+
+        locationData->AddPrimitive(mRoomOutput.roomIndexMapping[location.node]);
+
+        locations->Add(std::move(locationData));
+    }
+
+    locationsName = fileDefinition.GetUniqueName("locations");
+    std::unique_ptr<FileDefinition> triggersDef(new DataFileDefinition("struct Location", locationsName, true, "_geo", std::move(locations)));
+    fileDefinition.AddDefinition(std::move(triggersDef));
+}
+
 void LevelGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) {
     std::string portalSurfaces;
     std::string portalSurfaceMapping;
@@ -208,19 +245,26 @@ void LevelGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& 
 
     std::string triggers;
     CalculateTriggers(scene, fileDefinition, triggers);
+
+    std::string locations;
+    CalculateLocations(scene, fileDefinition, locations);
     
     std::unique_ptr<StructureDataChunk> levelDef(new StructureDataChunk());
 
     levelDef->AddPrimitive(mCollisionOutput.quadsName);
     levelDef->AddPrimitive(mStaticOutput.staticContentName);
+    levelDef->AddPrimitive(mStaticOutput.roomMappingName);
     levelDef->AddPrimitive(boundingBoxes);
     levelDef->AddPrimitive(portalSurfaces);
     levelDef->AddPrimitive(portalSurfaceMapping);
     levelDef->AddPrimitive(triggers);
+    levelDef->AddPrimitive(locations);
     levelDef->AddPrimitive(mCollisionOutput.quads.size());
     levelDef->AddPrimitive(mStaticOutput.staticMeshes.size());
     levelDef->AddPrimitive(portalSurfacesCount);
     levelDef->AddPrimitive(mTriggerOutput.triggers.size());
+    levelDef->AddPrimitive(mRoomOutput.namedLocations.size());
+    levelDef->AddPrimitive(mRoomOutput.FindLocationRoom("start"));
 
     fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct LevelDefinition", fileDefinition.GetUniqueName("level"), false, "_geo", std::move(levelDef))));
 }
