@@ -20,8 +20,34 @@ enum TriggerCutsceneIndex {
     TRIGGER_START,
 };
 
+enum CutsceneStepType {
+    CutsceneStepTypeNoop,
+    CutsceneStepTypePlaySound,
+    CutsceneStepTypeStartSound,
+    CutsceneStepTypeDelay,
+};
+
+struct CutsceneStep {
+    enum CutsceneStepType type;
+
+    union {
+        struct {
+            u16 soundId;
+            u8 volume;
+            u8 pitch;
+        } playSound;
+        float delay;
+        int noop;
+    };
+};
+
+struct Cutscene {
+    struct CutsceneStep* steps;
+    u16 stepCount;
+};
+
 struct Trigger {
-    enum TriggerCutsceneIndex triggerIndex;
+    struct Cutscene cutscene;
     struct Box3D box;
 };
 

@@ -90,6 +90,8 @@ extern OSMesgQueue dmaMessageQ;
 
 extern char _heapStart[];
 
+#define FRAME_SKIP  0
+
 static void gameProc(void* arg) {
     u8 schedulerMode = OS_VI_NTSC_LPF1;
 
@@ -110,8 +112,7 @@ static void gameProc(void* arg) {
         (void *)(scheduleStack + OS_SC_STACKSIZE/8),
         SCHEDULER_PRIORITY,
         schedulerMode,
-        // 30 fps
-        2
+        1
     );
 
     schedulerCommandQueue = osScGetCmdQ(&scheduler);
@@ -126,6 +127,7 @@ static void gameProc(void* arg) {
 
     u32 pendingGFX = 0;
     u32 drawBufferIndex = 0;
+    u8 frameControl = 0;
 
     u16* memoryEnd = graphicsLayoutScreenBuffers((u16*)PHYS_TO_K0(osMemSize));
 
@@ -155,6 +157,12 @@ static void gameProc(void* arg) {
         
         switch (msg->type) {
             case (OS_SC_RETRACE_MSG):
+                // control the framerate
+                frameControl = (frameControl + 1) % (FRAME_SKIP + 1);
+                if (frameControl != 0) {
+                    break;
+                }
+
                 static int renderSkip = 1;
 
                 if (pendingGFX < 2 && !renderSkip) {

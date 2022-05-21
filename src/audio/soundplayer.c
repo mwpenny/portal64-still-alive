@@ -13,6 +13,8 @@ ALSndPlayer gSoundPlayer;
 struct ActiveSound {
     ALSndId soundId;
     u16 soundId3d;
+    u16 newSoundTicks;
+    float estimatedTimeLeft;
 };
 
 struct ActiveSound gActiveSounds[MAX_ACTIVE_SOUNDS];
@@ -34,6 +36,22 @@ void soundPlayerInit() {
     }
 }
 
+float soundPlayerEstimateLength(ALSound* sound, float speed) {
+    if (!sound->wavetable) {
+        return 0.0f;
+    }
+
+    int sampleCount = 0;
+
+    if (sound->wavetable->type == AL_ADPCM_WAVE) {
+        sampleCount = sound->wavetable->len * 16 / 9;
+    } else {
+        sampleCount = sound->wavetable->len >> 1;
+    }
+
+    return sampleCount * (1.0f / OUTPUT_RATE) / speed;
+}
+
 ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch) {
     if (gActiveSoundCount == MAX_ACTIVE_SOUNDS || soundClipId < 0 || soundClipId >= gSoundClipArray->soundCount) {
         return SOUND_ID_NONE;
@@ -47,11 +65,15 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch) {
 
     gActiveSounds[gActiveSoundCount].soundId = result;
     gActiveSounds[gActiveSoundCount].soundId3d = SOUND_ID_NONE;
+    gActiveSounds[gActiveSoundCount].newSoundTicks = 10;
+    gActiveSounds[gActiveSoundCount].estimatedTimeLeft = soundPlayerEstimateLength(gSoundClipArray->sounds[soundClipId], pitch);
 
     alSndpSetSound(&gSoundPlayer, result);
     alSndpSetVol(&gSoundPlayer, (short)(32767 * volume));
     alSndpSetPitch(&gSoundPlayer, pitch);
     alSndpPlay(&gSoundPlayer);
+
+    ++gActiveSoundCount;
 
     return result;
 }
@@ -61,10 +83,19 @@ void soundPlayerUpdate() {
     int writeIndex = 0;
 
     while (index < gActiveSoundCount) {
-        alSndpSetSound(&gSoundPlayer, gActiveSounds[index].soundId);
+        struct ActiveSound* sound = &gActiveSounds[index];
 
-        if (alSndpGetState(&gSoundPlayer) == AL_STOPPED) {
-            alSndpDeallocate(&gSoundPlayer, gActiveSounds[index].soundId);
+        if (sound->newSoundTicks) {
+            --sound->newSoundTicks;
+        }
+
+        sound->estimatedTimeLeft -= FIXED_DELTA_TIME;
+
+        alSndpSetSound(&gSoundPlayer, sound->soundId);
+
+        if (alSndpGetState(&gSoundPlayer) == AL_STOPPED && !sound->newSoundTicks) {
+            alSndpDeallocate(&gSoundPlayer, sound->soundId);
+            sound->soundId = SOUND_ID_NONE;
         } else {
             ++writeIndex;
         }
@@ -77,4 +108,33 @@ void soundPlayerUpdate() {
     }
 
     gActiveSoundCount = writeIndex;
+}
+
+struct ActiveSound* soundPlayerFindActiveSound(ALSndId soundId) {
+    if (soundId == SOUND_ID_NONE) {
+        return NULL;
+    }
+    
+    for (int i = 0; i < gActiveSoundCount; ++i) {
+        if (gActiveSounds[i].soundId == soundId) {
+            return &gActiveSounds[i];
+        }
+    }
+
+    return NULL;
+}
+
+int soundPlayerIsPlaying(ALSndId soundId) {
+    struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
+
+    if (!activeSound) {
+        return 0;
+    }
+
+    if (activeSound->newSoundTicks) {
+        return 1;
+    }
+
+    alSndpSetSound(&gSoundPlayer, soundId);
+    return activeSound->estimatedTimeLeft > 0.0f && alSndpGetState(&gSoundPlayer) != AL_STOPPED;
 }

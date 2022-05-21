@@ -17,4 +17,6 @@ Gfx* levelMaterialRevert(int index);
 
 int levelQuadIndex(struct CollisionObject* pointer);
 
+void levelCheckTriggers(struct Vector3* playerPos);
+
 #endif

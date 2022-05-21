@@ -1,5 +1,6 @@
 #include "TriggerGenerator.h"
 #include "../StringUtils.h"
+#include "../MathUtl.h"
 
 #define TRIGGER_PREFIX  "@trigger_"
 
@@ -20,15 +21,55 @@ CutsceneStep::CutsceneStep(
 bool doesBelongToCutscene(const CutsceneStep& startStep, const CutsceneStep& otherStep) {
     aiVector3D offset = otherStep.location - startStep.location;
     aiVector3D relativeOffset = startStep.direction.Rotate(offset);
-    std::cout << relativeOffset.x << std::endl;
 
     return relativeOffset.y >= 0.0f && relativeOffset.x * relativeOffset.x + relativeOffset.z * relativeOffset.z < 0.1f;
+}
+
+float distanceFromStart(const CutsceneStep& startStep, const CutsceneStep& otherStep) {
+    aiVector3D offset = otherStep.location - startStep.location;
+    aiVector3D relativeOffset = startStep.direction.Rotate(offset);
+    return relativeOffset.y;
 }
 
 TriggerGenerator::TriggerGenerator(const DisplayListSettings& settings): DefinitionGenerator(), mSettings(settings) {}
 
 bool TriggerGenerator::ShouldIncludeNode(aiNode* node) {
     return (StartsWith(node->mName.C_Str(), TRIGGER_PREFIX) && node->mNumMeshes >= 1) || StartsWith(node->mName.C_Str(), CUTSCENE_PREFIX);
+}
+
+std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step) {
+    std::unique_ptr<StructureDataChunk> result(new StructureDataChunk());
+
+    if ((step.command == "play_sound" || step.command == "start_sound") && step.args.size() >= 1) {
+        result->AddPrimitive<const char*>(step.command == "play_sound" ? "CutsceneStepTypePlaySound" : "CutsceneStepTypeStartSound");
+        std::unique_ptr<StructureDataChunk> playSound(new StructureDataChunk());
+        playSound->AddPrimitive(step.args[0]);
+
+        if (step.args.size() >= 2) {
+            playSound->AddPrimitive((int)(std::atof(step.args[1].c_str()) * 255.0f));
+        } else {
+            playSound->AddPrimitive(255);
+        }
+
+        if (step.args.size() >= 3) {
+            playSound->AddPrimitive((int)(std::atof(step.args[2].c_str()) * 64.0f + 0.5f));
+        } else {
+            playSound->AddPrimitive(64);
+        }
+
+        result->Add("playSound", std::move(playSound));
+
+        return result;
+    } else if (step.command == "delay" && step.args.size() >= 1) {
+        result->AddPrimitive<const char*>("CutsceneStepTypeDelay");
+        result->AddPrimitive("delay", std::atof(step.args[0].c_str()));
+        return result;
+    }
+
+    result->AddPrimitive<const char*>("CutsceneStepTypeNoop");
+    result->AddPrimitive("noop", 0);
+    
+    return result;
 }
 
 void TriggerGenerator::GenerateCutscenes(std::map<std::string, std::shared_ptr<Cutscene>>& output, CFileDefinition& fileDefinition) {
@@ -54,7 +95,7 @@ void TriggerGenerator::GenerateCutscenes(std::map<std::string, std::shared_ptr<C
         aiQuaternion rot;
         node->mTransformation.Decompose(scale, rot, pos);
 
-        std::shared_ptr<CutsceneStep> step(new CutsceneStep(cutsceneParts[1], cutsceneParts, pos, rot));
+        std::shared_ptr<CutsceneStep> step(new CutsceneStep(command, cutsceneParts, pos, rot));
 
         if (step->command == "start" && step->args.size() > 0) {
             std::shared_ptr<Cutscene> cutscene(new Cutscene());
@@ -73,6 +114,30 @@ void TriggerGenerator::GenerateCutscenes(std::map<std::string, std::shared_ptr<C
             }
         }
     }
+
+
+    for (auto& cutsceneEntry : output) {
+        Cutscene& cutscene  = *cutsceneEntry.second;
+        std::shared_ptr<CutsceneStep> firstStep = cutscene.steps[0];
+
+        cutscene.steps.erase(cutscene.steps.begin());
+
+        std::sort(cutscene.steps.begin(), cutscene.steps.end(), [&](const std::shared_ptr<CutsceneStep>& a, const std::shared_ptr<CutsceneStep>& b) -> bool {
+            return distanceFromStart(*firstStep, *a) < distanceFromStart(*firstStep, *b);
+        });
+
+        std::unique_ptr<StructureDataChunk> steps(new StructureDataChunk());
+
+        for (auto& step : cutscene.steps) {
+            steps->Add(std::move(generateCutsceneStep(*step)));
+        }
+
+        std::string stepsName = fileDefinition.GetUniqueName(cutscene.name + "_steps");
+        std::unique_ptr<FileDefinition> stepsDef(new DataFileDefinition("struct CutsceneStep", stepsName, true, "_geo", std::move(steps)));
+        stepsDef->AddTypeHeader("\"../build/src/audio/clips.h\"");
+        fileDefinition.AddDefinition(std::move(stepsDef));
+        cutscene.defName = stepsName;
+    }    
 }
 
 void TriggerGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) {
@@ -90,9 +155,23 @@ void TriggerGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition
         std::shared_ptr<Trigger> trigger(new Trigger());
 
         std::string nodeName = node->mName.C_Str();
-        trigger->name = nodeName.substr(strlen(TRIGGER_PREFIX));
-        trigger->bb.mMin = node->mTransformation * mesh->bbMin * mSettings.mCollisionScale;
-        trigger->bb.mMax = node->mTransformation * mesh->bbMax * mSettings.mCollisionScale;
+
+        auto cutscene = cutscenes.find(nodeName.substr(strlen(TRIGGER_PREFIX)));
+
+        if (cutscene == cutscenes.end()) {
+            trigger->stepsName = "";
+            trigger->stepsCount = 0;
+        } else {
+            trigger->stepsName = cutscene->second->defName;
+            trigger->stepsCount = cutscene->second->steps.size();
+        }
+
+        aiVector3D minTransformed = node->mTransformation * mesh->bbMin * mSettings.mCollisionScale;
+        aiVector3D maxTransformed = node->mTransformation * mesh->bbMax * mSettings.mCollisionScale;
+
+        trigger->bb.mMin = min(minTransformed, maxTransformed);
+        trigger->bb.mMax = max(minTransformed, maxTransformed);
+
         mOutput.triggers.push_back(trigger);
     }
 }

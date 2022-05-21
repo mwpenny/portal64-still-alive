@@ -182,7 +182,12 @@ void LevelGenerator::CalculateTriggers(const aiScene* scene, CFileDefinition& fi
     for (auto& trigger : mTriggerOutput.triggers) {
         std::unique_ptr<StructureDataChunk> triggerData(new StructureDataChunk());
 
-        triggerData->AddPrimitive(trigger->name);
+        std::unique_ptr<StructureDataChunk> cutsceneDef(new StructureDataChunk());
+       
+        cutsceneDef->AddPrimitive((trigger->stepsName == "") ? std::string("NULL") : trigger->stepsName);
+        cutsceneDef->AddPrimitive(trigger->stepsCount);
+
+        triggerData->Add(std::move(cutsceneDef));
         triggerData->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(trigger->bb)));
 
         triggers->Add(std::move(triggerData));

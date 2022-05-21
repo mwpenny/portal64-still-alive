@@ -6,7 +6,8 @@
 #include <map>
 
 struct Trigger {
-    std::string name;
+    std::string stepsName;
+    int stepsCount;
     aiAABB bb;
 };
 
@@ -25,6 +26,7 @@ struct CutsceneStep {
 
 struct Cutscene {
     std::string name;
+    std::string defName;
     std::vector<std::shared_ptr<CutsceneStep>> steps;
 };
 

@@ -8,4 +8,6 @@ struct Box3D {
     struct Vector3 max;
 };
 
+int box3DContainsPoint(struct Box3D* box, struct Vector3* point);
+
 #endif

@@ -5,6 +5,7 @@
 
 #include "physics/collision_scene.h"
 #include "static_render.h"
+#include "cutscene_runner.h"
 
 struct LevelDefinition* gCurrentLevel;
 
@@ -57,4 +58,15 @@ int levelQuadIndex(struct CollisionObject* pointer) {
     }
 
     return pointer - gCollisionScene.quads;
+}
+
+void levelCheckTriggers(struct Vector3* playerPos) {
+    for (int i = 0; i < gCurrentLevel->triggerCount; ++i) {
+        struct Trigger* trigger = &gCurrentLevel->triggers[i];
+        if (trigger->cutscene.stepCount && box3DContainsPoint(&trigger->box, playerPos)) {
+            cutsceneRunnerRun(&gCutsceneRunner, &trigger->cutscene);
+            // prevent the trigger from happening again
+            trigger->cutscene.stepCount = 0;
+        }
+    }
 }

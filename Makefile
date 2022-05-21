@@ -201,11 +201,10 @@ build/%.aifc: %.sox portal_pak_dir
 
 build/assets/sound/sounds.sounds build/assets/sound/sounds.sounds.tbl: $(SOUND_CLIPS)
 	@mkdir -p $(@D)
-	$(SFZ2N64) --compress -o $@ $^
+	$(SFZ2N64) -o $@ $^
 
 
-build/asm/sound_data.o: build/assets/sound/sounds.sounds \
-	build/assets/sound/sounds.sounds.tbl
+build/asm/sound_data.o: build/assets/sound/sounds.sounds build/assets/sound/sounds.sounds.tbl
 
 build/src/audio/clips.h: tools/generate_sound_ids.js $(SOUND_CLIPS)
 	@mkdir -p $(@D)

@@ -24,6 +24,7 @@
 #include "dynamic_scene.h"
 #include "../audio/soundplayer.h"
 #include "../audio/clips.h"
+#include "../levels/cutscene_runner.h"
 
 struct Vector3 gStartPosition = {5.0f, 1.2f, -5.0f};
 struct Vector3 gPortalGunOffset = {0.100957, -0.113587, -0.28916};
@@ -164,6 +165,9 @@ void sceneUpdate(struct Scene* scene) {
     cubeUpdate(&scene->cube);
     
     collisionSceneUpdateDynamics();
+
+    levelCheckTriggers(&scene->player.body.transform.position);
+    cutsceneRunnerUpdate(&gCutsceneRunner);
 
     scene->cpuTime = osGetTime() - frameStart;
     scene->lastFrameStart = frameStart;
