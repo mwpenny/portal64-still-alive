@@ -70,6 +70,14 @@ materials:
       tileSizeS: 0.0625
       tileSizeT: 2
 
+  autoportal_frame:
+    gDPSetTile:
+      filename: ./props/autoportal_frame/autoportal_frame.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode: G_CC_DECALRGBA
+    gDPSetCycleType: G_CYC_1CYCLE
+
     
   cube:
     gDPSetTile: 
@@ -85,3 +93,14 @@ materials:
       set: [G_LIGHTING, G_SHADE]
     gDPSetCombineMode: 
       color: ["SHADE", "0", "TEXEL0", "0"]
+
+
+  door_01:
+    gDPSetPrimColor:
+      r: 32
+      g: 32
+      b: 32
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "PRIMITIVE", "0"]

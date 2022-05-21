@@ -133,7 +133,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     hudRender(renderState);
 
-    // sceneRenderPerformanceMetrics(scene, renderState, task);
+    sceneRenderPerformanceMetrics(scene, renderState, task);
 
     // contactSolverDebugDraw(&gContactSolver, renderState);
 }
