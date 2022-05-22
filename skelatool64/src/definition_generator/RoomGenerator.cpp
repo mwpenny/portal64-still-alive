@@ -8,6 +8,15 @@
 
 #define LOCATION_PREFIX "@location "
 
+#define DOORWAY_PREFIX  "@doorway"
+
+Doorway::Doorway(const aiNode* node, const CollisionQuad& quad): 
+    node(node), quad(quad), roomA(0), roomB(0) {
+
+}
+
+RoomGenerator::RoomGenerator(const DisplayListSettings& settings): DefinitionGenerator(), mSettings(settings) {}
+
 short RoomGeneratorOutput::FindLocationRoom(const std::string& name) const {
     for (auto& location : namedLocations) {
         if (location.name == name) {
@@ -39,8 +48,38 @@ void sortNodesByRoom(std::vector<aiNode*>& nodes, RoomGeneratorOutput& roomOutpu
     });
 }
 
+int findClosestRoom(const aiNode* node, const aiScene* scene, CFileDefinition& fileDefinition, const std::vector<RoomBlock>& roomBlocks, int ignoreRoom) {
+    float distance = INFINITY;
+    int closestRoom = 0;
+
+    for (auto& roomBlock : roomBlocks) {
+        if (roomBlock.roomIndex == ignoreRoom) {
+            continue;
+        }
+
+        aiVector3D localCenter;
+
+        if (node->mNumMeshes) {
+            auto mesh = fileDefinition.GetExtendedMesh(scene->mMeshes[node->mMeshes[0]]);
+
+            localCenter = (mesh->bbMax + mesh->bbMin) * 0.5f;
+        }
+
+        float roomDistance = distanceToAABB(roomBlock.boundingBox, node->mTransformation * localCenter);
+
+        if (roomDistance < distance) {
+            distance = roomDistance;
+            closestRoom = roomBlock.roomIndex;
+        }
+    }
+
+    return closestRoom;
+}
+
 void RoomGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) {
     std::vector<RoomBlock> roomBlocks;
+
+    aiMatrix4x4 collisionTransform = mSettings.CreateCollisionTransform();
 
     mOutput.roomCount = 0;
 
@@ -67,6 +106,13 @@ void RoomGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& f
 
             mOutput.namedLocations.push_back(location);
         }
+
+        if (StartsWith(nodeName, DOORWAY_PREFIX) && node->mNumMeshes) {
+            mOutput.doorways.push_back(Doorway(node, CollisionQuad(
+                scene->mMeshes[node->mMeshes[0]], 
+                collisionTransform * node->mTransformation
+            )));
+        }
     }
 
     if (roomBlocks.size() == 0) {
@@ -76,28 +122,16 @@ void RoomGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& f
     }
 
     for (auto node : mIncludedNodes) {
-        float distance = INFINITY;
-        int closestRoom = 0;
-
-        for (auto& roomBlock : roomBlocks) {
-            aiVector3D localCenter;
-
-            if (node->mNumMeshes) {
-                auto mesh = fileDefinition.GetExtendedMesh(scene->mMeshes[node->mMeshes[0]]);
-
-                localCenter = (mesh->bbMax + mesh->bbMin) * 0.5f;
-            }
-
-            float roomDistance = distanceToAABB(roomBlock.boundingBox, node->mTransformation * localCenter);
-
-            if (roomDistance < distance) {
-                distance = roomDistance;
-                closestRoom = roomBlock.roomIndex;
-            }
-        }
-
+        int closestRoom = findClosestRoom(node, scene, fileDefinition, roomBlocks, -1);
         mOutput.roomIndexMapping[node] = closestRoom;
         mOutput.roomCount = std::max(mOutput.roomCount, closestRoom + 1);
+    }
+
+    for (auto& doorway : mOutput.doorways) {
+        doorway.roomA = mOutput.roomIndexMapping[doorway.node];
+        doorway.roomB = findClosestRoom(doorway.node, scene, fileDefinition, roomBlocks, doorway.roomA);
+
+        mOutput.roomCount = std::max(mOutput.roomCount, doorway.roomB + 1);
     }
 }
 

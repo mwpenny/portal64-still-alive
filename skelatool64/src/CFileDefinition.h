@@ -31,6 +31,7 @@ public:
     CFileDefinition(std::string prefix, float modelScale, aiQuaternion modelRotate);
 
     void AddDefinition(std::unique_ptr<FileDefinition> definition);
+    std::string AddDataDefinition(const std::string& nameHint, const std::string& dataType, bool isArray, const std::string& location, std::unique_ptr<DataChunk> data);
     void AddMacro(const std::string& name, const std::string& value);
 
     std::string GetVertexBuffer(std::shared_ptr<ExtendedMesh> mesh, VertexType vertexType, int textureWidth, int textureHeight, const std::string& modelSuffix);

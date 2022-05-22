@@ -175,6 +175,13 @@ void CFileDefinition::AddDefinition(std::unique_ptr<FileDefinition> definition) 
     mDefinitions.push_back(std::move(definition));
 }
 
+std::string CFileDefinition::AddDataDefinition(const std::string& nameHint, const std::string& dataType, bool isArray, const std::string& location, std::unique_ptr<DataChunk> data) {
+    std::string name = GetUniqueName(nameHint);
+    std::unique_ptr<FileDefinition> def(new DataFileDefinition(dataType, name, isArray, location, std::move(data)));
+    AddDefinition(std::move(def));
+    return name;
+}
+
 void CFileDefinition::AddMacro(const std::string& name, const std::string& value) {
     mMacros.push_back(name + " " + value);
 }

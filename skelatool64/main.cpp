@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
 
         if (args.mIsLevel) {
             std::cout << "Grouping objects by room" << std::endl;
-            RoomGenerator roomGenerator;
+            RoomGenerator roomGenerator(settings);
             roomGenerator.TraverseScene(scene);
             roomGenerator.GenerateDefinitions(scene, fileDef);
 

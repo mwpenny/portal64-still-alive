@@ -8,9 +8,11 @@ int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Boundi
     for (int i = 0; i < CLIPPING_PLANE_COUNT; ++i) {
         struct Vector3 closestPoint;
 
-        closestPoint.x = frustrum->clippingPlanes[i].normal.x < 0.0f ? boundingBox->minX : boundingBox->maxX;
-        closestPoint.y = frustrum->clippingPlanes[i].normal.y < 0.0f ? boundingBox->minY : boundingBox->maxY;
-        closestPoint.z = frustrum->clippingPlanes[i].normal.z < 0.0f ? boundingBox->minZ : boundingBox->maxZ;
+        struct Vector3* normal = &frustrum->clippingPlanes[i].normal;
+
+        closestPoint.x = normal->x < 0.0f ? boundingBox->minX : boundingBox->maxX;
+        closestPoint.y = normal->y < 0.0f ? boundingBox->minY : boundingBox->maxY;
+        closestPoint.z = normal->z < 0.0f ? boundingBox->minZ : boundingBox->maxZ;
 
         if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.0f) {
             return 1;
@@ -22,11 +24,32 @@ int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Boundi
 }
 
 int isSphereOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Vector3* scaledCenter, float scaledRadius) {
-        for (int i = 0; i < CLIPPING_PLANE_COUNT; ++i) {
+    for (int i = 0; i < CLIPPING_PLANE_COUNT; ++i) {
         if (planePointDistance(&frustrum->clippingPlanes[i], scaledCenter) < -scaledRadius) {
             return 1;
         }
     }
+
+    return 0;
+}
+
+int isQuadOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct CollisionQuad* quad) {
+    for (int i = 0; i < CLIPPING_PLANE_COUNT; ++i) {
+        struct Vector3* normal = &frustrum->clippingPlanes[i].normal;
+        float aLerp = vector3Dot(normal, &quad->edgeA) < 0.0f ? 0.0f : quad->edgeALength;
+        float bLerp = vector3Dot(normal, &quad->edgeB) < 0.0f ? 0.0f : quad->edgeBLength;
+
+        struct Vector3 closestPoint;
+        vector3AddScaled(&quad->corner, &quad->edgeA, aLerp, &closestPoint);
+        vector3AddScaled(&closestPoint, &quad->edgeB, bLerp, &closestPoint);
+
+        vector3Scale(&closestPoint, &closestPoint, SCENE_SCALE);
+
+        if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.0f) {
+            return 1;
+        }
+    }
+
 
     return 0;
 }

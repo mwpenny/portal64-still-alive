@@ -34,6 +34,8 @@ private:
     void CalculateTriggers(const aiScene* scene, CFileDefinition& fileDefinition, std::string& triggersName);
 
     void CalculateLocations(const aiScene* scene, CFileDefinition& fileDefinition, std::string& locationsName);
+
+    void CalculateDoorwaysAndRooms(const aiScene* scene, CFileDefinition& fileDefinition, std::string& doorwaysName, std::string& roomsName);
 };
 
 #endif
