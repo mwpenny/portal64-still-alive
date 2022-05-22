@@ -20,14 +20,16 @@ CutsceneStep::CutsceneStep(
 
 bool doesBelongToCutscene(const CutsceneStep& startStep, const CutsceneStep& otherStep) {
     aiVector3D offset = otherStep.location - startStep.location;
-    aiVector3D relativeOffset = startStep.direction.Rotate(offset);
+    aiQuaternion directionCopy = startStep.direction;
+    aiVector3D relativeOffset = directionCopy.Rotate(offset);
 
     return relativeOffset.y >= 0.0f && relativeOffset.x * relativeOffset.x + relativeOffset.z * relativeOffset.z < 0.1f;
 }
 
 float distanceFromStart(const CutsceneStep& startStep, const CutsceneStep& otherStep) {
     aiVector3D offset = otherStep.location - startStep.location;
-    aiVector3D relativeOffset = startStep.direction.Rotate(offset);
+    aiQuaternion directionCopy = startStep.direction;
+    aiVector3D relativeOffset = directionCopy.Rotate(offset);
     return relativeOffset.y;
 }
 

@@ -4,9 +4,10 @@
 
 #include <algorithm>
 
-CollisionGenerator::CollisionGenerator(const DisplayListSettings& settings) : 
+CollisionGenerator::CollisionGenerator(const DisplayListSettings& settings, const RoomGeneratorOutput& roomOutput) : 
     DefinitionGenerator(), 
-    mSettings(settings) {}
+    mSettings(settings),
+    mRoomOutput(roomOutput) {}
 
 
 bool CollisionGenerator::ShouldIncludeNode(aiNode* node) {
@@ -25,6 +26,8 @@ void CollisionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefiniti
     std::string quadCollidersName = fileDefinition.GetUniqueName("quad_colliders");
     std::string colliderTypesName = fileDefinition.GetUniqueName("collider_types");
     std::string collisionObjectsName = fileDefinition.GetUniqueName("collision_objects");
+
+    sortNodesByRoom(mIncludedNodes, mRoomOutput);
 
     for (auto node = mIncludedNodes.begin(); node != mIncludedNodes.end(); ++node) {
         for (unsigned i = 0; i < (*node)->mNumMeshes; ++i) {

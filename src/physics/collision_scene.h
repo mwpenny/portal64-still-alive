@@ -10,6 +10,17 @@
 
 #define MAX_DYNAMIC_OBJECTS     16
 
+struct BroadphaseEdge {
+    float xValue;
+    short quadIndex;
+    short isStartEdge;
+};
+
+struct BroadphaseIndex {
+    struct BroadphaseEdge* edges;
+    short edgesCount;
+};
+
 struct CollisionScene {
     struct CollisionObject* quads;
     struct Transform* portalTransforms[2];

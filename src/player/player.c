@@ -8,6 +8,7 @@
 #include "physics/collision_sphere.h"
 #include "physics/collision_scene.h"
 #include "physics/config.h"
+#include "../levels/levels.h"
 
 #define GRAB_RAYCAST_DISTANCE   3.5f
 
@@ -147,6 +148,8 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Vector3 forward;
     struct Vector3 right;
 
+    int doorwayMask = levelCheckDoorwaySides(&player->body.transform.position, player->currentRoom);
+
     struct Transform* transform = &player->body.transform;
 
     quatMultVector(&transform->rotation, &gForward, &forward);
@@ -276,4 +279,6 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     cameraTransform->rotation = player->body.transform.rotation;
     transformPoint(transform, &gCameraOffset, &cameraTransform->position);
     playerUpdateGrabbedObject(player);
+
+    player->currentRoom = levelCheckDoorwayCrossings(&player->body.transform.position, player->currentRoom, doorwayMask);
 }

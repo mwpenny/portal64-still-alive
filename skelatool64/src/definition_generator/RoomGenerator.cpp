@@ -20,17 +20,21 @@ RoomGenerator::RoomGenerator(const DisplayListSettings& settings): DefinitionGen
 short RoomGeneratorOutput::FindLocationRoom(const std::string& name) const {
     for (auto& location : namedLocations) {
         if (location.name == name) {
-            auto room = roomIndexMapping.find(location.node);
-
-            if (room == roomIndexMapping.end()) {
-                return -1;
-            }
-
-            return room->second;
+            return RoomForNode(location.node);
         }
     }
 
     return -1;
+}
+
+int RoomGeneratorOutput::RoomForNode(const aiNode* node) const {
+    auto room = roomIndexMapping.find(node);
+
+    if (room == roomIndexMapping.end()) {
+        return -1;
+    }
+
+    return room->second;
 }
 
 struct RoomBlock {
@@ -42,9 +46,9 @@ bool RoomGenerator::ShouldIncludeNode(aiNode* node) {
     return true;
 }
 
-void sortNodesByRoom(std::vector<aiNode*>& nodes, RoomGeneratorOutput& roomOutput) {
+void sortNodesByRoom(std::vector<aiNode*>& nodes, const RoomGeneratorOutput& roomOutput) {
     std::sort(nodes.begin(), nodes.end(), [&](const aiNode* a, const aiNode* b) -> bool {
-        return roomOutput.roomIndexMapping[a] < roomOutput.roomIndexMapping[b];
+        return roomOutput.RoomForNode(a) < roomOutput.RoomForNode(b);
     });
 }
 

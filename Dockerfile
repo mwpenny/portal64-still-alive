@@ -40,7 +40,8 @@ RUN apt install -y binutils-mips-n64 \
     cmake \
     build-essential \
     wget \
-    unzip
+    unzip \
+    sox
 
 COPY skelatool64/src skelatool64/src
 COPY skelatool64/main.cpp skelatool64/main.cpp
@@ -62,6 +63,7 @@ RUN pip install vpk
 COPY Makefile Makefile
 COPY tools/export_fbx.py tools/export_fbx.py
 COPY tools/generate_level_list.js tools/generate_level_list.js
+COPY tools/generate_sound_ids.js tools/generate_sound_ids.js
 COPY asm asm
 COPY assets assets
 COPY src src

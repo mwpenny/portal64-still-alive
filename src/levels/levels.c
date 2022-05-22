@@ -78,3 +78,41 @@ struct Location* levelGetLocation(short index) {
 
     return &gCurrentLevel->locations[index];
 }
+
+int levelCheckDoorwaySides(struct Vector3* position, int currentRoom) {
+    struct Room* room = &gCurrentLevel->rooms[currentRoom];
+
+    int sideMask = 0;
+
+    for (int i = 0; i < room->doorwayCount; ++i) {
+        if (planePointDistance(&gCurrentLevel->doorways[room->doorwayIndices[i]].quad.plane, position) > 0) {
+            sideMask |= 1 << 1;
+        }
+    }
+
+    return sideMask;
+}
+
+int levelCheckDoorwayCrossings(struct Vector3* position, int currentRoom, int sideMask) {
+    struct Room* room = &gCurrentLevel->rooms[currentRoom];
+
+    for (int i = 0; i < room->doorwayCount; ++i) {
+        struct Doorway* doorway = &gCurrentLevel->doorways[room->doorwayIndices[i]];
+
+        int prevSide = (sideMask & (1 << 1)) != 0;
+        int currSide = planePointDistance(&doorway->quad.plane, position) > 0;
+
+        if (prevSide != currSide) {
+            struct Vector3 posOnFace;
+            planeProjectPoint(&doorway->quad.plane, position, &posOnFace);
+
+            if (collisionQuadDetermineEdges(&posOnFace, &doorway->quad)) {
+                continue;
+            }
+
+            return doorway->roomA == currentRoom ? doorway->roomB : doorway->roomA;
+        }
+    }
+
+    return currentRoom;
+}

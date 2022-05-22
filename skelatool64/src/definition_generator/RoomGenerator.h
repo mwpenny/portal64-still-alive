@@ -28,9 +28,10 @@ struct RoomGeneratorOutput {
     int roomCount;
 
     short FindLocationRoom(const std::string& name) const;
+    int RoomForNode(const aiNode* node) const;
 };
 
-void sortNodesByRoom(std::vector<aiNode*>& nodes, RoomGeneratorOutput& roomOutput);
+void sortNodesByRoom(std::vector<aiNode*>& nodes, const RoomGeneratorOutput& roomOutput);
 
 class RoomGenerator : public DefinitionGenerator {
 public:

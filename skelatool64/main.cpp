@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
             roomGenerator.GenerateDefinitions(scene, fileDef);
 
             std::cout << "Generating collider definitions" << std::endl;
-            CollisionGenerator colliderGenerator(settings);
+            CollisionGenerator colliderGenerator(settings, roomGenerator.GetOutput());
             colliderGenerator.TraverseScene(scene);
             colliderGenerator.GenerateDefinitions(scene, fileDef);
 
