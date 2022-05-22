@@ -18,4 +18,6 @@ int collisionBoxCollidePlane(void* data, struct Transform* boxTransform, struct 
 
 float collisionBoxSolidMofI(struct ColliderTypeData* typeData, float mass);
 
+void collisionBoxBoundingBox(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box);
+
 #endif

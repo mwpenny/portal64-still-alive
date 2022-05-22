@@ -192,5 +192,6 @@ void collisionSceneUpdateDynamics() {
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
         rigidBodyUpdate(gCollisionScene.dynamicObjects[i]->body);
         rigidBodyCheckPortals(gCollisionScene.dynamicObjects[i]->body);
+        collisionObjectUpdateBB(gCollisionScene.dynamicObjects[i]);
     }
 }

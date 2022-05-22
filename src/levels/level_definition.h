@@ -69,7 +69,9 @@ struct Doorway {
 
 struct Room {
     short* doorwayIndices;
+    struct BroadphaseEdge* broadphaseEdges;
     short doorwayCount;
+    short broadphaseEdgeCount;
 };
 
 struct LevelDefinition {

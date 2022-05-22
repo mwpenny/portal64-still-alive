@@ -5,6 +5,7 @@
 #include "../math/transform.h"
 #include "../math/plane.h"
 #include "../math/ray.h"
+#include "../math/box3d.h"
 #include "contact_solver.h"
 #include "collision_quad.h"
 
@@ -25,7 +26,7 @@ struct CollisionObject;
 struct RaycastHit;
 
 typedef float (*MomentOfInertiaCalculator)(struct ColliderTypeData* typeData, float mass);
-
+typedef void (*BoundingBoxCalculator)(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box);
 
 typedef int (*CollideWithPlane)(void* data, struct Transform* transform, struct Plane* plane, struct ContactConstraintState* contact);
 typedef int (*CollideWithQuad)(void* data, struct Transform* transform, struct CollisionQuad* quad, struct ContactConstraintState* contact);
@@ -37,6 +38,7 @@ struct ColliderCallbacks {
     CollideWithQuad collideWithQuad;
     RaycastCollider raycast;
     MomentOfInertiaCalculator mofICalculator;
+    BoundingBoxCalculator boundingBoxCalculator;
 };
 
 struct ColliderTypeData {

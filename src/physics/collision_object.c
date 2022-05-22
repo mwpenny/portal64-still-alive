@@ -4,6 +4,7 @@ void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData
     object->collider = collider;
     object->body = body;
     rigidBodyInit(body, mass, collider->callbacks->mofICalculator(collider, mass));
+    collisionObjectUpdateBB(object);
 }
 
 
@@ -38,6 +39,10 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
         return;
     }
 
+    if (!box3DHasOverlap(&object->boundingBox, &quad->boundingBox)) {
+        return;
+    }
+
     struct ContactConstraintState localContact;
     localContact.contactCount = 0;
 
@@ -53,5 +58,11 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
         }
     } else if (contact) {
         contactSolverRemoveContact(contactSolver, contact);
+    }
+}
+
+void collisionObjectUpdateBB(struct CollisionObject* object) {
+    if (object->body) {
+        object->collider->callbacks->boundingBoxCalculator(object->collider, &object->body->transform, &object->boundingBox);
     }
 }

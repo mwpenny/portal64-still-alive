@@ -29,11 +29,15 @@ void CollisionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefiniti
 
     sortNodesByRoom(mIncludedNodes, mRoomOutput);
 
-    for (auto node = mIncludedNodes.begin(); node != mIncludedNodes.end(); ++node) {
-        for (unsigned i = 0; i < (*node)->mNumMeshes; ++i) {
-            aiMesh* mesh = scene->mMeshes[(*node)->mMeshes[i]];
+    for (int i = 0; i < mRoomOutput.roomCount; ++i) {
+        mOutput.broadphaseIndex.push_back(std::vector<BroadphaseEdge>());
+    }
 
-            CollisionQuad collider(mesh, globalTransform * (*node)->mTransformation);
+    for (auto node : mIncludedNodes) {
+        for (unsigned i = 0; i < node->mNumMeshes; ++i) {
+            aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+
+            CollisionQuad collider(mesh, globalTransform * node->mTransformation);
             collidersChunk->Add(std::move(collider.Generate()));
 
             std::unique_ptr<StructureDataChunk> colliderType(new StructureDataChunk());
@@ -47,12 +51,32 @@ void CollisionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefiniti
             std::unique_ptr<StructureDataChunk> collisionObject(new StructureDataChunk());
             collisionObject->AddPrimitive(std::string("&" + colliderTypesName + "[" + std::to_string(meshCount) + "]"));
             collisionObject->AddPrimitive<const char*>("NULL");
+            collisionObject->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(collider.BoundingBox())));
             collisionObjectChunk->Add(std::move(collisionObject));
+
 
             mOutput.quads.push_back(collider);
 
+            aiAABB bb = collider.BoundingBox();
+            BroadphaseEdge edge;
+            edge.quadIndex = meshCount;
+
+            edge.value = bb.mMin.x;
+            mOutput.broadphaseIndex[mRoomOutput.RoomForNode(node)].push_back(edge);
+
+            if (bb.mMin.x != bb.mMax.x) {
+                edge.value = bb.mMax.x;
+                mOutput.broadphaseIndex[mRoomOutput.RoomForNode(node)].push_back(edge);
+            }
+
             ++meshCount;
         }
+    }
+
+    for (auto& broadphase : mOutput.broadphaseIndex) {
+        std::sort(broadphase.begin(), broadphase.end(), [](const BroadphaseEdge& a, const BroadphaseEdge& b) -> bool {
+            return a.value < b.value;
+        });
     }
 
     std::unique_ptr<FileDefinition> collisionFileDef(new DataFileDefinition(

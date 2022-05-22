@@ -15,6 +15,7 @@ void quatAxisComplex(struct Vector3* axis, struct Vector2* complex, struct Quate
 void quatConjugate(struct Quaternion* in, struct Quaternion* out);
 void quatNegate(struct Quaternion* in, struct Quaternion* out);
 void quatMultVector(struct Quaternion* q, struct Vector3* a, struct Vector3* out);
+void quatRotatedBoundingBoxSize(struct Quaternion* q, struct Vector3* halfBoxSize, struct Vector3* out);
 void quatMultiply(struct Quaternion* a, struct Quaternion* b, struct Quaternion* out);
 void quatAdd(struct Quaternion* a, struct Quaternion* b, struct Quaternion* out);
 void quatToMatrix(struct Quaternion* q, float out[4][4]);

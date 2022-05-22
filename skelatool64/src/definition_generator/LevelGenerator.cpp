@@ -284,9 +284,30 @@ void LevelGenerator::CalculateDoorwaysAndRooms(const aiScene* scene, CFileDefini
             std::move(doorwayList)
         );
 
+        std::unique_ptr<StructureDataChunk> broadphaseIndex(new StructureDataChunk());
+
+        for (auto& edge : mCollisionOutput.broadphaseIndex[i]) {
+            std::unique_ptr<StructureDataChunk> broadphaseEdge(new StructureDataChunk());
+
+            broadphaseEdge->AddPrimitive(std::string("&") + mCollisionOutput.quadsName + "[" + std::to_string(edge.quadIndex) + "]");
+            broadphaseEdge->AddPrimitive(edge.value);
+
+            broadphaseIndex->Add(std::move(broadphaseEdge));
+        }
+
+        std::string broadphseName = fileDefinition.AddDataDefinition(
+            "room_broadphase",
+            "struct BroadphaseEdge",
+            true,
+            "_geo",
+            std::move(broadphaseIndex)
+        );
+
         std::unique_ptr<StructureDataChunk> room(new StructureDataChunk());
         room->AddPrimitive(std::move(doorwayListName));
+        room->AddPrimitive(std::move(broadphseName));
         room->AddPrimitive(roomDoorways[i].size());
+        room->AddPrimitive(mCollisionOutput.broadphaseIndex[i].size());
         rooms->Add(std::move(room));
     }
 

@@ -92,6 +92,32 @@ void quatMultVector(struct Quaternion* q, struct Vector3* a, struct Vector3* out
     out->z = asQuat.z;
 }
 
+void quatRotatedBoundingBoxSize(struct Quaternion* q, struct Vector3* halfBoxSize, struct Vector3* out) {
+    float xx = q->x*q->x;
+    float yy = q->y*q->y;
+    float zz = q->z*q->z;
+
+    float xy = q->x*q->y;
+    float yz = q->y*q->z;
+    float xz = q->x*q->z;
+
+    float xw = q->x*q->w;
+    float yw = q->y*q->w;
+    float zw = q->z*q->w;
+
+    out->x = fabsf(1.0f - 2.0f * (yy + zz)) * halfBoxSize->x +
+        fabsf(2.0f * (xy - zw)) * halfBoxSize->y +
+        fabsf(2.0f * (xz + yw)) * halfBoxSize->z;
+
+    out->y = fabsf(2.0f * (xy + zw)) * halfBoxSize->x +
+        fabsf(1.0f - 2.0f * (xx + zz)) * halfBoxSize->y +
+        fabsf(2.0f * (yz - xw)) * halfBoxSize->z;
+
+    out->z = fabsf(2.0f * (xz - yw)) * halfBoxSize->x +
+        fabsf(2.0f * (yz + xw)) * halfBoxSize->y +
+        fabsf(1.0f - 2.0f * (xx + yy));
+}
+
 void quatMultiply(struct Quaternion* a, struct Quaternion* b, struct Quaternion* out) {
     assert(a != out && b != out);
     out->x = a->w*b->x + a->x*b->w + a->y*b->z - a->z*b->y;

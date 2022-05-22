@@ -98,9 +98,21 @@ float collisionSphereSolidMofI(struct ColliderTypeData* typeData, float mass) {
     return (2.0f / 5.0f) * mass * sphere->radius * sphere->radius;
 }
 
+void collisionSphereBoundingBox(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box) {
+    struct CollisionSphere* sphere = (struct CollisionSphere*)typeData->data;
+    box->min.x = transform->position.x - sphere->radius;
+    box->min.y = transform->position.y - sphere->radius;
+    box->min.z = transform->position.z - sphere->radius;
+
+    box->max.x = transform->position.x + sphere->radius;
+    box->max.y = transform->position.y + sphere->radius;
+    box->max.z = transform->position.z + sphere->radius;
+}
+
 struct ColliderCallbacks gCollisionSphereCallbacks = {
     collisionSphereCollidePlane,
     collisionSphereCollideQuad,
     NULL, // TODO
     collisionSphereSolidMofI,
+    collisionSphereBoundingBox,
 };

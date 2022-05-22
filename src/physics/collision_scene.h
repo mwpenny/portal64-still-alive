@@ -11,14 +11,8 @@
 #define MAX_DYNAMIC_OBJECTS     16
 
 struct BroadphaseEdge {
-    float xValue;
-    short quadIndex;
-    short isStartEdge;
-};
-
-struct BroadphaseIndex {
-    struct BroadphaseEdge* edges;
-    short edgesCount;
+    struct CollisionObject* object;
+    float value;
 };
 
 struct CollisionScene {

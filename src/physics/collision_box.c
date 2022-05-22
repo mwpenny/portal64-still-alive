@@ -9,6 +9,7 @@ struct ColliderCallbacks gCollisionBoxCallbacks = {
     collisionBoxCollideQuad,
     raycastBox,
     collisionBoxSolidMofI,
+    collisionBoxBoundingBox,
 };
 
 int _collsionBuildPlaneContact(struct Transform* boxTransform, struct Plane* plane, struct Vector3* point, struct ContactConstraintState* output, int id) {
@@ -131,4 +132,12 @@ int collisionBoxCollidePlane(void* data, struct Transform* boxTransform, struct 
 float collisionBoxSolidMofI(struct ColliderTypeData* typeData, float mass) {
     float singleSide = sqrtf(vector3MagSqrd(&((struct CollisionBox*)typeData->data)->sideLength));
     return mass * singleSide * singleSide * (1.0f / 6.0f);
+}
+
+void collisionBoxBoundingBox(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box) {
+    struct CollisionBox* collisionBox = (struct CollisionBox*)typeData->data;
+    struct Vector3 halfSize;
+    quatRotatedBoundingBoxSize(&transform->rotation, &collisionBox->sideLength, &halfSize);
+    vector3Sub(&transform->position, &halfSize, &box->min);
+    vector3Add(&transform->position, &halfSize, &box->max);
 }

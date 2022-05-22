@@ -1,5 +1,7 @@
 #include "CollisionQuad.h"
 
+#include "../MathUtl.h"
+
 #define SAME_TOLERANCE  0.00001f
 
 bool bottomRightMost(const aiVector3D& a, const aiVector3D& b) { 
@@ -157,4 +159,25 @@ bool CollisionQuad::IsCoplanar(ExtendedMesh& mesh, float relativeScale) const {
     }
 
     return true;
+}
+
+aiAABB CollisionQuad::BoundingBox() const {
+    aiAABB result;
+
+    result.mMin = corner;
+    result.mMax = corner;
+
+    aiVector3D point = corner + edgeA * edgeALength;
+    result.mMin = min(result.mMin, point);
+    result.mMax = max(result.mMax, point);
+
+    point = point + edgeB * edgeBLength;
+    result.mMin = min(result.mMin, point);
+    result.mMax = max(result.mMax, point);
+
+    point = corner + edgeB * edgeBLength;
+    result.mMin = min(result.mMin, point);
+    result.mMax = max(result.mMax, point);
+
+    return result;
 }

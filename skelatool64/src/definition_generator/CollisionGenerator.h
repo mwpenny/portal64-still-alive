@@ -6,9 +6,15 @@
 #include "CollisionQuad.h"
 #include "RoomGenerator.h"
 
+struct BroadphaseEdge {
+    float value;
+    int quadIndex;
+};
+
 struct CollisionGeneratorOutput {
     std::string quadsName;
     std::vector<CollisionQuad> quads;
+    std::vector<std::vector<BroadphaseEdge>> broadphaseIndex;
 };
 
 class CollisionGenerator : public DefinitionGenerator {
