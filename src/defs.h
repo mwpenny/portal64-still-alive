@@ -18,6 +18,8 @@
 
 #define SCENE_SCALE 256
 
+#define MAX_DYNAMIC_OBJECTS     16
+
 #define SIMPLE_CONTROLLER_MSG	    (5)
 
 #define PRINTF(a) 

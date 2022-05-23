@@ -19,7 +19,6 @@ struct Player {
     struct CollisionObject collisionObject;
     struct RigidBody body;
     short grabbingThroughPortal;
-    short currentRoom;
     struct RigidBody* grabbing;
     float pitchVelocity;
     float yawVelocity;

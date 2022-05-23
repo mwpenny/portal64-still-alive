@@ -37,12 +37,12 @@ void playerInit(struct Player* player, struct Location* startLocation) {
 
     if (startLocation) {
         player->body.transform = startLocation->transform;
-        player->body.transform.position.y += PLAYER_HEAD_HEIGHT;
+        player->body.currentRoom = startLocation->roomIndex;
     } else {
         transformInitIdentity(&player->body.transform);
-        player->currentRoom = 0;
+        player->body.currentRoom = 0;
     }
-    player->currentRoom = startLocation->roomIndex;
+    player->body.transform.position.y += PLAYER_HEAD_HEIGHT;
 }
 
 #define PLAYER_SPEED    (5.0f)
@@ -148,7 +148,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Vector3 forward;
     struct Vector3 right;
 
-    int doorwayMask = levelCheckDoorwaySides(&player->body.transform.position, player->currentRoom);
+    int doorwayMask = worldCheckDoorwaySides(&gCurrentLevel->world, &player->body.transform.position, player->body.currentRoom);
 
     struct Transform* transform = &player->body.transform;
 
@@ -280,5 +280,5 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     transformPoint(transform, &gCameraOffset, &cameraTransform->position);
     playerUpdateGrabbedObject(player);
 
-    player->currentRoom = levelCheckDoorwayCrossings(&player->body.transform.position, player->currentRoom, doorwayMask);
+    player->body.currentRoom = worldCheckDoorwayCrossings(&gCurrentLevel->world, &player->body.transform.position, player->body.currentRoom, doorwayMask);
 }

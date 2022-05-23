@@ -284,30 +284,54 @@ void LevelGenerator::CalculateDoorwaysAndRooms(const aiScene* scene, CFileDefini
             std::move(doorwayList)
         );
 
-        std::unique_ptr<StructureDataChunk> broadphaseIndex(new StructureDataChunk());
+        std::unique_ptr<StructureDataChunk> quadIndices(new StructureDataChunk());
+        std::unique_ptr<StructureDataChunk> cellContents(new StructureDataChunk());
 
-        for (auto& edge : mCollisionOutput.broadphaseIndex[i]) {
-            std::unique_ptr<StructureDataChunk> broadphaseEdge(new StructureDataChunk());
+        int startIndex = 0;
 
-            broadphaseEdge->AddPrimitive(std::string("&") + mCollisionOutput.quadsName + "[" + std::to_string(edge.quadIndex) + "]");
-            broadphaseEdge->AddPrimitive(edge.value);
+        for (auto& zRange : mCollisionOutput.roomGrids[i].cells) {
+            for (auto& indices : zRange) {
+                for (auto index : indices) {
+                    quadIndices->AddPrimitive(index);
+                }
 
-            broadphaseIndex->Add(std::move(broadphaseEdge));
+                int endIndex = startIndex + indices.size();
+
+                std::unique_ptr<StructureDataChunk> range(new StructureDataChunk());
+                range->AddPrimitive(startIndex);
+                range->AddPrimitive(endIndex);
+                cellContents->Add(std::move(range));
+
+                startIndex = endIndex;
+
+            }
         }
 
-        std::string broadphseName = fileDefinition.AddDataDefinition(
-            "room_broadphase",
-            "struct BroadphaseEdge",
+        std::string quadIndicesName = fileDefinition.AddDataDefinition(
+            "room_indices",
+            "short",
             true,
             "_geo",
-            std::move(broadphaseIndex)
+            std::move(quadIndices)
+        );
+
+        std::string cellContentsName = fileDefinition.AddDataDefinition(
+            "room_cells",
+            "struct Rangeu16",
+            true,
+            "_geo",
+            std::move(cellContents)
         );
 
         std::unique_ptr<StructureDataChunk> room(new StructureDataChunk());
+        room->AddPrimitive(std::move(quadIndicesName));
+        room->AddPrimitive(std::move(cellContentsName));
+        room->AddPrimitive(mCollisionOutput.roomGrids[i].spanX);
+        room->AddPrimitive(mCollisionOutput.roomGrids[i].spanZ);
+        room->AddPrimitive(mCollisionOutput.roomGrids[i].x);
+        room->AddPrimitive(mCollisionOutput.roomGrids[i].z);
         room->AddPrimitive(std::move(doorwayListName));
-        room->AddPrimitive(std::move(broadphseName));
         room->AddPrimitive(roomDoorways[i].size());
-        room->AddPrimitive(mCollisionOutput.broadphaseIndex[i].size());
         rooms->Add(std::move(room));
     }
 
@@ -340,6 +364,7 @@ void LevelGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& 
     
     std::unique_ptr<StructureDataChunk> levelDef(new StructureDataChunk());
 
+
     levelDef->AddPrimitive("collisionQuads", mCollisionOutput.quadsName);
     levelDef->AddPrimitive("staticContent", mStaticOutput.staticContentName);
     levelDef->AddPrimitive("roomStaticMapping", mStaticOutput.roomMappingName);
@@ -348,15 +373,19 @@ void LevelGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& 
     levelDef->AddPrimitive("portalSurfaceMapping", portalSurfaceMapping);
     levelDef->AddPrimitive("triggers", triggers);
     levelDef->AddPrimitive("locations", locations);
-    levelDef->AddPrimitive("rooms", rooms);
-    levelDef->AddPrimitive("doorways", doorways);
+
+    std::unique_ptr<StructureDataChunk> worldDef(new StructureDataChunk());
+    worldDef->AddPrimitive("rooms", rooms);
+    worldDef->AddPrimitive("doorways", doorways);
+    worldDef->AddPrimitive("roomCount", mRoomOutput.roomCount);
+    worldDef->AddPrimitive("doorwayCount", mRoomOutput.doorways.size());
+    levelDef->Add("world", std::move(worldDef));
+
     levelDef->AddPrimitive("collisionQuadCount", mCollisionOutput.quads.size());
     levelDef->AddPrimitive("staticContentCount", mStaticOutput.staticMeshes.size());
     levelDef->AddPrimitive("portalSurfaceCount", portalSurfacesCount);
     levelDef->AddPrimitive("triggerCount", mTriggerOutput.triggers.size());
     levelDef->AddPrimitive("locationCount", mRoomOutput.namedLocations.size());
-    levelDef->AddPrimitive("roomCount", mRoomOutput.roomCount);
-    levelDef->AddPrimitive("doorwayCount", mRoomOutput.doorways.size());
     levelDef->AddPrimitive("startLocation", mRoomOutput.FindLocationRoom("start"));
 
     fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct LevelDefinition", fileDefinition.GetUniqueName("level"), false, "_geo", std::move(levelDef))));

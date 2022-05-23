@@ -4,19 +4,15 @@
 #include "collision_object.h"
 #include "raycasting.h"
 #include "../math/ray.h"
+#include "world.h"
+#include "defs.h"
 
 #define PORTAL_THICKNESS        0.11f
 #define PORTAL_X_RADIUS         0.5f
 
-#define MAX_DYNAMIC_OBJECTS     16
-
-struct BroadphaseEdge {
-    struct CollisionObject* object;
-    float value;
-};
-
 struct CollisionScene {
     struct CollisionObject* quads;
+    struct World* world;
     struct Transform* portalTransforms[2];
     struct CollisionObject* dynamicObjects[MAX_DYNAMIC_OBJECTS];
     u16 dynamicObjectCount;
@@ -27,7 +23,7 @@ typedef void (*ManifoldCallback)(void* data, struct ContactConstraintState* cont
 
 extern struct CollisionScene gCollisionScene;
 
-void collisionSceneInit(struct CollisionScene* scene, struct CollisionObject* quads, int quadCount);
+void collisionSceneInit(struct CollisionScene* scene, struct CollisionObject* quads, int quadCount, struct World* world);
 void collisionObjectCollideWithScene(struct CollisionObject* object, struct CollisionScene* scene, struct ContactSolver* contactSolver);
 
 int collisionSceneIsTouchingPortal(struct Vector3* contactPoint);

@@ -52,14 +52,17 @@ void sceneInit(struct Scene* scene) {
 
     quatAxisAngle(&gUp, M_PI * 0.5f, &scene->portals[1].transform.rotation);
 
-    cubeInit(&scene->cube);
+    for (int i = 0; i < MAX_CUBES; ++i) {
+        cubeInit(&scene->cubes[i]);
 
-    scene->cube.rigidBody.transform.position.x = 5.0f;
-    scene->cube.rigidBody.transform.position.y = 1.0f;
-    scene->cube.rigidBody.transform.position.z = -1.0f;
+        scene->cubes[i].rigidBody.transform.position.x = 5.0f;
+        scene->cubes[i].rigidBody.transform.position.y = 1.0f;
+        scene->cubes[i].rigidBody.transform.position.z = -9.0f + i;
 
-    quatAxisAngle(&gRight, M_PI * 0.125f, &scene->cube.rigidBody.transform.rotation);
-    scene->cube.rigidBody.angularVelocity = gOneVec;
+        quatAxisAngle(&gRight, M_PI * 0.125f, &scene->cubes[i].rigidBody.transform.rotation);
+        scene->cubes[i].rigidBody.angularVelocity = gOneVec;
+    }
+
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {
@@ -111,7 +114,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     
     struct RenderProps renderProperties;
 
-    renderPropsInit(&renderProperties, &scene->camera, (float)SCREEN_WD / (float)SCREEN_HT, renderState, scene->player.currentRoom);
+    renderPropsInit(&renderProperties, &scene->camera, (float)SCREEN_WD / (float)SCREEN_HT, renderState, scene->player.body.currentRoom);
 
     renderProperties.camera = scene->camera;
 
@@ -158,7 +161,9 @@ void sceneUpdate(struct Scene* scene) {
     playerUpdate(&scene->player, &scene->camera.transform);
     sceneCheckPortals(scene);
 
-    cubeUpdate(&scene->cube);
+    for (int i = 0; i < MAX_CUBES; ++i) {
+        cubeUpdate(&scene->cubes[i]);
+    }
     
     collisionSceneUpdateDynamics();
 

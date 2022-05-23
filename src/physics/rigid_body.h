@@ -31,6 +31,7 @@ struct RigidBody {
     float momentOfInertiaInv;
     
     enum RigidBodyFlags flags;
+    short currentRoom;
 };
 
 void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniteria);

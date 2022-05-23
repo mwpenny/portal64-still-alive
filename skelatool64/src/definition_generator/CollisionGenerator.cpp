@@ -1,6 +1,7 @@
 #include "CollisionGenerator.h"
 
 #include "../StringUtils.h"
+#include "../MathUtl.h"
 
 #include <algorithm>
 
@@ -12,6 +13,35 @@ CollisionGenerator::CollisionGenerator(const DisplayListSettings& settings, cons
 
 bool CollisionGenerator::ShouldIncludeNode(aiNode* node) {
     return StartsWith(node->mName.C_Str(), "@collision");
+}
+
+CollisionGrid::CollisionGrid(const aiAABB& boundaries) {
+    x = floor(boundaries.mMin.x);
+    z = floor(boundaries.mMin.z);
+
+    spanX = ceil((boundaries.mMax.x - x) / COLLISION_GRID_CELL_SIZE);
+    spanZ = ceil((boundaries.mMax.z - z) / COLLISION_GRID_CELL_SIZE);
+    
+    cells.resize(spanX);
+
+    for (int i = 0; i < spanX; ++i) {
+        cells[i].resize(spanZ);
+    }
+}
+
+void CollisionGrid::AddToCells(const aiAABB& box, short value) {
+    int minX = floor((box.mMin.x - x) / COLLISION_GRID_CELL_SIZE);
+    int maxX = floor((box.mMax.x - x) / COLLISION_GRID_CELL_SIZE);
+    int minZ = floor((box.mMin.z - z) / COLLISION_GRID_CELL_SIZE);
+    int maxZ = floor((box.mMax.z - z) / COLLISION_GRID_CELL_SIZE);
+
+    for (int currX = minX; currX <= maxX; ++currX) {
+        for (int currZ = minZ; currZ <= maxZ; ++currZ) {
+            if (currX >= 0 && currX < spanX && currZ >= 0 && currZ < spanZ) {
+                cells[currX][currZ].push_back(value);
+            }
+        }
+    }
 }
 
 void CollisionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) {
@@ -29,8 +59,11 @@ void CollisionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefiniti
 
     sortNodesByRoom(mIncludedNodes, mRoomOutput);
 
+    std::vector<aiAABB> roomBoxes;
+    std::vector<int> quadRooms;
+
     for (int i = 0; i < mRoomOutput.roomCount; ++i) {
-        mOutput.broadphaseIndex.push_back(std::vector<BroadphaseEdge>());
+        roomBoxes.push_back(aiAABB());
     }
 
     for (auto node : mIncludedNodes) {
@@ -57,26 +90,31 @@ void CollisionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefiniti
 
             mOutput.quads.push_back(collider);
 
+            int room = mRoomOutput.RoomForNode(node);
+            quadRooms.push_back(room);
+
             aiAABB bb = collider.BoundingBox();
-            BroadphaseEdge edge;
-            edge.quadIndex = meshCount;
-
-            edge.value = bb.mMin.x;
-            mOutput.broadphaseIndex[mRoomOutput.RoomForNode(node)].push_back(edge);
-
-            if (bb.mMin.x != bb.mMax.x) {
-                edge.value = bb.mMax.x;
-                mOutput.broadphaseIndex[mRoomOutput.RoomForNode(node)].push_back(edge);
+            aiAABB& roomBox = roomBoxes[room];
+            
+            if (roomBox.mMin == roomBox.mMax) {
+                roomBox = bb;
+            } else {
+                roomBox.mMin = min(roomBox.mMin, bb.mMin);
+                roomBox.mMax = max(roomBox.mMax, bb.mMax);
             }
 
             ++meshCount;
         }
     }
 
-    for (auto& broadphase : mOutput.broadphaseIndex) {
-        std::sort(broadphase.begin(), broadphase.end(), [](const BroadphaseEdge& a, const BroadphaseEdge& b) -> bool {
-            return a.value < b.value;
-        });
+    for (int i = 0; i < mRoomOutput.roomCount; ++i) {
+        mOutput.roomGrids.push_back(CollisionGrid(roomBoxes[i]));
+    }
+
+    int quadIndex = 0;
+    for (auto& quad : mOutput.quads) {
+        mOutput.roomGrids[quadRooms[quadIndex]].AddToCells(quad.BoundingBox(), quadIndex);
+        quadIndex++;
     }
 
     std::unique_ptr<FileDefinition> collisionFileDef(new DataFileDefinition(

@@ -10,11 +10,13 @@
 #include "../player/player.h"
 #include "cube.h"
 
+#define MAX_CUBES   2
+
 struct Scene {
     struct Camera camera;
     struct Player player;
     struct Portal portals[2];
-    struct Cube cube;
+    struct Cube cubes[MAX_CUBES];
     OSTime cpuTime;
     OSTime lastFrameStart;
     OSTime lastFrameTime;

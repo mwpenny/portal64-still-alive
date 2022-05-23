@@ -1,10 +1,11 @@
 #ifndef __LEVEL_DEFINITION_H__
 #define __LEVEL_DEFINITION_H__
 
-#include "../physics/collision_scene.h"
+#include "../physics/world.h"
 #include "../scene/portal_surface.h"
 #include "../math/boxs16.h"
 #include "../math/box3d.h"
+#include "../math/range.h"
 
 struct StaticContentElement {
     Gfx* displayList;
@@ -51,27 +52,9 @@ struct Trigger {
     struct Box3D box;
 };
 
-struct Rangeu16 {
-    short min;
-    short max;
-};
-
 struct Location {
     struct Transform transform;
     short roomIndex;
-};
-
-struct Doorway {
-    struct CollisionQuad quad;
-    short roomA;
-    short roomB;
-};
-
-struct Room {
-    short* doorwayIndices;
-    struct BroadphaseEdge* broadphaseEdges;
-    short doorwayCount;
-    short broadphaseEdgeCount;
 };
 
 struct LevelDefinition {
@@ -84,15 +67,12 @@ struct LevelDefinition {
     struct PortalSurfaceMapping* portalSurfaceMapping;
     struct Trigger* triggers;
     struct Location* locations;
-    struct Room* rooms;
-    struct Doorway* doorways;
+    struct World world;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
     short triggerCount;
     short locationCount;
-    short roomCount;
-    short doorwayCount;
     short startLocation;
 };
 

@@ -4,19 +4,105 @@
 
 struct CollisionScene gCollisionScene;
 
-void collisionSceneInit(struct CollisionScene* scene, struct CollisionObject* quads, int quadCount) {
+void collisionSceneInit(struct CollisionScene* scene, struct CollisionObject* quads, int quadCount, struct World* world) {
     scene->quads = quads;
     scene->quadCount = quadCount;
+
+    scene->world = world;
 
     scene->dynamicObjectCount = 0;
     scene->portalTransforms[0] = NULL;
     scene->portalTransforms[1] = NULL;
 }
 
-void collisionObjectCollideWithScene(struct CollisionObject* object, struct CollisionScene* scene, struct ContactSolver* contactSolver) {
-    for (int i = 0; i < scene->quadCount; ++i) {
-        collisionObjectCollideWithQuad(object, &scene->quads[i], contactSolver);
+int mergeColliderList(short* a, int aCount, short* b, int bCount, short* output) {
+    int aIndex = 0;
+    int bIndex = 0;
+    int result = 0;
+
+    while (aIndex < aCount && bIndex < bCount) {
+        if (a[aIndex] == b[bIndex]) {
+            output[result] = a[aIndex];
+            ++result;
+            ++aIndex;
+            ++bIndex;
+        } else if (a[aIndex] < b[bIndex]) {
+            output[result] = a[aIndex];
+            ++result;
+            ++aIndex;
+        } else {
+            output[result] = b[bIndex];
+            ++result;
+            ++bIndex;
+        }
     }
+
+    while (aIndex < aCount) {
+        output[result] = a[aIndex];
+        ++result;
+        ++aIndex;
+    }
+    
+    while (bIndex < bCount) {
+        output[result] = b[bIndex];
+        ++result;
+        ++bIndex;
+    }
+
+    return result;
+}
+
+#define MAX_COLLIDERS   64
+
+#define COLLISION_GRID_CELL_SIZE  4
+
+int collisionObjectRoomColliders(struct Room* room, struct Box3D* box, short output[MAX_COLLIDERS]) {
+    short tmp[MAX_COLLIDERS];
+
+    short* currentSource = tmp;
+    short* currentResult = output;
+    int result = 0;
+
+    int minX = floorf((box->min.x - room->cornerX) * (1.0f / COLLISION_GRID_CELL_SIZE));
+    int maxX = floorf((box->max.x - room->cornerX) * (1.0f / COLLISION_GRID_CELL_SIZE));
+
+    int minZ = floorf((box->min.z - room->cornerZ) * (1.0f / COLLISION_GRID_CELL_SIZE));
+    int maxZ = floorf((box->max.z - room->cornerZ) * (1.0f / COLLISION_GRID_CELL_SIZE));
+    
+    for (int x = MAX(minX, 0); x <= maxX && x < room->spanX; ++x) {
+        for (int z = MAX(minZ, 0); z <= maxZ && z < room->spanZ; ++z) {
+            struct Rangeu16* range = &room->cellContents[x * room->spanX + z];
+
+            result = mergeColliderList(currentSource, result, &room->quadIndices[range->min], range->max - range->min, currentResult);
+
+            if (currentResult == output) {
+                currentResult = tmp;
+                currentSource = output;
+            } else {
+                currentResult = output;
+                currentSource = tmp;
+            }
+        }
+    }
+
+    if (currentSource != output) {
+        mergeColliderList(currentSource, result, NULL, 0, output);
+    }
+
+    return result;
+}
+
+void collisionObjectCollideWithScene(struct CollisionObject* object, struct CollisionScene* scene, struct ContactSolver* contactSolver) {    
+    short colliderIndices[MAX_COLLIDERS];
+    int quadCount = collisionObjectRoomColliders(&scene->world->rooms[object->body->currentRoom], &object->boundingBox, colliderIndices);
+
+    for (int i = 0; i < quadCount; ++i) {
+        collisionObjectCollideWithQuad(object, &scene->quads[colliderIndices[i]], contactSolver);
+    }
+        
+    // for (int i = 0; i < scene->quadCount; ++i) {
+    //     collisionObjectCollideWithQuad(object, &scene->quads[i], contactSolver);
+    // }
 }
 
 int collisionSceneFilterPortalContacts(struct ContactConstraintState* contact) {

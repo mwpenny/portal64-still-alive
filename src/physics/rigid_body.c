@@ -18,6 +18,8 @@ void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniter
     rigidBody->momentOfInertiaInv = 1.0f / rigidBody->momentOfInertia;
 
     rigidBody->flags = 0;
+
+    rigidBody->currentRoom = 0;
 }
 
 void rigidBodyAppyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* impulse) {

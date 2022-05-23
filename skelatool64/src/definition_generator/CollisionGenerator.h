@@ -6,15 +6,25 @@
 #include "CollisionQuad.h"
 #include "RoomGenerator.h"
 
-struct BroadphaseEdge {
-    float value;
-    int quadIndex;
+#define COLLISION_GRID_CELL_SIZE    4
+
+struct CollisionGrid {
+    CollisionGrid(const aiAABB& boundaries);
+
+    short x;
+    short z;
+    short spanX;
+    short spanZ;
+
+    std::vector<std::vector<std::vector<short>>> cells;
+
+    void AddToCells(const aiAABB& box, short value);
 };
 
 struct CollisionGeneratorOutput {
     std::string quadsName;
     std::vector<CollisionQuad> quads;
-    std::vector<std::vector<BroadphaseEdge>> broadphaseIndex;
+    std::vector<CollisionGrid> roomGrids;
 };
 
 class CollisionGenerator : public DefinitionGenerator {

@@ -52,7 +52,7 @@ void sortNodesByRoom(std::vector<aiNode*>& nodes, const RoomGeneratorOutput& roo
     });
 }
 
-int findClosestRoom(const aiNode* node, const aiScene* scene, CFileDefinition& fileDefinition, const std::vector<RoomBlock>& roomBlocks, int ignoreRoom) {
+int findClosestRoom(const aiNode* node, const aiScene* scene, CFileDefinition& fileDefinition, const std::vector<RoomBlock>& roomBlocks, int ignoreRoom, const RoomBlock** foundBlock = NULL) {
     float distance = INFINITY;
     int closestRoom = 0;
 
@@ -74,6 +74,9 @@ int findClosestRoom(const aiNode* node, const aiScene* scene, CFileDefinition& f
         if (roomDistance < distance) {
             distance = roomDistance;
             closestRoom = roomBlock.roomIndex;
+            if (foundBlock) {
+                *foundBlock = &roomBlock;
+            }
         }
     }
 
@@ -133,7 +136,20 @@ void RoomGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& f
 
     for (auto& doorway : mOutput.doorways) {
         doorway.roomA = mOutput.roomIndexMapping[doorway.node];
-        doorway.roomB = findClosestRoom(doorway.node, scene, fileDefinition, roomBlocks, doorway.roomA);
+
+        const RoomBlock* roomB = NULL;
+        doorway.roomB = findClosestRoom(doorway.node, scene, fileDefinition, roomBlocks, doorway.roomA, &roomB);
+
+        if (roomB) {
+            aiVector3D roomBCenter = (roomB->boundingBox.mMin + roomB->boundingBox.mMax) * 0.5f;
+
+            // check if the doorway is facing room A
+            if ((roomBCenter - doorway.quad.corner) * doorway.quad.normal > 0.0f) {
+                int tmp = doorway.roomA;
+                doorway.roomA = doorway.roomB;
+                doorway.roomB = tmp;
+            }
+        }
 
         mOutput.roomCount = std::max(mOutput.roomCount, doorway.roomB + 1);
     }
