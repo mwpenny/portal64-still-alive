@@ -142,6 +142,8 @@ void rigidBodyCheckPortals(struct RigidBody* rigidBody) {
         rigidBody->transform.rotation = newRotation;
 
         newFlags |= RigidBodyFlagsCrossedPortal0 << i;
+
+        rigidBody->currentRoom = gCollisionScene.portalRooms[1 - i];
     }
 
     rigidBody->flags &= ~(

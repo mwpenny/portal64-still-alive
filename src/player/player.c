@@ -89,7 +89,7 @@ void playerUpdateGrabbedObject(struct Player* player) {
             
             struct RaycastHit hit;
 
-            if (collisionSceneRaycast(&gCollisionScene, &ray, GRAB_RAYCAST_DISTANCE, 1, &hit) && hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable)) {
+            if (collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, GRAB_RAYCAST_DISTANCE, 1, &hit) && hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable)) {
                 player->grabbing = hit.object->body;
 
                 if (hit.throughPortal) {
@@ -199,7 +199,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Ray ray;
     ray.origin = player->body.transform.position;
     vector3Scale(&gUp, &ray.dir, -1.0f);
-    if (collisionSceneRaycast(&gCollisionScene, &ray, PLAYER_HEAD_HEIGHT, 1, &hit)) {
+    if (collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, PLAYER_HEAD_HEIGHT, 1, &hit)) {
         vector3AddScaled(&hit.at, &gUp, PLAYER_HEAD_HEIGHT, &player->body.transform.position);
 
         player->body.velocity.y = 0.0f;
@@ -279,6 +279,8 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     cameraTransform->rotation = player->body.transform.rotation;
     transformPoint(transform, &gCameraOffset, &cameraTransform->position);
     playerUpdateGrabbedObject(player);
+
+    collisionObjectUpdateBB(&player->collisionObject);
 
     player->body.currentRoom = worldCheckDoorwayCrossings(&gCurrentLevel->world, &player->body.transform.position, player->body.currentRoom, doorwayMask);
 }

@@ -7,9 +7,7 @@
 #define NEAR_DOT_ZERO       0.00001f
 #define MIN_RAY_LENGTH      0.05f
 
-int raycastQuad(struct CollisionObject* quadObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
-    struct CollisionQuad* quad = (struct CollisionQuad*)quadObject->collider->data;
-
+int raycastQuadShape(struct CollisionQuad* quad, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
     float normalDot = vector3Dot(&ray->dir, &quad->plane.normal);
 
     if (fabsf(normalDot) < NEAR_DOT_ZERO) {
@@ -29,9 +27,20 @@ int raycastQuad(struct CollisionObject* quadObject, struct Ray* ray, float maxDi
     }
 
     contact->normal = quad->plane.normal;
-    contact->object = quadObject;
 
     return 1;
+}
+
+int raycastQuad(struct CollisionObject* quadObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
+    struct CollisionQuad* quad = (struct CollisionQuad*)quadObject->collider->data;
+
+    int result = raycastQuadShape(quad, ray, maxDistance, contact);
+
+    if (result) {
+        contact->object = quadObject;
+    }
+
+    return result;
 }
 
 int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
@@ -101,6 +110,8 @@ int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDist
         transformPoint(&boxObject->body->transform, &contact->at, &contact->at);
         quatMultVector(&boxObject->body->transform.rotation, &contact->normal, &contact->normal);
     }
+
+    contact->roomIndex = boxObject->body->currentRoom;
 
     return contact->distance != maxDistance;
 }

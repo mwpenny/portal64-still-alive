@@ -5,6 +5,7 @@
 #include "../graphics/graphics.h"
 #include "../defs.h"
 #include "dynamic_scene.h"
+#include "../physics/collision_scene.h"
 
 #define CALC_SCREEN_SPACE(clip_space, screen_size) ((clip_space + 1.0f) * ((screen_size) / 2))
 
@@ -151,8 +152,8 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
 
     next->currentDepth = current->currentDepth - 1;
     next->fromPortalIndex = toPortal < fromPortal ? 0 : 1;
-    // TODO
-    next->fromRoom = current->fromRoom;
+    // Gross
+    next->fromRoom = gCollisionScene.portalRooms[toPortal == gCollisionScene.portalTransforms[0] ? 0 : 1];
 
 #if !SHOW_EXTERNAL_VIEW
     gSPViewport(renderState->dl++, viewport);

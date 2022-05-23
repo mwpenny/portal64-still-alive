@@ -13,6 +13,7 @@
 struct CollisionScene {
     struct CollisionObject* quads;
     struct World* world;
+    short portalRooms[2];
     struct Transform* portalTransforms[2];
     struct CollisionObject* dynamicObjects[MAX_DYNAMIC_OBJECTS];
     u16 dynamicObjectCount;
@@ -31,7 +32,7 @@ int collisionSceneIsPortalOpen();
 
 void collisionObjectQueryScene(struct CollisionObject* object, struct CollisionScene* scene, void* data, ManifoldCallback callback);
 
-int collisionSceneRaycast(struct CollisionScene* scene, struct Ray* ray, float maxDistance, int passThroughPortals, struct RaycastHit* hit);
+int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, float maxDistance, int passThroughPortals, struct RaycastHit* hit);
 
 void collisionSceneGetPortalTransform(int fromPortal, struct Transform* out);
 

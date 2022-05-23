@@ -146,11 +146,11 @@ void sceneCheckPortals(struct Scene* scene) {
     quatMultVector(&scene->player.body.transform.rotation, &gUp, &playerUp);
 
     if (controllerGetButtonDown(0, Z_TRIG)) {
-        sceneFirePortal(scene, &raycastRay, &playerUp, 0);
+        sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom);
     }
 
     if (controllerGetButtonDown(0, R_TRIG)) {
-        sceneFirePortal(scene, &raycastRay, &playerUp, 1);
+        sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom);
     }
 }
 
@@ -174,10 +174,10 @@ void sceneUpdate(struct Scene* scene) {
     scene->lastFrameStart = frameStart;
 }
 
-int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex) {
+int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex) {
     struct RaycastHit hit;
 
-    if (!collisionSceneRaycast(&gCollisionScene, ray, 1000000.0f, 0, &hit)) {
+    if (!collisionSceneRaycast(&gCollisionScene, roomIndex, ray, 1000000.0f, 0, &hit)) {
         return 0;
     }
 
@@ -203,10 +203,10 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
         quatLook(&hitDirection, playerUp, &portalLocation.rotation);
     }
 
-    return sceneOpenPortal(scene, &portalLocation, portalIndex, quadIndex);
+    return sceneOpenPortal(scene, &portalLocation, portalIndex, quadIndex, hit.roomIndex);
 }
 
-int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, int quadIndex) {
+int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, int quadIndex, int roomIndex) {
     struct PortalSurfaceMapping surfaceMapping = gCurrentLevel->portalSurfaceMapping[quadIndex];
 
     for (int i = surfaceMapping.minPortalIndex; i < surfaceMapping.maxPortalIndex; ++i) {
@@ -220,6 +220,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
             
             scene->portals[portalIndex].transform = *at;
             gCollisionScene.portalTransforms[portalIndex] = &scene->portals[portalIndex].transform;
+            gCollisionScene.portalRooms[portalIndex] = roomIndex;
             return 1;
         }
     }

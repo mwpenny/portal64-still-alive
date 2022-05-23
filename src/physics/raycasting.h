@@ -11,8 +11,10 @@ struct RaycastHit {
     float distance;
     struct CollisionObject* object;
     struct Transform* throughPortal;
+    short roomIndex;
 };
 
+int raycastQuadShape(struct CollisionQuad* quad, struct Ray* ray, float maxDistance, struct RaycastHit* contact);
 int raycastQuad(struct CollisionObject* quadObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact);
 int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact);
 
