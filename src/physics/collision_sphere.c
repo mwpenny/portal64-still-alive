@@ -41,7 +41,7 @@ int collisionSphereCollideQuad(void* data, struct Transform* boxTransform, struc
     output->restitution = 0.1f;
     output->friction = 0.5f;
     ++output->contactCount;
-    // TODO
+    
     output->tangentVectors[0] = quad->edgeA;
     output->tangentVectors[1] = quad->edgeB;
 

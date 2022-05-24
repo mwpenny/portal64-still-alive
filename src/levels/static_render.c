@@ -81,26 +81,41 @@ void staticRenderSort(int min, int max) {
     }
 }
 
-int staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, int renderCount, u16 currentRoom, u32* visitedRooms) {
-    u32 roomMask = 1 << currentRoom;
+int staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, u64 visitedRooms) {
+    int renderCount = 0;
+    int currentRoom = 0;
+
+    while (visitedRooms) {
+        if (0x1 & visitedRooms) {
+            struct Rangeu16 staticRange = gCurrentLevel->roomStaticMapping[currentRoom];
+
+            for (int i = staticRange.min; i < staticRange.max; ++i) {
+                if (isOutsideFrustrum(cullingInfo, &gCurrentLevel->staticBoundingBoxes[i])) {
+                    continue;
+                }
+
+                gRenderOrder[renderCount] = i;
+                gSortKey[i] = staticRenderGenerateSortKey(i, cullingInfo);
+                ++renderCount;
+            }
+        }
+
+        visitedRooms >>= 1;
+        ++currentRoom;
+    }
+
+
+    return renderCount;
+}
+
+void staticRenderDetermineVisibleRooms(struct FrustrumCullingInformation* cullingInfo, u16 currentRoom, u64* visitedRooms) {
+    u64 roomMask = 1LL << currentRoom;
 
     if (*visitedRooms & roomMask) {
-        return renderCount;
+        return;
     }
 
     *visitedRooms |= roomMask;
-
-    struct Rangeu16 staticRange = gCurrentLevel->roomStaticMapping[currentRoom];
-
-    for (int i = staticRange.min; i < staticRange.max; ++i) {
-        if (isOutsideFrustrum(cullingInfo, &gCurrentLevel->staticBoundingBoxes[i])) {
-            continue;
-        }
-
-        gRenderOrder[renderCount] = i;
-        gSortKey[i] = staticRenderGenerateSortKey(i, cullingInfo);
-        ++renderCount;
-    }
 
     for (int i = 0; i < gCurrentLevel->world.rooms[currentRoom].doorwayCount; ++i) {
         struct Doorway* doorway = &gCurrentLevel->world.doorways[gCurrentLevel->world.rooms[currentRoom].doorwayIndices[i]];
@@ -109,19 +124,20 @@ int staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, in
             continue;
         }
 
-        renderCount = staticRenderPopulateRooms(cullingInfo, renderCount, currentRoom == doorway->roomA ? doorway->roomB : doorway->roomA, visitedRooms);
+        staticRenderDetermineVisibleRooms(cullingInfo, currentRoom == doorway->roomA ? doorway->roomB : doorway->roomA, visitedRooms);
     };
-
-    return renderCount;
 }
 
-void staticRender(struct FrustrumCullingInformation* cullingInfo, u16 startingRoom, struct RenderState* renderState) {
+int staticRenderIsRoomVisible(u64 visibleRooms, u16 roomIndex) {
+    return (visibleRooms & (1LL << roomIndex)) != 0;
+}
+
+void staticRender(struct FrustrumCullingInformation* cullingInfo, u64 visibleRooms, struct RenderState* renderState) {
     if (!gCurrentLevel) {
         return;
     }
 
-    u32 visitedRooms = 0;
-    int renderCount = staticRenderPopulateRooms(cullingInfo, 0, startingRoom, &visitedRooms);
+    int renderCount = staticRenderPopulateRooms(cullingInfo, visibleRooms);
 
     renderCount = dynamicScenePopulate(cullingInfo, renderCount, gCurrentLevel->staticContentCount, gSortKey, gRenderOrder);
 

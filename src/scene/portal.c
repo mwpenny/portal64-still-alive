@@ -167,6 +167,23 @@ void portalInit(struct Portal* portal, enum PortalFlags flags) {
 }
 
 void portalRender(struct Portal* portal, struct Portal* otherPortal, struct RenderProps* props, SceneRenderCallback sceneRenderer, void* data, struct RenderState* renderState) {
+    struct Vector3 forward = gForward;
+    if (!(portal->flags & PortalFlagsOddParity)) {
+        forward.z = -1.0f;
+    }
+
+    struct Vector3 worldForward;
+    quatMultVector(&portal->transform.rotation, &forward, &worldForward);
+
+    struct Quaternion inverseCamera;
+    quatConjugate(&props->camera.transform.rotation, &inverseCamera);
+    quatMultVector(&inverseCamera, &worldForward, &forward);
+
+    // don't render the portal if it is facing the wrong way
+    if (forward.z < 0.0f) {
+        return;
+    }
+    
     struct ScreenClipper clipper;
     float portalTransform[4][4];
 

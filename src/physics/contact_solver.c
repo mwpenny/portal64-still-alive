@@ -402,7 +402,7 @@ int contactSolverAssign(struct ContactConstraintState* into, struct ContactConst
 	int result = 0;
 
 	for (int sourceIndex = 0; sourceIndex < from->contactCount; ++sourceIndex) {
-		if (filterPortalContacts && collisionSceneIsTouchingPortal(&from->contacts[sourceIndex].ra)) {
+		if (filterPortalContacts && collisionSceneIsTouchingPortal(&from->contacts[sourceIndex].ra, &from->normal)) {
 			result = 1;
 			continue;
 		}

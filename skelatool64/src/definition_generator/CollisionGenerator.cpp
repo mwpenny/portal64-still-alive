@@ -35,6 +35,12 @@ void CollisionGrid::AddToCells(const aiAABB& box, short value) {
     int minZ = floor((box.mMin.z - z) / COLLISION_GRID_CELL_SIZE);
     int maxZ = floor((box.mMax.z - z) / COLLISION_GRID_CELL_SIZE);
 
+    if (maxX < 0) maxX = 0;
+    if (minX >= spanX) minX = spanX - 1;
+
+    if (maxZ < 0) maxZ = 0;
+    if (minX >= spanZ) minZ = spanZ - 1;
+
     for (int currX = minX; currX <= maxX; ++currX) {
         for (int currZ = minZ; currZ <= maxZ; ++currZ) {
             if (currX >= 0 && currX < spanX && currZ >= 0 && currZ < spanZ) {

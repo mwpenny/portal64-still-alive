@@ -69,9 +69,9 @@ int collisionObjectRoomColliders(struct Room* room, struct Box3D* box, short out
     int result = 0;
 
     int minX = GRID_CELL_X(room, box->min.x);
-    int maxX = GRID_CELL_Z(room, box->min.z);
+    int maxX = GRID_CELL_X(room, box->max.x);
 
-    int minZ = GRID_CELL_X(room, box->max.x);
+    int minZ = GRID_CELL_Z(room, box->min.z);
     int maxZ = GRID_CELL_Z(room, box->max.z);
     
     for (int x = MAX(minX, 0); x <= maxX && x < room->spanX; ++x) {
@@ -110,7 +110,7 @@ int collisionSceneFilterPortalContacts(struct ContactConstraintState* contact) {
     int writeIndex = 0;
 
     for (int readIndex = 0; readIndex < contact->contactCount; ++readIndex) {
-        if (collisionSceneIsTouchingPortal(&contact->contacts[readIndex].ra)) {
+        if (collisionSceneIsTouchingPortal(&contact->contacts[readIndex].ra, &contact->normal)) {
             continue;;
         }
 
@@ -148,7 +148,7 @@ void collisionObjectQueryScene(struct CollisionObject* object, struct CollisionS
     }
 }
 
-int collisionSceneIsTouchingSinglePortal(struct Vector3* contactPoint, struct Transform* portalTransform) {
+int collisionSceneIsTouchingSinglePortal(struct Vector3* contactPoint, struct Vector3* contactNormal, struct Transform* portalTransform, int portalIndex) {
     struct Vector3 localPoint;
     transformPointInverse(portalTransform, contactPoint, &localPoint);
 
@@ -159,16 +159,24 @@ int collisionSceneIsTouchingSinglePortal(struct Vector3* contactPoint, struct Tr
     localPoint.x *= (1.0f / PORTAL_X_RADIUS);
     localPoint.z = 0.0f;
 
-    return vector3MagSqrd(&localPoint) < 1.0f;
+    if (vector3MagSqrd(&localPoint) >= 1.0f) {
+        return 0;
+    }
+
+    struct Vector3 portalNormal = gZeroVec;
+    portalNormal.z = portalIndex ? 1.0f : -1.0f;
+    quatMultVector(&portalTransform->rotation, &portalNormal, &portalNormal);
+
+    return vector3Dot(contactNormal, &portalNormal) > 0.0f;
 }
 
-int collisionSceneIsTouchingPortal(struct Vector3* contactPoint) {
+int collisionSceneIsTouchingPortal(struct Vector3* contactPoint, struct Vector3* contactNormal) {
     if (!collisionSceneIsPortalOpen()) {
         return 0;
     }
 
     for (int i = 0; i < 2; ++i) {
-        if (collisionSceneIsTouchingSinglePortal(contactPoint, gCollisionScene.portalTransforms[i])) {
+        if (collisionSceneIsTouchingSinglePortal(contactPoint, contactNormal, gCollisionScene.portalTransforms[i], i)) {
             return 1;
         }
     }
@@ -305,7 +313,7 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
         hit->distance != maxDistance &&
         collisionSceneIsPortalOpen()) {
         for (int i = 0; i < 2; ++i) {
-            if (collisionSceneIsTouchingSinglePortal(&hit->at, gCollisionScene.portalTransforms[i])) {
+            if (collisionSceneIsTouchingSinglePortal(&hit->at, &hit->normal, gCollisionScene.portalTransforms[i], i)) {
                 struct Transform portalTransform;
                 collisionSceneGetPortalTransform(i, &portalTransform);
 
