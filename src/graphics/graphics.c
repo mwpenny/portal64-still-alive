@@ -35,7 +35,7 @@ u16* graphicsLayoutScreenBuffers(u16* memoryEnd) {
 void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callback, void* data) {
     struct RenderState *renderState = &targetTask->renderState;
 
-    renderStateInit(renderState);
+    renderStateInit(renderState, targetTask->framebuffer, zbuffer);
     gSPSegment(renderState->dl++, 0, 0);
 
     gSPDisplayList(renderState->dl++, setup_rspstate);

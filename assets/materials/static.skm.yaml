@@ -2,6 +2,8 @@ materials:
   default:
     gDPSetRenderMode: G_RM_ZB_OPA_SURF
 
+    gDPSetTextureFilter: G_TF_BILERP
+
     gSPGeometryMode:
       set: [G_CULL_BACK, G_ZBUFFER]
       clear: [G_CULL_FRONT]
@@ -94,16 +96,18 @@ materials:
     gDPSetCombineMode: 
       color: ["SHADE", "0", "TEXEL0", "0"]
 
-
   door_01:
-    gDPSetPrimColor:
-      r: 32
-      g: 32
-      b: 32
+    gDPSetTile: 
+      filename:
+        ../../portal_pak_modified/materials/models/props/door_01.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      t:
+        mirror: true
     gSPGeometryMode:
       set: [G_LIGHTING, G_SHADE]
     gDPSetCombineMode: 
-      color: ["SHADE", "0", "PRIMITIVE", "0"]
+      color: ["SHADE", "0", "TEXEL0", "0"]
 
   plastic/plasticwall001a:
     gDPSetPrimColor:

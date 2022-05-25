@@ -227,7 +227,7 @@ void collisionSceneRaycastRoom(struct CollisionScene* scene, struct Room* room, 
         }
 
         if (zDirInv != 0.0f) {
-            float nextEdge = (currZ + (ray->dir.x > 0.0f ? 1 : 0)) * COLLISION_GRID_CELL_SIZE + room->cornerZ;
+            float nextEdge = (currZ + (ray->dir.z > 0.0f ? 1 : 0)) * COLLISION_GRID_CELL_SIZE + room->cornerZ;
             float distanceCheck = (nextEdge - ray->origin.z) * zDirInv;
 
             if (distanceCheck < cellDistance) {

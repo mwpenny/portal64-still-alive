@@ -243,6 +243,7 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
         gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, props->minX, props->minY, props->maxX, props->maxY);       
         gSPViewport(renderState->dl++, props->viewport);
 
+        // render the front portal cover
         Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
         guMtxF2L(portalTransform, matrix);
