@@ -139,7 +139,8 @@ build/src/scene/hud.o: build/assets/materials/hud.h
 #
 
 MODEL_LIST = assets/models/cube/cube.blend \
-	assets/models/portal_gun/v_portalgun.blend
+	assets/models/portal_gun/v_portalgun.blend \
+	assets/models/props/button.blend
 
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
 MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)

@@ -9,4 +9,7 @@ extern Gfx* cube_gfx;
 extern short cube_material_index;
 extern Gfx* v_portal_gun_gfx;
 
+extern Gfx* button_gfx;
+extern short button_material_index;
+
 #endif

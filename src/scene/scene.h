@@ -9,6 +9,7 @@
 #include "portal.h"
 #include "../player/player.h"
 #include "cube.h"
+#include "button.h"
 
 #define MAX_CUBES   2
 
@@ -17,9 +18,11 @@ struct Scene {
     struct Player player;
     struct Portal portals[2];
     struct Cube cubes[MAX_CUBES];
+    struct Button* buttons;
     OSTime cpuTime;
     OSTime lastFrameStart;
     OSTime lastFrameTime;
+    u8 buttonCount;
 };
 
 extern struct Scene gScene;

@@ -25,6 +25,7 @@
 #include "../audio/soundplayer.h"
 #include "../audio/clips.h"
 #include "../levels/cutscene_runner.h"
+#include "../util/memory.h"
 
 struct Vector3 gPortalGunOffset = {0.100957, -0.113587, -0.28916};
 struct Vector3 gPortalGunForward = {0.1f, -0.1f, 1.0f};
@@ -50,6 +51,13 @@ void sceneInit(struct Scene* scene) {
         scene->cubes[i].rigidBody.angularVelocity = gOneVec;
     }
 
+    scene->buttonCount = 1;
+    scene->buttons = malloc(sizeof(struct Button) * scene->buttonCount);
+    struct Vector3 buttonPos;
+    buttonPos.x = 5.0f;
+    buttonPos.y = 0.0f;
+    buttonPos.z = 3.0f;
+    buttonInit(&scene->buttons[0], &buttonPos, 1);
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {

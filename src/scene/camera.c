@@ -84,6 +84,10 @@ void cameraExtractClippingPlane(float viewPersp[4][4], struct Plane* output, int
     output->normal.y = viewPersp[1][axis] * direction + viewPersp[1][3];
     output->normal.z = viewPersp[2][axis] * direction + viewPersp[2][3];
     output->d = viewPersp[3][axis] * direction + viewPersp[3][3];
+
+    float mult = 1.0f / sqrtf(vector3MagSqrd(&output->normal));
+    vector3Scale(&output->normal, &output->normal, mult);
+    output->d *= mult;
 }
 
 Mtx* cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, float aspectRatio, u16* perspNorm, Vp* viewport, struct FrustrumCullingInformation* clippingInfo) {
