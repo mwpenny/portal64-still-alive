@@ -38,19 +38,6 @@ void sceneInit(struct Scene* scene) {
 
     portalInit(&scene->portals[0], 0);
     portalInit(&scene->portals[1], PortalFlagsOddParity);
-    gCollisionScene.portalTransforms[0] = &scene->portals[0].transform;
-    gCollisionScene.portalTransforms[1] = &scene->portals[1].transform;
-
-    scene->portals[0].transform.position.x = 3.75f;
-    scene->portals[0].transform.position.y = 1.5f;
-    scene->portals[0].transform.position.z = -4.5f;
-
-    scene->portals[1].transform.position.x = 0.0f;
-    scene->portals[1].transform.position.y = 1.0f;
-    scene->portals[1].transform.position.z = -6.0f;
-
-
-    quatAxisAngle(&gUp, M_PI * 0.5f, &scene->portals[1].transform.rotation);
 
     for (int i = 0; i < MAX_CUBES; ++i) {
         cubeInit(&scene->cubes[i]);
@@ -72,12 +59,24 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
     staticRenderDetermineVisibleRooms(&properties->cullingInfo, properties->fromRoom, &visibleRooms);
 
     int closerPortal = vector3DistSqrd(&properties->camera.transform.position, &scene->portals[0].transform.position) > vector3DistSqrd(&properties->camera.transform.position, &scene->portals[1].transform.position) ? 0 : 1;
+    int otherPortal = 1 - closerPortal;
 
-    if (properties->fromPortalIndex != closerPortal && staticRenderIsRoomVisible(visibleRooms, gCollisionScene.portalRooms[closerPortal])) {
-        portalRender(&scene->portals[closerPortal], &scene->portals[1 - closerPortal], properties, sceneRenderWithProperties, data, renderState);
-    }
-    if (properties->fromPortalIndex != 1 - closerPortal && staticRenderIsRoomVisible(visibleRooms, gCollisionScene.portalRooms[1 - closerPortal])) {
-        portalRender(&scene->portals[1 - closerPortal], &scene->portals[closerPortal], properties, sceneRenderWithProperties, data, renderState);
+    for (int i = 0; i < 2; ++i) {
+        if (gCollisionScene.portalTransforms[closerPortal] && 
+            properties->fromPortalIndex != closerPortal && 
+            staticRenderIsRoomVisible(visibleRooms, gCollisionScene.portalRooms[closerPortal])) {
+            portalRender(
+                &scene->portals[closerPortal], 
+                gCollisionScene.portalTransforms[otherPortal] ? &scene->portals[otherPortal] : NULL, 
+                properties, 
+                sceneRenderWithProperties, 
+                data, 
+                renderState
+            );
+        }
+
+        closerPortal = 1 - closerPortal;
+        otherPortal = 1 - otherPortal;
     }
 
     staticRender(&properties->cullingInfo, visibleRooms, renderState);
@@ -135,7 +134,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     hudRender(renderState);
 
-    sceneRenderPerformanceMetrics(scene, renderState, task);
+    // sceneRenderPerformanceMetrics(scene, renderState, task);
 
     // contactSolverDebugDraw(&gContactSolver, renderState);
 }
@@ -214,12 +213,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
 
     for (int i = surfaceMapping.minPortalIndex; i < surfaceMapping.maxPortalIndex; ++i) {
         if (portalSurfaceGenerate(&gCurrentLevel->portalSurfaces[i], at, NULL, NULL)) {
-            // struct Vector3 portalForward;
-            // quatMultVector(&at->rotation, &gForward, &portalForward);
-            // // TODO remove once there is a hole in the wall
-            // vector3AddScaled(&at->position, &portalForward, (portalIndex == 0) ? -0.1f : 0.1f, &at->position);
-
-            soundPlayerPlay(soundsPortalEnter, 1.0f, 1.0f);
+            soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f);
             
             scene->portals[portalIndex].transform = *at;
             gCollisionScene.portalTransforms[portalIndex] = &scene->portals[portalIndex].transform;

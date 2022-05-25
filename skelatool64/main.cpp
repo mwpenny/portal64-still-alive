@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
             staticGenerator.TraverseScene(scene);
             staticGenerator.GenerateDefinitions(scene, fileDef);
 
-            TriggerGenerator triggerGenerator(settings);
+            TriggerGenerator triggerGenerator(settings, roomGenerator.GetOutput());
             triggerGenerator.TraverseScene(scene);
             triggerGenerator.GenerateDefinitions(scene, fileDef);
 

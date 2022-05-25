@@ -26,6 +26,7 @@ enum CutsceneStepType {
     CutsceneStepTypePlaySound,
     CutsceneStepTypeStartSound,
     CutsceneStepTypeDelay,
+    CutsceneStepTypeOpenPortal,
 };
 
 struct CutsceneStep {
@@ -37,6 +38,10 @@ struct CutsceneStep {
             u8 volume;
             u8 pitch;
         } playSound;
+        struct {
+            u16 locationIndex;
+            u16 portalIndex;
+        } openPortal;
         float delay;
         int noop;
     };

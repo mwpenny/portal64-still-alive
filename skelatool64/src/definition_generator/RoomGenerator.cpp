@@ -27,6 +27,16 @@ short RoomGeneratorOutput::FindLocationRoom(const std::string& name) const {
     return -1;
 }
 
+short RoomGeneratorOutput::FindLocationIndex(const std::string& name) const {
+    for (auto& location : namedLocations) {
+        if (location.name == name) {
+            return location.index;
+        }
+    }
+
+    return -1;
+}
+
 int RoomGeneratorOutput::RoomForNode(const aiNode* node) const {
     auto room = roomIndexMapping.find(node);
 

@@ -356,12 +356,6 @@
                     "type": "number",
                     "minimum": 0,
                     "maximum": 7
-                },
-                "s": {
-                    "$ref": "#/definitions/textureCoordinateSettings"
-                },
-                "t": {
-                    "$ref": "#/definitions/textureCoordinateSettings"
                 }
             }
         },
@@ -402,6 +396,12 @@
                             "type": "number",
                             "minimum": 0,
                             "maximum": 15
+                        },
+                        "s": {
+                            "$ref": "#/definitions/textureCoordinateSettings"
+                        },
+                        "t": {
+                            "$ref": "#/definitions/textureCoordinateSettings"
                         },
                         "twoTone": {
                             "type": "boolean"

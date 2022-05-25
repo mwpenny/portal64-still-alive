@@ -33,13 +33,13 @@ float distanceFromStart(const CutsceneStep& startStep, const CutsceneStep& other
     return relativeOffset.y;
 }
 
-TriggerGenerator::TriggerGenerator(const DisplayListSettings& settings): DefinitionGenerator(), mSettings(settings) {}
+TriggerGenerator::TriggerGenerator(const DisplayListSettings& settings, const RoomGeneratorOutput& roomOutput): DefinitionGenerator(), mSettings(settings), mRoomOutput(roomOutput) {}
 
 bool TriggerGenerator::ShouldIncludeNode(aiNode* node) {
     return (StartsWith(node->mName.C_Str(), TRIGGER_PREFIX) && node->mNumMeshes >= 1) || StartsWith(node->mName.C_Str(), CUTSCENE_PREFIX);
 }
 
-std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step) {
+std::unique_ptr<StructureDataChunk> TriggerGenerator::GenerateCutsceneStep(CutsceneStep& step) {
     std::unique_ptr<StructureDataChunk> result(new StructureDataChunk());
 
     if ((step.command == "play_sound" || step.command == "start_sound") && step.args.size() >= 1) {
@@ -66,6 +66,17 @@ std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step) {
         result->AddPrimitive<const char*>("CutsceneStepTypeDelay");
         result->AddPrimitive("delay", std::atof(step.args[0].c_str()));
         return result;
+    } else if (step.command == "open_portal" && step.args.size() >= 1) {
+        short roomLocation = mRoomOutput.FindLocationIndex(step.args[0]);
+
+        if (roomLocation != -1) {
+            result->AddPrimitive<const char*>("CutsceneStepTypeOpenPortal");
+            std::unique_ptr<StructureDataChunk> openPortal(new StructureDataChunk());
+            openPortal->AddPrimitive(roomLocation);
+            openPortal->AddPrimitive((step.args.size() >= 2 && step.args[1] == "1") ? 1 : 0);
+            result->Add("openPortal", std::move(openPortal));
+            return result;
+        }
     }
 
     result->AddPrimitive<const char*>("CutsceneStepTypeNoop");
@@ -131,7 +142,7 @@ void TriggerGenerator::GenerateCutscenes(std::map<std::string, std::shared_ptr<C
         std::unique_ptr<StructureDataChunk> steps(new StructureDataChunk());
 
         for (auto& step : cutscene.steps) {
-            steps->Add(std::move(generateCutsceneStep(*step)));
+            steps->Add(std::move(GenerateCutsceneStep(*step)));
         }
 
         std::string stepsName = fileDefinition.GetUniqueName(cutscene.name + "_steps");

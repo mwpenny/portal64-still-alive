@@ -104,3 +104,36 @@ materials:
       set: [G_LIGHTING, G_SHADE]
     gDPSetCombineMode: 
       color: ["SHADE", "0", "PRIMITIVE", "0"]
+
+  plastic/plasticwall001a:
+    gDPSetPrimColor:
+      r: 230
+      g: 230
+      b: 230
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "PRIMITIVE", "0"]
+  
+  button:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/button.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ../../portal_pak_modified/materials/models/props/button_base.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 256
+        s:
+          wrap: false
+        t:
+          wrap: false
+        
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "TEXEL0", "0"]

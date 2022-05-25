@@ -24,6 +24,8 @@ public:
     std::map<std::string, int> mMaterialUseCount;
     std::map<std::string, std::string> mMaterialNameMapping;
     std::map<std::string, std::string> mResourceNameMapping;
+
+private:
 };
 
 void generateMeshIntoDLWithMaterials(const aiScene* scene, CFileDefinition& fileDefinition, MaterialCollector* materials, std::vector<RenderChunk>& renderChunks, DisplayListSettings& settings, DisplayList &displayList, const std::string& modelSuffix);

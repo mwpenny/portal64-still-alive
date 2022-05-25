@@ -1,6 +1,8 @@
 #include "cutscene_runner.h"
 #include "../audio/soundplayer.h"
 #include "../util/time.h"
+#include "../scene/scene.h"
+#include "../levels/levels.h"
 
 struct CutsceneRunner gCutsceneRunner;
 
@@ -18,6 +20,16 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         case CutsceneStepTypeDelay:
             runner->state.delay = step->delay;
             break;
+        case CutsceneStepTypeOpenPortal:
+        {
+            struct Location* location = &gCurrentLevel->locations[step->openPortal.locationIndex];
+            struct Ray firingRay;
+            firingRay.origin = location->transform.position;
+            quatMultVector(&location->transform.rotation, &gForward, &firingRay.dir);
+            vector3AddScaled(&location->transform.position, &firingRay.dir, -0.1f, &firingRay.origin);
+            sceneFirePortal(&gScene, &firingRay, &gUp, step->openPortal.portalIndex, location->roomIndex);
+            break;
+        }
         default:
     }
 }

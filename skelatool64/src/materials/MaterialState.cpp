@@ -38,6 +38,11 @@ struct FlagList FlagList::GetDeltaFrom(struct FlagList& other) {
     return result;
 }
 
+void FlagList::ApplyFrom(const FlagList& other) {
+    knownFlags |= other.knownFlags;
+    flags = (other.flags & other.knownFlags) | (flags & ~other.knownFlags);   
+}
+
 TextureCoordinateState::TextureCoordinateState():
     wrap(true),
     mirror(false),
@@ -208,6 +213,17 @@ MaterialState::MaterialState() :
     useFogColor(false),
     useBlendColor(false)
      {}
+
+
+bool MaterialState::IsTextureLoaded(std::shared_ptr<TextureDefinition> texture, int tmem) const {
+    for (int i = 0; i < MAX_TILE_COUNT; ++i) {
+        if (tiles[i].texture == texture && tiles[i].tmem == tmem) {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 void appendToFlags(std::ostringstream& flags, const std::string& value) {
     if (flags.tellp() != 0) {
@@ -569,3 +585,108 @@ void generateMaterial(CFileDefinition& fileDef, const MaterialState& from, const
 
     // TODO fill color
 }
+
+void applyMaterial(const MaterialState& from, MaterialState& to) {
+    for (int i = 0; i < MAX_TILE_COUNT; ++i) {
+        if (from.tiles[i].isOn) {
+            to.tiles[i] = from.tiles[i];
+        }
+    }
+
+    if (from.textureState.isOn) {
+        to.textureState = from.textureState;
+    }
+
+    to.geometryModes.ApplyFrom(from.geometryModes);
+
+    if (from.pipelineMode != PipelineMode::Unknown) {
+        to.pipelineMode = from.pipelineMode;
+    }
+
+    if (from.cycleType != CycleType::Unknown) {
+        to.cycleType = from.cycleType;
+    }
+
+    if (from.perspectiveMode != PerspectiveMode::Unknown) {
+        to.perspectiveMode = from.perspectiveMode;
+    }
+
+    if (from.textureDetail != TextureDetail::Unknown) {
+        to.textureDetail = from.textureDetail;
+    }
+
+    if (from.textureLOD != TextureLOD::Unknown) {
+        to.textureLOD = from.textureLOD;
+    }
+
+    if (from.textureLUT != TextureLUT::Unknown) {
+        to.textureLUT = from.textureLUT;
+    }
+
+    if (from.textureFilter != TextureFilter::Unknown) {
+        to.textureFilter = from.textureFilter;
+    }
+
+    if (from.textureConvert != TextureConvert::Unknown) {
+        to.textureConvert = from.textureConvert;
+    }
+
+    if (from.combineKey != CombineKey::Unknown) {
+        to.combineKey = from.combineKey;
+    }
+
+    if (from.colorDither != ColorDither::Unknown) {
+        to.colorDither = from.colorDither;
+    }
+
+    if (from.alphaDither != AlphaDither::Unknown) {
+        to.alphaDither = from.alphaDither;
+    }
+
+    if (from.alphaCompare != AlphaCompare::Unknown) {
+        to.alphaCompare = from.alphaCompare;
+    }
+
+    if (from.depthSource != DepthSource::Unknown) {
+        to.depthSource = from.depthSource;
+    }
+
+    if (from.hasCombineMode) {
+        to.hasCombineMode = true;
+        to.cycle1Combine = from.cycle1Combine;
+        to.cycle2Combine = from.cycle2Combine;
+    }
+
+    if (from.hasRenderMode) {
+        to.hasRenderMode = true;
+        to.cycle1RenderMode = from.cycle1RenderMode;
+        to.cycle2RenderMode = from.cycle2RenderMode;
+    }
+
+    if (from.usePrimitiveColor) {
+        to.usePrimitiveColor = true;
+        to.primitiveColor = from.primitiveColor;
+        to.primitiveM = from.primitiveM;
+        to.primitiveL = from.primitiveL;
+    }
+
+    if (from.useEnvColor) {
+        to.useEnvColor = true;
+        to.envColor = from.envColor;
+    }
+
+    if (from.useFillColor) {
+        to.useFillColor = true;
+        to.fillColor = from.fillColor;
+    }
+
+    if (from.useFogColor) {
+        to.useFogColor = true;
+        to.fogColor = from.fogColor;
+    }
+
+    if (from.useBlendColor) {
+        to.useBlendColor = true;
+        to.blendColor = from.blendColor;
+    }
+} 

@@ -15,6 +15,8 @@ struct FlagList {
     void DeleteFlag(int mask);
 
     struct FlagList GetDeltaFrom(struct FlagList& other);
+
+    void ApplyFrom(const FlagList& other);
 };
 
 struct TextureCoordinateState {
@@ -139,8 +141,12 @@ public:
 
     bool useBlendColor;
     PixelRGBAu8 blendColor;
+
+    bool IsTextureLoaded(std::shared_ptr<TextureDefinition> texture, int tmem) const;
 };
 
 void generateMaterial(CFileDefinition& fileDef, const MaterialState& from, const MaterialState& to, StructureDataChunk& output);
+
+void applyMaterial(const MaterialState& from, MaterialState& to);
 
 #endif

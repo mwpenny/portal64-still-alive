@@ -18,4 +18,48 @@ materials:
       set: [G_LIGHTING, G_SHADE]
     gDPSetCombineMode: 
       color: ["PRIMITIVE", "0", "SHADE", "0"]
+
+  button_base:
+    gDPSetTile:
+      - null
+      - filename: ../../portal_pak_modified/materials/models/props/button_base.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 256
+        s:
+          wrap: false
+        t:
+          wrap: false
+    gSPTexture:
+      tile: 1
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "TEXEL0", "0"]
+
+  button_base_black:
+    gDPSetPrimColor:
+      r: 32
+      g: 32
+      b: 32
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["PRIMITIVE", "0", "SHADE", "0"]
+  
+  button_top:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/button.png
+      fmt: G_IM_FMT_RGBA
+      siz: G_IM_SIZ_16b
+      s:
+        wrap: false
+      t:
+        wrap: false
+    gSPTexture:
+      tile: 0
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "TEXEL0", "0"]
     

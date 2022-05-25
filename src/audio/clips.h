@@ -3,4 +3,6 @@
 
 extern unsigned short soundsPortalEnter;
 
+extern unsigned short soundsPortalOpen2;
+
 #endif

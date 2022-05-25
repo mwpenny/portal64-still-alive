@@ -68,7 +68,7 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
     props->maxY = SCREEN_HT;
 }
 
-#define MIN_VP_WIDTH 42
+#define MIN_VP_WIDTH 64
 
 void renderPropscheckViewportSize(int* min, int* max, int screenSize) {
     if (*max < MIN_VP_WIDTH) {
@@ -197,7 +197,7 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
     
     transformToMatrix(&finalTransform, portalTransform, SCENE_SCALE);
 
-    if (props->currentDepth == 0) {
+    if (props->currentDepth == 0 || !otherPortal) {
         Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
         guMtxF2L(portalTransform, matrix);

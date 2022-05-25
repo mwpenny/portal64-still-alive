@@ -24,19 +24,19 @@
 void hudRender(struct RenderState* renderState) {
     gSPDisplayList(renderState->dl++, hud_material_list[PORTAL_CROSSHAIRS_INDEX]);
 
-    gSPTextureRectangle(renderState->dl++, 
-        (SCREEN_WD - HUD_CENTER_WIDTH) << 1, (SCREEN_HT - HUD_CENTER_HEIGHT) << 1, 
-        (SCREEN_WD + HUD_CENTER_WIDTH) << 1, (SCREEN_HT + HUD_CENTER_HEIGHT) << 1, 
-        G_TX_RENDERTILE, HUD_CENTER_S << 5, HUD_CENTER_T << 5, 1 << 10, 1 << 10);
+    // gSPTextureRectangle(renderState->dl++, 
+    //     (SCREEN_WD - HUD_CENTER_WIDTH) << 1, (SCREEN_HT - HUD_CENTER_HEIGHT) << 1, 
+    //     (SCREEN_WD + HUD_CENTER_WIDTH) << 1, (SCREEN_HT + HUD_CENTER_HEIGHT) << 1, 
+    //     G_TX_RENDERTILE, HUD_CENTER_S << 5, HUD_CENTER_T << 5, 1 << 10, 1 << 10);
 
-    gDPSetPrimColor(renderState->dl++, 255, 255, 255, 128, 0, 255);
+    gDPSetPrimColor(renderState->dl++, 255, 255, 0, 128, 255, 255);
 
     gSPTextureRectangle(renderState->dl++, 
         HUD_UPPER_X, HUD_UPPER_Y,
         HUD_UPPER_X + (HUD_OUTER_WIDTH << 2), HUD_UPPER_Y + (HUD_OUTER_HEIGHT << 2), 
         G_TX_RENDERTILE, 0 << 5, 0 << 5, 1 << 10, 1 << 10);
 
-    gDPSetPrimColor(renderState->dl++, 255, 255, 0, 128, 255, 255);
+    gDPSetPrimColor(renderState->dl++, 255, 255, 255, 128, 0, 255);
 
     gSPTextureRectangle(renderState->dl++, 
         HUD_LOWER_X, HUD_LOWER_Y,

@@ -1,0 +1,1 @@
+-alpha off \( +clone -crop 150x150+147+139 -rotate 180 -alpha on -channel a -evaluate set 50% +repage \) -geometry +147+139 -composite \( +clone -crop 150x150+147+139 -rotate 90 -alpha on -channel a -evaluate set 50% +repage \) -geometry +147+139 -composite

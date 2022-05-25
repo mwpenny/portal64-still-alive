@@ -203,7 +203,7 @@ void collisionSceneRaycastRoom(struct CollisionScene* scene, struct Room* room, 
         for (int i = range->min; i < range->max; ++i) {
             struct RaycastHit hitTest;
 
-            if (raycastQuad(&scene->quads[room->quadIndices[i]], ray, hit->distance, &hitTest) && hitTest.distance < hit->distance) {
+            if (raycastQuad(&scene->quads[room->quadIndices[i]], ray, hit->distance, &hitTest) && hitTest.distance < hit->distance && vector3Dot(&hitTest.normal, &ray->dir) < 0.0f) {
                 hit->at = hitTest.at;
                 hit->normal = hitTest.normal;
                 hit->distance = hitTest.distance;

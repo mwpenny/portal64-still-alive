@@ -3,6 +3,7 @@
 
 #include "DefinitionGenerator.h"
 #include "../DisplayListSettings.h"
+#include "RoomGenerator.h"
 #include <map>
 
 struct Trigger {
@@ -32,7 +33,7 @@ struct Cutscene {
 
 class TriggerGenerator : public DefinitionGenerator {
 public:
-    TriggerGenerator(const DisplayListSettings& settings);
+    TriggerGenerator(const DisplayListSettings& settings, const RoomGeneratorOutput& roomOutput);
 
     virtual bool ShouldIncludeNode(aiNode* node);
     virtual void GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition);
@@ -41,8 +42,10 @@ public:
 private:
     DisplayListSettings mSettings;
     TriggerGeneratorOutput mOutput;
+    RoomGeneratorOutput mRoomOutput;
 
     void GenerateCutscenes(std::map<std::string, std::shared_ptr<Cutscene>>& output, CFileDefinition& fileDefinition);
+    std::unique_ptr<StructureDataChunk> GenerateCutsceneStep(CutsceneStep& step);
 };
 
 #endif

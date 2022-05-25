@@ -649,6 +649,7 @@ void parseTiles(const YAML::Node& node, MaterialState& state, ParseResult& outpu
                 state.textureState.isOn = true;
             }
         }
+        return;
     }
 
     output.mErrors.push_back(ParseError(formatError("Expected a tile or array of tiles", node.Mark())));

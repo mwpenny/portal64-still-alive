@@ -22,6 +22,8 @@ struct Scene {
     OSTime lastFrameTime;
 };
 
+extern struct Scene gScene;
+
 struct GraphicsTask;
 
 void sceneInit(struct Scene* scene);

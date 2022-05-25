@@ -28,6 +28,7 @@ struct RoomGeneratorOutput {
     int roomCount;
 
     short FindLocationRoom(const std::string& name) const;
+    short FindLocationIndex(const std::string& name) const;
     int RoomForNode(const aiNode* node) const;
 };
 

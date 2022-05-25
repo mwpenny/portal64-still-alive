@@ -84,7 +84,7 @@ static void initProc(void* arg) {
     for(;;);
 }
 
-static struct Scene gScene;
+struct Scene gScene;
 
 extern OSMesgQueue dmaMessageQ;
 
@@ -128,6 +128,7 @@ static void gameProc(void* arg) {
     u32 pendingGFX = 0;
     u32 drawBufferIndex = 0;
     u8 frameControl = 0;
+    u8 inputIgnore = 6;
 
     u16* memoryEnd = graphicsLayoutScreenBuffers((u16*)PHYS_TO_K0(osMemSize));
 
@@ -174,7 +175,11 @@ static void gameProc(void* arg) {
                 }
 
                 controllersTriggerRead();
-                sceneUpdate(&gScene);
+                if (inputIgnore) {
+                    --inputIgnore;
+                } else {
+                    sceneUpdate(&gScene);
+                }
                 timeUpdateDelta();
                 soundPlayerUpdate();
 
