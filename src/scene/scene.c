@@ -87,7 +87,7 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
         otherPortal = 1 - otherPortal;
     }
 
-    staticRender(&properties->cullingInfo, visibleRooms, renderState);
+    staticRender(&properties->camera.transform, &properties->cullingInfo, visibleRooms, renderState);
 }
 
 #define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
@@ -130,7 +130,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 
-    dynamicSceneRenderTouchingPortal(renderState);
+    dynamicSceneRenderTouchingPortal(&scene->camera.transform, &renderProperties.cullingInfo, renderState);
 
     sceneRenderWithProperties(scene, &renderProperties, renderState);
 

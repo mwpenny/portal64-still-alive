@@ -1,6 +1,11 @@
 #include "plane.h"
 #include "mathf.h"
 
+void planeInitWithNormalAndPoint(struct Plane* plane, struct Vector3* normal, struct Vector3* point) {
+    plane->normal = *normal;
+    plane->d = -vector3Dot(normal, point);
+}
+
 int planeRayIntersection(struct Plane* plane, struct Vector3* rayOrigin, struct Vector3* rayDirection, float* rayDistance) {
     float normalDot = vector3Dot(&plane->normal, rayDirection);
 

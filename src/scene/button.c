@@ -5,14 +5,12 @@
 #include "../graphics/renderstate.h"
 #include "dynamic_scene.h"
 
-void buttonRender(void* data, struct RenderState* renderState) {
+void buttonRender(void* data, struct RenderScene* renderScene) {
     struct Button* button = (struct Button*)data;
-    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
+    Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
     transformToMatrixL(&button->rigidBody.transform, matrix, SCENE_SCALE);
 
-    gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
-    gSPDisplayList(renderState->dl++, button_gfx);
-    gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
+    renderSceneAdd(renderScene, button_gfx, matrix, button_material_index, &button->rigidBody.transform.position);
 }
 
 void buttonInit(struct Button* button, struct Vector3* at, int roomIndex) {
@@ -22,7 +20,7 @@ void buttonInit(struct Button* button, struct Vector3* at, int roomIndex) {
 
     button->rigidBody.currentRoom = roomIndex;
 
-    button->dynamicId = dynamicSceneAdd(button, buttonRender, &button->rigidBody.transform, 0.74f, button_material_index);
+    button->dynamicId = dynamicSceneAdd(button, buttonRender, &button->rigidBody.transform, 0.74f);
 }
 
 void buttonUpdate(struct Button* button) {

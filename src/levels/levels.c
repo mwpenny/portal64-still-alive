@@ -21,7 +21,6 @@ void levelLoad(int index) {
     gCurrentLevel = gLevelList[index];
 
     collisionSceneInit(&gCollisionScene, gCurrentLevel->collisionQuads, gCurrentLevel->collisionQuadCount, &gCurrentLevel->world);
-    staticRenderInit();
 }
 
 int levelMaterialCount() {

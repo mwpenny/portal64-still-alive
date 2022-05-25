@@ -1,0 +1,31 @@
+#ifndef __RENDER_SCENE_H__
+#define __RENDER_SCENE_H__
+
+#include <ultra64.h>
+#include "../math/transform.h"
+#include "../math/plane.h"
+#include "renderstate.h"
+
+struct RenderPart {
+    Mtx* matrix;
+    Gfx* geometry;
+};
+
+struct RenderScene {
+    u64 visibleRooms;
+    struct Plane forwardPlane;
+    struct RenderPart* renderParts;
+    short* materials;
+    int* sortKeys;
+    short* renderOrder;
+    short* renderOrderCopy;
+    int currentRenderPart;
+    int maxRenderParts;
+    struct RenderState *renderState;
+};
+
+struct RenderScene* renderSceneInit(struct Transform* cameraTransform, struct RenderState *renderState, int capacity, u64 visibleRooms);
+void renderSceneAdd(struct RenderScene* renderScene, Gfx* geometry, Mtx* matrix, int materialIndex, struct Vector3* at);
+void renderSceneGenerate(struct RenderScene* renderScene, struct RenderState* renderState);
+
+#endif

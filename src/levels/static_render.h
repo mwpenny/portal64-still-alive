@@ -6,11 +6,8 @@
 #include "scene/camera.h"
 #include "../scene/dynamic_scene.h"
 
-void staticRenderInit();
-
-int staticRenderSorkKeyFromMaterial(int materialIndex, float distanceScaled);
 void staticRenderDetermineVisibleRooms(struct FrustrumCullingInformation* cullingInfo, u16 currentRoom, u64* visitedRooms);
 int staticRenderIsRoomVisible(u64 visibleRooms, u16 roomIndex);
-void staticRender(struct FrustrumCullingInformation* cullingInfo, u64 visibleRooms, struct RenderState* renderState);
+void staticRender(struct Transform* cameraTransform, struct FrustrumCullingInformation* cullingInfo, u64 visibleRooms, struct RenderState* renderState);
 
 #endif

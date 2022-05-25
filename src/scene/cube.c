@@ -58,14 +58,12 @@ struct ColliderTypeData gCubeCollider = {
     &gCollisionBoxCallbacks,  
 };
 
-void cubeRender(void* data, struct RenderState* renderState) {
+void cubeRender(void* data, struct RenderScene* renderScene) {
     struct Cube* cube = (struct Cube*)data;
-    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
+    Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
     transformToMatrixL(&cube->rigidBody.transform, matrix, SCENE_SCALE);
 
-    gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
-    gSPDisplayList(renderState->dl++, cube_gfx);
-    gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
+    renderSceneAdd(renderScene, cube_gfx, matrix, cube_material_index, &cube->rigidBody.transform.position);
 }
 
 void cubeInit(struct Cube* cube) {
@@ -74,7 +72,7 @@ void cubeInit(struct Cube* cube) {
 
     cube->collisionObject.body->flags |= RigidBodyFlagsGrabbable;
 
-    cube->dynamicId = dynamicSceneAdd(cube, cubeRender, &cube->rigidBody.transform, sqrtf(vector3MagSqrd(&gCubeCollisionBox.sideLength)), cube_material_index);
+    cube->dynamicId = dynamicSceneAdd(cube, cubeRender, &cube->rigidBody.transform, sqrtf(vector3MagSqrd(&gCubeCollisionBox.sideLength)));
 }
 
 void cubeUpdate(struct Cube* cube) {

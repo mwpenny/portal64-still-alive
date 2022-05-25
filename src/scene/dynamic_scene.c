@@ -6,6 +6,7 @@
 struct DynamicScene gDynamicScene;
 
 #define FLAG_MASK (DYNAMIC_SCENE_OBJECT_FLAGS_USED | DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE | DYNAMIC_SCENE_OBJECT_FLAGS_TOUCHING_PORTAL)
+
 #define FLAG_VALUE_NOT_TOUCHING_PORTAL (DYNAMIC_SCENE_OBJECT_FLAGS_USED | DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE)
 #define FLAG_VALUE_TOUCHING_PORTAL (DYNAMIC_SCENE_OBJECT_FLAGS_USED | DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE | DYNAMIC_SCENE_OBJECT_FLAGS_TOUCHING_PORTAL)
 
@@ -15,24 +16,30 @@ void dynamicSceneInit() {
     }
 }
 
-void dynamicSceneRenderTouchingPortal(struct RenderState* renderState) {
+
+void dynamicScenePopulateWithFlags(struct FrustrumCullingInformation* cullingInfo, struct RenderScene* renderScene, int flags) {
     for (int i = 0; i < MAX_DYNAMIC_SCENE_OBJECTS; ++i) {
         struct DynamicSceneObject* object = &gDynamicScene.objects[i];
-        if ((object->flags & FLAG_MASK) == FLAG_VALUE_TOUCHING_PORTAL) {
-            if (object->materialIndex != -1) {
-                gSPDisplayList(renderState->dl++, levelMaterial(object->materialIndex));
+        if ((object->flags & FLAG_MASK) == flags) {
+            struct Vector3 scaledPos;
+            vector3Scale(&object->transform->position, &scaledPos, SCENE_SCALE);
+
+            if (isSphereOutsideFrustrum(cullingInfo, &scaledPos, object->scaledRadius)) {
+                continue;
             }
 
-            gDynamicScene.objects[i].renderCallback(gDynamicScene.objects[i].data, renderState);
-
-            if (object->materialIndex != -1) {
-                gSPDisplayList(renderState->dl++, levelMaterialRevert(object->materialIndex));
-            }
+            object->renderCallback(object->data, renderScene);
         }
     }
 }
 
-int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Transform* transform, float radius, u16 materialIndex) {
+void dynamicSceneRenderTouchingPortal(struct Transform* cameraTransform, struct FrustrumCullingInformation* cullingInfo, struct RenderState* renderState) {
+    struct RenderScene* tmpScene = renderSceneInit(cameraTransform, renderState, MAX_DYNAMIC_SCENE_OBJECTS, ~0);
+    dynamicScenePopulateWithFlags(cullingInfo, tmpScene, FLAG_VALUE_NOT_TOUCHING_PORTAL);
+    renderSceneGenerate(tmpScene, renderState);
+}
+
+int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Transform* transform, float radius) {
     for (int i = 0; i < MAX_DYNAMIC_SCENE_OBJECTS; ++i) {
         struct DynamicSceneObject* object = &gDynamicScene.objects[i];
         if (!(object->flags & DYNAMIC_SCENE_OBJECT_FLAGS_USED)) {
@@ -42,7 +49,6 @@ int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Transform* 
             object->renderCallback = renderCallback;
             object->transform = transform;
             object->scaledRadius = radius * SCENE_SCALE;
-            object->materialIndex = materialIndex;
             return i;
         }
     }
@@ -66,42 +72,6 @@ void dynamicSceneClearFlags(int id, int flags) {
     gDynamicScene.objects[id].flags &= ~flags;
 }
 
-int dynamicScenePopulate(struct FrustrumCullingInformation* cullingInfo, int currentObjectCount, int staticObjectCount, int* sortKey, u16* renderOrder) {
-    for (int i = 0; i < MAX_DYNAMIC_SCENE_OBJECTS; ++i) {
-        struct DynamicSceneObject* object = &gDynamicScene.objects[i];
-        if ((object->flags & FLAG_MASK) == FLAG_VALUE_NOT_TOUCHING_PORTAL) {
-            struct Vector3 scaledPos;
-            vector3Scale(&object->transform->position, &scaledPos, SCENE_SCALE);
-
-            if (isSphereOutsideFrustrum(cullingInfo, &scaledPos, object->scaledRadius)) {
-                continue;
-            }
-
-            renderOrder[currentObjectCount] = staticObjectCount + i;
-            sortKey[staticObjectCount + i] = staticRenderSorkKeyFromMaterial(
-                object->materialIndex, 
-                sqrtf(vector3DistSqrd(&scaledPos, &cullingInfo->cameraPosScaled))
-            );
-            ++currentObjectCount;
-        }
-    }
-
-    return currentObjectCount;
-}
-
-void dynamicSceneRenderObject(int index, struct RenderState* renderState) {
-    if (index < 0 || index >= MAX_DYNAMIC_OBJECTS) {
-        return;
-    }
-
-    struct DynamicSceneObject* object = &gDynamicScene.objects[index];
-    object->renderCallback(object->data, renderState);
-}
-
-int dynamicSceneObjectMaterialIndex(int objectIndex) {
-    if (objectIndex < 0 || objectIndex >= MAX_DYNAMIC_OBJECTS) {
-        return -1;
-    }
-
-    return gDynamicScene.objects[objectIndex].materialIndex;
+void dynamicScenePopulate(struct FrustrumCullingInformation* cullingInfo, struct RenderScene* renderScene) {
+    dynamicScenePopulateWithFlags(cullingInfo, renderScene, FLAG_VALUE_NOT_TOUCHING_PORTAL);
 }

@@ -4,8 +4,9 @@
 #include "../graphics/renderstate.h"
 #include "../math/transform.h"
 #include "../scene/camera.h"
+#include "../graphics/render_scene.h"
 
-typedef void (*DynamicRender)(void* data, struct RenderState* renderState);
+typedef void (*DynamicRender)(void* data, struct RenderScene* renderScene);
 
 #define MAX_DYNAMIC_SCENE_OBJECTS 32
 
@@ -20,7 +21,6 @@ struct DynamicSceneObject {
     DynamicRender renderCallback;
     struct Transform* transform;
     float scaledRadius;
-    u16 materialIndex;
     u16 flags;
 };
 
@@ -30,16 +30,13 @@ struct DynamicScene {
 
 void dynamicSceneInit();
 
-void dynamicSceneRenderTouchingPortal(struct RenderState* renderState);
+void dynamicSceneRenderTouchingPortal(struct Transform* cameraTransform, struct FrustrumCullingInformation* cullingInfo, struct RenderState* renderState);
 
-int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Transform* transform, float radius, u16 materialIndex);
+int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Transform* transform, float radius);
 void dynamicSceneRemove(int id);
 void dynamicSceneSetFlags(int id, int flags);
 void dynamicSceneClearFlags(int id, int flags);
 
-int dynamicScenePopulate(struct FrustrumCullingInformation* cullingInfo, int currentObjectCount, int staticObjectCount, int* sortKey, u16* renderOrder);
-
-void dynamicSceneRenderObject(int index, struct RenderState* renderState);
-int dynamicSceneObjectMaterialIndex(int objectIndex);
+void dynamicScenePopulate(struct FrustrumCullingInformation* cullingInfo, struct RenderScene* renderScene);
 
 #endif
