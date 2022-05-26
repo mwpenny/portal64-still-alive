@@ -6,8 +6,6 @@
 
 #define EDGE_ZERO_BIAS  0.001f
 
-#define POINT_NO_OVERLAP    -1
-
 void collisionQuadInitializeNormalContact(struct CollisionQuad* quad, struct ContactConstraintState* output) {
     output->normal = quad->plane.normal;
     output->tangentVectors[0] = quad->edgeA;

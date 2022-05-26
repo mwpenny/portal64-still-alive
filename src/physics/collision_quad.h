@@ -6,6 +6,8 @@
 #include "../math/transform.h"
 #include "contact_solver.h"
 
+#define POINT_NO_OVERLAP    -1
+
 struct CollisionQuad {
     struct Vector3 corner;
     struct Vector3 edgeA;
