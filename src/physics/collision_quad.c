@@ -8,6 +8,15 @@
 
 #define POINT_NO_OVERLAP    -1
 
+void collisionQuadInitializeNormalContact(struct CollisionQuad* quad, struct ContactConstraintState* output) {
+    output->normal = quad->plane.normal;
+    output->tangentVectors[0] = quad->edgeA;
+    output->tangentVectors[1] = quad->edgeB;
+
+    output->restitution = 0.0f;
+    output->friction = 1.0f;
+}
+
 /**
  *        -------
  *        |  3  |
@@ -351,7 +360,7 @@ int collisionBoxCollideQuad(void* data, struct Transform* boxTransform, struct C
 
     output->contactCount = 0;
     output->normal = quad->plane.normal;
-    // TODO actually calculate tangent 
+    // TODO handle non orthogonal edges
     output->tangentVectors[0] = quad->edgeA;
     output->tangentVectors[1] = quad->edgeB;
 
