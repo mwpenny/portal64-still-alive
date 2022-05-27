@@ -73,6 +73,16 @@ void sceneInit(struct Scene* scene) {
     scene->decor[0]->rigidBody.velocity.y = 1.0f;
     scene->decor[0]->rigidBody.velocity.z = 1.0f;
     scene->decor[0]->rigidBody.velocity.x = 1.0f;
+
+    scene->doorCount = gCurrentLevel->doorCount;
+    scene->doors = malloc(sizeof(struct Door) * scene->doorCount);
+    for (int i = 0; i < scene->doorCount; ++i) {
+        struct Transform doorTransform;
+        doorTransform.position = gCurrentLevel->doors[i].location;
+        doorTransform.rotation = gCurrentLevel->doors[i].rotation;
+        doorTransform.scale = gOneVec;
+        doorInit(&scene->doors[i], &doorTransform, 0, 0, gCurrentLevel->doors[i].doorwayIndex);
+    }
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {

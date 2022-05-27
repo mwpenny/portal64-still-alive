@@ -21,10 +21,18 @@ struct Doorway {
     int roomB;
 };
 
+struct Door {
+    Door(const aiNode* node);
+    
+    const aiNode* node;
+    int doorwayIndex;
+};
+
 struct RoomGeneratorOutput {
     std::map<const aiNode*, int> roomIndexMapping;
     std::vector<NamedLocation> namedLocations;
     std::vector<Doorway> doorways;
+    std::vector<Door> doors;
     int roomCount;
 
     short FindLocationRoom(const std::string& name) const;

@@ -62,6 +62,12 @@ struct Location {
     short roomIndex;
 };
 
+struct DoorDefinition {
+    struct Vector3 location;
+    struct Quaternion rotation;
+    short doorwayIndex;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
@@ -73,11 +79,13 @@ struct LevelDefinition {
     struct Trigger* triggers;
     struct Location* locations;
     struct World world;
+    struct DoorDefinition* doors;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
     short triggerCount;
     short locationCount;
+    short doorCount;
     short startLocation;
 };
 

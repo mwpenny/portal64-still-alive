@@ -20,7 +20,7 @@ void buttonInit(struct Button* button, struct Vector3* at, int roomIndex) {
 
     button->rigidBody.currentRoom = roomIndex;
 
-    button->dynamicId = dynamicSceneAdd(button, buttonRender, &button->rigidBody.transform, 0.74f);
+    button->dynamicId = dynamicSceneAdd(button, buttonRender, &button->rigidBody.transform, 0.84f);
 }
 
 void buttonUpdate(struct Button* button) {

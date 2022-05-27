@@ -19,6 +19,7 @@ struct CollisionQuad {
     void ToLocalCoords(const aiVector3D& input, short& outX, short& outY);
 
     bool IsCoplanar(ExtendedMesh& mesh, float relativeScale) const;
+    bool IsCoplanar(const aiVector3D& input) const;
 
     aiAABB BoundingBox() const;
 };

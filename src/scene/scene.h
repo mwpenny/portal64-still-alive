@@ -11,6 +11,7 @@
 #include "cube.h"
 #include "button.h"
 #include "../decor/decor_object.h"
+#include "./door.h"
 
 #define MAX_CUBES   2
 
@@ -21,11 +22,13 @@ struct Scene {
     struct Cube cubes[MAX_CUBES];
     struct Button* buttons;
     struct DecorObject** decor;
+    struct Door* doors;
     OSTime cpuTime;
     OSTime lastFrameStart;
     OSTime lastFrameTime;
     u8 buttonCount;
     u8 decorCount;
+    u8 doorCount;
 };
 
 extern struct Scene gScene;

@@ -36,6 +36,8 @@ private:
     void CalculateLocations(const aiScene* scene, CFileDefinition& fileDefinition, std::string& locationsName);
 
     void CalculateDoorwaysAndRooms(const aiScene* scene, CFileDefinition& fileDefinition, std::string& doorwaysName, std::string& roomsName);
+
+    void CalculateDoors(const aiScene* scene, CFileDefinition& fileDefinition, std::string& doorsName);
 };
 
 #endif

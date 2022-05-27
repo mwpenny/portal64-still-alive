@@ -2,6 +2,8 @@
 
 #include "math/mathf.h"
 #include "collision_box.h"
+#include "collision_cylinder.h"
+#include "line.h"
 
 #define NEAR_EDGE_ZERO      0.001f
 #define NEAR_DOT_ZERO       0.00001f
@@ -47,6 +49,10 @@ int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDist
     struct CollisionBox* box = (struct CollisionBox*)boxObject->collider->data;
 
     float distance = rayDetermineDistance(ray, &boxObject->body->transform.position);
+
+    if (distance < 0.0f) {
+        return 0;
+    }
 
     struct Vector3 nearestPoint;
 
@@ -114,4 +120,48 @@ int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDist
     contact->roomIndex = boxObject->body->currentRoom;
 
     return contact->distance != maxDistance;
+}
+
+int raycastCylinder(struct CollisionObject* cylinderObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
+    struct CollisionCylinder* cylinder = (struct CollisionCylinder*)cylinderObject->collider->data;
+
+    float distance = rayDetermineDistance(ray, &cylinderObject->body->transform.position);
+
+    if (distance < 0.0f) {
+        return 0;
+    }
+    
+    float rayLerp;
+    float cylinderLerp;
+
+    struct Vector3 up;
+    quatMultVector(&cylinderObject->body->transform.rotation, &gUp, &up);
+
+    if (lineNearestApproach(&ray->origin, &ray->dir, &cylinderObject->body->transform.position, &up, &rayLerp, &cylinderLerp)) {
+        if (cylinderLerp < -cylinder->halfHeight || cylinderLerp > cylinder->halfHeight || rayLerp > maxDistance) {
+            return 0;
+        }
+
+        struct Vector3 nearPoint;
+        vector3AddScaled(&ray->origin, &ray->dir, rayLerp, &nearPoint);
+        
+        struct Vector3 cylinderPoint;
+        vector3AddScaled(&cylinderObject->body->transform.position, &up, cylinderLerp, &cylinderPoint);
+
+        if (vector3DistSqrd(&nearPoint, &cylinderPoint) > cylinder->radius * cylinder->radius) {
+            return 0;
+        }
+
+        // good enough for now
+        // TODO check collision on cylinder surface
+        // TODO check collision on cylinder caps
+        contact->at = nearPoint;
+        contact->distance = rayLerp;
+        vector3Negate(&ray->dir, &contact->normal);
+        contact->object = cylinderObject;
+
+        return 1;
+    }
+
+    return 0;
 }

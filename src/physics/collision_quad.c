@@ -3,6 +3,7 @@
 
 #include "collision_box.h"
 #include "../math/mathf.h"
+#include "./line.h"
 
 #define EDGE_ZERO_BIAS  0.001f
 
@@ -124,29 +125,41 @@ struct CollisionEdge {
 // nearestPointB = Pb + Db * b
 
 struct ContactState* _collisionEdgeEdge(struct CollisionEdge* quadEdge, struct CollisionEdge* cubeEdge, struct ContactConstraintState* output) {
-    float edgesDot = vector3Dot(&quadEdge->direction, &cubeEdge->direction);
+//     float edgesDot = vector3Dot(&quadEdge->direction, &cubeEdge->direction);
 
-    float denomInv = 1.0f - edgesDot * edgesDot;
+//     float denomInv = 1.0f - edgesDot * edgesDot;
 
-    if (denomInv < 0.0001f) {
+//     if (denomInv < 0.0001f) {
+//         return NULL;
+//     }
+
+//     denomInv = 1.0f / denomInv;
+
+//     struct Vector3 offset;
+//     vector3Sub(&cubeEdge->origin, &quadEdge->origin, &offset);
+
+//     float cubeDot = vector3Dot(&cubeEdge->direction, &offset);
+//     float edgeDot = vector3Dot(&quadEdge->direction, &offset);
+
+//     float quadLerp = (edgeDot - edgesDot * cubeDot) * denomInv;
+
+
+//     float cubeLerp = (edgesDot * edgeDot - cubeDot) * denomInv;
+
+    float quadLerp;
+    float cubeLerp;
+
+    if (!lineNearestApproach(
+        &quadEdge->origin, &quadEdge->direction,
+        &cubeEdge->origin, &cubeEdge->direction,
+        &quadLerp, &cubeLerp
+    )) {
         return NULL;
     }
-
-    denomInv = 1.0f / denomInv;
-
-    struct Vector3 offset;
-    vector3Sub(&cubeEdge->origin, &quadEdge->origin, &offset);
-
-    float cubeDot = vector3Dot(&cubeEdge->direction, &offset);
-    float edgeDot = vector3Dot(&quadEdge->direction, &offset);
-
-    float quadLerp = (edgeDot - edgesDot * cubeDot) * denomInv;
 
     if (quadLerp < -EDGE_ZERO_BIAS || quadLerp > quadEdge->length + EDGE_ZERO_BIAS) {
         return NULL;
     }
-
-    float cubeLerp = (edgesDot * edgeDot - cubeDot) * denomInv;
 
     if (cubeLerp < -EDGE_ZERO_BIAS || cubeLerp > cubeEdge->length + EDGE_ZERO_BIAS) {
         return NULL;

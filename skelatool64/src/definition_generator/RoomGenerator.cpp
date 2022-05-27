@@ -10,10 +10,14 @@
 
 #define DOORWAY_PREFIX  "@doorway"
 
+#define DOOR_PREFIX "@door "
+
 Doorway::Doorway(const aiNode* node, const CollisionQuad& quad): 
     node(node), quad(quad), roomA(0), roomB(0) {
 
 }
+
+Door::Door(const aiNode* node): node(node) {}
 
 RoomGenerator::RoomGenerator(const DisplayListSettings& settings): DefinitionGenerator(), mSettings(settings) {}
 
@@ -130,6 +134,10 @@ void RoomGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& f
                 collisionTransform * node->mTransformation
             )));
         }
+
+        if (StartsWith(nodeName, DOOR_PREFIX)) {
+            mOutput.doors.push_back(Door(node));
+        }
     }
 
     if (roomBlocks.size() == 0) {
@@ -162,6 +170,23 @@ void RoomGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& f
         }
 
         mOutput.roomCount = std::max(mOutput.roomCount, doorway.roomB + 1);
+    }
+
+    for (auto& door : mOutput.doors) {
+        int doorwayIndex = -1;
+
+        int index = 0;
+
+        for (auto& doorway : mOutput.doorways) {
+            if (doorway.quad.IsCoplanar(door.node->mTransformation * aiVector3D(0.0f, 0.0f, 0.0f))) {
+                doorwayIndex = index;
+                break;
+            }
+
+            ++index;
+        }
+
+        door.doorwayIndex = doorwayIndex;
     }
 }
 
