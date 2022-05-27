@@ -4,6 +4,37 @@
 #include "contact_solver.h"
 #include "collision_quad.h"
 
+struct ColliderCallbacks gCollisionCylinderCallbacks = {
+    NULL,
+    collisionCylinderCollideQuad,
+    NULL,
+    collisionCylinderSolidMofI,
+    collisionCylinderBoundingBox,
+};
+
+float collisionCylinderSolidMofI(struct ColliderTypeData* typeData, float mass) {
+    struct CollisionCylinder* cylinder = (struct CollisionCylinder*)typeData->data;
+
+    float rr = cylinder->radius * cylinder->radius;
+
+    float topResult = 0.5f * mass * rr;
+    float sideResult = (1.0f / 12.0f) * mass * (3.0f * rr + 4.0f * cylinder->halfHeight * cylinder->halfHeight);
+
+    return MAX(topResult, sideResult);
+}
+
+void collisionCylinderBoundingBox(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box) {
+    struct CollisionCylinder* cylinder = (struct CollisionCylinder*)typeData->data;
+    struct Vector3 radius;
+    radius.x = cylinder->radius;
+    radius.y = cylinder->halfHeight;
+    radius.z = cylinder->radius;
+    struct Vector3 halfSize;
+    quatRotatedBoundingBoxSize(&transform->rotation, &radius, &halfSize);
+    vector3Sub(&transform->position, &halfSize, &box->min);
+    vector3Add(&transform->position, &halfSize, &box->max);
+}
+
 int _collisionPointCheckOverlapWithQuad(struct Vector3* pointToCheck, struct Vector3* colliderCenter, struct CollisionQuad* quad, struct ContactConstraintState* output) {
     float edgeDistance = planePointDistance(&quad->plane, pointToCheck);
 
@@ -12,8 +43,6 @@ int _collisionPointCheckOverlapWithQuad(struct Vector3* pointToCheck, struct Vec
     }
 
     int edgesToCheck = collisionQuadDetermineEdges(pointToCheck, quad);
-
-    output->contactCount = 0;
 
     if (!edgesToCheck) {
         if (output->contactCount == 0) {
@@ -64,6 +93,12 @@ int _collisionCylinderParallel(struct CollisionCylinder* cylinder, struct Transf
 }
 
 int _collisionCylinderPerpendicular(struct CollisionCylinder* cylinder, struct Transform* cylinderTransform, struct Vector3* centerAxis, struct Vector3* crossAxis, float normalDotProduct, struct CollisionQuad* quad, struct ContactConstraintState* output) {
+    float centerDistance = planePointDistance(&quad->plane, &cylinderTransform->position);
+
+    if (centerDistance < -cylinder->radius) {
+        return 0;
+    }
+
     struct Vector3 edgeEndpoint;
     struct Vector3 centerPoint;
     vector3AddScaled(&cylinderTransform->position, centerAxis, normalDotProduct > 0.0f ? -cylinder->halfHeight : cylinder->halfHeight, &centerPoint);
@@ -113,6 +148,7 @@ int collisionCylinderCollideQuad(void* data, struct Transform* cylinderTransform
 
     struct Vector3 capCenterTowardsPlane;
     vector3AddScaled(&quad->plane.normal, &centerAxis, -normalDotProduct, &capCenterTowardsPlane);
+    vector3Negate(&capCenterTowardsPlane, &capCenterTowardsPlane);
 
     float magSqrd = vector3MagSqrd(&capCenterTowardsPlane);
 
@@ -130,6 +166,8 @@ int collisionCylinderCollideQuad(void* data, struct Transform* cylinderTransform
                 vector3Cross(&gRight, &centerAxis, &capCenterTowardsPlane);
             }
             vector3Scale(&capCenterTowardsPlane, &capCenterTowardsPlane, cylinder->radius / sqrtf(vector3MagSqrd(&capCenterTowardsPlane)));
+        } else {
+            vector3Scale(&capCenterTowardsPlane, &capCenterTowardsPlane, cylinder->radius / sqrtf(magSqrd));
         }
         edgesToCheck = _collisionCylinderPerpendicular(cylinder, cylinderTransform, &centerAxis, &capCenterTowardsPlane, normalDotProduct, quad, output);
     } else {

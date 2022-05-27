@@ -130,8 +130,28 @@ int collisionBoxCollidePlane(void* data, struct Transform* boxTransform, struct 
 }
 
 float collisionBoxSolidMofI(struct ColliderTypeData* typeData, float mass) {
-    float singleSide = sqrtf(vector3MagSqrd(&((struct CollisionBox*)typeData->data)->sideLength));
-    return mass * singleSide * singleSide * (1.0f / 6.0f);
+    struct CollisionBox* collisionBox = (struct CollisionBox*)typeData->data;
+
+    float xx = collisionBox->sideLength.x * collisionBox->sideLength.x;
+    float yy = collisionBox->sideLength.y * collisionBox->sideLength.y;
+    float zz = collisionBox->sideLength.z * collisionBox->sideLength.z;
+
+    float biggestSide = xx + yy;
+
+    float sideCheck = yy + zz;
+
+    if (sideCheck > biggestSide) {
+        biggestSide = sideCheck;
+    }
+
+    sideCheck = zz + xx;
+
+    if (sideCheck > biggestSide) {
+        biggestSide = sideCheck;
+    }
+
+
+    return mass * biggestSide * (1.0f / 12.0f);
 }
 
 void collisionBoxBoundingBox(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box) {
