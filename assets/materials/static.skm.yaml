@@ -20,6 +20,22 @@ materials:
       tileSizeS: 1
       tileSizeT: 2
 
+  concrete/observationwall_001a:
+    gDPSetTile: 
+      filename: ../../portal_pak_modified/materials/concrete/observationwall_001a.png
+      siz: G_IM_SIZ_8b
+      fmt: G_IM_FMT_I
+
+    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+
+    properties:
+      tileSizeS: 2
+      tileSizeT: 2
+
   metalwall048b:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/metal/metalwall048b.png
