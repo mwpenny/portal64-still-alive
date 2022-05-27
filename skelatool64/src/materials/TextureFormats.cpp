@@ -27,8 +27,8 @@ bool G_IM_SUPPORTED[5][4] = {
     {false, false, true, true},
     {false, false, true, false},
     {true, true, false, false},
-    {true, true, true, false},
     {true, true, false, false},
+    {true, true, true, false},
 };
 
 bool isImageFormatSupported(G_IM_FMT format, G_IM_SIZ size) {

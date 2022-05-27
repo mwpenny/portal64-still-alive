@@ -72,6 +72,23 @@ materials:
       tileSizeS: 0.0625
       tileSizeT: 2
 
+  refract01_dx8:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/glass/refract01_dx8.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_IA
+
+    gDPSetCombineMode: G_CC_DECALRGBA
+    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetRenderMode: G_RM_ZB_XLU_SURF
+    gDPSetTextureFilter: G_TF_POINT
+    gSPGeometryMode:
+      clear: [G_CULL_BACK, G_CULL_FRONT]
+
+    properties:
+      tileSizeS: 0.125
+      tileSizeT: 1
+
   autoportal_frame:
     gDPSetTile:
       filename: ./props/autoportal_frame/autoportal_frame.png
@@ -120,13 +137,6 @@ materials:
       color: ["SHADE", "0", "PRIMITIVE", "0"]
 
   plastic/plasticwall003a:
-    # filename:
-    #   ../../portal_pak_modified/materials/plastic/plasticwall003a.png
-    # siz: G_IM_SIZ_16b
-    # fmt: G_IM_FMT_RGBA
-
-    # gDPSetCombineMode: G_CC_DECALRGB
-    # gDPSetCycleType: G_CYC_1CYCLE
 
     gDPSetTile: 
       filename: ../../portal_pak_modified/materials/plastic/plasticwall003a.png
