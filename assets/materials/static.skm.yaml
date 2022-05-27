@@ -118,6 +118,26 @@ materials:
       set: [G_LIGHTING, G_SHADE]
     gDPSetCombineMode: 
       color: ["SHADE", "0", "PRIMITIVE", "0"]
+
+  plastic/plasticwall003a:
+    # filename:
+    #   ../../portal_pak_modified/materials/plastic/plasticwall003a.png
+    # siz: G_IM_SIZ_16b
+    # fmt: G_IM_FMT_RGBA
+
+    # gDPSetCombineMode: G_CC_DECALRGB
+    # gDPSetCycleType: G_CYC_1CYCLE
+
+    gDPSetTile: 
+      filename: ../../portal_pak_modified/materials/plastic/plasticwall003a.png
+      siz: G_IM_SIZ_8b
+      fmt: G_IM_FMT_I
+      t:
+        wrap: false
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCycleType: G_CYC_1CYCLE
   
   button:
     gDPSetTile:
