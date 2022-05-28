@@ -4,9 +4,15 @@
 #include <ultra64.h>
 #include <sched.h>
 #include "renderstate.h"
+#include "defs.h"
 
+#if HIGH_RES
+#define SCREEN_WD   640
+#define SCREEN_HT   480
+#else
 #define SCREEN_WD   320
 #define SCREEN_HT   240
+#endif
 
 struct GraphicsTask {
     struct RenderState renderState;
