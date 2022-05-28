@@ -13,6 +13,7 @@ struct StaticContentElement {
 struct StaticGeneratorOutput {
     std::string staticContentName;
     std::vector<std::shared_ptr<ExtendedMesh>> staticMeshes;
+    std::vector<int> staticRooms;
     std::string roomMappingName;
 };
 

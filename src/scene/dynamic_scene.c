@@ -35,7 +35,7 @@ void dynamicScenePopulateWithFlags(struct FrustrumCullingInformation* cullingInf
 
 void dynamicSceneRenderTouchingPortal(struct Transform* cameraTransform, struct FrustrumCullingInformation* cullingInfo, struct RenderState* renderState) {
     struct RenderScene* tmpScene = renderSceneInit(cameraTransform, renderState, MAX_DYNAMIC_SCENE_OBJECTS, ~0);
-    dynamicScenePopulateWithFlags(cullingInfo, tmpScene, FLAG_VALUE_NOT_TOUCHING_PORTAL);
+    dynamicScenePopulateWithFlags(cullingInfo, tmpScene, FLAG_VALUE_TOUCHING_PORTAL);
     renderSceneGenerate(tmpScene, renderState);
 }
 

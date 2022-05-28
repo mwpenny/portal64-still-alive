@@ -90,7 +90,7 @@ void cameraExtractClippingPlane(float viewPersp[4][4], struct Plane* output, int
     output->d *= mult;
 }
 
-Mtx* cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, float aspectRatio, u16* perspNorm, Vp* viewport, struct FrustrumCullingInformation* clippingInfo) {
+Mtx* cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, float aspectRatio, u16* perspNorm, Vp* viewport, struct FrustrumCullingInformation* clippingInfo, float zBias) {
     Mtx* viewProjMatrix = renderStateRequestMatrices(renderState, 2);
     
     if (!viewProjMatrix) {
@@ -110,7 +110,7 @@ Mtx* cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState,
     float centerX = ((float)viewport->vp.vtrans[0] - (SCREEN_WD << 1)) * (1.0f / (SCREEN_WD << 1));
     float centerY = ((SCREEN_HT << 1) - (float)viewport->vp.vtrans[1]) * (1.0f / (SCREEN_HT << 1));
 
-    guOrthoF(combined, centerX - scaleX, centerX + scaleX, centerY - scaleY, centerY + scaleY, 1.0f, -1.0f, 1.0f);
+    guOrthoF(combined, centerX - scaleX, centerX + scaleX, centerY - scaleY, centerY + scaleY, 1.0f + zBias, -1.0f + zBias, 1.0f);
     u16 perspectiveNormalize;
     cameraBuildProjectionMatrix(camera, view, &perspectiveNormalize, aspectRatio);
     guMtxCatF(view, combined, persp);

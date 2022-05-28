@@ -40,6 +40,7 @@ void StaticGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition&
             elements.push_back(element);
 
             mOutput.staticMeshes.push_back(renderChunks[0].mMesh);
+            mOutput.staticRooms.push_back(mRoomMapping.RoomForNode(*node));
         }
     }
 

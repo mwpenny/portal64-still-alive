@@ -108,6 +108,8 @@ void generateMeshIntoDLWithMaterials(const aiScene* scene, CFileDefinition& file
         generateGeometry(*chunk, rcpState, vertexBuffer, displayList, settings.mHasTri2);
     }
     rcpState.TraverseToBone(nullptr, displayList);
+
+    generateMaterial(fileDefinition, rcpState.GetMaterialState(), settings.mDefaultMaterialState, displayList.GetDataChunk());
 }
 
 

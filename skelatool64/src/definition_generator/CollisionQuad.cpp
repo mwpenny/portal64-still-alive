@@ -144,18 +144,6 @@ bool CollisionQuad::IsCoplanar(ExtendedMesh& mesh, float relativeScale) const {
         if (fabs(z) >= INSIDE_NORMAL_TOLERANCE) {
             return false;
         }
-
-        float x = offset * edgeA;
-
-        if (x < -INSIDE_NORMAL_TOLERANCE || x > edgeALength + INSIDE_NORMAL_TOLERANCE) {
-            return false;
-        }
-
-        float y = offset * edgeB;
-
-        if (y < -INSIDE_NORMAL_TOLERANCE || y > edgeBLength + INSIDE_NORMAL_TOLERANCE) {
-            return false;
-        }
     }
 
     return true;

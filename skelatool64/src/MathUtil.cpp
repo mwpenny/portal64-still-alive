@@ -29,3 +29,9 @@ float distanceToAABB(const aiAABB& aabb, const aiVector3D& point) {
         return (closestPoint - point).Length();
     }
 }
+
+bool doesAABBOverlap(const aiAABB& a, const aiAABB& b) {
+    return a.mMin.x < b.mMax.x && b.mMin.x < a.mMax.x &&
+        a.mMin.y < b.mMax.y && b.mMin.y < a.mMax.y &&
+        a.mMin.z < b.mMax.z && b.mMin.z < a.mMax.z;
+}

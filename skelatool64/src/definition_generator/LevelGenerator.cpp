@@ -3,6 +3,7 @@
 #include <set>
 #include <string>
 #include "../math/MES.h"
+#include "../MathUtl.h"
 
 std::set<std::string> gPortalableSurfaces = {
     "concrete_modular_wall001d",
@@ -130,17 +131,31 @@ int LevelGenerator::CalculatePortalSurfaces(const aiScene* scene, CFileDefinitio
     for (auto& collision : mCollisionOutput.quads) {
         int startSurfaceCount = surfaceCount;
 
+        aiAABB collisionWithPadding = collision.BoundingBox();
+        collisionWithPadding.mMin = collisionWithPadding.mMin - aiVector3D(0.1f, 0.1f, 0.1f);
+        collisionWithPadding.mMax = collisionWithPadding.mMax + aiVector3D(0.1f, 0.1f, 0.1f);
+
         for (auto mesh : mStaticOutput.staticMeshes) {
             aiMaterial* material = scene->mMaterials[mesh->mMesh->mMaterialIndex];
 
-            if (gPortalableSurfaces.find(ExtendedMesh::GetMaterialName(material)) == gPortalableSurfaces.end()) {
-                continue;;
+            std::string materialName = ExtendedMesh::GetMaterialName(material);
+
+            if (gPortalableSurfaces.find(materialName) == gPortalableSurfaces.end()) {
+                continue;
             }
 
-            if (collision.IsCoplanar(*mesh, mSettings.mCollisionScale)) {
-                portalSurfaces->Add(std::move(CalculatePortalSingleSurface(fileDefinition, collision, *mesh, mSettings.mCollisionScale)));                
-                ++surfaceCount;
+            aiAABB meshBB(mesh->bbMin * mSettings.mCollisionScale, mesh->bbMax * mSettings.mCollisionScale);
+
+            if (!collision.IsCoplanar(*mesh, mSettings.mCollisionScale)) {
+                continue;
             }
+
+            if (!doesAABBOverlap(collisionWithPadding, meshBB)) {
+                continue;
+            }
+
+            portalSurfaces->Add(std::move(CalculatePortalSingleSurface(fileDefinition, collision, *mesh, mSettings.mCollisionScale)));                
+            ++surfaceCount;
         }
 
         std::unique_ptr<StructureDataChunk> indices(new StructureDataChunk());

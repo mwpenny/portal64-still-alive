@@ -45,12 +45,12 @@ void playerInit(struct Player* player, struct Location* startLocation) {
     player->body.transform.position.y += PLAYER_HEAD_HEIGHT;
 }
 
-#define PLAYER_SPEED    (5.0f)
-#define PLAYER_ACCEL    (40.0f)
+#define PLAYER_SPEED    (3.0f)
+#define PLAYER_ACCEL    (30.0f)
 #define PLAYER_STOP_ACCEL    (80.0f)
 
 #define ROTATE_RATE     (M_PI * 2.0f)
-#define ROTATE_RATE_DELTA     (M_PI * 0.25f)
+#define ROTATE_RATE_DELTA     (M_PI * 0.125f)
 #define ROTATE_RATE_STOP_DELTA (M_PI * 0.25f)
 
 #define JUMP_IMPULSE   3.2f
@@ -175,11 +175,20 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
     OSContPad* controllerInput = controllersGetControllerData(0);
 
-    struct Vector3 targetVelocity;
+    struct Vector3 targetVelocity = gZeroVec;
 
-    vector3Scale(&forward, &targetVelocity, -controllerInput->stick_y * PLAYER_SPEED / 80.0f);
-    vector3AddScaled(&targetVelocity, &right, controllerInput->stick_x * PLAYER_SPEED / 80.0f, &targetVelocity);
+    if (controllerGetButton(0, L_CBUTTONS | L_JPAD)) {
+        vector3AddScaled(&targetVelocity, &right, -PLAYER_SPEED, &targetVelocity);
+    } else if (controllerGetButton(0, R_CBUTTONS | R_JPAD)) {
+        vector3AddScaled(&targetVelocity, &right, PLAYER_SPEED, &targetVelocity);
+    }
 
+    if (controllerGetButton(0, U_CBUTTONS | U_JPAD)) {
+        vector3AddScaled(&targetVelocity, &forward, -PLAYER_SPEED, &targetVelocity);
+    } else if (controllerGetButton(0, D_CBUTTONS | D_JPAD)) {
+        vector3AddScaled(&targetVelocity, &forward, PLAYER_SPEED, &targetVelocity);
+    }
+    
     targetVelocity.y = player->body.velocity.y;
 
     vector3MoveTowards(
@@ -210,20 +219,8 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
     rigidBodyCheckPortals(&player->body);
 
-    float targetYaw = 0.0f;
-    float targetPitch = 0.0f;
-
-    if (controllerGetButton(0, L_CBUTTONS)) {
-        targetYaw += ROTATE_RATE;
-    } else if (controllerGetButton(0, R_CBUTTONS)) {
-        targetYaw -= ROTATE_RATE;
-    }
-
-    if (controllerGetButton(0, U_CBUTTONS)) {
-        targetPitch += ROTATE_RATE;
-    } else if (controllerGetButton(0, D_CBUTTONS)) {
-        targetPitch -= ROTATE_RATE;
-    }
+    float targetYaw = -ROTATE_RATE * controllerInput->stick_x / 80.0f;
+    float targetPitch = ROTATE_RATE * controllerInput->stick_y / 80.0f;
 
     player->yawVelocity = mathfMoveTowards(
         player->yawVelocity, 

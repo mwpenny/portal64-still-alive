@@ -153,7 +153,7 @@ void portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform
             int boxPosition = VECTOR2s16_AS_ARRAY(output)[crossAxis] + crossDirection * VECTOR2s16_AS_ARRAY(&halfSize)[crossAxis];
             int distance = (boxPosition - VECTOR2s16_AS_ARRAY(&a)[crossAxis]) * crossDirection;
 
-            if (distance <= 0 && distance < VECTOR2s16_AS_ARRAY(&halfSize)[crossAxis]) {
+            if (distance <= 0 || distance >= VECTOR2s16_AS_ARRAY(&halfSize)[crossAxis]) {
                 continue;
             }
 

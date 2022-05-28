@@ -44,9 +44,10 @@ void sceneInit(struct Scene* scene) {
     for (int i = 0; i < MAX_CUBES; ++i) {
         cubeInit(&scene->cubes[i]);
 
-        scene->cubes[i].rigidBody.transform.position.x = 5.0f;
+        scene->cubes[i].rigidBody.transform.position.x = 0.0f;
         scene->cubes[i].rigidBody.transform.position.y = 1.0f;
-        scene->cubes[i].rigidBody.transform.position.z = -9.0f + i;
+        scene->cubes[i].rigidBody.transform.position.z = 6.0f + i;
+        scene->cubes[i].rigidBody.currentRoom = 1;
 
         quatAxisAngle(&gRight, M_PI * 0.125f, &scene->cubes[i].rigidBody.transform.rotation);
         scene->cubes[i].rigidBody.angularVelocity = gOneVec;
@@ -169,7 +170,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     // sceneRenderPerformanceMetrics(scene, renderState, task);
 
-    contactSolverDebugDraw(&gContactSolver, renderState);
+    // contactSolverDebugDraw(&gContactSolver, renderState);
 }
 
 void sceneCheckPortals(struct Scene* scene) {
@@ -184,7 +185,7 @@ void sceneCheckPortals(struct Scene* scene) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom);
     }
 
-    if (controllerGetButtonDown(0, R_TRIG)) {
+    if (controllerGetButtonDown(0, R_TRIG | L_TRIG)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom);
     }
 }

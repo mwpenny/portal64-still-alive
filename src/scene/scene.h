@@ -13,7 +13,7 @@
 #include "../decor/decor_object.h"
 #include "./door.h"
 
-#define MAX_CUBES   2
+#define MAX_CUBES   1
 
 struct Scene {
     struct Camera camera;

@@ -31,7 +31,8 @@ struct ContactState
 struct ContactConstraintState
 {
 	struct ContactState contacts[ MAX_CONTACTS_PER_MANIFOLD ];
-	int contactCount;
+	short contactCount;
+	short didContactLastFrame;
 	struct Vector3 tangentVectors[ 2 ];	// Tangent vectors
 	struct Vector3 normal;				// From A to B
 	float restitution;
@@ -48,6 +49,7 @@ struct ContactSolver {
 	struct ContactConstraintState* unusedContacts;
 	struct ContactConstraintState* activeContacts;
 	int contactCapacity;
+	short currentContactFrame;
 };
 
 extern struct ContactSolver gContactSolver;

@@ -16,6 +16,31 @@
 
 struct ContactSolver gContactSolver;
 
+void contactSolverRemoveUnusedContacts(struct ContactSolver* contactSolver) {
+	struct ContactConstraintState* curr = contactSolver->activeContacts;
+	struct ContactConstraintState* prev = NULL;
+
+	while (curr) {
+
+		if (!curr->didContactLastFrame) {
+			if (prev) {
+				prev->next = curr->next;
+			} else {
+				contactSolver->activeContacts = curr->next;
+			}
+
+			struct ContactConstraintState* next = curr->next;
+			curr->next = contactSolver->unusedContacts;
+			contactSolver->unusedContacts = curr;
+			curr = next;
+		} else {
+			curr->didContactLastFrame = 0;
+			prev = curr;
+			curr = curr->next;
+		}
+	}
+}
+
 void contactSolverInit(struct ContactSolver* contactSolver) {
 	memset(contactSolver, 0, sizeof(struct ContactSolver));
 
@@ -295,6 +320,7 @@ void contactSolverIterate(struct ContactSolver* contactSolver) {
 
 
 void contactSolverSolve(struct ContactSolver* solver) {
+	contactSolverRemoveUnusedContacts(solver);
 	contactSolverPreSolve(solver);
 	contactSolverIterate(solver);
 	contactSolverIterate(solver);
@@ -412,6 +438,7 @@ int contactSolverAssign(struct ContactConstraintState* into, struct ContactConst
 	}
 
 	into->contactCount = copiedCount;
+	into->didContactLastFrame = copiedCount > 0;
 	into->tangentVectors[0] = from->tangentVectors[0];
 	into->tangentVectors[1] = from->tangentVectors[1];
 	into->normal = from->normal;
