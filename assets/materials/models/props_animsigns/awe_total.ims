@@ -1,0 +1,1 @@
+-alpha extract \( +clone -crop 682x342+682+0 \) -gravity west -append -crop 682x1364+0+0 -resize 64x128

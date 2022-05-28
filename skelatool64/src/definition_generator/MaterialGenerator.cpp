@@ -16,8 +16,12 @@ int sortOrderForMaterial(const Material& material) {
         return 0;
     }
 
-    if (material.mState.cycle1RenderMode.data & FORCE_BL) {
+    if (material.mState.cycle1RenderMode.GetZMode() == ZMODE_DEC) {
         return 1;
+    }
+
+    if (material.mState.cycle1RenderMode.data & FORCE_BL) {
+        return 2;
     }
 
     return 0;

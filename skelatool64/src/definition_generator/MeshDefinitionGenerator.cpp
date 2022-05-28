@@ -44,6 +44,8 @@ void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* n
 
         if (material != settings.mMaterials.end()) {
             materialPtr = material->second.get();
+        } else {
+            std::cout << "Could not find material with name " << materialName << std::endl;
         }
 
         double sTile;

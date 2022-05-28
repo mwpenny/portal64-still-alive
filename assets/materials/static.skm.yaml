@@ -186,3 +186,97 @@ materials:
       set: [G_LIGHTING, G_SHADE]
     gDPSetCombineMode: 
       color: ["SHADE", "0", "TEXEL0", "0"]
+
+  newsignage_back02:
+    gDPSetTile: 
+      filename: ../../portal_pak_modified/materials/models/props_animsigns/newsignage_back02.png
+      siz: G_IM_SIZ_4b
+      twoTone: true
+      s:
+        wrap: false
+      t:
+        wrap: false
+        
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+    gDPSetCycleType: G_CYC_1CYCLE
+
+  awe_total:
+    gDPSetTile: 
+      filename: ../../portal_pak_modified/materials/models/props_animsigns/awe_total.png
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+        
+    gDPSetRenderMode: G_RM_ZB_OPA_DECAL
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+      set: [G_SHADE]
+    gDPSetCombineMode:
+      color: [SHADE, PRIMITIVE, TEXEL0, PRIMITIVE]
+    gDPSetPrimColor:
+      r: 242
+      g: 245
+      b: 247
+    gDPSetCycleType: G_CYC_1CYCLE
+
+  awe_total_copy_0:
+    gDPSetTile: 
+      filename: ../../portal_pak_modified/materials/models/props_animsigns/awe_total_copy_0.png
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+        
+    gDPSetRenderMode: G_RM_ZB_OPA_DECAL
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+      set: [G_SHADE]
+    gDPSetCombineMode:
+      color: [SHADE, PRIMITIVE, TEXEL0, PRIMITIVE]
+    gDPSetPrimColor:
+      r: 242
+      g: 245
+      b: 247
+    gDPSetCycleType: G_CYC_1CYCLE
+
+  awe_total_copy_1:
+    gDPSetTile: 
+      filename: ../../portal_pak_modified/materials/models/props_animsigns/awe_total_copy_1.png
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+        
+    gDPSetRenderMode: G_RM_ZB_OPA_DECAL
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+      set: [G_SHADE]
+    gDPSetCombineMode:
+      color: [SHADE, PRIMITIVE, TEXEL0, PRIMITIVE]
+    gDPSetPrimColor:
+      r: 242
+      g: 245
+      b: 247
+    gDPSetCycleType: G_CYC_1CYCLE
+
+  awe_total_copy_2:
+    gDPSetTile: 
+      filename: ../../portal_pak_modified/materials/models/props_animsigns/awe_total_copy_2.png
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+        
+    gDPSetRenderMode: G_RM_ZB_OPA_DECAL
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+      set: [G_SHADE]
+    gDPSetCombineMode:
+      color: [SHADE, PRIMITIVE, TEXEL0, PRIMITIVE]
+    gDPSetPrimColor:
+      r: 242
+      g: 245
+      b: 247
+    gDPSetCycleType: G_CYC_1CYCLE
+
+  vertex_color:
+    gDPSetCombineMode:
+      color: ["0", "0", "0", SHADE]
+    gDPSetCycleType: G_CYC_1CYCLE
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+      set: [G_SHADE]

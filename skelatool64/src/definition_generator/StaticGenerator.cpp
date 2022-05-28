@@ -25,21 +25,23 @@ void StaticGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition&
     for (auto node = mIncludedNodes.begin(); node != mIncludedNodes.end(); ++node) {
         std::vector<RenderChunk> renderChunks;
         MeshDefinitionGenerator::AppendRenderChunks(scene, *node, fileDefinition, mSettings, renderChunks);
-        
-        if (renderChunks.size()) {
+
+        for (auto& chunk : renderChunks) {
             StaticContentElement element;
 
-            if (renderChunks[0].mMaterial) {
-                settings.mDefaultMaterialState = renderChunks[0].mMaterial->mState;
-                element.materialName = MaterialGenerator::MaterialIndexMacroName(renderChunks[0].mMaterial->mName);
+            if (chunk.mMaterial) {
+                settings.mDefaultMaterialState = chunk.mMaterial->mState;
+                element.materialName = MaterialGenerator::MaterialIndexMacroName(chunk.mMaterial->mName);
             } else {
                 element.materialName = "0";
             }
-            element.meshName = generateMesh(scene, fileDefinition, renderChunks, settings, "_geo");
+            std::vector<RenderChunk> singleChunk;
+            singleChunk.push_back(chunk);
+            element.meshName = generateMesh(scene, fileDefinition, singleChunk, settings, "_geo");
 
             elements.push_back(element);
 
-            mOutput.staticMeshes.push_back(renderChunks[0].mMesh);
+            mOutput.staticMeshes.push_back(chunk.mMesh);
             mOutput.staticRooms.push_back(mRoomMapping.RoomForNode(*node));
         }
     }
