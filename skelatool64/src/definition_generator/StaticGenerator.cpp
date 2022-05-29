@@ -26,6 +26,10 @@ void StaticGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition&
         std::vector<RenderChunk> renderChunks;
         MeshDefinitionGenerator::AppendRenderChunks(scene, *node, fileDefinition, mSettings, renderChunks);
 
+        if (std::string((*node)->mName.C_Str()) == "@static_wall_00.013") {
+            std::cout << "Here" << std::endl;
+        }
+
         for (auto& chunk : renderChunks) {
             StaticContentElement element;
 
@@ -70,7 +74,7 @@ void StaticGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition&
         std::unique_ptr<StructureDataChunk> singleMapping(new StructureDataChunk());
 
         int currentIndex = prevIndex;
-        while (currentIndex < (int)mIncludedNodes.size() && mRoomMapping.roomIndexMapping[mIncludedNodes[currentIndex]] <= roomIndex) {
+        while (currentIndex < (int)mOutput.staticRooms.size() && mOutput.staticRooms[currentIndex] <= roomIndex) {
             ++currentIndex;
         }
 

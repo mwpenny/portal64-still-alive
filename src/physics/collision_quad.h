@@ -8,6 +8,12 @@
 
 #define POINT_NO_OVERLAP    -1
 
+struct CollisionEdge {
+    struct Vector3 origin;
+    struct Vector3 direction;
+    float length;
+};
+
 struct CollisionQuad {
     struct Vector3 corner;
     struct Vector3 edgeA;

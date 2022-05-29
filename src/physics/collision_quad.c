@@ -107,12 +107,6 @@ char secondOtherAxis[] = {
 #define ID_FROM_AXIS_DIRS(positiveX, positiveY, positiveZ) (((positiveX) ? 1 : 0) | ((positiveY) ? 2 : 0) | ((positiveZ) ? 4 : 0))
 #define ID_SEGEMENT_FROM_AXIS(axisNumber, isPositive) ((isPositive) ? 0 : (1 << axisNumber))
 
-struct CollisionEdge {
-    struct Vector3 origin;
-    struct Vector3 direction;
-    float length;
-};
-
 // contactPoint(Pa, Da, Pb, Db)
 // offset = Pa - Pb
 // Dota = Da * offset

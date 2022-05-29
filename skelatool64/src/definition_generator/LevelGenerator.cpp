@@ -432,7 +432,7 @@ void LevelGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& 
     levelDef->AddPrimitive("triggerCount", mTriggerOutput.triggers.size());
     levelDef->AddPrimitive("locationCount", mRoomOutput.namedLocations.size());
     levelDef->AddPrimitive("doorCount", mRoomOutput.doors.size());
-    levelDef->AddPrimitive("startLocation", mRoomOutput.FindLocationRoom("start"));
+    levelDef->AddPrimitive("startLocation", mRoomOutput.FindLocationIndex("start"));
 
     fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct LevelDefinition", fileDefinition.GetUniqueName("level"), false, "_geo", std::move(levelDef))));
 }

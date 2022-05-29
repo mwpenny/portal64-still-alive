@@ -207,7 +207,6 @@ materials:
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
         
-    gDPSetRenderMode: G_RM_ZB_OPA_DECAL
     gSPGeometryMode:
       clear: [G_LIGHTING]
       set: [G_SHADE]
@@ -225,7 +224,6 @@ materials:
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
         
-    gDPSetRenderMode: G_RM_ZB_OPA_DECAL
     gSPGeometryMode:
       clear: [G_LIGHTING]
       set: [G_SHADE]
@@ -243,7 +241,6 @@ materials:
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
         
-    gDPSetRenderMode: G_RM_ZB_OPA_DECAL
     gSPGeometryMode:
       clear: [G_LIGHTING]
       set: [G_SHADE]
@@ -261,7 +258,6 @@ materials:
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
         
-    gDPSetRenderMode: G_RM_ZB_OPA_DECAL
     gSPGeometryMode:
       clear: [G_LIGHTING]
       set: [G_SHADE]
