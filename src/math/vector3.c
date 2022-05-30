@@ -92,6 +92,14 @@ void vector3Cross(struct Vector3* a, struct Vector3* b, struct Vector3* out) {
     out->z = a->x * b->y - a->y * b->x;
 }
 
+void vector3Perp(struct Vector3* a, struct Vector3* out) {
+    if (fabsf(a->x) > fabsf(a->z)) {
+        vector3Cross(a, &gForward, out);
+    } else {
+        vector3Cross(a, &gRight, out);
+    }
+}
+
 void vector3Project(struct Vector3* in, struct Vector3* normal, struct Vector3* out) {
     float mag = vector3Dot(in, normal);
     out->x = normal->x * mag;
@@ -119,6 +127,15 @@ int vector3MoveTowards(struct Vector3* from, struct Vector3* towards, float maxD
         out->z = (towards->z - from->z) * scale + from->z;
         return 0;
     }
+}
+
+void vector3TripleProduct(struct Vector3* a, struct Vector3* b, struct Vector3* c, struct Vector3* output) {
+    vector3Scale(b, output, vector3Dot(a, c));
+    vector3AddScaled(output, a, -vector3Dot(b, c), output);
+}
+
+int vector3IsZero(struct Vector3* vector) {
+    return vector->x == 0.0f && vector->y == 0.0f && vector->z == 0.0f;
 }
 
 void vector3ToVector3u8(struct Vector3* input, struct Vector3u8* output) {
