@@ -59,7 +59,7 @@ int simplexCheck(struct Simplex* simplex, struct Vector3* nextDirection) {
             return 0;
         }
 
-        vector3Cross(&ac, &normal, &dirCheck);
+        vector3Cross(&normal, &ac, &dirCheck);
 
         if (vector3Dot(&dirCheck, &aToOrigin) > 0.0f) {
             vector3TripleProduct(&ac, &aToOrigin, &ac, nextDirection);

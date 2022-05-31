@@ -395,10 +395,13 @@ int collisionSceneTestMinkowsiSum(struct CollisionObject* object) {
     quadSum.collisionObject = object;
     struct Simplex simplex;
 
-    for (unsigned i = 0; i < gCollisionScene.quadCount; ++i) {
-        quadSum.quad = gCollisionScene.quads[i].collider->data;
+    short colliderIndices[MAX_COLLIDERS];
+    int quadCount = collisionObjectRoomColliders(&gCollisionScene.world->rooms[object->body->currentRoom], &object->boundingBox, colliderIndices);
 
-        if (gjkCheckForOverlap(&simplex, &quadSum, minkowsiSumAgainstQuadSum, &quadSum.quad->plane.normal)) {
+    for (int i = 0; i < quadCount; ++i) {
+        quadSum.quad = gCollisionScene.quads[colliderIndices[i]].collider->data;
+
+        if (box3DHasOverlap(&object->boundingBox, &gCollisionScene.quads[colliderIndices[i]].boundingBox) && gjkCheckForOverlap(&simplex, &quadSum, minkowsiSumAgainstQuadSum, &quadSum.quad->plane.normal)) {
             return 1;
         }
     }

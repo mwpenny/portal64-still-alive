@@ -121,6 +121,10 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
 #define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
 
 void sceneRenderPerformanceMetrics(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
+    if (!scene->lastFrameTime) {
+        return;
+    }
+
     gDPSetCycleType(renderState->dl++, G_CYC_1CYCLE);
     gDPSetFillColor(renderState->dl++, (GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1)));
     gDPSetCombineMode(renderState->dl++, SOLID_COLOR, SOLID_COLOR);
@@ -170,7 +174,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     hudRender(renderState);
 
-    // sceneRenderPerformanceMetrics(scene, renderState, task);
+    sceneRenderPerformanceMetrics(scene, renderState, task);
 
     // contactSolverDebugDraw(&gContactSolver, renderState);
 }

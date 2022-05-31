@@ -8,7 +8,7 @@
 
 #include <string.h>
 
-#define Q3_BAUMGARTE 0.05f
+#define Q3_BAUMGARTE 0.3f
 
 #define Q3_PENETRATION_SLOP 0.001f
 
@@ -324,7 +324,7 @@ void contactSolverSolve(struct ContactSolver* solver) {
 	contactSolverPreSolve(solver);
 	contactSolverIterate(solver);
 	contactSolverIterate(solver);
-	// contactSolverIterate(solver);
+	contactSolverIterate(solver);
 }
 
 struct ContactConstraintState* contactSolverPeekContact(struct ContactSolver* solver, struct CollisionObject* shapeA, struct CollisionObject* shapeB) {

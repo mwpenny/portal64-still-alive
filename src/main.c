@@ -90,8 +90,6 @@ extern OSMesgQueue dmaMessageQ;
 
 extern char _heapStart[];
 
-#define FRAME_SKIP  0
-
 static void gameProc(void* arg) {
     u8 schedulerMode = OS_VI_NTSC_LPF1;
 
