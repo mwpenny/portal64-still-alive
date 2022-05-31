@@ -41,4 +41,6 @@ void collisionSceneRemoveDynamicObject(struct CollisionObject* object);
 
 void collisionSceneUpdateDynamics();
 
+int collisionSceneTestMinkowsiSum(struct CollisionObject* object);
+
 #endif

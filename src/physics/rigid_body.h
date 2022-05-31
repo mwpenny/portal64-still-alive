@@ -1,8 +1,9 @@
 #ifndef __RIGID_BODY_H__
 #define __RIGID_BODY_H__
 
+#include "../math/basis.h"
 #include "../math/transform.h"
-#include "collision.h"
+#include "./collision.h"
 
 enum RigidBodyFlags {
     RigidBodyFlagsInFrontPortal0 = (1 << 0),
@@ -13,12 +14,16 @@ enum RigidBodyFlags {
     RigidBodyFlagsGrabbable = (1 << 5),
     RigidBodyIsTouchingPortal = (1 << 6),
     RigidBodyWasTouchingPortal = (1 << 7),
+
+    RigidBodyDebugFlag = (1 << 8),
 };
 
 struct RigidBody {
     struct Transform transform;
     struct Vector3 velocity;
     struct Vector3 angularVelocity;
+    // used to speed up caluclations
+    struct Basis rotationBasis;
 
     float mass;
     float massInv;

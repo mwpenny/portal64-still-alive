@@ -1,13 +1,15 @@
 #ifndef __COLLISION_H__
 #define __COLLISION_H__
 
-#include "../math/vector3.h"
-#include "../math/transform.h"
+#include "../math/basis.h"
+#include "../math/box3d.h"
 #include "../math/plane.h"
 #include "../math/ray.h"
-#include "../math/box3d.h"
+#include "../math/transform.h"
+#include "../math/vector3.h"
 #include "contact_solver.h"
 #include "collision_quad.h"
+#include "gjk.h"
 
 enum CollisionShapeType {
     CollisionShapeTypeBox,
@@ -34,12 +36,15 @@ typedef int (*CollideWithQuad)(void* data, struct Transform* transform, struct C
 
 typedef int (*RaycastCollider)(struct CollisionObject* object, struct Ray* ray, float maxDistance, struct RaycastHit* contact);
 
+typedef void (*MinkowsiSumWithBasis)(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output);
+
 struct ColliderCallbacks {
     CollideWithPlane collideWithPlane;
     CollideWithQuad collideWithQuad;
     RaycastCollider raycast;
     MomentOfInertiaCalculator mofICalculator;
     BoundingBoxCalculator boundingBoxCalculator;
+    MinkowsiSumWithBasis minkowsiSum;
 };
 
 struct ColliderTypeData {

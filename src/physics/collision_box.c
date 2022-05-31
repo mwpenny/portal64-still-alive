@@ -1,6 +1,7 @@
 #include "collision_box.h"
 
 #include "raycasting.h"
+#include "../math/mathf.h"
 
 #include <math.h>
 
@@ -10,6 +11,7 @@ struct ColliderCallbacks gCollisionBoxCallbacks = {
     raycastBox,
     collisionBoxSolidMofI,
     collisionBoxBoundingBox,
+    collisionBoxMinkowsiSum,
 };
 
 int _collsionBuildPlaneContact(struct Transform* boxTransform, struct Plane* plane, struct Vector3* point, struct ContactConstraintState* output, int id) {
@@ -160,4 +162,11 @@ void collisionBoxBoundingBox(struct ColliderTypeData* typeData, struct Transform
     quatRotatedBoundingBoxSize(&transform->rotation, &collisionBox->sideLength, &halfSize);
     vector3Sub(&transform->position, &halfSize, &box->min);
     vector3Add(&transform->position, &halfSize, &box->max);
+}
+
+void collisionBoxMinkowsiSum(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output) {
+    struct CollisionBox* collisionBox = (struct CollisionBox*)data;
+    vector3Scale(&basis->x, output, vector3Dot(&basis->x, direction) > 0.0f ? collisionBox->sideLength.x : -collisionBox->sideLength.x);
+    vector3AddScaled(output, &basis->y, vector3Dot(&basis->y, direction) > 0.0f ? collisionBox->sideLength.y : -collisionBox->sideLength.y, output);
+    vector3AddScaled(output, &basis->z, vector3Dot(&basis->z, direction) > 0.0f ? collisionBox->sideLength.z : -collisionBox->sideLength.z, output);
 }

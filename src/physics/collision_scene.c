@@ -1,6 +1,7 @@
 #include "collision_scene.h"
 
 #include "math/mathf.h"
+#include "gjk.h"
 
 struct CollisionScene gCollisionScene;
 
@@ -383,4 +384,24 @@ void collisionSceneUpdateDynamics() {
         rigidBodyCheckPortals(gCollisionScene.dynamicObjects[i]->body);
         collisionObjectUpdateBB(gCollisionScene.dynamicObjects[i]);
     }
+}
+
+int collisionSceneTestMinkowsiSum(struct CollisionObject* object) {
+    if (!object->collider->callbacks->minkowsiSum) {
+        return 0;
+    }
+
+    struct MinkowsiSumAgainstQuad quadSum;
+    quadSum.collisionObject = object;
+    struct Simplex simplex;
+
+    for (unsigned i = 0; i < gCollisionScene.quadCount; ++i) {
+        quadSum.quad = gCollisionScene.quads[i].collider->data;
+
+        if (gjkCheckForOverlap(&simplex, &quadSum, minkowsiSumAgainstQuadSum, &quadSum.quad->plane.normal)) {
+            return 1;
+        }
+    }
+
+    return 0;
 }

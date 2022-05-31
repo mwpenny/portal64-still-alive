@@ -84,6 +84,8 @@ void sceneInit(struct Scene* scene) {
         doorTransform.scale = gOneVec;
         doorInit(&scene->doors[i], &doorTransform, 0, 0, gCurrentLevel->doors[i].doorwayIndex);
     }
+
+    scene->player.grabbing = &scene->cubes[0].rigidBody;
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {
@@ -199,6 +201,12 @@ void sceneUpdate(struct Scene* scene) {
 
     for (int i = 0; i < MAX_CUBES; ++i) {
         cubeUpdate(&scene->cubes[i]);
+
+        if (collisionSceneTestMinkowsiSum(&scene->cubes[i].collisionObject)) {
+            scene->cubes[i].rigidBody.flags |= RigidBodyDebugFlag;
+        } else {
+            scene->cubes[i].rigidBody.flags &= ~RigidBodyDebugFlag;
+        }
     }
     
     collisionSceneUpdateDynamics();

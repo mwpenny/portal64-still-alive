@@ -20,6 +20,8 @@ void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniter
     rigidBody->flags = 0;
 
     rigidBody->currentRoom = 0;
+
+    basisFromQuat(&rigidBody->rotationBasis, &rigidBody->transform.rotation);
 }
 
 void rigidBodyAppyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* impulse) {

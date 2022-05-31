@@ -64,5 +64,52 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
 void collisionObjectUpdateBB(struct CollisionObject* object) {
     if (object->body) {
         object->collider->callbacks->boundingBoxCalculator(object->collider, &object->body->transform, &object->boundingBox);
+        basisFromQuat(&object->body->rotationBasis, &object->body->transform.rotation);
     }
+}
+
+void minkowsiSumAgainstQuadInit(struct MinkowsiSumAgainstQuad* sumData, struct CollisionObject* object, struct CollisionQuad* quad) {
+    sumData->collisionObject = object;
+    sumData->quad= quad;
+}
+
+void minkowsiSumAgainstQuadSum(void* data, struct Vector3* direction, struct Vector3* output) {
+    struct MinkowsiSumAgainstQuad* collisionData = (struct MinkowsiSumAgainstQuad*)data;
+
+    collisionData->collisionObject->collider->callbacks->minkowsiSum(collisionData->collisionObject->collider->data, &collisionData->collisionObject->body->rotationBasis, direction, output);
+    vector3Add(output, &collisionData->collisionObject->body->transform.position, output);
+
+    struct Vector3 quadSum = collisionData->quad->corner;
+
+    if (vector3Dot(&collisionData->quad->edgeA, direction) < 0.0f) {
+        vector3AddScaled(&quadSum, &collisionData->quad->edgeA,  collisionData->quad->edgeALength, &quadSum);
+    }
+
+    if (vector3Dot(&collisionData->quad->edgeB, direction) < 0.0f) {
+        vector3AddScaled(&quadSum, &collisionData->quad->edgeB,  collisionData->quad->edgeBLength, &quadSum);
+    }
+
+    vector3Sub(output, &quadSum, output);
+}
+
+void minkowsiSumAgainstObjectsInit(struct MinkowsiSumAgainstObjects* sumData, struct CollisionObject* a, struct CollisionObject* b) {
+    sumData->collisionObjectA = a;
+    sumData->collisionObjectB = b;
+}
+
+// data should be of type struct MinkowsiSumAgainstObjects
+void minkowsiSumAgainstObjects(void* data, struct Vector3* direction, struct Vector3* output) {
+    struct MinkowsiSumAgainstObjects* collisionData = (struct MinkowsiSumAgainstObjects*)data;
+
+    collisionData->collisionObjectA->collider->callbacks->minkowsiSum(collisionData->collisionObjectA->collider->data, &collisionData->collisionObjectA->body->rotationBasis, direction, output);
+    vector3Add(output, &collisionData->collisionObjectA->body->transform.position, output);
+
+    struct Vector3 bResult;
+    struct Vector3 oppositeDir;
+    vector3Negate(direction, &oppositeDir);
+
+    collisionData->collisionObjectB->collider->callbacks->minkowsiSum(collisionData->collisionObjectB->collider->data, &collisionData->collisionObjectB->body->rotationBasis, &oppositeDir, output);
+    vector3Add(output, &collisionData->collisionObjectB->body->transform.position, &bResult);
+
+    vector3Sub(output, &bResult, output);
 }

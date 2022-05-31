@@ -20,4 +20,6 @@ float collisionBoxSolidMofI(struct ColliderTypeData* typeData, float mass);
 
 void collisionBoxBoundingBox(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box);
 
+void collisionBoxMinkowsiSum(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output);
+
 #endif
