@@ -5,7 +5,7 @@
 #include "../levels/levels.h"
 
 struct RenderScene* renderSceneNew(struct Transform* cameraTransform, struct RenderState *renderState, int capacity, u64 visibleRooms) {
-    struct RenderScene* result = stackMallock(sizeof(struct RenderScene));
+    struct RenderScene* result = stackMalloc(sizeof(struct RenderScene));
 
     struct Vector3 cameraForward;
     quatMultVector(&cameraTransform->rotation, &gForward, &cameraForward);
@@ -15,9 +15,9 @@ struct RenderScene* renderSceneNew(struct Transform* cameraTransform, struct Ren
     result->currentRenderPart = 0;
     result->maxRenderParts = capacity;
 
-    result->renderParts = stackMallock(sizeof(struct RenderPart) * capacity);
-    result->sortKeys = stackMallock(sizeof(int) * capacity);
-    result->materials = stackMallock(sizeof(short) * capacity);
+    result->renderParts = stackMalloc(sizeof(struct RenderPart) * capacity);
+    result->sortKeys = stackMalloc(sizeof(int) * capacity);
+    result->materials = stackMalloc(sizeof(short) * capacity);
 
     result->renderOrder = NULL;
     result->renderOrderCopy = NULL;
@@ -30,7 +30,7 @@ struct RenderScene* renderSceneNew(struct Transform* cameraTransform, struct Ren
 }
 
 void renderSceneFree(struct RenderScene* renderScene) {
-    stackMallockFree(renderScene);
+    stackMallocFree(renderScene);
 }
 
 int renderSceneSortKey(int materialIndex, float distance) {
@@ -103,8 +103,8 @@ void renderSceneSort(struct RenderScene* renderScene, int min, int max) {
 }
 
 void renderSceneGenerate(struct RenderScene* renderScene, struct RenderState* renderState) {
-    renderScene->renderOrder = stackMallock(sizeof(short) * renderScene->currentRenderPart);
-    renderScene->renderOrderCopy = stackMallock(sizeof(short) * renderScene->currentRenderPart);
+    renderScene->renderOrder = stackMalloc(sizeof(short) * renderScene->currentRenderPart);
+    renderScene->renderOrderCopy = stackMalloc(sizeof(short) * renderScene->currentRenderPart);
 
     for (int i = 0; i < renderScene->currentRenderPart; ++i) {
         renderScene->renderOrder[i] = i;

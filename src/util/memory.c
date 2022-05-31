@@ -346,11 +346,11 @@ void memCopy(void* target, const void* src, int size)
 int gStackMallocAt;
 long long gStackMalloc[STACK_MALLOC_SIZE_WORDS];
 
-void stackMallockReset() {
+void stackMallocReset() {
     gStackMallocAt = 0;
 }
 
-void stackMallockFree(void* ptr) {
+void stackMallocFree(void* ptr) {
     void* currentHead = &gStackMalloc[gStackMallocAt];
 
     if (ptr < currentHead) {
@@ -358,7 +358,7 @@ void stackMallockFree(void* ptr) {
     }
 }
 
-void* stackMallock(int size) {
+void* stackMalloc(int size) {
     int nWords = (size + 7) >> 3;
     void* result = &gStackMalloc[gStackMallocAt];
     gStackMallocAt += nWords;

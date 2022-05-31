@@ -46,7 +46,7 @@ void expandingSimplexTriangleInit(struct ExpandingSimplex* simplex, int a, int b
 
     vector3Cross(&edgeB, &edgeC, &triangle->normal);
     vector3Normalize(&triangle->normal, &triangle->normal);
-    triangle->distanceToOrigin = -vector3Dot(&triangle->normal, &simplex->points[a]);
+    triangle->distanceToOrigin = vector3Dot(&triangle->normal, &simplex->points[a]);
 }
 
 #define GET_PARENT_INDEX(heapIndex) (((heapIndex) - 1) >> 1)
@@ -140,15 +140,18 @@ struct SimplexTriangle* expandingSimplexClosestFace(struct ExpandingSimplex* sim
 void expandingSimplexInit(struct ExpandingSimplex* expandingSimplex, struct Simplex* simplex) {
     __assert(simplex->nPoints == 4);
 
+    expandingSimplex->triangleCount = 0;
+    expandingSimplex->pointCount = 0;
+
     expandingSimplexAddPoint(expandingSimplex, &simplex->points[0]);
     expandingSimplexAddPoint(expandingSimplex, &simplex->points[1]);
     expandingSimplexAddPoint(expandingSimplex, &simplex->points[2]);
     expandingSimplexAddPoint(expandingSimplex, &simplex->points[3]);
 
-    expandingSimplexAddTriangle(expandingSimplex, 2, 1, 0);
-    expandingSimplexAddTriangle(expandingSimplex, 1, 2, 3);
-    expandingSimplexAddTriangle(expandingSimplex, 2, 0, 3);
-    expandingSimplexAddTriangle(expandingSimplex, 0, 1, 3);
+    expandingSimplexAddTriangle(expandingSimplex, 0, 1, 2);
+    expandingSimplexAddTriangle(expandingSimplex, 2, 1, 3);
+    expandingSimplexAddTriangle(expandingSimplex, 0, 2, 3);
+    expandingSimplexAddTriangle(expandingSimplex, 1, 0, 3);
 }
 
 int expandingSimplexExpand(struct ExpandingSimplex* expandingSimplex, struct Vector3* newPoint) {
@@ -175,21 +178,22 @@ int expandingSimplexExpand(struct ExpandingSimplex* expandingSimplex, struct Vec
 }
 
 void epaSolve(struct Simplex* startingSimplex, void* data, MinkowsiSum sum, struct EpaResult* result) {
-    struct ExpandingSimplex* simplex = stackMallock(sizeof(struct ExpandingSimplex));
+    struct ExpandingSimplex* simplex = stackMalloc(sizeof(struct ExpandingSimplex));
     expandingSimplexInit(simplex, startingSimplex);
     struct Vector3 nextPoint;
-    struct SimplexTriangle* closestFace;
+    struct SimplexTriangle* closestFace = NULL;
+    float projection = 0.0f;
 
-    for (int i = 0; i < MAX_ITERATIONS; ++i) {
+    int i;
+
+    for (i = 0; i < MAX_ITERATIONS; ++i) {
         closestFace = expandingSimplexClosestFace(simplex);
         sum(data, &closestFace->normal, &nextPoint);
 
-        float projection = vector3Dot(&nextPoint, &closestFace->normal);
+        projection = vector3Dot(&nextPoint, &closestFace->normal);
 
         if ((projection - closestFace->distanceToOrigin) < 0.00000001f) {
-            result->normal = closestFace->normal;
-            result->penetration = projection;
-            return;
+            break;
         }
 
         if (!expandingSimplexExpand(simplex, &nextPoint)) {
@@ -199,8 +203,8 @@ void epaSolve(struct Simplex* startingSimplex, void* data, MinkowsiSum sum, stru
 
     if (closestFace) {
         result->normal = closestFace->normal;
-        result->penetration = vector3Dot(&nextPoint, &closestFace->normal);
+        result->penetration = projection;
     }
 
-    stackMallockFree(simplex);
+    stackMallocFree(simplex);
 }

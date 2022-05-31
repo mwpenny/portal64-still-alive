@@ -2,6 +2,7 @@
 
 #include "math/mathf.h"
 #include "gjk.h"
+#include "epa.h"
 
 struct CollisionScene gCollisionScene;
 
@@ -402,6 +403,8 @@ int collisionSceneTestMinkowsiSum(struct CollisionObject* object) {
         quadSum.quad = gCollisionScene.quads[colliderIndices[i]].collider->data;
 
         if (box3DHasOverlap(&object->boundingBox, &gCollisionScene.quads[colliderIndices[i]].boundingBox) && gjkCheckForOverlap(&simplex, &quadSum, minkowsiSumAgainstQuadSum, &quadSum.quad->plane.normal)) {
+            struct EpaResult result;
+            epaSolve(&simplex, &quadSum, minkowsiSumAgainstQuadSum, &result);
             return 1;
         }
     }
