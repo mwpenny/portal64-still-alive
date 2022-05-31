@@ -4,8 +4,7 @@
 #include "defs.h"
 #include "../levels/levels.h"
 
-struct RenderScene* renderSceneInit(struct Transform* cameraTransform, struct RenderState *renderState, int capacity, u64 visibleRooms) {
-    stackMallockReset();
+struct RenderScene* renderSceneNew(struct Transform* cameraTransform, struct RenderState *renderState, int capacity, u64 visibleRooms) {
     struct RenderScene* result = stackMallock(sizeof(struct RenderScene));
 
     struct Vector3 cameraForward;
@@ -28,6 +27,10 @@ struct RenderScene* renderSceneInit(struct Transform* cameraTransform, struct Re
     result->renderState = renderState;
 
     return result;
+}
+
+void renderSceneFree(struct RenderScene* renderScene) {
+    stackMallockFree(renderScene);
 }
 
 int renderSceneSortKey(int materialIndex, float distance) {

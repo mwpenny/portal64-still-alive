@@ -64,11 +64,13 @@ void staticRender(struct Transform* cameraTransform, struct FrustrumCullingInfor
         return;
     }
 
-    struct RenderScene* renderScene = renderSceneInit(cameraTransform, renderState, MAX_RENDER_COUNT, visibleRooms);
+    struct RenderScene* renderScene = renderSceneNew(cameraTransform, renderState, MAX_RENDER_COUNT, visibleRooms);
 
     staticRenderPopulateRooms(cullingInfo, renderScene);
 
     dynamicScenePopulate(cullingInfo, renderScene);
 
     renderSceneGenerate(renderScene, renderState);
+
+    renderSceneFree(renderScene);
 }

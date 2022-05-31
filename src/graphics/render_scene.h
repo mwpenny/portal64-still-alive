@@ -24,7 +24,8 @@ struct RenderScene {
     struct RenderState *renderState;
 };
 
-struct RenderScene* renderSceneInit(struct Transform* cameraTransform, struct RenderState *renderState, int capacity, u64 visibleRooms);
+struct RenderScene* renderSceneNew(struct Transform* cameraTransform, struct RenderState *renderState, int capacity, u64 visibleRooms);
+void renderSceneFree(struct RenderScene* renderScene);
 void renderSceneAdd(struct RenderScene* renderScene, Gfx* geometry, Mtx* matrix, int materialIndex, struct Vector3* at);
 void renderSceneGenerate(struct RenderScene* renderScene, struct RenderState* renderState);
 

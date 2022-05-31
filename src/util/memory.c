@@ -350,6 +350,14 @@ void stackMallockReset() {
     gStackMallocAt = 0;
 }
 
+void stackMallockFree(void* ptr) {
+    void* currentHead = &gStackMalloc[gStackMallocAt];
+
+    if (ptr < currentHead) {
+        gStackMallocAt = (long long*)ptr - gStackMalloc;
+    }
+}
+
 void* stackMallock(int size) {
     int nWords = (size + 7) >> 3;
     void* result = &gStackMalloc[gStackMallocAt];

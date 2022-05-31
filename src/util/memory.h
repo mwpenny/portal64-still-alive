@@ -50,6 +50,7 @@ extern void zeroMemory(void* memory, int size);
 extern void memCopy(void* target, const void* src, int size);
 
 void stackMallockReset();
+void stackMallockFree(void* ptr);
 void* stackMallock(int size);
 
 #endif
