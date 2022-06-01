@@ -9,13 +9,15 @@ typedef void (*MinkowsiSum)(void* data, struct Vector3* direction, struct Vector
 
 struct Simplex {
     struct Vector3 points[MAX_SIMPLEX_SIZE];
+    struct Vector3 objectAPoint[MAX_SIMPLEX_SIZE];
+    struct Vector3 objectBPoint[MAX_SIMPLEX_SIZE];
     short nPoints;
 };
 
-void simplexInit(struct Simplex* simplex, struct Vector3* firstPoint);
-int simplexAddPoint(struct Simplex* simplex, struct Vector3* point);
+void simplexInit(struct Simplex* simplex);
+struct Vector3* simplexAddPoint(struct Simplex* simplex, struct Vector3* aPoint, struct Vector3* bPoint);
 int simplexCheck(struct Simplex* simplex, struct Vector3* nextDirection);
 
-int gjkCheckForOverlap(struct Simplex* simplex, void* data, MinkowsiSum sum, struct Vector3* firstDirection);
+int gjkCheckForOverlap(struct Simplex* simplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct Vector3* firstDirection);
 
 #endif

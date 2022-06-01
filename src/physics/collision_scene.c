@@ -392,19 +392,27 @@ int collisionSceneTestMinkowsiSum(struct CollisionObject* object) {
         return 0;
     }
 
-    struct MinkowsiSumAgainstQuad quadSum;
-    quadSum.collisionObject = object;
     struct Simplex simplex;
 
     short colliderIndices[MAX_COLLIDERS];
     int quadCount = collisionObjectRoomColliders(&gCollisionScene.world->rooms[object->body->currentRoom], &object->boundingBox, colliderIndices);
 
     for (int i = 0; i < quadCount; ++i) {
-        quadSum.quad = gCollisionScene.quads[colliderIndices[i]].collider->data;
+        struct CollisionQuad* quad = gCollisionScene.quads[colliderIndices[i]].collider->data;
 
-        if (box3DHasOverlap(&object->boundingBox, &gCollisionScene.quads[colliderIndices[i]].boundingBox) && gjkCheckForOverlap(&simplex, &quadSum, minkowsiSumAgainstQuadSum, &quadSum.quad->plane.normal)) {
+        if (box3DHasOverlap(&object->boundingBox, &gCollisionScene.quads[colliderIndices[i]].boundingBox) && 
+            gjkCheckForOverlap(
+                &simplex, 
+                object, minkowsiSumAgainstObject, 
+                quad, minkowsiSumAgainstQuad, 
+                &quad->plane.normal)) {
             struct EpaResult result;
-            epaSolve(&simplex, &quadSum, minkowsiSumAgainstQuadSum, &result);
+            epaSolve(
+                &simplex, 
+                object, minkowsiSumAgainstObject, 
+                quad, minkowsiSumAgainstQuad, 
+                &result
+            );
             return 1;
         }
     }

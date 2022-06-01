@@ -1,20 +1,23 @@
 #include "gjk.h"
 
-void simplexInit(struct Simplex* simplex, struct Vector3* firstPoint) {
-    simplex->nPoints = 1;
-    simplex->points[0] = *firstPoint;
+void simplexInit(struct Simplex* simplex) {
+    simplex->nPoints = 0;
 }
 
-int simplexAddPoint(struct Simplex* simplex, struct Vector3* point) {
+struct Vector3* simplexAddPoint(struct Simplex* simplex, struct Vector3* aPoint, struct Vector3* bPoint) {
     if (simplex->nPoints == MAX_SIMPLEX_SIZE) {
         // SHOULD never happen, but just in case
         return 0;
     }
 
-    simplex->points[simplex->nPoints] = *point;
+    int index = simplex->nPoints;
+
+    simplex->objectAPoint[index] = *aPoint;
+    simplex->objectBPoint[index] = *bPoint;
+    vector3Sub(&simplex->objectAPoint[index], &simplex->objectBPoint[index], &simplex->points[index]);
     ++simplex->nPoints;
 
-    return 1;
+    return &simplex->points[index];
 }
 
 int simplexCheck(struct Simplex* simplex, struct Vector3* nextDirection) {
@@ -155,30 +158,43 @@ int simplexCheck(struct Simplex* simplex, struct Vector3* nextDirection) {
 
 #define MAX_GJK_ITERATIONS  10
 
-int gjkCheckForOverlap(struct Simplex* simplex, void* data, MinkowsiSum sum, struct Vector3* firstDirection) {
-    struct Vector3 nextPoint;
+int gjkCheckForOverlap(struct Simplex* simplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct Vector3* firstDirection) {
+    struct Vector3 aPoint;
+    struct Vector3 bPoint;
     struct Vector3 nextDirection;
 
+    simplexInit(simplex);
+
     if (vector3IsZero(firstDirection)) {
-        sum(data, &gRight, &nextPoint);
+        objectASum(objectA, &gRight, &aPoint);
         vector3Negate(&gRight, &nextDirection);
+
+        objectBSum(objectB, &nextDirection, &bPoint);
+        simplexAddPoint(simplex, &aPoint, &bPoint);
     } else {
-        sum(data, firstDirection, &nextPoint);
+        objectASum(objectA, firstDirection, &aPoint);
         vector3Negate(firstDirection, &nextDirection);
+
+        objectBSum(objectB, &nextDirection, &bPoint);
+        simplexAddPoint(simplex, &aPoint, &bPoint);
     }
 
-    simplexInit(simplex, &nextPoint);
-
     for (int iteration = 0; iteration < MAX_GJK_ITERATIONS; ++iteration) {
-        sum(data, &nextDirection, &nextPoint);
+        struct Vector3 reverseDirection;
+        vector3Negate(&nextDirection, &reverseDirection);
+        objectASum(objectA, &nextDirection, &aPoint);
+        objectBSum(objectB, &reverseDirection, &bPoint);
+
+        struct Vector3* addedPoint = simplexAddPoint(simplex, &aPoint, &bPoint);
+
+        if (!addedPoint) {
+            return 0;
+        }
         
-        if (vector3Dot(&nextPoint, &nextDirection) <= 0.0f) {
+        if (vector3Dot(addedPoint, &nextDirection) <= 0.0f) {
             return 0;
         }
 
-        if (!simplexAddPoint(simplex, &nextPoint)) {
-            return 0;
-        }
 
         if (simplexCheck(simplex, &nextDirection)) {
             return 1;

@@ -8,6 +8,6 @@ struct EpaResult {
     float penetration;
 };
 
-void epaSolve(struct Simplex* startingSimplex, void* data, MinkowsiSum sum, struct EpaResult* result);
+void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct EpaResult* result);
 
 #endif

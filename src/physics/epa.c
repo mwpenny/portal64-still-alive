@@ -16,22 +16,20 @@ struct SimplexTriangle {
 
 struct ExpandingSimplex {
     struct Vector3 points[MAX_SIMPLEX_POINTS];
+    struct Vector3 aPoints[MAX_SIMPLEX_POINTS];
+    struct Vector3 bPoints[MAX_SIMPLEX_POINTS];
     unsigned pointCount;
     struct SimplexTriangle triangles[MAX_SIMPLEX_TRIANGLES];
     unsigned triangleCount;
     unsigned char triangleHeap[MAX_SIMPLEX_TRIANGLES];
 };
 
-int expandingSimplexAddPoint(struct ExpandingSimplex* simplex, struct Vector3* point) {
-    if (simplex->pointCount == MAX_SIMPLEX_POINTS) {
-        return -1;
-    }
-
+void expandingSimplexAddPoint(struct ExpandingSimplex* simplex, struct Vector3* aPoint, struct Vector3* bPoint, struct Vector3* pointDiff) {
     int result = simplex->pointCount;
-    simplex->points[result] = *point;
+    simplex->aPoints[result] = *aPoint;
+    simplex->bPoints[result] = *bPoint;
+    simplex->points[result] = *pointDiff;
     ++simplex->pointCount; 
-
-    return result;
 }
 
 void expandingSimplexTriangleInit(struct ExpandingSimplex* simplex, int a, int b, int c, struct SimplexTriangle* triangle) {
@@ -143,10 +141,9 @@ void expandingSimplexInit(struct ExpandingSimplex* expandingSimplex, struct Simp
     expandingSimplex->triangleCount = 0;
     expandingSimplex->pointCount = 0;
 
-    expandingSimplexAddPoint(expandingSimplex, &simplex->points[0]);
-    expandingSimplexAddPoint(expandingSimplex, &simplex->points[1]);
-    expandingSimplexAddPoint(expandingSimplex, &simplex->points[2]);
-    expandingSimplexAddPoint(expandingSimplex, &simplex->points[3]);
+    for (int i = 0; i < 4; ++i) {
+        expandingSimplexAddPoint(expandingSimplex, &simplex->objectAPoint[i], &simplex->objectBPoint[i], &simplex->points[i]);
+    }
 
     expandingSimplexAddTriangle(expandingSimplex, 0, 1, 2);
     expandingSimplexAddTriangle(expandingSimplex, 2, 1, 3);
@@ -154,9 +151,7 @@ void expandingSimplexInit(struct ExpandingSimplex* expandingSimplex, struct Simp
     expandingSimplexAddTriangle(expandingSimplex, 1, 0, 3);
 }
 
-int expandingSimplexExpand(struct ExpandingSimplex* expandingSimplex, struct Vector3* newPoint) {
-    int newPointIndex = expandingSimplexAddPoint(expandingSimplex, newPoint);
-
+int expandingSimplexExpand(struct ExpandingSimplex* expandingSimplex, int newPointIndex) {
     if (newPointIndex == -1) {
         return 0;
     }
@@ -177,26 +172,39 @@ int expandingSimplexExpand(struct ExpandingSimplex* expandingSimplex, struct Vec
     return 1;
 }
 
-void epaSolve(struct Simplex* startingSimplex, void* data, MinkowsiSum sum, struct EpaResult* result) {
+void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct EpaResult* result) {
     struct ExpandingSimplex* simplex = stackMalloc(sizeof(struct ExpandingSimplex));
     expandingSimplexInit(simplex, startingSimplex);
-    struct Vector3 nextPoint;
     struct SimplexTriangle* closestFace = NULL;
     float projection = 0.0f;
 
     int i;
 
     for (i = 0; i < MAX_ITERATIONS; ++i) {
-        closestFace = expandingSimplexClosestFace(simplex);
-        sum(data, &closestFace->normal, &nextPoint);
+        struct Vector3 reverseNormal;
 
-        projection = vector3Dot(&nextPoint, &closestFace->normal);
+        closestFace = expandingSimplexClosestFace(simplex);
+
+        int nextIndex = simplex->pointCount;
+
+        struct Vector3* aPoint = &simplex->aPoints[nextIndex];
+        struct Vector3* bPoint = &simplex->bPoints[nextIndex];
+
+        objectASum(objectA, &closestFace->normal, aPoint);
+        vector3Negate(&closestFace->normal, &reverseNormal);
+        objectBSum(objectB, &reverseNormal, bPoint);
+
+        vector3Sub(aPoint, bPoint, &simplex->points[nextIndex]);
+
+        projection = vector3Dot(&simplex->points[nextIndex], &closestFace->normal);
 
         if ((projection - closestFace->distanceToOrigin) < 0.00000001f) {
             break;
         }
 
-        if (!expandingSimplexExpand(simplex, &nextPoint)) {
+        ++simplex->pointCount;
+
+        if (!expandingSimplexExpand(simplex, nextIndex)) {
             break;
         }
     }

@@ -18,25 +18,11 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
 
 void collisionObjectUpdateBB(struct CollisionObject* object);
 
-struct MinkowsiSumAgainstQuad {
-    struct CollisionObject* collisionObject;
-    struct CollisionQuad* quad;
-};
+// data should be of type struct CollisionQuad
+void minkowsiSumAgainstQuad(void* data, struct Vector3* direction, struct Vector3* output);
 
-void minkowsiSumAgainstQuadInit(struct MinkowsiSumAgainstQuad* sumData, struct CollisionObject* object, struct CollisionQuad* quad);
-
-// data should be of type struct MinkowsiSumAgainstQuad
-void minkowsiSumAgainstQuadSum(void* data, struct Vector3* direction, struct Vector3* output);
-
-struct MinkowsiSumAgainstObjects {
-    struct CollisionObject* collisionObjectA;
-    struct CollisionObject* collisionObjectB;
-};
-
-void minkowsiSumAgainstObjectsInit(struct MinkowsiSumAgainstObjects* sumData, struct CollisionObject* a, struct CollisionObject* b);
-
-// data should be of type struct MinkowsiSumAgainstObjects
-void minkowsiSumAgainstObjects(void* data, struct Vector3* direction, struct Vector3* output);
+// data should be of type struct CollisionObject
+void minkowsiSumAgainstObject(void* data, struct Vector3* direction, struct Vector3* output);
 
 
 #endif
