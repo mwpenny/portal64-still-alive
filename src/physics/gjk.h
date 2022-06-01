@@ -10,7 +10,6 @@ typedef void (*MinkowsiSum)(void* data, struct Vector3* direction, struct Vector
 struct Simplex {
     struct Vector3 points[MAX_SIMPLEX_SIZE];
     struct Vector3 objectAPoint[MAX_SIMPLEX_SIZE];
-    struct Vector3 objectBPoint[MAX_SIMPLEX_SIZE];
     short nPoints;
 };
 

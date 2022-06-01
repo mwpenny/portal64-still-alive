@@ -81,7 +81,6 @@ void minkowsiSumAgainstQuad(void* data, struct Vector3* direction, struct Vector
     }
 }
 
-// data should be of type struct MinkowsiSumAgainstObjects
 void minkowsiSumAgainstObject(void* data, struct Vector3* direction, struct Vector3* output) {
     struct CollisionObject* object = (struct CollisionObject*)data;
     object->collider->callbacks->minkowsiSum(object->collider->data, &object->body->rotationBasis, direction, output);

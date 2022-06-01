@@ -2,14 +2,29 @@
 
 #include "../util/assert.h"
 #include "../util/memory.h"
+#include "../math/plane.h"
+#include "../math/mathf.h"
 
 #define MAX_ITERATIONS  10
 
 #define MAX_SIMPLEX_POINTS      (4 + MAX_ITERATIONS)
 #define MAX_SIMPLEX_TRIANGLES   (4 + MAX_ITERATIONS * 2)
 
+#define NEXT_FACE(index)        ((index) == 2 ? 0 : (index) + 1)
+
+union SimplexTriangleIndexData {
+    struct {
+        unsigned char indices[3];
+        unsigned char adjacentFaces[3];
+        // the index of the point oppositve to the 
+        // in the cooresponding adjacent face
+        unsigned char oppositePoints[3];
+    };
+    int alignment;
+};
+
 struct SimplexTriangle {
-    unsigned char indices[3];
+    union SimplexTriangleIndexData indexData;
     float distanceToOrigin;
     struct Vector3 normal;
 };
@@ -17,48 +32,31 @@ struct SimplexTriangle {
 struct ExpandingSimplex {
     struct Vector3 points[MAX_SIMPLEX_POINTS];
     struct Vector3 aPoints[MAX_SIMPLEX_POINTS];
-    struct Vector3 bPoints[MAX_SIMPLEX_POINTS];
     unsigned pointCount;
     struct SimplexTriangle triangles[MAX_SIMPLEX_TRIANGLES];
     unsigned triangleCount;
     unsigned char triangleHeap[MAX_SIMPLEX_TRIANGLES];
 };
 
-void expandingSimplexAddPoint(struct ExpandingSimplex* simplex, struct Vector3* aPoint, struct Vector3* bPoint, struct Vector3* pointDiff) {
+void expandingSimplexAddPoint(struct ExpandingSimplex* simplex, struct Vector3* aPoint, struct Vector3* pointDiff) {
     int result = simplex->pointCount;
     simplex->aPoints[result] = *aPoint;
-    simplex->bPoints[result] = *bPoint;
     simplex->points[result] = *pointDiff;
     ++simplex->pointCount; 
-}
-
-void expandingSimplexTriangleInit(struct ExpandingSimplex* simplex, int a, int b, int c, struct SimplexTriangle* triangle) {
-    triangle->indices[0] = a;
-    triangle->indices[1] = b;
-    triangle->indices[2] = c;
-
-    struct Vector3 edgeB;
-    vector3Sub(&simplex->points[b], &simplex->points[a], &edgeB);
-    struct Vector3 edgeC;
-    vector3Sub(&simplex->points[c], &simplex->points[a], &edgeC);
-
-    vector3Cross(&edgeB, &edgeC, &triangle->normal);
-    vector3Normalize(&triangle->normal, &triangle->normal);
-    triangle->distanceToOrigin = vector3Dot(&triangle->normal, &simplex->points[a]);
 }
 
 #define GET_PARENT_INDEX(heapIndex) (((heapIndex) - 1) >> 1)
 #define GET_CHILD_INDEX(heapIndex, childHeapIndex)  (((heapIndex) << 1) + 1 + (childHeapIndex))
 #define EXPANDING_SIMPLEX_GET_DISTANCE(simplex, triangleIndex)  ((simplex)->triangles[triangleIndex].distanceToOrigin)
 
-void expandingSimplexSiftDownHeap(struct ExpandingSimplex* simplex, int heapIndex) {
+int expandingSimplexSiftDownHeap(struct ExpandingSimplex* simplex, int heapIndex) {
     int parentHeapIndex = GET_PARENT_INDEX(heapIndex);
     float currentDistance = EXPANDING_SIMPLEX_GET_DISTANCE(simplex, simplex->triangleHeap[heapIndex]);
 
     while (heapIndex > 0) {
         // already heaped
         if (currentDistance >= EXPANDING_SIMPLEX_GET_DISTANCE(simplex, simplex->triangleHeap[parentHeapIndex])) {
-            return;
+            break;
         }
 
         // swap the parent with the current node
@@ -70,9 +68,11 @@ void expandingSimplexSiftDownHeap(struct ExpandingSimplex* simplex, int heapInde
         heapIndex = parentHeapIndex;
         parentHeapIndex = GET_PARENT_INDEX(heapIndex);
     }
+
+    return heapIndex;
 }
 
-void expandingSimplexSiftUpHeap(struct ExpandingSimplex* simplex, int heapIndex) {
+int expandingSimplexSiftUpHeap(struct ExpandingSimplex* simplex, int heapIndex) {
     float currentDistance = EXPANDING_SIMPLEX_GET_DISTANCE(simplex, simplex->triangleHeap[heapIndex]);
 
     while (heapIndex < simplex->triangleCount) {
@@ -94,7 +94,7 @@ void expandingSimplexSiftUpHeap(struct ExpandingSimplex* simplex, int heapIndex)
 
         if (swapWithChild == 2) {
             // no child out of order
-            return;
+            break;
         }
 
         int childHeapIndex = GET_CHILD_INDEX(heapIndex, swapWithChild);
@@ -106,34 +106,164 @@ void expandingSimplexSiftUpHeap(struct ExpandingSimplex* simplex, int heapIndex)
 
         heapIndex = childHeapIndex;
     }
+
+    return heapIndex;
 }
 
-void expandingSimplexAddTriangle(struct ExpandingSimplex* simplex, int a, int b, int c) {
+void expandingSimplexFixHeap(struct ExpandingSimplex* simplex, int heapIndex) {
+    int nextHeapIndex = expandingSimplexSiftUpHeap(simplex, heapIndex);
+
+    if (nextHeapIndex != heapIndex) {
+        return;
+    }
+
+    expandingSimplexSiftDownHeap(simplex, nextHeapIndex);
+}
+
+int expandingSimplexFindHeapIndex(struct ExpandingSimplex* simplex, int value) {
+    for (int i = 0; i < simplex->triangleCount; ++i) {
+        if (simplex->triangleHeap[i] == value) {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+void expandingSimplexTriangleInitNormal(struct ExpandingSimplex* simplex, struct SimplexTriangle* triangle) {
+    struct Vector3 edgeB;
+    vector3Sub(&simplex->points[triangle->indexData.indices[1]], &simplex->points[triangle->indexData.indices[0]], &edgeB);
+    struct Vector3 edgeC;
+    vector3Sub(&simplex->points[triangle->indexData.indices[2]], &simplex->points[triangle->indexData.indices[0]], &edgeC);
+
+    vector3Cross(&edgeB, &edgeC, &triangle->normal);
+}
+
+int expandingSimplexTriangleCheckEdge(struct ExpandingSimplex* simplex, struct SimplexTriangle* triangle, int index) {
+    struct Vector3* pointA = &simplex->points[triangle->indexData.indices[index]];
+
+    struct Vector3 edge;
+    vector3Sub(&simplex->points[triangle->indexData.indices[NEXT_FACE(index)]], pointA, &edge);
+    struct Vector3 toOrigin;
+    vector3Negate(pointA, &toOrigin);
+
+    struct Vector3 crossCheck;
+    vector3Cross(&edge, &toOrigin, &crossCheck);
+
+    // check if origin is off to the side of edge
+    if (vector3Dot(&crossCheck, &triangle->normal) >= 0.0f) {
+        return 0;
+    }
+
+    float edgeLerp = vector3Dot(&toOrigin, &edge);
+    float edgeMagSqrd = vector3MagSqrd(&edge);
+
+    if (edgeLerp < 0.0f) {
+        edgeLerp = 0.0f;
+    } else if (edgeLerp > edgeMagSqrd) {
+        edgeLerp = 1.0f;
+    } else {
+        edgeLerp /= edgeMagSqrd;
+    }
+
+    struct Vector3 nearestPoint;
+    vector3AddScaled(pointA, &edge, edgeLerp, &nearestPoint);
+
+    triangle->distanceToOrigin = sqrtf(vector3MagSqrd(&nearestPoint));
+
+    return 1;
+}
+
+void expandingSimplexTriangleDetermineDistance(struct ExpandingSimplex* simplex, struct SimplexTriangle* triangle) {
+    vector3Normalize(&triangle->normal, &triangle->normal);
+
+    for (int i = 0; i < 3; ++i) {
+        if (expandingSimplexTriangleCheckEdge(simplex, triangle, i)) {
+            return ;
+        }
+    }
+    
+    triangle->distanceToOrigin = vector3Dot(&triangle->normal, &simplex->points[triangle->indexData.indices[0]]);
+}
+
+void expandingSimplexRotateEdge(struct ExpandingSimplex* simplex, struct SimplexTriangle* triangleA, int triangleAIndex, int heapIndex) {
+    // new triangles are setup so the edge to rotate is the first edge
+    int triangleBIndex = triangleA->indexData.adjacentFaces[0];
+
+    struct SimplexTriangle* triangleB = &simplex->triangles[triangleBIndex];
+
+    int relativeIndex0 = triangleA->indexData.oppositePoints[0];
+    int relativeIndex1 = NEXT_FACE(relativeIndex0);
+    int relativeIndex2 = NEXT_FACE(relativeIndex1);
+
+    triangleA->indexData.adjacentFaces[0] = triangleB->indexData.adjacentFaces[relativeIndex2];
+    triangleB->indexData.adjacentFaces[relativeIndex1] = triangleA->indexData.adjacentFaces[1];
+    triangleA->indexData.adjacentFaces[1] = triangleBIndex;
+    triangleB->indexData.adjacentFaces[relativeIndex2] = triangleAIndex;
+
+    triangleA->indexData.indices[1] = triangleB->indexData.indices[relativeIndex0];
+    triangleB->indexData.indices[relativeIndex2] = triangleA->indexData.indices[2];
+
+    triangleA->indexData.oppositePoints[0] = triangleB->indexData.oppositePoints[relativeIndex2];
+    triangleB->indexData.oppositePoints[relativeIndex1] = triangleA->indexData.oppositePoints[1];
+    triangleA->indexData.oppositePoints[1] = relativeIndex1;
+    triangleB->indexData.oppositePoints[relativeIndex2] = 0;
+
+    expandingSimplexTriangleInitNormal(simplex, triangleA);
+    expandingSimplexTriangleDetermineDistance(simplex, triangleA);
+    expandingSimplexFixHeap(simplex, heapIndex);
+
+    expandingSimplexTriangleInitNormal(simplex, triangleB);
+    expandingSimplexTriangleDetermineDistance(simplex, triangleB);
+    expandingSimplexFixHeap(simplex, expandingSimplexFindHeapIndex(simplex, triangleBIndex));
+}
+
+void expandingSimplexTriangleCheckRotate(struct ExpandingSimplex* simplex, int triangleIndex, int heapIndex) {
+    struct SimplexTriangle* triangle = &simplex->triangles[triangleIndex];
+    struct SimplexTriangle* adjacent = &simplex->triangles[triangle->indexData.adjacentFaces[0]];
+    struct Vector3* oppositePoint = &simplex->points[adjacent->indexData.indices[triangle->indexData.oppositePoints[0]]];
+
+    struct Vector3* firstPoint = &simplex->points[triangle->indexData.indices[0]];
+
+    struct Vector3 offset;
+    vector3Sub(oppositePoint, firstPoint, &offset);
+
+    if (vector3Dot(&offset, &triangle->normal) > 0.0f) {
+        expandingSimplexRotateEdge(simplex, triangle, triangleIndex, heapIndex);
+    } else {
+        expandingSimplexTriangleDetermineDistance(simplex, triangle);
+    }
+}
+
+void expandingSimplexTriangleInit(struct ExpandingSimplex* simplex, union SimplexTriangleIndexData* indexData, struct SimplexTriangle* triangle) {
+    triangle->indexData = *indexData;
+    expandingSimplexTriangleInitNormal(simplex, triangle);
+}
+
+void expandingSimplexAddTriangle(struct ExpandingSimplex* simplex, union SimplexTriangleIndexData* data) {
     if (simplex->triangleCount == MAX_SIMPLEX_TRIANGLES) {
         return;
     }
 
     int result = simplex->triangleCount;
-    expandingSimplexTriangleInit(simplex, a, b, c, &simplex->triangles[result]);
+    expandingSimplexTriangleInit(simplex, data, &simplex->triangles[result]);
+    expandingSimplexTriangleDetermineDistance(simplex, &simplex->triangles[result]);
 
     simplex->triangleHeap[result] = result;
-
     ++simplex->triangleCount;
-    
     expandingSimplexSiftDownHeap(simplex, result);
-}
-
-void expandingSimplexReplaceFrontTriangle(struct ExpandingSimplex* simplex, int a, int b, int c) {
-    int triangleIndex = simplex->triangleHeap[0];
-    // resuse memory of front triangle
-    expandingSimplexTriangleInit(simplex, a, b, c, &simplex->triangles[triangleIndex]);
-    // ajust new position in heap
-    expandingSimplexSiftUpHeap(simplex, 0);
 }
 
 struct SimplexTriangle* expandingSimplexClosestFace(struct ExpandingSimplex* simplex) {
     return &simplex->triangles[simplex->triangleHeap[0]];
 }
+
+union SimplexTriangleIndexData gInitialSimplexIndexData[] = {
+    {{{0, 1, 2}, {3, 1, 2}, {2, 2, 2}}},
+    {{{2, 1, 3}, {0, 3, 2}, {0, 1, 0}}},
+    {{{0, 2, 3}, {0, 1, 3}, {1, 1, 0}}},
+    {{{1, 0, 3}, {0, 2, 1}, {2, 1, 0}}},
+};
 
 void expandingSimplexInit(struct ExpandingSimplex* expandingSimplex, struct Simplex* simplex) {
     __assert(simplex->nPoints == 4);
@@ -142,34 +272,90 @@ void expandingSimplexInit(struct ExpandingSimplex* expandingSimplex, struct Simp
     expandingSimplex->pointCount = 0;
 
     for (int i = 0; i < 4; ++i) {
-        expandingSimplexAddPoint(expandingSimplex, &simplex->objectAPoint[i], &simplex->objectBPoint[i], &simplex->points[i]);
+        expandingSimplexAddPoint(expandingSimplex, &simplex->objectAPoint[i], &simplex->points[i]);
     }
 
-    expandingSimplexAddTriangle(expandingSimplex, 0, 1, 2);
-    expandingSimplexAddTriangle(expandingSimplex, 2, 1, 3);
-    expandingSimplexAddTriangle(expandingSimplex, 0, 2, 3);
-    expandingSimplexAddTriangle(expandingSimplex, 1, 0, 3);
+    for (int i = 0; i < 4; ++i) {
+        expandingSimplexAddTriangle(expandingSimplex, &gInitialSimplexIndexData[i]);
+    }
 }
 
-int expandingSimplexExpand(struct ExpandingSimplex* expandingSimplex, int newPointIndex) {
+void expandingSimplexExpand(struct ExpandingSimplex* expandingSimplex, int newPointIndex) {
     if (newPointIndex == -1) {
-        return 0;
+        return;
     }
 
     struct SimplexTriangle* faceToRemove = expandingSimplexClosestFace(expandingSimplex);
 
-    int existing0 = faceToRemove->indices[0];
-    int existing1 = faceToRemove->indices[1];
-    int existing2 = faceToRemove->indices[2];
+    union SimplexTriangleIndexData existing = faceToRemove->indexData;
 
-    // replace the front triangle
-    expandingSimplexReplaceFrontTriangle(expandingSimplex, existing2, existing0, newPointIndex);
+    unsigned char triangleIndices[3];
+    triangleIndices[0] = expandingSimplex->triangleHeap[0];
+    triangleIndices[1] = expandingSimplex->triangleCount;
+    triangleIndices[2] = expandingSimplex->triangleCount + 1;
 
-    // add two new triangles
-    expandingSimplexAddTriangle(expandingSimplex, existing0, existing1, newPointIndex);
-    expandingSimplexAddTriangle(expandingSimplex, existing1, existing2, newPointIndex);
+    // first connect all the adjacent face information
+    for (int i = 0; i < 3; ++i) {
+        union SimplexTriangleIndexData next;
+        int nextFace = NEXT_FACE(i);
+        int nextNextFace = NEXT_FACE(nextFace);
+        next.indices[0] = existing.indices[i];
+        next.indices[1] = existing.indices[nextFace];
+        next.indices[3] = newPointIndex;
 
-    return 1;
+        next.adjacentFaces[0] = existing.adjacentFaces[i];
+        next.adjacentFaces[1] = triangleIndices[nextFace];
+        next.adjacentFaces[2] = triangleIndices[nextNextFace];
+
+        next.oppositePoints[0] = existing.oppositePoints[i];
+        next.oppositePoints[1] = 1;
+        next.oppositePoints[2] = 0;
+
+        // update back reference to new triangle
+        struct SimplexTriangle* otherTriangle = &expandingSimplex->triangles[existing.adjacentFaces[i]];
+        int backReferenceIndex = NEXT_FACE(existing.oppositePoints[i]);
+        otherTriangle->indexData.adjacentFaces[backReferenceIndex] = triangleIndices[i];
+        otherTriangle->indexData.oppositePoints[backReferenceIndex] = 2;
+
+        expandingSimplexTriangleInit(expandingSimplex, &next, &expandingSimplex->triangles[triangleIndices[i]]);
+    }
+
+    // then check for edge rotation
+    for (int i = 0; i < 3; ++i) {
+        int triangleIndex = triangleIndices[i];
+
+        if (i != 0) {
+            expandingSimplex->triangleHeap[triangleIndex] = triangleIndex;
+            ++expandingSimplex->triangleCount;
+        }
+
+        expandingSimplexTriangleCheckRotate(expandingSimplex, triangleIndex, i == 0 ? 0 : triangleIndex);
+    }
+}
+
+void epaCalculateContact(struct ExpandingSimplex* simplex, struct SimplexTriangle* closestFace, struct EpaResult* result) {
+    struct Vector3 baryCoords;
+
+    struct Vector3 planePos;
+    vector3Scale(&closestFace->normal, &planePos, closestFace->distanceToOrigin);
+
+    calculateBarycentricCoords(
+        &simplex->points[closestFace->indexData.indices[0]],
+        &simplex->points[closestFace->indexData.indices[1]],
+        &simplex->points[closestFace->indexData.indices[2]],
+        &planePos,
+        &baryCoords
+    );
+
+    evaluateBarycentricCoords(
+        &simplex->aPoints[closestFace->indexData.indices[0]],
+        &simplex->aPoints[closestFace->indexData.indices[1]],
+        &simplex->aPoints[closestFace->indexData.indices[2]],
+        &baryCoords,
+        &result->contactA
+    );
+
+    vector3AddScaled(&result->contactA, &result->normal, result->penetration, &result->contactB);
 }
 
 void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct EpaResult* result) {
@@ -178,9 +364,7 @@ void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum object
     struct SimplexTriangle* closestFace = NULL;
     float projection = 0.0f;
 
-    int i;
-
-    for (i = 0; i < MAX_ITERATIONS; ++i) {
+    for (int i = 0; i < MAX_ITERATIONS; ++i) {
         struct Vector3 reverseNormal;
 
         closestFace = expandingSimplexClosestFace(simplex);
@@ -188,13 +372,13 @@ void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum object
         int nextIndex = simplex->pointCount;
 
         struct Vector3* aPoint = &simplex->aPoints[nextIndex];
-        struct Vector3* bPoint = &simplex->bPoints[nextIndex];
+        struct Vector3 bPoint;
 
         objectASum(objectA, &closestFace->normal, aPoint);
         vector3Negate(&closestFace->normal, &reverseNormal);
-        objectBSum(objectB, &reverseNormal, bPoint);
+        objectBSum(objectB, &reverseNormal, &bPoint);
 
-        vector3Sub(aPoint, bPoint, &simplex->points[nextIndex]);
+        vector3Sub(aPoint, &bPoint, &simplex->points[nextIndex]);
 
         projection = vector3Dot(&simplex->points[nextIndex], &closestFace->normal);
 
@@ -203,15 +387,13 @@ void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum object
         }
 
         ++simplex->pointCount;
-
-        if (!expandingSimplexExpand(simplex, nextIndex)) {
-            break;
-        }
+        expandingSimplexExpand(simplex, nextIndex);
     }
 
     if (closestFace) {
         result->normal = closestFace->normal;
         result->penetration = projection;
+        epaCalculateContact(simplex, closestFace, result);
     }
 
     stackMallocFree(simplex);

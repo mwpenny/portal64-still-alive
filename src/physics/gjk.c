@@ -13,8 +13,7 @@ struct Vector3* simplexAddPoint(struct Simplex* simplex, struct Vector3* aPoint,
     int index = simplex->nPoints;
 
     simplex->objectAPoint[index] = *aPoint;
-    simplex->objectBPoint[index] = *bPoint;
-    vector3Sub(&simplex->objectAPoint[index], &simplex->objectBPoint[index], &simplex->points[index]);
+    vector3Sub(&simplex->objectAPoint[index], bPoint, &simplex->points[index]);
     ++simplex->nPoints;
 
     return &simplex->points[index];
