@@ -46,7 +46,7 @@ void calculateBarycentricCoords(struct Vector3* a, struct Vector3* b, struct Vec
     float denom = 1.0f / (d00 * d11 - d01 * d01);
     output->y = (d11 * d20 - d01 * d21) * denom;
     output->z = (d00 * d21 - d01 * d20) * denom;
-    output->x = 1.0f - output->x - output->y;
+    output->x = 1.0f - output->y - output->z;
 }
 
 void evaluateBarycentricCoords(struct Vector3* a, struct Vector3* b, struct Vector3* c, struct Vector3* bary, struct Vector3* output) {

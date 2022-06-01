@@ -6,6 +6,7 @@
 struct EpaResult {
     struct Vector3 contactA;
     struct Vector3 contactB;
+    // points from A to B
     struct Vector3 normal;
     float penetration;
 };

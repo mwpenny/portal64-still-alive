@@ -38,16 +38,29 @@ struct ExpandingSimplex {
     unsigned char triangleHeap[MAX_SIMPLEX_TRIANGLES];
 };
 
+
+#define GET_PARENT_INDEX(heapIndex) (((heapIndex) - 1) >> 1)
+#define GET_CHILD_INDEX(heapIndex, childHeapIndex)  (((heapIndex) << 1) + 1 + (childHeapIndex))
+#define EXPANDING_SIMPLEX_GET_DISTANCE(simplex, triangleIndex)  ((simplex)->triangles[triangleIndex].distanceToOrigin)
+
+int validateHeap(struct ExpandingSimplex* simplex) {
+    for (int i = 1; i < simplex->triangleCount; ++i) {
+        int parentIndex = GET_PARENT_INDEX(i);
+
+        if (simplex->triangles[simplex->triangleHeap[i]].distanceToOrigin < simplex->triangles[simplex->triangleHeap[parentIndex]].distanceToOrigin) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 void expandingSimplexAddPoint(struct ExpandingSimplex* simplex, struct Vector3* aPoint, struct Vector3* pointDiff) {
     int result = simplex->pointCount;
     simplex->aPoints[result] = *aPoint;
     simplex->points[result] = *pointDiff;
     ++simplex->pointCount; 
 }
-
-#define GET_PARENT_INDEX(heapIndex) (((heapIndex) - 1) >> 1)
-#define GET_CHILD_INDEX(heapIndex, childHeapIndex)  (((heapIndex) << 1) + 1 + (childHeapIndex))
-#define EXPANDING_SIMPLEX_GET_DISTANCE(simplex, triangleIndex)  ((simplex)->triangles[triangleIndex].distanceToOrigin)
 
 int expandingSimplexSiftDownHeap(struct ExpandingSimplex* simplex, int heapIndex) {
     int parentHeapIndex = GET_PARENT_INDEX(heapIndex);
@@ -76,35 +89,40 @@ int expandingSimplexSiftUpHeap(struct ExpandingSimplex* simplex, int heapIndex) 
     float currentDistance = EXPANDING_SIMPLEX_GET_DISTANCE(simplex, simplex->triangleHeap[heapIndex]);
 
     while (heapIndex < simplex->triangleCount) {
-        int swapWithChild;
-        
-        for (swapWithChild = 0; swapWithChild < 2; ++swapWithChild) {
-            int childHeapIndex = GET_CHILD_INDEX(heapIndex, swapWithChild);
+        int swapWithChild = -1;
 
-            // check that we don't run off the end of the heap
-            if (childHeapIndex >= simplex->triangleCount) {
-                break;
-            }
+        int childHeapIndex = GET_CHILD_INDEX(heapIndex, 0);
 
-            if (EXPANDING_SIMPLEX_GET_DISTANCE(simplex, simplex->triangleHeap[heapIndex]) < currentDistance) {
-                swapWithChild = childHeapIndex;
-                break;
-            }
+        // reached the end of the heap
+        if (childHeapIndex >= simplex->triangleCount) {
+            break;
         }
 
-        if (swapWithChild == 2) {
+        float childDistance = EXPANDING_SIMPLEX_GET_DISTANCE(simplex, simplex->triangleHeap[childHeapIndex]);
+
+        // check that we don't run off the end of the heap
+        if (childDistance < currentDistance) {
+            swapWithChild = childHeapIndex;
+        }
+
+        float otherChildDistance = EXPANDING_SIMPLEX_GET_DISTANCE(simplex, simplex->triangleHeap[childHeapIndex + 1]);
+
+        // grab the smallest child
+        if (childHeapIndex + 1 < simplex->triangleCount && otherChildDistance < currentDistance && otherChildDistance < childDistance) {
+            swapWithChild = childHeapIndex + 1;
+        }
+
+        if (swapWithChild == -1) {
             // no child out of order
             break;
         }
 
-        int childHeapIndex = GET_CHILD_INDEX(heapIndex, swapWithChild);
-
         // swap child with the current node
         int tmp = simplex->triangleHeap[heapIndex];
-        simplex->triangleHeap[heapIndex] = simplex->triangleHeap[childHeapIndex];
-        simplex->triangleHeap[childHeapIndex] = tmp;
+        simplex->triangleHeap[heapIndex] = simplex->triangleHeap[swapWithChild];
+        simplex->triangleHeap[swapWithChild] = tmp;
 
-        heapIndex = childHeapIndex;
+        heapIndex = swapWithChild;
     }
 
     return heapIndex;
@@ -179,7 +197,7 @@ void expandingSimplexTriangleDetermineDistance(struct ExpandingSimplex* simplex,
 
     for (int i = 0; i < 3; ++i) {
         if (expandingSimplexTriangleCheckEdge(simplex, triangle, i)) {
-            return ;
+            return;
         }
     }
     
@@ -232,6 +250,7 @@ void expandingSimplexTriangleCheckRotate(struct ExpandingSimplex* simplex, int t
         expandingSimplexRotateEdge(simplex, triangle, triangleIndex, heapIndex);
     } else {
         expandingSimplexTriangleDetermineDistance(simplex, triangle);
+        expandingSimplexFixHeap(simplex, heapIndex);
     }
 }
 
@@ -301,7 +320,7 @@ void expandingSimplexExpand(struct ExpandingSimplex* expandingSimplex, int newPo
         int nextNextFace = NEXT_FACE(nextFace);
         next.indices[0] = existing.indices[i];
         next.indices[1] = existing.indices[nextFace];
-        next.indices[3] = newPointIndex;
+        next.indices[2] = newPointIndex;
 
         next.adjacentFaces[0] = existing.adjacentFaces[i];
         next.adjacentFaces[1] = triangleIndices[nextFace];
@@ -355,7 +374,7 @@ void epaCalculateContact(struct ExpandingSimplex* simplex, struct SimplexTriangl
         &result->contactA
     );
 
-    vector3AddScaled(&result->contactA, &result->normal, result->penetration, &result->contactB);
+    vector3AddScaled(&result->contactA, &result->normal, -result->penetration, &result->contactB);
 }
 
 void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct EpaResult* result) {
