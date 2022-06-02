@@ -3,6 +3,7 @@
 #include "gjk.h"
 #include "contact_insertion.h"
 #include "collision_scene.h"
+#include "../math/mathf.h"
 
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass) {
     object->collider = collider;
@@ -49,6 +50,10 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
 
     contact->friction = 0.5f;
     contact->restitution = 0.5f;
+
+    if (isnan(result.penetration) || isnan(result.contactA.x) || isnan(result.contactB.x) || isnan(result.normal.x)) {
+        return;
+    }
 
     contactInsert(contact, &result);
 }

@@ -8,7 +8,7 @@
 
 #include <string.h>
 
-#define Q3_BAUMGARTE 0.3f
+#define Q3_BAUMGARTE 0.1f
 
 #define Q3_PENETRATION_SLOP 0.001f
 
@@ -17,6 +17,8 @@
 #define SEPERATION_TOLERANCE	0.2f
 
 #define ENABLE_FRICTION 1
+
+#define SOLVER_ITERATIONS	8
 
 struct ContactSolver gContactSolver;
 
@@ -381,9 +383,9 @@ void contactSolverIterate(struct ContactSolver* contactSolver) {
 
 void contactSolverSolve(struct ContactSolver* solver) {
 	contactSolverPreSolve(solver);
-	contactSolverIterate(solver);
-	contactSolverIterate(solver);
-	contactSolverIterate(solver);
+	for (int i = 0; i < SOLVER_ITERATIONS; ++i) {
+		contactSolverIterate(solver);
+	}
 }
 
 struct ContactManifold* contactSolverGetContactManifold(struct ContactSolver* solver, struct CollisionObject* shapeA, struct CollisionObject* shapeB) {
