@@ -45,7 +45,7 @@ void sceneInit(struct Scene* scene) {
         cubeInit(&scene->cubes[i]);
 
         scene->cubes[i].rigidBody.transform.position.x = 0.0f;
-        scene->cubes[i].rigidBody.transform.position.y = 0.1f;
+        scene->cubes[i].rigidBody.transform.position.y = 0.5f;
         scene->cubes[i].rigidBody.transform.position.z = 6.0f + i;
         scene->cubes[i].rigidBody.currentRoom = 1;
 

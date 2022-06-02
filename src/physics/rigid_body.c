@@ -82,7 +82,7 @@ void rigidBodyCheckPortals(struct RigidBody* rigidBody) {
     }
 
     for (int i = 0; i < 2; ++i) {
-        transformPointInverse(gCollisionScene.portalTransforms[i], &rigidBody->transform.position, &localPoint);
+        transformPointInverseNoScale(gCollisionScene.portalTransforms[i], &rigidBody->transform.position, &localPoint);
 
         int mask = (1 << i);
 

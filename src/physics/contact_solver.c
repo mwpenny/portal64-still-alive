@@ -59,15 +59,12 @@ void contactSolverCleanupManifold(struct ContactManifold* manifold) {
 
 		// update the world radius for the contact solver
 		if (manifold->shapeA->body) {
-			vector3Sub(&worldPosA, &manifold->shapeA->body->transform.position, &worldPosA);
+			vector3Sub(&worldPosA, &manifold->shapeA->body->transform.position, &contactPoint->contactAWorld);
 		}
 
 		if (manifold->shapeB->body) {
-			vector3Sub(&worldPosB, &manifold->shapeB->body->transform.position, &worldPosB);
+			vector3Sub(&worldPosB, &manifold->shapeB->body->transform.position, &contactPoint->contactBWorld);
 		}
-
-		contactPoint->contactAWorld = worldPosA;
-		contactPoint->contactBWorld = worldPosA;
 
 		if (readIndex != writeIndex) {
 			manifold->contacts[writeIndex] = *contactPoint;

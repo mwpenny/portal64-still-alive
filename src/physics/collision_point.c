@@ -7,7 +7,7 @@
 
 int collisionBoxCollidePoint(void* data, struct Transform* boxTransform, struct Vector3* point, struct ContactManifold* output) {
     struct Vector3 localSpace;
-    transformPointInverse(boxTransform, point, &localSpace);
+    transformPointInverseNoScale(boxTransform, point, &localSpace);
 
     struct Vector3 absLocalspace;
     vector3Abs(&localSpace, &absLocalspace);

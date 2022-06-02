@@ -40,12 +40,15 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
         return;
     }
 
-    transformPointInverse(&object->body->transform, &result.contactB, &result.contactB);
+    transformPointInverseNoScale(&object->body->transform, &result.contactB, &result.contactB);
     struct ContactManifold* contact = contactSolverGetContactManifold(contactSolver, quadObject, object);
 
     if (!contact) {
         return;
     }
+
+    contact->friction = 0.5f;
+    contact->restitution = 0.5f;
 
     contactInsert(contact, &result);
 }

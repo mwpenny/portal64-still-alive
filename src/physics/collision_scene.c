@@ -153,7 +153,7 @@ void collisionObjectQueryScene(struct CollisionObject* object, struct CollisionS
 
 int collisionSceneIsTouchingSinglePortal(struct Vector3* contactPoint, struct Vector3* contactNormal, struct Transform* portalTransform, int portalIndex) {
     struct Vector3 localPoint;
-    transformPointInverse(portalTransform, contactPoint, &localPoint);
+    transformPointInverseNoScale(portalTransform, contactPoint, &localPoint);
 
     if (fabsf(localPoint.z) > PORTAL_THICKNESS) {
         return 0;

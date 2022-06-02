@@ -1,5 +1,7 @@
 #include "contact_insertion.h"
 
+#include "collision_object.h"
+
 #define CONTACT_MOVE_TOLERNACE  0.1f
 
 void contactInsert(struct ContactManifold* contactState, struct EpaResult* epaResult) {
@@ -9,7 +11,7 @@ void contactInsert(struct ContactManifold* contactState, struct EpaResult* epaRe
 
     int insertIndex;
 
-    for (insertIndex = 0; insertIndex < contactState->contactCount && insertIndex < MAX_CONTACT_COUNT; ++insertIndex) {
+    for (insertIndex = 0; insertIndex < contactState->contactCount && insertIndex < MAX_CONTACTS_PER_MANIFOLD; ++insertIndex) {
         struct ContactPoint* contactPoint = &contactState->contacts[insertIndex];
 
         if (contactPoint->id == epaResult->id) {
@@ -34,14 +36,12 @@ void contactInsert(struct ContactManifold* contactState, struct EpaResult* epaRe
         }
     }
 
-    if (contactState->contactCount == 0) {
-        contactState->normal = epaResult->normal;
-        vector3Perp(&contactState->normal, &contactState->tangentVectors[0]);
-        vector3Normalize(&contactState->tangentVectors[0], &contactState->tangentVectors[0]);
-        vector3Cross(&contactState->normal, &contactState->tangentVectors[0], &contactState->tangentVectors[1]);
-    }
+    contactState->normal = epaResult->normal;
+    vector3Perp(&contactState->normal, &contactState->tangentVectors[0]);
+    vector3Normalize(&contactState->tangentVectors[0], &contactState->tangentVectors[0]);
+    vector3Cross(&contactState->normal, &contactState->tangentVectors[0], &contactState->tangentVectors[1]);
 
-    if (insertIndex == MAX_CONTACT_COUNT) {
+    if (insertIndex == MAX_CONTACTS_PER_MANIFOLD) {
         if (!shouldReplace) {
             return;
         }
@@ -57,6 +57,18 @@ void contactInsert(struct ContactManifold* contactState, struct EpaResult* epaRe
     contactPoint->contactALocal = epaResult->contactA;
     contactPoint->contactBLocal = epaResult->contactB;
     contactPoint->penetration = epaResult->penetration;
+
+    if (contactState->shapeA->body) {
+        quatMultVector(&contactState->shapeA->body->transform.rotation, &contactPoint->contactALocal, &contactPoint->contactAWorld);
+    } else {
+        contactPoint->contactAWorld = contactPoint->contactALocal;
+    }
+
+    if (contactState->shapeB->body) {
+        quatMultVector(&contactState->shapeB->body->transform.rotation, &contactPoint->contactBLocal, &contactPoint->contactBWorld);
+    } else {
+        contactPoint->contactBWorld = contactPoint->contactBLocal;
+    }
 
     if (insertIndex == contactState->contactCount) {
         contactState->contactCount = insertIndex + 1;

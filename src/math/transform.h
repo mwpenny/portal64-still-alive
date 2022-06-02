@@ -17,6 +17,7 @@ void transformToMatrixL(struct Transform* in, Mtx* mtx, float sceneScale);
 void transformInvert(struct Transform* in, struct Transform* out);
 void transformPoint(struct Transform* transform, struct Vector3* in, struct Vector3* out);
 void transformPointInverse(struct Transform* transform, struct Vector3* in, struct Vector3* out);
+void transformPointInverseNoScale(struct Transform* transform, struct Vector3* in, struct Vector3* out);
 void transformConcat(struct Transform* left, struct Transform* right, struct Transform* output);
 
 #endif

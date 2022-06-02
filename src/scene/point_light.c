@@ -158,7 +158,7 @@ void pointLightableMeshInit(struct PointLightableMesh* mesh, Vtx* inputVertices,
 
 void pointLightableCalc(struct PointLightableMesh* mesh, struct Transform* meshTransform, struct PointLight* pointLight) {
     struct Vector3 relativePos;
-    transformPointInverse(meshTransform, &pointLight->position, &relativePos);
+    transformPointInverseNoScale(meshTransform, &pointLight->position, &relativePos);
 
     for (unsigned i = 0; i < mesh->vertexCount; ++i) {
         struct Vector3 vertexPos;

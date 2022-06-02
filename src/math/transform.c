@@ -74,6 +74,13 @@ void transformPointInverse(struct Transform* transform, struct Vector3* in, stru
     out->z /= transform->scale.z;
 }
 
+void transformPointInverseNoScale(struct Transform* transform, struct Vector3* in, struct Vector3* out) {
+    vector3Sub(in, &transform->position, out);
+    struct Quaternion quatInverse;
+    quatConjugate(&transform->rotation, &quatInverse);
+    quatMultVector(&quatInverse, out, out);
+}
+
 void transformConcat(struct Transform* left, struct Transform* right, struct Transform* output) {
     vector3Multiply(&left->scale, &right->scale, &output->scale);
     struct Vector3 rotatedOffset;
