@@ -3,6 +3,7 @@
 #include "math/mathf.h"
 #include "gjk.h"
 #include "epa.h"
+#include "contact_solver.h"
 
 struct CollisionScene gCollisionScene;
 
@@ -112,8 +113,8 @@ int collisionSceneFilterPortalContacts(struct ContactManifold* contact) {
     int writeIndex = 0;
 
     for (int readIndex = 0; readIndex < contact->contactCount; ++readIndex) {
-        if (collisionSceneIsTouchingPortal(&contact->contacts[readIndex].ra, &contact->normal)) {
-            continue;;
+        if (collisionSceneIsTouchingPortal(&contact->contacts[readIndex].contactALocal, &contact->normal)) {
+            continue;
         }
 
         if (readIndex != writeIndex) {
@@ -374,6 +375,8 @@ void collisionSceneRemoveDynamicObject(struct CollisionObject* object) {
 }
 
 void collisionSceneUpdateDynamics() {
+	contactSolverRemoveUnusedContacts(&gContactSolver);
+
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
         collisionObjectCollideWithScene(gCollisionScene.dynamicObjects[i], &gCollisionScene, &gContactSolver);
     }

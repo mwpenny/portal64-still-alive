@@ -376,7 +376,7 @@ void epaCalculateContact(struct ExpandingSimplex* simplex, struct SimplexTriangl
         &result->contactA
     );
 
-    vector3AddScaled(&result->contactA, &result->normal, -result->penetration, &result->contactB);
+    vector3AddScaled(&result->contactA, &result->normal, result->penetration, &result->contactB);
 
     result->id = simplex->ids[closestFace->indexData.indices[0]] & simplex->ids[closestFace->indexData.indices[1]] & simplex->ids[closestFace->indexData.indices[2]];
 }
@@ -417,7 +417,7 @@ void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum object
 
     if (closestFace) {
         result->normal = closestFace->normal;
-        result->penetration = projection;
+        result->penetration = -projection;
         epaCalculateContact(simplex, closestFace, result);
     }
 

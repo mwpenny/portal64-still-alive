@@ -6,7 +6,7 @@
 #include <math.h>
 
 struct ColliderCallbacks gCollisionBoxCallbacks = {
-    collisionBoxCollideQuad,
+    NULL,
     raycastBox,
     collisionBoxSolidMofI,
     collisionBoxBoundingBox,

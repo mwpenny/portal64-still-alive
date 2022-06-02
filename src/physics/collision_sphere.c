@@ -21,10 +21,10 @@ int collisionSphereCollideQuad(void* data, struct Transform* boxTransform, struc
 
     struct ContactPoint* contact = &output->contacts[output->contactCount];
 
-    vector3AddScaled(&quad->corner, &quad->edgeA, aLerp, &contact->ra);
-    vector3AddScaled(&contact->ra, &quad->edgeB, bLerp, &contact->ra);
+    vector3AddScaled(&quad->corner, &quad->edgeA, aLerp, &contact->contactAWorld);
+    vector3AddScaled(&contact->contactAWorld, &quad->edgeB, bLerp, &contact->contactAWorld);
 
-    vector3Sub(&boxTransform->position, &contact->ra, &output->normal);
+    vector3Sub(&boxTransform->position, &contact->contactAWorld, &output->normal);
 
     float outputLength = vector3MagSqrd(&output->normal);
 
@@ -36,7 +36,7 @@ int collisionSphereCollideQuad(void* data, struct Transform* boxTransform, struc
 
     vector3Scale(&output->normal, &output->normal, 1.0f / sqrtf(outputLength));
 
-    vector3AddScaled(&boxTransform->position, &output->normal, -sphere->radius, &contact->rb);
+    vector3AddScaled(&boxTransform->position, &output->normal, -sphere->radius, &contact->contactBWorld);
 
     output->restitution = 0.1f;
     output->friction = 0.5f;

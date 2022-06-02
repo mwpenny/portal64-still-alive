@@ -1,4 +1,8 @@
 #include "collision_object.h"
+#include "epa.h"
+#include "gjk.h"
+#include "contact_insertion.h"
+#include "collision_scene.h"
 
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass) {
     object->collider = collider;
@@ -7,33 +11,43 @@ void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData
     collisionObjectUpdateBB(object);
 }
 
-void collisionObjectCollideWithQuad(struct CollisionObject* object, struct CollisionObject* quad, struct ContactSolver* contactSolver) {
-    CollideWithQuad quadCollider = object->collider->callbacks->collideWithQuad;
-
-    if (!quadCollider) {
+void collisionObjectCollideWithQuad(struct CollisionObject* object, struct CollisionObject* quadObject, struct ContactSolver* contactSolver) {
+    if (!box3DHasOverlap(&object->boundingBox, &quadObject->boundingBox)) {
         return;
     }
 
-    if (!box3DHasOverlap(&object->boundingBox, &quad->boundingBox)) {
+    struct Simplex simplex;
+
+    struct CollisionQuad* quad = (struct CollisionQuad*)quadObject->collider->data;
+
+    if (!gjkCheckForOverlap(&simplex, 
+                quad, minkowsiSumAgainstQuad, 
+                object, minkowsiSumAgainstObject, 
+                &quad->plane.normal)) {
         return;
     }
 
-    struct ContactManifold localContact;
-    localContact.contactCount = 0;
+    struct EpaResult result;
+    epaSolve(
+        &simplex, 
+        quad, minkowsiSumAgainstQuad, 
+        object, minkowsiSumAgainstObject, 
+        &result
+    );
 
-    struct ContactManifold* contact = contactSolverPeekContact(contactSolver, quad, object);
-    
-    if (quadCollider(object->collider->data, &object->body->transform, quad->collider->data, &localContact)) {
-        if (!contact) {
-            return;
-        }
-        
-        if (contactSolverAssign(contact, &localContact, 1) && object->body) {
-            object->body->flags |= RigidBodyIsTouchingPortal;
-        }
-    } else if (contact) {
-        contactSolverRemoveContact(contactSolver, contact);
+    if (collisionSceneIsTouchingPortal(&result.contactA, &result.normal)) {
+        object->body->flags |= RigidBodyIsTouchingPortal;
+        return;
     }
+
+    transformPointInverse(&object->body->transform, &result.contactB, &result.contactB);
+    struct ContactManifold* contact = contactSolverGetContactManifold(contactSolver, quadObject, object);
+
+    if (!contact) {
+        return;
+    }
+
+    contactInsert(contact, &result);
 }
 
 void collisionObjectUpdateBB(struct CollisionObject* object) {

@@ -63,7 +63,7 @@ void cubeRender(void* data, struct RenderScene* renderScene) {
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
     transformToMatrixL(&cube->rigidBody.transform, matrix, SCENE_SCALE);
 
-    renderSceneAdd(renderScene, cube_gfx, matrix, (cube->rigidBody.flags & RigidBodyDebugFlag) ? button_material_index : cube_material_index, &cube->rigidBody.transform.position);
+    renderSceneAdd(renderScene, cube_gfx, matrix, cube_material_index, &cube->rigidBody.transform.position);
 }
 
 void cubeInit(struct Cube* cube) {
