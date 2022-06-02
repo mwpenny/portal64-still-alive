@@ -20,7 +20,7 @@ struct CollisionScene {
     u16 quadCount;
 };
 
-typedef void (*ManifoldCallback)(void* data, struct ContactConstraintState* contact);
+typedef void (*ManifoldCallback)(void* data, struct ContactManifold* contact);
 
 extern struct CollisionScene gCollisionScene;
 

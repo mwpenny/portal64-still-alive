@@ -4,7 +4,7 @@ void simplexInit(struct Simplex* simplex) {
     simplex->nPoints = 0;
 }
 
-struct Vector3* simplexAddPoint(struct Simplex* simplex, struct Vector3* aPoint, struct Vector3* bPoint) {
+struct Vector3* simplexAddPoint(struct Simplex* simplex, struct Vector3* aPoint, struct Vector3* bPoint, int id) {
     if (simplex->nPoints == MAX_SIMPLEX_SIZE) {
         // SHOULD never happen, but just in case
         return 0;
@@ -14,9 +14,16 @@ struct Vector3* simplexAddPoint(struct Simplex* simplex, struct Vector3* aPoint,
 
     simplex->objectAPoint[index] = *aPoint;
     vector3Sub(&simplex->objectAPoint[index], bPoint, &simplex->points[index]);
+    simplex->ids[index] = id;
     ++simplex->nPoints;
 
     return &simplex->points[index];
+}
+
+void simplexMovePoint(struct Simplex* simplex, int to, int from) {
+    simplex->points[to] = simplex->points[from];
+    simplex->objectAPoint[to] = simplex->objectAPoint[from];
+    simplex->ids[to] = simplex->ids[from];
 }
 
 int simplexCheck(struct Simplex* simplex, struct Vector3* nextDirection) {
@@ -54,8 +61,9 @@ int simplexCheck(struct Simplex* simplex, struct Vector3* nextDirection) {
             }
 
             // remove c
-            simplex->points[0] = simplex->points[1];
-            simplex->points[1] = simplex->points[2];
+            simplexMovePoint(simplex, 0, 1);
+            simplexMovePoint(simplex, 1, 2);
+            
             simplex->nPoints = 2;
 
             return 0;
@@ -71,7 +79,7 @@ int simplexCheck(struct Simplex* simplex, struct Vector3* nextDirection) {
             }
 
             // remove b
-            simplex->points[1] = simplex->points[2];
+            simplexMovePoint(simplex, 1, 2);
             simplex->nPoints = 2;
 
             return 0;
@@ -83,9 +91,10 @@ int simplexCheck(struct Simplex* simplex, struct Vector3* nextDirection) {
         }
 
         // change triangle winding
-        struct Vector3 tmp = simplex->points[0];
-        simplex->points[0] = simplex->points[1];
-        simplex->points[1] = tmp;
+        // temporarily use unused vertex 4
+        simplexMovePoint(simplex, 3, 0);
+        simplexMovePoint(simplex, 0, 1);
+        simplexMovePoint(simplex, 1, 3);
         vector3Negate(&normal, nextDirection);
     } else if (simplex->nPoints == 4) {
         int lastBehindIndex = -1;
@@ -116,23 +125,23 @@ int simplexCheck(struct Simplex* simplex, struct Vector3* nextDirection) {
             *nextDirection = normals[lastInFrontIndex];
 
             if (lastInFrontIndex == 1) {
-                simplex->points[0] = simplex->points[1];
-                simplex->points[1] = simplex->points[2];
+                simplexMovePoint(simplex, 0, 1);
+                simplexMovePoint(simplex, 1, 2);
             } else if (lastInFrontIndex == 2) {
-                simplex->points[1] = simplex->points[0];
-                simplex->points[0] = simplex->points[2];
+                simplexMovePoint(simplex, 1, 0);
+                simplexMovePoint(simplex, 0, 2);
             }
 
-            simplex->points[2] = simplex->points[3];
+            simplexMovePoint(simplex, 2, 3);
             simplex->nPoints = 3;
         } else if (isFrontCount == 2) {
             if (lastBehindIndex == 0) {
-                simplex->points[0] = simplex->points[2];
+                simplexMovePoint(simplex, 0, 2);
             } else if (lastBehindIndex == 2) {
-                simplex->points[0] = simplex->points[1];
+                simplexMovePoint(simplex, 0, 1);
             }
 
-            simplex->points[1] = simplex->points[3];
+            simplexMovePoint(simplex, 1, 3);
             simplex->nPoints = 2;
 
             struct Vector3 ab;
@@ -146,7 +155,7 @@ int simplexCheck(struct Simplex* simplex, struct Vector3* nextDirection) {
         } else {
             // this case shouldn't happen but if it does
             // this is the correct logic
-            simplex->points[0] = simplex->points[3];
+            simplexMovePoint(simplex, 0, 3);
             simplex->nPoints = 1;
             *nextDirection = aToOrigin;
         }
@@ -164,27 +173,30 @@ int gjkCheckForOverlap(struct Simplex* simplex, void* objectA, MinkowsiSum objec
 
     simplexInit(simplex);
 
+    int aId;
+    int bId;
+
     if (vector3IsZero(firstDirection)) {
-        objectASum(objectA, &gRight, &aPoint);
+        aId = objectASum(objectA, &gRight, &aPoint);
         vector3Negate(&gRight, &nextDirection);
 
-        objectBSum(objectB, &nextDirection, &bPoint);
-        simplexAddPoint(simplex, &aPoint, &bPoint);
+        bId = objectBSum(objectB, &nextDirection, &bPoint);
+        simplexAddPoint(simplex, &aPoint, &bPoint, COMBINE_CONTACT_IDS(aId, bId));
     } else {
-        objectASum(objectA, firstDirection, &aPoint);
+        aId = objectASum(objectA, firstDirection, &aPoint);
         vector3Negate(firstDirection, &nextDirection);
 
-        objectBSum(objectB, &nextDirection, &bPoint);
-        simplexAddPoint(simplex, &aPoint, &bPoint);
+        bId = objectBSum(objectB, &nextDirection, &bPoint);
+        simplexAddPoint(simplex, &aPoint, &bPoint, COMBINE_CONTACT_IDS(aId, bId));
     }
 
     for (int iteration = 0; iteration < MAX_GJK_ITERATIONS; ++iteration) {
         struct Vector3 reverseDirection;
         vector3Negate(&nextDirection, &reverseDirection);
-        objectASum(objectA, &nextDirection, &aPoint);
-        objectBSum(objectB, &reverseDirection, &bPoint);
+        aId = objectASum(objectA, &nextDirection, &aPoint);
+        bId = objectBSum(objectB, &reverseDirection, &bPoint);
 
-        struct Vector3* addedPoint = simplexAddPoint(simplex, &aPoint, &bPoint);
+        struct Vector3* addedPoint = simplexAddPoint(simplex, &aPoint, &bPoint, COMBINE_CONTACT_IDS(aId, bId));
 
         if (!addedPoint) {
             return 0;

@@ -7,7 +7,7 @@
 
 #define EDGE_ZERO_BIAS  0.001f
 
-void collisionQuadInitializeNormalContact(struct CollisionQuad* quad, struct ContactConstraintState* output) {
+void collisionQuadInitializeNormalContact(struct CollisionQuad* quad, struct ContactManifold* output) {
     output->normal = quad->plane.normal;
     output->tangentVectors[0] = quad->edgeA;
     output->tangentVectors[1] = quad->edgeB;
@@ -53,9 +53,9 @@ int collisionQuadDetermineEdges(struct Vector3* worldPoint, struct CollisionQuad
     return edgeMask;
 }
 
-int _collsionBuildQuadContact(struct Transform* boxTransform, struct CollisionQuad* quad, struct Vector3* point, struct ContactConstraintState* output, int id) {
+int _collsionBuildQuadContact(struct Transform* boxTransform, struct CollisionQuad* quad, struct Vector3* point, struct ContactManifold* output, int id) {
     struct Vector3 worldPoint;
-    struct ContactState* contact = &output->contacts[output->contactCount];
+    struct ContactPoint* contact = &output->contacts[output->contactCount];
 
     quatMultVector(&boxTransform->rotation, point, &contact->rb);
     vector3Add(&contact->rb, &boxTransform->position, &worldPoint);
@@ -118,7 +118,7 @@ char secondOtherAxis[] = {
 // nearestPointA = Pa + Da * a
 // nearestPointB = Pb + Db * b
 
-struct ContactState* _collisionEdgeEdge(struct CollisionEdge* quadEdge, struct CollisionEdge* cubeEdge, struct ContactConstraintState* output) {
+struct ContactPoint* _collisionEdgeEdge(struct CollisionEdge* quadEdge, struct CollisionEdge* cubeEdge, struct ContactManifold* output) {
 //     float edgesDot = vector3Dot(&quadEdge->direction, &cubeEdge->direction);
 
 //     float denomInv = 1.0f - edgesDot * edgesDot;
@@ -163,7 +163,7 @@ struct ContactState* _collisionEdgeEdge(struct CollisionEdge* quadEdge, struct C
         return NULL;
     }
 
-    struct ContactState* result = &output->contacts[output->contactCount];
+    struct ContactPoint* result = &output->contacts[output->contactCount];
 
     vector3AddScaled(&quadEdge->origin, &quadEdge->direction, quadLerp, &result->rb);
     vector3AddScaled(&cubeEdge->origin, &cubeEdge->direction, cubeLerp, &result->ra);
@@ -171,7 +171,7 @@ struct ContactState* _collisionEdgeEdge(struct CollisionEdge* quadEdge, struct C
     return result;
 }
 
-void _collisionBoxCollideEdge(struct CollisionBox* box, struct Transform* boxTransform, int cornerIds, struct CollisionEdge* edge, struct Vector3* edgeDirection, struct ContactConstraintState* output) {
+void _collisionBoxCollideEdge(struct CollisionBox* box, struct Transform* boxTransform, int cornerIds, struct CollisionEdge* edge, struct Vector3* edgeDirection, struct ContactManifold* output) {
     struct Quaternion inverseBoxRotation;
     quatConjugate(&boxTransform->rotation, &inverseBoxRotation);
 
@@ -199,7 +199,7 @@ void _collisionBoxCollideEdge(struct CollisionBox* box, struct Transform* boxTra
             VECTOR3_AS_ARRAY(&cubeEdge.origin)[firstAxis] = isFirstPositive ? VECTOR3_AS_ARRAY(&box->sideLength)[firstAxis] : -VECTOR3_AS_ARRAY(&box->sideLength)[firstAxis];
             VECTOR3_AS_ARRAY(&cubeEdge.origin)[secondAxis] = isSecondPositive ? VECTOR3_AS_ARRAY(&box->sideLength)[secondAxis] : -VECTOR3_AS_ARRAY(&box->sideLength)[secondAxis];
 
-            struct ContactState* contact = _collisionEdgeEdge(edge, &cubeEdge, output);
+            struct ContactPoint* contact = _collisionEdgeEdge(edge, &cubeEdge, output);
 
             if (!contact) {
                 continue;
@@ -258,7 +258,7 @@ void _collisionBoxCollideEdge(struct CollisionBox* box, struct Transform* boxTra
     return;
 }
 
-void _collisionBoxCollidePoint(struct CollisionBox* box, struct Transform* boxTransform, struct Vector3* localPoint, int id, struct ContactConstraintState* output) {
+void _collisionBoxCollidePoint(struct CollisionBox* box, struct Transform* boxTransform, struct Vector3* localPoint, int id, struct ContactManifold* output) {
     float minDepth = localPoint->x > 0.0f ? localPoint->x - box->sideLength.x : (-box->sideLength.x - localPoint->x);
     int minAxis = 0;
 
@@ -294,7 +294,7 @@ void _collisionBoxCollidePoint(struct CollisionBox* box, struct Transform* boxTr
         return;
     }
 
-    struct ContactState* contact = &output->contacts[output->contactCount];
+    struct ContactPoint* contact = &output->contacts[output->contactCount];
 
     int positiveAxis = VECTOR3_AS_ARRAY(localPoint)[minAxis] > 0.0f;
 
@@ -331,7 +331,7 @@ void _collisionBoxCollidePoint(struct CollisionBox* box, struct Transform* boxTr
     contact->tangentImpulse[1] = 0.0f;
 }
 
-int collisionBoxCollideQuad(void* data, struct Transform* boxTransform, struct CollisionQuad* quad, struct ContactConstraintState* output) {
+int collisionBoxCollideQuad(void* data, struct Transform* boxTransform, struct CollisionQuad* quad, struct ContactManifold* output) {
     struct CollisionBox* box = (struct CollisionBox*)data;
 
     float boxDistance = planePointDistance(&quad->plane, &boxTransform->position);

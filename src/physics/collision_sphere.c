@@ -4,7 +4,7 @@
 #include "math/mathf.h"
 #include "collision_quad.h"
 
-int collisionSphereCollideQuad(void* data, struct Transform* boxTransform, struct CollisionQuad* quad, struct ContactConstraintState* output) {
+int collisionSphereCollideQuad(void* data, struct Transform* boxTransform, struct CollisionQuad* quad, struct ContactManifold* output) {
     struct CollisionSphere* sphere = (struct CollisionSphere*)data;
 
     float overlap = planePointDistance(&quad->plane, &boxTransform->position) - sphere->radius;
@@ -19,7 +19,7 @@ int collisionSphereCollideQuad(void* data, struct Transform* boxTransform, struc
     float aLerp = clampf(vector3Dot(&relativePos, &quad->edgeA), 0.0f, quad->edgeALength);
     float bLerp = clampf(vector3Dot(&relativePos, &quad->edgeB), 0.0f, quad->edgeBLength);
 
-    struct ContactState* contact = &output->contacts[output->contactCount];
+    struct ContactPoint* contact = &output->contacts[output->contactCount];
 
     vector3AddScaled(&quad->corner, &quad->edgeA, aLerp, &contact->ra);
     vector3AddScaled(&contact->ra, &quad->edgeB, bLerp, &contact->ra);
@@ -58,41 +58,6 @@ int collisionSphereCollideQuad(void* data, struct Transform* boxTransform, struc
     return 1;
 }
 
-int collisionSphereCollidePlane(void* data, struct Transform* boxTransform, struct Plane* plane, struct ContactConstraintState* output) {
-    struct CollisionSphere* sphere = (struct CollisionSphere*)data;
-
-    float overlap = planePointDistance(plane, &boxTransform->position) - sphere->radius;
-
-    if (overlap > NEGATIVE_PENETRATION_BIAS || overlap < -2.0 * sphere->radius) {
-        return 0;
-    }
-
-    struct ContactState* contact = &output->contacts[output->contactCount];
-
-    planeProjectPoint(plane, &boxTransform->position, &contact->ra);
-    output->normal = plane->normal;
-    vector3AddScaled(&boxTransform->position, &output->normal, -sphere->radius, &contact->rb);
-
-    output->restitution = 0.1f;
-    output->friction = 0.5f;
-    ++output->contactCount;
-    // TODO
-    output->tangentVectors[0] = gRight;
-    output->tangentVectors[1] = gForward;
-
-    contact->id = 0;
-    contact->penetration = overlap;
-    contact->bias = 0;
-    contact->normalMass = 0;
-    contact->tangentMass[0] = 0.0f;
-    contact->tangentMass[1] = 0.0f;
-    contact->normalImpulse = 0.0f;
-    contact->tangentImpulse[0] = 0.0f;
-    contact->tangentImpulse[1] = 0.0f;
-
-    return 1;
-}
-
 float collisionSphereSolidMofI(struct ColliderTypeData* typeData, float mass) {
     struct CollisionSphere* sphere = (struct CollisionSphere*)typeData->data;
     return (2.0f / 5.0f) * mass * sphere->radius * sphere->radius;
@@ -110,7 +75,6 @@ void collisionSphereBoundingBox(struct ColliderTypeData* typeData, struct Transf
 }
 
 struct ColliderCallbacks gCollisionSphereCallbacks = {
-    collisionSphereCollidePlane,
     collisionSphereCollideQuad,
     NULL, // TODO
     collisionSphereSolidMofI,

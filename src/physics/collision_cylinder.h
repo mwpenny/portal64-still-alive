@@ -11,7 +11,7 @@ struct CollisionCylinder {
 
 extern struct ColliderCallbacks gCollisionCylinderCallbacks;
 
-int collisionCylinderCollideQuad(void* data, struct Transform* cylinderTransform, struct CollisionQuad* quad, struct ContactConstraintState* output);
+int collisionCylinderCollideQuad(void* data, struct Transform* cylinderTransform, struct CollisionQuad* quad, struct ContactManifold* output);
 float collisionCylinderSolidMofI(struct ColliderTypeData* typeData, float mass);
 void collisionCylinderBoundingBox(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box);
 

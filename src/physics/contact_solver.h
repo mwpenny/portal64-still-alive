@@ -11,7 +11,7 @@ struct VelocityState
 	struct Vector3 v;
 };
 
-struct ContactState
+struct ContactPoint
 {
 	int id;
 	struct Vector3 ra;					// Vector from C.O.M to contact position
@@ -28,9 +28,9 @@ struct ContactState
 
 #define NEGATIVE_PENETRATION_BIAS   0.00001f
 
-struct ContactConstraintState
+struct ContactManifold
 {
-	struct ContactState contacts[ MAX_CONTACTS_PER_MANIFOLD ];
+	struct ContactPoint contacts[ MAX_CONTACTS_PER_MANIFOLD ];
 	short contactCount;
 	short didContactLastFrame;
 	struct Vector3 tangentVectors[ 2 ];	// Tangent vectors
@@ -39,15 +39,15 @@ struct ContactConstraintState
 	float friction;
 	struct CollisionObject* shapeA;
 	struct CollisionObject* shapeB;
-	struct ContactConstraintState* next;
+	struct ContactManifold* next;
 };
 
 #define MAX_CONTACT_COUNT	8
 
 struct ContactSolver {
-    struct ContactConstraintState contacts[MAX_CONTACT_COUNT];
-	struct ContactConstraintState* unusedContacts;
-	struct ContactConstraintState* activeContacts;
+    struct ContactManifold contacts[MAX_CONTACT_COUNT];
+	struct ContactManifold* unusedContacts;
+	struct ContactManifold* activeContacts;
 	int contactCapacity;
 	short currentContactFrame;
 };
@@ -58,13 +58,13 @@ void contactSolverInit(struct ContactSolver* contactSolver);
 
 void contactSolverSolve(struct ContactSolver* solver);
 
-struct ContactConstraintState* contactSolverPeekContact(struct ContactSolver* solver, struct CollisionObject* shapeA, struct CollisionObject* shapeB);
+struct ContactManifold* contactSolverPeekContact(struct ContactSolver* solver, struct CollisionObject* shapeA, struct CollisionObject* shapeB);
 
-void contactSolverRemoveContact(struct ContactSolver* solver, struct ContactConstraintState* toRemove);
+void contactSolverRemoveContact(struct ContactSolver* solver, struct ContactManifold* toRemove);
 
-struct ContactState* contactSolverGetContact(struct ContactConstraintState* contact, int id);
+struct ContactPoint* contactSolverGetContact(struct ContactManifold* contact, int id);
 
-int contactSolverAssign(struct ContactConstraintState* into, struct ContactConstraintState* from, int filterPortalContacts);
+int contactSolverAssign(struct ContactManifold* into, struct ContactManifold* from, int filterPortalContacts);
 
 #endif
 

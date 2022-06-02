@@ -27,8 +27,8 @@ struct CollisionQuad {
     u8 enabledEdges;
 };
 
-void collisionQuadInitializeNormalContact(struct CollisionQuad* quad, struct ContactConstraintState* output);
+void collisionQuadInitializeNormalContact(struct CollisionQuad* quad, struct ContactManifold* output);
 int collisionQuadDetermineEdges(struct Vector3* worldPoint, struct CollisionQuad* quad);
-int collisionBoxCollideQuad(void* data, struct Transform* boxTransform, struct CollisionQuad* quad, struct ContactConstraintState* output);
+int collisionBoxCollideQuad(void* data, struct Transform* boxTransform, struct CollisionQuad* quad, struct ContactManifold* output);
 
 #endif

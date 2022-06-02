@@ -32,6 +32,7 @@ struct SimplexTriangle {
 struct ExpandingSimplex {
     struct Vector3 points[MAX_SIMPLEX_POINTS];
     struct Vector3 aPoints[MAX_SIMPLEX_POINTS];
+    int ids[MAX_SIMPLEX_POINTS];
     unsigned pointCount;
     struct SimplexTriangle triangles[MAX_SIMPLEX_TRIANGLES];
     unsigned triangleCount;
@@ -55,10 +56,11 @@ int validateHeap(struct ExpandingSimplex* simplex) {
     return 1;
 }
 
-void expandingSimplexAddPoint(struct ExpandingSimplex* simplex, struct Vector3* aPoint, struct Vector3* pointDiff) {
+void expandingSimplexAddPoint(struct ExpandingSimplex* simplex, struct Vector3* aPoint, struct Vector3* pointDiff, int id) {
     int result = simplex->pointCount;
     simplex->aPoints[result] = *aPoint;
     simplex->points[result] = *pointDiff;
+    simplex->ids[result] = id;
     ++simplex->pointCount; 
 }
 
@@ -291,7 +293,7 @@ void expandingSimplexInit(struct ExpandingSimplex* expandingSimplex, struct Simp
     expandingSimplex->pointCount = 0;
 
     for (int i = 0; i < 4; ++i) {
-        expandingSimplexAddPoint(expandingSimplex, &simplex->objectAPoint[i], &simplex->points[i]);
+        expandingSimplexAddPoint(expandingSimplex, &simplex->objectAPoint[i], &simplex->points[i], simplex->ids[i]);
     }
 
     for (int i = 0; i < 4; ++i) {
@@ -375,6 +377,8 @@ void epaCalculateContact(struct ExpandingSimplex* simplex, struct SimplexTriangl
     );
 
     vector3AddScaled(&result->contactA, &result->normal, -result->penetration, &result->contactB);
+
+    result->id = simplex->ids[closestFace->indexData.indices[0]] & simplex->ids[closestFace->indexData.indices[1]] & simplex->ids[closestFace->indexData.indices[2]];
 }
 
 void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct EpaResult* result) {
@@ -393,11 +397,13 @@ void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum object
         struct Vector3* aPoint = &simplex->aPoints[nextIndex];
         struct Vector3 bPoint;
 
-        objectASum(objectA, &closestFace->normal, aPoint);
+        int aId = objectASum(objectA, &closestFace->normal, aPoint);
         vector3Negate(&closestFace->normal, &reverseNormal);
-        objectBSum(objectB, &reverseNormal, &bPoint);
+        int bId = objectBSum(objectB, &reverseNormal, &bPoint);
 
         vector3Sub(aPoint, &bPoint, &simplex->points[nextIndex]);
+
+        simplex->ids[nextIndex] = COMBINE_CONTACT_IDS(aId, bId);
 
         projection = vector3Dot(&simplex->points[nextIndex], &closestFace->normal);
 

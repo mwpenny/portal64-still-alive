@@ -61,19 +61,19 @@ void sceneInit(struct Scene* scene) {
     buttonPos.z = 3.0f;
     buttonInit(&scene->buttons[0], &buttonPos, 1);
 
-    scene->decorCount = 1;
-    scene->decor = malloc(sizeof(struct DecorObject*) * scene->decorCount);
-    struct Transform decorTransform;
-    transformInitIdentity(&decorTransform);
-    decorTransform.position.x = 3.0f;
-    decorTransform.position.y = 2.0f;
-    decorTransform.position.z = 3.0f;
-    quatAxisAngle(&gRight, 1.0f, &decorTransform.rotation);
-    scene->decor[0] = decorObjectNew(decorObjectDefinitionForId(DECOR_TYPE_CYLINDER), &decorTransform, 1);
-    vector3Scale(&gForward, &scene->decor[0]->rigidBody.angularVelocity, 10.0f);
-    scene->decor[0]->rigidBody.velocity.y = 1.0f;
-    scene->decor[0]->rigidBody.velocity.z = 1.0f;
-    scene->decor[0]->rigidBody.velocity.x = 1.0f;
+    scene->decorCount = 0;
+    // scene->decor = malloc(sizeof(struct DecorObject*) * scene->decorCount);
+    // struct Transform decorTransform;
+    // transformInitIdentity(&decorTransform);
+    // decorTransform.position.x = 3.0f;
+    // decorTransform.position.y = 2.0f;
+    // decorTransform.position.z = 3.0f;
+    // quatAxisAngle(&gRight, 1.0f, &decorTransform.rotation);
+    // scene->decor[0] = decorObjectNew(decorObjectDefinitionForId(DECOR_TYPE_CYLINDER), &decorTransform, 1);
+    // vector3Scale(&gForward, &scene->decor[0]->rigidBody.angularVelocity, 10.0f);
+    // scene->decor[0]->rigidBody.velocity.y = 1.0f;
+    // scene->decor[0]->rigidBody.velocity.z = 1.0f;
+    // scene->decor[0]->rigidBody.velocity.x = 1.0f;
 
     scene->doorCount = gCurrentLevel->doorCount;
     scene->doors = malloc(sizeof(struct Door) * scene->doorCount);
@@ -85,7 +85,7 @@ void sceneInit(struct Scene* scene) {
         doorInit(&scene->doors[i], &doorTransform, 0, 0, gCurrentLevel->doors[i].doorwayIndex);
     }
 
-    scene->player.grabbing = &scene->cubes[0].rigidBody;
+    // scene->player.grabbing = &scene->cubes[0].rigidBody;
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {

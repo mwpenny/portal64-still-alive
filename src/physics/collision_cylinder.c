@@ -7,7 +7,6 @@
 #include "line.h"
 
 struct ColliderCallbacks gCollisionCylinderCallbacks = {
-    NULL,
     collisionCylinderCollideQuad,
     raycastCylinder,
     collisionCylinderSolidMofI,
@@ -37,7 +36,7 @@ void collisionCylinderBoundingBox(struct ColliderTypeData* typeData, struct Tran
     vector3Add(&transform->position, &halfSize, &box->max);
 }
 
-int _collisionPointCheckOverlapWithQuad(struct Vector3* pointToCheck, struct Vector3* colliderCenter, struct CollisionQuad* quad, struct ContactConstraintState* output, int id) {
+int _collisionPointCheckOverlapWithQuad(struct Vector3* pointToCheck, struct Vector3* colliderCenter, struct CollisionQuad* quad, struct ContactManifold* output, int id) {
     float edgeDistance = planePointDistance(&quad->plane, pointToCheck);
 
     if (edgeDistance > NEGATIVE_PENETRATION_BIAS) {
@@ -51,7 +50,7 @@ int _collisionPointCheckOverlapWithQuad(struct Vector3* pointToCheck, struct Vec
             collisionQuadInitializeNormalContact(quad, output);
         }
 
-        struct ContactState* contact = &output->contacts[output->contactCount];
+        struct ContactPoint* contact = &output->contacts[output->contactCount];
 
         ++output->contactCount;
 
@@ -72,7 +71,7 @@ int _collisionPointCheckOverlapWithQuad(struct Vector3* pointToCheck, struct Vec
     return edgesToCheck;
 }
 
-int _collisionCylinderParallel(struct CollisionCylinder* cylinder, struct Transform* cylinderTransform, struct Vector3* centerAxis, struct Vector3* crossAxis, float normalDotProduct, struct CollisionQuad* quad, struct ContactConstraintState* output) {
+int _collisionCylinderParallel(struct CollisionCylinder* cylinder, struct Transform* cylinderTransform, struct Vector3* centerAxis, struct Vector3* crossAxis, float normalDotProduct, struct CollisionQuad* quad, struct ContactManifold* output) {
     struct Vector3 edgeEndpoint;
     vector3AddScaled(&cylinderTransform->position, centerAxis, normalDotProduct > 0.0f ? -cylinder->halfHeight : cylinder->halfHeight, &edgeEndpoint);
     vector3Add(&edgeEndpoint, crossAxis, &edgeEndpoint);
@@ -94,7 +93,7 @@ int _collisionCylinderParallel(struct CollisionCylinder* cylinder, struct Transf
     return edgesToCheck;
 }
 
-int _collisionCylinderPerpendicular(struct CollisionCylinder* cylinder, struct Transform* cylinderTransform, struct Vector3* centerAxis, struct Vector3* crossAxis, float normalDotProduct, struct CollisionQuad* quad, struct ContactConstraintState* output) {
+int _collisionCylinderPerpendicular(struct CollisionCylinder* cylinder, struct Transform* cylinderTransform, struct Vector3* centerAxis, struct Vector3* crossAxis, float normalDotProduct, struct CollisionQuad* quad, struct ContactManifold* output) {
     float centerDistance = planePointDistance(&quad->plane, &cylinderTransform->position);
 
     if (centerDistance < -cylinder->radius) {
@@ -144,7 +143,7 @@ int _collisionCylinderPerpendicular(struct CollisionCylinder* cylinder, struct T
 
 #define EDGE_LERP_BIAS  0.00001f
 
-void collisionCylinderSingleCap(struct CollisionCylinder* cylinder, struct Transform* cylinderTransform, struct Vector3* centerAxis, float capDistance, float invDot, int idOffset, struct CollisionEdge* edge, struct Vector3* edgeDirection, struct ContactConstraintState* output) {
+void collisionCylinderSingleCap(struct CollisionCylinder* cylinder, struct Transform* cylinderTransform, struct Vector3* centerAxis, float capDistance, float invDot, int idOffset, struct CollisionEdge* edge, struct Vector3* edgeDirection, struct ContactManifold* output) {
     float dOffset = vector3Dot(&cylinderTransform->position, centerAxis);
     float lineDot = vector3Dot(&edge->origin, centerAxis);
 
@@ -154,7 +153,7 @@ void collisionCylinderSingleCap(struct CollisionCylinder* cylinder, struct Trans
         return;
     }
 
-    struct ContactState* contact = &output->contacts[output->contactCount];
+    struct ContactPoint* contact = &output->contacts[output->contactCount];
 
     vector3AddScaled(&cylinderTransform->position, centerAxis, capDistance, &contact->rb);
     vector3AddScaled(&edge->origin, &edge->direction, distance, &contact->ra);
@@ -204,7 +203,7 @@ void collisionCylinderSingleCap(struct CollisionCylinder* cylinder, struct Trans
     ++output->contactCount;
 }
 
-int collisionCylinderCap(struct CollisionCylinder* cylinder, struct Transform* cylinderTransform, struct Vector3* centerAxis, float normalDotProduct, int idOffset, struct CollisionEdge* edge, struct Vector3* edgeDirection, struct ContactConstraintState* output) {
+int collisionCylinderCap(struct CollisionCylinder* cylinder, struct Transform* cylinderTransform, struct Vector3* centerAxis, float normalDotProduct, int idOffset, struct CollisionEdge* edge, struct Vector3* edgeDirection, struct ContactManifold* output) {
     if (fabsf(normalDotProduct) < 0.00001f) {
         return 0;
     }
@@ -217,7 +216,7 @@ int collisionCylinderCap(struct CollisionCylinder* cylinder, struct Transform* c
     return output->contactCount > 0;
 }
 
-int collisionCylinderEdge(struct CollisionCylinder* cylinder, struct Transform* cylinderTransform, struct Vector3* centerAxis, float normalDotProduct, int idOffset, struct CollisionEdge* edge, struct Vector3* edgeDirection, struct ContactConstraintState* output) {
+int collisionCylinderEdge(struct CollisionCylinder* cylinder, struct Transform* cylinderTransform, struct Vector3* centerAxis, float normalDotProduct, int idOffset, struct CollisionEdge* edge, struct Vector3* edgeDirection, struct ContactManifold* output) {
     float cylinderLerp;
     float edgeLerp;
     
@@ -225,7 +224,7 @@ int collisionCylinderEdge(struct CollisionCylinder* cylinder, struct Transform* 
         return collisionCylinderCap(cylinder, cylinderTransform, centerAxis, normalDotProduct, idOffset, edge, edgeDirection, output);
     }
 
-    struct ContactState* contact = &output->contacts[output->contactCount];
+    struct ContactPoint* contact = &output->contacts[output->contactCount];
 
     vector3AddScaled(&cylinderTransform->position, centerAxis, cylinderLerp, &contact->rb);
     vector3AddScaled(&edge->origin, &edge->direction, edgeLerp, &contact->ra);
@@ -285,7 +284,7 @@ int collisionCylinderEdge(struct CollisionCylinder* cylinder, struct Transform* 
     return collisionCylinderCap(cylinder, cylinderTransform, centerAxis, normalDotProduct, idOffset, edge, edgeDirection, output);
 }
 
-int collisionCylinderCollideQuad(void* data, struct Transform* cylinderTransform, struct CollisionQuad* quad, struct ContactConstraintState* output) {
+int collisionCylinderCollideQuad(void* data, struct Transform* cylinderTransform, struct CollisionQuad* quad, struct ContactManifold* output) {
     struct Vector3 centerAxis;
     quatMultVector(&cylinderTransform->rotation, &gUp, &centerAxis);
 

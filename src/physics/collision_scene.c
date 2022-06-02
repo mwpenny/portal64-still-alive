@@ -108,7 +108,7 @@ void collisionObjectCollideWithScene(struct CollisionObject* object, struct Coll
     }
 }
 
-int collisionSceneFilterPortalContacts(struct ContactConstraintState* contact) {
+int collisionSceneFilterPortalContacts(struct ContactManifold* contact) {
     int writeIndex = 0;
 
     for (int readIndex = 0; readIndex < contact->contactCount; ++readIndex) {
@@ -138,7 +138,7 @@ void collisionObjectQueryScene(struct CollisionObject* object, struct CollisionS
     short colliderIndices[MAX_COLLIDERS];
     int quadCount = collisionObjectRoomColliders(&scene->world->rooms[object->body->currentRoom], &object->boundingBox, colliderIndices);
 
-    struct ContactConstraintState localContact;
+    struct ContactManifold localContact;
 
     for (int i = 0; i < quadCount; ++i) {
         localContact.contactCount = 0;

@@ -27,9 +27,9 @@ Gfx mat_contact_solver_debug[] = {
 	gsSPEndDisplayList(),
 };
 
-void contactConstraintStateDebugDraw(struct ContactConstraintState* constraintState, struct RenderState* renderState) {
+void contactConstraintStateDebugDraw(struct ContactManifold* constraintState, struct RenderState* renderState) {
     for (int i = 0; i < constraintState->contactCount; ++i) {
-        struct ContactState* contact = &constraintState->contacts[i];
+        struct ContactPoint* contact = &constraintState->contacts[i];
 
         float mat[4][4];
 
@@ -70,7 +70,7 @@ void contactConstraintStateDebugDraw(struct ContactConstraintState* constraintSt
 
 void contactSolverDebugDraw(struct ContactSolver* contactSolver, struct RenderState* renderState) {
     gSPDisplayList(renderState->dl++, mat_contact_solver_debug);
-    struct ContactConstraintState* contact = contactSolver->activeContacts;
+    struct ContactManifold* contact = contactSolver->activeContacts;
 
     while (contact) {
         contactConstraintStateDebugDraw(contact, renderState);

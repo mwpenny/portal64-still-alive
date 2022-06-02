@@ -13,16 +13,15 @@ struct CollisionObject {
 
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass);
 
-void collisionObjectCollideWithPlane(struct CollisionObject* object, struct CollisionObject* plane, struct ContactSolver* contactSolver);
 void collisionObjectCollideWithQuad(struct CollisionObject* object, struct CollisionObject* quad, struct ContactSolver* contactSolver);
 
 void collisionObjectUpdateBB(struct CollisionObject* object);
 
 // data should be of type struct CollisionQuad
-void minkowsiSumAgainstQuad(void* data, struct Vector3* direction, struct Vector3* output);
+int minkowsiSumAgainstQuad(void* data, struct Vector3* direction, struct Vector3* output);
 
 // data should be of type struct CollisionObject
-void minkowsiSumAgainstObject(void* data, struct Vector3* direction, struct Vector3* output);
+int minkowsiSumAgainstObject(void* data, struct Vector3* direction, struct Vector3* output);
 
 
 #endif

@@ -55,7 +55,7 @@ void playerInit(struct Player* player, struct Location* startLocation) {
 
 #define JUMP_IMPULSE   3.2f
 
-void playerHandleCollision(void* data, struct ContactConstraintState* contact) {
+void playerHandleCollision(void* data, struct ContactManifold* contact) {
     struct Player* player = (struct Player*)data;
 
     if (contact->contactCount == 1 && contact->contacts[0].penetration < 0.0f) {

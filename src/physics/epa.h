@@ -9,6 +9,7 @@ struct EpaResult {
     // points from A to B
     struct Vector3 normal;
     float penetration;
+    int id;
 };
 
 void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct EpaResult* result);

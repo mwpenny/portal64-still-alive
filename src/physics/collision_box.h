@@ -14,12 +14,10 @@ struct CollisionBox {
 
 extern struct ColliderCallbacks gCollisionBoxCallbacks;
 
-int collisionBoxCollidePlane(void* data, struct Transform* boxTransform, struct Plane* plane, struct ContactConstraintState* contact);
-
 float collisionBoxSolidMofI(struct ColliderTypeData* typeData, float mass);
 
 void collisionBoxBoundingBox(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box);
 
-void collisionBoxMinkowsiSum(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output);
+int collisionBoxMinkowsiSum(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output);
 
 #endif

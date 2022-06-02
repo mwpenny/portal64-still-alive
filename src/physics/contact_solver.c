@@ -17,8 +17,8 @@
 struct ContactSolver gContactSolver;
 
 void contactSolverRemoveUnusedContacts(struct ContactSolver* contactSolver) {
-	struct ContactConstraintState* curr = contactSolver->activeContacts;
-	struct ContactConstraintState* prev = NULL;
+	struct ContactManifold* curr = contactSolver->activeContacts;
+	struct ContactManifold* prev = NULL;
 
 	while (curr) {
 
@@ -29,7 +29,7 @@ void contactSolverRemoveUnusedContacts(struct ContactSolver* contactSolver) {
 				contactSolver->activeContacts = curr->next;
 			}
 
-			struct ContactConstraintState* next = curr->next;
+			struct ContactManifold* next = curr->next;
 			curr->next = contactSolver->unusedContacts;
 			contactSolver->unusedContacts = curr;
 			curr = next;
@@ -54,7 +54,7 @@ void contactSolverInit(struct ContactSolver* contactSolver) {
 }
 
 void contactSolverPreSolve(struct ContactSolver* contactSolver) {
-	struct ContactConstraintState *cs = contactSolver->activeContacts;
+	struct ContactManifold *cs = contactSolver->activeContacts;
 	
     while (cs)
 	{
@@ -84,7 +84,7 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 
 		for ( int j = 0; j < cs->contactCount; ++j )
 		{
-			struct ContactState *c = cs->contacts + j;
+			struct ContactPoint *c = cs->contacts + j;
 
 			// Precalculate JM^-1JT for contact and friction constraints
 			struct Vector3 raCn;
@@ -186,7 +186,7 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 }
 
 void contactSolverIterate(struct ContactSolver* contactSolver) {
-	struct ContactConstraintState *cs = contactSolver->activeContacts;
+	struct ContactManifold *cs = contactSolver->activeContacts;
 
     while (cs)
 	{
@@ -216,7 +216,7 @@ void contactSolverIterate(struct ContactSolver* contactSolver) {
 
 		for ( int j = 0; j < cs->contactCount; ++j )
 		{
-			struct ContactState *c = cs->contacts + j;
+			struct ContactPoint *c = cs->contacts + j;
 
 			// relative velocity at contact
             struct Vector3 dv;
@@ -327,8 +327,8 @@ void contactSolverSolve(struct ContactSolver* solver) {
 	contactSolverIterate(solver);
 }
 
-struct ContactConstraintState* contactSolverPeekContact(struct ContactSolver* solver, struct CollisionObject* shapeA, struct CollisionObject* shapeB) {
-	struct ContactConstraintState* curr = solver->activeContacts;
+struct ContactManifold* contactSolverPeekContact(struct ContactSolver* solver, struct CollisionObject* shapeA, struct CollisionObject* shapeB) {
+	struct ContactManifold* curr = solver->activeContacts;
 
 	while (curr) {
 		if ((curr->shapeA == shapeA && curr->shapeB == shapeB) || (curr->shapeA == shapeB && curr->shapeB == shapeA)) {
@@ -338,7 +338,7 @@ struct ContactConstraintState* contactSolverPeekContact(struct ContactSolver* so
 		curr = curr->next;
 	}
 
-	struct ContactConstraintState* result = solver->unusedContacts;
+	struct ContactManifold* result = solver->unusedContacts;
 
 	if (result) {
 		result->shapeA = shapeA;
@@ -353,9 +353,9 @@ struct ContactConstraintState* contactSolverPeekContact(struct ContactSolver* so
 	return result;
 }
 
-void contactSolverRemoveContact(struct ContactSolver* solver, struct ContactConstraintState* toRemove) {
-	struct ContactConstraintState* curr = solver->activeContacts;
-	struct ContactConstraintState* prev = NULL;
+void contactSolverRemoveContact(struct ContactSolver* solver, struct ContactManifold* toRemove) {
+	struct ContactManifold* curr = solver->activeContacts;
+	struct ContactManifold* prev = NULL;
 
 	while (curr) {
 		if (curr == toRemove) {
@@ -380,7 +380,7 @@ void contactSolverRemoveContact(struct ContactSolver* solver, struct ContactCons
 	solver->unusedContacts = curr;
 }
 
-struct ContactState* contactSolverGetContact(struct ContactConstraintState* contact, int id) {
+struct ContactPoint* contactSolverGetContact(struct ContactManifold* contact, int id) {
 	int i;
 
 	for (i = 0; i < contact->contactCount; ++i) {
@@ -393,7 +393,7 @@ struct ContactState* contactSolverGetContact(struct ContactConstraintState* cont
 		return NULL;
 	}
 
-	struct ContactState* result = &contact->contacts[i];
+	struct ContactPoint* result = &contact->contacts[i];
 
 	result->normalImpulse = 0.0f;
 	result->tangentImpulse[0] = 0.0f;
@@ -405,14 +405,14 @@ struct ContactState* contactSolverGetContact(struct ContactConstraintState* cont
 	return result;
 }
 
-int contactSolverAssign(struct ContactConstraintState* into, struct ContactConstraintState* from, int filterPortalContacts) {
+int contactSolverAssign(struct ContactManifold* into, struct ContactManifold* from, int filterPortalContacts) {
 	for (int sourceIndex = 0; sourceIndex < from->contactCount; ++sourceIndex) {
 		int targetIndex;
 
-		struct ContactState* sourceContact = &from->contacts[sourceIndex];
+		struct ContactPoint* sourceContact = &from->contacts[sourceIndex];
 
 		for (targetIndex = 0; targetIndex < into->contactCount; ++targetIndex) {
-			struct ContactState* targetContact = &into->contacts[targetIndex];
+			struct ContactPoint* targetContact = &into->contacts[targetIndex];
 
 			if (sourceContact->id == targetContact->id) {
 				sourceContact->normalImpulse = targetContact->normalImpulse;
