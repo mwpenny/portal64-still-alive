@@ -5,9 +5,18 @@
 
 #include "../physics/collision_cylinder.h"
 
+struct Vector2 gCylinderColliderEdgeVectors[] = {
+    {0.0f, 1.0f},
+    {0.707f, 0.707f},
+    {1.0f, 0.0f},
+    {0.707f, -0.707f},
+};
+
 struct CollisionCylinder gCylinderCollider = {
     0.3f,
     0.35f,
+    gCylinderColliderEdgeVectors,
+    sizeof(gCylinderColliderEdgeVectors) / sizeof(*gCylinderColliderEdgeVectors),
 };
 
 struct DecorObjectDefinition gDecorObjectDefinitions[] = {

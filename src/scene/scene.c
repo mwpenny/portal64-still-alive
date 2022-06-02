@@ -41,17 +41,17 @@ void sceneInit(struct Scene* scene) {
     portalInit(&scene->portals[0], 0);
     portalInit(&scene->portals[1], PortalFlagsOddParity);
 
-    for (int i = 0; i < MAX_CUBES; ++i) {
-        cubeInit(&scene->cubes[i]);
+    // for (int i = 0; i < MAX_CUBES; ++i) {
+    //     cubeInit(&scene->cubes[i]);
 
-        scene->cubes[i].rigidBody.transform.position.x = 0.0f;
-        scene->cubes[i].rigidBody.transform.position.y = 0.5f;
-        scene->cubes[i].rigidBody.transform.position.z = 6.0f + i;
-        scene->cubes[i].rigidBody.currentRoom = 1;
+    //     scene->cubes[i].rigidBody.transform.position.x = 0.0f;
+    //     scene->cubes[i].rigidBody.transform.position.y = 0.5f;
+    //     scene->cubes[i].rigidBody.transform.position.z = 6.0f + i;
+    //     scene->cubes[i].rigidBody.currentRoom = 1;
 
-        quatAxisAngle(&gRight, M_PI * 0.125f, &scene->cubes[i].rigidBody.transform.rotation);
-        scene->cubes[i].rigidBody.angularVelocity = gOneVec;
-    }
+    //     quatAxisAngle(&gRight, M_PI * 0.125f, &scene->cubes[i].rigidBody.transform.rotation);
+    //     scene->cubes[i].rigidBody.angularVelocity = gOneVec;
+    // }
 
     scene->buttonCount = 1;
     scene->buttons = malloc(sizeof(struct Button) * scene->buttonCount);
@@ -62,14 +62,14 @@ void sceneInit(struct Scene* scene) {
     buttonInit(&scene->buttons[0], &buttonPos, 1);
 
     scene->decorCount = 0;
-    // scene->decor = malloc(sizeof(struct DecorObject*) * scene->decorCount);
-    // struct Transform decorTransform;
-    // transformInitIdentity(&decorTransform);
-    // decorTransform.position.x = 3.0f;
-    // decorTransform.position.y = 2.0f;
-    // decorTransform.position.z = 3.0f;
+    scene->decor = malloc(sizeof(struct DecorObject*) * scene->decorCount);
+    struct Transform decorTransform;
+    transformInitIdentity(&decorTransform);
+    decorTransform.position.x = 3.0f;
+    decorTransform.position.y = 0.5f;
+    decorTransform.position.z = 3.0f;
     // quatAxisAngle(&gRight, 1.0f, &decorTransform.rotation);
-    // scene->decor[0] = decorObjectNew(decorObjectDefinitionForId(DECOR_TYPE_CYLINDER), &decorTransform, 1);
+    scene->decor[0] = decorObjectNew(decorObjectDefinitionForId(DECOR_TYPE_CYLINDER), &decorTransform, 1);
     // vector3Scale(&gForward, &scene->decor[0]->rigidBody.angularVelocity, 10.0f);
     // scene->decor[0]->rigidBody.velocity.y = 1.0f;
     // scene->decor[0]->rigidBody.velocity.z = 1.0f;
@@ -203,15 +203,15 @@ void sceneUpdate(struct Scene* scene) {
     playerUpdate(&scene->player, &scene->camera.transform);
     sceneCheckPortals(scene);
 
-    for (int i = 0; i < MAX_CUBES; ++i) {
-        cubeUpdate(&scene->cubes[i]);
+    // for (int i = 0; i < MAX_CUBES; ++i) {
+    //     cubeUpdate(&scene->cubes[i]);
 
-        if (collisionSceneTestMinkowsiSum(&scene->cubes[i].collisionObject)) {
-            scene->cubes[i].rigidBody.flags |= RigidBodyDebugFlag;
-        } else {
-            scene->cubes[i].rigidBody.flags &= ~RigidBodyDebugFlag;
-        }
-    }
+    //     if (collisionSceneTestMinkowsiSum(&scene->cubes[i].collisionObject)) {
+    //         scene->cubes[i].rigidBody.flags |= RigidBodyDebugFlag;
+    //     } else {
+    //         scene->cubes[i].rigidBody.flags &= ~RigidBodyDebugFlag;
+    //     }
+    // }
     
     collisionSceneUpdateDynamics();
 

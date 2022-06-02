@@ -407,7 +407,7 @@ void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum object
 
         projection = vector3Dot(&simplex->points[nextIndex], &closestFace->normal);
 
-        if ((projection - closestFace->distanceToOrigin) < 0.00000001f) {
+        if ((projection - closestFace->distanceToOrigin) < 0.001f) {
             break;
         }
 

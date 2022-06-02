@@ -41,7 +41,6 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
         return;
     }
 
-    transformPointInverseNoScale(&object->body->transform, &result.contactB, &result.contactB);
     struct ContactManifold* contact = contactSolverGetContactManifold(contactSolver, quadObject, object);
 
     if (!contact) {
@@ -55,6 +54,7 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
         return;
     }
 
+    transformPointInverseNoScale(&object->body->transform, &result.contactB, &result.contactB);
     contactInsert(contact, &result);
 }
 
