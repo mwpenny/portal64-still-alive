@@ -4,6 +4,7 @@
 #include "gjk.h"
 #include "epa.h"
 #include "contact_solver.h"
+#include "../util/memory.h"
 
 struct CollisionScene gCollisionScene;
 
@@ -374,51 +375,167 @@ void collisionSceneRemoveDynamicObject(struct CollisionObject* object) {
     }
 }
 
+#define BROADPHASE_SCALE    16.0f
+
+union DynamicBroadphaseEdge {
+    struct {
+        unsigned short isLeadingEdge: 1;
+        unsigned short objectId: 7;
+        short sortKey;
+    };
+    int align;
+};
+
+struct DynamicBroadphase {
+    union DynamicBroadphaseEdge* edges;
+    short* objectsInCurrentRange;
+    int objectInRangeCount;
+};
+
+void dynamicBroadphasePopulate(struct DynamicBroadphase* broadphase, struct CollisionObject** objects, int count) {
+    int edgeIndex = 0;
+
+    for (int i = 0; i < count; ++i) {
+        union DynamicBroadphaseEdge edge;
+        edge.isLeadingEdge = 1;
+        edge.objectId = i;
+        edge.sortKey = (short)floorf(objects[i]->boundingBox.min.x * BROADPHASE_SCALE);
+
+        broadphase->edges[edgeIndex++] = edge;
+
+        edge.isLeadingEdge = 0;
+        edge.sortKey = (short)ceilf(objects[i]->boundingBox.max.x * BROADPHASE_SCALE);
+
+        broadphase->edges[edgeIndex++] = edge;
+    }
+}
+
+void dynamicBroadphaseSort(union DynamicBroadphaseEdge* edges, union DynamicBroadphaseEdge* tmp, int min, int max) {
+    if (min + 1 >= max) {
+        return;
+    }
+
+    int middle = (min + max) >> 1;
+    dynamicBroadphaseSort(edges, tmp, min, middle);
+    dynamicBroadphaseSort(edges, tmp, middle, max);
+
+    int aHead = min;
+    int bHead = middle;
+    int output = min;
+
+    while (aHead < middle && bHead < max) {
+        int sortDifference = (int)edges[aHead].sortKey - (int)edges[bHead].sortKey;
+
+        if (sortDifference <= 0) {
+            tmp[output].align = edges[aHead].align;
+            ++output;
+            ++aHead;
+        } else {
+            tmp[output].align = edges[bHead].align;
+            ++output;
+            ++bHead;
+        }
+    }
+
+    while (aHead < middle) {
+        tmp[output].align = edges[aHead].align;
+        ++output;
+        ++aHead;
+    }
+
+    while (bHead < max) {
+        tmp[output].align = edges[bHead].align;
+        ++output;
+        ++bHead;
+    }
+
+    for (output = min; output < max; ++output) {
+        edges[output] = tmp[output];
+    }
+}
+
+void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct DynamicBroadphase* broadphase) {
+    int broadphaseEdgeCount = collisionScene->dynamicObjectCount * 2;
+    for (int i = 0; i < broadphaseEdgeCount; ++i) {
+        union DynamicBroadphaseEdge edge;
+        edge.align = broadphase->edges[i].align;
+
+        if (edge.isLeadingEdge) {
+            for (int objectIndex = 0; objectIndex < broadphase->objectInRangeCount; ++objectIndex) {
+                // collide pair
+                // a lower in memory
+                struct CollisionObject* a = collisionScene->dynamicObjects[broadphase->objectsInCurrentRange[objectIndex]];
+                struct CollisionObject* b = collisionScene->dynamicObjects[edge.objectId];
+
+                if (a < b) {
+                    collisionObjectCollideTwoObjects(a, b, &gContactSolver);
+                } else {
+                    collisionObjectCollideTwoObjects(b, a, &gContactSolver);
+                }
+            }
+
+            // add object
+            broadphase->objectsInCurrentRange[broadphase->objectInRangeCount] = edge.objectId;
+            ++broadphase->objectInRangeCount;
+        } else {
+            // remove object
+            int hasFound = 0;
+            for (int i = 0; i < broadphase->objectInRangeCount - 1; ++i) {
+                if (broadphase->objectsInCurrentRange[i] == edge.objectId) {
+                    hasFound = 1;
+                }
+
+                if (hasFound) {
+                    broadphase->objectsInCurrentRange[i] = broadphase->objectsInCurrentRange[i - 1];
+                }
+            }
+
+            --broadphase->objectInRangeCount;
+        }
+    }
+}
+
+void collisionSceneCollideDynamicPairs(struct CollisionScene* collisionScene) {
+    struct DynamicBroadphase dynamicBroadphase;
+
+    dynamicBroadphase.edges = stackMalloc(sizeof(union DynamicBroadphaseEdge) * collisionScene->dynamicObjectCount * 2);
+    dynamicBroadphasePopulate(&dynamicBroadphase, collisionScene->dynamicObjects, collisionScene->dynamicObjectCount);
+
+    union DynamicBroadphaseEdge* tmpEdges = stackMalloc(sizeof(union DynamicBroadphaseEdge) * collisionScene->dynamicObjectCount * 2);
+    dynamicBroadphaseSort(dynamicBroadphase.edges, tmpEdges, 0, collisionScene->dynamicObjectCount * 2);
+    stackMallocFree(tmpEdges);
+
+    dynamicBroadphase.objectsInCurrentRange = stackMalloc(sizeof(short) * collisionScene->dynamicObjectCount);
+    dynamicBroadphase.objectInRangeCount = 0;
+
+    collisionSceneWalkBroadphase(collisionScene, &dynamicBroadphase);
+
+    stackMallocFree(dynamicBroadphase.objectsInCurrentRange);
+    stackMallocFree(dynamicBroadphase.edges);
+}
+
 void collisionSceneUpdateDynamics() {
 	contactSolverRemoveUnusedContacts(&gContactSolver);
 
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
+        if ((gCollisionScene.dynamicObjects[i]->body->flags & (RigidBodyIsKinematic | RigidBodyIsSleeping)) != 0) {
+            continue;
+        }
+
         collisionObjectCollideWithScene(gCollisionScene.dynamicObjects[i], &gCollisionScene, &gContactSolver);
     }
+
+    collisionSceneCollideDynamicPairs(&gCollisionScene);
 
     contactSolverSolve(&gContactSolver);
 
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
+        if ((gCollisionScene.dynamicObjects[i]->body->flags & (RigidBodyIsKinematic | RigidBodyIsSleeping)) != 0) {
+            continue;
+        }
+
         rigidBodyUpdate(gCollisionScene.dynamicObjects[i]->body);
         rigidBodyCheckPortals(gCollisionScene.dynamicObjects[i]->body);
         collisionObjectUpdateBB(gCollisionScene.dynamicObjects[i]);
     }
-}
-
-int collisionSceneTestMinkowsiSum(struct CollisionObject* object) {
-    if (!object->collider->callbacks->minkowsiSum) {
-        return 0;
-    }
-
-    struct Simplex simplex;
-
-    short colliderIndices[MAX_COLLIDERS];
-    int quadCount = collisionObjectRoomColliders(&gCollisionScene.world->rooms[object->body->currentRoom], &object->boundingBox, colliderIndices);
-
-    for (int i = 0; i < quadCount; ++i) {
-        struct CollisionQuad* quad = gCollisionScene.quads[colliderIndices[i]].collider->data;
-
-        if (box3DHasOverlap(&object->boundingBox, &gCollisionScene.quads[colliderIndices[i]].boundingBox) && 
-            gjkCheckForOverlap(
-                &simplex, 
-                object, minkowsiSumAgainstObject, 
-                quad, minkowsiSumAgainstQuad, 
-                &quad->plane.normal)) {
-            struct EpaResult result;
-            epaSolve(
-                &simplex, 
-                object, minkowsiSumAgainstObject, 
-                quad, minkowsiSumAgainstQuad, 
-                &result
-            );
-            return 1;
-        }
-    }
-
-    return 0;
 }

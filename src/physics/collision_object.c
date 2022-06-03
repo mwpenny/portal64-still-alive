@@ -58,6 +58,47 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
     contactInsert(contact, &result);
 }
 
+
+void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct CollisionObject* b, struct ContactSolver* contactSolver) {
+    if (!box3DHasOverlap(&a->boundingBox, &b->boundingBox)) {
+        return;
+    }
+
+    struct Simplex simplex;
+
+    struct Vector3 offset;
+
+    vector3Sub(&b->body->transform.position, &a->body->transform.position, &offset);
+
+    if (!gjkCheckForOverlap(&simplex, 
+                a, minkowsiSumAgainstObject, 
+                b, minkowsiSumAgainstObject, 
+                &offset)) {
+        return;
+    }
+
+    struct EpaResult result;
+    epaSolve(
+        &simplex, 
+        a, minkowsiSumAgainstObject, 
+        b, minkowsiSumAgainstObject, 
+        &result
+    );
+
+    struct ContactManifold* contact = contactSolverGetContactManifold(contactSolver, a, b);
+
+    if (!contact) {
+        return;
+    }
+
+    contact->friction = 0.5f;
+    contact->restitution = 0.5f;
+
+    transformPointInverseNoScale(&a->body->transform, &result.contactA, &result.contactA);
+    transformPointInverseNoScale(&b->body->transform, &result.contactB, &result.contactB);
+    contactInsert(contact, &result);
+}
+
 void collisionObjectUpdateBB(struct CollisionObject* object) {
     if (object->body) {
         object->collider->callbacks->boundingBoxCalculator(object->collider, &object->body->transform, &object->boundingBox);

@@ -41,17 +41,17 @@ void sceneInit(struct Scene* scene) {
     portalInit(&scene->portals[0], 0);
     portalInit(&scene->portals[1], PortalFlagsOddParity);
 
-    // for (int i = 0; i < MAX_CUBES; ++i) {
-    //     cubeInit(&scene->cubes[i]);
+    for (int i = 0; i < MAX_CUBES; ++i) {
+        cubeInit(&scene->cubes[i]);
 
-    //     scene->cubes[i].rigidBody.transform.position.x = 0.0f;
-    //     scene->cubes[i].rigidBody.transform.position.y = 0.5f;
-    //     scene->cubes[i].rigidBody.transform.position.z = 6.0f + i;
-    //     scene->cubes[i].rigidBody.currentRoom = 1;
+        scene->cubes[i].rigidBody.transform.position.x = 0.0f;
+        scene->cubes[i].rigidBody.transform.position.y = 0.5f;
+        scene->cubes[i].rigidBody.transform.position.z = 6.0f + i;
+        scene->cubes[i].rigidBody.currentRoom = 1;
 
-    //     quatAxisAngle(&gRight, M_PI * 0.125f, &scene->cubes[i].rigidBody.transform.rotation);
-    //     scene->cubes[i].rigidBody.angularVelocity = gOneVec;
-    // }
+        quatAxisAngle(&gRight, M_PI * 0.125f, &scene->cubes[i].rigidBody.transform.rotation);
+        scene->cubes[i].rigidBody.angularVelocity = gOneVec;
+    }
 
     scene->buttonCount = 1;
     scene->buttons = malloc(sizeof(struct Button) * scene->buttonCount);
@@ -203,15 +203,9 @@ void sceneUpdate(struct Scene* scene) {
     playerUpdate(&scene->player, &scene->camera.transform);
     sceneCheckPortals(scene);
 
-    // for (int i = 0; i < MAX_CUBES; ++i) {
-    //     cubeUpdate(&scene->cubes[i]);
-
-    //     if (collisionSceneTestMinkowsiSum(&scene->cubes[i].collisionObject)) {
-    //         scene->cubes[i].rigidBody.flags |= RigidBodyDebugFlag;
-    //     } else {
-    //         scene->cubes[i].rigidBody.flags &= ~RigidBodyDebugFlag;
-    //     }
-    // }
+    for (int i = 0; i < MAX_CUBES; ++i) {
+        cubeUpdate(&scene->cubes[i]);
+    }
     
     collisionSceneUpdateDynamics();
 

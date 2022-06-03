@@ -15,7 +15,8 @@ enum RigidBodyFlags {
     RigidBodyIsTouchingPortal = (1 << 6),
     RigidBodyWasTouchingPortal = (1 << 7),
 
-    RigidBodyDebugFlag = (1 << 8),
+    RigidBodyIsKinematic = (1 << 8),
+    RigidBodyIsSleeping = (1 << 9),
 };
 
 struct RigidBody {
