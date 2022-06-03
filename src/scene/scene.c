@@ -44,7 +44,7 @@ void sceneInit(struct Scene* scene) {
     for (int i = 0; i < MAX_CUBES; ++i) {
         cubeInit(&scene->cubes[i]);
 
-        scene->cubes[i].rigidBody.transform.position.x = 0.0f;
+        scene->cubes[i].rigidBody.transform.position.x = 1.0f;
         scene->cubes[i].rigidBody.transform.position.y = 0.5f;
         scene->cubes[i].rigidBody.transform.position.z = 6.0f + i;
         scene->cubes[i].rigidBody.currentRoom = 1;
@@ -66,8 +66,8 @@ void sceneInit(struct Scene* scene) {
     struct Transform decorTransform;
     transformInitIdentity(&decorTransform);
     decorTransform.position.x = 3.0f;
-    decorTransform.position.y = 0.5f;
-    decorTransform.position.z = 3.0f;
+    decorTransform.position.y = 1.5f;
+    decorTransform.position.z = 3.2f;
     // quatAxisAngle(&gRight, 1.0f, &decorTransform.rotation);
     scene->decor[0] = decorObjectNew(decorObjectDefinitionForId(DECOR_TYPE_CYLINDER), &decorTransform, 1);
     // vector3Scale(&gForward, &scene->decor[0]->rigidBody.angularVelocity, 10.0f);
@@ -205,6 +205,10 @@ void sceneUpdate(struct Scene* scene) {
 
     for (int i = 0; i < MAX_CUBES; ++i) {
         cubeUpdate(&scene->cubes[i]);
+    }
+
+    for (int i = 0; i < scene->buttonCount; ++i) {
+        buttonUpdate(&scene->buttons[i]);
     }
     
     collisionSceneUpdateDynamics();

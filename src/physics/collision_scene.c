@@ -388,7 +388,7 @@ union DynamicBroadphaseEdge {
 
 struct DynamicBroadphase {
     union DynamicBroadphaseEdge* edges;
-    short* objectsInCurrentRange;
+    struct CollisionObject** objectsInCurrentRange;
     int objectInRangeCount;
 };
 
@@ -460,33 +460,37 @@ void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct 
         union DynamicBroadphaseEdge edge;
         edge.align = broadphase->edges[i].align;
 
+        struct CollisionObject* subject = collisionScene->dynamicObjects[edge.objectId];
+
         if (edge.isLeadingEdge) {
             for (int objectIndex = 0; objectIndex < broadphase->objectInRangeCount; ++objectIndex) {
-                // collide pair
-                // a lower in memory
-                struct CollisionObject* a = collisionScene->dynamicObjects[broadphase->objectsInCurrentRange[objectIndex]];
-                struct CollisionObject* b = collisionScene->dynamicObjects[edge.objectId];
+                struct CollisionObject* existing = broadphase->objectsInCurrentRange[objectIndex];
 
-                if (a < b) {
-                    collisionObjectCollideTwoObjects(a, b, &gContactSolver);
+                if (!collisionObjectIsActive(existing) && !collisionObjectIsActive(subject)) {
+                    continue;
+                }
+
+                // collide pair lowest in memory first
+                if (existing < subject) {
+                    collisionObjectCollideTwoObjects(existing, subject, &gContactSolver);
                 } else {
-                    collisionObjectCollideTwoObjects(b, a, &gContactSolver);
+                    collisionObjectCollideTwoObjects(subject, existing, &gContactSolver);
                 }
             }
 
             // add object
-            broadphase->objectsInCurrentRange[broadphase->objectInRangeCount] = edge.objectId;
+            broadphase->objectsInCurrentRange[broadphase->objectInRangeCount] = subject;
             ++broadphase->objectInRangeCount;
         } else {
             // remove object
             int hasFound = 0;
             for (int i = 0; i < broadphase->objectInRangeCount - 1; ++i) {
-                if (broadphase->objectsInCurrentRange[i] == edge.objectId) {
+                if (broadphase->objectsInCurrentRange[i] == subject) {
                     hasFound = 1;
                 }
 
                 if (hasFound) {
-                    broadphase->objectsInCurrentRange[i] = broadphase->objectsInCurrentRange[i - 1];
+                    broadphase->objectsInCurrentRange[i] = broadphase->objectsInCurrentRange[i + 1];
                 }
             }
 
@@ -505,7 +509,7 @@ void collisionSceneCollideDynamicPairs(struct CollisionScene* collisionScene) {
     dynamicBroadphaseSort(dynamicBroadphase.edges, tmpEdges, 0, collisionScene->dynamicObjectCount * 2);
     stackMallocFree(tmpEdges);
 
-    dynamicBroadphase.objectsInCurrentRange = stackMalloc(sizeof(short) * collisionScene->dynamicObjectCount);
+    dynamicBroadphase.objectsInCurrentRange = stackMalloc(sizeof(struct CollisionObject*) * collisionScene->dynamicObjectCount);
     dynamicBroadphase.objectInRangeCount = 0;
 
     collisionSceneWalkBroadphase(collisionScene, &dynamicBroadphase);
@@ -518,7 +522,7 @@ void collisionSceneUpdateDynamics() {
 	contactSolverRemoveUnusedContacts(&gContactSolver);
 
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
-        if ((gCollisionScene.dynamicObjects[i]->body->flags & (RigidBodyIsKinematic | RigidBodyIsSleeping)) != 0) {
+        if (!collisionObjectIsActive(gCollisionScene.dynamicObjects[i])) {
             continue;
         }
 
@@ -530,12 +534,16 @@ void collisionSceneUpdateDynamics() {
     contactSolverSolve(&gContactSolver);
 
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
-        if ((gCollisionScene.dynamicObjects[i]->body->flags & (RigidBodyIsKinematic | RigidBodyIsSleeping)) != 0) {
+        struct CollisionObject* collisionObject = gCollisionScene.dynamicObjects[i];
+        if (!collisionObjectIsActive(collisionObject)) {
+            // clear out any velocities
+            collisionObject->body->velocity = gZeroVec;
+            collisionObject->body->angularVelocity = gZeroVec;
             continue;
         }
 
-        rigidBodyUpdate(gCollisionScene.dynamicObjects[i]->body);
-        rigidBodyCheckPortals(gCollisionScene.dynamicObjects[i]->body);
-        collisionObjectUpdateBB(gCollisionScene.dynamicObjects[i]);
+        rigidBodyUpdate(collisionObject->body);
+        rigidBodyCheckPortals(collisionObject->body);
+        collisionObjectUpdateBB(collisionObject);
     }
 }

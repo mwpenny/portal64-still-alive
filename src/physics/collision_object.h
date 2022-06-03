@@ -11,6 +11,8 @@ struct CollisionObject {
     struct Box3D boundingBox;
 };
 
+int collisionObjectIsActive(struct CollisionObject* object);
+
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass);
 
 void collisionObjectCollideWithQuad(struct CollisionObject* object, struct CollisionObject* quad, struct ContactSolver* contactSolver);

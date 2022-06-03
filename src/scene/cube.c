@@ -67,7 +67,7 @@ void cubeRender(void* data, struct RenderScene* renderScene) {
 }
 
 void cubeInit(struct Cube* cube) {
-    collisionObjectInit(&cube->collisionObject, &gCubeCollider, &cube->rigidBody, 1.0f);
+    collisionObjectInit(&cube->collisionObject, &gCubeCollider, &cube->rigidBody, 2.0f);
     collisionSceneAddDynamicObject(&cube->collisionObject);
 
     cube->collisionObject.body->flags |= RigidBodyFlagsGrabbable;

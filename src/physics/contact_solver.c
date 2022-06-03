@@ -104,7 +104,8 @@ void contactSolverRemoveUnusedContacts(struct ContactSolver* contactSolver) {
 }
 
 void contactSolverInit(struct ContactSolver* contactSolver) {
-	memset(contactSolver, 0, sizeof(struct ContactSolver));
+	int solverSize = sizeof(struct ContactSolver);
+	memset(contactSolver, 0, solverSize);
 
 	contactSolver->contactCapacity = MAX_CONTACT_COUNT;
 
@@ -120,6 +121,11 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 	
     while (cs)
 	{
+		if (!collisionObjectIsActive(cs->shapeA) && !collisionObjectIsActive(cs->shapeB)) {
+			cs = cs->next;
+			continue;
+		}
+
 		struct Vector3* vA;
 		struct Vector3* wA;
 		struct Vector3* vB;
@@ -252,6 +258,11 @@ void contactSolverIterate(struct ContactSolver* contactSolver) {
 
     while (cs)
 	{
+		if (!collisionObjectIsActive(cs->shapeA) && !collisionObjectIsActive(cs->shapeB)) {
+			cs = cs->next;
+			continue;
+		}
+
 		struct Vector3* vA;
 		struct Vector3* wA;
 		struct Vector3* vB;
@@ -412,4 +423,20 @@ struct ContactManifold* contactSolverGetContactManifold(struct ContactSolver* so
 	}
 
 	return result;
+}
+
+struct ContactManifold* contactSolverNextManifold(struct ContactSolver* solver, struct CollisionObject* forObject, struct ContactManifold* current) {
+	if (!current) {
+		current = solver->activeContacts;
+	}
+
+	while (current) {
+		if (current->shapeA == forObject || current->shapeB == forObject) {
+			return current;
+		}
+
+		current = current->next;
+	}
+
+	return NULL;
 }

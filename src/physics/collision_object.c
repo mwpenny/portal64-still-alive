@@ -12,6 +12,10 @@ void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData
     collisionObjectUpdateBB(object);
 }
 
+int collisionObjectIsActive(struct CollisionObject* object) {
+    return object->body && (object->body->flags & (RigidBodyIsKinematic | RigidBodyIsSleeping)) == 0;
+}
+
 void collisionObjectCollideWithQuad(struct CollisionObject* object, struct CollisionObject* quadObject, struct ContactSolver* contactSolver) {
     if (!box3DHasOverlap(&object->boundingBox, &quadObject->boundingBox)) {
         return;

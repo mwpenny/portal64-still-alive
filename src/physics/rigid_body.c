@@ -24,6 +24,14 @@ void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniter
     basisFromQuat(&rigidBody->rotationBasis, &rigidBody->transform.rotation);
 }
 
+void rigitBodyMarkKinematic(struct RigidBody* rigidBody) {
+    rigidBody->flags |= RigidBodyIsKinematic;
+    rigidBody->mass = 1000000000000000.0f;
+    rigidBody->massInv = 0.0f;
+    rigidBody->momentOfInertia = 1000000000000000.0f;
+    rigidBody->momentOfInertiaInv = 0.0f;
+}
+
 void rigidBodyAppyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* impulse) {
     struct Vector3 offset;
     vector3Sub(worldPoint, &rigidBody->transform.position, &offset);

@@ -7,6 +7,8 @@ struct Button {
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
     short dynamicId;
+    short pressStateCounter;
+    struct Vector3 originalPos;
 };
 
 void buttonInit(struct Button* button, struct Vector3* at, int roomIndex);
