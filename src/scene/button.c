@@ -41,12 +41,14 @@ void buttonRender(void* data, struct RenderScene* renderScene) {
     struct Button* button = (struct Button*)data;
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
 
-    // guTranslate(matrix, button->originalPos.x * SCENE_SCALE, button->originalPos.y * SCENE_SCALE, button->originalPos.z * SCENE_SCALE);
-    transformToMatrixL(&button->rigidBody.transform, matrix, SCENE_SCALE);
+    guTranslate(matrix, button->originalPos.x * SCENE_SCALE, button->originalPos.y * SCENE_SCALE, button->originalPos.z * SCENE_SCALE);
 
     Mtx* armature = renderStateRequestMatrices(renderScene->renderState, PROPS_BUTTON_DEFAULT_BONES_COUNT);
-    guMtxIdent(&armature[PROPS_BUTTON_BUTTONBASE_BONE]);
-    guMtxIdent(&armature[PROPS_BUTTON_BUTTONPAD_BONE]);
+    transformToMatrixL(&props_button_default_bones[PROPS_BUTTON_BUTTONBASE_BONE], &armature[PROPS_BUTTON_BUTTONBASE_BONE], 1.0f);
+
+    // reusing global memory
+    props_button_default_bones[PROPS_BUTTON_BUTTONPAD_BONE].position.y = (button->rigidBody.transform.position.y - button->originalPos.y) * SCENE_SCALE;
+    transformToMatrixL(&props_button_default_bones[PROPS_BUTTON_BUTTONPAD_BONE], &armature[PROPS_BUTTON_BUTTONPAD_BONE], 1.0f);
 
     renderSceneAdd(renderScene, button_gfx, matrix, button_material_index, &button->rigidBody.transform.position, armature);
 }
