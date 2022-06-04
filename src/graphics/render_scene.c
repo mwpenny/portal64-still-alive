@@ -3,6 +3,7 @@
 #include "../util/memory.h"
 #include "defs.h"
 #include "../levels/levels.h"
+#include "sk64/skelatool_defs.h"
 
 struct RenderScene* renderSceneNew(struct Transform* cameraTransform, struct RenderState *renderState, int capacity, u64 visibleRooms) {
     struct RenderScene* result = stackMalloc(sizeof(struct RenderScene));
@@ -44,7 +45,7 @@ int renderSceneSortKey(int materialIndex, float distance) {
     return (materialIndex << 23) | (distanceScaled & 0x7FFFFF);
 }
 
-void renderSceneAdd(struct RenderScene* renderScene, Gfx* geometry, Mtx* matrix, int materialIndex, struct Vector3* at) {
+void renderSceneAdd(struct RenderScene* renderScene, Gfx* geometry, Mtx* matrix, int materialIndex, struct Vector3* at, Mtx* armature) {
     if (renderScene->currentRenderPart == renderScene->maxRenderParts) {
         return;
     }
@@ -52,6 +53,7 @@ void renderSceneAdd(struct RenderScene* renderScene, Gfx* geometry, Mtx* matrix,
     struct RenderPart* part = &renderScene->renderParts[renderScene->currentRenderPart];
     part->geometry = geometry;
     part->matrix = matrix;
+    part->armature = armature;
     renderScene->materials[renderScene->currentRenderPart] = materialIndex;
     renderScene->sortKeys[renderScene->currentRenderPart] = renderSceneSortKey(materialIndex, planePointDistance(&renderScene->forwardPlane, at));
 
@@ -135,6 +137,10 @@ void renderSceneGenerate(struct RenderScene* renderScene, struct RenderState* re
 
         if (renderPart->matrix) {
             gSPMatrix(renderState->dl++, renderPart->matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
+        }
+
+        if (renderPart->armature) {
+            gSPSegment(renderState->dl++, MATRIX_TRANSFORM_SEGMENT, renderPart->armature);
         }
 
         gSPDisplayList(renderState->dl++, renderPart->geometry);

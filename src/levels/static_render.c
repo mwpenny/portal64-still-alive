@@ -26,7 +26,7 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, s
                 boxCenter.y = (float)(box->minY + box->maxY) * (0.5f / SCENE_SCALE);
                 boxCenter.z = (float)(box->minZ + box->maxZ) * (0.5f / SCENE_SCALE);
 
-                renderSceneAdd(renderScene, gCurrentLevel->staticContent[i].displayList, NULL, gCurrentLevel->staticContent[i].materialIndex, &boxCenter);
+                renderSceneAdd(renderScene, gCurrentLevel->staticContent[i].displayList, NULL, gCurrentLevel->staticContent[i].materialIndex, &boxCenter, NULL);
             }
         }
 

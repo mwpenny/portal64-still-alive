@@ -1,5 +1,5 @@
-#ifndef __BUTTON_H__
-#define __BUTTON_H__
+#ifndef __SCENE_BUTTON_H__
+#define __SCENE_BUTTON_H__
 
 #include "../physics/collision_object.h"
 

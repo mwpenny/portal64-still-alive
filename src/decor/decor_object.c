@@ -9,7 +9,7 @@ void decorObjectRender(void* data, struct RenderScene* renderScene) {
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
     transformToMatrixL(&object->rigidBody.transform, matrix, SCENE_SCALE);
 
-    renderSceneAdd(renderScene, object->definition->graphics, matrix, object->definition->materialIndex, &object->rigidBody.transform.position);
+    renderSceneAdd(renderScene, object->definition->graphics, matrix, object->definition->materialIndex, &object->rigidBody.transform.position, NULL);
 }
 
 struct DecorObject* decorObjectNew(struct DecorObjectDefinition* definition, struct Transform* at, int room) {

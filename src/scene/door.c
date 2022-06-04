@@ -9,7 +9,7 @@ void doorRender(void* data, struct RenderScene* renderScene) {
     struct Door* door = (struct Door*)data;
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
     transformToMatrixL(&door->rigidBody.transform, matrix, SCENE_SCALE);
-    renderSceneAdd(renderScene, door_01_gfx, matrix, door_01_material_index, &door->rigidBody.transform.position);
+    renderSceneAdd(renderScene, door_01_gfx, matrix, door_01_material_index, &door->rigidBody.transform.position, NULL);
 }
 
 void doorInit(struct Door* door, struct Transform* at, int roomA, int roomB, int doorwayIndex) {

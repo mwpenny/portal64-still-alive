@@ -9,6 +9,8 @@
 #include "../physics/contact_solver.h"
 #include "../util/time.h"
 
+#include "../build/assets/models/props/button.h"
+
 struct Vector2 gButtonCylinderEdgeVectors[] = {
     {0.0f, 1.0f},
     {0.707f, 0.707f},
@@ -38,9 +40,15 @@ struct ColliderTypeData gButtonCollider = {
 void buttonRender(void* data, struct RenderScene* renderScene) {
     struct Button* button = (struct Button*)data;
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+
+    // guTranslate(matrix, button->originalPos.x * SCENE_SCALE, button->originalPos.y * SCENE_SCALE, button->originalPos.z * SCENE_SCALE);
     transformToMatrixL(&button->rigidBody.transform, matrix, SCENE_SCALE);
 
-    renderSceneAdd(renderScene, button_gfx, matrix, button_material_index, &button->rigidBody.transform.position);
+    Mtx* armature = renderStateRequestMatrices(renderScene->renderState, PROPS_BUTTON_DEFAULT_BONES_COUNT);
+    guMtxIdent(&armature[PROPS_BUTTON_BUTTONBASE_BONE]);
+    guMtxIdent(&armature[PROPS_BUTTON_BUTTONPAD_BONE]);
+
+    renderSceneAdd(renderScene, button_gfx, matrix, button_material_index, &button->rigidBody.transform.position, armature);
 }
 
 void buttonInit(struct Button* button, struct Vector3* at, int roomIndex) {
