@@ -4,6 +4,7 @@
 #include <assimp/scene.h>
 
 #include <vector>
+#include <functional>
 
 #include "../CFileDefinition.h"
 
@@ -20,8 +21,8 @@ public:
     virtual void GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) = 0;
 protected:
     std::vector<aiNode*> mIncludedNodes;
-private:
-    void TraverseNodes(aiNode* node);
 };
+
+void forEachNode(aiNode* node, const std::function<void(aiNode*)>& callback);
 
 #endif

@@ -55,6 +55,11 @@ int collisionSphereCollideQuad(void* data, struct Transform* boxTransform, struc
     contact->tangentImpulse[0] = 0.0f;
     contact->tangentImpulse[1] = 0.0f;
 
+    contact->contactALocal = contact->contactAWorld;
+    struct Quaternion inverseRotation;
+    quatConjugate(&boxTransform->rotation, &inverseRotation);
+    quatMultVector(&inverseRotation, &contact->contactBWorld, &contact->contactBLocal);
+
     return 1;
 }
 

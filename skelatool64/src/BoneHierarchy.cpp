@@ -27,16 +27,11 @@ Bone* Bone::GetParent() {
     return mParent;
 }
 
-std::unique_ptr<DataChunk> Bone::GenerateRestPosiitonData(float scale, aiQuaternion rotation) {
-    aiVector3D restPosition = rotation.Rotate(mRestPosition);
-    aiQuaternion restRotation = rotation * mRestRotation;
-
+std::unique_ptr<DataChunk> Bone::GenerateRestPosiitonData() {
     std::unique_ptr<StructureDataChunk> result(new StructureDataChunk());
 
-    restPosition = restPosition * scale;
-
-    result->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(restPosition)));
-    result->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(restRotation)));
+    result->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(mRestPosition)));
+    result->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(mRestRotation)));
     result->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(mRestScale)));
 
     return std::move(result);
@@ -98,6 +93,41 @@ int Bone::GetBoneIndex(Bone* a) {
     }
 }
 
+void BoneHierarchy::PopulateWithAnimationNodeInfo(const NodeAnimationInfo& animInfo) {
+    for (auto& node : animInfo.nodesWithAnimation) {
+        Bone* parent = nullptr;
+
+        if (node->parent) {
+            auto parentFind = mBoneByName.find(node->parent->mName.C_Str());
+
+            if (parentFind != mBoneByName.end()) {
+                parent = parentFind->second;
+            }
+        }
+
+        std::string boneName = node->node->mName.C_Str();
+
+        aiVector3D restPosition;
+        aiQuaternion restRotation;
+        aiVector3D restScale;
+
+        aiMatrix4x4 fullRestTransform = node->relativeTransform * node->node->mTransformation;
+
+        fullRestTransform.Decompose(restScale, restRotation, restPosition);
+
+        mBones.push_back(std::unique_ptr<Bone>(new Bone(
+            mBones.size(),
+            boneName,
+            parent,
+            restPosition,
+            restRotation,
+            restScale
+        )));
+
+        mBoneByName.insert(std::pair<std::string, Bone*>(boneName, mBones.back().get()));
+    }
+}
+
 void BoneHierarchy::SearchForBones(aiNode* node, Bone* currentBoneParent, std::set<std::string>& knownBones, bool parentIsBone) {
     if (knownBones.find(node->mName.C_Str()) != knownBones.end()) {
         aiVector3D restPosition;
@@ -153,17 +183,13 @@ Bone* BoneHierarchy::BoneForName(std::string name) {
     }
 }
 
-void BoneHierarchy::GenerateRestPosiitonData(CFileDefinition& fileDef, const std::string& variableName, float scale, aiQuaternion rotation) {
+void BoneHierarchy::GenerateRestPosiitonData(CFileDefinition& fileDef, const std::string& variableName) {
     if (mBones.size() == 0) return;
 
     std::unique_ptr<StructureDataChunk> transformData(new StructureDataChunk());
 
     for (unsigned int boneIndex = 0; boneIndex < mBones.size(); ++boneIndex) {
-        if (mBones[boneIndex]->GetParent()) {
-            transformData->Add(std::move(mBones[boneIndex]->GenerateRestPosiitonData(scale, aiQuaternion())));
-        } else {
-            transformData->Add(std::move(mBones[boneIndex]->GenerateRestPosiitonData(scale, rotation)));
-        }
+        transformData->Add(std::move(mBones[boneIndex]->GenerateRestPosiitonData()));
 
         std::string boneName = fileDef.GetUniqueName(mBones[boneIndex]->GetName() + "_BONE");
         std::transform(boneName.begin(), boneName.end(), boneName.begin(), ::toupper);
@@ -171,7 +197,9 @@ void BoneHierarchy::GenerateRestPosiitonData(CFileDefinition& fileDef, const std
         fileDef.AddMacro(boneName, std::to_string(boneIndex));
     }
 
-    fileDef.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct Transform", variableName, true, "_anim", std::move(transformData))));
+    std::unique_ptr<FileDefinition> restPosDef(new DataFileDefinition("struct Transform", variableName, true, "_geo", std::move(transformData)));
+    restPosDef->AddTypeHeader("\"math/transform.h\"");
+    fileDef.AddDefinition(std::move(restPosDef));
 }
 
 bool BoneHierarchy::HasData() const {

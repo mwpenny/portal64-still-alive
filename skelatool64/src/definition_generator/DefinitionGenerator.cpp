@@ -9,21 +9,25 @@ void DefinitionGenerator::TraverseScene(const aiScene* scene) {
     }
 
     BeforeTraversal(scene);
-    TraverseNodes(scene->mRootNode);
+
+    forEachNode(scene->mRootNode, [&](aiNode* node) -> void { 
+        if (ShouldIncludeNode(node)) {
+            mIncludedNodes.push_back(node);
+        }
+    });
 }
 
 void DefinitionGenerator::BeforeTraversal(const aiScene* scene) {}
 
-void DefinitionGenerator::TraverseNodes(aiNode* node) {
+
+void forEachNode(aiNode* node, const std::function<void(aiNode*)>& callback) {
     if (!node) {
         return;
     }
 
-    if (ShouldIncludeNode(node)) {
-        mIncludedNodes.push_back(node);
-    }
+    callback(node);
 
     for (unsigned int i = 0; i < node->mNumChildren; ++i) {
-        TraverseNodes(node->mChildren[i]);
+        forEachNode(node->mChildren[i], callback);
     }
 }

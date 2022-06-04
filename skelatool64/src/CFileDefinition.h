@@ -53,6 +53,8 @@ public:
     bool GetResourceName(const void* resource, std::string& result) const;
 
     std::shared_ptr<ExtendedMesh> GetExtendedMesh(aiMesh* mesh);
+
+    BoneHierarchy& GetBoneHierarchy();
 private:
     std::string mPrefix;
     float mModelScale;

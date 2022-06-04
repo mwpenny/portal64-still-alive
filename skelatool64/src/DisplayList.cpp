@@ -137,6 +137,8 @@ std::unique_ptr<DataChunk> PushMatrixCommand::GenerateCommand() {
     } else {
         flags += "G_MTX_PUSH";
     }
+
+    result->AddPrimitive(flags);
     
     return std::move(result);
 }

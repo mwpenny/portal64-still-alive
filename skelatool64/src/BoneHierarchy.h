@@ -15,6 +15,17 @@
 #include "ErrorCode.h"
 #include "./definitions/DataChunk.h"
 
+struct AnimationNodeInfo {
+    const aiNode* node;
+    // the ancestor of this node that is also a bone
+    const aiNode* parent;
+    aiMatrix4x4 relativeTransform;
+};
+
+struct NodeAnimationInfo {
+    std::vector<std::unique_ptr<AnimationNodeInfo>> nodesWithAnimation;
+};
+
 class CFileDefinition;
 
 class Bone {
@@ -25,7 +36,7 @@ public:
     const std::string& GetName();
     Bone* GetParent();
 
-    std::unique_ptr<DataChunk> GenerateRestPosiitonData(float scale, aiQuaternion rotation);
+    std::unique_ptr<DataChunk> GenerateRestPosiitonData();
 
     static Bone* FindCommonAncestor(Bone* a, Bone* b);
     /**
@@ -44,7 +55,7 @@ private:
     Bone* mParent;
     aiVector3D mRestPosition;
     aiQuaternion mRestRotation;
-    aiQuaternion mRestScale;
+    aiVector3D mRestScale;
 
     std::vector<Bone*> mChildren;
 };
@@ -53,12 +64,15 @@ class BoneHierarchy {
 public:
     void SearchForBones(aiNode* node, Bone* currentBoneParent, std::set<std::string>& knownBones, bool parentIsBone);
     void SearchForBonesInScene(const aiScene* scene);
+
+    void PopulateWithAnimationNodeInfo(const NodeAnimationInfo& animInfo);
+
     Bone* BoneByIndex(unsigned index);
     Bone* BoneForName(std::string name);
     bool HasData() const;
     unsigned int GetBoneCount() const;
 
-    void GenerateRestPosiitonData(CFileDefinition& fileDef, const std::string& variableName, float scale, aiQuaternion rotation);
+    void GenerateRestPosiitonData(CFileDefinition& fileDef, const std::string& variableName);
 private:
     std::vector<std::unique_ptr<Bone>> mBones;
     std::map<std::string, Bone*> mBoneByName;

@@ -63,6 +63,12 @@ ExtendedMesh::ExtendedMesh(const ExtendedMesh& other):
         
         mBoneSpanningFaces[it.first] = faces;
     }
+
+    for (auto& it : mNormalInverseTransform) {
+        if (it) {
+            it = new aiMatrix3x3(*it);
+        }
+    }
 }
 
 ExtendedMesh::ExtendedMesh(aiMesh* mesh, BoneHierarchy& boneHierarchy) :

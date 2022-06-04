@@ -125,6 +125,12 @@ std::string generateMesh(const aiScene* scene, CFileDefinition& fileDefinition, 
     DisplayList displayList(fileDefinition.GetUniqueName("model_gfx"));
     generateMeshIntoDL(scene, fileDefinition, renderChunks, settings, displayList, fileSuffix);
     std::unique_ptr<FileDefinition> dlResult = displayList.Generate(fileSuffix);
+
+
+    if (fileDefinition.GetBoneHierarchy().HasData()) {
+        dlResult->AddTypeHeader("\"sk64/skelatool_defs.h\"");
+    }
+
     fileDefinition.AddDefinition(std::move(dlResult));
 
     return displayList.GetName();

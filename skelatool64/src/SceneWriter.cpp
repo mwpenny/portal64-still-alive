@@ -15,28 +15,7 @@
 #include "AnimationTranslator.h"
 #include "MeshWriter.h"
 #include "FileUtils.h"
-
-std::vector<SKAnimationHeader> generateAnimationData(const aiScene* scene, BoneHierarchy& bones, CFileDefinition& fileDef, float modelScale, unsigned short targetTicksPerSecond, aiQuaternion rotate) {
-    std::vector<SKAnimationHeader> animations;
-
-    for (unsigned i = 0; i < scene->mNumAnimations; ++i) {
-        SKAnimation animation;
-        if (translateAnimationToSK(*scene->mAnimations[i], animation, bones, modelScale, targetTicksPerSecond, rotate)) {
-            std::string animationName = fileDef.GetUniqueName(scene->mAnimations[i]->mName.C_Str());
-            unsigned short firstChunkSize = formatAnimationChunks(animationName, animation.chunks, fileDef);
-
-            SKAnimationHeader header;
-            header.firstChunkSize = firstChunkSize;
-            header.ticksPerSecond = targetTicksPerSecond;
-            header.maxTicks = animation.maxTicks;
-            header.animationName = animationName;
-
-            animations.push_back(header);
-        }
-    }
-
-    return animations;
-}
+#include "./definition_generator/AnimationGenerator.h"
 
 void generateMeshFromScene(const aiScene* scene, CFileDefinition& fileDefinition, DisplayListSettings& settings) {
     BoneHierarchy bones;
@@ -67,51 +46,7 @@ void generateMeshFromScene(const aiScene* scene, CFileDefinition& fileDefinition
     }
 
     if (shouldExportAnimations) {        
-        std::string bonesName = fileDefinition.GetUniqueName("default_bones");
-        std::string boneParentName = fileDefinition.GetUniqueName("bone_parent");
-        bones.GenerateRestPosiitonData(fileDefinition, bonesName, settings.mGraphicsScale, settings.mRotateModel);
-        std::string boneCountName = bonesName + "_COUNT";
-        std::transform(boneCountName.begin(), boneCountName.end(), boneCountName.begin(), ::toupper);
-        fileDefinition.AddMacro(boneCountName, std::to_string(bones.GetBoneCount()));
-
-        std::string animationsName = fileDefinition.GetUniqueName("animations");
-        auto animations = generateAnimationData(scene, bones, fileDefinition, settings.mGraphicsScale, settings.mTicksPerSecond, settings.mRotateModel);
-
-        std::unique_ptr<StructureDataChunk> animationNameData(new StructureDataChunk());
-
-        int index = 0;
-        for (auto it = animations.begin(); it != animations.end(); ++it) {
-            std::unique_ptr<StructureDataChunk> animationChunk(new StructureDataChunk());
-
-            animationChunk->AddPrimitive(it->firstChunkSize);
-            animationChunk->AddPrimitive(it->ticksPerSecond);
-            animationChunk->AddPrimitive(it->maxTicks);
-            animationChunk->AddPrimitive(0);
-            animationChunk->AddPrimitive(std::string("(struct SKAnimationChunk*)") + it->animationName);
-            animationChunk->AddPrimitive(0);
-
-            animationNameData->Add(std::move(animationChunk));
-
-            std::string animationIndex = fileDefinition.GetUniqueName(it->animationName + "_INDEX");
-            std::transform(animationIndex.begin(), animationIndex.end(), animationIndex.begin(), ::toupper);
-            fileDefinition.AddMacro(animationIndex, std::to_string(index));
-
-            ++index;
-        }
-        fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct SKAnimationHeader", animationsName, true, "_anim", std::move(animationNameData))));
-
-        std::unique_ptr<StructureDataChunk> boneParentDataChunk(new StructureDataChunk());
-
-        for (unsigned int boneIndex = 0; boneIndex < bones.GetBoneCount(); ++boneIndex) {
-            Bone* bone = bones.BoneByIndex(boneIndex);
-            if (bone->GetParent()) {
-                boneParentDataChunk->AddPrimitive(bone->GetParent()->GetIndex());
-            } else {
-                boneParentDataChunk->AddPrimitive(0xFFFF);
-            }
-        }
-
-        fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("unsigned short", boneParentName, true, "_anim", std::move(boneParentDataChunk))));
+        generateAnimationForScene(scene, fileDefinition, settings);
     }
 }
 

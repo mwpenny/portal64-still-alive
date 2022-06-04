@@ -2,6 +2,7 @@
 
 #include "../RenderChunk.h"
 #include "../MeshWriter.h"
+#include "AnimationGenerator.h"
 
 bool extractMaterialAutoTileParameters(Material* material, double& sTile, double& tTile) {
     if (!material) {
@@ -58,20 +59,34 @@ void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* n
             );
         }
 
-        renderChunks.push_back(RenderChunk(
-            std::pair<Bone*, Bone*>(NULL, NULL),
-            mesh,
-            materialPtr
-        ));
+
+        for (auto boneSegment = mesh->mFacesForBone.begin(); boneSegment != mesh->mFacesForBone.end(); ++boneSegment) {
+            renderChunks.push_back(RenderChunk(
+                std::make_pair(boneSegment->first, boneSegment->first),
+                mesh,
+                materialPtr
+            ));
+        }
+
+        for (auto pairSegment = mesh->mBoneSpanningFaces.begin(); pairSegment != mesh->mBoneSpanningFaces.end(); ++pairSegment) {
+            renderChunks.push_back(RenderChunk(pairSegment->first, mesh, materialPtr));
+        }
     }
 }
 
 void MeshDefinitionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) {
     std::vector<RenderChunk> renderChunks;
 
+    auto animInfo = findNodesForWithAnimation(scene, mSettings.CreateCollisionTransform());
+    fileDefinition.GetBoneHierarchy().PopulateWithAnimationNodeInfo(*animInfo);
+
     for (auto node = mIncludedNodes.begin(); node != mIncludedNodes.end(); ++node) {
         AppendRenderChunks(scene, *node, fileDefinition, mSettings, renderChunks);
     }
 
     generateMesh(scene, fileDefinition, renderChunks, mSettings, "_geo");
+
+    if (fileDefinition.GetBoneHierarchy().HasData()) {
+        generateAnimationForScene(scene, fileDefinition, mSettings);
+    }
 }

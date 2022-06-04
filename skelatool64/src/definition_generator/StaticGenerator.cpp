@@ -20,6 +20,8 @@ void StaticGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition&
 
     std::vector<StaticContentElement> elements;
 
+    BoneHierarchy unusedBones;
+
     sortNodesByRoom(mIncludedNodes, mRoomMapping);
 
     for (auto node = mIncludedNodes.begin(); node != mIncludedNodes.end(); ++node) {

@@ -403,3 +403,7 @@ std::shared_ptr<ExtendedMesh> CFileDefinition::GetExtendedMesh(aiMesh* mesh) {
 
     return result;
 }
+
+BoneHierarchy& CFileDefinition::GetBoneHierarchy() {
+    return mBoneHierarchy;
+}
