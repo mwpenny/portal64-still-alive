@@ -6,7 +6,7 @@
 #include <string>
 #include <map>
 
-std::shared_ptr<NodeAnimationInfo> findNodesForWithAnimation(const aiScene* scene, const aiMatrix4x4& baseTransform) {
+std::shared_ptr<NodeAnimationInfo> findNodesForWithAnimation(const aiScene* scene, const std::vector<aiNode*>& usedNodes, const aiMatrix4x4& baseTransform) {
     std::set<std::string> animatedNodeNames;
 
     for (unsigned animIndex = 0; animIndex < scene->mNumAnimations; ++animIndex) {
@@ -17,16 +17,22 @@ std::shared_ptr<NodeAnimationInfo> findNodesForWithAnimation(const aiScene* scen
         }
     }
 
-    std::set<aiNode*> nodesWithAnimationData;
+    std::set<aiMesh*> usedMeshes;
 
-    for (unsigned meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
-        aiMesh* mesh = scene->mMeshes[meshIndex];
+    for (auto node : usedNodes) {
+        for (unsigned i = 0; i < node->mNumMeshes; ++i) {
+            usedMeshes.insert(scene->mMeshes[node->mMeshes[i]]);
+        }
+    }
+
+    for (auto mesh : usedMeshes) {
         for (unsigned boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
             animatedNodeNames.insert(mesh->mBones[boneIndex]->mName.C_Str());
         }
     }
 
     std::map<const aiNode*, int> nodeOrder;
+    std::set<aiNode*> nodesWithAnimationData;
 
     forEachNode(scene->mRootNode, [&](aiNode* node) -> void {
         if (animatedNodeNames.find(node->mName.C_Str()) != animatedNodeNames.end()) {

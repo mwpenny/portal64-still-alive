@@ -77,7 +77,7 @@ void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* n
 void MeshDefinitionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) {
     std::vector<RenderChunk> renderChunks;
 
-    auto animInfo = findNodesForWithAnimation(scene, mSettings.CreateCollisionTransform());
+    auto animInfo = findNodesForWithAnimation(scene, mIncludedNodes, mSettings.CreateCollisionTransform());
     fileDefinition.GetBoneHierarchy().PopulateWithAnimationNodeInfo(*animInfo);
 
     for (auto node = mIncludedNodes.begin(); node != mIncludedNodes.end(); ++node) {

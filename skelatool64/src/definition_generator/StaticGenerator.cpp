@@ -11,7 +11,7 @@ StaticGenerator::StaticGenerator(const DisplayListSettings& settings, const Room
 }
 
 bool StaticGenerator::ShouldIncludeNode(aiNode* node) {
-    return StartsWith(node->mName.C_Str(), "@static") && node->mNumMeshes > 0;
+    return StartsWith(node->mName.C_Str(), "@static ") && node->mNumMeshes > 0;
 }
 
 void StaticGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) {
@@ -27,10 +27,6 @@ void StaticGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition&
     for (auto node = mIncludedNodes.begin(); node != mIncludedNodes.end(); ++node) {
         std::vector<RenderChunk> renderChunks;
         MeshDefinitionGenerator::AppendRenderChunks(scene, *node, fileDefinition, mSettings, renderChunks);
-
-        if (std::string((*node)->mName.C_Str()) == "@static_wall_00.013") {
-            std::cout << "Here" << std::endl;
-        }
 
         for (auto& chunk : renderChunks) {
             StaticContentElement element;

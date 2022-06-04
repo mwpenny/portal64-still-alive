@@ -52,7 +52,7 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
     }
 
     contact->friction = 0.5f;
-    contact->restitution = 0.5f;
+    contact->restitution = 0.0f;
 
     if (isnan(result.penetration) || isnan(result.contactA.x) || isnan(result.contactB.x) || isnan(result.normal.x)) {
         return;
@@ -95,8 +95,8 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
         return;
     }
 
-    contact->friction = 0.5f;
-    contact->restitution = 0.5f;
+    contact->friction = MAX(a->collider->friction, b->collider->friction);
+    contact->restitution = MIN(a->collider->bounce, b->collider->bounce);
 
     transformPointInverseNoScale(&a->body->transform, &result.contactA, &result.contactA);
     transformPointInverseNoScale(&b->body->transform, &result.contactB, &result.contactB);

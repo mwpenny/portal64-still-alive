@@ -12,7 +12,7 @@ CollisionGenerator::CollisionGenerator(const DisplayListSettings& settings, cons
 
 
 bool CollisionGenerator::ShouldIncludeNode(aiNode* node) {
-    return StartsWith(node->mName.C_Str(), "@collision");
+    return StartsWith(node->mName.C_Str(), "@collision ");
 }
 
 CollisionGrid::CollisionGrid(const aiAABB& boundaries) {

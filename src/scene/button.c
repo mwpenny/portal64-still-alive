@@ -35,7 +35,7 @@ struct ColliderTypeData gButtonCollider = {
 
 #define MASS_BUTTON_PRESS_THRESHOLD     1.9f
 #define BUTTON_MOVEMENT_AMOUNT          0.1f
-#define BUTTON_MOVE_VELOCTY             0.2f
+#define BUTTON_MOVE_VELOCTY             0.3f
 
 void buttonRender(void* data, struct RenderScene* renderScene) {
     struct Button* button = (struct Button*)data;
@@ -53,7 +53,7 @@ void buttonRender(void* data, struct RenderScene* renderScene) {
     renderSceneAdd(renderScene, button_gfx, matrix, button_material_index, &button->rigidBody.transform.position, armature);
 }
 
-void buttonInit(struct Button* button, struct Vector3* at, int roomIndex) {
+void buttonInit(struct Button* button, struct Vector3* at, int roomIndex, int signalIndex) {
     collisionObjectInit(&button->collisionObject, &gButtonCollider, &button->rigidBody, 1.0f);
     rigitBodyMarkKinematic(&button->rigidBody);
     collisionSceneAddDynamicObject(&button->collisionObject);
@@ -66,7 +66,7 @@ void buttonInit(struct Button* button, struct Vector3* at, int roomIndex) {
     collisionObjectUpdateBB(&button->collisionObject);
 
     button->dynamicId = dynamicSceneAdd(button, buttonRender, &button->rigidBody.transform, 0.84f);
-    button->pressStateCounter = 0;
+    button->signalIndex = signalIndex;
 
     button->originalPos = *at;
 }
@@ -91,6 +91,7 @@ void buttonUpdate(struct Button* button) {
     
     if (shouldPress) {
         targetPos.y -= BUTTON_MOVEMENT_AMOUNT;
+        signalsSend(button->signalIndex);
     }
 
     if (targetPos.y != button->rigidBody.transform.position.y) {

@@ -6,6 +6,7 @@
 #include <memory>
 #include "./BoneHierarchy.h"
 #include "./ExtendedMesh.h"
+#include "./definition_generator/DefinitionGenerator.h"
 
 void generateVertexMapping(aiMesh* mesh, std::vector<aiFace*> faces, std::map<unsigned int, unsigned int>& result) {
     std::set<unsigned int> usedIndices;
@@ -123,6 +124,7 @@ aiMesh* subMesh(aiMesh* mesh, std::vector<aiFace*> faces) {
 
 void splitSceneByBones(aiScene* targetScene) {
     std::vector<aiMesh*> newMeshes;
+    std::vector<std::pair<std::size_t, std::size_t>> meshIndexMapping;
     
     BoneHierarchy bones;
 
@@ -131,6 +133,8 @@ void splitSceneByBones(aiScene* targetScene) {
     for (unsigned int i = 0; i < targetScene->mNumMeshes; ++i) {
         aiMesh* currMesh = targetScene->mMeshes[i];
         std::unique_ptr<ExtendedMesh> extendedMesh(new ExtendedMesh(currMesh, bones));
+
+        int startIndex = newMeshes.size();
         
         for (auto newFaces = extendedMesh->mFacesForBone.begin(); newFaces != extendedMesh->mFacesForBone.end(); ++newFaces) {
             newMeshes.push_back(subMesh(currMesh, newFaces->second));
@@ -140,8 +144,41 @@ void splitSceneByBones(aiScene* targetScene) {
             newMeshes.push_back(subMesh(currMesh, newFaces->second));
         }
 
+        meshIndexMapping.push_back(std::make_pair(startIndex, newMeshes.size()));
+
         delete currMesh;
     }
+
+    forEachNode(targetScene->mRootNode, [&](aiNode* node) -> void {
+        if (!node->mNumMeshes) {
+            return;
+        }
+
+        unsigned newMeshCount = 0;
+
+        for (unsigned i = 0; i < node->mNumMeshes; ++i) {
+            std::pair<std::size_t, std::size_t> newMeshRange = meshIndexMapping[node->mMeshes[i]];
+            newMeshCount += newMeshRange.second - newMeshRange.first;
+        }
+
+        unsigned* newMeshIndices = new unsigned[newMeshCount];
+
+        unsigned currentIndex = 0;
+
+        for (unsigned i = 0; i < node->mNumMeshes; ++i) {
+            std::pair<std::size_t, std::size_t> newMeshRange = meshIndexMapping[node->mMeshes[i]];
+
+            for (std::size_t meshIndex = newMeshRange.first; meshIndex < newMeshRange.second; ++meshIndex) {
+                newMeshIndices[currentIndex] = meshIndex;
+                ++currentIndex;
+            }
+        }
+
+        delete [] node->mMeshes;
+
+        node->mNumMeshes = newMeshCount;
+        node->mMeshes = newMeshIndices;
+    });
     
     delete [] targetScene->mMeshes;
 

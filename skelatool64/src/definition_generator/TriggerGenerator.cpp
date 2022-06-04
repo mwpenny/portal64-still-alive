@@ -2,7 +2,7 @@
 #include "../StringUtils.h"
 #include "../MathUtl.h"
 
-#define TRIGGER_PREFIX  "@trigger_"
+#define TRIGGER_PREFIX  "@trigger "
 
 #define CUTSCENE_PREFIX    "@cutscene "
 

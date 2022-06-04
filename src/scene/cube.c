@@ -53,7 +53,7 @@ struct CollisionObject gFloatingQuadObject = {
 struct ColliderTypeData gCubeCollider = {
     CollisionShapeTypeBox,
     &gCubeCollisionBox,
-    0.5f,
+    0.0f,
     0.5f,
     &gCollisionBoxCallbacks,  
 };

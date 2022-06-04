@@ -27,6 +27,7 @@
 #include "../levels/cutscene_runner.h"
 #include "../util/memory.h"
 #include "../decor/decor_object_list.h"
+#include "signals.h"
 
 struct Vector3 gPortalGunOffset = {0.100957, -0.113587, -0.28916};
 struct Vector3 gPortalGunForward = {0.1f, -0.1f, 1.0f};
@@ -35,6 +36,8 @@ struct Vector3 gPortalGunUp = {0.0f, 1.0f, 0.0f};
 Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 
 void sceneInit(struct Scene* scene) {
+    signalsInit(1);
+
     cameraInit(&scene->camera, 45.0f, 0.125f * SCENE_SCALE, 80.0f * SCENE_SCALE);
     playerInit(&scene->player, levelGetLocation(gCurrentLevel->startLocation));
 
@@ -59,7 +62,7 @@ void sceneInit(struct Scene* scene) {
     buttonPos.x = 5.0f;
     buttonPos.y = 0.0f;
     buttonPos.z = 3.0f;
-    buttonInit(&scene->buttons[0], &buttonPos, 1);
+    buttonInit(&scene->buttons[0], &buttonPos, 1, 0);
 
     scene->decorCount = 0;
     scene->decor = malloc(sizeof(struct DecorObject*) * scene->decorCount);
@@ -82,7 +85,7 @@ void sceneInit(struct Scene* scene) {
         doorTransform.position = gCurrentLevel->doors[i].location;
         doorTransform.rotation = gCurrentLevel->doors[i].rotation;
         doorTransform.scale = gOneVec;
-        doorInit(&scene->doors[i], &doorTransform, 0, 0, gCurrentLevel->doors[i].doorwayIndex);
+        doorInit(&scene->doors[i], &doorTransform, 0, 0, gCurrentLevel->doors[i].doorwayIndex, 0);
     }
 
     // scene->player.grabbing = &scene->cubes[0].rigidBody;
@@ -200,6 +203,8 @@ void sceneUpdate(struct Scene* scene) {
     OSTime frameStart = osGetTime();
     scene->lastFrameTime = frameStart - scene->lastFrameStart;
 
+    signalsReset();
+
     playerUpdate(&scene->player, &scene->camera.transform);
     sceneCheckPortals(scene);
 
@@ -209,6 +214,10 @@ void sceneUpdate(struct Scene* scene) {
 
     for (int i = 0; i < scene->buttonCount; ++i) {
         buttonUpdate(&scene->buttons[i]);
+    }
+
+    for (int i = 0; i < scene->doorCount; ++i) {
+        doorUpdate(&scene->doors[i]);
     }
     
     collisionSceneUpdateDynamics();
