@@ -8,10 +8,31 @@
 #include <memory>
 #include <assimp/scene.h>
 
-struct Signals {
+enum class SignalOperationType {
+    And,
+    Or,
+    Not,
+    Timer
+};
+
+struct SignalOperation {
+    SignalOperationType type;
+    std::string outputName;
+    std::vector<std::string> inputNames;
+
+    union {
+        float duration;
+    } operand;
+};
+
+class Signals {
+public: 
+    int SignalCount();
+    int SignalIndexForName(const std::string& name);
+private:
     std::map<std::string, int> signalNameToIndex;
 };
 
-std::unique_ptr<Signals> findSignals(const aiScene* scene);
+std::vector<SignalOperation> orderSignals(const std::vector<SignalOperation>& signals);
 
 #endif
