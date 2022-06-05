@@ -28,7 +28,7 @@ void doorRender(void* data, struct RenderScene* renderScene) {
     renderSceneAdd(renderScene, door_01_gfx, matrix, door_01_material_index, &door->rigidBody.transform.position, armature);
 }
 
-void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, int roomA, int roomB) {
+void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct World* world) {
     // collisionObjectInit(&cube->collisionObject, &gCubeCollider, &cube->rigidBody, 1.0f);
     // collisionSceneAddDynamicObject(&cube->collisionObject);
 
@@ -41,9 +41,24 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, int room
     door->dynamicId = dynamicSceneAdd(door, doorRender, &door->rigidBody.transform, 1.7f);
     door->signalIndex = doorDefinition->signalIndex;
     door->openAmount = 0.0f;
+
+    if (doorDefinition->doorwayIndex >= 0 && doorDefinition->doorwayIndex < world->doorwayCount) {
+        door->forDoorway = &world->doorways[doorDefinition->doorwayIndex];
+        door->forDoorway->flags &= ~DoorwayFlagsOpen;
+    } else {
+        door->forDoorway = NULL;
+    }
 }
 
 void doorUpdate(struct Door* door) {
     float targetOpenAmount = signalsRead(door->signalIndex) ? 1.0f : 0.0f;
     door->openAmount = mathfMoveTowards(door->openAmount, targetOpenAmount, OPEN_VELOCITY * FIXED_DELTA_TIME);
+
+    if (door->forDoorway) {
+        if (door->openAmount == 0.0f) {
+            door->forDoorway->flags &= ~DoorwayFlagsOpen;
+        } else {
+            door->forDoorway->flags |= DoorwayFlagsOpen;
+        }
+    }
 }

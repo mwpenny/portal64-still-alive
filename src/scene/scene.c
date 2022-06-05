@@ -80,7 +80,7 @@ void sceneInit(struct Scene* scene) {
     scene->doorCount = gCurrentLevel->doorCount;
     scene->doors = malloc(sizeof(struct Door) * scene->doorCount);
     for (int i = 0; i < scene->doorCount; ++i) {
-        doorInit(&scene->doors[i], &gCurrentLevel->doors[i], 0, 0);
+        doorInit(&scene->doors[i], &gCurrentLevel->doors[i], &gCurrentLevel->world);
     }
 }
 

@@ -92,6 +92,7 @@ void buttonUpdate(struct Button* button) {
     if (shouldPress) {
         targetPos.y -= BUTTON_MOVEMENT_AMOUNT;
         signalsSend(button->signalIndex);
+        signalsSend(1 - button->signalIndex);
     }
 
     if (targetPos.y != button->rigidBody.transform.position.y) {

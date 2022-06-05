@@ -184,7 +184,7 @@ std::shared_ptr<RoomGeneratorOutput> generateRooms(const aiScene* scene, CFileDe
         int index = 0;
 
         for (auto& doorway : output->doorways) {
-            if (doorway.quad.IsCoplanar(door.node->mTransformation * aiVector3D(0.0f, 0.0f, 0.0f))) {
+            if (doorway.quad.IsCoplanar(collisionTransform * door.node->mTransformation * aiVector3D(0.0f, 0.0f, 0.0f))) {
                 doorwayIndex = index;
                 break;
             }

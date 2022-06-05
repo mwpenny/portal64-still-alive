@@ -47,6 +47,10 @@ void staticRenderDetermineVisibleRooms(struct FrustrumCullingInformation* cullin
     for (int i = 0; i < gCurrentLevel->world.rooms[currentRoom].doorwayCount; ++i) {
         struct Doorway* doorway = &gCurrentLevel->world.doorways[gCurrentLevel->world.rooms[currentRoom].doorwayIndices[i]];
 
+        if ((doorway->flags & DoorwayFlagsOpen) == 0) {
+            continue;
+        }
+
         if (isQuadOutsideFrustrum(cullingInfo, &doorway->quad)) {
             continue;
         }

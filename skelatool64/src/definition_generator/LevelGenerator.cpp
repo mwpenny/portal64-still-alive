@@ -267,6 +267,7 @@ void generateWorldDefinition(const aiScene* scene, CFileDefinition& fileDefiniti
         doorwayData->Add(std::move(doorway.quad.Generate()));
         doorwayData->AddPrimitive(doorway.roomA);
         doorwayData->AddPrimitive(doorway.roomB);
+        doorwayData->AddPrimitive<const char*>("DoorwayFlagsOpen");
         doorways->Add(std::move(doorwayData));
 
         ++doorwayIndex;

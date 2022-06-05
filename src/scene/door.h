@@ -7,12 +7,13 @@
 struct Door {
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
+    struct Doorway* forDoorway;
     short dynamicId;
     short signalIndex;
     float openAmount;
 };
 
-void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, int roomA, int roomB);
+void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct World* world);
 void doorUpdate(struct Door* door);
 
 #endif

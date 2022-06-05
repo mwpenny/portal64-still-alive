@@ -4,10 +4,15 @@
 #include "collision_object.h"
 #include "../math/range.h"
 
+enum DoorwayFlags {
+    DoorwayFlagsOpen = (1 << 0),
+};
+
 struct Doorway {
     struct CollisionQuad quad;
     short roomA;
     short roomB;
+    short flags;
 };
 
 struct Room {
