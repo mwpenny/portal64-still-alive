@@ -16,7 +16,7 @@ DisplayListSettings::DisplayListSettings():
     mIncludeCulling(true) {
 }
 
-aiMatrix4x4 DisplayListSettings::CreateGlobalTransform() {
+aiMatrix4x4 DisplayListSettings::CreateGlobalTransform() const {
     aiMatrix4x4 scale;
     aiMatrix4x4::Scaling(aiVector3D(1, 1, 1) * mGraphicsScale, scale);
     aiMatrix4x4 rotation(mRotateModel.GetMatrix());
@@ -24,7 +24,7 @@ aiMatrix4x4 DisplayListSettings::CreateGlobalTransform() {
     return rotation * scale;
 }
 
-aiMatrix4x4 DisplayListSettings::CreateCollisionTransform() {
+aiMatrix4x4 DisplayListSettings::CreateCollisionTransform() const {
     aiMatrix4x4 scale;
     aiMatrix4x4::Scaling(aiVector3D(1, 1, 1) * mCollisionScale, scale);
     aiMatrix4x4 rotation(mRotateModel.GetMatrix());

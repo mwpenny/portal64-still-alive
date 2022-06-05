@@ -1,5 +1,9 @@
 #include "DefinitionGenerator.h"
 
+#include <iostream>
+
+#include "../StringUtils.h"
+
 DefinitionGenerator::DefinitionGenerator() {}
 DefinitionGenerator::~DefinitionGenerator() {}
 
@@ -18,6 +22,36 @@ void DefinitionGenerator::TraverseScene(const aiScene* scene) {
 }
 
 void DefinitionGenerator::BeforeTraversal(const aiScene* scene) {}
+
+NodeGroups::NodeGroups(const aiScene* scene) {
+    forEachNode(scene->mRootNode, [&](aiNode* node) -> void {
+        if (node->mName.data[0] == '@') {
+            AddNode(node);
+        }
+    });
+}
+
+std::vector<NodeWithArguments>& NodeGroups::NodesForType(const std::string& typeName) {
+    mTypesReferenced.insert(typeName);
+    return mNodesByType[typeName];
+}
+
+void NodeGroups::PrintUnusedTypes() {
+    for (auto& byType : mNodesByType) {
+        if (mTypesReferenced.find(byType.first) == mTypesReferenced.end()) {
+            std::cout << "The node type " << byType.first << " was never referenced." << std::endl;
+        }
+    }
+}
+
+void NodeGroups::AddNode(aiNode* node) {
+    NodeWithArguments result;
+    SplitString(node->mName.C_Str(), ' ', result.arguments);
+    std::string typeName = result.arguments[0];
+    result.node = node;
+    result.arguments.erase(result.arguments.begin());
+    mNodesByType[typeName].push_back(result);
+}
 
 
 void forEachNode(aiNode* node, const std::function<void(aiNode*)>& callback) {

@@ -12,7 +12,7 @@ public:
     virtual bool ShouldIncludeNode(aiNode* node);
     virtual void GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition);
 
-    static void AppendRenderChunks(const aiScene* scene, aiNode* node, CFileDefinition& fileDefinition, DisplayListSettings& settings, std::vector<RenderChunk>& renderChunks);
+    static void AppendRenderChunks(const aiScene* scene, aiNode* node, CFileDefinition& fileDefinition, const DisplayListSettings& settings, std::vector<RenderChunk>& renderChunks);
 private:
     DisplayListSettings mSettings;
 };

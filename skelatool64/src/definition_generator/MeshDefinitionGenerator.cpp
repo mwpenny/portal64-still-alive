@@ -31,7 +31,7 @@ bool MeshDefinitionGenerator::ShouldIncludeNode(aiNode* node) {
     return node->mName.C_Str()[0] != '@' && node->mNumMeshes > 0;
 }
 
-void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* node, CFileDefinition& fileDefinition, DisplayListSettings& settings, std::vector<RenderChunk>& renderChunks) {
+void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* node, CFileDefinition& fileDefinition, const DisplayListSettings& settings, std::vector<RenderChunk>& renderChunks) {
     for (unsigned meshIndex = 0; meshIndex < node->mNumMeshes; ++meshIndex) {
         std::shared_ptr<ExtendedMesh> mesh = fileDefinition.GetExtendedMesh(scene->mMeshes[node->mMeshes[meshIndex]]);
 

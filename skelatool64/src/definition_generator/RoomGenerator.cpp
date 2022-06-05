@@ -4,13 +4,13 @@
 #include "../StringUtils.h"
 #include "../MathUtl.h"
 
-#define ROOM_PREFIX "@room "
+#define ROOM_PREFIX "@room"
 
-#define LOCATION_PREFIX "@location "
+#define LOCATION_PREFIX "@location"
 
 #define DOORWAY_PREFIX  "@doorway"
 
-#define DOOR_PREFIX "@door "
+#define DOOR_PREFIX "@door"
 
 Doorway::Doorway(const aiNode* node, const CollisionQuad& quad): 
     node(node), quad(quad), roomA(0), roomB(0) {
@@ -18,8 +18,6 @@ Doorway::Doorway(const aiNode* node, const CollisionQuad& quad):
 }
 
 Door::Door(const aiNode* node): node(node) {}
-
-RoomGenerator::RoomGenerator(const DisplayListSettings& settings): DefinitionGenerator(), mSettings(settings) {}
 
 short RoomGeneratorOutput::FindLocationRoom(const std::string& name) const {
     for (auto& location : namedLocations) {
@@ -56,13 +54,15 @@ struct RoomBlock {
     int roomIndex;
 };
 
-bool RoomGenerator::ShouldIncludeNode(aiNode* node) {
-    return true;
-}
-
 void sortNodesByRoom(std::vector<aiNode*>& nodes, const RoomGeneratorOutput& roomOutput) {
     std::sort(nodes.begin(), nodes.end(), [&](const aiNode* a, const aiNode* b) -> bool {
         return roomOutput.RoomForNode(a) < roomOutput.RoomForNode(b);
+    });
+}
+
+void sortNodesWithArgsByRoom(std::vector<NodeWithArguments>& nodes, const RoomGeneratorOutput& roomOutput) {
+    std::sort(nodes.begin(), nodes.end(), [&](const NodeWithArguments& a, const NodeWithArguments& b) -> bool {
+        return roomOutput.RoomForNode(a.node) < roomOutput.RoomForNode(b.node);
     });
 }
 
@@ -97,47 +97,53 @@ int findClosestRoom(const aiNode* node, const aiScene* scene, CFileDefinition& f
     return closestRoom;
 }
 
-void RoomGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) {
+
+std::shared_ptr<RoomGeneratorOutput> generateRooms(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, NodeGroups& nodeGroups) {
     std::vector<RoomBlock> roomBlocks;
+    std::shared_ptr<RoomGeneratorOutput> output(new RoomGeneratorOutput());
 
-    aiMatrix4x4 collisionTransform = mSettings.CreateCollisionTransform();
+    aiMatrix4x4 collisionTransform = settings.CreateCollisionTransform();
 
-    mOutput.roomCount = 0;
+    output->roomCount = 0;
 
-    for (auto node : mIncludedNodes) {
-        std::string nodeName(node->mName.C_Str());
-        
-        if (StartsWith(nodeName, ROOM_PREFIX) && node->mNumMeshes) {
-            auto mesh = fileDefinition.GetExtendedMesh(scene->mMeshes[node->mMeshes[0]]);
-            aiVector3D minPoint = node->mTransformation * mesh->bbMin;
-            aiVector3D maxPoint = node->mTransformation * mesh->bbMax;
-
-            struct RoomBlock roomBlock;
-            roomBlock.boundingBox.mMin = min(minPoint, maxPoint);
-            roomBlock.boundingBox.mMax = max(minPoint, maxPoint);
-            roomBlock.roomIndex = std::atoi(nodeName.substr(strlen(ROOM_PREFIX)).c_str());
-            roomBlocks.push_back(roomBlock);
+    for (auto& nodeInfo : nodeGroups.NodesForType(ROOM_PREFIX)) {
+        if (!nodeInfo.node->mNumMeshes) {
+            continue;
         }
 
-        if (StartsWith(nodeName, LOCATION_PREFIX)) {
-            NamedLocation location;
-            location.node = node;
-            location.name = nodeName.substr(strlen(LOCATION_PREFIX));
-            location.index = mOutput.namedLocations.size();
+        auto mesh = fileDefinition.GetExtendedMesh(scene->mMeshes[nodeInfo.node->mMeshes[0]]);
+        aiVector3D minPoint = nodeInfo.node->mTransformation * mesh->bbMin;
+        aiVector3D maxPoint = nodeInfo.node->mTransformation * mesh->bbMax;
 
-            mOutput.namedLocations.push_back(location);
-        }
+        struct RoomBlock roomBlock;
+        roomBlock.boundingBox.mMin = min(minPoint, maxPoint);
+        roomBlock.boundingBox.mMax = max(minPoint, maxPoint);
+        roomBlock.roomIndex = nodeInfo.arguments.size() ? std::atoi(nodeInfo.arguments[0].c_str()) : 0;
+        roomBlocks.push_back(roomBlock);
+    }
 
-        if (StartsWith(nodeName, DOORWAY_PREFIX) && node->mNumMeshes) {
-            mOutput.doorways.push_back(Doorway(node, CollisionQuad(
-                scene->mMeshes[node->mMeshes[0]], 
-                collisionTransform * node->mTransformation
-            )));
+    for (auto& nodeInfo : nodeGroups.NodesForType(LOCATION_PREFIX)) {
+        NamedLocation location;
+        location.node = nodeInfo.node;
+        if (nodeInfo.arguments.size()) {
+            location.name = nodeInfo.arguments[0];
+        } else {
+            std::cout << "@location without a name";
         }
+        location.index = output->namedLocations.size();
 
-        if (StartsWith(nodeName, DOOR_PREFIX)) {
-            mOutput.doors.push_back(Door(node));
-        }
+        output->namedLocations.push_back(location);
+    }
+
+    for (auto& nodeInfo : nodeGroups.NodesForType(DOORWAY_PREFIX)) {
+        output->doorways.push_back(Doorway(nodeInfo.node, CollisionQuad(
+            scene->mMeshes[nodeInfo.node->mMeshes[0]], 
+            collisionTransform * nodeInfo.node->mTransformation
+        )));
+    }
+    
+    for (auto& nodeInfo : nodeGroups.NodesForType(DOOR_PREFIX)) {
+        output->doors.push_back(Door(nodeInfo.node));
     }
 
     if (roomBlocks.size() == 0) {
@@ -146,14 +152,14 @@ void RoomGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& f
         roomBlocks.push_back(roomBlock);
     }
 
-    for (auto node : mIncludedNodes) {
+    forEachNode(scene->mRootNode, [&](aiNode* node) -> void {
         int closestRoom = findClosestRoom(node, scene, fileDefinition, roomBlocks, -1);
-        mOutput.roomIndexMapping[node] = closestRoom;
-        mOutput.roomCount = std::max(mOutput.roomCount, closestRoom + 1);
-    }
+        output->roomIndexMapping[node] = closestRoom;
+        output->roomCount = std::max(output->roomCount, closestRoom + 1);
+    });
 
-    for (auto& doorway : mOutput.doorways) {
-        doorway.roomA = mOutput.roomIndexMapping[doorway.node];
+    for (auto& doorway : output->doorways) {
+        doorway.roomA = output->roomIndexMapping[doorway.node];
 
         const RoomBlock* roomB = NULL;
         doorway.roomB = findClosestRoom(doorway.node, scene, fileDefinition, roomBlocks, doorway.roomA, &roomB);
@@ -169,15 +175,15 @@ void RoomGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& f
             }
         }
 
-        mOutput.roomCount = std::max(mOutput.roomCount, doorway.roomB + 1);
+        output->roomCount = std::max(output->roomCount, doorway.roomB + 1);
     }
 
-    for (auto& door : mOutput.doors) {
+    for (auto& door : output->doors) {
         int doorwayIndex = -1;
 
         int index = 0;
 
-        for (auto& doorway : mOutput.doorways) {
+        for (auto& doorway : output->doorways) {
             if (doorway.quad.IsCoplanar(door.node->mTransformation * aiVector3D(0.0f, 0.0f, 0.0f))) {
                 doorwayIndex = index;
                 break;
@@ -188,8 +194,6 @@ void RoomGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& f
 
         door.doorwayIndex = doorwayIndex;
     }
-}
 
-const RoomGeneratorOutput& RoomGenerator::GetOutput() const {
-    return mOutput;
+    return output;
 }

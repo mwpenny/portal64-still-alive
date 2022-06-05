@@ -147,34 +147,31 @@ int main(int argc, char *argv[]) {
 
 
         if (args.mIsLevel) {
+            NodeGroups nodesByGroup(scene);
+
             std::cout << "Grouping objects by room" << std::endl;
-            RoomGenerator roomGenerator(settings);
-            roomGenerator.TraverseScene(scene);
-            roomGenerator.GenerateDefinitions(scene, fileDef);
+            auto roomOutput = generateRooms(scene, fileDef, settings, nodesByGroup);
 
             std::cout << "Generating collider definitions" << std::endl;
-            CollisionGenerator colliderGenerator(settings, roomGenerator.GetOutput());
-            colliderGenerator.TraverseScene(scene);
-            colliderGenerator.GenerateDefinitions(scene, fileDef);
+            auto collisionOutput = generateCollision(scene, fileDef, settings, *roomOutput, nodesByGroup);
 
             std::cout << "Generating static definitions" << std::endl;
-            StaticGenerator staticGenerator(settings, roomGenerator.GetOutput());
-            staticGenerator.TraverseScene(scene);
-            staticGenerator.GenerateDefinitions(scene, fileDef);
+            auto staticOutput = generateStatic(scene, fileDef, settings, *roomOutput, nodesByGroup);
 
-            TriggerGenerator triggerGenerator(settings, roomGenerator.GetOutput());
-            triggerGenerator.TraverseScene(scene);
-            triggerGenerator.GenerateDefinitions(scene, fileDef);
+            auto triggerOutput = generateTriggers(scene, fileDef, settings, *roomOutput, nodesByGroup);
 
             std::cout << "Generating level definitions" << std::endl;
-            LevelGenerator levelGenerator(
+            generateLevel(
+                scene,
+                fileDef,
                 settings, 
-                staticGenerator.GetOutput(), 
-                colliderGenerator.GetOutput(),
-                triggerGenerator.GetOutput(),
-                roomGenerator.GetOutput()
+                *staticOutput, 
+                *collisionOutput,
+                *triggerOutput,
+                *roomOutput
             );
-            levelGenerator.GenerateDefinitions(scene, fileDef);
+
+            nodesByGroup.PrintUnusedTypes();
         }
 
         std::cout << "Writing output" << std::endl;

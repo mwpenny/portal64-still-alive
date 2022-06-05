@@ -31,21 +31,6 @@ struct Cutscene {
     std::vector<std::shared_ptr<CutsceneStep>> steps;
 };
 
-class TriggerGenerator : public DefinitionGenerator {
-public:
-    TriggerGenerator(const DisplayListSettings& settings, const RoomGeneratorOutput& roomOutput);
-
-    virtual bool ShouldIncludeNode(aiNode* node);
-    virtual void GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition);
-
-    const TriggerGeneratorOutput& GetOutput() const;
-private:
-    DisplayListSettings mSettings;
-    TriggerGeneratorOutput mOutput;
-    RoomGeneratorOutput mRoomOutput;
-
-    void GenerateCutscenes(std::map<std::string, std::shared_ptr<Cutscene>>& output, CFileDefinition& fileDefinition);
-    std::unique_ptr<StructureDataChunk> GenerateCutsceneStep(CutsceneStep& step);
-};
+std::shared_ptr<TriggerGeneratorOutput> generateTriggers(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, const RoomGeneratorOutput& roomOutput, NodeGroups& nodeGroups);
 
 #endif

@@ -25,8 +25,8 @@ struct DisplayListSettings {
     bool mExportGeometry;
     bool mIncludeCulling;
 
-    aiMatrix4x4 CreateGlobalTransform();
-    aiMatrix4x4 CreateCollisionTransform();
+    aiMatrix4x4 CreateGlobalTransform() const;
+    aiMatrix4x4 CreateCollisionTransform() const;
 };
 
 #endif

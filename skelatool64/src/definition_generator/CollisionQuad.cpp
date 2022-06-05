@@ -104,7 +104,7 @@ CollisionQuad::CollisionQuad(aiMesh* mesh, const aiMatrix4x4& transform) {
     }
 }
 
-std::unique_ptr<DataChunk> CollisionQuad::Generate() {
+std::unique_ptr<DataChunk> CollisionQuad::Generate() const {
     std::unique_ptr<StructureDataChunk> result(new StructureDataChunk());
 
     result->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(corner)));
@@ -126,7 +126,7 @@ std::unique_ptr<DataChunk> CollisionQuad::Generate() {
 #define FIXED_POINT_PRECISION   8
 #define FIXED_POINT_SCALAR      (1 << FIXED_POINT_PRECISION)
 
-void CollisionQuad::ToLocalCoords(const aiVector3D& input, short& outX, short& outY) {
+void CollisionQuad::ToLocalCoords(const aiVector3D& input, short& outX, short& outY) const {
     aiVector3D relative = input - corner;
 
     outX = (short)(relative * edgeA * FIXED_POINT_SCALAR + 0.5f);

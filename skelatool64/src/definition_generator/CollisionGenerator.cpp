@@ -5,16 +5,6 @@
 
 #include <algorithm>
 
-CollisionGenerator::CollisionGenerator(const DisplayListSettings& settings, const RoomGeneratorOutput& roomOutput) : 
-    DefinitionGenerator(), 
-    mSettings(settings),
-    mRoomOutput(roomOutput) {}
-
-
-bool CollisionGenerator::ShouldIncludeNode(aiNode* node) {
-    return StartsWith(node->mName.C_Str(), "@collision ");
-}
-
 CollisionGrid::CollisionGrid(const aiAABB& boundaries) {
     x = floor(boundaries.mMin.x);
     z = floor(boundaries.mMin.z);
@@ -50,12 +40,14 @@ void CollisionGrid::AddToCells(const aiAABB& box, short value) {
     }
 }
 
-void CollisionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) {
+std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, RoomGeneratorOutput& roomOutput, NodeGroups& nodeGroups) {
+    std::shared_ptr<CollisionGeneratorOutput> output(new CollisionGeneratorOutput());
+    
     std::unique_ptr<StructureDataChunk> collidersChunk(new StructureDataChunk());
     std::unique_ptr<StructureDataChunk> colliderTypeChunk(new StructureDataChunk());
     std::unique_ptr<StructureDataChunk> collisionObjectChunk(new StructureDataChunk());
 
-    aiMatrix4x4 globalTransform = mSettings.CreateCollisionTransform();
+    aiMatrix4x4 globalTransform = settings.CreateCollisionTransform();
 
     int meshCount = 0;
 
@@ -63,20 +55,22 @@ void CollisionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefiniti
     std::string colliderTypesName = fileDefinition.GetUniqueName("collider_types");
     std::string collisionObjectsName = fileDefinition.GetUniqueName("collision_objects");
 
-    sortNodesByRoom(mIncludedNodes, mRoomOutput);
+    std::vector<NodeWithArguments> nodes = nodeGroups.NodesForType("@collision");
+
+    sortNodesWithArgsByRoom(nodes, roomOutput);
 
     std::vector<aiAABB> roomBoxes;
     std::vector<int> quadRooms;
 
-    for (int i = 0; i < mRoomOutput.roomCount; ++i) {
+    for (int i = 0; i < roomOutput.roomCount; ++i) {
         roomBoxes.push_back(aiAABB());
     }
 
-    for (auto node : mIncludedNodes) {
-        for (unsigned i = 0; i < node->mNumMeshes; ++i) {
-            aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+    for (auto nodeInfo : nodes) {
+        for (unsigned i = 0; i < nodeInfo.node->mNumMeshes; ++i) {
+            aiMesh* mesh = scene->mMeshes[nodeInfo.node->mMeshes[i]];
 
-            CollisionQuad collider(mesh, globalTransform * node->mTransformation);
+            CollisionQuad collider(mesh, globalTransform * nodeInfo.node->mTransformation);
             collidersChunk->Add(std::move(collider.Generate()));
 
             std::unique_ptr<StructureDataChunk> colliderType(new StructureDataChunk());
@@ -94,9 +88,9 @@ void CollisionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefiniti
             collisionObjectChunk->Add(std::move(collisionObject));
 
 
-            mOutput.quads.push_back(collider);
+            output->quads.push_back(collider);
 
-            int room = mRoomOutput.RoomForNode(node);
+            int room = roomOutput.RoomForNode(nodeInfo.node);
             quadRooms.push_back(room);
 
             aiAABB bb = collider.BoundingBox();
@@ -113,13 +107,13 @@ void CollisionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefiniti
         }
     }
 
-    for (int i = 0; i < mRoomOutput.roomCount; ++i) {
-        mOutput.roomGrids.push_back(CollisionGrid(roomBoxes[i]));
+    for (int i = 0; i < roomOutput.roomCount; ++i) {
+        output->roomGrids.push_back(CollisionGrid(roomBoxes[i]));
     }
 
     int quadIndex = 0;
-    for (auto& quad : mOutput.quads) {
-        mOutput.roomGrids[quadRooms[quadIndex]].AddToCells(quad.BoundingBox(), quadIndex);
+    for (auto& quad : output->quads) {
+        output->roomGrids[quadRooms[quadIndex]].AddToCells(quad.BoundingBox(), quadIndex);
         quadIndex++;
     }
 
@@ -155,9 +149,7 @@ void CollisionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefiniti
 
     fileDefinition.AddMacro(fileDefinition.GetMacroName("QUAD_COLLIDERS_COUNT"), std::to_string(meshCount));
 
-    mOutput.quadsName = collisionObjectsName;
-}
+    output->quadsName = collisionObjectsName;
 
-const CollisionGeneratorOutput& CollisionGenerator::GetOutput() const {
-    return mOutput;
+    return output;
 }

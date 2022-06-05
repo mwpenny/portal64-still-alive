@@ -17,19 +17,6 @@ struct StaticGeneratorOutput {
     std::string roomMappingName;
 };
 
-class StaticGenerator : public DefinitionGenerator {
-public:
-    StaticGenerator(const DisplayListSettings& settings, const RoomGeneratorOutput& roomMapping);
-
-    virtual bool ShouldIncludeNode(aiNode* node);
-    virtual void GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition);
-
-    const StaticGeneratorOutput& GetOutput() const;
-private:
-    DisplayListSettings mSettings;
-
-    StaticGeneratorOutput mOutput;
-    RoomGeneratorOutput mRoomMapping;
-};
+std::shared_ptr<StaticGeneratorOutput> generateStatic(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, RoomGeneratorOutput& roomMapping, NodeGroups& nodeGroups);
 
 #endif

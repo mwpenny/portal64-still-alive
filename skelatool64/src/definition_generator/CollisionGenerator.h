@@ -27,19 +27,6 @@ struct CollisionGeneratorOutput {
     std::vector<CollisionGrid> roomGrids;
 };
 
-class CollisionGenerator : public DefinitionGenerator {
-public:
-    CollisionGenerator(const DisplayListSettings& settings, const RoomGeneratorOutput& roomOutput);
-
-    virtual bool ShouldIncludeNode(aiNode* node);
-    virtual void GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition);
-
-    const CollisionGeneratorOutput& GetOutput() const;
-private:
-    DisplayListSettings mSettings;
-    RoomGeneratorOutput mRoomOutput;
-
-    CollisionGeneratorOutput mOutput;
-};
+std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, RoomGeneratorOutput& roomOutput, NodeGroups& nodeGroups);
 
 #endif
