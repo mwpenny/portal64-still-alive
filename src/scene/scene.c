@@ -85,7 +85,7 @@ void sceneInit(struct Scene* scene) {
         doorTransform.position = gCurrentLevel->doors[i].location;
         doorTransform.rotation = gCurrentLevel->doors[i].rotation;
         doorTransform.scale = gOneVec;
-        doorInit(&scene->doors[i], &doorTransform, 0, 0, gCurrentLevel->doors[i].doorwayIndex, 0);
+        doorInit(&scene->doors[i], &doorTransform, 0, 0, gCurrentLevel->doors[i].doorwayIndex, gCurrentLevel->doors[i].signalIndex);
     }
 
     // scene->player.grabbing = &scene->cubes[0].rigidBody;

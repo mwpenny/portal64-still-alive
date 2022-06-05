@@ -148,9 +148,10 @@ int main(int argc, char *argv[]) {
 
         if (args.mIsLevel) {
             NodeGroups nodesByGroup(scene);
+            Signals signals;
 
             std::cout << "Grouping objects by room" << std::endl;
-            auto roomOutput = generateRooms(scene, fileDef, settings, nodesByGroup);
+            auto roomOutput = generateRooms(scene, fileDef, settings, signals, nodesByGroup);
 
             std::cout << "Generating collider definitions" << std::endl;
             auto collisionOutput = generateCollision(scene, fileDef, settings, *roomOutput, nodesByGroup);
@@ -158,7 +159,7 @@ int main(int argc, char *argv[]) {
             std::cout << "Generating static definitions" << std::endl;
             auto staticOutput = generateStatic(scene, fileDef, settings, *roomOutput, nodesByGroup);
 
-            auto triggerOutput = generateTriggers(scene, fileDef, settings, *roomOutput, nodesByGroup);
+            auto triggerOutput = generateTriggers(scene, fileDef, settings, *roomOutput, signals, nodesByGroup);
 
             std::cout << "Generating level definitions" << std::endl;
             generateLevel(

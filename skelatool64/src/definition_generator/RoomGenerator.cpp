@@ -17,7 +17,7 @@ Doorway::Doorway(const aiNode* node, const CollisionQuad& quad):
 
 }
 
-Door::Door(const aiNode* node): node(node) {}
+Door::Door(const aiNode* node, int signalIndex): node(node), signalIndex(signalIndex) {}
 
 short RoomGeneratorOutput::FindLocationRoom(const std::string& name) const {
     for (auto& location : namedLocations) {
@@ -98,7 +98,7 @@ int findClosestRoom(const aiNode* node, const aiScene* scene, CFileDefinition& f
 }
 
 
-std::shared_ptr<RoomGeneratorOutput> generateRooms(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, NodeGroups& nodeGroups) {
+std::shared_ptr<RoomGeneratorOutput> generateRooms(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, Signals& signals, NodeGroups& nodeGroups) {
     std::vector<RoomBlock> roomBlocks;
     std::shared_ptr<RoomGeneratorOutput> output(new RoomGeneratorOutput());
 
@@ -143,7 +143,7 @@ std::shared_ptr<RoomGeneratorOutput> generateRooms(const aiScene* scene, CFileDe
     }
     
     for (auto& nodeInfo : nodeGroups.NodesForType(DOOR_PREFIX)) {
-        output->doors.push_back(Door(nodeInfo.node));
+        output->doors.push_back(Door(nodeInfo.node, nodeInfo.arguments.size() ? signals.SignalIndexForName(nodeInfo.arguments[0]): -1));
     }
 
     if (roomBlocks.size() == 0) {

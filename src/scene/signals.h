@@ -7,4 +7,21 @@ int signalsRead(unsigned signalIndex);
 void signalsSend(unsigned signalIndex);
 void signalsSetDefault(unsigned signalIndex, int value);
 
+enum SignalOperatorType {
+    SignalOperatorTypeAnd,
+    SignalOperatorTypeOr,
+    SignalOperatorTypeNot,
+    SignalOperatorTypeTimer,
+};
+
+struct SignalOperator {
+    unsigned char type;
+    unsigned char outputSignal;
+    unsigned char inputSignals[2];
+    union {
+        char additionalInputs[2];
+        short duration;
+    } data;
+};
+
 #endif

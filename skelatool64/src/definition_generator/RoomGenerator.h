@@ -4,6 +4,7 @@
 #include "DefinitionGenerator.h"
 #include "CollisionQuad.h"
 #include "../DisplayListSettings.h"
+#include "./Signals.h"
 
 #include <map>
 
@@ -22,9 +23,10 @@ struct Doorway {
 };
 
 struct Door {
-    Door(const aiNode* node);
+    Door(const aiNode* node, int signalIndex);
     
     const aiNode* node;
+    int signalIndex;
     int doorwayIndex;
 };
 
@@ -43,6 +45,6 @@ struct RoomGeneratorOutput {
 void sortNodesByRoom(std::vector<aiNode*>& nodes, const RoomGeneratorOutput& roomOutput);
 void sortNodesWithArgsByRoom(std::vector<NodeWithArguments>& nodes, const RoomGeneratorOutput& roomOutput);
 
-std::shared_ptr<RoomGeneratorOutput> generateRooms(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, NodeGroups& nodeGroups);
+std::shared_ptr<RoomGeneratorOutput> generateRooms(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, Signals& signals, NodeGroups& nodeGroups);
 
 #endif

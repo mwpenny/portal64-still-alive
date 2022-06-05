@@ -3,6 +3,7 @@
 #include "../MathUtl.h"
 
 #define TRIGGER_PREFIX  "@trigger"
+#define BUTTON_PREFIX  "@button"
 
 #define CUTSCENE_PREFIX    "@cutscene"
 
@@ -144,7 +145,7 @@ void generateCutscenes(std::map<std::string, std::shared_ptr<Cutscene>>& output,
     }    
 }
 
-std::shared_ptr<TriggerGeneratorOutput> generateTriggers(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, const RoomGeneratorOutput& roomOutput, NodeGroups& nodeGroups) {
+std::shared_ptr<TriggerGeneratorOutput> generateTriggers(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, const RoomGeneratorOutput& roomOutput, Signals& signals, NodeGroups& nodeGroups) {
     std::shared_ptr<TriggerGeneratorOutput> output(new TriggerGeneratorOutput());
 
     std::map<std::string, std::shared_ptr<Cutscene>> cutscenes;
@@ -177,5 +178,36 @@ std::shared_ptr<TriggerGeneratorOutput> generateTriggers(const aiScene* scene, C
         output->triggers.push_back(trigger);
     }
 
+    aiMatrix4x4 baseTransform = settings.CreateCollisionTransform();
+
+    for (auto& nodeInfo : nodeGroups.NodesForType(BUTTON_PREFIX)) {
+        aiQuaternion rot;
+        Button button;
+
+        (baseTransform * nodeInfo.node->mTransformation).DecomposeNoScaling(rot, button.position);
+        
+        button.signalIndex = nodeInfo.arguments.size() ? signals.SignalIndexForName(nodeInfo.arguments[0]) : -1;
+
+        output->buttons.push_back(button);
+    }
+
     return output;
+}
+
+void generateButtonsDefinition(CFileDefinition& fileDefinition, StructureDataChunk& levelDefinitionChunk, const std::vector<Button>& buttons) {
+    std::unique_ptr<StructureDataChunk> buttonData(new StructureDataChunk());
+
+    for (auto& ref : buttons) {
+        std::unique_ptr<StructureDataChunk> singleButton(new StructureDataChunk());
+
+        singleButton->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(ref.position)));
+        singleButton->AddPrimitive(ref.signalIndex);
+
+        buttonData->Add(std::move(singleButton));
+    }
+
+    std::string buttonsName = fileDefinition.AddDataDefinition("buttons", "struct ButtonDefinition", true, "_geo", std::move(buttonData));
+
+    levelDefinitionChunk.AddPrimitive("buttons", buttonsName);
+    levelDefinitionChunk.AddPrimitive("buttonCount", buttons.size());
 }

@@ -3,6 +3,7 @@
 
 #include "../physics/world.h"
 #include "../scene/portal_surface.h"
+#include "../scene/signals.h"
 #include "../math/boxs16.h"
 #include "../math/box3d.h"
 #include "../math/range.h"
@@ -66,6 +67,12 @@ struct DoorDefinition {
     struct Vector3 location;
     struct Quaternion rotation;
     short doorwayIndex;
+    short signalIndex;
+};
+
+struct ButtonDefinition {
+    struct Vector3 location;
+    short signalIndex;
 };
 
 struct LevelDefinition {
@@ -80,12 +87,16 @@ struct LevelDefinition {
     struct Location* locations;
     struct World world;
     struct DoorDefinition* doors;
+    struct ButtonDefinition* buttons;
+    struct SignalOperator* signalOperators;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
     short triggerCount;
     short locationCount;
     short doorCount;
+    short buttonCount;
+    short signalOperatorCount;
     short startLocation;
 };
 

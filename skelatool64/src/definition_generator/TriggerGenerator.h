@@ -4,6 +4,7 @@
 #include "DefinitionGenerator.h"
 #include "../DisplayListSettings.h"
 #include "RoomGenerator.h"
+#include "./Signals.h"
 #include <map>
 
 struct Trigger {
@@ -12,8 +13,14 @@ struct Trigger {
     aiAABB bb;
 };
 
+struct Button {
+    aiVector3D position;
+    int signalIndex;
+};
+
 struct TriggerGeneratorOutput {
     std::vector<std::shared_ptr<Trigger>> triggers;
+    std::vector<Button> buttons;
 };
 
 struct CutsceneStep {
@@ -31,6 +38,8 @@ struct Cutscene {
     std::vector<std::shared_ptr<CutsceneStep>> steps;
 };
 
-std::shared_ptr<TriggerGeneratorOutput> generateTriggers(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, const RoomGeneratorOutput& roomOutput, NodeGroups& nodeGroups);
+std::shared_ptr<TriggerGeneratorOutput> generateTriggers(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, const RoomGeneratorOutput& roomOutput, Signals& signals, NodeGroups& nodeGroups);
+
+void generateButtonsDefinition(CFileDefinition& fileDefinition, StructureDataChunk& levelDefinitionChunk, const std::vector<Button>& buttons);
 
 #endif
