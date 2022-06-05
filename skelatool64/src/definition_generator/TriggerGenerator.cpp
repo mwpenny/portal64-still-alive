@@ -186,6 +186,7 @@ std::shared_ptr<TriggerGeneratorOutput> generateTriggers(const aiScene* scene, C
 
         (baseTransform * nodeInfo.node->mTransformation).DecomposeNoScaling(rot, button.position);
         
+        button.roomIndex = roomOutput.RoomForNode(nodeInfo.node);
         button.signalIndex = nodeInfo.arguments.size() ? signals.SignalIndexForName(nodeInfo.arguments[0]) : -1;
 
         output->buttons.push_back(button);
@@ -201,6 +202,7 @@ void generateButtonsDefinition(CFileDefinition& fileDefinition, StructureDataChu
         std::unique_ptr<StructureDataChunk> singleButton(new StructureDataChunk());
 
         singleButton->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(ref.position)));
+        singleButton->AddPrimitive(ref.roomIndex);
         singleButton->AddPrimitive(ref.signalIndex);
 
         buttonData->Add(std::move(singleButton));

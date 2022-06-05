@@ -161,6 +161,8 @@ int main(int argc, char *argv[]) {
 
             auto triggerOutput = generateTriggers(scene, fileDef, settings, *roomOutput, signals, nodesByGroup);
 
+            auto signalsOutput = generateSignals(nodesByGroup);
+
             std::cout << "Generating level definitions" << std::endl;
             generateLevel(
                 scene,
@@ -169,7 +171,9 @@ int main(int argc, char *argv[]) {
                 *staticOutput, 
                 *collisionOutput,
                 *triggerOutput,
-                *roomOutput
+                *roomOutput,
+                *signalsOutput,
+                signals
             );
 
             nodesByGroup.PrintUnusedTypes();

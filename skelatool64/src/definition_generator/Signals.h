@@ -33,6 +33,14 @@ private:
     std::map<std::string, int> signalNameToIndex;
 };
 
+struct SignalsOutput {
+    std::vector<SignalOperation> signalOperations;    
+};
+
+std::shared_ptr<SignalsOutput> generateSignals(NodeGroups& nodeGroups);
+
 std::vector<SignalOperation> orderSignals(const std::vector<SignalOperation>& signals);
+
+void generateSignalsDefinition(CFileDefinition& fileDefinition, StructureDataChunk& levelDef, const SignalsOutput& signalsOutput, Signals& signals);
 
 #endif

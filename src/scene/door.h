@@ -2,6 +2,7 @@
 #define __DOOR_H__
 
 #include "../physics/collision_object.h"
+#include "../levels/level_definition.h"
 
 struct Door {
     struct CollisionObject collisionObject;
@@ -11,7 +12,7 @@ struct Door {
     float openAmount;
 };
 
-void doorInit(struct Door* door, struct Transform* at, int roomA, int roomB, int doorwayIndex, int signalIndex);
+void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, int roomA, int roomB);
 void doorUpdate(struct Door* door);
 
 #endif

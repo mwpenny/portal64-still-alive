@@ -3,6 +3,7 @@
 
 #include "../physics/collision_object.h"
 #include "signals.h"
+#include "../levels/level_definition.h"
 
 struct Button {
     struct CollisionObject collisionObject;
@@ -12,7 +13,7 @@ struct Button {
     struct Vector3 originalPos;
 };
 
-void buttonInit(struct Button* button, struct Vector3* at, int roomIndex, int signalIndex);
+void buttonInit(struct Button* button, struct ButtonDefinition* definition);
 void buttonUpdate(struct Button* button);
 
 #endif

@@ -28,16 +28,18 @@ void doorRender(void* data, struct RenderScene* renderScene) {
     renderSceneAdd(renderScene, door_01_gfx, matrix, door_01_material_index, &door->rigidBody.transform.position, armature);
 }
 
-void doorInit(struct Door* door, struct Transform* at, int roomA, int roomB, int doorwayIndex, int signalIndex) {
+void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, int roomA, int roomB) {
     // collisionObjectInit(&cube->collisionObject, &gCubeCollider, &cube->rigidBody, 1.0f);
     // collisionSceneAddDynamicObject(&cube->collisionObject);
 
     // cube->collisionObject.body->flags |= RigidBodyFlagsGrabbable;
 
-    door->rigidBody.transform = *at;
+    door->rigidBody.transform.position = doorDefinition->location;
+    door->rigidBody.transform.rotation = doorDefinition->rotation;
+    door->rigidBody.transform.scale = gOneVec;
 
     door->dynamicId = dynamicSceneAdd(door, doorRender, &door->rigidBody.transform, 1.7f);
-    door->signalIndex = signalIndex;
+    door->signalIndex = doorDefinition->signalIndex;
     door->openAmount = 0.0f;
 }
 

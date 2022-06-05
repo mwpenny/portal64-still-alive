@@ -15,7 +15,9 @@ void generateLevel(
         const StaticGeneratorOutput& staticOutput,
         const CollisionGeneratorOutput& collisionOutput,
         const TriggerGeneratorOutput& triggerOutput,
-        const RoomGeneratorOutput& roomOutput
+        const RoomGeneratorOutput& roomOutput,
+        const SignalsOutput& signalsOutput,
+        Signals& signals
 );
 
 #endif

@@ -402,7 +402,9 @@ void generateLevel(
         const StaticGeneratorOutput& staticOutput,
         const CollisionGeneratorOutput& collisionOutput,
         const TriggerGeneratorOutput& triggerOutput,
-        const RoomGeneratorOutput& roomOutput
+        const RoomGeneratorOutput& roomOutput,
+        const SignalsOutput& signalsOutput,
+        Signals& signals
 ) {    
     std::unique_ptr<StructureDataChunk> levelDef(new StructureDataChunk());
 
@@ -426,6 +428,8 @@ void generateLevel(
 
     generateDoorsDefinition(scene, fileDefinition, *levelDef, roomOutput, settings);
     generateButtonsDefinition(fileDefinition, *levelDef, triggerOutput.buttons);
+
+    generateSignalsDefinition(fileDefinition, *levelDef, signalsOutput, signals);
 
     fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct LevelDefinition", fileDefinition.GetUniqueName("level"), false, "_geo", std::move(levelDef))));
 }

@@ -56,13 +56,12 @@ void sceneInit(struct Scene* scene) {
         scene->cubes[i].rigidBody.angularVelocity = gOneVec;
     }
 
-    scene->buttonCount = 1;
+    scene->buttonCount = gCurrentLevel->buttonCount;
     scene->buttons = malloc(sizeof(struct Button) * scene->buttonCount);
-    struct Vector3 buttonPos;
-    buttonPos.x = 5.0f;
-    buttonPos.y = 0.0f;
-    buttonPos.z = 3.0f;
-    buttonInit(&scene->buttons[0], &buttonPos, 1, 0);
+
+    for (int i = 0; i < scene->buttonCount; ++i) {
+        buttonInit(&scene->buttons[i], &gCurrentLevel->buttons[i]);
+    }
 
     scene->decorCount = 0;
     scene->decor = malloc(sizeof(struct DecorObject*) * scene->decorCount);
@@ -81,14 +80,8 @@ void sceneInit(struct Scene* scene) {
     scene->doorCount = gCurrentLevel->doorCount;
     scene->doors = malloc(sizeof(struct Door) * scene->doorCount);
     for (int i = 0; i < scene->doorCount; ++i) {
-        struct Transform doorTransform;
-        doorTransform.position = gCurrentLevel->doors[i].location;
-        doorTransform.rotation = gCurrentLevel->doors[i].rotation;
-        doorTransform.scale = gOneVec;
-        doorInit(&scene->doors[i], &doorTransform, 0, 0, gCurrentLevel->doors[i].doorwayIndex, gCurrentLevel->doors[i].signalIndex);
+        doorInit(&scene->doors[i], &gCurrentLevel->doors[i], 0, 0);
     }
-
-    // scene->player.grabbing = &scene->cubes[0].rigidBody;
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {

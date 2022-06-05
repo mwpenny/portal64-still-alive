@@ -72,6 +72,7 @@ struct DoorDefinition {
 
 struct ButtonDefinition {
     struct Vector3 location;
+    short roomIndex;
     short signalIndex;
 };
 

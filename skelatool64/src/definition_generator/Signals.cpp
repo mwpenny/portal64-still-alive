@@ -99,7 +99,7 @@ std::unique_ptr<DataChunk> generateChunkForSignal(const SignalOperation& signal,
     return result;
 };
 
-std::unique_ptr<DataChunk> generateSignals(const std::vector<SignalOperation>& operations, Signals& signals) {
+std::unique_ptr<DataChunk> generateSignalData(const std::vector<SignalOperation>& operations, Signals& signals) {
     int timerCount = 0;
 
     std::unique_ptr<StructureDataChunk> result(new StructureDataChunk());
@@ -110,4 +110,82 @@ std::unique_ptr<DataChunk> generateSignals(const std::vector<SignalOperation>& o
     }
 
     return result;
+}
+
+
+std::shared_ptr<SignalsOutput> generateSignals(NodeGroups& nodeGroups) {
+    std::vector<SignalOperation> operations;
+    
+    for (auto& nodeInfo : nodeGroups.NodesForType("@and")) {
+        if (nodeInfo.arguments.size() <= 1) {
+            continue;
+        }
+
+        SignalOperation operation;
+        operation.type = SignalOperationType::And;
+        operation.outputName = nodeInfo.arguments[0];
+        operation.inputNames.assign(nodeInfo.arguments.begin() + 1, nodeInfo.arguments.end());
+
+        operations.push_back(operation);
+    }
+
+    for (auto& nodeInfo : nodeGroups.NodesForType("@or")) {
+        if (nodeInfo.arguments.size() <= 1) {
+            continue;
+        }
+
+        SignalOperation operation;
+        operation.type = SignalOperationType::Or;
+        operation.outputName = nodeInfo.arguments[0];
+        operation.inputNames.assign(nodeInfo.arguments.begin() + 1, nodeInfo.arguments.end());
+
+        operations.push_back(operation);
+    }
+
+    for (auto& nodeInfo : nodeGroups.NodesForType("@not")) {
+        if (nodeInfo.arguments.size() <= 1) {
+            continue;
+        }
+
+        SignalOperation operation;
+        operation.type = SignalOperationType::Not;
+        operation.outputName = nodeInfo.arguments[0];
+        operation.inputNames.push_back(nodeInfo.arguments[1]);
+
+        operations.push_back(operation);
+    }
+
+    for (auto& nodeInfo : nodeGroups.NodesForType("@timer")) {
+        if (nodeInfo.arguments.size() <= 2) {
+            continue;
+        }
+
+        SignalOperation operation;
+        operation.type = SignalOperationType::Timer;
+        operation.outputName = nodeInfo.arguments[0];
+        operation.inputNames.push_back(nodeInfo.arguments[1]);
+
+        operation.operand.duration = std::atof(nodeInfo.arguments[2].c_str());
+
+        operations.push_back(operation);
+    }
+
+    std::shared_ptr<SignalsOutput> result(new SignalsOutput());
+
+    result->signalOperations = orderSignals(operations);
+
+    return result;      
+}
+
+void generateSignalsDefinition(CFileDefinition& fileDefinition, StructureDataChunk& levelDef, const SignalsOutput& signalsOutput, Signals& signals) {
+    std::string signalsName = fileDefinition.AddDataDefinition(
+        "signal_operations", 
+        "struct SignalOperator", 
+        true, 
+        "_geo", 
+        std::move(generateSignalData(signalsOutput.signalOperations, signals))
+    );
+
+    levelDef.AddPrimitive("signalOperators", signalsName);
+    levelDef.AddPrimitive("signalOperatorCount", signalsOutput.signalOperations.size());
 }

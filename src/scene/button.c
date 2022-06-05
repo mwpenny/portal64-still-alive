@@ -53,22 +53,22 @@ void buttonRender(void* data, struct RenderScene* renderScene) {
     renderSceneAdd(renderScene, button_gfx, matrix, button_material_index, &button->rigidBody.transform.position, armature);
 }
 
-void buttonInit(struct Button* button, struct Vector3* at, int roomIndex, int signalIndex) {
+void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
     collisionObjectInit(&button->collisionObject, &gButtonCollider, &button->rigidBody, 1.0f);
     rigitBodyMarkKinematic(&button->rigidBody);
     collisionSceneAddDynamicObject(&button->collisionObject);
 
-    button->rigidBody.transform.position = *at;
+    button->rigidBody.transform.position = definition->location;
     quatIdent(&button->rigidBody.transform.rotation);
     button->rigidBody.transform.scale = gOneVec;
-    button->rigidBody.currentRoom = roomIndex;
+    button->rigidBody.currentRoom = definition->roomIndex;
 
     collisionObjectUpdateBB(&button->collisionObject);
 
     button->dynamicId = dynamicSceneAdd(button, buttonRender, &button->rigidBody.transform, 0.84f);
-    button->signalIndex = signalIndex;
+    button->signalIndex = definition->signalIndex;
 
-    button->originalPos = *at;
+    button->originalPos = definition->location;
 }
 
 void buttonUpdate(struct Button* button) {
