@@ -121,7 +121,7 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
     next->aspectRatio = current->aspectRatio;
     transformConcat(&portalCombined, &current->camera.transform, &next->camera.transform);
 
-    float zBias = (STARTING_RENDER_DEPTH - current->currentDepth - 1) * (-0.01f / STARTING_RENDER_DEPTH);
+    float zBias = (STARTING_RENDER_DEPTH - current->currentDepth - 1) * -0.005f;
 
     // render any objects halfway through portals
     cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, current->viewport, NULL, 0.0f);
@@ -177,12 +177,11 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
     struct Vector3 worldForward;
     quatMultVector(&portal->transform.rotation, &forward, &worldForward);
 
-    struct Quaternion inverseCamera;
-    quatConjugate(&props->camera.transform.rotation, &inverseCamera);
-    quatMultVector(&inverseCamera, &worldForward, &forward);
+    struct Vector3 offsetFromCamera;
+    vector3Sub(&props->camera.transform.position, &portal->transform.position, &offsetFromCamera);
 
     // don't render the portal if it is facing the wrong way
-    if (forward.z < 0.0f) {
+    if (vector3Dot(&worldForward, &offsetFromCamera) < 0.0f) {
         return;
     }
     

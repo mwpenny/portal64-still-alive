@@ -123,10 +123,13 @@ static void gameProc(void* arg) {
 			OS_VI_DIVOT_OFF |
 			OS_VI_DITHER_FILTER_OFF);
 
+    osViBlack(1);
+
     u32 pendingGFX = 0;
     u32 drawBufferIndex = 0;
     u8 frameControl = 0;
-    u8 inputIgnore = 6;
+    u8 inputIgnore = 5;
+    u8 drawingEnabled = 0;
 
     u16* memoryEnd = graphicsLayoutScreenBuffers((u16*)PHYS_TO_K0(osMemSize));
 
@@ -162,22 +165,18 @@ static void gameProc(void* arg) {
                     break;
                 }
 
-                static int renderSkip = 1;
-
-                if (pendingGFX < 2 && !renderSkip) {
+                if (pendingGFX < 2 && drawingEnabled) {
                     graphicsCreateTask(&gGraphicsTasks[drawBufferIndex], (GraphicsCallback)sceneRender, &gScene);
                     drawBufferIndex = drawBufferIndex ^ 1;
                     ++pendingGFX;
-                } else if (renderSkip) {
-                    --renderSkip;
                 }
 
                 controllersTriggerRead();
                 if (inputIgnore) {
                     --inputIgnore;
                 } else {
-
                     sceneUpdate(&gScene);
+                    drawingEnabled = 1;
                 }
                 timeUpdateDelta();
                 soundPlayerUpdate();

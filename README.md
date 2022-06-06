@@ -57,9 +57,11 @@ where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where blender
 
 ## Current TODO list
 
-Portal culling
 Doorway collision
     Implement collider bitmask
 Cylinder touching bug
-Blank screen on game start
+Radio
+    Create radio model
+    Create radio texture
+    Implement 3D sound
 cube dispenser
