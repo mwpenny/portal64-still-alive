@@ -146,6 +146,25 @@ void playerUpdateGrabbedObject(struct Player* player) {
     }
 }
 
+#define DEADZONE_SIZE       5
+#define MAX_JOYSTICK_RANGE  80
+
+float playerCleanupStickInput(s8 input) {
+    if (input > -DEADZONE_SIZE && input < DEADZONE_SIZE) {
+        return 0.0f;
+    }
+
+    if (input >= MAX_JOYSTICK_RANGE) {
+        return 1.0f;
+    }
+
+    if (input <= -MAX_JOYSTICK_RANGE) {
+        return -1.0f;
+    }
+
+    return ((float)input + (input > 0 ? -DEADZONE_SIZE : DEADZONE_SIZE)) * (1.0f / (MAX_JOYSTICK_RANGE - DEADZONE_SIZE));
+}
+
 void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Vector3 forward;
     struct Vector3 right;
@@ -226,8 +245,10 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         soundPlayerPlay(soundsPortalExit[2 - didPassThroughPortal], 0.75f, 1.0f);
     }
 
-    float targetYaw = -ROTATE_RATE * controllerInput->stick_x / 80.0f;
-    float targetPitch = ROTATE_RATE * controllerInput->stick_y / 80.0f;
+    
+
+    float targetYaw = -playerCleanupStickInput(controllerInput->stick_x) * ROTATE_RATE;
+    float targetPitch = playerCleanupStickInput(controllerInput->stick_y) * ROTATE_RATE;
 
     player->yawVelocity = mathfMoveTowards(
         player->yawVelocity, 

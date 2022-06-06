@@ -63,7 +63,7 @@ int mergeColliderList(short* a, int aCount, short* b, int bCount, short* output)
 #define GRID_CELL_X(room, worldX) floorf(((worldX) - room->cornerX) * (1.0f / COLLISION_GRID_CELL_SIZE));
 #define GRID_CELL_Z(room, worldZ) floorf(((worldZ) - room->cornerZ) * (1.0f / COLLISION_GRID_CELL_SIZE));
 
-#define GRID_CELL_CONTENTS(room, x, z) (&room->cellContents[(x) * room->spanX + (z)])
+#define GRID_CELL_CONTENTS(room, x, z) (&room->cellContents[(x) * room->spanZ + (z)])
 
 int collisionObjectRoomColliders(struct Room* room, struct Box3D* box, short output[MAX_COLLIDERS]) {
     short tmp[MAX_COLLIDERS];

@@ -2,6 +2,7 @@
 #include "ExtendedMesh.h"
 
 #include <algorithm>
+#include <iostream>
 #include "MathUtl.h"
 
 aiMesh* copyMesh(aiMesh* mesh) {
@@ -193,54 +194,63 @@ void getMeshFaceGroups(aiMesh* mesh, std::vector<std::shared_ptr<std::set<aiFace
 
     std::map<int, int> indexToGroup;
 
+    // assign each index a unique group
+    for (unsigned vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex) {
+        indexToGroup[vertexIndex] = vertexIndex;
+    }
+
+    bool hadChanges;
+
+    // join adjacent faces into the same group until all merges complete
+    do {
+        hadChanges = false;
+        for (unsigned faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex) {
+            aiFace* face = &mesh->mFaces[faceIndex];
+
+            int minGroup = indexToGroup[face->mIndices[0]];
+
+            for (unsigned indexIndex = 1; indexIndex < face->mNumIndices; ++indexIndex) {
+                int indexGroup = indexToGroup[face->mIndices[indexIndex]];
+
+                if (indexGroup < minGroup) {
+                    minGroup = indexGroup;
+                }
+            }
+
+            for (unsigned indexIndex = 0; indexIndex < face->mNumIndices; ++indexIndex) {
+                int indexGroup = indexToGroup[face->mIndices[indexIndex]];
+
+                if (indexGroup != minGroup) {
+                    indexToGroup[face->mIndices[indexIndex]] = minGroup;
+                    hadChanges = true;
+
+                }
+            }
+
+        }
+    } while (hadChanges);
+
+    std::map<int, int> groupIndexMapping;
+
     for (unsigned faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex) {
         aiFace* face = &mesh->mFaces[faceIndex];
 
-        int currentGroup = -1;
+        int faceGroup = indexToGroup[face->mIndices[0]];
 
-        for (unsigned indexIndex = 0; indexIndex < face->mNumIndices; ++indexIndex) {
-            unsigned index = face->mIndices[indexIndex];
+        auto groupMapping = groupIndexMapping.find(faceGroup);
 
-            auto indexToGroupFind = indexToGroup.find(index);
+        int resultIndex;
 
-            int indexGroup = indexToGroupFind == indexToGroup.end() ? -1 : indexToGroupFind->second;
-
-            if (indexGroup == -1) {
-                if (currentGroup == -1) {
-                    indexGroup = result.size();
-                    currentGroup = indexGroup;
-
-                    result.push_back(std::shared_ptr<std::set<aiFace*>>(new std::set<aiFace*>()));
-                } else {
-                    indexGroup = currentGroup;
-                }
-
-                indexToGroup[index] = indexGroup;
-            }
-
-            if (currentGroup == -1) {
-                currentGroup = indexGroup;
-            }
-
-            auto currentGroupSet = result[currentGroup];
-            auto indexGroupSet = result[indexGroup];
-
-            if (currentGroupSet != indexGroupSet) {
-                // merge both the groups
-                for (auto face : *indexGroupSet) {
-                    currentGroupSet->insert(face);
-                }
-                // have both group numbers point to the same group
-                result[indexGroup] = currentGroupSet;
-            }
-
-            // add current face to group
-            currentGroupSet->insert(face);
+        if (groupMapping == groupIndexMapping.end()) {
+            resultIndex = result.size();
+            groupIndexMapping[faceGroup] = resultIndex;
+            result.push_back(std::shared_ptr<std::set<aiFace*>>(new std::set<aiFace*>()));
+        } else {
+            resultIndex = groupMapping->second;
         }
-    }
 
-    std::sort(result.begin(), result.end());
-    result.erase(std::unique(result.begin(), result.end()), result.end());
+        result[resultIndex]->insert(face);
+    }
 }
 
 void cubeProjectSingleFace(aiMesh* mesh, std::set<aiFace*>& faces, double sTile, double tTile) {

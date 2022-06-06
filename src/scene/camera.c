@@ -125,7 +125,7 @@ Mtx* cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState,
         cameraExtractClippingPlane(combined, &clippingInfo->clippingPlanes[2], 1, 1.0f);
         cameraExtractClippingPlane(combined, &clippingInfo->clippingPlanes[3], 1, -1.0f);
         cameraExtractClippingPlane(combined, &clippingInfo->clippingPlanes[4], 2, 1.0f);
-        vector3Scale(&camera->transform.position, &clippingInfo->cameraPosScaled, SCENE_SCALE);
+        clippingInfo->cameraPos = camera->transform.position;
     }
 
     gSPMatrix(renderState->dl++, osVirtualToPhysical(&viewProjMatrix[1]), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);

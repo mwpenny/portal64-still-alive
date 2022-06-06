@@ -4,6 +4,7 @@
 #include "util/memory.h"
 #include "defs.h"
 #include "../graphics/render_scene.h"
+#include "../math/mathf.h"
 
 void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, struct RenderScene* renderScene) {
     int currentRoom = 0;
@@ -35,6 +36,8 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, s
     }
 }
 
+#define FORCE_RENDER_DOORWAY_DISTANCE   0.1f
+
 void staticRenderDetermineVisibleRooms(struct FrustrumCullingInformation* cullingInfo, u16 currentRoom, u64* visitedRooms) {
     u64 roomMask = 1LL << currentRoom;
 
@@ -51,7 +54,12 @@ void staticRenderDetermineVisibleRooms(struct FrustrumCullingInformation* cullin
             continue;
         }
 
-        if (isQuadOutsideFrustrum(cullingInfo, &doorway->quad)) {
+        float doorwayDistance = planePointDistance(&doorway->quad.plane, &cullingInfo->cameraPos);
+
+        if (
+            // if the player is close enough to the doorway it should still render it, even if facing the wrong way
+            (fabsf(doorwayDistance) > FORCE_RENDER_DOORWAY_DISTANCE || collisionQuadDetermineEdges(&cullingInfo->cameraPos, &doorway->quad)) && 
+            isQuadOutsideFrustrum(cullingInfo, &doorway->quad)) {
             continue;
         }
 

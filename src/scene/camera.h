@@ -23,7 +23,7 @@ struct Camera {
 struct FrustrumCullingInformation {
     struct Plane clippingPlanes[CLIPPING_PLANE_COUNT];
 
-    struct Vector3 cameraPosScaled;
+    struct Vector3 cameraPos;
 };
 
 int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox);

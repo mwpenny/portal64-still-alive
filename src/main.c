@@ -176,6 +176,7 @@ static void gameProc(void* arg) {
                 if (inputIgnore) {
                     --inputIgnore;
                 } else {
+
                     sceneUpdate(&gScene);
                 }
                 timeUpdateDelta();
