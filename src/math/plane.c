@@ -28,6 +28,7 @@ void planeProjectPoint(struct Plane* plane, struct Vector3* point, struct Vector
     vector3AddScaled(point, &plane->normal, distance, output);
 }
 
+// TODO figure out what to do when two points are the same
 void calculateBarycentricCoords(struct Vector3* a, struct Vector3* b, struct Vector3* c, struct Vector3* point, struct Vector3* output) {
     struct Vector3 v0;
     struct Vector3 v1;

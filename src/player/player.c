@@ -12,9 +12,9 @@
 #include "../audio/soundplayer.h"
 #include "../audio/clips.h"
 
-#define GRAB_RAYCAST_DISTANCE   3.5f
+#define GRAB_RAYCAST_DISTANCE   2.5f
 
-struct Vector3 gGrabDistance = {0.0f, 0.0f, -2.5f};
+struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
 
 struct CollisionSphere gPlayerCollider = {

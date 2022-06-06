@@ -29,7 +29,7 @@
 #include "../decor/decor_object_list.h"
 #include "signals.h"
 
-struct Vector3 gPortalGunOffset = {0.110957, -0.113587, -0.21916};
+struct Vector3 gPortalGunOffset = {0.120957, -0.113587, -0.20916};
 struct Vector3 gPortalGunForward = {0.1f, -0.1f, 1.0f};
 struct Vector3 gPortalGunUp = {0.0f, 1.0f, 0.0f};
 
