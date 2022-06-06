@@ -74,11 +74,11 @@ float rigidBodyMassInverseAtLocalPoint(struct RigidBody* rigidBody, struct Vecto
 }
 
 
-void rigidBodyCheckPortals(struct RigidBody* rigidBody) {
+int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
     if (!gCollisionScene.portalTransforms[0] || !gCollisionScene.portalTransforms[1]) {
         rigidBody->flags &= ~(RigidBodyFlagsInFrontPortal0 | RigidBodyFlagsInFrontPortal1);
         rigidBody->flags |= RigidBodyFlagsPortalsInactive;
-        return;
+        return 0;
     }
 
     struct Vector3 localPoint;
@@ -88,6 +88,8 @@ void rigidBodyCheckPortals(struct RigidBody* rigidBody) {
     if (rigidBody->flags & RigidBodyIsTouchingPortal) {
         newFlags |= RigidBodyWasTouchingPortal;
     }
+
+    int result = 0;
 
     for (int i = 0; i < 2; ++i) {
         transformPointInverseNoScale(gCollisionScene.portalTransforms[i], &rigidBody->transform.position, &localPoint);
@@ -154,6 +156,8 @@ void rigidBodyCheckPortals(struct RigidBody* rigidBody) {
         newFlags |= RigidBodyFlagsCrossedPortal0 << i;
 
         rigidBody->currentRoom = gCollisionScene.portalRooms[1 - i];
+
+        result = i + 1;
     }
 
     rigidBody->flags &= ~(
@@ -166,4 +170,6 @@ void rigidBodyCheckPortals(struct RigidBody* rigidBody) {
         RigidBodyWasTouchingPortal
     );
     rigidBody->flags |= newFlags;
+
+    return result;
 }

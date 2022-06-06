@@ -9,7 +9,7 @@
 
 #define PLAYER_GRABBING_THROUGH_NOTHING -1
 
-#define PLAYER_HEAD_HEIGHT              1.2f
+#define PLAYER_HEAD_HEIGHT              1.0f
 
 enum PlayerFlags {
     PlayerFlagsGrounded = (1 << 0),

@@ -39,7 +39,7 @@ int renderSceneSortKey(int materialIndex, float distance) {
 
     // sort transparent surfaces from back to front
     if (materialIndex >= levelMaterialTransparentStart()) {
-        distanceScaled = 0x1000000 - distanceScaled;
+        return (0xFF << 23) | (0x1000000 - distanceScaled);
     }
 
     return (materialIndex << 23) | (distanceScaled & 0x7FFFFF);

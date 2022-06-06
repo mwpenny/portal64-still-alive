@@ -2,6 +2,7 @@
 #include "../audio/soundplayer.h"
 #include "../util/time.h"
 #include "../scene/scene.h"
+#include "../scene/signals.h"
 #include "../levels/levels.h"
 
 struct CutsceneRunner gCutsceneRunner;
@@ -30,6 +31,9 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             sceneFirePortal(&gScene, &firingRay, &gUp, step->openPortal.portalIndex, location->roomIndex);
             break;
         }
+        case CutsceneStepTypeSetSignal:
+            signalsSetDefault(step->setSignal.signalIndex, step->setSignal.signalValue);
+            break;
         default:
     }
 }

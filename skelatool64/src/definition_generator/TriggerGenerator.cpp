@@ -34,7 +34,7 @@ float distanceFromStart(const CutsceneStep& startStep, const CutsceneStep& other
     return relativeOffset.y;
 }
 
-std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, const RoomGeneratorOutput& roomOutput) {
+std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, const RoomGeneratorOutput& roomOutput, Signals& signals) {
     std::unique_ptr<StructureDataChunk> result(new StructureDataChunk());
 
     if ((step.command == "play_sound" || step.command == "start_sound") && step.args.size() >= 1) {
@@ -72,6 +72,13 @@ std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, con
             result->Add("openPortal", std::move(openPortal));
             return result;
         }
+    } else if ((step.command == "set_signal" || step.command == "clear_signal") && step.args.size() >= 1) {
+        result->AddPrimitive<const char*>("CutsceneStepTypeSetSignal");
+        std::unique_ptr<StructureDataChunk> setSignal(new StructureDataChunk());
+        setSignal->AddPrimitive(signals.SignalIndexForName(step.args[0]));
+        setSignal->AddPrimitive(step.command == "set_signal" ? 1 : 0);
+        result->Add("setSignal", std::move(setSignal));
+        return result;
     }
 
     result->AddPrimitive<const char*>("CutsceneStepTypeNoop");
@@ -80,20 +87,19 @@ std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, con
     return result;
 }
 
-void generateCutscenes(std::map<std::string, std::shared_ptr<Cutscene>>& output, CFileDefinition& fileDefinition, const RoomGeneratorOutput& roomOutput, NodeGroups& nodeGroups) {
+void generateCutscenes(std::map<std::string, std::shared_ptr<Cutscene>>& output, CFileDefinition& fileDefinition, const RoomGeneratorOutput& roomOutput, Signals& signals, NodeGroups& nodeGroups) {
     std::vector<std::shared_ptr<CutsceneStep>> steps;
 
     for (auto& nodeInfo : nodeGroups.NodesForType(CUTSCENE_PREFIX)) {
-        std::vector<std::string> cutsceneParts;
-        SplitString(nodeInfo.node->mName.C_Str(), ' ', cutsceneParts);
-
-        if (cutsceneParts.size() <= 1) {
+        if (nodeInfo.arguments.size() == 0) {
             continue;
         }
 
-        std::string command = cutsceneParts[1];
 
-        cutsceneParts.erase(cutsceneParts.begin(), cutsceneParts.begin() + 2);
+        std::string command = nodeInfo.arguments[0];
+
+        std::vector<std::string> cutsceneParts;
+        cutsceneParts.assign(nodeInfo.arguments.begin() + 1, nodeInfo.arguments.end());
 
         aiVector3D scale;
         aiVector3D pos;
@@ -134,7 +140,7 @@ void generateCutscenes(std::map<std::string, std::shared_ptr<Cutscene>>& output,
         std::unique_ptr<StructureDataChunk> steps(new StructureDataChunk());
 
         for (auto& step : cutscene.steps) {
-            steps->Add(std::move(generateCutsceneStep(*step, roomOutput)));
+            steps->Add(std::move(generateCutsceneStep(*step, roomOutput, signals)));
         }
 
         std::string stepsName = fileDefinition.GetUniqueName(cutscene.name + "_steps");
@@ -150,7 +156,7 @@ std::shared_ptr<TriggerGeneratorOutput> generateTriggers(const aiScene* scene, C
 
     std::map<std::string, std::shared_ptr<Cutscene>> cutscenes;
 
-    generateCutscenes(cutscenes, fileDefinition, roomOutput, nodeGroups);
+    generateCutscenes(cutscenes, fileDefinition, roomOutput, signals, nodeGroups);
 
     for (auto& nodeInfo : nodeGroups.NodesForType(TRIGGER_PREFIX)) {
         auto mesh = fileDefinition.GetExtendedMesh(scene->mMeshes[nodeInfo.node->mMeshes[0]]);
@@ -159,7 +165,7 @@ std::shared_ptr<TriggerGeneratorOutput> generateTriggers(const aiScene* scene, C
 
         std::string nodeName = nodeInfo.node->mName.C_Str();
 
-        auto cutscene = cutscenes.find(nodeName.substr(strlen(TRIGGER_PREFIX)));
+        auto cutscene = cutscenes.find(nodeInfo.arguments.size() ? nodeInfo.arguments[0] : std::string(""));
 
         if (cutscene == cutscenes.end()) {
             trigger->stepsName = "";

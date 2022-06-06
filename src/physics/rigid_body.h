@@ -47,7 +47,7 @@ void rigidBodyUpdate(struct RigidBody* rigidBody);
 void rigidBodyVelocityAtLocalPoint(struct RigidBody* rigidBody, struct Vector3* localPoint, struct Vector3* worldVelocity);
 void rigidBodyVelocityAtWorldPoint(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* worldVelocity);
 
-void rigidBodyCheckPortals(struct RigidBody* rigidBody);
+int rigidBodyCheckPortals(struct RigidBody* rigidBody);
 
 
 #endif

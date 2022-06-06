@@ -4,6 +4,8 @@ materials:
 
     gDPSetTextureFilter: G_TF_BILERP
 
+    gDPSetTexturePersp: G_TP_PERSP
+
     gSPGeometryMode:
       set: [G_CULL_BACK, G_ZBUFFER]
       clear: [G_CULL_FRONT]
@@ -77,9 +79,17 @@ materials:
       filename: ../../portal_pak_modified/materials/glass/glasswindow_frosted_002.png
       siz: G_IM_SIZ_32b
 
-    gDPSetCombineMode: G_CC_DECALRGBA
+    gDPSetCombineMode: G_CC_PRIMITIVE
     gDPSetCycleType: G_CYC_1CYCLE
     gDPSetRenderMode: G_RM_ZB_XLU_SURF
+    gDPSetPrimColor:
+      r: 176
+      g: 188
+      b: 196
+      a: 156
+
+    gDPSetTexturePersp: G_TP_NONE
+
     gSPGeometryMode:
       clear: [G_CULL_BACK, G_CULL_FRONT]
 

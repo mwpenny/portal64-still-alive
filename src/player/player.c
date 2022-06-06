@@ -9,6 +9,8 @@
 #include "physics/collision_scene.h"
 #include "physics/config.h"
 #include "../levels/levels.h"
+#include "../audio/soundplayer.h"
+#include "../audio/clips.h"
 
 #define GRAB_RAYCAST_DISTANCE   3.5f
 
@@ -217,7 +219,12 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         player->flags &= ~PlayerFlagsGrounded;
     }
 
-    rigidBodyCheckPortals(&player->body);
+    int didPassThroughPortal = rigidBodyCheckPortals(&player->body);
+
+    if (didPassThroughPortal) {
+        soundPlayerPlay(soundsPortalEnter[didPassThroughPortal - 1], 0.75f, 1.0f);
+        soundPlayerPlay(soundsPortalExit[2 - didPassThroughPortal], 0.75f, 1.0f);
+    }
 
     float targetYaw = -ROTATE_RATE * controllerInput->stick_x / 80.0f;
     float targetPitch = ROTATE_RATE * controllerInput->stick_y / 80.0f;
@@ -264,7 +271,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
     float pitchSign = signf(player->pitchVelocity);
 
-    if (lookingForward.y * pitchSign > newLookingForward.y * pitchSign) {
+    if (!didPassThroughPortal && lookingForward.y * pitchSign > newLookingForward.y * pitchSign) {
         struct Vector3 newForward = gZeroVec;
         newForward.y = pitchSign;
         struct Vector3 newUp;

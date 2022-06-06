@@ -29,7 +29,7 @@
 #include "../decor/decor_object_list.h"
 #include "signals.h"
 
-struct Vector3 gPortalGunOffset = {0.100957, -0.113587, -0.28916};
+struct Vector3 gPortalGunOffset = {0.110957, -0.113587, -0.21916};
 struct Vector3 gPortalGunForward = {0.1f, -0.1f, 1.0f};
 struct Vector3 gPortalGunUp = {0.0f, 1.0f, 0.0f};
 
@@ -38,7 +38,7 @@ Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 void sceneInit(struct Scene* scene) {
     signalsInit(1);
 
-    cameraInit(&scene->camera, 45.0f, 0.125f * SCENE_SCALE, 80.0f * SCENE_SCALE);
+    cameraInit(&scene->camera, 70.0f, 0.125f * SCENE_SCALE, 80.0f * SCENE_SCALE);
     playerInit(&scene->player, levelGetLocation(gCurrentLevel->startLocation));
 
     portalInit(&scene->portals[0], 0);
@@ -170,9 +170,9 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     hudRender(renderState);
 
-    sceneRenderPerformanceMetrics(scene, renderState, task);
+    // sceneRenderPerformanceMetrics(scene, renderState, task);
 
-    contactSolverDebugDraw(&gContactSolver, renderState);
+    // contactSolverDebugDraw(&gContactSolver, renderState);
 }
 
 void sceneCheckPortals(struct Scene* scene) {
@@ -185,10 +185,12 @@ void sceneCheckPortals(struct Scene* scene) {
 
     if (controllerGetButtonDown(0, Z_TRIG)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom);
+        soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f);
     }
 
     if (controllerGetButtonDown(0, R_TRIG | L_TRIG)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom);
+        soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f);
     }
 }
 
