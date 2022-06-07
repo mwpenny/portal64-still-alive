@@ -130,34 +130,6 @@ int collisionSceneFilterPortalContacts(struct ContactManifold* contact) {
     return writeIndex;
 }
 
-void collisionObjectQueryScene(struct CollisionObject* object, struct CollisionScene* scene, void* data, ManifoldCallback callback) {
-    CollideWithQuad quadCollider = object->collider->callbacks->collideWithQuad;
-
-    if (!quadCollider) {
-        return;
-    }
-
-    short colliderIndices[MAX_COLLIDERS];
-    int quadCount = collisionObjectRoomColliders(&scene->world->rooms[object->body->currentRoom], &object->boundingBox, colliderIndices);
-
-    struct ContactManifold localContact;
-
-    for (int i = 0; i < quadCount; ++i) {
-        localContact.contactCount = 0;
-
-        struct CollisionObject* quadObject = &scene->quads[colliderIndices[i]];
-
-        if ((quadObject->collisionLayers & object->collisionLayers) == 0) {
-            continue;
-        }
-
-        if (quadCollider(object->collider->data, &object->body->transform, quadObject->collider->data, &localContact) &&
-            collisionSceneFilterPortalContacts(&localContact)) {
-            callback(data, &localContact);
-        }
-    }
-}
-
 int collisionSceneIsTouchingSinglePortal(struct Vector3* contactPoint, struct Vector3* contactNormal, struct Transform* portalTransform, int portalIndex) {
     struct Vector3 localPoint;
     transformPointInverseNoScale(portalTransform, contactPoint, &localPoint);

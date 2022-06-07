@@ -8,7 +8,6 @@
 #include "../math/vector2.h"
 
 struct ColliderCallbacks gCollisionCylinderCallbacks = {
-    NULL,
     raycastCylinder,
     collisionCylinderSolidMofI,
     collisionCylinderBoundingBox,

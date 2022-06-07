@@ -35,7 +35,6 @@ typedef int (*MinkowsiSumWithBasis)(void* data, struct Basis* basis, struct Vect
 typedef int (*CollideWithSphere)(void* data, struct Transform* transform, struct CollisionSphere* sphere, struct Vector3* spherePos, struct ContactManifold* contact);
 
 struct ColliderCallbacks {
-    CollideWithQuad collideWithQuad;
     RaycastCollider raycast;
     MomentOfInertiaCalculator mofICalculator;
     BoundingBoxCalculator boundingBoxCalculator;

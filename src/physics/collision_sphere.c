@@ -80,7 +80,6 @@ void collisionSphereBoundingBox(struct ColliderTypeData* typeData, struct Transf
 }
 
 struct ColliderCallbacks gCollisionSphereCallbacks = {
-    collisionSphereCollideQuad,
     NULL, // TODO
     collisionSphereSolidMofI,
     collisionSphereBoundingBox,

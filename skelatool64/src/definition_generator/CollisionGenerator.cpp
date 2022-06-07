@@ -29,7 +29,7 @@ void CollisionGrid::AddToCells(const aiAABB& box, short value) {
     if (minX >= spanX) minX = spanX - 1;
 
     if (maxZ < 0) maxZ = 0;
-    if (minX >= spanZ) minZ = spanZ - 1;
+    if (minZ >= spanZ) minZ = spanZ - 1;
 
     for (int currX = minX; currX <= maxX; ++currX) {
         for (int currZ = minZ; currZ <= maxZ; ++currZ) {
@@ -67,7 +67,11 @@ std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene
     }
 
     for (auto nodeInfo : nodes) {
+        if (std::string(nodeInfo.node->mName.C_Str()) == "@collision quad_Wall.023") {
+            std::cout << "foo bar";
+        }
         for (unsigned i = 0; i < nodeInfo.node->mNumMeshes; ++i) {
+
             aiMesh* mesh = scene->mMeshes[nodeInfo.node->mMeshes[i]];
 
             bool isTransparent = std::find(nodeInfo.arguments.begin(), nodeInfo.arguments.end(), "transparent") != nodeInfo.arguments.end();

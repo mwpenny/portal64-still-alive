@@ -30,8 +30,6 @@ void collisionObjectCollideWithScene(struct CollisionObject* object, struct Coll
 int collisionSceneIsTouchingPortal(struct Vector3* contactPoint, struct Vector3* contactNormal);
 int collisionSceneIsPortalOpen();
 
-void collisionObjectQueryScene(struct CollisionObject* object, struct CollisionScene* scene, void* data, ManifoldCallback callback);
-
 int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, int collisionLayers, float maxDistance, int passThroughPortals, struct RaycastHit* hit);
 
 void collisionSceneGetPortalTransform(int fromPortal, struct Transform* out);

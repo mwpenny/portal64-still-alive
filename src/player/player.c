@@ -15,6 +15,8 @@
 
 #define GRAB_RAYCAST_DISTANCE   2.5f
 
+#define PLAYER_COLLISION_LAYERS COLLISION_LAYERS_TANGIBLE
+
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
 
@@ -41,7 +43,7 @@ struct ColliderTypeData gPlayerColliderData = {
 };
 
 void playerInit(struct Player* player, struct Location* startLocation) {
-    collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, COLLISION_LAYERS_TANGIBLE);
+    collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
     rigidBodyMarkKinematic(&player->body);
     player->body.flags |= RigidBodyGenerateContacts;
     collisionSceneAddDynamicObject(&player->collisionObject);
@@ -126,6 +128,8 @@ void playerUpdateGrabbedObject(struct Player* player) {
             
             struct RaycastHit hit;
 
+            player->collisionObject.collisionLayers = 0;
+
             if (collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, &hit) && hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable)) {
                 player->grabbing = hit.object->body;
 
@@ -135,6 +139,8 @@ void playerUpdateGrabbedObject(struct Player* player) {
                     player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
                 }
             }
+
+            player->collisionObject.collisionLayers = PLAYER_COLLISION_LAYERS;
         }
     }
 
