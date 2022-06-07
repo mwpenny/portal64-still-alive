@@ -82,3 +82,40 @@ int collisionCylinderMinkowsiSum(void* data, struct Basis* basis, struct Vector3
 
     return (centerDir ? 0x1 : 0x2) | (1 << (faceId + 2)) | (1 << (nextId + 2));
 }
+
+int collisionCylinderRaycast(struct CollisionObject* cylinderObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact {
+    float rayLerp;
+    float cylinderLerp;
+
+    lineNearestApproach(&ray->origin, &ray->dir, &cylinderObject->body->transform.position, &cylinderObject->body->rotationBasis.y, &rayLerp, &cylinderLerp);
+
+    if (rayLerp < 0.0f) {
+        return 0;
+    }
+
+    struct CollisionCylinder* cylinder = (struct CollisionCylinder*)cylinderObject->collider->data;
+
+    float diagnalReach = cylinder->radius * cylinder->radius + cylinder->halfHeight * cylinder->halfHeight;
+
+    float distanceCheck = maxDistance + diagnalReach;
+
+    if (rayLerp > distanceCheck * distanceCheck) {
+        return 0;
+    }
+
+    struct Vector3 rayApproach;
+    vector3AddScaled(&ray->origin, &ray->dir, rayLerp, &rayApproach);
+
+    struct Vector3 cylinderApproach;
+    vector3AddScaled(&cylinderObject->body->transform.position, &cylinderObject->body->rotationBasis.y, cylinderLerp, &cylinderApproach);
+
+    if (vector3DistSqrd(&rayApproach, &cylinderApproach) > cylinder->radius * cylinder->radius) {
+        return 0;
+    }
+
+    struct Ray localRay;
+    struct Vector3 offset;
+    vector3Sub(&ray->origin, &cylinderObject->body->transform.position, &offset);
+    basisUnRotate(&cylinderObject->body->rotationBasis, &ray->dir, &localRay.dir);
+    basisUnRotate(&cylinderObject->body->rotationBasis, &offset, &localRay.origin);
+}
