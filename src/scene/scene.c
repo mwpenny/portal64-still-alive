@@ -134,10 +134,10 @@ void sceneRenderPerformanceMetrics(struct Scene* scene, struct RenderState* rend
 
 void sceneRenderPortalGun(struct Scene* scene, struct RenderState* renderState) {
     struct Transform gunTransform;
-    transformPoint(&scene->player.body.transform, &gPortalGunOffset, &gunTransform.position);
+    transformPoint(&scene->player.lookTransform, &gPortalGunOffset, &gunTransform.position);
     struct Quaternion relativeRotation;
     quatLook(&gPortalGunForward, &gPortalGunUp, &relativeRotation);
-    quatMultiply(&scene->player.body.transform.rotation, &relativeRotation, &gunTransform.rotation);
+    quatMultiply(&scene->player.lookTransform.rotation, &relativeRotation, &gunTransform.rotation);
     gunTransform.scale = gOneVec;
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
     transformToMatrixL(&gunTransform, matrix, SCENE_SCALE);
@@ -178,10 +178,10 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 void sceneCheckPortals(struct Scene* scene) {
     struct Ray raycastRay;
     struct Vector3 playerUp;
-    raycastRay.origin = scene->player.body.transform.position;
+    raycastRay.origin = scene->player.lookTransform.position;
     vector3Negate(&gForward, &raycastRay.dir);
-    quatMultVector(&scene->player.body.transform.rotation, &raycastRay.dir, &raycastRay.dir);
-    quatMultVector(&scene->player.body.transform.rotation, &gUp, &playerUp);
+    quatMultVector(&scene->player.lookTransform.rotation, &raycastRay.dir, &raycastRay.dir);
+    quatMultVector(&scene->player.lookTransform.rotation, &gUp, &playerUp);
 
     if (controllerGetButtonDown(0, Z_TRIG)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom);
@@ -217,7 +217,7 @@ void sceneUpdate(struct Scene* scene) {
     
     collisionSceneUpdateDynamics();
 
-    levelCheckTriggers(&scene->player.body.transform.position);
+    levelCheckTriggers(&scene->player.lookTransform.position);
     cutsceneRunnerUpdate(&gCutsceneRunner);
 
     scene->cpuTime = osGetTime() - frameStart;

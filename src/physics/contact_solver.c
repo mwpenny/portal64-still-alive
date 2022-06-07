@@ -475,6 +475,8 @@ struct ContactManifold* contactSolverGetContactManifold(struct ContactSolver* so
 struct ContactManifold* contactSolverNextManifold(struct ContactSolver* solver, struct CollisionObject* forObject, struct ContactManifold* current) {
 	if (!current) {
 		current = solver->activeContacts;
+	} else {
+		current = current->next;
 	}
 
 	while (current) {

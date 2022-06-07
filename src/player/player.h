@@ -18,6 +18,7 @@ enum PlayerFlags {
 struct Player {
     struct CollisionObject collisionObject;
     struct RigidBody body;
+    struct Transform lookTransform;
     short grabbingThroughPortal;
     struct RigidBody* grabbing;
     float pitchVelocity;

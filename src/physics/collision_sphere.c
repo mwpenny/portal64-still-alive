@@ -84,4 +84,82 @@ struct ColliderCallbacks gCollisionSphereCallbacks = {
     NULL, // TODO
     collisionSphereSolidMofI,
     collisionSphereBoundingBox,
+    NULL,
+    collisionSphereCollideWithSphere,
 };
+
+int collisionSphereCheckWithNearestPoint(struct Vector3* nearestPoint, struct CollisionSphere* otherSphere, struct Vector3* spherePos, struct ContactManifold* contact) {
+    vector3Sub(spherePos, nearestPoint, &contact->normal);
+
+    float distanceSqrd = vector3MagSqrd(&contact->normal);
+
+    if (distanceSqrd > otherSphere->radius * otherSphere->radius) {
+        return 0;
+    }
+
+    float distance = 0.0f;
+
+    if (distanceSqrd < 0.00001f) {
+        contact->normal = gRight;
+    } else {
+        distance = sqrtf(distanceSqrd);
+        vector3Scale(&contact->normal, &contact->normal, 1.0f / distance);
+    }
+
+    struct ContactPoint* contactPoint = &contact->contacts[0];
+
+    vector3Scale(&contact->normal, &contactPoint->contactAWorld, otherSphere->radius);
+    vector3Scale(&contact->normal, &contactPoint->contactBWorld, -otherSphere->radius);
+
+    contactPoint->bias = 0.0f;
+    contactPoint->id = 0;
+    contactPoint->normalImpulse = 0.0f;
+    contactPoint->normalMass = 0.0f;
+    contactPoint->penetration = distance - otherSphere->radius;
+    contactPoint->tangentImpulse[0] = 0.0f;
+    contactPoint->tangentImpulse[1] = 0.0f;
+    contactPoint->tangentMass[0] = 0.0f;
+    contactPoint->tangentMass[0] = 0.0f;
+
+    return 1;
+}
+
+int collisionSphereCollideWithSphere(void* data, struct Transform* transform, struct CollisionSphere* otherSphere, struct Vector3* spherePos, struct ContactManifold* contact) {
+    struct CollisionSphere* sphere = (struct CollisionSphere*)data;
+
+    vector3Sub(spherePos, &transform->position, &contact->normal);
+
+    float radiusSum = sphere->radius + otherSphere->radius;
+
+    float distanceSqrd = vector3MagSqrd(&contact->normal);
+
+    if (distanceSqrd > radiusSum * radiusSum) {
+        return 0;
+    }
+
+    float distance = 0.0f;
+
+    if (distanceSqrd < 0.00001f) {
+        contact->normal = gRight;
+    } else {
+        distance = sqrtf(distanceSqrd);
+        vector3Scale(&contact->normal, &contact->normal, 1.0f / distance);
+    }
+
+    struct ContactPoint* contactPoint = &contact->contacts[0];
+
+    vector3Scale(&contact->normal, &contactPoint->contactAWorld, sphere->radius);
+    vector3Scale(&contact->normal, &contactPoint->contactBWorld, -otherSphere->radius);
+
+    contactPoint->bias = 0.0f;
+    contactPoint->id = 0;
+    contactPoint->normalImpulse = 0.0f;
+    contactPoint->normalMass = 0.0f;
+    contactPoint->penetration = distance - radiusSum;
+    contactPoint->tangentImpulse[0] = 0.0f;
+    contactPoint->tangentImpulse[1] = 0.0f;
+    contactPoint->tangentMass[0] = 0.0f;
+    contactPoint->tangentMass[0] = 0.0f;
+
+    return 1;
+}

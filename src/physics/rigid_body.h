@@ -17,6 +17,9 @@ enum RigidBodyFlags {
 
     RigidBodyIsKinematic = (1 << 8),
     RigidBodyIsSleeping = (1 << 9),
+    // for kinematic bodies that should generate 
+    // contacts with other kinematic bodies
+    RigidBodyGenerateContacts = (1 << 10),
 };
 
 struct RigidBody {
@@ -41,7 +44,7 @@ struct RigidBody {
 };
 
 void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniteria);
-void rigitBodyMarkKinematic(struct RigidBody* rigidBody);
+void rigidBodyMarkKinematic(struct RigidBody* rigidBody);
 void rigidBodyAppyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* impulse);
 void rigidBodyUpdate(struct RigidBody* rigidBody);
 void rigidBodyVelocityAtLocalPoint(struct RigidBody* rigidBody, struct Vector3* localPoint, struct Vector3* worldVelocity);

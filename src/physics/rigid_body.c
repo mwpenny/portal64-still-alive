@@ -24,7 +24,7 @@ void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniter
     basisFromQuat(&rigidBody->rotationBasis, &rigidBody->transform.rotation);
 }
 
-void rigitBodyMarkKinematic(struct RigidBody* rigidBody) {
+void rigidBodyMarkKinematic(struct RigidBody* rigidBody) {
     rigidBody->flags |= RigidBodyIsKinematic;
     rigidBody->mass = 1000000000000000.0f;
     rigidBody->massInv = 0.0f;

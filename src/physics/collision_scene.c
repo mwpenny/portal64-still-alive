@@ -515,7 +515,7 @@ void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct 
                     continue;
                 }
 
-                if (!collisionObjectIsActive(existing) && !collisionObjectIsActive(subject)) {
+                if (!collisionObjectShouldGenerateConctacts(existing) && !collisionObjectShouldGenerateConctacts(subject)) {
                     continue;
                 }
 
@@ -571,7 +571,7 @@ void collisionSceneUpdateDynamics() {
 	contactSolverRemoveUnusedContacts(&gContactSolver);
 
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
-        if (!collisionObjectIsActive(gCollisionScene.dynamicObjects[i])) {
+        if (!collisionObjectShouldGenerateConctacts(gCollisionScene.dynamicObjects[i])) {
             continue;
         }
 
@@ -585,9 +585,14 @@ void collisionSceneUpdateDynamics() {
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
         struct CollisionObject* collisionObject = gCollisionScene.dynamicObjects[i];
         if (!collisionObjectIsActive(collisionObject)) {
-            // clear out any velocities
-            collisionObject->body->velocity = gZeroVec;
-            collisionObject->body->angularVelocity = gZeroVec;
+            // kind of a hack, but the player is the only kinematic body that
+            // also generates contacts and the player velocty should not be 
+            // cleared
+            if (!collisionObjectShouldGenerateConctacts(collisionObject)) {
+                // clear out any velocities
+                collisionObject->body->velocity = gZeroVec;
+                collisionObject->body->angularVelocity = gZeroVec;
+            }
             continue;
         }
 

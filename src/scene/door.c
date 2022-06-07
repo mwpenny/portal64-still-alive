@@ -51,7 +51,7 @@ void doorRender(void* data, struct RenderScene* renderScene) {
 
 void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct World* world) {
     collisionObjectInit(&door->collisionObject, &gDoorCollider, &door->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
-    rigitBodyMarkKinematic(&door->rigidBody);
+    rigidBodyMarkKinematic(&door->rigidBody);
     collisionSceneAddDynamicObject(&door->collisionObject);
 
     door->rigidBody.transform.position = doorDefinition->location;
