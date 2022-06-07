@@ -205,7 +205,38 @@ void collisionSceneRaycastRoom(struct CollisionScene* scene, struct Room* room, 
     float xDirInv = fabsf(ray->dir.x) > 0.00001f ? 1.0f / ray->dir.x : 0.0f;
     float zDirInv = fabsf(ray->dir.z) > 0.00001f ? 1.0f / ray->dir.z : 0.0f;
 
-    // TODO adjust currX and currZ if ray starts outside room
+    if ((currX < 0 || currX >= room->spanX) && xDirInv != 0.0f) {
+        int boundX = (ray->dir.x > 0.0f ? 0 : room->spanX) * COLLISION_GRID_CELL_SIZE + room->cornerX;
+
+        float distanceToEdge = (boundX - ray->origin.x) * xDirInv;
+
+        if (distanceToEdge > 0.0f) {
+            float zAtDistance = ray->dir.z * distanceToEdge + ray->origin.z;
+
+            int zCheck = GRID_CELL_Z(room, zAtDistance);
+
+            if (zCheck >= 0 && zCheck < room->spanZ) {
+                currX = ray->dir.x > 0.0f ? 0 : room->spanX - 1;
+                currZ = zCheck;
+            }
+        }
+    }
+
+    if ((currZ < 0 || currZ >= room->spanZ) && zDirInv != 0.0f) {
+        int boundZ = (ray->dir.z > 0.0f ? 0 : room->spanZ) * COLLISION_GRID_CELL_SIZE + room->cornerZ;
+
+        float distanceToEdge = (boundZ - ray->origin.z) * zDirInv;
+
+        if (distanceToEdge > 0.0f) {
+            float xAtDistance = ray->dir.x * distanceToEdge + ray->origin.x;
+            int xCheck = GRID_CELL_X(room, xAtDistance);
+
+            if (xCheck >= 0 && xCheck < room->spanX) {
+                currX = xCheck;
+                currZ = ray->dir.z > 0.0f ? 0 : room->spanZ - 1;
+            }
+        }
+    }
 
     while (currX >=0 && currX < room->spanX && currZ >= 0 && currZ < room->spanZ) {
         struct Rangeu16* range = GRID_CELL_CONTENTS(room, currX, currZ);
@@ -278,13 +309,7 @@ int collisionSceneRaycastDoorways(struct CollisionScene* scene, struct Room* roo
 
         if (raycastQuadShape(&doorway->quad, ray, roomDistance, &hitTest) && hitTest.distance < roomDistance) {
             roomDistance = hitTest.distance;
-            // check that the doorway wasn't hit from the wrong side
-            int expectedRoom = vector3Dot(&doorway->quad.plane.normal, &hitTest.normal) < 0.0f ? doorway->roomA : doorway->roomB;
-            int otherRoom = currentRoom == doorway->roomA ? doorway->roomB : doorway->roomA;
-
-            if (expectedRoom == otherRoom) {
-                nextRoom = otherRoom;
-            }
+            nextRoom = currentRoom == doorway->roomA ? doorway->roomB : doorway->roomA;
         }
     }
 
