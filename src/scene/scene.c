@@ -224,10 +224,29 @@ void sceneUpdate(struct Scene* scene) {
     scene->lastFrameStart = frameStart;
 }
 
+int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, int quadIndex, int roomIndex) {
+    struct PortalSurfaceMapping surfaceMapping = gCurrentLevel->portalSurfaceMapping[quadIndex];
+
+    for (int i = surfaceMapping.minPortalIndex; i < surfaceMapping.maxPortalIndex; ++i) {
+        if (portalSurfaceGenerate(&gCurrentLevel->portalSurfaces[i], at, NULL, NULL)) {
+            soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f);
+            
+            scene->portals[portalIndex].transform = *at;
+            gCollisionScene.portalTransforms[portalIndex] = &scene->portals[portalIndex].transform;
+            gCollisionScene.portalRooms[portalIndex] = roomIndex;
+
+            contactSolverCheckPortalContacts(&gContactSolver, &gCurrentLevel->collisionQuads[quadIndex]);
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex) {
     struct RaycastHit hit;
 
-    if (!collisionSceneRaycast(&gCollisionScene, roomIndex, ray, 1000000.0f, 0, &hit)) {
+    if (!collisionSceneRaycast(&gCollisionScene, roomIndex, ray, COLLISION_LAYERS_STATIC, 1000000.0f, 0, &hit)) {
         return 0;
     }
 
@@ -254,21 +273,4 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
     }
 
     return sceneOpenPortal(scene, &portalLocation, portalIndex, quadIndex, hit.roomIndex);
-}
-
-int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, int quadIndex, int roomIndex) {
-    struct PortalSurfaceMapping surfaceMapping = gCurrentLevel->portalSurfaceMapping[quadIndex];
-
-    for (int i = surfaceMapping.minPortalIndex; i < surfaceMapping.maxPortalIndex; ++i) {
-        if (portalSurfaceGenerate(&gCurrentLevel->portalSurfaces[i], at, NULL, NULL)) {
-            soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f);
-            
-            scene->portals[portalIndex].transform = *at;
-            gCollisionScene.portalTransforms[portalIndex] = &scene->portals[portalIndex].transform;
-            gCollisionScene.portalRooms[portalIndex] = roomIndex;
-            return 1;
-        }
-    }
-
-    return 0;
 }

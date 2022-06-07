@@ -103,6 +103,53 @@ void contactSolverRemoveUnusedContacts(struct ContactSolver* contactSolver) {
 	}
 }
 
+void contactSolverCheckPortalManifoldContacts(struct ContactManifold* manifold) {
+	int writeIndex = 0;
+
+	for (int readIndex = 0; readIndex < manifold->contactCount; ++readIndex) {
+		struct ContactPoint* contactPoint = &manifold->contacts[readIndex];
+
+		if (collisionSceneIsTouchingPortal(&contactPoint->contactAWorld, &manifold->normal)) {
+			continue;
+		}
+
+		if (readIndex != writeIndex) {
+			manifold->contacts[writeIndex] = *contactPoint;
+		}
+
+		++writeIndex;
+	}
+
+	manifold->contactCount = writeIndex;
+}
+
+void contactSolverCheckPortalContacts(struct ContactSolver* contactSolver, struct CollisionObject* objectWithNewPortal) {	
+	struct ContactManifold* curr = contactSolver->activeContacts;
+	struct ContactManifold* prev = NULL;
+
+	while (curr) {
+		if (curr->shapeA == objectWithNewPortal) {
+			contactSolverCheckPortalManifoldContacts(curr);
+		}
+
+		if (curr->contactCount == 0) {
+			if (prev) {
+				prev->next = curr->next;
+			} else {
+				contactSolver->activeContacts = curr->next;
+			}
+
+			struct ContactManifold* next = curr->next;
+			curr->next = contactSolver->unusedContacts;
+			contactSolver->unusedContacts = curr;
+			curr = next;
+		} else {
+			prev = curr;
+			curr = curr->next;
+		}
+	}
+}
+
 void contactSolverInit(struct ContactSolver* contactSolver) {
 	int solverSize = sizeof(struct ContactSolver);
 	memset(contactSolver, 0, solverSize);

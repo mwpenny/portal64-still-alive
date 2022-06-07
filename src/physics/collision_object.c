@@ -5,11 +5,12 @@
 #include "collision_scene.h"
 #include "../math/mathf.h"
 
-void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass) {
+void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers) {
     object->collider = collider;
     object->body = body;
     rigidBodyInit(body, mass, collider->callbacks->mofICalculator(collider, mass));
     collisionObjectUpdateBB(object);
+    object->collisionLayers = collisionLayers;
 }
 
 int collisionObjectIsActive(struct CollisionObject* object) {
@@ -17,6 +18,10 @@ int collisionObjectIsActive(struct CollisionObject* object) {
 }
 
 void collisionObjectCollideWithQuad(struct CollisionObject* object, struct CollisionObject* quadObject, struct ContactSolver* contactSolver) {
+    if ((object->collisionLayers | quadObject->collisionLayers) == 0) {
+        return;
+    }
+
     if (!box3DHasOverlap(&object->boundingBox, &quadObject->boundingBox)) {
         return;
     }
@@ -51,12 +56,8 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
         return;
     }
 
-    contact->friction = 0.5f;
-    contact->restitution = 0.0f;
-
-    if (isnan(result.penetration) || isnan(result.contactA.x) || isnan(result.contactB.x) || isnan(result.normal.x)) {
-        return;
-    }
+    contact->friction = MAX(object->collider->friction, quadObject->collider->friction);
+    contact->restitution = MIN(object->collider->bounce, quadObject->collider->bounce);
 
     transformPointInverseNoScale(&object->body->transform, &result.contactB, &result.contactB);
     contactInsert(contact, &result);

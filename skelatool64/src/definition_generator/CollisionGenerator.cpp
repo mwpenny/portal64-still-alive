@@ -70,6 +70,8 @@ std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene
         for (unsigned i = 0; i < nodeInfo.node->mNumMeshes; ++i) {
             aiMesh* mesh = scene->mMeshes[nodeInfo.node->mMeshes[i]];
 
+            bool isTransparent = std::find(nodeInfo.arguments.begin(), nodeInfo.arguments.end(), "transparent") != nodeInfo.arguments.end();
+
             CollisionQuad collider(mesh, globalTransform * nodeInfo.node->mTransformation);
             collidersChunk->Add(std::move(collider.Generate()));
 
@@ -85,6 +87,9 @@ std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene
             collisionObject->AddPrimitive(std::string("&" + colliderTypesName + "[" + std::to_string(meshCount) + "]"));
             collisionObject->AddPrimitive<const char*>("NULL");
             collisionObject->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(collider.BoundingBox())));
+            collisionObject->AddPrimitive<const char*>(isTransparent ? 
+                "COLLISION_LAYERS_STATIC | COLLISION_LAYERS_TRANSPARENT | COLLISION_LAYERS_TANGIBLE" : 
+                "COLLISION_LAYERS_STATIC | COLLISION_LAYERS_TANGIBLE");
             collisionObjectChunk->Add(std::move(collisionObject));
 
 

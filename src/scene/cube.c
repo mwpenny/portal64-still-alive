@@ -11,45 +11,6 @@ struct CollisionBox gCubeCollisionBox = {
     {0.3165f, 0.3165f, 0.3165f}
 };
 
-struct Plane gFloor = {{0.0f, 1.0f, 0.0f}, 0.0f};
-
-struct ColliderTypeData gFloorColliderType = {
-    CollisionShapeTypeQuad,
-    &gFloor,
-    0.0f,
-    1.0f,
-    NULL,
-};
-
-struct CollisionObject gFloorObject = {
-    &gFloorColliderType,
-    NULL,
-};
-
-struct CollisionQuad gFloatingQuad = {
-    {-1.0f, 0.0f, 0.0f},
-    {1.0f, 0.0f, 0.0f},
-    2.0f,
-    {0.0f, 1.0f, 0.0f},
-    2.0f,
-    {{0.0f, 0.0f, -1.0}, 0.0f},
-    0xF,
-};
-
-struct ColliderTypeData gFloatingQuadCollider = {
-    CollisionShapeTypeQuad,
-    &gFloatingQuad,
-    0.0f,
-    1.0f,
-    NULL,
-} ;
-
-
-struct CollisionObject gFloatingQuadObject = {
-    &gFloatingQuadCollider,
-    NULL,
-};
-
 struct ColliderTypeData gCubeCollider = {
     CollisionShapeTypeBox,
     &gCubeCollisionBox,
@@ -67,7 +28,7 @@ void cubeRender(void* data, struct RenderScene* renderScene) {
 }
 
 void cubeInit(struct Cube* cube) {
-    collisionObjectInit(&cube->collisionObject, &gCubeCollider, &cube->rigidBody, 2.0f);
+    collisionObjectInit(&cube->collisionObject, &gCubeCollider, &cube->rigidBody, 2.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE);
     collisionSceneAddDynamicObject(&cube->collisionObject);
 
     cube->collisionObject.body->flags |= RigidBodyFlagsGrabbable;

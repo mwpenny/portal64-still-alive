@@ -8,6 +8,7 @@ struct Door {
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
     struct Doorway* forDoorway;
+    struct DoorDefinition* doorDefinition;
     short dynamicId;
     short signalIndex;
     float openAmount;

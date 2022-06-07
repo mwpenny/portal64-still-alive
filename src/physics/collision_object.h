@@ -5,15 +5,21 @@
 #include "collision.h"
 #include "../math/box3d.h"
 
+#define COLLISION_LAYERS_STATIC             (1 << 0)
+#define COLLISION_LAYERS_TRANSPARENT        (1 << 1)
+#define COLLISION_LAYERS_TANGIBLE           (1 << 2)
+#define COLLISION_LAYERS_GRABBABLE          (1 << 3)
+
 struct CollisionObject {
     struct ColliderTypeData *collider;
     struct RigidBody* body;
     struct Box3D boundingBox;
+    int collisionLayers;
 };
 
 int collisionObjectIsActive(struct CollisionObject* object);
 
-void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass);
+void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers);
 
 void collisionObjectCollideWithQuad(struct CollisionObject* object, struct CollisionObject* quad, struct ContactSolver* contactSolver);
 void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct CollisionObject* b, struct ContactSolver* contactSolver);

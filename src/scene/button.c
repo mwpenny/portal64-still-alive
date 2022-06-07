@@ -54,7 +54,7 @@ void buttonRender(void* data, struct RenderScene* renderScene) {
 }
 
 void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
-    collisionObjectInit(&button->collisionObject, &gButtonCollider, &button->rigidBody, 1.0f);
+    collisionObjectInit(&button->collisionObject, &gButtonCollider, &button->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
     rigitBodyMarkKinematic(&button->rigidBody);
     collisionSceneAddDynamicObject(&button->collisionObject);
 

@@ -7,6 +7,8 @@
 #include "signals.h"
 #include "../math/mathf.h"
 #include "../util/time.h"
+#include "../physics/collision_box.h"
+#include "../physics/collision_scene.h"
 
 #include "../build/assets/models/props/door_01.h"
 
@@ -14,10 +16,27 @@
 
 #define OPEN_WIDTH  0.625
 
+struct CollisionBox gDoorCollisionBox = {
+    {1.0f, 1.0f, 0.1125f}
+};
+
+struct ColliderTypeData gDoorCollider = {
+    CollisionShapeTypeBox,
+    &gDoorCollisionBox,
+    0.0f,
+    0.5f,
+    &gCollisionBoxCallbacks,  
+};
+
 void doorRender(void* data, struct RenderScene* renderScene) {
     struct Door* door = (struct Door*)data;
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
-    transformToMatrixL(&door->rigidBody.transform, matrix, SCENE_SCALE);
+    struct Transform originalTransform;
+    originalTransform.position = door->doorDefinition->location;
+    originalTransform.rotation = door->doorDefinition->rotation;
+    originalTransform.scale = gOneVec;
+
+    transformToMatrixL(&originalTransform, matrix, SCENE_SCALE);
 
     props_door_01_default_bones[PROPS_DOOR_01_DOORL_BONE].position.x = door->openAmount * -0.625f * SCENE_SCALE;
     props_door_01_default_bones[PROPS_DOOR_01_DOORR_BONE].position.x = door->openAmount * 0.625f * SCENE_SCALE;
@@ -31,14 +50,16 @@ void doorRender(void* data, struct RenderScene* renderScene) {
 }
 
 void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct World* world) {
-    // collisionObjectInit(&cube->collisionObject, &gCubeCollider, &cube->rigidBody, 1.0f);
-    // collisionSceneAddDynamicObject(&cube->collisionObject);
-
-    // cube->collisionObject.body->flags |= RigidBodyFlagsGrabbable;
+    collisionObjectInit(&door->collisionObject, &gDoorCollider, &door->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
+    rigitBodyMarkKinematic(&door->rigidBody);
+    collisionSceneAddDynamicObject(&door->collisionObject);
 
     door->rigidBody.transform.position = doorDefinition->location;
+    door->rigidBody.transform.position.y += 1.0f;
     door->rigidBody.transform.rotation = doorDefinition->rotation;
     door->rigidBody.transform.scale = gOneVec;
+
+    collisionObjectUpdateBB(&door->collisionObject);
 
     door->dynamicId = dynamicSceneAdd(door, doorRender, &door->rigidBody.transform, 1.7f);
     door->signalIndex = doorDefinition->signalIndex;
@@ -50,6 +71,8 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct W
     } else {
         door->forDoorway = NULL;
     }
+
+    door->doorDefinition = doorDefinition;
 }
 
 void doorUpdate(struct Door* door) {
@@ -59,8 +82,10 @@ void doorUpdate(struct Door* door) {
     if (door->forDoorway) {
         if (door->openAmount == 0.0f) {
             door->forDoorway->flags &= ~DoorwayFlagsOpen;
+            door->collisionObject.collisionLayers = COLLISION_LAYERS_TANGIBLE;
         } else {
             door->forDoorway->flags |= DoorwayFlagsOpen;
+            door->collisionObject.collisionLayers = 0;
         }
     }
 }

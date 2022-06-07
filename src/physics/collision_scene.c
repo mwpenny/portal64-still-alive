@@ -145,7 +145,13 @@ void collisionObjectQueryScene(struct CollisionObject* object, struct CollisionS
     for (int i = 0; i < quadCount; ++i) {
         localContact.contactCount = 0;
 
-        if (quadCollider(object->collider->data, &object->body->transform, scene->quads[colliderIndices[i]].collider->data, &localContact) &&
+        struct CollisionObject* quadObject = &scene->quads[colliderIndices[i]];
+
+        if ((quadObject->collisionLayers & object->collisionLayers) == 0) {
+            continue;
+        }
+
+        if (quadCollider(object->collider->data, &object->body->transform, quadObject->collider->data, &localContact) &&
             collisionSceneFilterPortalContacts(&localContact)) {
             callback(data, &localContact);
         }
@@ -192,7 +198,7 @@ int collisionSceneIsPortalOpen() {
     return gCollisionScene.portalTransforms[0] != NULL && gCollisionScene.portalTransforms[1] != NULL;
 }
 
-void collisionSceneRaycastRoom(struct CollisionScene* scene, struct Room* room, struct Ray* ray, struct RaycastHit* hit) {
+void collisionSceneRaycastRoom(struct CollisionScene* scene, struct Room* room, struct Ray* ray, int collisionLayers, struct RaycastHit* hit) {
     int currX = GRID_CELL_X(room, ray->origin.x);
     int currZ = GRID_CELL_Z(room, ray->origin.z);
 
@@ -207,7 +213,13 @@ void collisionSceneRaycastRoom(struct CollisionScene* scene, struct Room* room, 
         for (int i = range->min; i < range->max; ++i) {
             struct RaycastHit hitTest;
 
-            if (raycastQuad(&scene->quads[room->quadIndices[i]], ray, hit->distance, &hitTest) && hitTest.distance < hit->distance && vector3Dot(&hitTest.normal, &ray->dir) < 0.0f) {
+            struct CollisionObject* collisionObject = &scene->quads[room->quadIndices[i]];
+
+            if ((collisionObject->collisionLayers & collisionLayers) == 0) {
+                continue;
+            }
+
+            if (raycastQuad(collisionObject, ray, hit->distance, &hitTest) && hitTest.distance < hit->distance && vector3Dot(&hitTest.normal, &ray->dir) < 0.0f) {
                 hit->at = hitTest.at;
                 hit->normal = hitTest.normal;
                 hit->distance = hitTest.distance;
@@ -260,6 +272,10 @@ int collisionSceneRaycastDoorways(struct CollisionScene* scene, struct Room* roo
 
         struct Doorway* doorway = &scene->world->doorways[room->doorwayIndices[i]];
 
+        if ((doorway->flags & DoorwayFlagsOpen) == 0) {
+            continue;
+        }
+
         if (raycastQuadShape(&doorway->quad, ray, roomDistance, &hitTest) && hitTest.distance < roomDistance) {
             roomDistance = hitTest.distance;
             // check that the doorway wasn't hit from the wrong side
@@ -275,7 +291,7 @@ int collisionSceneRaycastDoorways(struct CollisionScene* scene, struct Room* roo
     return nextRoom;
 }
 
-int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, float maxDistance, int passThroughPortals, struct RaycastHit* hit) {
+int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, int collisionLayers, float maxDistance, int passThroughPortals, struct RaycastHit* hit) {
     hit->distance = maxDistance;
     hit->throughPortal = NULL;
 
@@ -283,7 +299,7 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
 
     while (roomsToCheck && roomIndex != -1) {
         struct Room* room = &scene->world->rooms[roomIndex];
-        collisionSceneRaycastRoom(scene, room, ray, hit);
+        collisionSceneRaycastRoom(scene, room, ray, collisionLayers, hit);
 
         if (hit->distance != maxDistance) {
             hit->roomIndex = roomIndex;
@@ -301,6 +317,10 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
         struct RaycastHit hitTest;
 
         struct CollisionObject* object = scene->dynamicObjects[i];
+
+        if ((object->collisionLayers & collisionLayers) == 0) {
+            continue;
+        }
 
         if (object->collider->callbacks->raycast && 
             object->collider->callbacks->raycast(object, ray, hit->distance, &hitTest) &&
@@ -328,7 +348,7 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
 
                 struct RaycastHit newHit;
 
-                int result = collisionSceneRaycast(scene, gCollisionScene.portalRooms[1 - i], &newRay, maxDistance - hit->distance, 0, &newHit);
+                int result = collisionSceneRaycast(scene, gCollisionScene.portalRooms[1 - i], &newRay, collisionLayers, maxDistance - hit->distance, 0, &newHit);
 
                 if (result) {
                     newHit.distance += hit->distance;
@@ -465,6 +485,10 @@ void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct 
         if (edge.isLeadingEdge) {
             for (int objectIndex = 0; objectIndex < broadphase->objectInRangeCount; ++objectIndex) {
                 struct CollisionObject* existing = broadphase->objectsInCurrentRange[objectIndex];
+
+                if ((existing->collisionLayers & subject->collisionLayers) == 0) {
+                    continue;
+                }
 
                 if (!collisionObjectIsActive(existing) && !collisionObjectIsActive(subject)) {
                     continue;
