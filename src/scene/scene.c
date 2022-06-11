@@ -68,10 +68,10 @@ void sceneInit(struct Scene* scene) {
     struct Transform decorTransform;
     transformInitIdentity(&decorTransform);
     decorTransform.position.x = 3.0f;
-    decorTransform.position.y = 1.5f;
+    decorTransform.position.y = 0.1f;
     decorTransform.position.z = 3.2f;
     // quatAxisAngle(&gRight, 1.0f, &decorTransform.rotation);
-    scene->decor[0] = decorObjectNew(decorObjectDefinitionForId(DECOR_TYPE_CYLINDER), &decorTransform, 1);
+    scene->decor[0] = decorObjectNew(decorObjectDefinitionForId(DECOR_TYPE_RADIO), &decorTransform, 1);
     // vector3Scale(&gForward, &scene->decor[0]->rigidBody.angularVelocity, 10.0f);
     // scene->decor[0]->rigidBody.velocity.y = 1.0f;
     // scene->decor[0]->rigidBody.velocity.z = 1.0f;

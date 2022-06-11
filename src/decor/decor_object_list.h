@@ -4,6 +4,7 @@
 #include "./decor_object.h"
 
 #define DECOR_TYPE_CYLINDER 0
+#define DECOR_TYPE_RADIO    1
 
 struct DecorObjectDefinition* decorObjectDefinitionForId(int id);
 

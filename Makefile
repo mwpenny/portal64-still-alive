@@ -151,7 +151,8 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/portal_gun/v_portalgun.blend \
 	assets/models/props/button.blend \
 	assets/models/props/door_01.blend \
-	assets/models/props/cylinder_test.blend
+	assets/models/props/cylinder_test.blend \
+	assets/models/props/radio.blend
 
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
 MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)

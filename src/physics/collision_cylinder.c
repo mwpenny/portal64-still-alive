@@ -83,7 +83,7 @@ int collisionCylinderMinkowsiSum(void* data, struct Basis* basis, struct Vector3
     return (centerDir ? 0x1 : 0x2) | (1 << (faceId + 2)) | (1 << (nextId + 2));
 }
 
-int collisionCylinderRaycast(struct CollisionObject* cylinderObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact {
+int collisionCylinderRaycast(struct CollisionObject* cylinderObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
     float rayLerp;
     float cylinderLerp;
 
@@ -118,4 +118,6 @@ int collisionCylinderRaycast(struct CollisionObject* cylinderObject, struct Ray*
     vector3Sub(&ray->origin, &cylinderObject->body->transform.position, &offset);
     basisUnRotate(&cylinderObject->body->rotationBasis, &ray->dir, &localRay.dir);
     basisUnRotate(&cylinderObject->body->rotationBasis, &offset, &localRay.origin);
+
+    return 1;
 }

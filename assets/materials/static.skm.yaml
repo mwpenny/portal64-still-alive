@@ -286,3 +286,27 @@ materials:
     gSPGeometryMode:
       clear: [G_LIGHTING]
       set: [G_SHADE]
+
+  elevatorshaft_wall:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/elevatorshaft_wall/elevatorshaft_wall.png
+      siz: G_IM_SIZ_16b
+      s:
+        mirror: true
+      t:
+        mirror: true
+    
+    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCycleType: G_CYC_1CYCLE
+
+  radio:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/radio.png
+      fmt: G_IM_FMT_RGBA
+      siz: G_IM_SIZ_16b
+        
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "TEXEL0", "0"]
+    
