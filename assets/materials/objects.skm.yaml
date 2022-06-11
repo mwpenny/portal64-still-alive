@@ -8,6 +8,7 @@ materials:
       set: [G_LIGHTING, G_SHADE]
     gDPSetCombineMode: 
       color: ["PRIMITIVE", "0", "SHADE", "0"]
+    gDPSetRenderMode: G_RM_OPA_SURF
 
   portal_gun_metal:
     gDPSetPrimColor:
@@ -18,6 +19,7 @@ materials:
       set: [G_LIGHTING, G_SHADE]
     gDPSetCombineMode: 
       color: ["PRIMITIVE", "0", "SHADE", "0"]
+    gDPSetRenderMode: G_RM_OPA_SURF
 
   button_base:
     gDPSetTile:
