@@ -131,7 +131,7 @@ void playerUpdateGrabbedObject(struct Player* player) {
             player->collisionObject.collisionLayers = 0;
 
             if (collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, &hit) && hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable)) {
-                player->grabbing = hit.object->body;
+                player->grabbing = hit.object;
 
                 if (hit.throughPortal) {
                     player->grabbingThroughPortal = hit.throughPortal == gCollisionScene.portalTransforms[0] ? 0 : 1;
@@ -153,11 +153,11 @@ void playerUpdateGrabbedObject(struct Player* player) {
             playerApplyPortalGrab(player, 0);
         }
 
-        if (player->grabbing->flags & RigidBodyFlagsCrossedPortal0) {
+        if (player->grabbing->body->flags & RigidBodyFlagsCrossedPortal0) {
             playerApplyPortalGrab(player, 0);
         }
 
-        if (player->grabbing->flags & RigidBodyFlagsCrossedPortal1) {
+        if (player->grabbing->body->flags & RigidBodyFlagsCrossedPortal1) {
             playerApplyPortalGrab(player, 1);
         }
 
@@ -182,8 +182,8 @@ void playerUpdateGrabbedObject(struct Player* player) {
             grabRotation = finalRotation;
         }
 
-        pointConstraintMoveToPoint(player->grabbing, &grabPoint, 20.0f);
-        pointConstraintRotateTo(player->grabbing, &grabRotation, 5.0f);
+        pointConstraintMoveToPoint(player->grabbing, &grabPoint, 8.0f);
+        pointConstraintRotateTo(player->grabbing->body, &grabRotation, 5.0f);
     }
 }
 

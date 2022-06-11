@@ -8,7 +8,7 @@
 
 #include <string.h>
 
-#define Q3_BAUMGARTE 0.1f
+#define Q3_BAUMGARTE 0.15f
 
 #define Q3_PENETRATION_SLOP 0.001f
 

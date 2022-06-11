@@ -20,7 +20,7 @@ struct Player {
     struct RigidBody body;
     struct Transform lookTransform;
     short grabbingThroughPortal;
-    struct RigidBody* grabbing;
+    struct CollisionObject* grabbing;
     float pitchVelocity;
     float yawVelocity;
     enum PlayerFlags flags;
