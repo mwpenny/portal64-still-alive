@@ -3,6 +3,7 @@
 #include "../../build/assets/models/props/cylinder_test.h"
 #include "../../build/assets/models/props/radio.h"
 #include "../../build/assets/materials/static.h"
+#include "../../build/src/audio/clips.h"
 
 #include "../physics/collision_cylinder.h"
 #include "../physics/collision_box.h"
@@ -38,6 +39,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         0.92f,
         &props_cylinder_test_model_gfx[0],
         PLASTIC_PLASTICWALL001A_INDEX,
+        .soundClipId = -1,
     },
     [DECOR_TYPE_RADIO] = {
         {
@@ -51,6 +53,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         0.4f,
         &props_radio_model_gfx[0],
         RADIO_INDEX,
+        .soundClipId = SOUNDS_LOOPING_RADIO_MIX,
     },
 };
 

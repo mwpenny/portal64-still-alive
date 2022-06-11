@@ -3,6 +3,7 @@
 #include "../physics/collision_scene.h"
 #include "../scene/dynamic_scene.h"
 #include "../util/memory.h"
+#include "../audio/soundplayer.h"
 
 void decorObjectRender(void* data, struct RenderScene* renderScene) {
     struct DecorObject* object = (struct DecorObject*)data;
@@ -28,10 +29,22 @@ void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* d
     object->definition = definition;
 
     object->dynamicId = dynamicSceneAdd(object, decorObjectRender, &object->rigidBody.transform, definition->radius);
+
+    if (definition->soundClipId != -1) {
+        object->playingSound = soundPlayerPlay(definition->soundClipId, 1.0f, 1.0f, &object->rigidBody.transform.position);
+    } else {
+        object->playingSound = SOUND_ID_NONE;
+    }
 }
 
 void decorObjectDelete(struct DecorObject* decorObject) {
     dynamicSceneRemove(decorObject->dynamicId);
     collisionSceneRemoveDynamicObject(&decorObject->collisionObject);
     free(decorObject);
+}
+
+void decorObjectUpdate(struct DecorObject* decorObject) {
+    if (decorObject->playingSound != SOUND_ID_NONE) {
+        soundPlayerUpdatePosition(decorObject->playingSound, &decorObject->rigidBody.transform.position);
+    }
 }

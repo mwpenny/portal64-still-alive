@@ -11,6 +11,7 @@ struct DecorObjectDefinition {
     float radius;
     Gfx* graphics;
     short materialIndex;
+    short soundClipId;
 };
 
 struct DecorObject {
@@ -18,10 +19,13 @@ struct DecorObject {
     struct RigidBody rigidBody;
     struct DecorObjectDefinition* definition;
     short dynamicId;
+    ALSndId playingSound;
 };
 
 struct DecorObject* decorObjectNew(struct DecorObjectDefinition* definition, struct Transform* at, int room);
 void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* definition, struct Transform* at, int room);
 void decorObjectDelete(struct DecorObject* decorObject);
+
+void decorObjectUpdate(struct DecorObject* decorObject);
 
 #endif

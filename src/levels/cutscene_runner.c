@@ -15,7 +15,8 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             runner->state.playSound.soundId = soundPlayerPlay(
                 step->playSound.soundId,
                 step->playSound.volume * (1.0f / 255.0f),
-                step->playSound.pitch * (1.0f / 64.0f)
+                step->playSound.pitch * (1.0f / 64.0f),
+                NULL
             );
             break;
         case CutsceneStepTypeDelay:

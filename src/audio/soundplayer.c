@@ -10,15 +10,79 @@ ALSndPlayer gSoundPlayer;
 
 #define MAX_ACTIVE_SOUNDS   16
 
+#define SOUND_FLAGS_3D          (1 << 0)
+#define SOUND_FLAGS_LOOPING     (1 << 1)
+
 struct ActiveSound {
     ALSndId soundId;
-    u16 soundId3d;
+    u16 flags;
     u16 newSoundTicks;
     float estimatedTimeLeft;
+    struct Vector3 pos3D;
+    float volume;
+};
+
+struct SoundListener {
+    struct Vector3 worldPos;
+    struct Vector3 rightVector;
 };
 
 struct ActiveSound gActiveSounds[MAX_ACTIVE_SOUNDS];
 int gActiveSoundCount = 0;
+
+struct SoundListener gSoundListeners[MAX_SOUND_LISTENERS];
+int gActiveListenerCount = 0;
+
+void soundPlayerDetermine3DSound(struct Vector3* at, float* volumeIn, float* volumeOut, int* panOut) {
+    if (!gActiveListenerCount) {
+        *volumeOut = *volumeIn;
+        *panOut = 64;
+        return;
+    }
+
+    struct SoundListener* nearestListener = &gSoundListeners[0];
+    float distance = vector3DistSqrd(at, &gSoundListeners[0].worldPos);
+
+    for (int i = 1; i < MAX_SOUND_LISTENERS; ++i) {
+        float check = vector3DistSqrd(at, &gSoundListeners[i].worldPos);
+
+        if (check < distance) {
+            distance = check;
+            nearestListener = &gSoundListeners[i];
+        }
+    }
+
+    if (distance < 0.0000001f) {
+        *volumeOut = *volumeIn;
+        *panOut = 64;
+        return;
+    }
+
+    // attenuate the volume
+    *volumeOut = *volumeIn / distance;
+
+    // clamp to full volume
+    if (*volumeOut > 1.0f) {
+        *volumeOut = 1.0f;
+    }
+
+    struct Vector3 offset;
+    vector3Sub(at, &nearestListener->worldPos, &offset);
+
+    float pan = vector3Dot(&offset, &nearestListener->rightVector) / sqrtf(distance);
+
+    pan = pan * 64.0f + 64.0f;
+
+    *panOut = (int)pan;
+
+    if (*panOut < 0) {
+        *panOut = 0;
+    } 
+
+    if (*panOut > 127) {
+        *panOut = 127;
+    }
+}
 
 void soundPlayerInit() {
     gSoundClipArray = alHeapAlloc(&gAudioHeap, 1, _soundsSegmentRomEnd - _soundsSegmentRomStart);
@@ -36,9 +100,25 @@ void soundPlayerInit() {
     }
 }
 
+int soundPlayerIsLooped(ALSound* sound) {
+    if (!sound->wavetable) {
+        return 0;
+    }
+
+    if (sound->wavetable->type == AL_ADPCM_WAVE) {
+        return sound->wavetable->waveInfo.adpcmWave.loop != NULL;
+    } else {
+        return sound->wavetable->waveInfo.rawWave.loop != NULL;
+    }
+}
+
 float soundPlayerEstimateLength(ALSound* sound, float speed) {
     if (!sound->wavetable) {
         return 0.0f;
+    }
+
+    if (soundPlayerIsLooped(sound)) {
+        return 1000000000000000000000.0f;
     }
 
     int sampleCount = 0;
@@ -52,25 +132,44 @@ float soundPlayerEstimateLength(ALSound* sound, float speed) {
     return sampleCount * (1.0f / OUTPUT_RATE) / speed;
 }
 
-ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch) {
+ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at) {
     if (gActiveSoundCount == MAX_ACTIVE_SOUNDS || soundClipId < 0 || soundClipId >= gSoundClipArray->soundCount) {
         return SOUND_ID_NONE;
     }
+    
+    ALSound* alSound = gSoundClipArray->sounds[soundClipId];
 
-    ALSndId result = alSndpAllocate(&gSoundPlayer, gSoundClipArray->sounds[soundClipId]);
+    ALSndId result = alSndpAllocate(&gSoundPlayer, alSound);
 
     if (result == SOUND_ID_NONE) {
         return result;
     }
 
-    gActiveSounds[gActiveSoundCount].soundId = result;
-    gActiveSounds[gActiveSoundCount].soundId3d = SOUND_ID_NONE;
-    gActiveSounds[gActiveSoundCount].newSoundTicks = 10;
-    gActiveSounds[gActiveSoundCount].estimatedTimeLeft = soundPlayerEstimateLength(gSoundClipArray->sounds[soundClipId], pitch);
+    struct ActiveSound* sound = &gActiveSounds[gActiveSoundCount];
+
+    sound->soundId = result;
+    sound->newSoundTicks = 10;
+    sound->flags = 0;
+    sound->estimatedTimeLeft = soundPlayerEstimateLength(alSound, pitch);
+    sound->volume = volume;
+
+    float startingVolume = volume;
+    int panning = 64;
+
+    if (at) {
+        sound->flags |= SOUND_FLAGS_3D;
+        sound->pos3D = *at;
+        soundPlayerDetermine3DSound(at, &startingVolume, &startingVolume, &panning);
+    }
+
+    if (soundPlayerIsLooped(alSound)) {
+        sound->flags |= SOUND_FLAGS_LOOPING;
+    }
 
     alSndpSetSound(&gSoundPlayer, result);
-    alSndpSetVol(&gSoundPlayer, (short)(32767 * volume));
+    alSndpSetVol(&gSoundPlayer, (short)(32767 * startingVolume));
     alSndpSetPitch(&gSoundPlayer, pitch);
+    alSndpSetPan(&gSoundPlayer, panning);
     alSndpPlay(&gSoundPlayer);
 
     ++gActiveSoundCount;
@@ -97,6 +196,15 @@ void soundPlayerUpdate() {
             alSndpDeallocate(&gSoundPlayer, sound->soundId);
             sound->soundId = SOUND_ID_NONE;
         } else {
+            if (sound->flags & SOUND_FLAGS_3D) {
+                float volume;
+                int panning;
+
+                soundPlayerDetermine3DSound(&sound->pos3D, &sound->volume, &volume, &panning);
+                alSndpSetVol(&gSoundPlayer, (short)(32767 * volume));
+                alSndpSetPan(&gSoundPlayer, panning);
+            }
+
             ++writeIndex;
         }
         
@@ -124,6 +232,16 @@ struct ActiveSound* soundPlayerFindActiveSound(ALSndId soundId) {
     return NULL;
 }
 
+
+void soundPlayerUpdatePosition(ALSndId soundId, struct Vector3* at) {
+    struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
+
+    if (activeSound) {
+        activeSound->flags |= SOUND_FLAGS_3D;
+        activeSound->pos3D = *at;
+    }
+}
+
 int soundPlayerIsPlaying(ALSndId soundId) {
     struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
 
@@ -137,4 +255,13 @@ int soundPlayerIsPlaying(ALSndId soundId) {
 
     alSndpSetSound(&gSoundPlayer, soundId);
     return activeSound->estimatedTimeLeft > 0.0f && alSndpGetState(&gSoundPlayer) != AL_STOPPED;
+}
+
+void soundListenerUpdate(struct Vector3* position, struct Quaternion* rotation, int listenerIndex) {
+    gSoundListeners[listenerIndex].worldPos = *position;
+    quatMultVector(rotation, &gRight, &gSoundListeners[listenerIndex].rightVector);
+}
+
+void soundListenerSetCount(int count) {
+    gActiveListenerCount = count;
 }

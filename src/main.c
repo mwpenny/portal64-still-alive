@@ -143,10 +143,10 @@ static void gameProc(void* arg) {
     dynamicSceneInit();
     contactSolverInit(&gContactSolver);
     levelLoad(0);
-    sceneInit(&gScene);
     controllersInit();
     initAudio();
     soundPlayerInit();
+    sceneInit(&gScene);
 #ifdef WITH_DEBUGGER
     OSThread* debugThreads[2];
     debugThreads[0] = &gameThread;

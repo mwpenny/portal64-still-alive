@@ -35,11 +35,14 @@ struct Vector3 gPortalGunUp = {0.0f, 1.0f, 0.0f};
 
 Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 
+void sceneUpdateListeners(struct Scene* scene);
+
 void sceneInit(struct Scene* scene) {
     signalsInit(1);
 
     cameraInit(&scene->camera, 70.0f, 0.125f * SCENE_SCALE, 80.0f * SCENE_SCALE);
     playerInit(&scene->player, levelGetLocation(gCurrentLevel->startLocation));
+    sceneUpdateListeners(scene);
 
     portalInit(&scene->portals[0], 0);
     portalInit(&scene->portals[1], PortalFlagsOddParity);
@@ -63,7 +66,7 @@ void sceneInit(struct Scene* scene) {
         buttonInit(&scene->buttons[i], &gCurrentLevel->buttons[i]);
     }
 
-    scene->decorCount = 0;
+    scene->decorCount = 1;
     scene->decor = malloc(sizeof(struct DecorObject*) * scene->decorCount);
     struct Transform decorTransform;
     transformInitIdentity(&decorTransform);
@@ -185,12 +188,36 @@ void sceneCheckPortals(struct Scene* scene) {
 
     if (controllerGetButtonDown(0, Z_TRIG)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom);
-        soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f);
+        soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL);
     }
 
     if (controllerGetButtonDown(0, R_TRIG | L_TRIG)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom);
-        soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f);
+        soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL);
+    }
+}
+
+void sceneUpdatePortalListener(struct Scene* scene, int portalIndex, int listenerIndex) {
+    struct Transform otherInverse;
+    transformInvert(&scene->portals[1 - portalIndex].transform, &otherInverse);
+    struct Transform portalCombined;
+    transformConcat(&scene->portals[portalIndex].transform, &otherInverse, &portalCombined);
+
+    struct Transform relativeTransform;
+    transformConcat(&portalCombined, &scene->player.lookTransform, &relativeTransform);
+
+    soundListenerUpdate(&relativeTransform.position, &relativeTransform.rotation, listenerIndex);
+}
+
+void sceneUpdateListeners(struct Scene* scene) {
+    soundListenerUpdate(&scene->player.lookTransform.position, &scene->player.lookTransform.rotation, 0);
+
+    if (collisionSceneIsPortalOpen()) {
+        soundListenerSetCount(3);
+        sceneUpdatePortalListener(scene, 0, 1);
+        sceneUpdatePortalListener(scene, 1, 2);
+    } else {
+        soundListenerSetCount(1);
     }
 }
 
@@ -201,6 +228,7 @@ void sceneUpdate(struct Scene* scene) {
     signalsReset();
 
     playerUpdate(&scene->player, &scene->camera.transform);
+    sceneUpdateListeners(scene);
     sceneCheckPortals(scene);
 
     for (int i = 0; i < MAX_CUBES; ++i) {
@@ -213,6 +241,10 @@ void sceneUpdate(struct Scene* scene) {
 
     for (int i = 0; i < scene->doorCount; ++i) {
         doorUpdate(&scene->doors[i]);
+    }
+
+    for (int i = 0; i < scene->decorCount; ++i) {
+        decorObjectUpdate(scene->decor[i]);
     }
     
     collisionSceneUpdateDynamics();
@@ -229,7 +261,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
 
     for (int i = surfaceMapping.minPortalIndex; i < surfaceMapping.maxPortalIndex; ++i) {
         if (portalSurfaceGenerate(&gCurrentLevel->portalSurfaces[i], at, NULL, NULL)) {
-            soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f);
+            soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &at->position);
             
             scene->portals[portalIndex].transform = *at;
             gCollisionScene.portalTransforms[portalIndex] = &scene->portals[portalIndex].transform;

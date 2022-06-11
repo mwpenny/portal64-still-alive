@@ -207,7 +207,11 @@ build/src/levels/levels.o: build/assets/test_chambers/level_list.h build/assets/
 
 SOUND_ATTRIBUTES = $(shell find assets/ -type f -name '*.sox')
 
-SOUND_CLIPS = $(SOUND_ATTRIBUTES:%.sox=build/%.aifc)
+INS_SOUNDS = $(shell find assets/ -type f -name '*.ins')
+
+SOUND_CLIPS = $(SOUND_ATTRIBUTES:%.sox=build/%.aifc) $(INS_SOUNDS)
+
+$(INS_SOUNDS): portal_pak_dir
 
 build/%.aifc: %.sox portal_pak_dir
 	@mkdir -p $(@D)
@@ -226,6 +230,7 @@ build/src/audio/clips.h: tools/generate_sound_ids.js $(SOUND_CLIPS)
 	node tools/generate_sound_ids.js -o $@ -p SOUNDS_ $(SOUND_CLIPS)
 
 build/src/audio/clips.o: build/src/audio/clips.h
+build/src/decor/decor_object_list.o: build/src/audio/clips.h
 
 ####################
 ## Linking
