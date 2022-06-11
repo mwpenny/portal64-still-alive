@@ -6,6 +6,7 @@
 #include "raycasting.h"
 #include "line.h"
 #include "../math/vector2.h"
+#include "./raycasting.h"
 
 struct ColliderCallbacks gCollisionCylinderCallbacks = {
     raycastCylinder,
@@ -13,6 +14,59 @@ struct ColliderCallbacks gCollisionCylinderCallbacks = {
     collisionCylinderBoundingBox,
     collisionCylinderMinkowsiSum,
 };
+
+void collisionCylinderBoxCheckForFaces(struct CollisionCylinder* cylinder) {
+    if (cylinder->outsideFaces[0].edgeALength > 0.0f) {
+        return;
+    }
+
+    struct Vector2 prevPoint;
+    vector2Scale(&cylinder->edgeVectors[cylinder->edgeCount - 1], -cylinder->radius, &prevPoint);
+
+    for (int i = 0; i < (cylinder->edgeCount << 1); ++i) {
+        struct Vector2 currPoint;
+        vector2Scale(&cylinder->edgeVectors[i % cylinder->edgeCount], i >= cylinder->edgeCount ? -cylinder->radius : cylinder->radius, &currPoint);
+
+        struct CollisionQuad* quad = &cylinder->outsideFaces[i];
+
+        quad->corner.x = prevPoint.x;
+        quad->corner.y = -cylinder->halfHeight;
+        quad->corner.z = prevPoint.y;
+
+        struct Vector3 toEdge;
+
+        toEdge.x = currPoint.x;
+        toEdge.y = -cylinder->halfHeight;
+        toEdge.z = currPoint.y;
+
+        vector3Sub(&toEdge, &quad->corner, &quad->edgeA);
+        quad->edgeALength = sqrtf(vector3MagSqrd(&quad->edgeA));
+        vector3Scale(&quad->edgeA, &quad->edgeA, 1.0f / quad->edgeALength);
+
+        quad->edgeB = gUp;
+        quad->edgeBLength = cylinder->halfHeight * 2.0f;
+
+        vector3Cross(&quad->edgeA, &quad->edgeB, &quad->plane.normal);
+
+        if (vector3Dot(&quad->plane.normal, &quad->corner) < 0.0f) {
+            struct Vector3 tmpEdge = quad->edgeA;
+            quad->edgeA = quad->edgeB;
+            quad->edgeB = tmpEdge;
+
+            float tmpLen = quad->edgeALength;
+            quad->edgeALength = quad->edgeBLength;
+            quad->edgeBLength = tmpLen;
+
+            vector3Negate(&quad->plane.normal, &quad->plane.normal);
+        }
+
+        quad->plane.d = -vector3Dot(&quad->plane.normal, &quad->corner);
+        
+        quad->enabledEdges = 0;
+
+        prevPoint = currPoint;
+    }
+}
 
 float collisionCylinderSolidMofI(struct ColliderTypeData* typeData, float mass) {
     struct CollisionCylinder* cylinder = (struct CollisionCylinder*)typeData->data;
@@ -119,5 +173,16 @@ int collisionCylinderRaycast(struct CollisionObject* cylinderObject, struct Ray*
     basisUnRotate(&cylinderObject->body->rotationBasis, &ray->dir, &localRay.dir);
     basisUnRotate(&cylinderObject->body->rotationBasis, &offset, &localRay.origin);
 
-    return 1;
+    collisionCylinderBoxCheckForFaces(cylinder);
+
+    struct RaycastHit localHit;
+
+    for (int i = 0; i < (cylinder->edgeCount << 1); ++i) {
+        if (raycastQuadShape(&cylinder->outsideFaces[i], &localRay, maxDistance, &localHit)) {
+            // TODO transform hit
+            return 1;
+        }
+    }
+
+    return 0;
 }

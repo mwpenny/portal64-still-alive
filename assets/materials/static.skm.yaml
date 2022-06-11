@@ -298,6 +298,7 @@ materials:
     
     gDPSetCombineMode: G_CC_DECALRGB
     gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetTextureFilter: G_TF_BILERP
 
   radio:
     gDPSetTile:

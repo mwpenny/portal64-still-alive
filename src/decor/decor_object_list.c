@@ -15,11 +15,14 @@ struct Vector2 gCylinderColliderEdgeVectors[] = {
     {0.707f, -0.707f},
 };
 
+struct CollisionQuad gCyliderColliderFaces[8];
+
 struct CollisionCylinder gCylinderCollider = {
     0.3f,
     0.35f,
     gCylinderColliderEdgeVectors,
     sizeof(gCylinderColliderEdgeVectors) / sizeof(*gCylinderColliderEdgeVectors),
+    gCyliderColliderFaces,
 };
 
 struct CollisionBox gRadioCollider = {

@@ -44,6 +44,8 @@ struct Quaternion gVerticalFlip = {0.0f, 1.0f, 0.0f, 0.0f};
 
 #define STARTING_RENDER_DEPTH       2
 
+#define PORTAL_CLIPPING_PLANE_BIAS  (SCENE_SCALE * 0.25f)
+
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex) {
     props->camera = *camera;
     props->aspectRatio = aspectRatio;
@@ -150,7 +152,7 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
     if (toPortal < fromPortal) {
         vector3Negate(&next->cullingInfo.clippingPlanes[4].normal, &next->cullingInfo.clippingPlanes[4].normal);
     }
-    next->cullingInfo.clippingPlanes[4].d = -vector3Dot(&next->cullingInfo.clippingPlanes[4].normal, &toPortal->position) * SCENE_SCALE;
+    next->cullingInfo.clippingPlanes[4].d = -vector3Dot(&next->cullingInfo.clippingPlanes[4].normal, &toPortal->position) * SCENE_SCALE - PORTAL_CLIPPING_PLANE_BIAS;
 
     next->currentDepth = current->currentDepth - 1;
     next->fromPortalIndex = toPortal < fromPortal ? 0 : 1;

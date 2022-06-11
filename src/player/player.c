@@ -27,11 +27,14 @@ struct Vector2 gPlayerColliderEdgeVectors[] = {
     {0.707f, -0.707f},
 };
 
+struct CollisionQuad gPlayerColliderFaces[8];
+
 struct CollisionCylinder gPlayerCollider = {
     0.25f,
     0.7f,
     gPlayerColliderEdgeVectors,
     sizeof(gPlayerColliderEdgeVectors) / sizeof(*gPlayerColliderEdgeVectors),
+    gPlayerColliderFaces,
 };
 
 struct ColliderTypeData gPlayerColliderData = {

@@ -10,6 +10,7 @@ struct CollisionCylinder {
     float halfHeight;
     struct Vector2* edgeVectors;
     int edgeCount;
+    struct CollisionQuad* outsideFaces;
 };
 
 extern struct ColliderCallbacks gCollisionCylinderCallbacks;
