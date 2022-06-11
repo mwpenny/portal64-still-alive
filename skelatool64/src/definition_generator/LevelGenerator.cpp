@@ -4,6 +4,7 @@
 #include <string>
 #include "../math/MES.h"
 #include "../MathUtl.h"
+#include "./DecorGenerator.h"
 
 std::set<std::string> gPortalableSurfaces = {
     "concrete_modular_wall001d",
@@ -405,7 +406,8 @@ void generateLevel(
         const TriggerGeneratorOutput& triggerOutput,
         const RoomGeneratorOutput& roomOutput,
         const SignalsOutput& signalsOutput,
-        Signals& signals
+        Signals& signals,
+        NodeGroups& nodeGroups
 ) {    
     std::unique_ptr<StructureDataChunk> levelDef(new StructureDataChunk());
 
@@ -431,6 +433,8 @@ void generateLevel(
     generateButtonsDefinition(fileDefinition, *levelDef, triggerOutput.buttons);
 
     generateSignalsDefinition(fileDefinition, *levelDef, signalsOutput, signals);
+
+    generateDecorDefinition(scene, fileDefinition, *levelDef, roomOutput, settings, nodeGroups);
 
     fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct LevelDefinition", fileDefinition.GetUniqueName("level"), false, "_geo", std::move(levelDef))));
 }

@@ -66,19 +66,17 @@ void sceneInit(struct Scene* scene) {
         buttonInit(&scene->buttons[i], &gCurrentLevel->buttons[i]);
     }
 
-    scene->decorCount = 1;
+    scene->decorCount = gCurrentLevel->decorCount;
     scene->decor = malloc(sizeof(struct DecorObject*) * scene->decorCount);
-    struct Transform decorTransform;
-    transformInitIdentity(&decorTransform);
-    decorTransform.position.x = 3.0f;
-    decorTransform.position.y = 0.1f;
-    decorTransform.position.z = 3.2f;
-    // quatAxisAngle(&gRight, 1.0f, &decorTransform.rotation);
-    scene->decor[0] = decorObjectNew(decorObjectDefinitionForId(DECOR_TYPE_RADIO), &decorTransform, 1);
-    // vector3Scale(&gForward, &scene->decor[0]->rigidBody.angularVelocity, 10.0f);
-    // scene->decor[0]->rigidBody.velocity.y = 1.0f;
-    // scene->decor[0]->rigidBody.velocity.z = 1.0f;
-    // scene->decor[0]->rigidBody.velocity.x = 1.0f;
+
+    for (int i = 0; i < scene->decorCount; ++i) {
+        struct DecorDefinition* decorDef = &gCurrentLevel->decor[i];
+        struct Transform decorTransform;
+        decorTransform.position = decorDef->position;
+        decorTransform.rotation = decorDef->rotation;
+        decorTransform.scale = gOneVec;
+        scene->decor[i] = decorObjectNew(decorObjectDefinitionForId(decorDef->decorId), &decorTransform, decorDef->roomIndex);
+    }
 
     scene->doorCount = gCurrentLevel->doorCount;
     scene->doors = malloc(sizeof(struct Door) * scene->doorCount);

@@ -81,6 +81,13 @@ struct ButtonDefinition {
     short signalIndex;
 };
 
+struct DecorDefinition {
+    struct Vector3 position;
+    struct Quaternion rotation;
+    short roomIndex;
+    short decorId;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
@@ -95,6 +102,7 @@ struct LevelDefinition {
     struct DoorDefinition* doors;
     struct ButtonDefinition* buttons;
     struct SignalOperator* signalOperators;
+    struct DecorDefinition* decor;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
@@ -103,6 +111,7 @@ struct LevelDefinition {
     short doorCount;
     short buttonCount;
     short signalOperatorCount;
+    short decorCount;
     short startLocation;
 };
 

@@ -173,7 +173,8 @@ int main(int argc, char *argv[]) {
                 *triggerOutput,
                 *roomOutput,
                 *signalsOutput,
-                signals
+                signals,
+                nodesByGroup
             );
 
             nodesByGroup.PrintUnusedTypes();

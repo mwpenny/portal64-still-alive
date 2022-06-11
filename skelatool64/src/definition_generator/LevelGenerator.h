@@ -17,7 +17,8 @@ void generateLevel(
         const TriggerGeneratorOutput& triggerOutput,
         const RoomGeneratorOutput& roomOutput,
         const SignalsOutput& signalsOutput,
-        Signals& signals
+        Signals& signals,
+        NodeGroups& nodeGroups
 );
 
 #endif
