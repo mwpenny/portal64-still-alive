@@ -18,5 +18,6 @@ extern struct ColliderCallbacks gCollisionCylinderCallbacks;
 float collisionCylinderSolidMofI(struct ColliderTypeData* typeData, float mass);
 void collisionCylinderBoundingBox(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box);
 int collisionCylinderMinkowsiSum(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output);
+int collisionCylinderRaycast(struct CollisionObject* cylinderObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact);
 
 #endif

@@ -9,7 +9,7 @@
 #include "./raycasting.h"
 
 struct ColliderCallbacks gCollisionCylinderCallbacks = {
-    raycastCylinder,
+    collisionCylinderRaycast,
     collisionCylinderSolidMofI,
     collisionCylinderBoundingBox,
     collisionCylinderMinkowsiSum,
@@ -137,17 +137,71 @@ int collisionCylinderMinkowsiSum(void* data, struct Basis* basis, struct Vector3
     return (centerDir ? 0x1 : 0x2) | (1 << (faceId + 2)) | (1 << (nextId + 2));
 }
 
+int collisionCylinderRaycastCap(struct CollisionObject* cylinderObject, struct Ray* ray, struct Ray* localRay, float maxDistance, struct RaycastHit* contact) {
+    struct CollisionCylinder* cylinder = (struct CollisionCylinder*)cylinderObject->collider->data;
+
+    struct Plane localPlane;
+
+    localPlane.normal = gZeroVec;
+    localPlane.normal.y = localRay->dir.y > 0.0f ? -1.0f : 1.0f;
+    localPlane.d = -cylinder->halfHeight;
+
+    float capHitDistance;
+    if (!planeRayIntersection(&localPlane, &localRay->origin, &localRay->dir, &capHitDistance)) {
+        return 0;
+    }
+
+    if (capHitDistance < 0.0f || capHitDistance > maxDistance) {
+        return 0;
+    }
+    
+    struct Vector3 localHit;
+    vector3AddScaled(&localRay->origin, &localRay->dir, capHitDistance, &localHit);
+
+    for (int i = 0; i < (cylinder->edgeCount << 1); ++i) {
+        if (planePointDistance(&cylinder->outsideFaces[i].plane, &localHit) > 0.0f) {
+            return 0;
+        }
+    }
+
+    vector3AddScaled(&ray->origin, &ray->dir, capHitDistance, &contact->at);
+    if (localPlane.normal.y > 0.0f) {
+        contact->normal = cylinderObject->body->rotationBasis.y;
+    } else {
+        vector3Negate(&cylinderObject->body->rotationBasis.y, &contact->normal);
+    }
+
+    contact->distance = capHitDistance;
+    contact->object = cylinderObject;
+    contact->throughPortal = 0;
+    contact->roomIndex = cylinderObject->body->currentRoom;
+
+    return 1;
+}
+
+void collisionObjectLocalRay(struct CollisionObject* cylinderObject, struct Ray* ray, struct Ray* localRay) {
+    struct Vector3 offset;
+    vector3Sub(&ray->origin, &cylinderObject->body->transform.position, &offset);
+    basisUnRotate(&cylinderObject->body->rotationBasis, &ray->dir, &localRay->dir);
+    basisUnRotate(&cylinderObject->body->rotationBasis, &offset, &localRay->origin);
+}
+
 int collisionCylinderRaycast(struct CollisionObject* cylinderObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
     float rayLerp;
     float cylinderLerp;
 
-    lineNearestApproach(&ray->origin, &ray->dir, &cylinderObject->body->transform.position, &cylinderObject->body->rotationBasis.y, &rayLerp, &cylinderLerp);
+    struct CollisionCylinder* cylinder = (struct CollisionCylinder*)cylinderObject->collider->data;
+    collisionCylinderBoxCheckForFaces(cylinder);
+
+    if (!lineNearestApproach(&ray->origin, &ray->dir, &cylinderObject->body->transform.position, &cylinderObject->body->rotationBasis.y, &rayLerp, &cylinderLerp)) {
+        struct Ray localRay;
+        collisionObjectLocalRay(cylinderObject, ray, &localRay);
+        return collisionCylinderRaycastCap(cylinderObject, ray, &localRay, maxDistance, contact);
+    }
 
     if (rayLerp < 0.0f) {
         return 0;
     }
-
-    struct CollisionCylinder* cylinder = (struct CollisionCylinder*)cylinderObject->collider->data;
 
     float diagnalReach = cylinder->radius * cylinder->radius + cylinder->halfHeight * cylinder->halfHeight;
 
@@ -168,21 +222,22 @@ int collisionCylinderRaycast(struct CollisionObject* cylinderObject, struct Ray*
     }
 
     struct Ray localRay;
-    struct Vector3 offset;
-    vector3Sub(&ray->origin, &cylinderObject->body->transform.position, &offset);
-    basisUnRotate(&cylinderObject->body->rotationBasis, &ray->dir, &localRay.dir);
-    basisUnRotate(&cylinderObject->body->rotationBasis, &offset, &localRay.origin);
-
-    collisionCylinderBoxCheckForFaces(cylinder);
-
-    struct RaycastHit localHit;
+    collisionObjectLocalRay(cylinderObject, ray, &localRay);
 
     for (int i = 0; i < (cylinder->edgeCount << 1); ++i) {
-        if (raycastQuadShape(&cylinder->outsideFaces[i], &localRay, maxDistance, &localHit)) {
-            // TODO transform hit
+        if (raycastQuadShape(&cylinder->outsideFaces[i], &localRay, maxDistance, contact)) {
+            struct Vector3 rotatedNormal;
+            basisRotate(&cylinderObject->body->rotationBasis, &contact->normal, &rotatedNormal);
+            contact->normal = rotatedNormal;
+            vector3AddScaled(&ray->origin, &ray->dir, contact->distance, &contact->at);
+
+            contact->object = cylinderObject;
+            contact->throughPortal = 0;
+            contact->roomIndex = cylinderObject->body->currentRoom;
+            
             return 1;
         }
     }
 
-    return 0;
+    return collisionCylinderRaycastCap(cylinderObject, ray, &localRay, maxDistance, contact);
 }
