@@ -76,20 +76,16 @@ int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDist
         // d = -(o * N + d) / (N * D)
 
         float dir = VECTOR3_AS_ARRAY(&localRay.dir)[i];
-        
-        float denominator = fabsf(dir);
 
-        if (denominator < NEAR_DOT_ZERO) {
+        if (fabsf(dir) < NEAR_DOT_ZERO) {
             continue;
         }
 
-        float numerator = VECTOR3_AS_ARRAY(&localRay.origin)[i] - VECTOR3_AS_ARRAY(&box->sideLength)[i];
-
-        if (dir > 0) {
-            numerator = -numerator;
+        if (dir > 0.0f) {
+            hitTest.distance = -(VECTOR3_AS_ARRAY(&localRay.origin)[i] + VECTOR3_AS_ARRAY(&box->sideLength)[i]) / dir;
+        } else {
+            hitTest.distance = -(VECTOR3_AS_ARRAY(&localRay.origin)[i] - VECTOR3_AS_ARRAY(&box->sideLength)[i]) / dir;
         }
-
-        hitTest.distance = numerator / denominator;
 
         // check if hit is within valid bounds
         if (hitTest.distance < MIN_RAY_LENGTH || hitTest.distance > contact->distance) {
