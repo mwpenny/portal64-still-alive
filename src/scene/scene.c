@@ -83,6 +83,16 @@ void sceneInit(struct Scene* scene) {
     for (int i = 0; i < scene->doorCount; ++i) {
         doorInit(&scene->doors[i], &gCurrentLevel->doors[i], &gCurrentLevel->world);
     }
+
+    scene->fizzlerCount = 1;
+    scene->fizzlers = malloc(sizeof(struct Fizzler) * scene->fizzlerCount);
+    for (int i = 0; i < scene->fizzlerCount; ++i) {
+        struct Transform fizzlerTransform;
+        transformInitIdentity(&fizzlerTransform);
+        fizzlerTransform.position = scene->buttons[0].rigidBody.transform.position;
+        fizzlerTransform.position.y += 1.0f;
+        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, 2.0f, 2.0f);
+    }
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {
@@ -243,6 +253,10 @@ void sceneUpdate(struct Scene* scene) {
 
     for (int i = 0; i < scene->decorCount; ++i) {
         decorObjectUpdate(scene->decor[i]);
+    }
+
+    for (int i = 0; i < scene->fizzlerCount; ++i) {
+        fizzlerUpdate(&scene->fizzlers[i]);
     }
     
     collisionSceneUpdateDynamics();

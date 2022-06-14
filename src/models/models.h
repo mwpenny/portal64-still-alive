@@ -21,4 +21,6 @@ extern short door_01_material_index;
 extern Gfx* cylinder_gfx;
 extern short cylinder_material_index;
 
+extern short fizzler_material_index;
+
 #endif

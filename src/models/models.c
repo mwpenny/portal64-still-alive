@@ -24,3 +24,5 @@ short door_01_material_index = DOOR_01_INDEX;
 
 Gfx* cylinder_gfx = &props_cylinder_test_model_gfx[0];
 short cylinder_material_index = PLASTIC_PLASTICWALL001A_INDEX;
+
+short fizzler_material_index = PORTAL_CLEANSER_INDEX;

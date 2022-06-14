@@ -311,3 +311,13 @@ materials:
     gDPSetCombineMode: 
       color: ["SHADE", "0", "TEXEL0", "0"]
     
+
+  portal_cleanser:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/effects/portal_cleanser.png
+      fmt: G_IM_FMT_RGBA
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode: G_CC_DECALRGB
+    gSPGeometryMode:
+      clear: [G_CULL_BACK, G_CULL_FRONT]

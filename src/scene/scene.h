@@ -12,6 +12,7 @@
 #include "button.h"
 #include "../decor/decor_object.h"
 #include "./door.h"
+#include "./fizzler.h"
 
 #define MAX_CUBES   1
 
@@ -23,12 +24,14 @@ struct Scene {
     struct Button* buttons;
     struct DecorObject** decor;
     struct Door* doors;
+    struct Fizzler* fizzlers;
     OSTime cpuTime;
     OSTime lastFrameStart;
     OSTime lastFrameTime;
     u8 buttonCount;
     u8 decorCount;
     u8 doorCount;
+    u8 fizzlerCount;
 };
 
 extern struct Scene gScene;
