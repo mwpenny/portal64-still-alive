@@ -179,13 +179,6 @@ int collisionCylinderRaycastCap(struct CollisionObject* cylinderObject, struct R
     return 1;
 }
 
-void collisionObjectLocalRay(struct CollisionObject* cylinderObject, struct Ray* ray, struct Ray* localRay) {
-    struct Vector3 offset;
-    vector3Sub(&ray->origin, &cylinderObject->body->transform.position, &offset);
-    basisUnRotate(&cylinderObject->body->rotationBasis, &ray->dir, &localRay->dir);
-    basisUnRotate(&cylinderObject->body->rotationBasis, &offset, &localRay->origin);
-}
-
 int collisionCylinderRaycast(struct CollisionObject* cylinderObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
     float rayLerp;
     float cylinderLerp;

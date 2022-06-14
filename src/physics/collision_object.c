@@ -100,6 +100,13 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
         return;
     }
 
+    if (contact->shapeA == b) {
+        struct Vector3 tmp = result.contactA;
+        result.contactA = result.contactB;
+        result.contactB = tmp;
+        vector3Negate(&result.normal, &result.normal);
+    }
+
     contact->friction = MAX(a->collider->friction, b->collider->friction);
     contact->restitution = MIN(a->collider->bounce, b->collider->bounce);
 
@@ -143,4 +150,11 @@ int minkowsiSumAgainstObject(void* data, struct Vector3* direction, struct Vecto
     int result = object->collider->callbacks->minkowsiSum(object->collider->data, &object->body->rotationBasis, direction, output);
     vector3Add(output, &object->body->transform.position, output);
     return result;
+}
+
+void collisionObjectLocalRay(struct CollisionObject* cylinderObject, struct Ray* ray, struct Ray* localRay) {
+    struct Vector3 offset;
+    vector3Sub(&ray->origin, &cylinderObject->body->transform.position, &offset);
+    basisUnRotate(&cylinderObject->body->rotationBasis, &ray->dir, &localRay->dir);
+    basisUnRotate(&cylinderObject->body->rotationBasis, &offset, &localRay->origin);
 }

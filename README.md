@@ -58,6 +58,5 @@ where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where blender
 ## Current TODO list
 
 Allow player to press button -- kinda done
-Cylinder raycasting
 cube dispenser
 nan in overlap

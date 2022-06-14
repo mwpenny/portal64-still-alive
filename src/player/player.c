@@ -12,6 +12,7 @@
 #include "../physics/config.h"
 #include "../physics/point_constraint.h"
 #include "../util/time.h"
+#include "../physics/contact_insertion.h"
 
 #define GRAB_RAYCAST_DISTANCE   2.5f
 
@@ -95,7 +96,7 @@ void playerHandleCollision(struct Player* player) {
             vector3AddScaled(
                 &player->body.transform.position, 
                 &contact->normal, 
-                (contact->shapeA == &player->collisionObject ? offset : -offset) * 0.9f, 
+                (contact->shapeA == &player->collisionObject ? offset : -offset) * 0.5f, 
                 &player->body.transform.position
             );
 
@@ -268,20 +269,49 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
     vector3AddScaled(&player->body.transform.position, &player->body.velocity, FIXED_DELTA_TIME, &player->body.transform.position);
 
-    playerHandleCollision(player);
-
     struct RaycastHit hit;
     struct Ray ray;
     ray.origin = player->body.transform.position;
     vector3Scale(&gUp, &ray.dir, -1.0f);
     if (collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_TANGIBLE, PLAYER_HEAD_HEIGHT, 1, &hit)) {
-        vector3AddScaled(&hit.at, &gUp, PLAYER_HEAD_HEIGHT, &player->body.transform.position);
+        struct ContactManifold* collisionManifold = contactSolverGetContactManifold(&gContactSolver, &player->collisionObject, hit.object);
 
-        player->body.velocity.y = 0.0f;
+        struct EpaResult newContact;
+
+        newContact.id = 0xFFFF;
+
+        struct Vector3* playerContact;
+        struct Vector3* otherContact;
+        
+        if (collisionManifold->shapeA == &player->collisionObject) {
+            playerContact = &newContact.contactA;
+            otherContact = &newContact.contactB;
+            vector3Negate(&hit.normal, &newContact.normal);
+        } else {
+            playerContact = &newContact.contactB;
+            otherContact = &newContact.contactA;
+            newContact.normal = hit.normal;
+        }
+
+        playerContact->x = 0.0f; playerContact->y = -PLAYER_HEAD_HEIGHT; playerContact->z = 0.0f;
+        *otherContact = hit.at;
+
+        newContact.penetration = hit.distance - PLAYER_HEAD_HEIGHT;
+
+        if (hit.object && hit.object->body) {
+            transformPointInverseNoScale(&hit.object->body->transform, otherContact, otherContact);
+        }
+
+        collisionManifold->friction = MAX(player->collisionObject.collider->friction, hit.object->collider->friction);
+        collisionManifold->restitution = MIN(player->collisionObject.collider->bounce, hit.object->collider->bounce);
+
+        contactInsert(collisionManifold, &newContact);
         player->flags |= PlayerFlagsGrounded;
     } else {
         player->flags &= ~PlayerFlagsGrounded;
     }
+
+    playerHandleCollision(player);
 
     player->body.transform.rotation = player->lookTransform.rotation;    
 

@@ -62,11 +62,8 @@ int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDist
         return 0;
     }
 
-    struct Transform boxInverse;
-    transformInvert(&boxObject->body->transform, &boxInverse);
-
     struct Ray localRay;
-    rayTransform(&boxInverse, ray, &localRay);
+    collisionObjectLocalRay(boxObject, ray, &localRay);
 
     contact->distance = maxDistance;
 

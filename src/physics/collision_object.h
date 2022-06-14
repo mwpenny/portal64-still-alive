@@ -33,5 +33,6 @@ int minkowsiSumAgainstQuad(void* data, struct Vector3* direction, struct Vector3
 // data should be of type struct CollisionObject
 int minkowsiSumAgainstObject(void* data, struct Vector3* direction, struct Vector3* output);
 
+void collisionObjectLocalRay(struct CollisionObject* cylinderObject, struct Ray* ray, struct Ray* localRay);
 
 #endif
