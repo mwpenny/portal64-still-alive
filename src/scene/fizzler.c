@@ -41,7 +41,7 @@ void fizzlerSpawnParticle(struct Fizzler* fizzler, int particleIndex) {
     currentVertex->v.ob[2] = 0;
 
     currentVertex->v.flag = 0;
-    currentVertex->v.tc[0] = 32 << 5;
+    currentVertex->v.tc[0] = IMAGE_WIDTH << 5;
     currentVertex->v.tc[1] = 0;
 
     currentVertex->v.cn[0] = 255; currentVertex->v.cn[1] = 255; currentVertex->v.cn[2] = 255; currentVertex->v.cn[3] = 255;
@@ -53,8 +53,8 @@ void fizzlerSpawnParticle(struct Fizzler* fizzler, int particleIndex) {
     currentVertex->v.ob[2] = 0;
 
     currentVertex->v.flag = 0;
-    currentVertex->v.tc[0] = 32 << 5;
-    currentVertex->v.tc[1] = 64 << 5;
+    currentVertex->v.tc[0] = IMAGE_WIDTH << 5;
+    currentVertex->v.tc[1] = IMAGE_HEIGHT << 5;
 
     currentVertex->v.cn[0] = 255; currentVertex->v.cn[1] = 255; currentVertex->v.cn[2] = 255; currentVertex->v.cn[3] = 255;
 
@@ -66,7 +66,7 @@ void fizzlerSpawnParticle(struct Fizzler* fizzler, int particleIndex) {
 
     currentVertex->v.flag = 0;
     currentVertex->v.tc[0] = 0;
-    currentVertex->v.tc[1] = 64 << 5;
+    currentVertex->v.tc[1] = IMAGE_HEIGHT << 5;
 
     currentVertex->v.cn[0] = 255; currentVertex->v.cn[1] = 255; currentVertex->v.cn[2] = 255; currentVertex->v.cn[3] = 255;
 }

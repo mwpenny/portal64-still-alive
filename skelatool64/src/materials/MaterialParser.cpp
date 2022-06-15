@@ -300,18 +300,20 @@ int parseRenderModeFlags(const YAML::Node& node, ParseResult& output) {
 
     int result = 0;
 
-    for (auto it = node.begin(); it != node.end(); ++it) {
-        if (!it->second.IsScalar()) {
-            output.mErrors.push_back(ParseError(formatError("Flags should be a list of strings", it->second.Mark())));
+    for (unsigned i = 0; i < node.size(); ++i) {
+        const YAML::Node& element = node[i];
+
+        if (!element.IsScalar()) {
+            output.mErrors.push_back(ParseError(formatError("Flags should be a list of strings", element.Mark())));
             continue;
         }
 
-        std::string asString = it->second.as<std::string>();
+        std::string asString = element.as<std::string>();
 
         int singleFlag = 0;
 
         if (!renderModeGetFlagValue(asString, singleFlag)) {    
-            output.mErrors.push_back(ParseError(formatError("Invalid flag", it->second.Mark())));
+            output.mErrors.push_back(ParseError(formatError("Invalid flag", element.Mark())));
             continue;
         }
 

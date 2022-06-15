@@ -13,6 +13,9 @@
 #define FIZZLER_PARTICLE_LENGTH_FIXED   (int)(FIZZLER_PARTICLE_LENGTH * SCENE_SCALE)
 #define FIZZLER_PARTICLE_HEIGHT_FIXED   (int)(FIZZLER_PARTICLE_LENGTH * SCENE_SCALE * 0.5f)
 
+#define IMAGE_WIDTH     16
+#define IMAGE_HEIGHT    32
+
 struct Fizzler {
     struct Transform transform;
     Vtx* modelVertices;

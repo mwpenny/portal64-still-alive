@@ -318,10 +318,8 @@ std::string generateSingleRenderMode(int renderMode, int cycleNumber) {
     renderModeExtractFlags(renderMode, flags);
 
     for (auto& flag : flags) {
-        if (result.tellp()) {
-            result << " | ";
-        }
         result << flag;
+        result << " | ";
     }
 
     result << "GBL_c" << cycleNumber << "(";

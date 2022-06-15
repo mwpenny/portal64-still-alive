@@ -1,0 +1,1 @@
+-resize 16x32 -alpha on -background none -fuzz 50% -transparent black -flatten

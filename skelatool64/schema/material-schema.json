@@ -66,10 +66,7 @@
                     },
                     "uniqueItems": true
                 },
-                "cycle1": {
-                    "$ref": "#/definitions/renderBlendModes"
-                },
-                "cycle2": {
+                "blend": {
                     "$ref": "#/definitions/renderBlendModes"
                 }
             }
