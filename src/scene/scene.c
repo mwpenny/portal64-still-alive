@@ -84,14 +84,16 @@ void sceneInit(struct Scene* scene) {
         doorInit(&scene->doors[i], &gCurrentLevel->doors[i], &gCurrentLevel->world);
     }
 
-    scene->fizzlerCount = 1;
+    scene->fizzlerCount = gCurrentLevel->fizzlerCount;
     scene->fizzlers = malloc(sizeof(struct Fizzler) * scene->fizzlerCount);
     for (int i = 0; i < scene->fizzlerCount; ++i) {
+        struct FizzlerDefinition* fizzlerDef = &gCurrentLevel->fizzlers[i];
+
         struct Transform fizzlerTransform;
-        transformInitIdentity(&fizzlerTransform);
-        fizzlerTransform.position = scene->buttons[0].rigidBody.transform.position;
-        fizzlerTransform.position.y += 1.0f;
-        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, 2.0f, 2.0f);
+        fizzlerTransform.position = fizzlerDef->position;
+        fizzlerTransform.rotation = fizzlerDef->rotation;
+        fizzlerTransform.scale = gOneVec;
+        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height);
     }
 }
 

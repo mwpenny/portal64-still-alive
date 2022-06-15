@@ -397,6 +397,47 @@ void generateDoorsDefinition(const aiScene* scene, CFileDefinition& fileDefiniti
     levelDef.AddPrimitive("doorCount", roomOutput.doors.size());
 }
 
+void generateFizzlerDefinitions(
+    const aiScene* scene, 
+    CFileDefinition& fileDefinition, 
+    StructureDataChunk& levelDef, 
+    const RoomGeneratorOutput& roomOutput, 
+    const DisplayListSettings& settings,
+    NodeGroups& nodeGroups) {
+    
+    int fizzlerCount = 0;
+    std::unique_ptr<StructureDataChunk> fizzlers(new StructureDataChunk());
+
+    aiMatrix4x4 baseTransform = settings.CreateCollisionTransform();
+
+    for (auto& nodeInfo : nodeGroups.NodesForType("@fizzler")) {
+        std::unique_ptr<StructureDataChunk> fizzlerData(new StructureDataChunk());
+        aiVector3D pos;
+        aiQuaternion rot;
+        aiVector3D scale;
+        (baseTransform * nodeInfo.node->mTransformation).Decompose(scale, rot, pos);
+        fizzlerData->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(pos)));
+        fizzlerData->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(rot)));
+        fizzlerData->AddPrimitive(2.0f);
+        fizzlerData->AddPrimitive(2.0f);
+        fizzlerData->AddPrimitive(roomOutput.RoomForNode(nodeInfo.node));
+
+        fizzlers->Add(std::move(fizzlerData));
+        ++fizzlerCount;
+    }
+
+    std::string fizzlersName = fileDefinition.AddDataDefinition(
+        "fizzlers",
+        "struct FizzlerDefinition",
+        true,
+        "_geo",
+        std::move(fizzlers)
+    );
+
+    levelDef.AddPrimitive("fizzlers", fizzlersName);
+    levelDef.AddPrimitive("fizzlerCount", fizzlerCount);
+}
+
 void generateLevel(
         const aiScene* scene, 
         CFileDefinition& fileDefinition,
@@ -435,6 +476,8 @@ void generateLevel(
     generateSignalsDefinition(fileDefinition, *levelDef, signalsOutput, signals);
 
     generateDecorDefinition(scene, fileDefinition, *levelDef, roomOutput, settings, nodeGroups);
+
+    generateFizzlerDefinitions(scene, fileDefinition, *levelDef, roomOutput, settings, nodeGroups);
 
     fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct LevelDefinition", fileDefinition.GetUniqueName("level"), false, "_geo", std::move(levelDef))));
 }

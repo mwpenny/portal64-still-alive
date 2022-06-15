@@ -10,11 +10,15 @@
 #define COLLISION_LAYERS_TANGIBLE           (1 << 2)
 #define COLLISION_LAYERS_GRABBABLE          (1 << 3)
 
+typedef void (*TriggerCallback)(void* data, struct CollisionObject* objectEnteringTrigger);
+
 struct CollisionObject {
     struct ColliderTypeData *collider;
     struct RigidBody* body;
     struct Box3D boundingBox;
     int collisionLayers;
+    void* data;
+    TriggerCallback trigger;
 };
 
 int collisionObjectIsActive(struct CollisionObject* object);

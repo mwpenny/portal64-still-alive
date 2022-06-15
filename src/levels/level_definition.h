@@ -88,6 +88,14 @@ struct DecorDefinition {
     short decorId;
 };
 
+struct FizzlerDefinition {
+    struct Vector3 position;
+    struct Quaternion rotation;
+    float width;
+    float height;
+    short roomIndex;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
@@ -103,6 +111,7 @@ struct LevelDefinition {
     struct ButtonDefinition* buttons;
     struct SignalOperator* signalOperators;
     struct DecorDefinition* decor;
+    struct FizzlerDefinition* fizzlers;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
@@ -112,6 +121,7 @@ struct LevelDefinition {
     short buttonCount;
     short signalOperatorCount;
     short decorCount;
+    short fizzlerCount;
     short startLocation;
 };
 

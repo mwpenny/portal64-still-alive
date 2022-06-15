@@ -11,6 +11,8 @@ void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData
     rigidBodyInit(body, mass, collider->callbacks->mofICalculator(collider, mass));
     collisionObjectUpdateBB(object);
     object->collisionLayers = collisionLayers;
+    object->data = 0;
+    object->trigger = 0;
 }
 
 int collisionObjectIsActive(struct CollisionObject* object) {
@@ -30,6 +32,10 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
         return;
     }
 
+    if (object->trigger && quadObject->trigger) {
+        return;
+    }
+
     struct Simplex simplex;
 
     struct CollisionQuad* quad = (struct CollisionQuad*)quadObject->collider->data;
@@ -38,6 +44,16 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
                 quad, minkowsiSumAgainstQuad, 
                 object, minkowsiSumAgainstObject, 
                 &quad->plane.normal)) {
+        return;
+    }
+
+    if (object->trigger) {
+        object->trigger(object->data, quadObject);
+        return;
+    }
+
+    if (quadObject->trigger) {
+        quadObject->trigger(quadObject->data, object);
         return;
     }
 
@@ -73,6 +89,10 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
         return;
     }
 
+    if (a->trigger && b->trigger) {
+        return;
+    }
+
     struct Simplex simplex;
 
     struct Vector3 offset;
@@ -83,6 +103,16 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
                 a, minkowsiSumAgainstObject, 
                 b, minkowsiSumAgainstObject, 
                 &offset)) {
+        return;
+    }
+
+    if (a->trigger) {
+        a->trigger(a->data, b);
+        return;
+    }
+
+    if (b->trigger) {
+        b->trigger(b->data, a);
         return;
     }
 
