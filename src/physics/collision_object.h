@@ -9,6 +9,8 @@
 #define COLLISION_LAYERS_TRANSPARENT        (1 << 1)
 #define COLLISION_LAYERS_TANGIBLE           (1 << 2)
 #define COLLISION_LAYERS_GRABBABLE          (1 << 3)
+#define COLLISION_LAYERS_FIZZLER            (1 << 4)
+#define COLLISION_LAYERS_BLOCK_PORTAL       (1 << 5)
 
 typedef void (*TriggerCallback)(void* data, struct CollisionObject* objectEnteringTrigger);
 

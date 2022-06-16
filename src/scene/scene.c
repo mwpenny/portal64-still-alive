@@ -93,7 +93,7 @@ void sceneInit(struct Scene* scene) {
         fizzlerTransform.position = fizzlerDef->position;
         fizzlerTransform.rotation = fizzlerDef->rotation;
         fizzlerTransform.scale = gOneVec;
-        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height);
+        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height, fizzlerDef->roomIndex);
     }
 }
 
@@ -205,6 +205,12 @@ void sceneCheckPortals(struct Scene* scene) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom);
         soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL);
     }
+
+    if (scene->player.body.flags & RigidBodyFizzled) {
+        sceneClosePortal(scene, 0);
+        sceneClosePortal(scene, 1);
+        scene->player.body.flags &= ~RigidBodyFizzled;
+    }
 }
 
 void sceneUpdatePortalListener(struct Scene* scene, int portalIndex, int listenerIndex) {
@@ -292,7 +298,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
 int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex) {
     struct RaycastHit hit;
 
-    if (!collisionSceneRaycast(&gCollisionScene, roomIndex, ray, COLLISION_LAYERS_STATIC, 1000000.0f, 0, &hit)) {
+    if (!collisionSceneRaycast(&gCollisionScene, roomIndex, ray, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, 1000000.0f, 0, &hit)) {
         return 0;
     }
 
@@ -319,4 +325,8 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
     }
 
     return sceneOpenPortal(scene, &portalLocation, portalIndex, quadIndex, hit.roomIndex);
+}
+
+void sceneClosePortal(struct Scene* scene, int portalIndex) {
+    gCollisionScene.portalTransforms[portalIndex] = NULL;
 }

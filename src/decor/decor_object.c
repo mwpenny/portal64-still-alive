@@ -20,13 +20,15 @@ struct DecorObject* decorObjectNew(struct DecorObjectDefinition* definition, str
 }
 
 void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* definition, struct Transform* at, int room) {
-    collisionObjectInit(&object->collisionObject, &definition->colliderType, &object->rigidBody, definition->mass, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE);
+    collisionObjectInit(&object->collisionObject, &definition->colliderType, &object->rigidBody, definition->mass, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_FIZZLER);
     collisionSceneAddDynamicObject(&object->collisionObject);
 
     object->rigidBody.transform = *at;
     object->rigidBody.flags |= RigidBodyFlagsGrabbable;
     object->rigidBody.currentRoom = room;
     object->definition = definition;
+
+    collisionObjectUpdateBB(&object->collisionObject);
 
     object->dynamicId = dynamicSceneAdd(object, decorObjectRender, &object->rigidBody.transform, definition->radius);
 

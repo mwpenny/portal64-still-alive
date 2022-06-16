@@ -43,5 +43,6 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 void sceneUpdate(struct Scene* scene);
 
 int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex);
+void sceneClosePortal(struct Scene* scene, int portalIndex);
 
 #endif

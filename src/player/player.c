@@ -16,7 +16,7 @@
 
 #define GRAB_RAYCAST_DISTANCE   2.5f
 
-#define PLAYER_COLLISION_LAYERS COLLISION_LAYERS_TANGIBLE
+#define PLAYER_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER)
 
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
