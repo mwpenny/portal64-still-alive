@@ -49,4 +49,10 @@ void decorObjectUpdate(struct DecorObject* decorObject) {
     if (decorObject->playingSound != SOUND_ID_NONE) {
         soundPlayerUpdatePosition(decorObject->playingSound, &decorObject->rigidBody.transform.position);
     }
+
+    if (decorObject->rigidBody.flags & (RigidBodyIsTouchingPortal | RigidBodyWasTouchingPortal)) {
+        dynamicSceneSetFlags(decorObject->dynamicId, DYNAMIC_SCENE_OBJECT_FLAGS_TOUCHING_PORTAL);
+    } else {
+        dynamicSceneClearFlags(decorObject->dynamicId, DYNAMIC_SCENE_OBJECT_FLAGS_TOUCHING_PORTAL);
+    }
 }

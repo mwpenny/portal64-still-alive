@@ -5,6 +5,7 @@
 
 #define DECOR_TYPE_CYLINDER 0
 #define DECOR_TYPE_RADIO    1
+#define DECOR_TYPE_CUBE     2
 
 struct DecorObjectDefinition* decorObjectDefinitionForId(int id);
 

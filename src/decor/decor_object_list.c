@@ -1,6 +1,7 @@
 #include "decor_object_list.h"
 
 #include "../../build/assets/models/props/cylinder_test.h"
+#include "../../build/assets/models/cube/cube.h"
 #include "../../build/assets/models/props/radio.h"
 #include "../../build/assets/materials/static.h"
 #include "../../build/src/audio/clips.h"
@@ -27,6 +28,10 @@ struct CollisionCylinder gCylinderCollider = {
 
 struct CollisionBox gRadioCollider = {
     {0.23351f, 0.20597f, 0.154298f},
+};
+
+struct CollisionBox gCubeCollisionBox = {
+    {0.3165f, 0.3165f, 0.3165f}
 };
 
 struct DecorObjectDefinition gDecorObjectDefinitions[] = {
@@ -57,6 +62,19 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         &props_radio_model_gfx[0],
         RADIO_INDEX,
         .soundClipId = SOUNDS_LOOPING_RADIO_MIX,
+    },
+    [DECOR_TYPE_CUBE] = {
+        {
+            CollisionShapeTypeBox,
+            &gCubeCollisionBox,
+            0.0f,
+            0.5f,
+            &gCollisionBoxCallbacks,  
+        },
+        2.0f, 
+        0.55f,
+        &cube_cube_model_gfx[0],
+        CUBE_INDEX,
     },
 };
 

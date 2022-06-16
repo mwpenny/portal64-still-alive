@@ -8,19 +8,15 @@
 #include "point_light.h"
 #include "portal.h"
 #include "../player/player.h"
-#include "cube.h"
 #include "button.h"
 #include "../decor/decor_object.h"
 #include "./door.h"
 #include "./fizzler.h"
 
-#define MAX_CUBES   1
-
 struct Scene {
     struct Camera camera;
     struct Player player;
     struct Portal portals[2];
-    struct Cube cubes[MAX_CUBES];
     struct Button* buttons;
     struct DecorObject** decor;
     struct Door* doors;
