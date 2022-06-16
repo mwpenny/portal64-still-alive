@@ -46,7 +46,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         1.0f,
         0.92f,
         &props_cylinder_test_model_gfx[0],
-        PLASTIC_PLASTICWALL001A_INDEX,
+        .materialIndex = PLASTIC_PLASTICWALL001A_INDEX,
         .soundClipId = -1,
     },
     [DECOR_TYPE_RADIO] = {
@@ -60,7 +60,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         0.2f,
         0.4f,
         &props_radio_model_gfx[0],
-        RADIO_INDEX,
+        .materialIndex = RADIO_INDEX,
         .soundClipId = SOUNDS_LOOPING_RADIO_MIX,
     },
     [DECOR_TYPE_CUBE] = {
@@ -74,7 +74,9 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         2.0f, 
         0.55f,
         &cube_cube_model_gfx[0],
-        CUBE_INDEX,
+        .materialIndex = CUBE_INDEX,
+        .materialIndexFizzled = CUBE_FIZZLED_INDEX,
+        .soundClipId = -1,
     },
 };
 

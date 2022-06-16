@@ -46,7 +46,9 @@ void rigidBodyAppyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoin
 #define ENERGY_SCALE_PER_STEP   0.99f
 
 void rigidBodyUpdate(struct RigidBody* rigidBody) {
-    rigidBody->velocity.y += GRAVITY_CONSTANT * FIXED_DELTA_TIME;
+    if (!(rigidBody->flags & RigidBodyDisableGravity)) {
+        rigidBody->velocity.y += GRAVITY_CONSTANT * FIXED_DELTA_TIME;
+    }
 
     vector3AddScaled(&rigidBody->transform.position, &rigidBody->velocity, FIXED_DELTA_TIME, &rigidBody->transform.position);
     quatApplyAngularVelocity(&rigidBody->transform.rotation, &rigidBody->angularVelocity, FIXED_DELTA_TIME, &rigidBody->transform.rotation);

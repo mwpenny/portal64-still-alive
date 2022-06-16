@@ -148,6 +148,10 @@ void playerUpdateGrabbedObject(struct Player* player) {
         }
     }
 
+    if (player->grabbing && (player->grabbing->body->flags & RigidBodyFlagsGrabbable) == 0) {
+        player->grabbing = NULL;
+    }
+
     if (player->grabbing) {
         if (player->body.flags & RigidBodyFlagsCrossedPortal0) {
             playerApplyPortalGrab(player, 1);

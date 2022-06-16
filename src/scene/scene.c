@@ -312,5 +312,8 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
 }
 
 void sceneClosePortal(struct Scene* scene, int portalIndex) {
-    gCollisionScene.portalTransforms[portalIndex] = NULL;
+    if (gCollisionScene.portalTransforms[portalIndex]) {
+        soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position);
+        gCollisionScene.portalTransforms[portalIndex] = NULL;
+    }
 }

@@ -40,36 +40,92 @@
             ]
         },
         "renderMode": {
-            "type": "object",
-            "properties": {
-                "flags": {
-                    "type": "array",
-                    "items": {
-                        "enum": [
-                            "AA_EN",
-                            "Z_CMP",
-                            "Z_UPD",
-                            "IM_RD",
-                            "CLR_ON_CVG",
-                            "CVG_X_ALPHA",
-                            "ALPHA_CVG_SEL",
-                            "FORCE_BL",
-                            "CVG_DST_CLAMP",
-                            "CVG_DST_WRAP",
-                            "CVG_DST_FULL",
-                            "CVG_DST_SAVE",
-                            "ZMODE_OPA",
-                            "ZMODE_INTER",
-                            "ZMODE_XLU",
-                            "ZMODE_DEC"
-                        ]
-                    },
-                    "uniqueItems": true
+            "anyOf": [
+                {
+                    "enum": [
+                        "G_RM_AA_ZB_OPA_SURF",
+                        "G_RM_RA_ZB_OPA_SURF",
+                        "G_RM_AA_ZB_XLU_SURF",
+                        "G_RM_AA_ZB_OPA_DECAL",
+                        "G_RM_RA_ZB_OPA_DECAL",
+                        "G_RM_AA_ZB_XLU_DECAL",
+                        "G_RM_AA_ZB_OPA_INTER",
+                        "G_RM_RA_ZB_OPA_INTER",
+                        "G_RM_AA_ZB_XLU_INTER",
+                        "G_RM_AA_ZB_XLU_LINE",
+                        "G_RM_AA_ZB_DEC_LINE",
+                        "G_RM_AA_ZB_TEX_EDGE",
+                        "G_RM_AA_ZB_TEX_INTER",
+                        "G_RM_AA_ZB_SUB_SURF",
+                        "G_RM_AA_ZB_PCL_SURF",
+                        "G_RM_AA_ZB_OPA_TERR",
+                        "G_RM_AA_ZB_TEX_TERR",
+                        "G_RM_AA_ZB_SUB_TERR",
+                        "G_RM_AA_OPA_SURF",
+                        "G_RM_RA_OPA_SURF",
+                        "G_RM_AA_XLU_SURF",
+                        "G_RM_AA_XLU_LINE",
+                        "G_RM_AA_DEC_LINE",
+                        "G_RM_AA_TEX_EDGE",
+                        "G_RM_AA_SUB_SURF",
+                        "G_RM_AA_PCL_SURF",
+                        "G_RM_AA_OPA_TERR",
+                        "G_RM_AA_TEX_TERR",
+                        "G_RM_AA_SUB_TERR",
+                        "G_RM_ZB_OPA_SURF",
+                        "G_RM_ZB_XLU_SURF",
+                        "G_RM_ZB_OPA_DECAL",
+                        "G_RM_ZB_XLU_DECAL",
+                        "G_RM_ZB_CLD_SURF",
+                        "G_RM_ZB_OVL_SURF",
+                        "G_RM_ZB_PCL_SURF",
+                        "G_RM_OPA_SURF",
+                        "G_RM_XLU_SURF",
+                        "G_RM_TEX_EDGE",
+                        "G_RM_CLD_SURF",
+                        "G_RM_PCL_SURF",
+                        "G_RM_ADD",
+                        "G_RM_NOOP",
+                        "G_RM_VISCVG",
+                        "G_RM_OPA_CI",
+                        "G_RM_FOG_SHADE_A",
+                        "G_RM_FOG_PRIM_A",
+                        "G_RM_PASS"
+                    ]
                 },
-                "blend": {
-                    "$ref": "#/definitions/renderBlendModes"
+                {
+                    "type": "object",
+                    "properties": {
+                        "flags": {
+                            "type": "array",
+                            "items": {
+                                "enum": [
+                                    "AA_EN",
+                                    "Z_CMP",
+                                    "Z_UPD",
+                                    "IM_RD",
+                                    "CLR_ON_CVG",
+                                    "CVG_X_ALPHA",
+                                    "ALPHA_CVG_SEL",
+                                    "FORCE_BL",
+                                    "CVG_DST_CLAMP",
+                                    "CVG_DST_WRAP",
+                                    "CVG_DST_FULL",
+                                    "CVG_DST_SAVE",
+                                    "ZMODE_OPA",
+                                    "ZMODE_INTER",
+                                    "ZMODE_XLU",
+                                    "ZMODE_DEC"
+                                ]
+                            },
+                            "uniqueItems": true
+                        },
+                        "blend": {
+                            "$ref": "#/definitions/renderBlendModes"
+                        }
+                    }
                 }
-            }
+            ]
         },
         "geometryModeArray": {
             "type": "array",
@@ -518,59 +574,15 @@
                 "gDPSetRenderMode": {
                     "anyOf": [
                         {
-                            "enum": [
-                                "G_RM_AA_ZB_OPA_SURF",
-                                "G_RM_RA_ZB_OPA_SURF",
-                                "G_RM_AA_ZB_XLU_SURF",
-                                "G_RM_AA_ZB_OPA_DECAL",
-                                "G_RM_RA_ZB_OPA_DECAL",
-                                "G_RM_AA_ZB_XLU_DECAL",
-                                "G_RM_AA_ZB_OPA_INTER",
-                                "G_RM_RA_ZB_OPA_INTER",
-                                "G_RM_AA_ZB_XLU_INTER",
-                                "G_RM_AA_ZB_XLU_LINE",
-                                "G_RM_AA_ZB_DEC_LINE",
-                                "G_RM_AA_ZB_TEX_EDGE",
-                                "G_RM_AA_ZB_TEX_INTER",
-                                "G_RM_AA_ZB_SUB_SURF",
-                                "G_RM_AA_ZB_PCL_SURF",
-                                "G_RM_AA_ZB_OPA_TERR",
-                                "G_RM_AA_ZB_TEX_TERR",
-                                "G_RM_AA_ZB_SUB_TERR",
-                                "G_RM_AA_OPA_SURF",
-                                "G_RM_RA_OPA_SURF",
-                                "G_RM_AA_XLU_SURF",
-                                "G_RM_AA_XLU_LINE",
-                                "G_RM_AA_DEC_LINE",
-                                "G_RM_AA_TEX_EDGE",
-                                "G_RM_AA_SUB_SURF",
-                                "G_RM_AA_PCL_SURF",
-                                "G_RM_AA_OPA_TERR",
-                                "G_RM_AA_TEX_TERR",
-                                "G_RM_AA_SUB_TERR",
-                                "G_RM_ZB_OPA_SURF",
-                                "G_RM_ZB_XLU_SURF",
-                                "G_RM_ZB_OPA_DECAL",
-                                "G_RM_ZB_XLU_DECAL",
-                                "G_RM_ZB_CLD_SURF",
-                                "G_RM_ZB_OVL_SURF",
-                                "G_RM_ZB_PCL_SURF",
-                                "G_RM_OPA_SURF",
-                                "G_RM_XLU_SURF",
-                                "G_RM_TEX_EDGE",
-                                "G_RM_CLD_SURF",
-                                "G_RM_PCL_SURF",
-                                "G_RM_ADD",
-                                "G_RM_NOOP",
-                                "G_RM_VISCVG",
-                                "G_RM_OPA_CI",
-                                "G_RM_FOG_SHADE_A",
-                                "G_RM_FOG_PRIM_A",
-                                "G_RM_PASS"
-                            ]
+                            "$ref": "#/definitions/renderMode"
                         },
                         {
-                            "$ref": "#/definitions/renderMode"
+                            "type": "array",
+                            "items": [{
+                                "$ref": "#/definitions/renderMode"
+                            }, {
+                                "$ref": "#/definitions/renderMode"
+                            }]
                         }
                     ]
                 },

@@ -22,6 +22,7 @@ enum RigidBodyFlags {
     RigidBodyGenerateContacts = (1 << 10),
 
     RigidBodyFizzled = (1 << 11),
+    RigidBodyDisableGravity = (1 << 12),
 };
 
 struct RigidBody {
