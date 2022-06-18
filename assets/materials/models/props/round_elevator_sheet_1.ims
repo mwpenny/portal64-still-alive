@@ -1,0 +1,8 @@
+-alpha off 
+    \( +clone -crop 280x280+1550+985 -resize 32x32 -fill "#262d2f" -draw 'rectangle 0,-1 32,0' -draw 'rectangle 0,31 32,32' -draw 'rectangle -1,0 0,32' -draw 'rectangle 31,0 32,32' -write portal_pak_modified/materials/models/props/round_elevator_floor.png +delete \)
+    -crop 162x554+1031+26
+    +repage +0+0
+    \( portal_pak_dir/materials/models/props/round_elevator_sheet_3.png -crop 14x480+1170+1051 -repage +0+0 \)
+    -compose Over
+    -layers merge
+    -resize 16x128

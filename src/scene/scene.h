@@ -12,6 +12,7 @@
 #include "../decor/decor_object.h"
 #include "./door.h"
 #include "./fizzler.h"
+#include "elevator.h"
 
 struct Scene {
     struct Camera camera;
@@ -21,6 +22,7 @@ struct Scene {
     struct DecorObject** decor;
     struct Door* doors;
     struct Fizzler* fizzlers;
+    struct Elevator* elevators;
     OSTime cpuTime;
     OSTime lastFrameStart;
     OSTime lastFrameTime;
@@ -28,6 +30,7 @@ struct Scene {
     u8 decorCount;
     u8 doorCount;
     u8 fizzlerCount;
+    u8 elevatorCount;
 };
 
 extern struct Scene gScene;

@@ -1,0 +1,9 @@
+-alpha off 
+    \( -clone 0 -crop 16x58+287+126 -repage +0+0 \) 
+    \( -clone 0 -crop 16x52+287+192 -repage +0+58 \) 
+    \( -clone 0 -crop 16x16+287+418 -repage +0+76 \) 
+    -compose Over
+    -layers merge
+    -crop 16x110+0+0
+    -resize 16x128\!
+    -rotate 180

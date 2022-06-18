@@ -83,6 +83,12 @@ void sceneInit(struct Scene* scene) {
         fizzlerTransform.scale = gOneVec;
         fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height, fizzlerDef->roomIndex);
     }
+
+    scene->elevatorCount = 1;
+    scene->elevators = malloc(sizeof(struct Elevator) * scene->elevatorCount);
+    for (int i = 0; i < scene->elevatorCount; ++i) {
+        elevatorInit(&scene->elevators[i]);
+    }
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {
@@ -249,6 +255,10 @@ void sceneUpdate(struct Scene* scene) {
 
     for (int i = 0; i < scene->fizzlerCount; ++i) {
         fizzlerUpdate(&scene->fizzlers[i]);
+    }
+    
+    for (int i = 0; i < scene->elevatorCount; ++i) {
+        elevatorUpdate(&scene->elevators[i]);
     }
     
     collisionSceneUpdateDynamics();
