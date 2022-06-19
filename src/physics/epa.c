@@ -423,3 +423,11 @@ void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum object
 
     stackMallocFree(simplex);
 }
+
+void epaSwapResult(struct EpaResult* result) {
+    struct Vector3 tmp = result->contactA;
+    result->contactA = result->contactB;
+    result->contactB = tmp;
+    vector3Negate(&result->normal, &result->normal);
+    result->id = ((result->id << 16) & 0xFFFF0000) | ((result->id >> 16) & 0xFFFF);
+}

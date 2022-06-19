@@ -4,6 +4,7 @@
 #include "contact_insertion.h"
 #include "collision_scene.h"
 #include "../math/mathf.h"
+#include "mesh_collider.h"
 
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers) {
     object->collider = collider;
@@ -24,7 +25,7 @@ int collisionObjectShouldGenerateConctacts(struct CollisionObject* object) {
 }
 
 void collisionObjectCollideWithQuad(struct CollisionObject* object, struct CollisionObject* quadObject, struct ContactSolver* contactSolver) {
-    if ((object->collisionLayers | quadObject->collisionLayers) == 0) {
+    if ((object->collisionLayers & quadObject->collisionLayers) == 0) {
         return;
     }
 
@@ -93,6 +94,17 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
         return;
     }
 
+    if (a->collider->type == CollisionShapeTypeMesh) {
+        if (b->collider->type != CollisionShapeTypeMesh) {
+            meshColliderCollideObject(a, b, contactSolver);
+        }
+
+        return;
+    } else if (b->collider->type == CollisionShapeTypeMesh) {
+        meshColliderCollideObject(b, a, contactSolver);
+        return;
+    }
+
     struct Simplex simplex;
 
     struct Vector3 offset;
@@ -130,18 +142,16 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
         return;
     }
 
+    transformPointInverseNoScale(&a->body->transform, &result.contactA, &result.contactA);
+    transformPointInverseNoScale(&b->body->transform, &result.contactB, &result.contactB);
+
     if (contact->shapeA == b) {
-        struct Vector3 tmp = result.contactA;
-        result.contactA = result.contactB;
-        result.contactB = tmp;
-        vector3Negate(&result.normal, &result.normal);
+        epaSwapResult(&result);
     }
 
     contact->friction = MAX(a->collider->friction, b->collider->friction);
     contact->restitution = MIN(a->collider->bounce, b->collider->bounce);
 
-    transformPointInverseNoScale(&a->body->transform, &result.contactA, &result.contactA);
-    transformPointInverseNoScale(&b->body->transform, &result.contactB, &result.contactB);
     contactInsert(contact, &result);
 }
 
