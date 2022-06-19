@@ -10,16 +10,18 @@ Next, you will need to download blender 2.9 or higher. Then set the environment 
 
 <br />
 
-You will need to install python vpk
+You will need to install python `vpk`
 ```
 pip install vpk
 ```
 
 <br />
 
-Install vtf2png, sfz2n64 and skeletool64
-```
-echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" | tee /etc/apt/sources.list.d/lambertjamesd.list
+Install `vtf2png`, `sfz2n64` and `skeletool64`
+```sh
+echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" \
+    | tee /etc/apt/sources.list.d/lambertjamesd.list
+
 sudo apt install vtf2png sfz2n64 skeletool64
 ```
 
@@ -59,7 +61,7 @@ docker build . -t portal64
 <br />
 
 Then build
-```
+```sh
 # Set the environment variable
 BLENDER_2_9=/blender/blender
 
