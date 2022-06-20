@@ -194,6 +194,10 @@ int main(int argc, char *argv[]) {
         }
         case FileOutputType::CollisionMesh:
         {
+            NodeGroups nodesByGroup(scene);
+            std::cout << "Generating collider definitions" << std::endl;
+            auto collisionOutput = generateCollision(scene, fileDef, settings, NULL, nodesByGroup);
+            generateMeshCollider(fileDef, *collisionOutput);
             break;
         }
     }

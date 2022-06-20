@@ -153,7 +153,8 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/door_01.blend \
 	assets/models/props/cylinder_test.blend \
 	assets/models/props/radio.blend \
-	assets/models/props/round_elevator.blend
+	assets/models/props/round_elevator.blend \
+	assets/models/props/round_elevator_collision.blend
 
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
 MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)

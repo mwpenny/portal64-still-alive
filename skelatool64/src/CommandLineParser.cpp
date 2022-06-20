@@ -84,6 +84,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
             lastParameter = 'm';
         } else if (strcmp(curr, "--material-output") == 0) {
             output.mOutputType = FileOutputType::Materials;
+        } else if (strcmp(curr, "--mesh-collider") == 0) {
+            output.mOutputType = FileOutputType::CollisionMesh;
         } else if (
             strcmp(curr, "-r") == 0 || 
             strcmp(curr, "--rotate") == 0) {

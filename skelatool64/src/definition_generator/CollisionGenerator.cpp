@@ -169,3 +169,32 @@ std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene
 
     return output;
 }
+
+void generateMeshCollider(CFileDefinition& fileDefinition, CollisionGeneratorOutput& collisionOutput) {
+    std::unique_ptr<StructureDataChunk> meshColliderChunk(new StructureDataChunk());
+
+    meshColliderChunk->AddPrimitive(collisionOutput.quadsName);
+    meshColliderChunk->AddPrimitive(collisionOutput.quads.size());
+    
+    aiAABB colliderbox;
+
+    if (collisionOutput.quads.size()) {
+        colliderbox = collisionOutput.quads[0].BoundingBox();
+
+        for (std::size_t i = 1; i < collisionOutput.quads.size(); ++i) {
+            aiAABB quadBox = collisionOutput.quads[i].BoundingBox();
+            colliderbox.mMin = min(quadBox.mMin, colliderbox.mMin);
+            colliderbox.mMax = min(quadBox.mMax, colliderbox.mMax);
+        }
+    }
+
+    meshColliderChunk->Add(std::unique_ptr<DataChunk>(new StructureDataChunk((colliderbox.mMax + colliderbox.mMin) * 0.5f)));
+    aiVector3D halfSize = (colliderbox.mMax - colliderbox.mMin) * 0.5f;
+    meshColliderChunk->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(halfSize)));
+    meshColliderChunk->AddPrimitive(halfSize.Length());
+
+    std::string colliderName = fileDefinition.GetUniqueName("collider");
+    std::unique_ptr<FileDefinition> definition(new DataFileDefinition("struct MeshCollider", colliderName, false, "_geo", std::move(meshColliderChunk)));
+    definition->AddTypeHeader("\"physics/mesh_collider.h\"");
+    fileDefinition.AddDefinition(std::move(definition));
+}
