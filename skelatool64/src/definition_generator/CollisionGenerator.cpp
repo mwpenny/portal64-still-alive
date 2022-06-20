@@ -40,7 +40,7 @@ void CollisionGrid::AddToCells(const aiAABB& box, short value) {
     }
 }
 
-std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, RoomGeneratorOutput& roomOutput, NodeGroups& nodeGroups) {
+std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, RoomGeneratorOutput* roomOutput, NodeGroups& nodeGroups) {
     std::shared_ptr<CollisionGeneratorOutput> output(new CollisionGeneratorOutput());
     
     std::unique_ptr<StructureDataChunk> collidersChunk(new StructureDataChunk());
@@ -57,13 +57,16 @@ std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene
 
     std::vector<NodeWithArguments> nodes = nodeGroups.NodesForType("@collision");
 
-    sortNodesWithArgsByRoom(nodes, roomOutput);
 
     std::vector<aiAABB> roomBoxes;
     std::vector<int> quadRooms;
 
-    for (int i = 0; i < roomOutput.roomCount; ++i) {
-        roomBoxes.push_back(aiAABB());
+    if (roomOutput) {
+        sortNodesWithArgsByRoom(nodes, *roomOutput);
+
+        for (int i = 0; i < roomOutput->roomCount; ++i) {
+            roomBoxes.push_back(aiAABB());
+        }
     }
 
     for (auto nodeInfo : nodes) {
@@ -99,31 +102,35 @@ std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene
 
             output->quads.push_back(collider);
 
-            int room = roomOutput.RoomForNode(nodeInfo.node);
-            quadRooms.push_back(room);
+            if (roomOutput) {
+                int room = roomOutput->RoomForNode(nodeInfo.node);
+                quadRooms.push_back(room);
 
-            aiAABB bb = collider.BoundingBox();
-            aiAABB& roomBox = roomBoxes[room];
-            
-            if (roomBox.mMin == roomBox.mMax) {
-                roomBox = bb;
-            } else {
-                roomBox.mMin = min(roomBox.mMin, bb.mMin);
-                roomBox.mMax = max(roomBox.mMax, bb.mMax);
+                aiAABB bb = collider.BoundingBox();
+                aiAABB& roomBox = roomBoxes[room];
+                
+                if (roomBox.mMin == roomBox.mMax) {
+                    roomBox = bb;
+                } else {
+                    roomBox.mMin = min(roomBox.mMin, bb.mMin);
+                    roomBox.mMax = max(roomBox.mMax, bb.mMax);
+                }
             }
 
             ++meshCount;
         }
     }
 
-    for (int i = 0; i < roomOutput.roomCount; ++i) {
-        output->roomGrids.push_back(CollisionGrid(roomBoxes[i]));
-    }
+    if (roomOutput) {
+        for (int i = 0; i < roomOutput->roomCount; ++i) {
+            output->roomGrids.push_back(CollisionGrid(roomBoxes[i]));
+        }
 
-    int quadIndex = 0;
-    for (auto& quad : output->quads) {
-        output->roomGrids[quadRooms[quadIndex]].AddToCells(quad.BoundingBox(), quadIndex);
-        quadIndex++;
+        int quadIndex = 0;
+        for (auto& quad : output->quads) {
+            output->roomGrids[quadRooms[quadIndex]].AddToCells(quad.BoundingBox(), quadIndex);
+            quadIndex++;
+        }
     }
 
     std::unique_ptr<FileDefinition> collisionFileDef(new DataFileDefinition(

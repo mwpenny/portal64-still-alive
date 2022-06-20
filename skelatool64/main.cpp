@@ -127,26 +127,28 @@ int main(int argc, char *argv[]) {
 
     if (args.mInputFile.length()) {
         std::cout << "Generating from mesh "  << args.mInputFile << std::endl;
-        scene = loadScene(args.mInputFile, args.mIsLevel, settings.mVertexCacheSize);
+        scene = loadScene(args.mInputFile, args.mOutputType != FileOutputType::Mesh, settings.mVertexCacheSize);
 
         if (!scene) {
             return 1;
         }
     }
 
-    if (scene && args.mOutputFile.length()) {    
-        std::cout << "Saving to "  << args.mOutputFile << std::endl;
-        // generateMeshFromSceneToFile(scene, args.mOutputFile, settings);
+    std::cout << "Saving to "  << args.mOutputFile << std::endl;
+    CFileDefinition fileDef(settings.mPrefix, settings.mGraphicsScale, settings.mRotateModel);
 
-        MeshDefinitionGenerator meshGenerator(settings);
-
-        std::cout << "Generating mesh definitions" << std::endl;
-        meshGenerator.TraverseScene(scene);
-        CFileDefinition fileDef(settings.mPrefix, settings.mGraphicsScale, settings.mRotateModel);
-        meshGenerator.GenerateDefinitions(scene, fileDef);
-
-
-        if (args.mIsLevel) {
+    switch (args.mOutputType)
+    {
+        case FileOutputType::Mesh:
+        {
+            MeshDefinitionGenerator meshGenerator(settings);
+            std::cout << "Generating mesh definitions" << std::endl;
+            meshGenerator.TraverseScene(scene);
+            meshGenerator.GenerateDefinitions(scene, fileDef);
+            break;
+        }
+        case FileOutputType::Level:
+        {
             NodeGroups nodesByGroup(scene);
             Signals signals;
 
@@ -154,7 +156,7 @@ int main(int argc, char *argv[]) {
             auto roomOutput = generateRooms(scene, fileDef, settings, signals, nodesByGroup);
 
             std::cout << "Generating collider definitions" << std::endl;
-            auto collisionOutput = generateCollision(scene, fileDef, settings, *roomOutput, nodesByGroup);
+            auto collisionOutput = generateCollision(scene, fileDef, settings, roomOutput.get(), nodesByGroup);
 
             std::cout << "Generating static definitions" << std::endl;
             auto staticOutput = generateStatic(scene, fileDef, settings, *roomOutput, nodesByGroup);
@@ -178,23 +180,26 @@ int main(int argc, char *argv[]) {
             );
 
             nodesByGroup.PrintUnusedTypes();
+            break;
         }
+        case FileOutputType::Materials:
+        {
+            std::cout << "Saving materials to "  << args.mOutputFile << std::endl;
 
-        std::cout << "Writing output" << std::endl;
-        fileDef.GenerateAll(args.mOutputFile);
+            MaterialGenerator materialGenerator(settings);
+
+            materialGenerator.TraverseScene(scene);
+            materialGenerator.GenerateDefinitions(scene, fileDef);
+            break;
+        }
+        case FileOutputType::CollisionMesh:
+        {
+            break;
+        }
     }
 
-    if (args.mMaterialOutput.length()) {
-        std::cout << "Saving materials to "  << args.mMaterialOutput << std::endl;
-
-        MaterialGenerator materialGenerator(settings);
-
-        materialGenerator.TraverseScene(scene);
-        CFileDefinition fileDef(settings.mPrefix, settings.mGraphicsScale, settings.mRotateModel);
-        materialGenerator.GenerateDefinitions(scene, fileDef);
-
-        fileDef.GenerateAll(args.mMaterialOutput);
-    }
+    std::cout << "Writing output" << std::endl;
+    fileDef.GenerateAll(args.mOutputFile);
     
     return 0;
 }

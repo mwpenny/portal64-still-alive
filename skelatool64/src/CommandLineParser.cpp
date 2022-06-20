@@ -9,6 +9,10 @@ void parseEulerAngles(const std::string& input, aiVector3D& output) {
     output.z = (float)atof(input.substr(secondComma + 1).c_str());
 }
 
+bool needsInput(FileOutputType type) {
+    return type != FileOutputType::Materials;
+}
+
 bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArguments& output) {
     output.mInputFile = "";
     output.mOutputFile = "";
@@ -17,8 +21,7 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
     output.mCollisionScale = 1.0f;
     output.mExportAnimation = true;
     output.mExportGeometry = true;
-    output.mIsLevel = false;
-    output.mIsLevelDef = false;
+    output.mOutputType = FileOutputType::Mesh;
     output.mEulerAngles = aiVector3D(0.0f, 0.0f, 0.0f);
     output.mDefaultMaterial = "default";
 
@@ -50,9 +53,6 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
                 case 'm':
                     output.mMaterialFiles.push_back(curr);
                     break;
-                case 'M':
-                    output.mMaterialOutput = curr;
-                    break;
                 case 'r':
                     parseEulerAngles(curr, output.mEulerAngles);
                     break;
@@ -82,10 +82,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
             strcmp(curr, "-m") == 0 || 
             strcmp(curr, "--materials") == 0) {
             lastParameter = 'm';
-        } else if (
-            strcmp(curr, "-M") == 0 || 
-            strcmp(curr, "--material-output") == 0) {
-            lastParameter = 'M';
+        } else if (strcmp(curr, "--material-output") == 0) {
+            output.mOutputType = FileOutputType::Materials;
         } else if (
             strcmp(curr, "-r") == 0 || 
             strcmp(curr, "--rotate") == 0) {
@@ -94,15 +92,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
             strcmp(curr, "-a") == 0 || 
             strcmp(curr, "--animations-only") == 0) {
             output.mExportGeometry = false;
-        } else if (
-            strcmp(curr, "-l") == 0 || 
-            strcmp(curr, "--level") == 0) {
-                    output.mIsLevel = true;
-                    output.mExportAnimation = false;
-        } else if (
-            strcmp(curr, "-d") == 0 || 
-            strcmp(curr, "--level-def") == 0) {
-                    output.mIsLevelDef = true;
+        } else if (strcmp(curr, "--level") == 0) {
+                    output.mOutputType = FileOutputType::Level;
                     output.mExportAnimation = false;
         } else if (
             strcmp(curr, "-D") == 0 || 
@@ -123,8 +114,13 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
         }
     }
 
-    if ((output.mInputFile == "" || (output.mOutputFile == "" && !output.mIsLevelDef)) && output.mMaterialOutput == "") {
-        std::cerr << "Input and output file are both required" << std::endl;
+    if (output.mOutputFile == "") {
+        std::cerr << "No output file specified" << std::endl;
+        hasError = true;
+    }
+
+    if (output.mInputFile == "" && needsInput(output.mOutputType)) {
+        std::cerr << "No input file specified" << std::endl;
         hasError = true;
     }
 
