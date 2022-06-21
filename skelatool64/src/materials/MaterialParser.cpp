@@ -347,7 +347,7 @@ int parseBlendMode(const YAML::Node& node, ParseResult& output) {
         std::string asString = element.as<std::string>();
 
         if (!renderModeGetBlendModeValue(asString, i, params[i])) {
-            output.mErrors.push_back(ParseError(formatError("Invalid blend mode", node.Mark())));
+            output.mErrors.push_back(ParseError(formatError(std::string("Invalid blend mode ") + asString, node.Mark())));
         }
     }
 
@@ -391,7 +391,7 @@ void parseRenderMode(const YAML::Node& node, MaterialState& state, ParseResult& 
 
     if (node.IsSequence() && node.size() == 2) {
         parseSingleRenderMode(node[0], state.cycle1RenderMode, output);
-        parseSingleRenderMode(node[1], state.cycle1RenderMode, output);
+        parseSingleRenderMode(node[1], state.cycle2RenderMode, output);
         return;
     }
 

@@ -11,6 +11,7 @@ struct DecorObjectDefinition {
     float radius;
     Gfx* graphics;
     short materialIndex;
+    short materialIndexFizzled;
     short soundClipId;
 };
 
@@ -20,6 +21,7 @@ struct DecorObject {
     struct DecorObjectDefinition* definition;
     short dynamicId;
     ALSndId playingSound;
+    float fizzleTime;
 };
 
 struct DecorObject* decorObjectNew(struct DecorObjectDefinition* definition, struct Transform* at, int room);

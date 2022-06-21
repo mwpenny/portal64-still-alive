@@ -6,6 +6,8 @@ materials:
 
     gDPSetTexturePersp: G_TP_PERSP
 
+    gDPSetCycleType: G_CYC_1CYCLE
+
     gSPGeometryMode:
       set: [G_CULL_BACK, G_ZBUFFER]
       clear: [G_CULL_FRONT]
@@ -136,6 +138,41 @@ materials:
       set: [G_LIGHTING, G_SHADE]
     gDPSetCombineMode: 
       color: ["SHADE", "0", "TEXEL0", "0"]
+
+  cube_fizzled:
+    gDPSetTile: 
+      filename:
+        ../images/cube.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      s:
+        mirror: true
+      t:
+        mirror: true
+
+    gDPSetRenderMode: 
+      - blend: ["G_BL_CLR_IN", "G_BL_A_IN", "G_BL_CLR_FOG", "G_BL_1MA"]
+      - G_RM_ZB_XLU_SURF
+
+    gDPSetCycleType: G_CYC_2CYCLE
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      - color: ["SHADE", "0", "TEXEL0", "0"]
+        alpha: ["0", "0", "0", "PRIMITIVE"]
+      - color: ["NOISE", "COMBINED", "PRIMITIVE", "COMBINED"]
+        alpha: ["0", "0", "0", "PRIMITIVE"]
+
+    gDPSetFogColor:
+      r: 0
+      g: 0
+      b: 0
+
+    gDPSetPrimColor:
+      r: 100
+      g: 100
+      b: 200
+      a: 128
 
   door_01:
     gDPSetTile: 

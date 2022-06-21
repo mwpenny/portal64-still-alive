@@ -47,18 +47,6 @@ void sceneInit(struct Scene* scene) {
     portalInit(&scene->portals[0], 0);
     portalInit(&scene->portals[1], PortalFlagsOddParity);
 
-    for (int i = 0; i < MAX_CUBES; ++i) {
-        cubeInit(&scene->cubes[i]);
-
-        scene->cubes[i].rigidBody.transform.position.x = 1.0f;
-        scene->cubes[i].rigidBody.transform.position.y = 0.5f;
-        scene->cubes[i].rigidBody.transform.position.z = 6.0f + i;
-        scene->cubes[i].rigidBody.currentRoom = 1;
-
-        quatAxisAngle(&gRight, M_PI * 0.125f, &scene->cubes[i].rigidBody.transform.rotation);
-        scene->cubes[i].rigidBody.angularVelocity = gOneVec;
-    }
-
     scene->buttonCount = gCurrentLevel->buttonCount;
     scene->buttons = malloc(sizeof(struct Button) * scene->buttonCount);
 
@@ -93,7 +81,13 @@ void sceneInit(struct Scene* scene) {
         fizzlerTransform.position = fizzlerDef->position;
         fizzlerTransform.rotation = fizzlerDef->rotation;
         fizzlerTransform.scale = gOneVec;
-        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height);
+        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height, fizzlerDef->roomIndex);
+    }
+
+    scene->elevatorCount = 1;
+    scene->elevators = malloc(sizeof(struct Elevator) * scene->elevatorCount);
+    for (int i = 0; i < scene->elevatorCount; ++i) {
+        elevatorInit(&scene->elevators[i]);
     }
 }
 
@@ -205,6 +199,12 @@ void sceneCheckPortals(struct Scene* scene) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom);
         soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL);
     }
+
+    if (scene->player.body.flags & RigidBodyFizzled) {
+        sceneClosePortal(scene, 0);
+        sceneClosePortal(scene, 1);
+        scene->player.body.flags &= ~RigidBodyFizzled;
+    }
 }
 
 void sceneUpdatePortalListener(struct Scene* scene, int portalIndex, int listenerIndex) {
@@ -240,11 +240,7 @@ void sceneUpdate(struct Scene* scene) {
     playerUpdate(&scene->player, &scene->camera.transform);
     sceneUpdateListeners(scene);
     sceneCheckPortals(scene);
-
-    for (int i = 0; i < MAX_CUBES; ++i) {
-        cubeUpdate(&scene->cubes[i]);
-    }
-
+    
     for (int i = 0; i < scene->buttonCount; ++i) {
         buttonUpdate(&scene->buttons[i]);
     }
@@ -259,6 +255,10 @@ void sceneUpdate(struct Scene* scene) {
 
     for (int i = 0; i < scene->fizzlerCount; ++i) {
         fizzlerUpdate(&scene->fizzlers[i]);
+    }
+    
+    for (int i = 0; i < scene->elevatorCount; ++i) {
+        elevatorUpdate(&scene->elevators[i]);
     }
     
     collisionSceneUpdateDynamics();
@@ -292,7 +292,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
 int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex) {
     struct RaycastHit hit;
 
-    if (!collisionSceneRaycast(&gCollisionScene, roomIndex, ray, COLLISION_LAYERS_STATIC, 1000000.0f, 0, &hit)) {
+    if (!collisionSceneRaycast(&gCollisionScene, roomIndex, ray, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, 1000000.0f, 0, &hit)) {
         return 0;
     }
 
@@ -319,4 +319,11 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
     }
 
     return sceneOpenPortal(scene, &portalLocation, portalIndex, quadIndex, hit.roomIndex);
+}
+
+void sceneClosePortal(struct Scene* scene, int portalIndex) {
+    if (gCollisionScene.portalTransforms[portalIndex]) {
+        soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position);
+        gCollisionScene.portalTransforms[portalIndex] = NULL;
+    }
 }

@@ -1,0 +1,80 @@
+materials:
+  round_elevator_sheet_1:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/round_elevator_sheet_1.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        s:
+          wrap: true
+          mirror: true
+        t:
+          wrap: false
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "TEXEL0", "0"]
+
+  round_elevator_sheet_2:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/round_elevator_sheet_2.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        s:
+          wrap: true
+        t:
+          wrap: true
+          mirror: true
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "TEXEL0", "0"]
+
+  round_elevator_sheet_3:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/round_elevator_sheet_3.png
+        fmt: G_IM_FMT_I
+        siz: G_IM_SIZ_8b
+        s:
+          mirror: true
+        t:
+          mirror: true
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "TEXEL0", "0"]
+
+  round_elevator_floor:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/round_elevator_floor.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        s:
+          wrap: false
+        t:
+          wrap: false
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "TEXEL0", "0"]
+
+  elevator_caps:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/elevator_caps/elevator_caps.png
+        fmt: G_IM_FMT_I
+        siz: G_IM_SIZ_8b
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "TEXEL0", "0"]
+
+  elevator_sign:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/elevator_sign.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        s:
+          wrap: false
+        t:
+          wrap: false
+    gDPSetCombineMode: 
+      color: ["0", "0", "0", "TEXEL0"]

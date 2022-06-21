@@ -7,10 +7,17 @@
 #include <string.h>
 #include <iostream>
 
+enum class FileOutputType {
+    Mesh,
+    Level,
+    Materials,
+    CollisionMesh,
+};
+
 struct CommandLineArguments {
     std::string mInputFile;
     std::string mOutputFile;
-    std::string mMaterialOutput;
+    FileOutputType mOutputType;
     std::string mPrefix;
     std::vector<std::string> mMaterialFiles;
     std::string mDefaultMaterial;
@@ -18,8 +25,6 @@ struct CommandLineArguments {
     float mCollisionScale;
     bool mExportAnimation;
     bool mExportGeometry;
-    bool mIsLevel;
-    bool mIsLevelDef;
     aiVector3D mEulerAngles;
 };
 

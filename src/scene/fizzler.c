@@ -3,17 +3,24 @@
 #include "../util/memory.h"
 #include "../graphics/render_scene.h"
 #include "../scene/dynamic_scene.h"
+#include "../physics/collision_scene.h"
 #include "../models/models.h"
 
 #define GFX_PER_PARTICLE(particleCount) ((particleCount) + (((particleCount) + 7) >> 3) + 1)
+
+void fizzlerTrigger(void* data, struct CollisionObject* objectEnteringTrigger) {
+    if (objectEnteringTrigger->body) {
+        objectEnteringTrigger->body->flags |= RigidBodyFizzled;
+    }
+}
 
 void fizzlerRender(void* data, struct RenderScene* renderScene) {
     struct Fizzler* fizzler = (struct Fizzler*)data;
 
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
-    transformToMatrixL(&fizzler->transform, matrix, SCENE_SCALE);
+    transformToMatrixL(&fizzler->rigidBody.transform, matrix, SCENE_SCALE);
 
-    renderSceneAdd(renderScene, fizzler->modelGraphics, matrix, fizzler_material_index, &fizzler->transform.position, NULL);
+    renderSceneAdd(renderScene, fizzler->modelGraphics, matrix, fizzler_material_index, &fizzler->rigidBody.transform.position, NULL);
 }
 
 void fizzlerSpawnParticle(struct Fizzler* fizzler, int particleIndex) {
@@ -71,8 +78,27 @@ void fizzlerSpawnParticle(struct Fizzler* fizzler, int particleIndex) {
     currentVertex->v.cn[0] = 255; currentVertex->v.cn[1] = 255; currentVertex->v.cn[2] = 255; currentVertex->v.cn[3] = 255;
 }
 
-void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float width, float height) {
-    fizzler->transform = *transform;
+void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float width, float height, int room) {
+    fizzler->collisionBox.sideLength.x = width;
+    fizzler->collisionBox.sideLength.y = height;
+    fizzler->collisionBox.sideLength.z = 0.25f;
+
+    fizzler->colliderType.type = CollisionShapeTypeBox;
+    fizzler->colliderType.data = &fizzler->collisionBox;
+    fizzler->colliderType.bounce = 0.0f;
+    fizzler->colliderType.friction = 0.0f;
+    fizzler->colliderType.callbacks = &gCollisionBoxCallbacks;
+
+    collisionObjectInit(&fizzler->collisionObject, &fizzler->colliderType, &fizzler->rigidBody, 1.0f, COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_PORTAL);
+    rigidBodyMarkKinematic(&fizzler->rigidBody);
+
+    fizzler->collisionObject.trigger = fizzlerTrigger;
+
+    fizzler->rigidBody.transform = *transform;
+    fizzler->rigidBody.currentRoom = room;
+
+    collisionObjectUpdateBB(&fizzler->collisionObject);
+    collisionSceneAddDynamicObject(&fizzler->collisionObject);
 
     fizzler->maxExtent = (int)(width * SCENE_SCALE * 0.5f);
     fizzler->maxVerticalExtent = (int)(height * SCENE_SCALE * 0.5f);
@@ -120,7 +146,7 @@ void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float wid
         }
     }
 
-    fizzler->dynamicId = dynamicSceneAdd(fizzler, fizzlerRender, &fizzler->transform, sqrtf(width * width + height * height) * 0.5f);
+    fizzler->dynamicId = dynamicSceneAdd(fizzler, fizzlerRender, &fizzler->rigidBody.transform, sqrtf(width * width + height * height) * 0.5f);
 }
 
 void fizzlerUpdate(struct Fizzler* fizzler) {

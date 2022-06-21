@@ -27,6 +27,8 @@ struct CollisionGeneratorOutput {
     std::vector<CollisionGrid> roomGrids;
 };
 
-std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, RoomGeneratorOutput& roomOutput, NodeGroups& nodeGroups);
+std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, RoomGeneratorOutput* roomOutput, NodeGroups& nodeGroups);
+
+void generateMeshCollider(CFileDefinition& fileDefinition, CollisionGeneratorOutput& collisionOutput);
 
 #endif

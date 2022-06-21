@@ -13,5 +13,6 @@ struct EpaResult {
 };
 
 void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct EpaResult* result);
+void epaSwapResult(struct EpaResult* result);
 
 #endif

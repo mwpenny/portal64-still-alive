@@ -130,11 +130,11 @@ portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims
 
 build/assets/materials/static.h build/assets/materials/static_mat.c: assets/materials/static.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
 	@mkdir -p $(@D)
-	$(SKELATOOL64) -n static -m $< -M build/assets/materials/static.h
+	$(SKELATOOL64) -n static -m $< --material-output -o build/assets/materials/static.h
 
 build/assets/materials/hud.h build/assets/materials/hud_mat.c: assets/materials/hud.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
 	@mkdir -p $(@D)
-	$(SKELATOOL64) -n hud -m $< -M build/assets/materials/hud.h
+	$(SKELATOOL64) -n hud -m $< --material-output -o build/assets/materials/hud.h
 
 src/levels/level_def_gen.h: build/assets/materials/static.h
 
@@ -152,12 +152,14 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/button.blend \
 	assets/models/props/door_01.blend \
 	assets/models/props/cylinder_test.blend \
-	assets/models/props/radio.blend
+	assets/models/props/radio.blend \
+	assets/models/props/round_elevator.blend \
+	assets/models/props/round_elevator_collision.blend
 
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
 MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)
 
-build/assets/models/%.h build/assets/models/%_geo.c: build/assets/models/%.fbx assets/materials/objects.skm.yaml assets/materials/static.skm.yaml $(SKELATOOL64)
+build/assets/models/%.h build/assets/models/%_geo.c: build/assets/models/%.fbx assets/models/%.flags assets/materials/elevator.skm.yaml assets/materials/objects.skm.yaml assets/materials/static.skm.yaml $(SKELATOOL64)
 	$(SKELATOOL64) -s 2.56 -c 0.01 -n $(<:build/assets/models/%.fbx=%) $(shell cat $(<:build/assets/models/%.fbx=assets/models/%.flags)) -o $(<:%.fbx=%.h) $<
 
 build/src/models/models.o: $(MODEL_HEADERS)
@@ -178,7 +180,7 @@ build/%.fbx: %.blend
 	$(BLENDER_2_9) $< --background --python tools/export_fbx.py -- $@
 
 build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c: build/assets/test_chambers/%.fbx build/assets/materials/static.h $(SKELATOOL64) $(TEXTURE_IMAGES)
-	$(SKELATOOL64) -l -s 2.56 -c 0.01 -n $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
+	$(SKELATOOL64) --level -s 2.56 -c 0.01 -n $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
 
 build/assets/test_chambers/%.o: build/assets/test_chambers/%.c build/assets/materials/static.h
 	@mkdir -p $(@D)

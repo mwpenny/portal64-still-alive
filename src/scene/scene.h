@@ -8,23 +8,21 @@
 #include "point_light.h"
 #include "portal.h"
 #include "../player/player.h"
-#include "cube.h"
 #include "button.h"
 #include "../decor/decor_object.h"
 #include "./door.h"
 #include "./fizzler.h"
-
-#define MAX_CUBES   1
+#include "elevator.h"
 
 struct Scene {
     struct Camera camera;
     struct Player player;
     struct Portal portals[2];
-    struct Cube cubes[MAX_CUBES];
     struct Button* buttons;
     struct DecorObject** decor;
     struct Door* doors;
     struct Fizzler* fizzlers;
+    struct Elevator* elevators;
     OSTime cpuTime;
     OSTime lastFrameStart;
     OSTime lastFrameTime;
@@ -32,6 +30,7 @@ struct Scene {
     u8 decorCount;
     u8 doorCount;
     u8 fizzlerCount;
+    u8 elevatorCount;
 };
 
 extern struct Scene gScene;
@@ -43,5 +42,6 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 void sceneUpdate(struct Scene* scene);
 
 int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex);
+void sceneClosePortal(struct Scene* scene, int portalIndex);
 
 #endif

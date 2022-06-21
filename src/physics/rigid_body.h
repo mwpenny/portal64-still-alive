@@ -20,6 +20,9 @@ enum RigidBodyFlags {
     // for kinematic bodies that should generate 
     // contacts with other kinematic bodies
     RigidBodyGenerateContacts = (1 << 10),
+
+    RigidBodyFizzled = (1 << 11),
+    RigidBodyDisableGravity = (1 << 12),
 };
 
 struct RigidBody {

@@ -1,0 +1,6 @@
+-alpha off 
+    \( -clone 0 -crop 678x176+234+795 -resize 64x -write portal_pak_modified/materials/models/props/elevator_sign.png +delete \) 
+    -compose Over
+    -layers merge
+    -crop 432x432+1152+75
+    -resize 64x64

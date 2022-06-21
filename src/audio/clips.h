@@ -8,4 +8,6 @@ extern unsigned short soundsPortalgunShoot[2];
 
 extern unsigned short soundsPortalOpen2;
 
+extern unsigned short soundsPortalFizzle;
+
 #endif

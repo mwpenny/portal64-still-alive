@@ -6,6 +6,9 @@
 #include "defs.h"
 #include "../util/time.h"
 
+#include "../physics/collision_box.h"
+#include "../physics/collision_object.h"
+
 #define FIZZLER_PARTICLES_PER_1x1   2.5f
 #define FIZZLER_PARTICLE_VELOCITY   1.0f
 #define FIZZLER_UNITS_PER_UPDATE    (int)(SCENE_SCALE * FIZZLER_PARTICLE_VELOCITY * FIXED_DELTA_TIME)
@@ -17,7 +20,10 @@
 #define IMAGE_HEIGHT    32
 
 struct Fizzler {
-    struct Transform transform;
+    struct CollisionObject collisionObject;
+    struct RigidBody rigidBody;
+    struct ColliderTypeData colliderType;
+    struct CollisionBox collisionBox;
     Vtx* modelVertices;
     Gfx* modelGraphics;
     short particleCount;
@@ -27,7 +33,7 @@ struct Fizzler {
     short dynamicId;
 };
 
-void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float width, float height);
+void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float width, float height, int room);
 void fizzlerUpdate(struct Fizzler* fizzler);
 
 #endif

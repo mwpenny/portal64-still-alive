@@ -5,8 +5,6 @@ extern Gfx portal_mask_Circle_mesh[];
 extern Gfx portal_mask_Circle_mesh_tri_0[];
 extern Gfx portal_outline_portal_outline_mesh[];
 
-extern Gfx* cube_gfx;
-extern short cube_material_index;
 extern Gfx* v_portal_gun_gfx;
 
 extern Gfx* button_gfx;
@@ -22,5 +20,8 @@ extern Gfx* cylinder_gfx;
 extern short cylinder_material_index;
 
 extern short fizzler_material_index;
+
+extern Gfx* elevator_gfx;
+extern short elevator_material_index;
 
 #endif

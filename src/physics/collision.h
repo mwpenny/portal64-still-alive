@@ -16,6 +16,7 @@ enum CollisionShapeType {
     CollisionShapeTypeQuad,
     CollisionShapeTypeSphere,
     CollisionShapeTypeCylinder,
+    CollisionShapeTypeMesh,
 };
 
 struct ColliderTypeData;
