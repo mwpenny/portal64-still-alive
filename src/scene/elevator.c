@@ -22,10 +22,16 @@ struct ColliderTypeData gElevatorColliderType = {
 
 int gElevatorCollisionLayers = COLLISION_LAYERS_STATIC | COLLISION_LAYERS_TANGIBLE;
 
-struct Vector3 gOpenPosition = {
-    -0.275674,
-    0.0f,
-    -0.653916,
+struct Vector3 gClosedPosition[] = {
+    [PROPS_ROUND_ELEVATOR_ELEVATOR_BONE] = {0, 0, 0},
+    [PROPS_ROUND_ELEVATOR_DOORLEFT_BONE] = {1.46439, 0, 0},
+    [PROPS_ROUND_ELEVATOR_DOORRIGHT_BONE] = {1.46439, 0, 0},
+};
+
+struct Vector3 gOpenPosition[] = {
+    [PROPS_ROUND_ELEVATOR_ELEVATOR_BONE] = {0, 0, 0},
+    [PROPS_ROUND_ELEVATOR_DOORLEFT_BONE] = {-0.275674 * SCENE_SCALE, 0.653916 * SCENE_SCALE, 0.0f},
+    [PROPS_ROUND_ELEVATOR_DOORRIGHT_BONE] = {-0.275674 * SCENE_SCALE, -0.653916 * SCENE_SCALE, 0.0f},
 };
 
 void elevatorRender(void* data, struct RenderScene* renderScene) {
@@ -36,6 +42,12 @@ void elevatorRender(void* data, struct RenderScene* renderScene) {
     Mtx* armature = renderStateRequestMatrices(renderScene->renderState, PROPS_ROUND_ELEVATOR_DEFAULT_BONES_COUNT);
 
     for (int i = 0; i < PROPS_ROUND_ELEVATOR_DEFAULT_BONES_COUNT; ++i) {
+        if (elevator->flags & ElevatorFlagsIsOpen) {
+            props_round_elevator_default_bones[i].position = gOpenPosition[i];
+        } else {
+            props_round_elevator_default_bones[i].position = gClosedPosition[i];
+        }
+
         transformToMatrixL(&props_round_elevator_default_bones[i], &armature[i], 1.0f);
     }
 

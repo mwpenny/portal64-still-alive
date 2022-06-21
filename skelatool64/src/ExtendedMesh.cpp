@@ -42,10 +42,9 @@ ExtendedMesh::ExtendedMesh(const ExtendedMesh& other):
     mPointInverseTransform(other.mPointInverseTransform),
     mNormalInverseTransform(other.mNormalInverseTransform),
     mVertexBones(other.mVertexBones),
-    mFacesForBone(other.mFacesForBone),
     bbMin(other.bbMin),
     bbMax(other.bbMax) {
-    for (auto& it : mFacesForBone) {
+    for (auto& it : other.mFacesForBone) {
         std::vector<aiFace*> faces;
 
         for (auto face : it.second) {
@@ -55,7 +54,7 @@ ExtendedMesh::ExtendedMesh(const ExtendedMesh& other):
         mFacesForBone[it.first] = faces;
     }
 
-    for (auto& it : mBoneSpanningFaces) {
+    for (auto& it : other.mBoneSpanningFaces) {
         std::vector<aiFace*> faces;
 
         for (auto face : it.second) {
