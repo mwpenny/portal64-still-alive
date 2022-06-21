@@ -22,7 +22,7 @@ const aiVector3D* findMostOppositeEdge(const aiVector3D& fromEdge, const std::ve
     }).base();
 }
 
-CollisionQuad::CollisionQuad(aiMesh* mesh, const aiMatrix4x4& transform) {
+CollisionQuad::CollisionQuad(aiMesh* mesh, const aiMatrix4x4& transform): thickness(0.0f) {
     if (mesh->mVertices) {
         std::vector<aiVector3D> transformedPoints;
 
@@ -118,7 +118,7 @@ std::unique_ptr<DataChunk> CollisionQuad::Generate() const {
     plane->AddPrimitive(-(corner * normal));
     result->Add(std::move(plane));
 
-    result->AddPrimitive(0xF);
+    result->AddPrimitive(thickness);
 
     return result;
 }

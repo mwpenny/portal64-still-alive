@@ -29,6 +29,8 @@ protected:
 struct NodeWithArguments {
     aiNode* node;
     std::vector<std::string> arguments;
+
+    std::string ReadNamedArgument(const std::string& name);
 };
 
 class NodeGroups {

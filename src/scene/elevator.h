@@ -2,9 +2,11 @@
 #define __SCENE_ELEVATOR_H__
 
 #include "../math/transform.h"
+#include "../physics/collision_object.h"
 
 struct Elevator {
-    struct Transform transform;
+    struct CollisionObject collisionObject;
+    struct RigidBody rigidBody;
     short dynamicId;
 };
 

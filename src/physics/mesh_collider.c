@@ -110,13 +110,13 @@ int meshColliderRaycast(struct CollisionObject* object, struct Ray* ray, float m
     float passDistance = rayDetermineDistance(&localRay, &meshCollider->localCenter);
 
     // filter out rays that have no chance of hitting
-    if (passDistance < meshCollider->radiusFromCenter || passDistance - meshCollider->radiusFromCenter > maxDistance) {
+    if (passDistance < -meshCollider->radiusFromCenter || passDistance - meshCollider->radiusFromCenter > maxDistance) {
         return 0;
     }
 
     struct Vector3 nearestPoint;
 
-    vector3AddScaled(&ray->origin, &ray->dir, passDistance, &nearestPoint);
+    vector3AddScaled(&localRay.origin, &localRay.dir, passDistance, &nearestPoint);
 
     if (vector3DistSqrd(&nearestPoint, &meshCollider->localCenter) > meshCollider->radiusFromCenter * meshCollider->radiusFromCenter) {
         return 0;

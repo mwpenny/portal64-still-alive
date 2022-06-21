@@ -53,6 +53,16 @@ void NodeGroups::AddNode(aiNode* node) {
     mNodesByType[typeName].push_back(result);
 }
 
+std::string NodeWithArguments::ReadNamedArgument(const std::string& name) {
+    auto parameterValue = std::find(arguments.begin(), arguments.end(), name);
+
+    if (parameterValue == arguments.end() || parameterValue + 1 == arguments.end()) {
+        return "";
+    }
+
+    return *(parameterValue + 1);
+
+}
 
 void forEachNode(aiNode* node, const std::function<void(aiNode*)>& callback) {
     if (!node) {

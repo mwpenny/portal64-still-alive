@@ -40,6 +40,16 @@ void CollisionGrid::AddToCells(const aiAABB& box, short value) {
     }
 }
 
+float parseQuadThickness(NodeWithArguments& nodeInfo) {
+    auto thicknessParameter = nodeInfo.ReadNamedArgument("thickness");
+
+    if (thicknessParameter == "") {
+        return 0.0f;
+    }
+
+    return std::atof(thicknessParameter.c_str());
+}
+
 std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, RoomGeneratorOutput* roomOutput, NodeGroups& nodeGroups) {
     std::shared_ptr<CollisionGeneratorOutput> output(new CollisionGeneratorOutput());
     
@@ -70,16 +80,20 @@ std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene
     }
 
     for (auto nodeInfo : nodes) {
-        if (std::string(nodeInfo.node->mName.C_Str()) == "@collision quad_Wall.023") {
-            std::cout << "foo bar";
-        }
         for (unsigned i = 0; i < nodeInfo.node->mNumMeshes; ++i) {
-
             aiMesh* mesh = scene->mMeshes[nodeInfo.node->mMeshes[i]];
 
             bool isTransparent = std::find(nodeInfo.arguments.begin(), nodeInfo.arguments.end(), "transparent") != nodeInfo.arguments.end();
 
             CollisionQuad collider(mesh, globalTransform * nodeInfo.node->mTransformation);
+            collider.thickness = parseQuadThickness(nodeInfo);
+
+            std::string namedEntry = nodeInfo.ReadNamedArgument("name");
+
+            if (namedEntry != "") {
+                fileDefinition.AddMacro(fileDefinition.GetMacroName(namedEntry + "_COLLISION_INDEX"), std::to_string(output->quads.size()));
+            }
+
             collidersChunk->Add(std::move(collider.Generate()));
 
             std::unique_ptr<StructureDataChunk> colliderType(new StructureDataChunk());
@@ -184,7 +198,7 @@ void generateMeshCollider(CFileDefinition& fileDefinition, CollisionGeneratorOut
         for (std::size_t i = 1; i < collisionOutput.quads.size(); ++i) {
             aiAABB quadBox = collisionOutput.quads[i].BoundingBox();
             colliderbox.mMin = min(quadBox.mMin, colliderbox.mMin);
-            colliderbox.mMax = min(quadBox.mMax, colliderbox.mMax);
+            colliderbox.mMax = max(quadBox.mMax, colliderbox.mMax);
         }
     }
 

@@ -61,8 +61,6 @@ void collisionCylinderBoxCheckForFaces(struct CollisionCylinder* cylinder) {
         }
 
         quad->plane.d = -vector3Dot(&quad->plane.normal, &quad->corner);
-        
-        quad->enabledEdges = 0;
 
         prevPoint = currPoint;
     }

@@ -140,6 +140,8 @@ src/levels/level_def_gen.h: build/assets/materials/static.h
 
 build/src/scene/hud.o: build/assets/materials/hud.h
 
+build/src/scene/elevator.o: build/assets/models/props/round_elevator_collision.h
+
 ####################
 ## Models
 ####################

@@ -13,6 +13,7 @@ struct CollisionQuad {
     aiVector3D edgeB;
     float edgeBLength;
     aiVector3D normal;
+    float thickness;
 
     std::unique_ptr<DataChunk> Generate() const;
 

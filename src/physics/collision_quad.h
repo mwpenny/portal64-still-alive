@@ -21,10 +21,7 @@ struct CollisionQuad {
     struct Vector3 edgeB;
     float edgeBLength;
     struct Plane plane;
-    // used to filter out concave edges or
-    // reduce duplicate checks for faces
-    // that share edges
-    u8 enabledEdges;
+    float thickness;
 };
 
 void collisionQuadInitializeNormalContact(struct CollisionQuad* quad, struct ContactManifold* output);
