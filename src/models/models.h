@@ -21,7 +21,4 @@ extern short cylinder_material_index;
 
 extern short fizzler_material_index;
 
-extern Gfx* elevator_gfx;
-extern short elevator_material_index;
-
 #endif

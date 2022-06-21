@@ -39,6 +39,10 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, s
 #define FORCE_RENDER_DOORWAY_DISTANCE   0.1f
 
 void staticRenderDetermineVisibleRooms(struct FrustrumCullingInformation* cullingInfo, u16 currentRoom, u64* visitedRooms) {
+    if (currentRoom == RIGID_BODY_NO_ROOM) {
+        return;
+    }
+
     u64 roomMask = 1LL << currentRoom;
 
     if (*visitedRooms & roomMask) {

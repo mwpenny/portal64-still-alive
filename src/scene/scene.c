@@ -258,7 +258,7 @@ void sceneUpdate(struct Scene* scene) {
     }
     
     for (int i = 0; i < scene->elevatorCount; ++i) {
-        elevatorUpdate(&scene->elevators[i]);
+        elevatorUpdate(&scene->elevators[i], &scene->player);
     }
     
     collisionSceneUpdateDynamics();

@@ -140,7 +140,10 @@ src/levels/level_def_gen.h: build/assets/materials/static.h
 
 build/src/scene/hud.o: build/assets/materials/hud.h
 
-build/src/scene/elevator.o: build/assets/models/props/round_elevator_collision.h
+build/src/scene/elevator.o: build/assets/models/props/round_elevator_collision.h \
+	build/assets/models/props/round_elevator.h \
+	build/assets/models/props/round_elevator_interior.h \
+	build/assets/materials/static.h
 
 ####################
 ## Models
@@ -156,6 +159,7 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/cylinder_test.blend \
 	assets/models/props/radio.blend \
 	assets/models/props/round_elevator.blend \
+	assets/models/props/round_elevator_interior.blend \
 	assets/models/props/round_elevator_collision.blend
 
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)

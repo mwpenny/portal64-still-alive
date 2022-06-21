@@ -5,6 +5,8 @@
 #include "../math/transform.h"
 #include "./collision.h"
 
+#define RIGID_BODY_NO_ROOM  0xFFFF
+
 enum RigidBodyFlags {
     RigidBodyFlagsInFrontPortal0 = (1 << 0),
     RigidBodyFlagsInFrontPortal1 = (1 << 1),
@@ -43,7 +45,7 @@ struct RigidBody {
     float momentOfInertiaInv;
     
     enum RigidBodyFlags flags;
-    short currentRoom;
+    unsigned short currentRoom;
 };
 
 void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniteria);

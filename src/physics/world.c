@@ -1,6 +1,10 @@
 #include "world.h"
 
 int worldCheckDoorwaySides(struct World* world, struct Vector3* position, int currentRoom) {
+    if (currentRoom == -1) {
+        return 0;
+    }
+
     struct Room* room = &world->rooms[currentRoom];
 
     int sideMask = 0;
@@ -15,6 +19,10 @@ int worldCheckDoorwaySides(struct World* world, struct Vector3* position, int cu
 }
 
 int worldCheckDoorwayCrossings(struct World* world, struct Vector3* position, int currentRoom, int sideMask) {
+    if (currentRoom == RIGID_BODY_NO_ROOM) {
+        return RIGID_BODY_NO_ROOM;
+    }
+
     struct Room* room = &world->rooms[currentRoom];
 
     for (int i = 0; i < room->doorwayCount; ++i) {
