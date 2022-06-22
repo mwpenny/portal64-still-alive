@@ -29,6 +29,10 @@ enum CutsceneStepType {
     CutsceneStepTypeDelay,
     CutsceneStepTypeOpenPortal,
     CutsceneStepTypeSetSignal,
+    CutsceneWaitForElevator,
+    CutsceneOpenElevator,
+    CutsceneTeleportPlayer,
+    CutsceneLoadLevel,
 };
 
 struct CutsceneStep {
@@ -49,6 +53,20 @@ struct CutsceneStep {
             u16 signalIndex;
             u16 signalValue;
         } setSignal;
+        struct {
+            u16 elevatorIndex;
+        } waitForElevator;
+        struct {
+            u16 elevatorIndex;
+        } openElevator;
+        struct {
+            u16 fromLocation;
+            u16 toLocation;
+        } teleportPlayer;
+        struct {
+            u16 fromLocation;
+            u16 levelIndex;
+        } loadLevel;
         int noop;
     };
 };

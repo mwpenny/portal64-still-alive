@@ -8,6 +8,8 @@
 enum ElevatorFlags {
     ElevatorFlagsIsOpen = (1 << 0),
     ElevatorFlagsContainsPlayer = (1 << 1),
+    ElevatorFlagsReleasePlayer = (1 << 2),
+    ElevatorFlagsIsLocked = (1 << 3),
 };
 
 struct Elevator {

@@ -86,6 +86,9 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 
 - [ ] Implement "Elevator"
     - Mesh collider type
+    - implement teleportation logic
+- [ ] Implement level transitions
+    - Implement loading levels from the cartridge
 - [x] Implement "Emancipation grid"
 - [ ] Change the way player standing logic works
 - [ ] Cube dispenser

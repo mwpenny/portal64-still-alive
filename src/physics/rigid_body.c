@@ -137,28 +137,9 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
         }
 
         struct Transform* otherPortal = gCollisionScene.portalTransforms[1 - i];
-
-        transformPoint(otherPortal, &localPoint, &rigidBody->transform.position);
-
-        struct Quaternion inverseARotation;
-        quatConjugate(&gCollisionScene.portalTransforms[i]->rotation, &inverseARotation);
-
-        struct Quaternion rotationTransfer;
-        quatMultiply(&otherPortal->rotation, &inverseARotation, &rotationTransfer);
-
-        quatMultVector(&rotationTransfer, &rigidBody->velocity, &rigidBody->velocity);
-        quatMultVector(&rotationTransfer, &rigidBody->angularVelocity, &rigidBody->angularVelocity);
-
-        struct Quaternion newRotation;
-
-        quatMultiply(&rotationTransfer, &rigidBody->transform.rotation, &newRotation);
-
-        rigidBody->transform.rotation = newRotation;
+        rigidBodyTeleport(rigidBody, gCollisionScene.portalTransforms[i], otherPortal, gCollisionScene.portalRooms[1 - i]);
 
         newFlags |= RigidBodyFlagsCrossedPortal0 << i;
-
-        rigidBody->currentRoom = gCollisionScene.portalRooms[1 - i];
-
         result = i + 1;
     }
 
@@ -174,4 +155,29 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
     rigidBody->flags |= newFlags;
 
     return result;
+}
+
+void rigidBodyTeleport(struct RigidBody* rigidBody, struct Transform* from, struct Transform* to, int toRoom) {
+    struct Vector3 localPoint;
+
+    transformPointInverseNoScale(from, &rigidBody->transform.position, &localPoint);
+
+    transformPoint(to, &localPoint, &rigidBody->transform.position);
+
+    struct Quaternion inverseARotation;
+    quatConjugate(&from->rotation, &inverseARotation);
+
+    struct Quaternion rotationTransfer;
+    quatMultiply(&to->rotation, &inverseARotation, &rotationTransfer);
+
+    quatMultVector(&rotationTransfer, &rigidBody->velocity, &rigidBody->velocity);
+    quatMultVector(&rotationTransfer, &rigidBody->angularVelocity, &rigidBody->angularVelocity);
+
+    struct Quaternion newRotation;
+
+    quatMultiply(&rotationTransfer, &rigidBody->transform.rotation, &newRotation);
+
+    rigidBody->transform.rotation = newRotation;
+
+    rigidBody->currentRoom = toRoom;
 }

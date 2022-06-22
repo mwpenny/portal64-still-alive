@@ -35,6 +35,18 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         case CutsceneStepTypeSetSignal:
             signalsSetDefault(step->setSignal.signalIndex, step->setSignal.signalValue);
             break;
+        case CutsceneOpenElevator:
+            gScene.elevators[step->openElevator.elevatorIndex].flags = (gScene.elevators[step->openElevator.elevatorIndex].flags & ~ElevatorFlagsIsLocked) | ElevatorFlagsReleasePlayer;
+            break;
+        case CutsceneTeleportPlayer:
+        {
+            rigidBodyTeleport(
+                &gScene.player.body, 
+                &gCurrentLevel->locations[step->teleportPlayer.fromLocation].transform, 
+                &gCurrentLevel->locations[step->teleportPlayer.toLocation].transform,
+                gCurrentLevel->locations[step->teleportPlayer.toLocation].roomIndex
+            );
+        }
         default:
     }
 }
@@ -47,6 +59,8 @@ int cutsceneRunnerUpdateCurrentStep(struct CutsceneRunner* runner) {
         case CutsceneStepTypeDelay:
             runner->state.delay -= FIXED_DELTA_TIME;
             return runner->state.delay <= 0.0f;
+        case CutsceneWaitForElevator:
+            return (gScene.elevators[step->waitForElevator.elevatorIndex].flags & ElevatorFlagsContainsPlayer) != 0;
         default:
             return 1;
     }
