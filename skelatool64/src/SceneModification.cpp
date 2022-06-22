@@ -128,7 +128,7 @@ void splitSceneByBones(aiScene* targetScene) {
     
     BoneHierarchy bones;
 
-    bones.SearchForBonesInScene(targetScene);
+    bones.SearchForBonesInScene(targetScene, 1.0f);
 
     for (unsigned int i = 0; i < targetScene->mNumMeshes; ++i) {
         aiMesh* currMesh = targetScene->mMeshes[i];

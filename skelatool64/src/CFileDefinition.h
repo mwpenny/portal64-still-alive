@@ -22,13 +22,13 @@ public:
     int mTextureWidth;
     int mTextureHeight;
 
-    ErrorResult Generate(float scale, aiQuaternion rotate, std::unique_ptr<FileDefinition>& output, const std::string& fileSuffix);
+    ErrorResult Generate(float fixedPointScale, float modelScale, aiQuaternion rotate, std::unique_ptr<FileDefinition>& output, const std::string& fileSuffix);
 private:
 };
 
 class CFileDefinition {
 public:
-    CFileDefinition(std::string prefix, float modelScale, aiQuaternion modelRotate);
+    CFileDefinition(std::string prefix, float fixedPointScale, float modelScale, aiQuaternion modelRotate);
 
     void AddDefinition(std::unique_ptr<FileDefinition> definition);
     std::string AddDataDefinition(const std::string& nameHint, const std::string& dataType, bool isArray, const std::string& location, std::unique_ptr<DataChunk> data);
@@ -57,6 +57,7 @@ public:
     BoneHierarchy& GetBoneHierarchy();
 private:
     std::string mPrefix;
+    float mFixedPointScale;
     float mModelScale;
     aiQuaternion mModelRotate;
     std::set<std::string> mUsedNames;

@@ -131,9 +131,9 @@ void generatePortalSurfacesDefinition(const aiScene* scene, CFileDefinition& fil
                 continue;
             }
 
-            aiAABB meshBB(mesh->bbMin * settings.mCollisionScale, mesh->bbMax * settings.mCollisionScale);
+            aiAABB meshBB(mesh->bbMin * settings.mModelScale, mesh->bbMax * settings.mModelScale);
 
-            if (!collision.IsCoplanar(*mesh, settings.mCollisionScale)) {
+            if (!collision.IsCoplanar(*mesh, settings.mModelScale)) {
                 continue;
             }
 
@@ -141,7 +141,7 @@ void generatePortalSurfacesDefinition(const aiScene* scene, CFileDefinition& fil
                 continue;
             }
 
-            portalSurfaces->Add(std::move(calculatePortalSingleSurface(fileDefinition, collision, *mesh, settings.mCollisionScale)));                
+            portalSurfaces->Add(std::move(calculatePortalSingleSurface(fileDefinition, collision, *mesh, settings.mModelScale)));                
             ++surfaceCount;
         }
 
@@ -167,16 +167,18 @@ void generatePortalSurfacesDefinition(const aiScene* scene, CFileDefinition& fil
 void generateBoundingBoxesDefinition(const aiScene* scene, CFileDefinition& fileDefinition, StructureDataChunk& levelDef, const StaticGeneratorOutput& staticOutput, const DisplayListSettings& settings) {
     std::unique_ptr<StructureDataChunk> boundingBoxes(new StructureDataChunk());
 
+    float combinedScale = settings.mFixedPointScale * settings.mModelScale;
+
     for (auto& mesh : staticOutput.staticMeshes) {
         std::unique_ptr<StructureDataChunk> sphere(new StructureDataChunk());
 
-        sphere->AddPrimitive((short)(mesh->bbMin.x * settings.mGraphicsScale + 0.5f));
-        sphere->AddPrimitive((short)(mesh->bbMin.y * settings.mGraphicsScale + 0.5f));
-        sphere->AddPrimitive((short)(mesh->bbMin.z * settings.mGraphicsScale + 0.5f));
+        sphere->AddPrimitive((short)(mesh->bbMin.x * combinedScale + 0.5f));
+        sphere->AddPrimitive((short)(mesh->bbMin.y * combinedScale + 0.5f));
+        sphere->AddPrimitive((short)(mesh->bbMin.z * combinedScale + 0.5f));
         
-        sphere->AddPrimitive((short)(mesh->bbMax.x * settings.mGraphicsScale + 0.5f));
-        sphere->AddPrimitive((short)(mesh->bbMax.y * settings.mGraphicsScale + 0.5f));
-        sphere->AddPrimitive((short)(mesh->bbMax.z * settings.mGraphicsScale + 0.5f));
+        sphere->AddPrimitive((short)(mesh->bbMax.x * combinedScale + 0.5f));
+        sphere->AddPrimitive((short)(mesh->bbMax.y * combinedScale + 0.5f));
+        sphere->AddPrimitive((short)(mesh->bbMax.z * combinedScale + 0.5f));
 
         boundingBoxes->Add(std::move(sphere));
     }

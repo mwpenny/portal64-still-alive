@@ -62,10 +62,10 @@ private:
 
 class BoneHierarchy {
 public:
-    void SearchForBones(aiNode* node, Bone* currentBoneParent, std::set<std::string>& knownBones, bool parentIsBone);
-    void SearchForBonesInScene(const aiScene* scene);
+    void SearchForBones(aiNode* node, Bone* currentBoneParent, std::set<std::string>& knownBones, bool parentIsBone, float fixedPointScale);
+    void SearchForBonesInScene(const aiScene* scene, float fixedPointScale);
 
-    void PopulateWithAnimationNodeInfo(const NodeAnimationInfo& animInfo);
+    void PopulateWithAnimationNodeInfo(const NodeAnimationInfo& animInfo, float fixedPointScale);
 
     Bone* BoneByIndex(unsigned index);
     Bone* BoneForName(std::string name);

@@ -21,8 +21,8 @@ struct CommandLineArguments {
     std::string mPrefix;
     std::vector<std::string> mMaterialFiles;
     std::string mDefaultMaterial;
-    float mGraphicsScale;
-    float mCollisionScale;
+    float mFixedPointScale;
+    float mModelScale;
     bool mExportAnimation;
     bool mExportGeometry;
     aiVector3D mEulerAngles;

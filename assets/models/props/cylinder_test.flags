@@ -1,1 +1,1 @@
--m assets/materials/static.skm.yaml -D plastic/plasticwall001a
+-m assets/materials/static.skm.yaml --default-material plastic/plasticwall001a

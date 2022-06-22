@@ -51,7 +51,7 @@ unsigned convertByteRange(float value) {
     }
 }
 
- ErrorResult VertexBufferDefinition::Generate(float scale, aiQuaternion rotate, std::unique_ptr<FileDefinition>& output, const std::string& fileSuffix) {
+ ErrorResult VertexBufferDefinition::Generate(float fixedPointScale, float modelScale, aiQuaternion rotate, std::unique_ptr<FileDefinition>& output, const std::string& fileSuffix) {
     std::unique_ptr<StructureDataChunk> dataChunk(new StructureDataChunk());
     
     for (unsigned int i = 0; i < mTargetMesh->mMesh->mNumVertices; ++i) {
@@ -61,13 +61,15 @@ unsigned convertByteRange(float value) {
 
         aiVector3D pos = mTargetMesh->mMesh->mVertices[i];
 
+        pos = pos * modelScale;
+
         if (mTargetMesh->mPointInverseTransform[i]) {
             pos = (*mTargetMesh->mPointInverseTransform[i]) * pos;
         } else {
             pos = rotate.Rotate(pos);
         }
 
-        pos = pos * scale;
+        pos = pos * fixedPointScale;
 
         short converted;
 
@@ -160,8 +162,9 @@ unsigned convertByteRange(float value) {
     return ErrorResult();
 }
 
-CFileDefinition::CFileDefinition(std::string prefix, float modelScale, aiQuaternion modelRotate): 
+CFileDefinition::CFileDefinition(std::string prefix, float fixedPointScale, float modelScale, aiQuaternion modelRotate): 
     mPrefix(prefix),
+    mFixedPointScale(fixedPointScale),
     mModelScale(modelScale),
     mModelRotate(modelRotate) {
 
@@ -225,7 +228,7 @@ std::string CFileDefinition::GetVertexBuffer(std::shared_ptr<ExtendedMesh> mesh,
 
     std::unique_ptr<FileDefinition> vtxDef;
 
-    ErrorResult result = mVertexBuffers.find(name)->second.Generate(mModelScale, mModelRotate, vtxDef, modelSuffix);
+    ErrorResult result = mVertexBuffers.find(name)->second.Generate(mFixedPointScale, mModelScale, mModelRotate, vtxDef, modelSuffix);
 
     if (result.HasError()) {
         std::cerr << "Error generating vertex buffer " << name << " error: " << result.GetMessage() << std::endl;

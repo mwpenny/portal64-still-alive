@@ -175,8 +175,8 @@ std::shared_ptr<TriggerGeneratorOutput> generateTriggers(const aiScene* scene, C
             trigger->stepsCount = cutscene->second->steps.size();
         }
 
-        aiVector3D minTransformed = nodeInfo.node->mTransformation * mesh->bbMin * settings.mCollisionScale;
-        aiVector3D maxTransformed = nodeInfo.node->mTransformation * mesh->bbMax * settings.mCollisionScale;
+        aiVector3D minTransformed = nodeInfo.node->mTransformation * mesh->bbMin * settings.mModelScale;
+        aiVector3D maxTransformed = nodeInfo.node->mTransformation * mesh->bbMax * settings.mModelScale;
 
         trigger->bb.mMin = min(minTransformed, maxTransformed);
         trigger->bb.mMax = max(minTransformed, maxTransformed);

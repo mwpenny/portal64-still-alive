@@ -54,8 +54,8 @@ void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* n
 
         if (extractMaterialAutoTileParameters(materialPtr, sTile, tTile)) {
             mesh->CubeProjectTex(
-                settings.mCollisionScale / (double)sTile,
-                settings.mCollisionScale / (double)tTile
+                settings.mModelScale / (double)sTile,
+                settings.mModelScale / (double)tTile
             );
         }
 
@@ -78,7 +78,7 @@ void MeshDefinitionGenerator::GenerateDefinitions(const aiScene* scene, CFileDef
     std::vector<RenderChunk> renderChunks;
 
     auto animInfo = findNodesForWithAnimation(scene, mIncludedNodes, mSettings.CreateCollisionTransform());
-    fileDefinition.GetBoneHierarchy().PopulateWithAnimationNodeInfo(*animInfo);
+    fileDefinition.GetBoneHierarchy().PopulateWithAnimationNodeInfo(*animInfo, mSettings.mFixedPointScale);
 
     for (auto node = mIncludedNodes.begin(); node != mIncludedNodes.end(); ++node) {
         AppendRenderChunks(scene, *node, fileDefinition, mSettings, renderChunks);

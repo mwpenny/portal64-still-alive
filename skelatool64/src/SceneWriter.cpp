@@ -22,7 +22,7 @@ void generateMeshFromScene(const aiScene* scene, CFileDefinition& fileDefinition
     bool shouldExportAnimations;
 
     if (settings.mExportAnimation) {
-        bones.SearchForBonesInScene(scene);
+        bones.SearchForBonesInScene(scene, settings.mFixedPointScale);
         shouldExportAnimations = bones.HasData();
     } else {
         shouldExportAnimations = false;
@@ -51,7 +51,7 @@ void generateMeshFromScene(const aiScene* scene, CFileDefinition& fileDefinition
 }
 
 void generateMeshFromSceneToFile(const aiScene* scene, std::string filename, DisplayListSettings& settings) {
-    CFileDefinition fileDefinition(settings.mPrefix, settings.mGraphicsScale, settings.mRotateModel);
+    CFileDefinition fileDefinition(settings.mPrefix, settings.mFixedPointScale, settings.mModelScale, settings.mRotateModel);
 
     generateMeshFromScene(scene, fileDefinition, settings);
 

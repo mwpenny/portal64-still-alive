@@ -105,7 +105,7 @@ void generateAnimationForScene(const aiScene* scene, CFileDefinition &fileDefini
     fileDefinition.AddMacro(boneCountName, std::to_string(bones.GetBoneCount()));
 
     std::string animationsName = fileDefinition.GetUniqueName("animations");
-    auto animations = generateAnimationData(scene, bones, fileDefinition, settings.mGraphicsScale, settings.mTicksPerSecond, settings.mRotateModel);
+    auto animations = generateAnimationData(scene, bones, fileDefinition, settings.mFixedPointScale * settings.mModelScale, settings.mTicksPerSecond, settings.mRotateModel);
 
     std::unique_ptr<StructureDataChunk> animationNameData(new StructureDataChunk());
 

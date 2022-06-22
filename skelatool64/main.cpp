@@ -98,8 +98,8 @@ int main(int argc, char *argv[]) {
 
     DisplayListSettings settings = DisplayListSettings();
 
-    settings.mGraphicsScale = args.mGraphicsScale;
-    settings.mCollisionScale = args.mCollisionScale;
+    settings.mFixedPointScale = args.mFixedPointScale;
+    settings.mModelScale = args.mModelScale;
     settings.mRotateModel = getUpRotation(args.mEulerAngles);
     settings.mPrefix = args.mPrefix;
     settings.mExportAnimation = args.mExportAnimation;
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
     }
 
     std::cout << "Saving to "  << args.mOutputFile << std::endl;
-    CFileDefinition fileDef(settings.mPrefix, settings.mGraphicsScale, settings.mRotateModel);
+    CFileDefinition fileDef(settings.mPrefix, settings.mFixedPointScale, settings.mModelScale, settings.mRotateModel);
 
     switch (args.mOutputType)
     {

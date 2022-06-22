@@ -17,71 +17,59 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
     output.mInputFile = "";
     output.mOutputFile = "";
     output.mPrefix = "output";
-    output.mGraphicsScale = 256.0f;
-    output.mCollisionScale = 1.0f;
+    output.mFixedPointScale = 256.0f;
+    output.mModelScale = 1.0f;
     output.mExportAnimation = true;
     output.mExportGeometry = true;
     output.mOutputType = FileOutputType::Mesh;
     output.mEulerAngles = aiVector3D(0.0f, 0.0f, 0.0f);
     output.mDefaultMaterial = "default";
 
-    char lastParameter = '\0';
+    std::string lastParameter = "";
     bool hasError = false;
 
     for (int i = 1; i < argc; ++i) {
         char* curr = argv[i];
 
-        if (lastParameter != '\0') {
-            switch (lastParameter) {
-                case 'o':
-                    if (output.mOutputFile != "") {
-                        std::cerr << "You can only specify a single output file" << std::endl;
-                        hasError = true;
-                    }
+        if (lastParameter != "") {
+            if (lastParameter == "output") {
+                if (output.mOutputFile != "") {
+                    std::cerr << "You can only specify a single output file" << std::endl;
+                    hasError = true;
+                }
 
-                    output.mOutputFile = curr;
-                    break;
-                case 'n':
-                    output.mPrefix = curr;
-                    break;
-                case 's':
-                    output.mGraphicsScale = (float)atof(curr);
-                    break;
-                case 'c':
-                    output.mCollisionScale = (float)atof(curr);
-                    break;
-                case 'm':
-                    output.mMaterialFiles.push_back(curr);
-                    break;
-                case 'r':
-                    parseEulerAngles(curr, output.mEulerAngles);
-                    break;
-                case 'D':
-                    output.mDefaultMaterial = curr;
-                    break;
+                output.mOutputFile = curr;
+            } else if (lastParameter == "name") {
+                output.mPrefix = curr;
+            } else if (lastParameter == "fixed-point-scale") {
+                output.mFixedPointScale = (float)atof(curr);
+            } else if (lastParameter == "model-scale") {
+                output.mModelScale = (float)atof(curr);
+            } else if (lastParameter == "materials") {
+                output.mMaterialFiles.push_back(curr);
+            } else if (lastParameter == "rotate") {
+                parseEulerAngles(curr, output.mEulerAngles);
+            } else if (lastParameter == "default-material") {
+                output.mDefaultMaterial = curr;
             }
 
-            lastParameter = '\0';
+            lastParameter = "";
         } else if (
             strcmp(curr, "-o") == 0 || 
             strcmp(curr, "--output") == 0) {
-            lastParameter = 'o';
+            lastParameter = "output";
         } else if (
             strcmp(curr, "-n") == 0 || 
             strcmp(curr, "--name") == 0) {
-            lastParameter = 'n';
-        } else if (
-            strcmp(curr, "-s") == 0 || 
-            strcmp(curr, "--scale") == 0) {
-            lastParameter = 's';
-        } else if (
-            strcmp(curr, "-c") == 0 || 
-            strcmp(curr, "--collision-scale") == 0) {
-            lastParameter = 'c';
+            lastParameter = "name";
+        } else if (strcmp(curr, "--fixed-point-scale") == 0) {
+            lastParameter = "fixed-point-scale";
+        } else if (strcmp(curr, "--model-scale") == 0) {
+            lastParameter = "model-scale";
         } else if (
             strcmp(curr, "-m") == 0 || 
             strcmp(curr, "--materials") == 0) {
-            lastParameter = 'm';
+            lastParameter = "materials";
         } else if (strcmp(curr, "--material-output") == 0) {
             output.mOutputType = FileOutputType::Materials;
         } else if (strcmp(curr, "--mesh-collider") == 0) {
@@ -89,7 +77,7 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
         } else if (
             strcmp(curr, "-r") == 0 || 
             strcmp(curr, "--rotate") == 0) {
-            lastParameter = 'r';
+            lastParameter = "rotate";
         } else if (
             strcmp(curr, "-a") == 0 || 
             strcmp(curr, "--animations-only") == 0) {
@@ -97,10 +85,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
         } else if (strcmp(curr, "--level") == 0) {
                     output.mOutputType = FileOutputType::Level;
                     output.mExportAnimation = false;
-        } else if (
-            strcmp(curr, "-D") == 0 || 
-            strcmp(curr, "--default-material") == 0) {
-            lastParameter = 'D';
+        } else if (strcmp(curr, "--default-material") == 0) {
+            lastParameter = "default-material";
         } else {
             if (curr[0] == '-') {
                 hasError = true;

@@ -93,7 +93,7 @@ int Bone::GetBoneIndex(Bone* a) {
     }
 }
 
-void BoneHierarchy::PopulateWithAnimationNodeInfo(const NodeAnimationInfo& animInfo) {
+void BoneHierarchy::PopulateWithAnimationNodeInfo(const NodeAnimationInfo& animInfo, float fixedPointScale) {
     for (auto& node : animInfo.nodesWithAnimation) {
         Bone* parent = nullptr;
 
@@ -119,7 +119,7 @@ void BoneHierarchy::PopulateWithAnimationNodeInfo(const NodeAnimationInfo& animI
             mBones.size(),
             boneName,
             parent,
-            restPosition,
+            restPosition * fixedPointScale,
             restRotation,
             restScale
         )));
@@ -128,7 +128,7 @@ void BoneHierarchy::PopulateWithAnimationNodeInfo(const NodeAnimationInfo& animI
     }
 }
 
-void BoneHierarchy::SearchForBones(aiNode* node, Bone* currentBoneParent, std::set<std::string>& knownBones, bool parentIsBone) {
+void BoneHierarchy::SearchForBones(aiNode* node, Bone* currentBoneParent, std::set<std::string>& knownBones, bool parentIsBone, float fixedPointScale) {
     if (knownBones.find(node->mName.C_Str()) != knownBones.end()) {
         aiVector3D restPosition;
         aiQuaternion restRotation;
@@ -139,7 +139,7 @@ void BoneHierarchy::SearchForBones(aiNode* node, Bone* currentBoneParent, std::s
             mBones.size(),
             node->mName.C_Str(),
             currentBoneParent,
-            restPosition,
+            restPosition * fixedPointScale,
             restRotation,
             restScale
         )));
@@ -151,11 +151,11 @@ void BoneHierarchy::SearchForBones(aiNode* node, Bone* currentBoneParent, std::s
     }
 
     for (unsigned int i = 0; i < node->mNumChildren; ++i) {
-        SearchForBones(node->mChildren[i], currentBoneParent, knownBones, parentIsBone);
+        SearchForBones(node->mChildren[i], currentBoneParent, knownBones, parentIsBone, fixedPointScale);
     }
 }
 
-void BoneHierarchy::SearchForBonesInScene(const aiScene* scene) {
+void BoneHierarchy::SearchForBonesInScene(const aiScene* scene, float fixedPointScale) {
     std::set<std::string> knownBones;
 
     for (unsigned int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
@@ -166,7 +166,7 @@ void BoneHierarchy::SearchForBonesInScene(const aiScene* scene) {
         }
     }
 
-    SearchForBones(scene->mRootNode, nullptr, knownBones, false);
+    SearchForBones(scene->mRootNode, nullptr, knownBones, false, fixedPointScale);
 }
 
 Bone* BoneHierarchy::BoneByIndex(unsigned index) {
