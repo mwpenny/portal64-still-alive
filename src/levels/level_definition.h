@@ -29,10 +29,9 @@ enum CutsceneStepType {
     CutsceneStepTypeDelay,
     CutsceneStepTypeOpenPortal,
     CutsceneStepTypeSetSignal,
-    CutsceneWaitForElevator,
-    CutsceneOpenElevator,
-    CutsceneTeleportPlayer,
-    CutsceneLoadLevel,
+    CutsceneStepTypeWaitForSignal,
+    CutsceneStepTypeTeleportPlayer,
+    CutsceneStepTypeLoadLevel,
 };
 
 struct CutsceneStep {
@@ -54,11 +53,8 @@ struct CutsceneStep {
             u16 signalValue;
         } setSignal;
         struct {
-            u16 elevatorIndex;
-        } waitForElevator;
-        struct {
-            u16 elevatorIndex;
-        } openElevator;
+            u16 signalIndex;
+        } waitForSignal;
         struct {
             u16 fromLocation;
             u16 toLocation;
@@ -114,6 +110,14 @@ struct FizzlerDefinition {
     short roomIndex;
 };
 
+struct ElevatorDefinition {
+    struct Vector3 position;
+    struct Quaternion rotation;
+    short roomIndex;
+    short signalIndex;
+    short isExit;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
@@ -130,6 +134,7 @@ struct LevelDefinition {
     struct SignalOperator* signalOperators;
     struct DecorDefinition* decor;
     struct FizzlerDefinition* fizzlers;
+    struct ElevatorDefinition* elevators;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
@@ -140,6 +145,7 @@ struct LevelDefinition {
     short signalOperatorCount;
     short decorCount;
     short fizzlerCount;
+    short elevatorCount;
     short startLocation;
 };
 

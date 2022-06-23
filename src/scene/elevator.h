@@ -4,12 +4,12 @@
 #include "../math/transform.h"
 #include "../physics/collision_object.h"
 #include "../player/player.h"
+#include "../levels/level_definition.h"
 
 enum ElevatorFlags {
-    ElevatorFlagsIsOpen = (1 << 0),
-    ElevatorFlagsContainsPlayer = (1 << 1),
-    ElevatorFlagsReleasePlayer = (1 << 2),
-    ElevatorFlagsIsLocked = (1 << 3),
+    ElevatorFlagsIsLocked = (1 << 0),
+    ElevatorFlagsIsExit = (1 << 1),
+    ElevatorFlagsHasHadPlayer = (1 << 2),
 };
 
 struct Elevator {
@@ -17,9 +17,12 @@ struct Elevator {
     struct RigidBody rigidBody;
     short dynamicId;
     short flags;
+    short signalIndex;
+    short roomIndex;
+    float openAmount;
 };
 
-void elevatorInit(struct Elevator* elevator);
+void elevatorInit(struct Elevator* elevator, struct ElevatorDefinition* elevatorDefinition);
 
 void elevatorUpdate(struct Elevator* elevator, struct Player* player);
 

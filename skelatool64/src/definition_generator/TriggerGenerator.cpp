@@ -79,6 +79,24 @@ std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, con
         setSignal->AddPrimitive(step.command == "set_signal" ? 1 : 0);
         result->Add("setSignal", std::move(setSignal));
         return result;
+    } else if (step.command == "wait_for_signal" && step.args.size() >= 1) {
+        result->AddPrimitive<const char*>("CutsceneStepTypeWaitForSignal");
+        std::unique_ptr<StructureDataChunk> waitforSignal(new StructureDataChunk());
+        waitforSignal->AddPrimitive(signals.SignalIndexForName(step.args[0]));
+        result->Add("waitForSignal", std::move(waitforSignal));
+        return result;
+    } else if (step.command == "teleport_player" && step.args.size() >= 2) {
+        short fromLocation = roomOutput.FindLocationIndex(step.args[0]);
+        short toLocation = roomOutput.FindLocationIndex(step.args[1]);
+
+        if (fromLocation != -1 && toLocation != -1) {
+            result->AddPrimitive<const char*>("CutsceneStepTypeTeleportPlayer");
+            std::unique_ptr<StructureDataChunk> teleportPlayer(new StructureDataChunk());
+            teleportPlayer->AddPrimitive(fromLocation);
+            teleportPlayer->AddPrimitive(toLocation);
+            result->Add("teleportPlayer", std::move(teleportPlayer));
+            return result;
+        }
     }
 
     result->AddPrimitive<const char*>("CutsceneStepTypeNoop");

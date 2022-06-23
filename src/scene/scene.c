@@ -84,10 +84,10 @@ void sceneInit(struct Scene* scene) {
         fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height, fizzlerDef->roomIndex);
     }
 
-    scene->elevatorCount = 1;
+    scene->elevatorCount = gCurrentLevel->elevatorCount;
     scene->elevators = malloc(sizeof(struct Elevator) * scene->elevatorCount);
     for (int i = 0; i < scene->elevatorCount; ++i) {
-        elevatorInit(&scene->elevators[i]);
+        elevatorInit(&scene->elevators[i], &gCurrentLevel->elevators[i]);
     }
 }
 

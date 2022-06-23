@@ -440,6 +440,52 @@ void generateFizzlerDefinitions(
     levelDef.AddPrimitive("fizzlerCount", fizzlerCount);
 }
 
+void generateElevatorDefinitions(
+    const aiScene* scene, 
+    CFileDefinition& fileDefinition, 
+    StructureDataChunk& levelDef, 
+    const RoomGeneratorOutput& roomOutput, 
+    const DisplayListSettings& settings,
+    Signals& signals,
+    NodeGroups& nodeGroups) {
+
+    int elevatorCount = 0;
+    std::unique_ptr<StructureDataChunk> elevators(new StructureDataChunk());
+
+    aiMatrix4x4 baseTransform = settings.CreateCollisionTransform();
+
+    for (auto& nodeInfo : nodeGroups.NodesForType("@elevator")) {
+        if (nodeInfo.arguments.size() == 0) {
+            continue;
+        }
+
+        std::unique_ptr<StructureDataChunk> elevatorData(new StructureDataChunk());
+        aiVector3D pos;
+        aiQuaternion rot;
+        aiVector3D scale;
+        (baseTransform * nodeInfo.node->mTransformation).Decompose(scale, rot, pos);
+        elevatorData->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(pos)));
+        elevatorData->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(rot)));
+        elevatorData->AddPrimitive(roomOutput.RoomForNode(nodeInfo.node));
+        elevatorData->AddPrimitive(signals.SignalIndexForName(nodeInfo.arguments[0]));
+        elevatorData->AddPrimitive(nodeInfo.arguments.size() >= 2 && nodeInfo.arguments[1] == "isExit" ? 1 : 0);
+
+        elevators->Add(std::move(elevatorData));
+        ++elevatorCount;
+    }
+
+    std::string elevatorsName = fileDefinition.AddDataDefinition(
+        "elevators",
+        "struct ElevatorDefinition",
+        true,
+        "_geo",
+        std::move(elevators)
+    );
+
+    levelDef.AddPrimitive("elevators", elevatorsName);
+    levelDef.AddPrimitive("elevatorCount", elevatorCount);
+}
+
 void generateLevel(
         const aiScene* scene, 
         CFileDefinition& fileDefinition,
@@ -480,6 +526,8 @@ void generateLevel(
     generateDecorDefinition(scene, fileDefinition, *levelDef, roomOutput, settings, nodeGroups);
 
     generateFizzlerDefinitions(scene, fileDefinition, *levelDef, roomOutput, settings, nodeGroups);
+
+    generateElevatorDefinitions(scene, fileDefinition, *levelDef, roomOutput, settings, signals, nodeGroups);
 
     fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct LevelDefinition", fileDefinition.GetUniqueName("level"), false, "_geo", std::move(levelDef))));
 }

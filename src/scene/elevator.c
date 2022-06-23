@@ -2,6 +2,9 @@
 #include "../physics/collision_scene.h"
 #include "../scene/dynamic_scene.h"
 #include "../physics/mesh_collider.h"
+#include "./signals.h"
+#include "../math/mathf.h"
+#include "../util/time.h"
 
 #include "../../build/assets/models/props/round_elevator_collision.h"
 #include "../../build/assets/models/props/round_elevator_interior.h"
@@ -10,8 +13,9 @@
 #include "../../build/assets/materials/static.h"
 
 #define AUTO_OPEN_DISTANCE      4.0f
-
 #define INSIDE_DISTANCE      1.0f
+#define SAME_LEVEL_HEIGHT    3.0f
+#define OPEN_SPEED           2.0f
 
 struct ColliderTypeData gElevatorColliderType = {
     CollisionShapeTypeMesh,
@@ -42,12 +46,7 @@ void elevatorRender(void* data, struct RenderScene* renderScene) {
     Mtx* armature = renderStateRequestMatrices(renderScene->renderState, PROPS_ROUND_ELEVATOR_DEFAULT_BONES_COUNT);
 
     for (int i = 0; i < PROPS_ROUND_ELEVATOR_DEFAULT_BONES_COUNT; ++i) {
-        if (elevator->flags & ElevatorFlagsIsOpen) {
-            props_round_elevator_default_bones[i].position = gOpenPosition[i];
-        } else {
-            props_round_elevator_default_bones[i].position = gClosedPosition[i];
-        }
-
+        vector3Lerp(&gClosedPosition[i], &gOpenPosition[i], elevator->openAmount, &props_round_elevator_default_bones[i].position);
         transformToMatrixL(&props_round_elevator_default_bones[i], &armature[i], 1.0f);
     }
 
@@ -60,7 +59,11 @@ void elevatorRender(void* data, struct RenderScene* renderScene) {
         armature
     );
 
-    if (elevator->flags & (ElevatorFlagsIsOpen | ElevatorFlagsContainsPlayer)) {
+    int insideCheck = elevator->flags & (ElevatorFlagsIsLocked | ElevatorFlagsIsExit);
+
+    int isPlayerInside = insideCheck == ElevatorFlagsIsLocked || insideCheck == ElevatorFlagsIsExit;
+
+    if (elevator->openAmount > 0.0f || isPlayerInside) {
         renderSceneAdd(
             renderScene, 
             props_round_elevator_interior_model_gfx, 
@@ -72,46 +75,69 @@ void elevatorRender(void* data, struct RenderScene* renderScene) {
     }
 }
 
-void elevatorInit(struct Elevator* elevator) {
+void elevatorInit(struct Elevator* elevator, struct ElevatorDefinition* elevatorDefinition) {
     collisionObjectInit(&elevator->collisionObject, &gElevatorColliderType, &elevator->rigidBody, 1.0f, gElevatorCollisionLayers);
     rigidBodyMarkKinematic(&elevator->rigidBody);
     collisionSceneAddDynamicObject(&elevator->collisionObject);
 
-    elevator->rigidBody.transform.position.x = -10.0f;
-    elevator->rigidBody.transform.position.z = 2.5f;
+    elevator->rigidBody.transform.position = elevatorDefinition->position;
+    elevator->rigidBody.transform.rotation = elevatorDefinition->rotation;
 
     collisionObjectUpdateBB(&elevator->collisionObject);
 
     elevator->dynamicId = dynamicSceneAdd(elevator, elevatorRender, &elevator->rigidBody.transform, 3.9f);
-    elevator->flags = 0;
+    elevator->flags = elevatorDefinition->isExit ? ElevatorFlagsIsExit : 0;
+    elevator->openAmount = 0.0f;
+    elevator->roomIndex = elevatorDefinition->roomIndex;
+    elevator->signalIndex = elevatorDefinition->signalIndex;
 }
 
 void elevatorUpdate(struct Elevator* elevator, struct Player* player) {
     struct Vector3 offset;
     vector3Sub(&elevator->rigidBody.transform.position, &player->lookTransform.position, &offset);
+    
+    float verticalDistance = fabsf(offset.y);
     offset.y = 0.0f;
 
     float horizontalDistance = vector3MagSqrd(&offset);
 
-    int inRange = horizontalDistance < AUTO_OPEN_DISTANCE * AUTO_OPEN_DISTANCE;
-    int inside = horizontalDistance < INSIDE_DISTANCE * INSIDE_DISTANCE;
+    int inRange = horizontalDistance < AUTO_OPEN_DISTANCE * AUTO_OPEN_DISTANCE && verticalDistance < SAME_LEVEL_HEIGHT;
+    int inside = horizontalDistance < INSIDE_DISTANCE * INSIDE_DISTANCE && verticalDistance < SAME_LEVEL_HEIGHT;
 
-    if (inside) {
-        elevator->flags |= ElevatorFlagsContainsPlayer;
-        player->body.currentRoom = RIGID_BODY_NO_ROOM;
+    int shouldBeOpen;
+    int shouldLock;
+
+    if (elevator->flags & ElevatorFlagsIsExit) {
+        shouldBeOpen = signalsRead(elevator->signalIndex);
+        shouldLock = !inRange && (elevator->flags & ElevatorFlagsHasHadPlayer) != 0;
+    } else {
+        shouldBeOpen = inRange && !inside;
+        shouldLock = inside;
+        
+        if (inside || (elevator->flags & ElevatorFlagsIsLocked) != 0) {
+            signalsSend(elevator->signalIndex);
+        }
     }
 
-    int shouldBeOpen = inRange && (elevator->flags & ElevatorFlagsContainsPlayer) == 0;
+    if (inside) {
+        elevator->flags |= ElevatorFlagsHasHadPlayer;
+    }
+
+    if (shouldLock) {
+        elevator->flags |= ElevatorFlagsIsLocked;
+    }
+
+    if ((elevator->flags & ElevatorFlagsIsLocked) != 0) {
+        shouldBeOpen = 0;
+    }
 
     if (shouldBeOpen) {
         props_round_elevator_collision_collider.children[PROPS_ROUND_ELEVATOR_COLLISION_DOOR_RIGHT_COLLISION_INDEX].collisionLayers = 0;
         props_round_elevator_collision_collider.children[PROPS_ROUND_ELEVATOR_COLLISION_DOOR_LEFT_COLLISION_INDEX].collisionLayers = 0;
-
-        elevator->flags |= ElevatorFlagsIsOpen;
     } else {
         props_round_elevator_collision_collider.children[PROPS_ROUND_ELEVATOR_COLLISION_DOOR_RIGHT_COLLISION_INDEX].collisionLayers = gElevatorCollisionLayers;
         props_round_elevator_collision_collider.children[PROPS_ROUND_ELEVATOR_COLLISION_DOOR_LEFT_COLLISION_INDEX].collisionLayers = gElevatorCollisionLayers;
-
-        elevator->flags &= ~ElevatorFlagsIsOpen;
     }
+
+    elevator->openAmount = mathfMoveTowards(elevator->openAmount, shouldBeOpen ? 1.0f : 0.0f, OPEN_SPEED * FIXED_DELTA_TIME);
 }
