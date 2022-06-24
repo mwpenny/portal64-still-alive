@@ -34,7 +34,7 @@ float distanceFromStart(const CutsceneStep& startStep, const CutsceneStep& other
     return relativeOffset.y;
 }
 
-std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, const RoomGeneratorOutput& roomOutput, Signals& signals) {
+std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, int stepIndex, std::map<std::string, int>& labels, const RoomGeneratorOutput& roomOutput, Signals& signals) {
     std::unique_ptr<StructureDataChunk> result(new StructureDataChunk());
 
     if ((step.command == "play_sound" || step.command == "start_sound") && step.args.size() >= 1) {
@@ -97,6 +97,17 @@ std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, con
             result->Add("teleportPlayer", std::move(teleportPlayer));
             return result;
         }
+    } else if (step.command == "goto" && step.args.size() >= 1) {
+        auto gotoLabel = labels.find(step.args[0]);
+
+        if (gotoLabel != labels.end()) {
+            result->AddPrimitive<const char*>("CutsceneStepTypeGoto");
+            std::unique_ptr<StructureDataChunk> gotoStep(new StructureDataChunk());
+            gotoStep->AddPrimitive(gotoLabel->second - stepIndex - 1);
+            result->Add("gotoStep", std::move(gotoStep));
+
+            return result;
+        }
     }
 
     result->AddPrimitive<const char*>("CutsceneStepTypeNoop");
@@ -105,14 +116,30 @@ std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, con
     return result;
 }
 
+void findLabelLocations(std::vector<std::shared_ptr<CutsceneStep>>& stepNodes, std::map<std::string, int>& labelLocations) {
+    std::size_t currIndex = 0;
+
+    while (currIndex < stepNodes.size()) {
+        auto curr = stepNodes.begin() + currIndex;
+
+        if ((*curr)->command == "label" && (*curr)->args.size() >= 1) {
+            labelLocations[(*curr)->args[0]] = (int)currIndex;
+            stepNodes.erase(curr);
+        } else {
+            ++currIndex;
+        }
+    }
+}
+
 void generateCutscenes(std::map<std::string, std::shared_ptr<Cutscene>>& output, CFileDefinition& fileDefinition, const RoomGeneratorOutput& roomOutput, Signals& signals, NodeGroups& nodeGroups) {
     std::vector<std::shared_ptr<CutsceneStep>> steps;
 
-    for (auto& nodeInfo : nodeGroups.NodesForType(CUTSCENE_PREFIX)) {
+    std::vector<NodeWithArguments> stepNodes = nodeGroups.NodesForType(CUTSCENE_PREFIX);
+
+    for (auto& nodeInfo : stepNodes) {
         if (nodeInfo.arguments.size() == 0) {
             continue;
         }
-
 
         std::string command = nodeInfo.arguments[0];
 
@@ -155,10 +182,17 @@ void generateCutscenes(std::map<std::string, std::shared_ptr<Cutscene>>& output,
             return distanceFromStart(*firstStep, *a) < distanceFromStart(*firstStep, *b);
         });
 
+        std::map<std::string, int> labelLocations;
+
+        findLabelLocations(cutscene.steps, labelLocations);
+
         std::unique_ptr<StructureDataChunk> steps(new StructureDataChunk());
 
+        int currStepIndex = 0;
+
         for (auto& step : cutscene.steps) {
-            steps->Add(std::move(generateCutsceneStep(*step, roomOutput, signals)));
+            steps->Add(std::move(generateCutsceneStep(*step, currStepIndex, labelLocations, roomOutput, signals)));
+            ++currStepIndex;
         }
 
         std::string stepsName = fileDefinition.GetUniqueName(cutscene.name + "_steps");

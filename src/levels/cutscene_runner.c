@@ -43,6 +43,9 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 gCurrentLevel->locations[step->teleportPlayer.toLocation].roomIndex
             );
             break;
+        case CutsceneStepTypeGoto:
+            runner->currentStep += step->gotoStep.relativeInstructionIndex;
+            break;
         default:
     }
 }

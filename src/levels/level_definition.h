@@ -32,6 +32,7 @@ enum CutsceneStepType {
     CutsceneStepTypeWaitForSignal,
     CutsceneStepTypeTeleportPlayer,
     CutsceneStepTypeLoadLevel,
+    CutsceneStepTypeGoto,
 };
 
 struct CutsceneStep {
@@ -63,6 +64,9 @@ struct CutsceneStep {
             u16 fromLocation;
             u16 levelIndex;
         } loadLevel;
+        struct {
+            s16 relativeInstructionIndex;
+        } gotoStep;
         int noop;
     };
 };
