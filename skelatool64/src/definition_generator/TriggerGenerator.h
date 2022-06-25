@@ -8,21 +8,8 @@
 #include <map>
 
 struct Trigger {
-    std::string stepsName;
-    int stepsCount;
+    std::string cutsceneName;
     aiAABB bb;
-};
-
-struct Button {
-    aiVector3D position;
-    int roomIndex;
-    int signalIndex;
-    int cubeSignalIndex;
-};
-
-struct TriggerGeneratorOutput {
-    std::vector<std::shared_ptr<Trigger>> triggers;
-    std::vector<Button> buttons;
 };
 
 struct CutsceneStep {
@@ -36,8 +23,21 @@ struct CutsceneStep {
 
 struct Cutscene {
     std::string name;
-    std::string defName;
+    std::string stepsDefName;
     std::vector<std::shared_ptr<CutsceneStep>> steps;
+};
+
+struct Button {
+    aiVector3D position;
+    int roomIndex;
+    int signalIndex;
+    int cubeSignalIndex;
+};
+
+struct TriggerGeneratorOutput {
+    std::vector<std::shared_ptr<Trigger>> triggers;
+    std::vector<std::shared_ptr<Cutscene>> cutscenes;
+    std::vector<Button> buttons;
 };
 
 std::shared_ptr<TriggerGeneratorOutput> generateTriggers(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, const RoomGeneratorOutput& roomOutput, Signals& signals, NodeGroups& nodeGroups);

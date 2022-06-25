@@ -34,7 +34,17 @@ float distanceFromStart(const CutsceneStep& startStep, const CutsceneStep& other
     return relativeOffset.y;
 }
 
-std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, int stepIndex, std::map<std::string, int>& labels, const RoomGeneratorOutput& roomOutput, Signals& signals) {
+int findCutsceneIndex(const std::vector<std::shared_ptr<Cutscene>>& cutscenes, const std::string& name) {
+    for (int i = 0; i < (int)cutscenes.size(); ++i) {
+        if (cutscenes[i]->name == name) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, int stepIndex, std::map<std::string, int>& labels, const std::vector<std::shared_ptr<Cutscene>>& cutscenes, const RoomGeneratorOutput& roomOutput, Signals& signals) {
     std::unique_ptr<StructureDataChunk> result(new StructureDataChunk());
 
     if ((step.command == "play_sound" || step.command == "start_sound") && step.args.size() >= 1) {
@@ -108,6 +118,39 @@ std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, int
 
             return result;
         }
+    } else if (step.command == "start_cutscene" && step.args.size() >= 1) {
+        int cutsceneIndex = findCutsceneIndex(cutscenes, step.args[0]);
+
+        if (cutsceneIndex != -1) {
+            result->AddPrimitive<const char*>("CutsceneStepTypeStartCutscene");
+            std::unique_ptr<StructureDataChunk> cutscene(new StructureDataChunk());
+            cutscene->AddPrimitive(cutsceneIndex);
+            result->Add("cutscene", std::move(cutscene));
+
+            return result;
+        }
+    } else if (step.command == "stop_cutscene" && step.args.size() >= 1) {
+        int cutsceneIndex = findCutsceneIndex(cutscenes, step.args[0]);
+
+        if (cutsceneIndex != -1) {
+            result->AddPrimitive<const char*>("CutsceneStepTypeStopCutscene");
+            std::unique_ptr<StructureDataChunk> cutscene(new StructureDataChunk());
+            cutscene->AddPrimitive(cutsceneIndex);
+            result->Add("cutscene", std::move(cutscene));
+
+            return result;
+        }
+    } else if (step.command == "wait_for_cutscene" && step.args.size() >= 1) {
+        int cutsceneIndex = findCutsceneIndex(cutscenes, step.args[0]);
+
+        if (cutsceneIndex != -1) {
+            result->AddPrimitive<const char*>("CutsceneStepTypeWaitForCutscene");
+            std::unique_ptr<StructureDataChunk> cutscene(new StructureDataChunk());
+            cutscene->AddPrimitive(cutsceneIndex);
+            result->Add("cutscene", std::move(cutscene));
+
+            return result;
+        }
     }
 
     result->AddPrimitive<const char*>("CutsceneStepTypeNoop");
@@ -131,7 +174,7 @@ void findLabelLocations(std::vector<std::shared_ptr<CutsceneStep>>& stepNodes, s
     }
 }
 
-void generateCutscenes(std::map<std::string, std::shared_ptr<Cutscene>>& output, CFileDefinition& fileDefinition, const RoomGeneratorOutput& roomOutput, Signals& signals, NodeGroups& nodeGroups) {
+void generateCutscenes(std::vector<std::shared_ptr<Cutscene>>& output, CFileDefinition& fileDefinition, const RoomGeneratorOutput& roomOutput, Signals& signals, NodeGroups& nodeGroups) {
     std::vector<std::shared_ptr<CutsceneStep>> steps;
 
     std::vector<NodeWithArguments> stepNodes = nodeGroups.NodesForType(CUTSCENE_PREFIX);
@@ -157,7 +200,7 @@ void generateCutscenes(std::map<std::string, std::shared_ptr<Cutscene>>& output,
             std::shared_ptr<Cutscene> cutscene(new Cutscene());
             cutscene->name = step->args[0];
             cutscene->steps.push_back(step);
-            output[step->args[0]] = cutscene;
+            output.push_back(cutscene);
         } else {
             steps.push_back(step);
         }
@@ -165,15 +208,15 @@ void generateCutscenes(std::map<std::string, std::shared_ptr<Cutscene>>& output,
 
     for (auto& cutscene : output) {
         for (auto& step : steps) {
-            if (doesBelongToCutscene(*cutscene.second->steps[0], *step)) {
-                cutscene.second->steps.push_back(step);
+            if (doesBelongToCutscene(*cutscene->steps[0], *step)) {
+                cutscene->steps.push_back(step);
             }
         }
     }
 
 
     for (auto& cutsceneEntry : output) {
-        Cutscene& cutscene  = *cutsceneEntry.second;
+        Cutscene& cutscene  = *cutsceneEntry;
         std::shared_ptr<CutsceneStep> firstStep = cutscene.steps[0];
 
         cutscene.steps.erase(cutscene.steps.begin());
@@ -191,7 +234,7 @@ void generateCutscenes(std::map<std::string, std::shared_ptr<Cutscene>>& output,
         int currStepIndex = 0;
 
         for (auto& step : cutscene.steps) {
-            steps->Add(std::move(generateCutsceneStep(*step, currStepIndex, labelLocations, roomOutput, signals)));
+            steps->Add(std::move(generateCutsceneStep(*step, currStepIndex, labelLocations, output, roomOutput, signals)));
             ++currStepIndex;
         }
 
@@ -199,16 +242,14 @@ void generateCutscenes(std::map<std::string, std::shared_ptr<Cutscene>>& output,
         std::unique_ptr<FileDefinition> stepsDef(new DataFileDefinition("struct CutsceneStep", stepsName, true, "_geo", std::move(steps)));
         stepsDef->AddTypeHeader("\"../build/src/audio/clips.h\"");
         fileDefinition.AddDefinition(std::move(stepsDef));
-        cutscene.defName = stepsName;
+        cutscene.stepsDefName = stepsName;
     }    
 }
 
 std::shared_ptr<TriggerGeneratorOutput> generateTriggers(const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings, const RoomGeneratorOutput& roomOutput, Signals& signals, NodeGroups& nodeGroups) {
     std::shared_ptr<TriggerGeneratorOutput> output(new TriggerGeneratorOutput());
 
-    std::map<std::string, std::shared_ptr<Cutscene>> cutscenes;
-
-    generateCutscenes(cutscenes, fileDefinition, roomOutput, signals, nodeGroups);
+    generateCutscenes(output->cutscenes, fileDefinition, roomOutput, signals, nodeGroups);
 
     for (auto& nodeInfo : nodeGroups.NodesForType(TRIGGER_PREFIX)) {
         auto mesh = fileDefinition.GetExtendedMesh(scene->mMeshes[nodeInfo.node->mMeshes[0]]);
@@ -217,15 +258,7 @@ std::shared_ptr<TriggerGeneratorOutput> generateTriggers(const aiScene* scene, C
 
         std::string nodeName = nodeInfo.node->mName.C_Str();
 
-        auto cutscene = cutscenes.find(nodeInfo.arguments.size() ? nodeInfo.arguments[0] : std::string(""));
-
-        if (cutscene == cutscenes.end()) {
-            trigger->stepsName = "";
-            trigger->stepsCount = 0;
-        } else {
-            trigger->stepsName = cutscene->second->defName;
-            trigger->stepsCount = cutscene->second->steps.size();
-        }
+        trigger->cutsceneName = nodeInfo.arguments.size() ? nodeInfo.arguments[0] : std::string("");
 
         aiVector3D minTransformed = nodeInfo.node->mTransformation * mesh->bbMin * settings.mModelScale;
         aiVector3D maxTransformed = nodeInfo.node->mTransformation * mesh->bbMax * settings.mModelScale;

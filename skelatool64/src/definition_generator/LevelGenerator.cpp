@@ -193,18 +193,29 @@ void generateBoundingBoxesDefinition(const aiScene* scene, CFileDefinition& file
 void generateTriggerDefinition(const aiScene* scene, CFileDefinition& fileDefinition, StructureDataChunk& levelDef, const TriggerGeneratorOutput& triggerOutput) {
     std::unique_ptr<StructureDataChunk> triggers(new StructureDataChunk());
 
+    int triggerCount = 0;
+
     for (auto& trigger : triggerOutput.triggers) {
+        int cutsceneForTrigger = 0;
+
+        for (auto& cutscene : triggerOutput.cutscenes) {
+            if (cutscene->name == trigger->cutsceneName) {
+                break;
+            }
+            ++cutsceneForTrigger;
+        }
+
+        if (cutsceneForTrigger == (int)triggerOutput.cutscenes.size()) {
+            continue;
+        }
+
         std::unique_ptr<StructureDataChunk> triggerData(new StructureDataChunk());
 
-        std::unique_ptr<StructureDataChunk> cutsceneDef(new StructureDataChunk());
-       
-        cutsceneDef->AddPrimitive((trigger->stepsName == "") ? std::string("NULL") : trigger->stepsName);
-        cutsceneDef->AddPrimitive(trigger->stepsCount);
-
-        triggerData->Add(std::move(cutsceneDef));
         triggerData->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(trigger->bb)));
+        triggerData->AddPrimitive(cutsceneForTrigger);
 
         triggers->Add(std::move(triggerData));
+        ++triggerCount;
     }
 
     std::string triggersName = fileDefinition.GetUniqueName("triggers");
@@ -212,7 +223,23 @@ void generateTriggerDefinition(const aiScene* scene, CFileDefinition& fileDefini
     fileDefinition.AddDefinition(std::move(triggersDef));
 
     levelDef.AddPrimitive("triggers", triggersName);
-    levelDef.AddPrimitive("triggerCount", triggerOutput.triggers.size());
+    levelDef.AddPrimitive("triggerCount", triggerCount);
+
+    std::unique_ptr<StructureDataChunk> cutscenes(new StructureDataChunk());
+
+    for (auto& cutscene : triggerOutput.cutscenes) {
+        std::unique_ptr<StructureDataChunk> cutsceneDef(new StructureDataChunk());
+       
+        cutsceneDef->AddPrimitive((cutscene->stepsDefName == "") ? std::string("NULL") : cutscene->stepsDefName);
+        cutsceneDef->AddPrimitive(cutscene->steps.size());
+
+        cutscenes->Add(std::move(cutsceneDef));
+    }
+
+    std::string cutscenesName = fileDefinition.AddDataDefinition("cutscenes", "struct Cutscene", true, "_geo", std::move(cutscenes));
+
+    levelDef.AddPrimitive("cutscenes", cutscenesName);
+    levelDef.AddPrimitive("cutsceneCount", triggerOutput.cutscenes.size());
 }
 
 void generateLocationDefinition(const aiScene* scene, CFileDefinition& fileDefinition, StructureDataChunk& levelDef, const RoomGeneratorOutput& roomOutput, const DisplayListSettings& settings) {

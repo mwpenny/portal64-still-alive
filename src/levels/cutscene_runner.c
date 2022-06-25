@@ -79,6 +79,12 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         case CutsceneStepTypeGoto:
             runner->currentStep += step->gotoStep.relativeInstructionIndex;
             break;
+        case CutsceneStepTypeStartCutscene:
+            cutsceneStart(&gCurrentLevel->cutscenes[step->cutscene.cutsceneIndex]);
+            break;
+        case CutsceneStepTypeStopCutscene:
+            cutsceneStop(&gCurrentLevel->cutscenes[step->cutscene.cutsceneIndex]);
+            break;
         default:
     }
 }
@@ -93,6 +99,8 @@ int cutsceneRunnerUpdateCurrentStep(struct CutsceneRunner* runner) {
             return runner->state.delay <= 0.0f;
         case CutsceneStepTypeWaitForSignal:
             return signalsRead(step->waitForSignal.signalIndex);
+        case CutsceneStepTypeWaitForCutscene:
+            return !cutsceneIsRunning(&gCurrentLevel->cutscenes[step->cutscene.cutsceneIndex]);
         default:
             return 1;
     }
@@ -149,6 +157,22 @@ void cutsceneStop(struct Cutscene* cutscene) {
             current = current->nextRunner;
         }
     }
+}
+
+
+int cutsceneIsRunning(struct Cutscene* cutscene) {
+    struct CutsceneRunner* current = gRunningCutscenes;
+
+    while (current) {
+        if (current->currentCutscene == cutscene) {
+            return 1;
+        }
+
+        current = current->nextRunner;
+    }
+
+
+    return 0;
 }
 
 void cutscenesUpdate() {

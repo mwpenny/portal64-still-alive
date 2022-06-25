@@ -66,7 +66,7 @@ void levelCheckTriggers(struct Vector3* playerPos) {
         struct Trigger* trigger = &gCurrentLevel->triggers[i];
         u64 cutsceneMask = 1LL << i;
         if (!(gTriggeredCutscenes & cutsceneMask) && box3DContainsPoint(&trigger->box, playerPos)) {
-            cutsceneStart(&trigger->cutscene);
+            cutsceneStart(&gCurrentLevel->cutscenes[trigger->cutsceneIndex]);
             // prevent the trigger from happening again
             gTriggeredCutscenes |= cutsceneMask;
         }

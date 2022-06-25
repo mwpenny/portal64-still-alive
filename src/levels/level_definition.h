@@ -33,6 +33,9 @@ enum CutsceneStepType {
     CutsceneStepTypeTeleportPlayer,
     CutsceneStepTypeLoadLevel,
     CutsceneStepTypeGoto,
+    CutsceneStepTypeStartCutscene,
+    CutsceneStepTypeStopCutscene,
+    CutsceneStepTypeWaitForCutscene,
 };
 
 struct CutsceneStep {
@@ -67,6 +70,9 @@ struct CutsceneStep {
         struct {
             s16 relativeInstructionIndex;
         } gotoStep;
+        struct {
+            u16 cutsceneIndex;
+        } cutscene;
         int noop;
     };
 };
@@ -77,8 +83,8 @@ struct Cutscene {
 };
 
 struct Trigger {
-    struct Cutscene cutscene;
     struct Box3D box;
+    short cutsceneIndex;
 };
 
 struct Location {
@@ -132,6 +138,7 @@ struct LevelDefinition {
     // maps index of a collisionQuads to indices in portalSurfaces
     struct PortalSurfaceMapping* portalSurfaceMapping;
     struct Trigger* triggers;
+    struct Cutscene* cutscenes;
     struct Location* locations;
     struct World world;
     struct DoorDefinition* doors;
@@ -144,6 +151,7 @@ struct LevelDefinition {
     short staticContentCount;
     short portalSurfaceCount;
     short triggerCount;
+    short cutsceneCount;
     short locationCount;
     short doorCount;
     short buttonCount;
