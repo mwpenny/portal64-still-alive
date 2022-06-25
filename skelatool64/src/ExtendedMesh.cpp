@@ -33,6 +33,8 @@ aiMesh* copyMesh(aiMesh* mesh) {
         }
     }
 
+    result->mName = mesh->mName;
+
     return result;
 }
 

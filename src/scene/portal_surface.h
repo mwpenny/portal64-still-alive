@@ -19,23 +19,19 @@ struct Vector2s16 {
 struct SurfaceEdge {
     u8 aIndex;
     u8 bIndex;
-};
-
-struct SurfaceFace {
-    u8 aIndex;
-    u8 bIndex;
-    u8 cIndex;
+    u8 nextEdge;
+    u8 prevEdge;
+    u8 nextEdgeReverse;
+    u8 prevEdgeReverse;
 };
 
 struct PortalSurface {
     struct Vector2s16* vertices;
     // first sideCount edges are on the side
     struct SurfaceEdge* edges;
-    struct SurfaceFace* triangles;
 
     u8 sideCount;
     u8 edgeCount;
-    u8 triangleCount;
 
     struct Vector3 right;
     struct Vector3 up;

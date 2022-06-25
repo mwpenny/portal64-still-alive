@@ -17,9 +17,36 @@ int levelEdgeKey(int a, int b) {
 }
 
 struct EdgeIndices {
+    EdgeIndices();
     uint8_t a;
     uint8_t b;
+    int edgeIndex;
+
+    int nextEdgeKey;
+    int prevEdgeKey;
+    int nextEdgeReverseKey;
+    int prevEdgeReverseKey;
 };
+
+EdgeIndices::EdgeIndices() :
+    a(0), b(0),
+    edgeIndex(-1),
+    nextEdgeKey(-1),
+    prevEdgeKey(-1),
+    nextEdgeReverseKey(-1),
+    prevEdgeReverseKey(-1) {
+
+    }
+
+uint8_t getEdgeIndex(std::map<int, EdgeIndices>& edges, int edgeKey) {
+    auto result = edges.find(edgeKey);
+
+    if (result == edges.end()) {
+        return 0xFF;
+    }
+
+    return result->second.edgeIndex;
+}
 
 std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition& fileDefinition, const CollisionQuad& quad, ExtendedMesh& mesh, float scale) {
     std::unique_ptr<StructureDataChunk> portalSurface(new StructureDataChunk());
@@ -47,27 +74,68 @@ std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition
     for (unsigned faceIndex = 0; faceIndex < mesh.mMesh->mNumFaces; ++faceIndex) {
         aiFace* face = &mesh.mMesh->mFaces[faceIndex];
 
+        std::vector<int> edgeKeys;
+        std::vector<bool> isReverseEdge;
+
         for (unsigned index = 0; index < face->mNumIndices; ++index) {
             unsigned currentIndex = face->mIndices[index];
             unsigned nextIndex = face->mIndices[(index + 1) % face->mNumIndices];
 
             int key = levelEdgeKey(currentIndex, nextIndex);
 
+            edgeKeys.push_back(key);
+
             if (edgeUseCount.find(key) == edgeUseCount.end()) {
                 edgeUseCount.insert(std::make_pair(key, 1));
-                EdgeIndices indices = {(uint8_t)currentIndex, (uint8_t)nextIndex};
+                EdgeIndices indices;
+                indices.a = currentIndex;
+                indices.b = nextIndex;
                 edgeDirection.insert(std::make_pair(key, indices));
+                isReverseEdge.push_back(false);
                 edgeOrder.push_back(key);
             } else {
                 edgeUseCount[key] = edgeUseCount[key] + 1;
+                isReverseEdge.push_back(true);
+            }
+        }
+
+        // connect faces in a loop
+        for (int i = 0; i < (int)edgeKeys.size(); ++i) {
+            int prevKey = edgeKeys[(i + edgeKeys.size() - 1) % edgeKeys.size()];
+            int nextKey = edgeKeys[(i + 1) % edgeKeys.size()];
+
+            EdgeIndices& edge = edgeDirection[edgeKeys[i]];
+
+            if (isReverseEdge[i]) {
+                edge.nextEdgeReverseKey = nextKey;
+                edge.prevEdgeReverseKey = prevKey;
+            } else {
+                edge.nextEdgeKey = nextKey;
+                edge.prevEdgeKey = prevKey;
             }
         }
     }
 
-    // loops go first
+    // edges go first
     std::sort(edgeOrder.begin(), edgeOrder.end(), [&](int a, int b) -> bool {
-        return edgeUseCount[a] < edgeUseCount[b];
+        int edgeDiff = edgeUseCount[a] - edgeUseCount[b];
+
+        if (edgeDiff != 0) {
+            return edgeDiff < 0;
+        }
+
+        // this is an attempt to make edges that are near each other
+        // show up in memory near each other to improve cache
+        // performance
+        return edgeDirection[a].a < edgeDirection[b].a;
     });
+
+    int edgeIndex = 0;
+
+    for (auto key : edgeOrder) {
+        edgeDirection[key].edgeIndex = edgeIndex;
+        ++edgeIndex;
+    }
 
     int sideCount = 0;
 
@@ -82,6 +150,10 @@ std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition
         EdgeIndices indices = edgeDirection[key];
         edge->AddPrimitive((int)indices.a);
         edge->AddPrimitive((int)indices.b);
+        edge->AddPrimitive((int)getEdgeIndex(edgeDirection, indices.nextEdgeKey));
+        edge->AddPrimitive((int)getEdgeIndex(edgeDirection, indices.prevEdgeKey));
+        edge->AddPrimitive((int)getEdgeIndex(edgeDirection, indices.nextEdgeReverseKey));
+        edge->AddPrimitive((int)getEdgeIndex(edgeDirection, indices.prevEdgeReverseKey));
         edges->Add(std::move(edge));
     }
 
@@ -92,15 +164,11 @@ std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition
     portalSurface->AddPrimitive(verticesName);
     // edges
     portalSurface->AddPrimitive(edgesName);
-    // triangles
-    portalSurface->AddPrimitive<const char*>("NULL");
 
     // sideCount
     portalSurface->AddPrimitive(sideCount);
     // edgesCount
     portalSurface->AddPrimitive(edgeOrder.size());
-    // triangleCount
-    portalSurface->AddPrimitive(0);
 
     portalSurface->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(quad.edgeA)));
     portalSurface->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(quad.edgeB)));
