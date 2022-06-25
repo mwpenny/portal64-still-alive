@@ -179,17 +179,28 @@ aiAABB CollisionQuad::BoundingBox() const {
     result.mMin = corner;
     result.mMax = corner;
 
-    aiVector3D point = corner + edgeA * edgeALength;
-    result.mMin = min(result.mMin, point);
-    result.mMax = max(result.mMax, point);
+    for (int x = 0; x < 2; ++x) {
+        for (int y = 0; y < 2; ++y) {
+            for (int z = 0; z < 2; ++z) {
+                aiVector3D point = corner;
 
-    point = point + edgeB * edgeBLength;
-    result.mMin = min(result.mMin, point);
-    result.mMax = max(result.mMax, point);
+                if (x) {
+                    point = point + edgeA * edgeALength;
+                }
 
-    point = corner + edgeB * edgeBLength;
-    result.mMin = min(result.mMin, point);
-    result.mMax = max(result.mMax, point);
+                if (y) {
+                    point = point + edgeB * edgeBLength;
+                }
+
+                if (z) {
+                    point = point - normal * thickness;
+                }
+                
+                result.mMin = min(result.mMin, point);
+                result.mMax = max(result.mMax, point);
+            }
+        }
+    }
 
     return result;
 }

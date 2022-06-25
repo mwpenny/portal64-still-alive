@@ -169,17 +169,28 @@ int minkowsiSumAgainstQuad(void* data, struct Vector3* direction, struct Vector3
     int result = 0;
 
     if (vector3Dot(&quad->edgeA, direction) > 0.0f) {
-        vector3AddScaled(output, &quad->edgeA,  quad->edgeALength, output);
+        vector3AddScaled(output, &quad->edgeA, quad->edgeALength, output);
         result |= 0x1;
     } else {
         result |= 0x2;
     }
 
     if (vector3Dot(&quad->edgeB, direction) > 0.0f) {
-        vector3AddScaled(output, &quad->edgeB,  quad->edgeBLength, output);
+        vector3AddScaled(output, &quad->edgeB, quad->edgeBLength, output);
         result |= 0x4;
     } else {
         result |= 0x8;
+    }
+
+    if (quad->thickness > 0.0f) {
+        if (vector3Dot(&quad->plane.normal, direction) < 0.0f) {
+            vector3AddScaled(output, &quad->plane.normal, -quad->thickness, output);
+            result |= 0x10;
+        } else {
+            result |= 0x20;
+        }
+    } else {
+        result |= 0x20;
     }
 
     return result;

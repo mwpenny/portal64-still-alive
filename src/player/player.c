@@ -96,7 +96,7 @@ void playerHandleCollision(struct Player* player) {
             vector3AddScaled(
                 &player->body.transform.position, 
                 &contact->normal, 
-                (contact->shapeA == &player->collisionObject ? offset : -offset) * 0.5f, 
+                (contact->shapeA == &player->collisionObject ? offset : -offset) * 0.95f, 
                 &player->body.transform.position
             );
 
@@ -277,7 +277,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Ray ray;
     ray.origin = player->body.transform.position;
     vector3Scale(&gUp, &ray.dir, -1.0f);
-    if (collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_TANGIBLE, PLAYER_HEAD_HEIGHT, 1, &hit)) {
+    if (collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_TANGIBLE, PLAYER_HEAD_HEIGHT + 0.2f, 1, &hit)) {
         struct ContactManifold* collisionManifold = contactSolverGetContactManifold(&gContactSolver, &player->collisionObject, hit.object);
 
         struct EpaResult newContact;

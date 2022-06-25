@@ -87,6 +87,10 @@ void meshColliderCollideObject(struct CollisionObject* meshColliderObject, struc
         transformPoint(&meshColliderObject->body->transform, &result.contactB, &result.contactB);
         transformPointInverseNoScale(&other->body->transform, &result.contactB, &result.contactB);
 
+        struct Vector3 transformedNormal;
+        basisRotate(&meshColliderObject->body->rotationBasis, &result.normal, &transformedNormal);
+        result.normal = transformedNormal;
+
         if (contact->shapeB == quadObject) {
             epaSwapResult(&result);
         }
