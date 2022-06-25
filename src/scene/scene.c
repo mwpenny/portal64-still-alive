@@ -264,7 +264,7 @@ void sceneUpdate(struct Scene* scene) {
     collisionSceneUpdateDynamics();
 
     levelCheckTriggers(&scene->player.lookTransform.position);
-    cutsceneRunnerUpdate(&gCutsceneRunner);
+    cutscenesUpdate();
 
     scene->cpuTime = osGetTime() - frameStart;
     scene->lastFrameStart = frameStart;

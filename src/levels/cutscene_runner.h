@@ -5,7 +5,7 @@
 #include "level_definition.h"
 
 struct CutsceneRunner {
-    struct Cutscene currentCutscene;
+    struct Cutscene* currentCutscene;
     u16 currentStep;
 
     union {
@@ -14,13 +14,13 @@ struct CutsceneRunner {
         } playSound;
         float delay;
     } state;
+
+    struct CutsceneRunner* nextRunner;
 };
 
-extern struct CutsceneRunner gCutsceneRunner;
 
-void cutsceneRunnerRun(struct CutsceneRunner* runner, struct Cutscene* cutscene);
-void cutsceneRunnerUpdate(struct CutsceneRunner* runner);
-
-int cutsceneRunnerIsRunning(struct CutsceneRunner* runner);
+void cutsceneStart(struct Cutscene* cutscene);
+void cutsceneStop(struct Cutscene* cutscene);
+void cutscenesUpdate();
 
 #endif

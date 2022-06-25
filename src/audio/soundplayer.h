@@ -21,6 +21,7 @@ extern char _soundsTblSegmentRomEnd[];
 void soundPlayerInit();
 void soundPlayerUpdate();
 ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at);
+void soundPlayerStop(ALSndId soundId);
 
 void soundPlayerUpdatePosition(ALSndId soundId, struct Vector3* at);
 

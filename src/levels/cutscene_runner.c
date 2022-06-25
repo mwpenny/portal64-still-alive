@@ -4,11 +4,44 @@
 #include "../scene/scene.h"
 #include "../scene/signals.h"
 #include "../levels/levels.h"
+#include "../util/memory.h"
 
-struct CutsceneRunner gCutsceneRunner;
+struct CutsceneRunner* gRunningCutscenes;
+struct CutsceneRunner* gUnusedRunners;
+
+struct CutsceneRunner* cutsceneRunnerNew() {
+    struct CutsceneRunner* result;
+
+    if (gUnusedRunners) {
+        result = gUnusedRunners;
+        gUnusedRunners = result->nextRunner;
+    } else {
+        result = malloc(sizeof(struct CutsceneRunner));
+    }
+
+    result->nextRunner = NULL;
+    result->currentCutscene = NULL;
+    result->currentStep = 0;
+
+    return result;
+}
+
+void cutsceneRunnerCancel(struct CutsceneRunner* runner) {
+    struct CutsceneStep* step = &runner->currentCutscene->steps[runner->currentStep];
+
+    switch (step->type) {
+        case CutsceneStepTypePlaySound:
+            soundPlayerStop(runner->state.playSound.soundId);
+            break;
+        default:
+    }
+
+    runner->currentStep = 0;
+    runner->currentCutscene = NULL;
+}
 
 void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
-    struct CutsceneStep* step = &runner->currentCutscene.steps[runner->currentStep];
+    struct CutsceneStep* step = &runner->currentCutscene->steps[runner->currentStep];
     switch (step->type) {
         case CutsceneStepTypePlaySound:
         case CutsceneStepTypeStartSound:
@@ -51,7 +84,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
 }
 
 int cutsceneRunnerUpdateCurrentStep(struct CutsceneRunner* runner) {
-    struct CutsceneStep* step = &runner->currentCutscene.steps[runner->currentStep];
+    struct CutsceneStep* step = &runner->currentCutscene->steps[runner->currentStep];
     switch (step->type) {
         case CutsceneStepTypePlaySound:
             return !soundPlayerIsPlaying(runner->state.playSound.soundId);
@@ -66,13 +99,13 @@ int cutsceneRunnerUpdateCurrentStep(struct CutsceneRunner* runner) {
 }
 
 void cutsceneRunnerRun(struct CutsceneRunner* runner, struct Cutscene* cutscene) {
-    runner->currentCutscene = *cutscene;
+    runner->currentCutscene = cutscene;
     runner->currentStep = 0;
     cutsceneRunnerStartStep(runner);
 }
 
 int cutsceneRunnerIsRunning(struct CutsceneRunner* runner) {
-    return runner->currentStep < runner->currentCutscene.stepCount;
+    return runner->currentStep < runner->currentCutscene->stepCount;
 }
 
 void cutsceneRunnerUpdate(struct CutsceneRunner* runner) {
@@ -81,6 +114,65 @@ void cutsceneRunnerUpdate(struct CutsceneRunner* runner) {
 
         if (cutsceneRunnerIsRunning(runner)) {
             cutsceneRunnerStartStep(runner);
+        }
+    }
+}
+
+void cutsceneStart(struct Cutscene* cutscene) {
+    struct CutsceneRunner* runner = cutsceneRunnerNew();
+    cutsceneRunnerRun(runner, cutscene);
+    runner->nextRunner = gRunningCutscenes;
+    gRunningCutscenes = runner;
+}
+
+void cutsceneStop(struct Cutscene* cutscene) {
+    struct CutsceneRunner* previousCutscene = NULL;
+    struct CutsceneRunner* current = gRunningCutscenes;
+
+    while (current) {
+        if (current->currentCutscene == cutscene) {
+            struct CutsceneRunner* toRemove = current;
+            current = current->nextRunner;
+
+            cutsceneRunnerCancel(toRemove);
+
+            if (previousCutscene) {
+                previousCutscene->nextRunner = toRemove->nextRunner;
+            } else {
+                gRunningCutscenes = toRemove->nextRunner;
+            }
+
+            toRemove->nextRunner = gUnusedRunners;
+            gUnusedRunners = toRemove;            
+        } else {
+            previousCutscene = current;
+            current = current->nextRunner;
+        }
+    }
+}
+
+void cutscenesUpdate() {
+    struct CutsceneRunner* previousCutscene = NULL;
+    struct CutsceneRunner* current = gRunningCutscenes;
+
+    while (current) {
+        cutsceneRunnerUpdate(current);
+
+        if (!cutsceneRunnerIsRunning(current)) {
+            struct CutsceneRunner* toRemove = current;
+            current = current->nextRunner;
+
+            if (previousCutscene) {
+                previousCutscene->nextRunner = toRemove->nextRunner;
+            } else {
+                gRunningCutscenes = toRemove->nextRunner;
+            }
+
+            toRemove->nextRunner = gUnusedRunners;
+            gUnusedRunners = toRemove;            
+        } else {
+            previousCutscene = current;
+            current = current->nextRunner;
         }
     }
 }

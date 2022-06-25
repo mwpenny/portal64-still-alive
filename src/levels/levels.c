@@ -8,6 +8,7 @@
 #include "cutscene_runner.h"
 
 struct LevelDefinition* gCurrentLevel;
+u64 gTriggeredCutscenes;
 
 int levelCount() {
     return LEVEL_COUNT;
@@ -19,6 +20,7 @@ void levelLoad(int index) {
     }
 
     gCurrentLevel = gLevelList[index];
+    gTriggeredCutscenes = 0;
 
     collisionSceneInit(&gCollisionScene, gCurrentLevel->collisionQuads, gCurrentLevel->collisionQuadCount, &gCurrentLevel->world);
 }
@@ -62,10 +64,11 @@ int levelQuadIndex(struct CollisionObject* pointer) {
 void levelCheckTriggers(struct Vector3* playerPos) {
     for (int i = 0; i < gCurrentLevel->triggerCount; ++i) {
         struct Trigger* trigger = &gCurrentLevel->triggers[i];
-        if (trigger->cutscene.stepCount && box3DContainsPoint(&trigger->box, playerPos)) {
-            cutsceneRunnerRun(&gCutsceneRunner, &trigger->cutscene);
+        u64 cutsceneMask = 1LL << i;
+        if (!(gTriggeredCutscenes & cutsceneMask) && box3DContainsPoint(&trigger->box, playerPos)) {
+            cutsceneStart(&trigger->cutscene);
             // prevent the trigger from happening again
-            trigger->cutscene.stepCount = 0;
+            gTriggeredCutscenes |= cutsceneMask;
         }
     }
 }

@@ -233,6 +233,16 @@ struct ActiveSound* soundPlayerFindActiveSound(ALSndId soundId) {
 }
 
 
+void soundPlayerStop(ALSndId soundId) {
+    struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
+
+    if (activeSound) {
+        alSndpSetSound(&gSoundPlayer, soundId);
+        alSndpStop(&gSoundPlayer);
+        activeSound->estimatedTimeLeft = 0.0f;
+    }
+}
+
 void soundPlayerUpdatePosition(ALSndId soundId, struct Vector3* at) {
     struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
 
