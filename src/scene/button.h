@@ -10,6 +10,7 @@ struct Button {
     struct RigidBody rigidBody;
     short dynamicId;
     short signalIndex;
+    short cubeSignalIndex;
     struct Vector3 originalPos;
 };
 

@@ -97,6 +97,7 @@ struct ButtonDefinition {
     struct Vector3 location;
     short roomIndex;
     short signalIndex;
+    short cubeSignalIndex;
 };
 
 struct DecorDefinition {

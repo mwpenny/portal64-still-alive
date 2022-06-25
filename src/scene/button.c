@@ -40,6 +40,8 @@ struct ColliderTypeData gButtonCollider = {
 #define BUTTON_MOVEMENT_AMOUNT          0.1f
 #define BUTTON_MOVE_VELOCTY             0.3f
 
+#define PRESSED_WITH_CUBE               2
+
 void buttonRender(void* data, struct RenderScene* renderScene) {
     struct Button* button = (struct Button*)data;
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
@@ -72,6 +74,7 @@ void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
     button->signalIndex = definition->signalIndex;
 
     button->originalPos = definition->location;
+    button->cubeSignalIndex = definition->cubeSignalIndex;
 }
 
 void buttonUpdate(struct Button* button) {
@@ -84,6 +87,11 @@ void buttonUpdate(struct Button* button) {
 
         if (other->body && other->body->mass > MASS_BUTTON_PRESS_THRESHOLD) {
             shouldPress = 1;
+
+            if (other->body->flags & RigidBodyFlagsGrabbable) {
+                shouldPress = PRESSED_WITH_CUBE;
+            }
+
             break;
         }
 
@@ -95,6 +103,10 @@ void buttonUpdate(struct Button* button) {
     if (shouldPress) {
         targetPos.y -= BUTTON_MOVEMENT_AMOUNT;
         signalsSend(button->signalIndex);
+
+        if (shouldPress == PRESSED_WITH_CUBE) {
+            signalsSend(button->cubeSignalIndex);
+        }
     }
 
     if (targetPos.y != button->rigidBody.transform.position.y) {

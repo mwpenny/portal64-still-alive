@@ -17,6 +17,7 @@ struct Button {
     aiVector3D position;
     int roomIndex;
     int signalIndex;
+    int cubeSignalIndex;
 };
 
 struct TriggerGeneratorOutput {

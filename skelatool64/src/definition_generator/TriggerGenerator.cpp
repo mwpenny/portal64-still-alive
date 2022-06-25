@@ -246,6 +246,7 @@ std::shared_ptr<TriggerGeneratorOutput> generateTriggers(const aiScene* scene, C
         
         button.roomIndex = roomOutput.RoomForNode(nodeInfo.node);
         button.signalIndex = nodeInfo.arguments.size() ? signals.SignalIndexForName(nodeInfo.arguments[0]) : -1;
+        button.cubeSignalIndex = nodeInfo.arguments.size() > 1 ? signals.SignalIndexForName(nodeInfo.arguments[1]) : -1;
 
         output->buttons.push_back(button);
     }
@@ -262,6 +263,7 @@ void generateButtonsDefinition(CFileDefinition& fileDefinition, StructureDataChu
         singleButton->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(ref.position)));
         singleButton->AddPrimitive(ref.roomIndex);
         singleButton->AddPrimitive(ref.signalIndex);
+        singleButton->AddPrimitive(ref.cubeSignalIndex);
 
         buttonData->Add(std::move(singleButton));
     }
