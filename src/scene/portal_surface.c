@@ -144,10 +144,10 @@ void portalSurfacePrevEdge(struct PortalSurfaceBuilder* surfaceBuilder, struct S
 
 int portalSurfaceIsPointOnLine(struct Vector2s16* pointA, struct Vector2s16* edgeA, struct Vector2s16* edgeDir) {
     struct Vector2s16 originOffset;
-    vector2s16Sub(&edgeA, &pointA, &originOffset);
+    vector2s16Sub(edgeA, pointA, &originOffset);
 
-    s64 magProduct = (s64)vector2MagSqr(&edgeDir) * vector2MagSqr(&originOffset);
-    s64 dotProduct = vector2Dot(&edgeDir, &originOffset);
+    s64 magProduct = (s64)vector2s16MagSqr(edgeDir) * vector2s16MagSqr(&originOffset);
+    s64 dotProduct = vector2s16Dot(edgeDir, &originOffset);
 
     return magProduct == dotProduct * dotProduct;
 }
@@ -163,7 +163,7 @@ enum IntersectionType portalSurfaceIntersect(struct Vector2s16* pointA, struct V
     vector2s16Sub(edgeB, edgeA, &edgeDir);
 
     struct Vector2s16 originOffset;
-    vector2s16Sub(&edgeA, &pointA, &originOffset);
+    vector2s16Sub(edgeA, pointA, &originOffset);
 
     int pointLerp = vector2s16Cross(&originOffset, &edgeDir);
 
@@ -184,7 +184,7 @@ enum IntersectionType portalSurfaceIntersect(struct Vector2s16* pointA, struct V
         // that is on both line segments
         if (directionDot > 0) {
             // pointing towards b
-            if (vector2DistSqr(edgeB, pointA) >= vector2MagSqr(pointDir)) {
+            if (vector2s16DistSqr(edgeB, pointA) >= vector2s16MagSqr(pointDir)) {
                 // edge ends first
                 *intersection = *edgeB;
             } else {
@@ -192,7 +192,7 @@ enum IntersectionType portalSurfaceIntersect(struct Vector2s16* pointA, struct V
                 vector2s16Add(pointA, pointDir, intersection);
             }
         } else {
-            if (vector2MagSqr(originOffset) >= vector2MagSqr(pointDir)) {
+            if (vector2s16MagSqr(&originOffset) >= vector2s16MagSqr(pointDir)) {
                 // edge ends first
                 *intersection = *edgeA;
             } else {
@@ -268,8 +268,6 @@ int portalSurfaceSplitEdge(struct PortalSurfaceBuilder* surfaceBuilder, struct S
     portalSurfaceNextEdge(surfaceBuilder, edge, &nextEdge);
     portalSurfacePrevEdge(surfaceBuilder, edge, &prevReverseEdge);
 
-    struct SurfaceEdge previousEdgeCopy = *existingEdge;
-
     struct SurfaceEdge* newEdge = &surfaceBuilder->additionalEdges[surfaceBuilder->currentEdge];
     int newEdgeIndex = surfaceBuilder->currentEdge + surfaceBuilder->surface->edgeCount;
     ++surfaceBuilder->currentEdge;
@@ -307,7 +305,7 @@ int portalSurfaceSplitEdge(struct PortalSurfaceBuilder* surfaceBuilder, struct S
 int portalSurfaceFindStartingPoint(struct PortalSurfaceBuilder* surfaceBuilder, struct Vector2s16* point) {
     struct SurfaceEdgeWithSide currentEdge = surfaceBuilder->edgeOnSearchLoop;
 
-    struct Vector2s16* edgeA = portalSurfaceGetPoint(surfaceBuilder, GET_CURRENT_POINT(edge, currentEdge.isReverse));
+    struct Vector2s16* edgeA = portalSurfaceGetPoint(surfaceBuilder, GET_CURRENT_POINT(portalSurfaceGetEdge(surfaceBuilder, currentEdge.edgeIndex), currentEdge.isReverse));
 
     for (int iteration = 0; iteration < MAX_INTERSECT_LOOPS; ++iteration) {
         struct SurfaceEdgeWithSide nextEdge;
@@ -319,7 +317,7 @@ int portalSurfaceFindStartingPoint(struct PortalSurfaceBuilder* surfaceBuilder, 
             break;
         }
 
-        struct Vector2s16* edgeB = portalSurfaceGetPoint(surfaceBuilder, GET_NEXT_POINT(edge, currentEdge.isReverse));
+        struct Vector2s16* edgeB = portalSurfaceGetPoint(surfaceBuilder, GET_NEXT_POINT(portalSurfaceGetEdge(surfaceBuilder, currentEdge.edgeIndex), currentEdge.isReverse));
 
         struct Vector2s16 edgeDir;
         vector2s16Sub(edgeB, edgeA, &edgeDir);
@@ -342,7 +340,7 @@ int portalSurfaceFindStartingPoint(struct PortalSurfaceBuilder* surfaceBuilder, 
 
             surfaceBuilder->edgeOnSearchLoop = surfaceBuilder->cuttingEdge;
 
-            return;
+            return 1;
         }
 
         edgeA = edgeB;
@@ -368,7 +366,7 @@ struct PortalSurface* portalSurfaceCutHole(struct PortalSurface* surface, struct
         return NULL;
     }
 
-    if (!portalSurfaceFindStartingPoint(surfaceBuilder, &loop[0])) {
+    if (!portalSurfaceFindStartingPoint(&surfaceBuilder, &loop[0])) {
         return NULL;
     }
 
@@ -379,8 +377,11 @@ struct PortalSurface* portalSurfaceCutHole(struct PortalSurface* surface, struct
         struct Vector2s16 dir;
 
         vector2s16Sub(next, prev, &dir);
-        portalSurfaceIntersectEdgeWithLoop(surfaceBuilder, prev, &dir);
+        portalSurfaceIntersectEdgeWithLoop(&surfaceBuilder, prev, &dir);
     }
+
+    stackMallocFree(surfaceBuilder.additionalEdges);
+    stackMallocFree(surfaceBuilder.additionalVertices);
 
     return NULL;
 }
@@ -470,7 +471,7 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
 
     int iteration = 0;
 
-    for (interation = 0; interation < MAX_POS_ADJUST_ITERATIONS; ++interation) {
+    for (iteration = 0; iteration < MAX_POS_ADJUST_ITERATIONS; ++iteration) {
         int minOverlap = NO_OVERLAP;
         struct Vector2s16 minOverlapOffset;
 
