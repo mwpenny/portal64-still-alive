@@ -41,7 +41,8 @@ RUN apt install -y binutils-mips-n64 \
     build-essential \
     wget \
     unzip \
-    sox
+    sox \
+    mpg123
 
 COPY skelatool64/src skelatool64/src
 COPY skelatool64/main.cpp skelatool64/main.cpp

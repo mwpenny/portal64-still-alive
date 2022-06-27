@@ -22,7 +22,7 @@ Install `vtf2png`, `sfz2n64` and `skeletool64`
 echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" \
     | tee /etc/apt/sources.list.d/lambertjamesd.list
 
-sudo apt install vtf2png sfz2n64 skeletool64
+sudo apt install vtf2png sfz2n64 skeletool64 mpg123
 ```
 
 <br />
@@ -92,3 +92,4 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [ ] Cut holes in portal walls
 - [ ] Cube dispenser
 - [ ] NAN in overlap
+- [ ] Get an optimized build working

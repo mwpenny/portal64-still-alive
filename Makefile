@@ -215,15 +215,25 @@ build/src/levels/levels.o: build/assets/test_chambers/level_list.h build/assets/
 
 SOUND_ATTRIBUTES = $(shell find assets/ -type f -name '*.sox')
 
+MUSIC_ATTRIBUTES = $(shell find assets/sound/music/ -type f -name '*.msox')
+
 INS_SOUNDS = $(shell find assets/ -type f -name '*.ins')
 
-SOUND_CLIPS = $(SOUND_ATTRIBUTES:%.sox=build/%.aifc) $(INS_SOUNDS)
+SOUND_CLIPS = $(SOUND_ATTRIBUTES:%.sox=build/%.aifc) $(INS_SOUNDS) $(MUSIC_ATTRIBUTES:%.msox=build/%.aifc)
 
 $(INS_SOUNDS): portal_pak_dir
+
+portal_pak_dir/sound/music/%.wav: portal_pak_dir/sound/music/%.mp3
 
 build/%.aifc: %.sox portal_pak_dir
 	@mkdir -p $(@D)
 	sox $(<:assets/%.sox=portal_pak_dir/%.wav) $(shell cat $<) $(@:%.aifc=%.wav)
+	$(SFZ2N64) -o $@ $(@:%.aifc=%.wav)
+
+build/%.aifc: %.msox portal_pak_dir
+	@mkdir -p $(@D)
+	mpg123 -w $(<:assets/%.msox=portal_pak_dir/%.wav) $(<:assets/%.msox=portal_pak_dir/%.mp3)
+	sox $(<:assets/%.msox=portal_pak_dir/%.wav) $(shell cat $<) $(@:%.aifc=%.wav)
 	$(SFZ2N64) -o $@ $(@:%.aifc=%.wav)
 
 build/assets/sound/sounds.sounds build/assets/sound/sounds.sounds.tbl: $(SOUND_CLIPS)

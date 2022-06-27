@@ -169,6 +169,8 @@ std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition
     portalSurface->AddPrimitive(sideCount);
     // edgesCount
     portalSurface->AddPrimitive(edgeOrder.size());
+    // vertexCount
+    portalSurface->AddPrimitive(mesh.mMesh->mNumVertices);
 
     portalSurface->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(quad.edgeA)));
     portalSurface->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(quad.edgeB)));

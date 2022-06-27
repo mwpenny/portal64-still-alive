@@ -5,16 +5,12 @@
 
 #include "math/transform.h"
 #include "math/plane.h"
+#include "math/vector2s16.h"
 
 #define FIXED_POINT_PRECISION   8
 #define FIXED_POINT_SCALAR      (1 << FIXED_POINT_PRECISION)
 
 #define VECTOR2s16_AS_ARRAY(vector) ((s16*)(vector))
-
-struct Vector2s16 {
-    s16 x;
-    s16 y;
-};
 
 struct SurfaceEdge {
     u8 aIndex;
@@ -32,6 +28,7 @@ struct PortalSurface {
 
     u8 sideCount;
     u8 edgeCount;
+    u8 vertexCount;
 
     struct Vector3 right;
     struct Vector3 up;
