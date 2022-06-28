@@ -44,7 +44,7 @@ OSMesgQueue	*schedulerCommandQueue;
 
 OSPiHandle	*gPiHandle;
 
-void main(void *arg) {
+void boot(void *arg) {
     osInitialize();
 
     gPiHandle = osCartRomInit();

@@ -53,6 +53,8 @@ std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition
 
     std::unique_ptr<StructureDataChunk> vertices(new StructureDataChunk());
 
+    std::string name(mesh.mMesh->mName.C_Str());
+
     for (unsigned i = 0; i < mesh.mMesh->mNumVertices; ++i) {
         short x, y;
         quad.ToLocalCoords(mesh.mMesh->mVertices[i] * scale, x, y);

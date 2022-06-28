@@ -495,7 +495,7 @@ struct Vector2s16* portalSurfaceIntersectEdgeWithLoop(struct PortalSurfaceBuilde
                 newPointIndex = GET_NEXT_POINT(edge, currentEdge.isReverse);
                 surfaceBuilder->cuttingEdge = currentEdge;
             } else {
-                int newPointIndex = portalSurfaceSplitEdge(surfaceBuilder, &currentEdge, &intersectionPoint);
+                newPointIndex = portalSurfaceSplitEdge(surfaceBuilder, &currentEdge, &intersectionPoint);
 
                 if (newPointIndex == -1) {
                     return NULL;

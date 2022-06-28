@@ -17,9 +17,9 @@ glabel entry_point
     sw    $zero, 4($t0)
     bnez  $t1, .bss_clear
      addi  $t0, $t0, 8
-    lui   $t2, %hi(main) # $t2, 0x8024
+    lui   $t2, %hi(boot) # $t2, 0x8024
     lui   $sp, %hi(mainStack + STACKSIZEBYTES) # $sp, 0x8020
-    addiu $t2, %lo(main) # addiu $t2, $t2, 0x6dc4
+    addiu $t2, %lo(boot) # addiu $t2, $t2, 0x6dc4
     jr    $t2
      addiu $sp, %lo(mainStack + STACKSIZEBYTES) # addiu $sp, $sp, 0xa00
     nop
