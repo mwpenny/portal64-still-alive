@@ -63,11 +63,9 @@ int portalSurfaceFindEnclosingFace(struct PortalSurface* surface, struct Vector2
     int isEdgeReverse = 0;
     int startEdgeIndex = currentEdge - surface->edges;
 
-    int nextEdgeIndex;
-
     int currentIteration = 0;
 
-    while (currentIteration < MAX_SEARCH_ITERATIONS && (nextEdgeIndex = GET_NEXT_EDGE(currentEdge, isEdgeReverse)) != startEdgeIndex) {
+    while (currentIteration < MAX_SEARCH_ITERATIONS && (currentIteration == 0 || (currentEdge - surface->edges) != startEdgeIndex)) {
         struct Vector2s16 edgeDir;
         struct Vector2s16 pointDir;
 
@@ -85,9 +83,11 @@ int portalSurfaceFindEnclosingFace(struct PortalSurface* surface, struct Vector2
             &pointDir
         );
 
+        int nextEdgeIndex;
+
         if (vector2s16Cross(&edgeDir, &pointDir) < 0) {
             // the point is on the opposite side of this edge
-            startEdgeIndex = surface->edges - currentEdge;
+            startEdgeIndex = currentEdge - surface->edges;
             isEdgeReverse = !isEdgeReverse;
 
             nextEdgeIndex = GET_NEXT_EDGE(currentEdge, isEdgeReverse);
@@ -96,6 +96,8 @@ int portalSurfaceFindEnclosingFace(struct PortalSurface* surface, struct Vector2
                 // has no opposite edge
                 return 0;
             }
+        } else {
+            nextEdgeIndex = GET_NEXT_EDGE(currentEdge, isEdgeReverse);
         }
 
         int currentIndex = currentEdge - surface->edges;
@@ -534,11 +536,7 @@ int portalSurfaceFindStartingPoint(struct PortalSurfaceBuilder* surfaceBuilder, 
     struct Vector2s16* edgeA = portalSurfaceGetPoint(surfaceBuilder, GET_CURRENT_POINT(portalSurfaceGetEdge(surfaceBuilder, currentEdge.edgeIndex), currentEdge.isReverse));
 
     for (int iteration = 0; iteration < MAX_INTERSECT_LOOPS; ++iteration) {
-        struct SurfaceEdgeWithSide nextEdge;
-
-        portalSurfaceNextEdge(surfaceBuilder, &currentEdge, &nextEdge);
-
-        if (nextEdge.edgeIndex == surfaceBuilder->edgeOnSearchLoop.edgeIndex && nextEdge.isReverse == surfaceBuilder->edgeOnSearchLoop.isReverse) {
+        if (iteration > 0 && currentEdge.edgeIndex == surfaceBuilder->edgeOnSearchLoop.edgeIndex && currentEdge.isReverse == surfaceBuilder->edgeOnSearchLoop.isReverse) {
             // finished searching loop
             break;
         }
@@ -570,6 +568,8 @@ int portalSurfaceFindStartingPoint(struct PortalSurfaceBuilder* surfaceBuilder, 
         }
 
         edgeA = edgeB;
+        struct SurfaceEdgeWithSide nextEdge;
+        portalSurfaceNextEdge(surfaceBuilder, &currentEdge, &nextEdge);
         currentEdge = nextEdge;
     }
 
@@ -644,10 +644,27 @@ void portalSurfaceMarkHoleAsUsed(struct PortalSurfaceBuilder* surfaceBuilder) {
     }
 }
 
+struct PortalSurface* portalSurfaceStackCopy(struct PortalSurface* from) {
+    struct PortalSurface* result = stackMalloc(sizeof(struct PortalSurface));
+
+    *result = *from;
+
+    int verticesSize = sizeof(struct Vector2s16) * result->vertexCount;
+    int edgesSize = sizeof(struct SurfaceEdge) * result->edgeCount;
+
+    result->vertices = stackMalloc(verticesSize);
+    result->edges = stackMalloc(edgesSize);
+
+    memCopy(result->vertices, from->vertices, verticesSize);
+    memCopy(result->edges, from->edges, edgesSize);
+
+    return result;
+}
+
 struct PortalSurface* portalSurfaceCutHole(struct PortalSurface* surface, struct Vector2s16* loop) {
     struct PortalSurfaceBuilder surfaceBuilder;
 
-    surfaceBuilder.surface = surface;
+    surfaceBuilder.surface = portalSurfaceStackCopy(surface);
     surfaceBuilder.additionalVertices = stackMalloc(sizeof(struct Vector2s16) * ADDITIONAL_VERTEX_CAPACITY);
     surfaceBuilder.currentVertex = 0;
     surfaceBuilder.additionalEdges = stackMalloc(sizeof(struct SurfaceEdge) * ADDITIONAL_EDGE_CAPACITY);
@@ -716,6 +733,7 @@ struct PortalSurface* portalSurfaceCutHole(struct PortalSurface* surface, struct
     stackMallocFree(surfaceBuilder.isLoopEdge);
     stackMallocFree(surfaceBuilder.additionalEdges);
     stackMallocFree(surfaceBuilder.additionalVertices);
+    stackMallocFree(surfaceBuilder.surface);
 
     return NULL;
 
@@ -724,6 +742,7 @@ error:
     stackMallocFree(surfaceBuilder.isLoopEdge);
     stackMallocFree(surfaceBuilder.additionalEdges);
     stackMallocFree(surfaceBuilder.additionalVertices);
+    stackMallocFree(surfaceBuilder.surface);
     return NULL;
 }
 
