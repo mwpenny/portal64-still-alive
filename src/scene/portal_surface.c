@@ -143,6 +143,92 @@ void portalSurfacePrevEdge(struct PortalSurfaceBuilder* surfaceBuilder, struct S
     prevEdge->isReverse = portalSurfaceGetEdge(surfaceBuilder, prevEdge->edgeIndex)->nextEdgeReverse == currentEdge->edgeIndex;
 }
 
+int portalSurfacePointInsideFace(struct PortalSurfaceBuilder* surfaceBuilder, struct SurfaceEdgeWithSide* currentEdge, struct Vector2s16* point) {
+    struct SurfaceEdgeWithSide nextEdge;
+    portalSurfaceNextEdge(surfaceBuilder, currentEdge, &nextEdge);
+
+    struct SurfaceEdge* edgePtr = portalSurfaceGetEdge(surfaceBuilder, currentEdge->edgeIndex);
+    struct SurfaceEdge* nextEdgePtr = portalSurfaceGetEdge(surfaceBuilder, nextEdge.edgeIndex);
+
+    struct Vector2s16* corner = portalSurfaceGetPoint(surfaceBuilder, GET_NEXT_POINT(edgePtr, currentEdge->isReverse));
+    struct Vector2s16* prevPoint = portalSurfaceGetPoint(surfaceBuilder, GET_CURRENT_POINT(edgePtr, currentEdge->isReverse));
+    struct Vector2s16* nextPoint = portalSurfaceGetPoint(surfaceBuilder, GET_NEXT_POINT(nextEdgePtr, nextEdge.isReverse));
+
+    struct Vector2s16 nextDir;
+    struct Vector2s16 prevDir;
+
+    struct Vector2s16 pointDir;
+
+    vector2s16Sub(nextPoint, corner, &nextDir);
+    vector2s16Sub(prevPoint, corner, &prevDir);
+    vector2s16Sub(point, corner, &pointDir);
+
+    return vector2s16FallsBetween(&nextDir, &prevDir, &pointDir);
+}
+
+int portalSurfaceIsEdgeValid(struct PortalSurfaceBuilder* surfaceBuilder, struct SurfaceEdgeWithSide* currentEdge) {
+    return GET_NEXT_EDGE(portalSurfaceGetEdge(surfaceBuilder, currentEdge->edgeIndex), currentEdge->isReverse) != NO_EDGE_CONNECTION;
+}
+
+#define MAX_LOOP_SEARCH_ITERATIONS 20
+
+int portalSurfaceNextLoop(struct PortalSurfaceBuilder* surfaceBuilder, struct SurfaceEdgeWithSide* currentEdge, struct SurfaceEdgeWithSide* nextFace) {
+    portalSurfaceNextEdge(surfaceBuilder, currentEdge, nextFace);
+    nextFace->isReverse = !nextFace->isReverse;
+
+    if (portalSurfaceIsEdgeValid(surfaceBuilder, nextFace)) {
+        return 1;
+    }
+
+    *nextFace = *currentEdge;
+    nextFace->isReverse = !nextFace->isReverse;
+
+    int i = 0;
+
+    while (i < MAX_LOOP_SEARCH_ITERATIONS && portalSurfaceIsEdgeValid(surfaceBuilder, nextFace)) {
+        struct SurfaceEdgeWithSide prevFace;
+        portalSurfacePrevEdge(surfaceBuilder, nextFace, &prevFace);
+
+        *nextFace = prevFace;
+        nextFace->isReverse = !nextFace->isReverse;
+        ++i;
+    }
+
+    nextFace->isReverse = !nextFace->isReverse;
+
+    return i < MAX_LOOP_SEARCH_ITERATIONS;
+}
+
+int portalSurfaceFindNextLoop(struct PortalSurfaceBuilder* surfaceBuilder, struct Vector2s16* forPoint) {
+    if (!surfaceBuilder->hasConnected) {
+        return 1;
+    }
+
+    struct SurfaceEdgeWithSide currentEdge = surfaceBuilder->edgeOnSearchLoop;
+
+    int i = 0;
+
+    while (i < MAX_LOOP_SEARCH_ITERATIONS && !portalSurfacePointInsideFace(surfaceBuilder, &currentEdge, forPoint)) {
+        struct SurfaceEdgeWithSide nextEdge;
+
+        if (!portalSurfaceNextLoop(surfaceBuilder, &currentEdge, &nextEdge)) {
+            return 0;
+        }
+
+        if (nextEdge.edgeIndex == surfaceBuilder->edgeOnSearchLoop.edgeIndex) {
+            // a full loop and no face found
+            return 0;
+        }
+
+        currentEdge = nextEdge;
+        ++i;
+    }
+
+    surfaceBuilder->edgeOnSearchLoop = currentEdge;
+
+    return i < MAX_LOOP_SEARCH_ITERATIONS;
+}
+
 #define MAX_INTERSECT_LOOPS 20
 
 int portalSurfaceIsPointOnLine(struct Vector2s16* pointA, struct Vector2s16* edgeA, struct Vector2s16* edgeDir) {
@@ -514,6 +600,10 @@ struct PortalSurface* portalSurfaceCutHole(struct PortalSurface* surface, struct
     for (int i = 1; i < loopSize;) {
         struct Vector2s16* next = &loop[i];
         struct Vector2s16 dir;
+
+        if (!portalSurfaceFindNextLoop(&surfaceBuilder, next)) {
+            goto error;
+        }
 
         vector2s16Sub(next, prev, &dir);
         struct Vector2s16* newPoint = portalSurfaceIntersectEdgeWithLoop(&surfaceBuilder, prev, &dir);

@@ -10,7 +10,7 @@
 #define FIXED_POINT_PRECISION   8
 #define FIXED_POINT_SCALAR      (1 << FIXED_POINT_PRECISION)
 
-#define VECTOR2s16_AS_ARRAY(vector) ((s16*)(vector))
+#define NO_EDGE_CONNECTION      0xFF
 
 struct SurfaceEdge {
     u8 aIndex;

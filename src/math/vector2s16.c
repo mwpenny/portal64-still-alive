@@ -28,3 +28,15 @@ int vector2s16DistSqr(struct Vector2s16* a, struct Vector2s16* b) {
 
     return x * x + y * y;
 }
+
+int vector2s16FallsBetween(struct Vector2s16* from, struct Vector2s16* towards, struct Vector2s16* check) {
+    int directionCross = vector2s16Cross(from, towards);
+
+    if (directionCross == 0) {
+        return vector2s16Cross(from, check) >= 0;
+    } else if (directionCross > 0) {
+        return vector2s16Cross(from, check) >= 0 && vector2s16Cross(check, towards) >= 0;
+    } else {
+        return vector2s16Cross(from, check) >= 0 || vector2s16Cross(check, towards) >= 0;
+    }
+}
