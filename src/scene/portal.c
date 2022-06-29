@@ -21,14 +21,14 @@ struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE] = {
 };
 
 struct Vector3 gPortalOutlineUnscaled[PORTAL_LOOP_SIZE] = {
-    {0.0f, 1.0f, 0.0f},
-    {0.353553f, 0.707107f, 0.0f},
-    {0.5f, 0.0f, 0.0f},
-    {0.353553f, -0.707107f, 0.0f},
-    {0.0f, -1.0f, 0.0f},
-    {-0.353553f, -0.707107f, 0.0f},
-    {-0.5f, 0.0f, 0.0f},
     {-0.353553f, 0.707107f, 0.0f},
+    {-0.5f, 0.0f, 0.0f},
+    {-0.353553f, -0.707107f, 0.0f},
+    {0.0f, -1.0f, 0.0f},
+    {0.353553f, -0.707107f, 0.0f},
+    {0.5f, 0.0f, 0.0f},
+    {0.353553f, 0.707107f, 0.0f},
+    {0.0f, 1.0f, 0.0f},
 };
 
 #define SHOW_EXTERNAL_VIEW  0
