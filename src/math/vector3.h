@@ -41,4 +41,6 @@ int vector3IsZero(struct Vector3* vector);
 
 void vector3ToVector3u8(struct Vector3* input, struct Vector3u8* output);
 
+float vector3EvalBarycentric1D(struct Vector3* baryCoords, float a, float b, float c);
+
 #endif

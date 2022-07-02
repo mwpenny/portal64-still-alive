@@ -33,6 +33,9 @@ struct PortalSurface {
     struct Vector3 right;
     struct Vector3 up;
     struct Vector3 corner;
+
+    Vtx* gfxVertices;
+    Gfx* triangles;
 };
 
 struct PortalSurfaceMapping {
@@ -43,5 +46,7 @@ struct PortalSurfaceMapping {
 int portalSurfaceIsInside(struct PortalSurface* surface, struct Transform* portalAt);
 
 int portalSurfaceGenerate(struct PortalSurface* surface, struct Transform* portalAt, Vtx* vertices, Gfx* triangles);
+
+void deletePortalSurface(struct PortalSurface* portalSurface);
 
 #endif

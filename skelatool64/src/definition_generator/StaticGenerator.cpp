@@ -39,7 +39,12 @@ std::shared_ptr<StaticGeneratorOutput> generateStatic(const aiScene* scene, CFil
 
             elements.push_back(element);
 
-            output->staticMeshes.push_back(chunk.mMesh);
+            StaticMeshInfo meshInfo;
+            meshInfo.staticMesh = chunk.mMesh;
+            meshInfo.gfxName = element.meshName;
+            meshInfo.material = chunk.mMaterial;
+
+            output->staticMeshes.push_back(meshInfo);
             output->staticRooms.push_back(roomMapping.RoomForNode(nodeInfo.node));
         }
     }

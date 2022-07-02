@@ -40,3 +40,24 @@ int vector2s16FallsBetween(struct Vector2s16* from, struct Vector2s16* towards, 
         return vector2s16Cross(from, check) >= 0 || vector2s16Cross(check, towards) >= 0;
     }
 }
+
+void vector2s16Barycentric(struct Vector2s16* a, struct Vector2s16* b, struct Vector2s16* c, struct Vector2s16* point, struct Vector3* output) {
+    struct Vector2s16 v0;
+    struct Vector2s16 v1;
+    struct Vector2s16 v2;
+
+    vector2s16Sub(b, a, &v0);
+    vector2s16Sub(c, a, &v1);
+    vector2s16Sub(point, a, &v2);
+
+    float d00 = (float)vector2s16Dot(&v0, &v0);
+    float d01 = (float)vector2s16Dot(&v0, &v1);
+    float d11 = (float)vector2s16Dot(&v1, &v1);
+    float d20 = (float)vector2s16Dot(&v2, &v0);
+    float d21 = (float)vector2s16Dot(&v2, &v1);
+
+    float denom = 1.0f / (d00 * d11 - d01 * d01);
+    output->y = (d11 * d20 - d01 * d21) * denom;
+    output->z = (d00 * d21 - d01 * d20) * denom;
+    output->x = 1.0f - output->y - output->z;
+}

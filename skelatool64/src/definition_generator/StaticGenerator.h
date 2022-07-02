@@ -4,15 +4,22 @@
 #include "DefinitionGenerator.h"
 #include "../DisplayListSettings.h"
 #include "./RoomGenerator.h"
+#include "../RenderChunk.h"
 
 struct StaticContentElement {
     std::string meshName;
     std::string materialName;
 };
 
+struct StaticMeshInfo {
+    std::shared_ptr<ExtendedMesh> staticMesh;
+    std::string gfxName;
+    Material* material;
+};
+
 struct StaticGeneratorOutput {
     std::string staticContentName;
-    std::vector<std::shared_ptr<ExtendedMesh>> staticMeshes;
+    std::vector<StaticMeshInfo> staticMeshes;
     std::vector<int> staticRooms;
     std::string roomMappingName;
 };

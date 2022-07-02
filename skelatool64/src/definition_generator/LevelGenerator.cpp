@@ -48,16 +48,16 @@ uint8_t getEdgeIndex(std::map<int, EdgeIndices>& edges, int edgeKey) {
     return result->second.edgeIndex;
 }
 
-std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition& fileDefinition, const CollisionQuad& quad, ExtendedMesh& mesh, float scale) {
+std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition& fileDefinition, const CollisionQuad& quad, StaticMeshInfo& mesh, float scale) {
     std::unique_ptr<StructureDataChunk> portalSurface(new StructureDataChunk());
 
     std::unique_ptr<StructureDataChunk> vertices(new StructureDataChunk());
 
-    std::string name(mesh.mMesh->mName.C_Str());
+    std::string name(mesh.staticMesh->mMesh->mName.C_Str());
 
-    for (unsigned i = 0; i < mesh.mMesh->mNumVertices; ++i) {
+    for (unsigned i = 0; i < mesh.staticMesh->mMesh->mNumVertices; ++i) {
         short x, y;
-        quad.ToLocalCoords(mesh.mMesh->mVertices[i] * scale, x, y);
+        quad.ToLocalCoords(mesh.staticMesh->mMesh->mVertices[i] * scale, x, y);
 
         std::unique_ptr<StructureDataChunk> vertexWrapperWrapper(new StructureDataChunk());
         std::unique_ptr<StructureDataChunk> vertexWrapper(new StructureDataChunk());
@@ -69,7 +69,7 @@ std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition
         vertices->Add(std::move(vertexWrapperWrapper));
     }
 
-    std::string meshName(mesh.mMesh->mName.C_Str());
+    std::string meshName(mesh.staticMesh->mMesh->mName.C_Str());
     std::string verticesName = fileDefinition.GetUniqueName(meshName + "_portal_mesh");
     fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct Vector2s16", verticesName, true, "_geo", std::move(vertices))));
 
@@ -77,8 +77,8 @@ std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition
     std::map<int, EdgeIndices> edgeDirection;
     std::vector<int> edgeOrder;
 
-    for (unsigned faceIndex = 0; faceIndex < mesh.mMesh->mNumFaces; ++faceIndex) {
-        aiFace* face = &mesh.mMesh->mFaces[faceIndex];
+    for (unsigned faceIndex = 0; faceIndex < mesh.staticMesh->mMesh->mNumFaces; ++faceIndex) {
+        aiFace* face = &mesh.staticMesh->mMesh->mFaces[faceIndex];
 
         std::vector<int> edgeKeys;
         std::vector<bool> isReverseEdge;
@@ -176,12 +176,23 @@ std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition
     // edgesCount
     portalSurface->AddPrimitive(edgeOrder.size());
     // vertexCount
-    portalSurface->AddPrimitive(mesh.mMesh->mNumVertices);
+    portalSurface->AddPrimitive(mesh.staticMesh->mMesh->mNumVertices);
 
     portalSurface->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(quad.edgeA)));
     portalSurface->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(quad.edgeB)));
     portalSurface->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(quad.corner)));
 
+    std::string vertexBufferName = fileDefinition.GetVertexBuffer(
+        mesh.staticMesh, 
+        Material::GetVertexType(mesh.material), 
+        Material::TextureWidth(mesh.material), 
+        Material::TextureHeight(mesh.material), 
+        "_geo"
+    );
+
+    portalSurface->AddPrimitive(vertexBufferName);
+    portalSurface->AddPrimitive(mesh.gfxName);
+    
     return portalSurface;
 }
 
@@ -199,7 +210,7 @@ void generatePortalSurfacesDefinition(const aiScene* scene, CFileDefinition& fil
         collisionWithPadding.mMax = collisionWithPadding.mMax + aiVector3D(0.1f, 0.1f, 0.1f);
 
         for (auto mesh : staticOutput.staticMeshes) {
-            aiMaterial* material = scene->mMaterials[mesh->mMesh->mMaterialIndex];
+            aiMaterial* material = scene->mMaterials[mesh.staticMesh->mMesh->mMaterialIndex];
 
             std::string materialName = ExtendedMesh::GetMaterialName(material);
 
@@ -207,9 +218,9 @@ void generatePortalSurfacesDefinition(const aiScene* scene, CFileDefinition& fil
                 continue;
             }
 
-            aiAABB meshBB(mesh->bbMin * settings.mModelScale, mesh->bbMax * settings.mModelScale);
+            aiAABB meshBB(mesh.staticMesh->bbMin * settings.mModelScale, mesh.staticMesh->bbMax * settings.mModelScale);
 
-            if (!collision.IsCoplanar(*mesh, settings.mModelScale)) {
+            if (!collision.IsCoplanar(*mesh.staticMesh, settings.mModelScale)) {
                 continue;
             }
 
@@ -217,7 +228,7 @@ void generatePortalSurfacesDefinition(const aiScene* scene, CFileDefinition& fil
                 continue;
             }
 
-            portalSurfaces->Add(std::move(calculatePortalSingleSurface(fileDefinition, collision, *mesh, settings.mModelScale)));                
+            portalSurfaces->Add(std::move(calculatePortalSingleSurface(fileDefinition, collision, mesh, settings.mModelScale)));                
             ++surfaceCount;
         }
 
@@ -248,13 +259,13 @@ void generateBoundingBoxesDefinition(const aiScene* scene, CFileDefinition& file
     for (auto& mesh : staticOutput.staticMeshes) {
         std::unique_ptr<StructureDataChunk> sphere(new StructureDataChunk());
 
-        sphere->AddPrimitive((short)(mesh->bbMin.x * combinedScale + 0.5f));
-        sphere->AddPrimitive((short)(mesh->bbMin.y * combinedScale + 0.5f));
-        sphere->AddPrimitive((short)(mesh->bbMin.z * combinedScale + 0.5f));
+        sphere->AddPrimitive((short)(mesh.staticMesh->bbMin.x * combinedScale + 0.5f));
+        sphere->AddPrimitive((short)(mesh.staticMesh->bbMin.y * combinedScale + 0.5f));
+        sphere->AddPrimitive((short)(mesh.staticMesh->bbMin.z * combinedScale + 0.5f));
         
-        sphere->AddPrimitive((short)(mesh->bbMax.x * combinedScale + 0.5f));
-        sphere->AddPrimitive((short)(mesh->bbMax.y * combinedScale + 0.5f));
-        sphere->AddPrimitive((short)(mesh->bbMax.z * combinedScale + 0.5f));
+        sphere->AddPrimitive((short)(mesh.staticMesh->bbMax.x * combinedScale + 0.5f));
+        sphere->AddPrimitive((short)(mesh.staticMesh->bbMax.y * combinedScale + 0.5f));
+        sphere->AddPrimitive((short)(mesh.staticMesh->bbMax.z * combinedScale + 0.5f));
 
         boundingBoxes->Add(std::move(sphere));
     }

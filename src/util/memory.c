@@ -340,7 +340,7 @@ void memCopy(void* target, const void* src, int size)
     }
 }
 
-#define STACK_MALLOC_SIZE_BYTES    4096
+#define STACK_MALLOC_SIZE_BYTES    (8 * 1024)
 #define STACK_MALLOC_SIZE_WORDS (STACK_MALLOC_SIZE_BYTES >> 3)
 
 int gStackMallocAt;

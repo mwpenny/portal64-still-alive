@@ -143,3 +143,7 @@ void vector3ToVector3u8(struct Vector3* input, struct Vector3u8* output) {
     output->y = floatTos8norm(input->y);
     output->z = floatTos8norm(input->z);
 }
+
+float vector3EvalBarycentric1D(struct Vector3* baryCoords, float a, float b, float c) {
+    return baryCoords->x * a + baryCoords->y * b + baryCoords->z * c;
+}
