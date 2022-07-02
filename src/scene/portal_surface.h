@@ -6,6 +6,7 @@
 #include "math/transform.h"
 #include "math/plane.h"
 #include "math/vector2s16.h"
+#include "../levels/level_definition.h"
 
 #define FIXED_POINT_PRECISION   8
 #define FIXED_POINT_SCALAR      (1 << FIXED_POINT_PRECISION)
@@ -43,10 +44,25 @@ struct PortalSurfaceMapping {
     u8 maxPortalIndex;
 };
 
+enum PortalSurfaceReplacementFlags {
+    PortalSurfaceReplacementFlagsIsEnabled,
+};
+
+struct PortalSurfaceReplacement {
+    struct PortalSurface previousSurface;
+    short flags;
+    short staticIndex;
+    short portalSurfaceIndex;
+};
+
 int portalSurfaceIsInside(struct PortalSurface* surface, struct Transform* portalAt);
 
-int portalSurfaceGenerate(struct PortalSurface* surface, struct Transform* portalAt, Vtx* vertices, Gfx* triangles);
+int portalSurfaceGenerate(struct PortalSurface* surface, struct Transform* portalAt, struct PortalSurface* newSurface);
 
-void deletePortalSurface(struct PortalSurface* portalSurface);
+void portalSurfaceCleanup(struct PortalSurface* portalSurface);
+
+struct PortalSurface* portalSurfaceGetOriginalSurface(int portalSurfaceIndex, int portalIndex);
+
+void portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex, struct PortalSurface* with);
 
 #endif

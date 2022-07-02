@@ -884,7 +884,7 @@ int portalSurfaceTriangulate(struct PortalSurfaceBuilder* surfaceBuilder) {
     return 1;
 }
 
-struct PortalSurface* newPortalSurfaceWithHole(struct PortalSurface* surface, struct Vector2s16* loop) {
+int portalSurfacePokeHole(struct PortalSurface* surface, struct Vector2s16* loop, struct PortalSurface* result) {
     struct PortalSurfaceBuilder surfaceBuilder;
 
     int edgeCount = surface->edgeCount + ADDITIONAL_EDGE_CAPACITY;
@@ -954,7 +954,7 @@ struct PortalSurface* newPortalSurfaceWithHole(struct PortalSurface* surface, st
             --surfaceBuilder.currentVertex;
 
             if (!portalSurfaceJoinInnerLoopToOuterLoop(&surfaceBuilder)) {
-                return NULL;
+                return 0;
             }
         }
 
@@ -971,8 +971,6 @@ struct PortalSurface* newPortalSurfaceWithHole(struct PortalSurface* surface, st
     if (!portalSurfaceTriangulate(&surfaceBuilder)) {
         goto error;
     }
-
-    struct PortalSurface* result = malloc(sizeof(struct PortalSurface));
 
     result->vertices = malloc(sizeof(struct Vector2s16) * surfaceBuilder.currentVertex);
     result->edges = malloc(sizeof(struct SurfaceEdge) * surfaceBuilder.currentEdge);
@@ -993,12 +991,12 @@ struct PortalSurface* newPortalSurfaceWithHole(struct PortalSurface* surface, st
     stackMallocFree(surfaceBuilder.edges);
     stackMallocFree(surfaceBuilder.vertices);
 
-    return result;
+    return 1;
 
 error:
     stackMallocFree(surfaceBuilder.edgeFlags);
     stackMallocFree(surfaceBuilder.isLoopEdge);
     stackMallocFree(surfaceBuilder.edges);
     stackMallocFree(surfaceBuilder.vertices);
-    return NULL;
+    return 0;
 }

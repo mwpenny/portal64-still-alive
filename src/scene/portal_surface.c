@@ -5,7 +5,61 @@
 #include "math/vector2.h"
 #include <math.h>
 #include "portal_surface_generator.h"
+#include "../levels/level_definition.h"
+#include "../levels/levels.h"
 #include "../util/memory.h"
+
+struct PortalSurfaceReplacement gPortalSurfaceReplacements[2];
+
+void portalSurfaceReplacementRevert(struct PortalSurfaceReplacement* replacement) {
+    gCurrentLevel->staticContent[replacement->staticIndex].displayList = replacement->previousSurface.triangles;
+    portalSurfaceCleanup(&gCurrentLevel->portalSurfaces[replacement->portalSurfaceIndex]);
+    gCurrentLevel->portalSurfaces[replacement->portalSurfaceIndex] = replacement->previousSurface;
+    replacement->flags = 0;
+}
+
+struct PortalSurface* portalSurfaceGetOriginalSurface(int portalSurfaceIndex, int portalIndex) {
+    struct PortalSurfaceReplacement* replacement = &gPortalSurfaceReplacements[portalIndex];
+
+    // TODO swap portals if they are on the same surface
+    if ((replacement->flags & PortalSurfaceReplacementFlagsIsEnabled) != 0 && replacement->portalSurfaceIndex == portalSurfaceIndex) {
+        return &replacement->previousSurface;
+    } else {
+        return &gCurrentLevel->portalSurfaces[portalSurfaceIndex];
+    }
+}
+
+void portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex, struct PortalSurface* with) {
+    int staticIndex = -1;
+
+    struct Rangeu16 range = gCurrentLevel->roomStaticMapping[roomIndex];
+
+    struct PortalSurface* existing = &gCurrentLevel->portalSurfaces[portalSurfaceIndex];
+
+    for (staticIndex = range.min; staticIndex < (int)range.max; ++staticIndex) {
+        if (gCurrentLevel->staticContent[staticIndex].displayList == existing->triangles) {
+            break;
+        }
+    }
+
+    if (staticIndex == range.max) {
+        return;
+    }
+
+    struct PortalSurfaceReplacement* replacement = &gPortalSurfaceReplacements[portalIndex];
+
+    if (replacement->flags & PortalSurfaceReplacementFlagsIsEnabled) {
+        portalSurfaceReplacementRevert(replacement);
+    }
+
+    replacement->previousSurface = *existing;
+    replacement->flags = PortalSurfaceReplacementFlagsIsEnabled;
+    replacement->staticIndex = staticIndex;
+    replacement->portalSurfaceIndex = portalSurfaceIndex;
+
+    gCurrentLevel->staticContent[staticIndex].displayList = with->triangles;
+    gCurrentLevel->portalSurfaces[portalSurfaceIndex] = *with;
+}
 
 void portalSurface2DPoint(struct PortalSurface* surface, struct Vector3* at, struct Vector2s16* output) {
     struct Vector3 offset;
@@ -188,7 +242,7 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
     return iteration != MAX_POS_ADJUST_ITERATIONS;
 }
 
-int portalSurfaceGenerate(struct PortalSurface* surface, struct Transform* portalAt, Vtx* vertices, Gfx* triangles) {
+int portalSurfaceGenerate(struct PortalSurface* surface, struct Transform* portalAt, struct PortalSurface* newSurface) {
     // determine if portal is on surface
     if (!portalSurfaceIsInside(surface, portalAt)) {
         return 0;
@@ -200,25 +254,18 @@ int portalSurfaceGenerate(struct PortalSurface* surface, struct Transform* porta
         return 0;
     }
 
-    struct PortalSurface* newSurface = newPortalSurfaceWithHole(surface, portalOutline);
-
-    if (newSurface) {
-        deletePortalSurface(newSurface);
+    if (!portalSurfacePokeHole(surface, portalOutline, newSurface)) {
+        return 0;
     }
 
     portalSurfaceInverse(surface, &correctPosition, &portalAt->position);
-    // TODO
-    // loop through all triangles
-    // if no interesctions on triangle pass it through
-    // if triangle intersects portal then retrianglute face
 
     return 1;
 }
 
-void deletePortalSurface(struct PortalSurface* portalSurface) {
+void portalSurfaceCleanup(struct PortalSurface* portalSurface) {
     free(portalSurface->vertices);
     free(portalSurface->edges);
     free(portalSurface->gfxVertices);
     free(portalSurface->triangles);
-    free(portalSurface);
 }

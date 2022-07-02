@@ -274,7 +274,12 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
     struct PortalSurfaceMapping surfaceMapping = gCurrentLevel->portalSurfaceMapping[quadIndex];
 
     for (int i = surfaceMapping.minPortalIndex; i < surfaceMapping.maxPortalIndex; ++i) {
-        if (portalSurfaceGenerate(&gCurrentLevel->portalSurfaces[i], at, NULL, NULL)) {
+        struct PortalSurface* existingSurface = portalSurfaceGetOriginalSurface(i, portalIndex);
+        struct PortalSurface newSurface;
+
+        if (portalSurfaceGenerate(existingSurface, at, &newSurface)) {
+            portalSurfaceReplace(i, roomIndex, portalIndex, &newSurface);
+
             soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &at->position);
             
             scene->portals[portalIndex].transform = *at;

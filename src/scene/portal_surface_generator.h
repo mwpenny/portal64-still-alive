@@ -62,7 +62,7 @@ struct PortalSurfaceBuilder {
     Vtx* gfxVertices;
 };
 
-struct PortalSurface* newPortalSurfaceWithHole(struct PortalSurface* surface, struct Vector2s16* loop);
+int portalSurfacePokeHole(struct PortalSurface* surface, struct Vector2s16* loop, struct PortalSurface* result);
 int portalSurfaceHasFlag(struct PortalSurfaceBuilder* surfaceBuilder, struct SurfaceEdgeWithSide* edge, enum SurfaceEdgeFlags value);
 void portalSurfaceSetFlag(struct PortalSurfaceBuilder* surfaceBuilder, struct SurfaceEdgeWithSide* edge, enum SurfaceEdgeFlags value);
 struct SurfaceEdge* portalSurfaceGetEdge(struct PortalSurfaceBuilder* surfaceBuilder, int edgeIndex);
