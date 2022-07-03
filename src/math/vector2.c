@@ -114,3 +114,8 @@ void vector2Max(struct Vector2* a, struct Vector2* b, struct Vector2* out) {
     out->x = maxf(a->x, b->x);
     out->y = maxf(a->y, b->y);
 }
+
+void vector2Lerp(struct Vector2* a, struct Vector2* b, float lerp, struct Vector2* out) {
+    out->x = (b->x - a->x) * lerp + a->x;
+    out->y = (b->y - a->y) * lerp + a->y;
+}

@@ -3,6 +3,7 @@
 #include "portal.h"
 #include "../util/memory.h"
 #include "../math/mathf.h"
+#include "../math/vector2.h"
 #include "portal_surface_gfx.h"
 
 #define IS_ORIGINAL_VERTEX_INDEX(surfaceBuilder, vertexIndex) ((vertexIndex) < (surfaceBuilder)->original->vertexCount)
@@ -14,74 +15,60 @@
 
 #define VERIFY_INTEGRITY    0
 
+#define VERY_FAR_AWAY   1e15f
+
 int portalSurfaceFindEnclosingFace(struct PortalSurface* surface, struct Vector2s16* aroundPoint, struct SurfaceEdgeWithSide* output) {
-    struct SurfaceEdge* currentEdge = &surface->edges[0];
-    int edgeDistanceSq = vector2s16DistSqr(&surface->vertices[surface->edges[0].aIndex], aroundPoint);
+    float minDistance = VERY_FAR_AWAY;
 
-    for (int i = 1; i < surface->sideCount; ++i) {
-        int dist = vector2s16DistSqr(&surface->vertices[surface->edges[i].aIndex], aroundPoint);
+    struct Vector2 aroundPointF;
 
-        if (dist < edgeDistanceSq) {
-            edgeDistanceSq = dist;
-            currentEdge = &surface->edges[i];
+    aroundPointF.x = (float)aroundPoint->x;
+    aroundPointF.y = (float)aroundPoint->y;
+
+    for (int i = 0; i < surface->edgeCount; ++i) {
+        struct SurfaceEdge* edge = &surface->edges[i];
+
+        struct Vector2s16* as16 = &surface->vertices[edge->aIndex];
+        struct Vector2s16* bs16 = &surface->vertices[edge->bIndex];
+
+        struct Vector2 a;
+        struct Vector2 b;
+
+        a.x = (float)as16->x;
+        a.y = (float)as16->y;
+
+        b.x = (float)bs16->x;
+        b.y = (float)bs16->y;
+
+        struct Vector2 edgeOffset;
+        struct Vector2 pointOffset;
+
+        vector2Sub(&b, &a, &edgeOffset);
+        vector2Sub(&aroundPointF, &a, &pointOffset);
+
+        float lerp = vector2Dot(&edgeOffset, &pointOffset) / vector2MagSqr(&edgeOffset);
+
+        if (lerp < 0.0f) {
+            lerp = 0.0f;
+        } else if (lerp > 1.0f) {
+            lerp = 1.0f;
+        }
+
+        struct Vector2 closestPoint;
+
+        vector2Lerp(&a, &b, lerp, &closestPoint);
+
+        float distSqr = vector2DistSqr(&closestPoint, &aroundPointF);
+
+        if (distSqr < minDistance) {
+            minDistance = distSqr;
+
+            output->edgeIndex = i;
+            output->isReverse = vector2Cross(&edgeOffset, &pointOffset) < 0.0f;
         }
     }
 
-    int isEdgeReverse = 0;
-    int startEdgeIndex = currentEdge - surface->edges;
-
-    int currentIteration = 0;
-
-    while (currentIteration < MAX_SEARCH_ITERATIONS && (currentIteration == 0 || (currentEdge - surface->edges) != startEdgeIndex)) {
-        struct Vector2s16 edgeDir;
-        struct Vector2s16 pointDir;
-
-        int anchorPoint = SB_GET_CURRENT_POINT(currentEdge, isEdgeReverse);
-
-        vector2s16Sub(
-            &surface->vertices[SB_GET_NEXT_POINT(currentEdge, isEdgeReverse)], 
-            &surface->vertices[anchorPoint], 
-            &edgeDir
-        );
-
-        vector2s16Sub(
-            aroundPoint, 
-            &surface->vertices[anchorPoint], 
-            &pointDir
-        );
-
-        int nextEdgeIndex;
-
-        if (vector2s16Cross(&edgeDir, &pointDir) < 0) {
-            // the point is on the opposite side of this edge
-            startEdgeIndex = currentEdge - surface->edges;
-            isEdgeReverse = !isEdgeReverse;
-
-            nextEdgeIndex = SB_GET_NEXT_EDGE(currentEdge, isEdgeReverse);
-
-            if (nextEdgeIndex == 0xFF) {
-                // has no opposite edge
-                return 0;
-            }
-        } else {
-            nextEdgeIndex = SB_GET_NEXT_EDGE(currentEdge, isEdgeReverse);
-        }
-
-        int currentIndex = currentEdge - surface->edges;
-        currentEdge = &surface->edges[nextEdgeIndex];
-        isEdgeReverse = currentEdge->prevEdgeReverse == currentIndex;
-
-        ++currentIteration;
-    }
-
-    if (currentIteration == MAX_SEARCH_ITERATIONS) {
-        return 0;
-    }
-
-    output->edgeIndex = currentEdge - surface->edges;
-    output->isReverse = isEdgeReverse;
-
-    return 1;
+    return minDistance != VERY_FAR_AWAY;
 }
 
 struct SurfaceEdge* portalSurfaceGetEdge(struct PortalSurfaceBuilder* surfaceBuilder, int edgeIndex) {
@@ -788,7 +775,7 @@ int portalSurfaceTriangulateLoop(struct PortalSurfaceBuilder* surfaceBuilder, st
     }
 
     struct SurfaceEdgeWithSide currentEdge = *edgeOnLoop;
-    int iteration;
+    int iteration = 0;
     struct SurfaceEdge* currentEdgePtr = portalSurfaceGetEdge(surfaceBuilder, currentEdge.edgeIndex);
 
     // Find the starting point
@@ -798,6 +785,21 @@ int portalSurfaceTriangulateLoop(struct PortalSurfaceBuilder* surfaceBuilder, st
         currentEdgePtr = portalSurfaceGetEdge(surfaceBuilder, currentEdge.edgeIndex);
 
         if (iteration == MAX_SEARCH_ITERATIONS || (currentEdge.edgeIndex == edgeOnLoop->edgeIndex && currentEdge.isReverse == edgeOnLoop->isReverse)) {
+            if (iteration == 3) {
+                // already a triangle
+                struct SurfaceEdgeWithSide nextEdge;
+                struct SurfaceEdgeWithSide prevEdge;
+
+                portalSurfaceNextEdge(surfaceBuilder, &currentEdge, &nextEdge);
+                portalSurfacePrevEdge(surfaceBuilder, &currentEdge, &prevEdge);
+                
+                portalSurfaceSetFlag(surfaceBuilder, &currentEdge, SurfaceEdgeFlagsTriangulated);
+                portalSurfaceSetFlag(surfaceBuilder, &nextEdge, SurfaceEdgeFlagsTriangulated);
+                portalSurfaceSetFlag(surfaceBuilder, &prevEdge, SurfaceEdgeFlagsTriangulated);
+                return 1;
+
+            }
+
             return 0;
         }
     }
@@ -954,7 +956,7 @@ int portalSurfacePokeHole(struct PortalSurface* surface, struct Vector2s16* loop
             --surfaceBuilder.currentVertex;
 
             if (!portalSurfaceJoinInnerLoopToOuterLoop(&surfaceBuilder)) {
-                return 0;
+                goto error;
             }
         }
 
