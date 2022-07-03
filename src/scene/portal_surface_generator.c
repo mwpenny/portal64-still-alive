@@ -421,10 +421,15 @@ int portalSurfaceSplitEdge(struct PortalSurfaceBuilder* surfaceBuilder, struct S
     struct SurfaceEdgeWithSide nextEdge;
     struct SurfaceEdgeWithSide prevReverseEdge;
 
+    int hasReverseEdge = existingEdge->nextEdgeReverse != NO_EDGE_CONNECTION;
+
     portalSurfaceNextEdge(surfaceBuilder, edge, &nextEdge);
-    prevReverseEdge = *edge;
-    prevReverseEdge.isReverse = !prevReverseEdge.isReverse;
-    portalSurfacePrevEdge(surfaceBuilder, &prevReverseEdge, &prevReverseEdge);
+
+    if (hasReverseEdge) {
+        prevReverseEdge = *edge;
+        prevReverseEdge.isReverse = !prevReverseEdge.isReverse;
+        portalSurfacePrevEdge(surfaceBuilder, &prevReverseEdge, &prevReverseEdge);
+    }
 
     int newEdgeIndex = portalSurfaceNewEdge(surfaceBuilder, 0, &surfaceBuilder->originalEdgeIndex[edge->edgeIndex]);
 
@@ -441,21 +446,24 @@ int portalSurfaceSplitEdge(struct PortalSurfaceBuilder* surfaceBuilder, struct S
 
     SB_SET_NEXT_EDGE(newEdge, edge->isReverse, SB_GET_NEXT_EDGE(existingEdge, edge->isReverse));
     SB_SET_PREV_EDGE(newEdge, edge->isReverse, edge->edgeIndex);
-    SB_SET_NEXT_EDGE(newEdge, !edge->isReverse, edge->edgeIndex);
-    SB_SET_PREV_EDGE(newEdge, !edge->isReverse, SB_GET_PREV_EDGE(existingEdge, !edge->isReverse));
+    SB_SET_NEXT_EDGE(newEdge, !edge->isReverse, hasReverseEdge ? edge->edgeIndex : NO_EDGE_CONNECTION);
+    SB_SET_PREV_EDGE(newEdge, !edge->isReverse, hasReverseEdge ? SB_GET_PREV_EDGE(existingEdge, !edge->isReverse) : NO_EDGE_CONNECTION);
 
     SB_SET_NEXT_POINT(existingEdge, edge->isReverse, newVertexIndex);
 
     SB_SET_NEXT_EDGE(existingEdge, edge->isReverse, newEdgeIndex);
-    SB_SET_PREV_EDGE(existingEdge, !edge->isReverse, newEdgeIndex);
+    if (hasReverseEdge) {
+        SB_SET_PREV_EDGE(existingEdge, !edge->isReverse, newEdgeIndex);
+    }
 
     struct SurfaceEdge* nextEdgePtr = portalSurfaceGetEdge(surfaceBuilder, nextEdge.edgeIndex);
 
     SB_SET_PREV_EDGE(nextEdgePtr, nextEdge.isReverse, newEdgeIndex);
 
-    struct SurfaceEdge* prevEdgePtr = portalSurfaceGetEdge(surfaceBuilder, prevReverseEdge.edgeIndex);
-
-    SB_SET_NEXT_EDGE(prevEdgePtr, prevReverseEdge.isReverse, newEdgeIndex);
+    if (hasReverseEdge) {
+        struct SurfaceEdge* prevEdgePtr = portalSurfaceGetEdge(surfaceBuilder, prevReverseEdge.edgeIndex);
+        SB_SET_NEXT_EDGE(prevEdgePtr, prevReverseEdge.isReverse, newEdgeIndex);
+    }
 
 #if VERIFY_INTEGRITY
     if (!portalSurfaceIsWellFormed(surfaceBuilder)) {
