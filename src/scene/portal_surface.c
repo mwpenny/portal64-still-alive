@@ -9,6 +9,28 @@
 #include "../levels/levels.h"
 #include "../util/memory.h"
 
+#define MAX_PENDING_PORTAL_CLEANUP  4
+
+struct PortalSurface gPortalSurfaceCleanupQueue[MAX_PENDING_PORTAL_CLEANUP];
+int gPortalSurfaceNextToWrite;
+
+void portalSurfaceCheckCleanupQueue() {
+    for (int searchIterator = 0; searchIterator < MAX_PENDING_PORTAL_CLEANUP; ++searchIterator) {
+        struct PortalSurface* surface = &gPortalSurfaceCleanupQueue[searchIterator];
+
+        if (surface->shouldCleanup == 1) {
+            surface->shouldCleanup = 0;
+
+            free(surface->vertices);
+            free(surface->edges);
+            free(surface->gfxVertices);
+            free(surface->triangles);
+        } else if (surface->shouldCleanup) {
+            --surface->shouldCleanup;
+        }
+    }
+}
+
 struct PortalSurfaceReplacement gPortalSurfaceReplacements[2];
 
 void portalSurfaceReplacementRevert(struct PortalSurfaceReplacement* replacement) {
@@ -43,6 +65,7 @@ void portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex
     }
 
     if (staticIndex == range.max) {
+        portalSurfaceCleanup(with);
         return;
     }
 
@@ -264,8 +287,13 @@ int portalSurfaceGenerate(struct PortalSurface* surface, struct Transform* porta
 }
 
 void portalSurfaceCleanup(struct PortalSurface* portalSurface) {
-    free(portalSurface->vertices);
-    free(portalSurface->edges);
-    free(portalSurface->gfxVertices);
-    free(portalSurface->triangles);
+    if (!portalSurface->shouldCleanup) {
+        return;
+    }
+
+    gPortalSurfaceCleanupQueue[gPortalSurfaceNextToWrite] = *portalSurface;
+    gPortalSurfaceCleanupQueue[gPortalSurfaceNextToWrite].shouldCleanup = 2;
+    gPortalSurfaceNextToWrite = (gPortalSurfaceNextToWrite + 1) % MAX_PENDING_PORTAL_CLEANUP;
+
+    portalSurface->shouldCleanup = 0;
 }

@@ -33,7 +33,7 @@ void gfxBuilderCollectTriangles(struct GfxBuilderState* gfxBuilder, struct Porta
     for (edge.edgeIndex = 0; edge.edgeIndex < surfaceBuilder->currentEdge; ++edge.edgeIndex) {
         struct SurfaceEdge* edgePtr = portalSurfaceGetEdge(surfaceBuilder, edge.edgeIndex);
 
-        for (edge.isReverse = 0; edge.isReverse <= 2; ++edge.isReverse) {
+        for (edge.isReverse = 0; edge.isReverse < 2; ++edge.isReverse) {
             if (SB_GET_NEXT_EDGE(edgePtr, edge.isReverse) == NO_EDGE_CONNECTION) {
                 continue;
             }

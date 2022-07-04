@@ -13,6 +13,7 @@
 #include "scene/dynamic_scene.h"
 #include "audio/soundplayer.h"
 #include "audio/audio.h"
+#include "scene/portal_surface.h"
 
 #include "levels/levels.h"
 
@@ -185,6 +186,7 @@ static void gameProc(void* arg) {
 
             case (OS_SC_DONE_MSG):
                 --pendingGFX;
+                portalSurfaceCheckCleanupQueue();
                 break;
             case (OS_SC_PRE_NMI_MSG):
                 pendingGFX += 2;

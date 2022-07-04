@@ -23,7 +23,7 @@ struct SurfaceEdgeWithSide {
     int isReverse;
 };
 
-#define SB_ORIGINAL_EDGE_TO_EDGE_WITH_SIDE(originalEdge, edge) do { (edge)->edgeIndex = originalEdge & 0x7F; (edge)->isReverse = (originalEdge & 0x80) != 0; } while (0)
+#define SB_ORIGINAL_EDGE_TO_EDGE_WITH_SIDE(originalEdge, edge) do { (edge)->edgeIndex = (originalEdge) & 0x7F; (edge)->isReverse = ((originalEdge) & 0x80) != 0; } while (0)
 #define SB_PACK_ORIGINALEDGE(edge)  (((edge)->edgeIndex & 0x7F) | ((edge)->isReverse) ? 0x80 : 0x00)
 
 struct OriginalEdgeMapping {

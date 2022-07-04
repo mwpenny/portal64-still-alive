@@ -30,6 +30,7 @@ struct PortalSurface {
     u8 sideCount;
     u8 edgeCount;
     u8 vertexCount;
+    u8 shouldCleanup;
 
     struct Vector3 right;
     struct Vector3 up;
@@ -45,7 +46,7 @@ struct PortalSurfaceMapping {
 };
 
 enum PortalSurfaceReplacementFlags {
-    PortalSurfaceReplacementFlagsIsEnabled,
+    PortalSurfaceReplacementFlagsIsEnabled = (1 << 0),
 };
 
 struct PortalSurfaceReplacement {
@@ -64,5 +65,6 @@ void portalSurfaceCleanup(struct PortalSurface* portalSurface);
 struct PortalSurface* portalSurfaceGetOriginalSurface(int portalSurfaceIndex, int portalIndex);
 
 void portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex, struct PortalSurface* with);
+void portalSurfaceCheckCleanupQueue();
 
 #endif
