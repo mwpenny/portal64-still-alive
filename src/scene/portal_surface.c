@@ -54,6 +54,12 @@ struct PortalSurface* portalSurfaceGetOriginalSurface(int portalSurfaceIndex, in
 void portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex, struct PortalSurface* with) {
     int staticIndex = -1;
 
+    struct PortalSurfaceReplacement* replacement = &gPortalSurfaceReplacements[portalIndex];
+
+    if (replacement->flags & PortalSurfaceReplacementFlagsIsEnabled) {
+        portalSurfaceReplacementRevert(replacement);
+    }
+
     struct Rangeu16 range = gCurrentLevel->roomStaticMapping[roomIndex];
 
     struct PortalSurface* existing = &gCurrentLevel->portalSurfaces[portalSurfaceIndex];
@@ -67,12 +73,6 @@ void portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex
     if (staticIndex == range.max) {
         portalSurfaceCleanup(with);
         return;
-    }
-
-    struct PortalSurfaceReplacement* replacement = &gPortalSurfaceReplacements[portalIndex];
-
-    if (replacement->flags & PortalSurfaceReplacementFlagsIsEnabled) {
-        portalSurfaceReplacementRevert(replacement);
     }
 
     replacement->previousSurface = *existing;

@@ -300,7 +300,7 @@ enum IntersectionType portalSurfaceIntersect(struct Vector2s16* pointA, struct V
 }
 
 int portalSurfaceNewVertex(struct PortalSurfaceBuilder* surfaceBuilder, struct Vector2s16* point) {
-    if (surfaceBuilder->currentVertex == ADDITIONAL_VERTEX_CAPACITY) {
+    if (surfaceBuilder->currentVertex == ADDITIONAL_VERTEX_CAPACITY + surfaceBuilder->original->vertexCount) {
         return -1;
     }
 
@@ -312,7 +312,7 @@ int portalSurfaceNewVertex(struct PortalSurfaceBuilder* surfaceBuilder, struct V
 }
 
 int portalSurfaceNewEdge(struct PortalSurfaceBuilder* surfaceBuilder, int isLoopEdge, struct OriginalEdgeMapping* originalEdge) {
-    if (surfaceBuilder->currentEdge == ADDITIONAL_EDGE_CAPACITY) {
+    if (surfaceBuilder->currentEdge == ADDITIONAL_EDGE_CAPACITY + surfaceBuilder->original->edgeCount) {
         return -1;
     }
 
@@ -897,18 +897,18 @@ int portalSurfaceTriangulate(struct PortalSurfaceBuilder* surfaceBuilder) {
 int portalSurfacePokeHole(struct PortalSurface* surface, struct Vector2s16* loop, struct PortalSurface* result) {
     struct PortalSurfaceBuilder surfaceBuilder;
 
-    int edgeCount = surface->edgeCount + ADDITIONAL_EDGE_CAPACITY;
+    int edgeCapacity = surface->edgeCount + ADDITIONAL_EDGE_CAPACITY;
 
     surfaceBuilder.original = surface;
     surfaceBuilder.vertices = stackMalloc(sizeof(struct Vector2s16) * (surface->vertexCount + ADDITIONAL_VERTEX_CAPACITY));
     memCopy(surfaceBuilder.vertices, surface->vertices, sizeof(struct Vector2s16) * surface->vertexCount);
     surfaceBuilder.currentVertex = surface->vertexCount;
-    surfaceBuilder.edges = stackMalloc(sizeof(struct SurfaceEdge) * edgeCount);
+    surfaceBuilder.edges = stackMalloc(sizeof(struct SurfaceEdge) * edgeCapacity);
     memCopy(surfaceBuilder.edges, surface->edges, sizeof(struct SurfaceEdge) * surface->edgeCount);
-    surfaceBuilder.isLoopEdge = stackMalloc(sizeof(u8) * edgeCount);
+    surfaceBuilder.isLoopEdge = stackMalloc(sizeof(u8) * edgeCapacity);
     surfaceBuilder.currentEdge = surface->edgeCount;
-    surfaceBuilder.edgeFlags = stackMalloc(sizeof(u8) * edgeCount);
-    surfaceBuilder.originalEdgeIndex = stackMalloc(sizeof(u8) * edgeCount);
+    surfaceBuilder.edgeFlags = stackMalloc(sizeof(u8) * edgeCapacity);
+    surfaceBuilder.originalEdgeIndex = stackMalloc(sizeof(struct OriginalEdgeMapping) * edgeCapacity);
 
     for (int i = 0; i < surface->edgeCount; ++i) {
         surfaceBuilder.originalEdgeIndex[i].originalEdge = i;
@@ -917,8 +917,8 @@ int portalSurfacePokeHole(struct PortalSurface* surface, struct Vector2s16* loop
 
     surfaceBuilder.gfxVertices = stackMalloc(sizeof(Vtx) * (surface->vertexCount + ADDITIONAL_EDGE_CAPACITY));
 
-    zeroMemory(surfaceBuilder.edgeFlags, surface->edgeCount + edgeCount);
-    zeroMemory(surfaceBuilder.isLoopEdge, surface->edgeCount + edgeCount);
+    zeroMemory(surfaceBuilder.edgeFlags, surface->edgeCount + edgeCapacity);
+    zeroMemory(surfaceBuilder.isLoopEdge, surface->edgeCount + edgeCapacity);
     memCopy(surfaceBuilder.gfxVertices, surface->gfxVertices, sizeof(Vtx) * surface->vertexCount);
 
     struct Vector2s16* prev = &loop[0];
