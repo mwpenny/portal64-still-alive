@@ -318,7 +318,7 @@ int portalSurfaceNewEdge(struct PortalSurfaceBuilder* surfaceBuilder, int isLoop
 
     int newEdgeIndex = surfaceBuilder->currentEdge;
     surfaceBuilder->isLoopEdge[surfaceBuilder->currentEdge] = isLoopEdge;
-    surfaceBuilder->originalEdgeIndex = originalEdge;
+    surfaceBuilder->originalEdgeIndex[newEdgeIndex] = *originalEdge;
     ++surfaceBuilder->currentEdge;
     return newEdgeIndex;
 }

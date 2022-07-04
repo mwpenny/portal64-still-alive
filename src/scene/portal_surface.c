@@ -154,6 +154,8 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
 
     int shouldReverse = vector3Dot(&portalNormal, &surfaceNormal) > 0.0f;
 
+    struct Vector2s16 startingPoint = *output;
+
     minPortal = *output;
     maxPortal = *output;
 
@@ -258,6 +260,16 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
 
         output->x += minOverlapOffset.x;
         output->y += minOverlapOffset.y;        
+    }
+
+    // if the output position moved then adjust the loop
+    if (startingPoint.equalTest != output->equalTest) {
+        struct Vector2s16 offset;
+        vector2s16Sub(output, &startingPoint, &offset);
+
+        for (int i = 0; i < PORTAL_LOOP_SIZE; ++i) {
+            vector2s16Add(&outlineLoopOutput[i], &offset, &outlineLoopOutput[i]);
+        }
     }
 
     // running out of iterations is a sign there isn't enough
