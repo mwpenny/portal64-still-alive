@@ -10,7 +10,7 @@
 
 #define PORTAL_LOOP_SIZE    8
 
-extern struct Vector3 gPortalOutlineUnscaled[PORTAL_LOOP_SIZE];
+extern struct Vector3 gPortalOutlineWorld[PORTAL_LOOP_SIZE];
 
 enum PortalFlags {
     PortalFlagsOddParity = (1 << 0),

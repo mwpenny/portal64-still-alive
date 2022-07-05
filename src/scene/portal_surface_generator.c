@@ -545,8 +545,13 @@ int portalSurfaceConnectToPoint(struct PortalSurfaceBuilder* surfaceBuilder, int
     return 1;
 }
 
-struct Vector2s16* portalSurfaceIntersectEdgeWithLoop(struct PortalSurfaceBuilder* surfaceBuilder, struct Vector2s16* pointA, struct Vector2s16* pointDir) {
+#define COLLAPSE_DISTANCE   8
+
+struct Vector2s16* portalSurfaceIntersectEdgeWithLoop(struct PortalSurfaceBuilder* surfaceBuilder, struct Vector2s16* pointA, struct Vector2s16* pointB) {
     struct SurfaceEdgeWithSide currentEdge = surfaceBuilder->edgeOnSearchLoop;
+
+    struct Vector2s16 pointDir;
+    vector2s16Sub(pointB, pointA, &pointDir);
 
     int iteration;
 
@@ -563,7 +568,7 @@ struct Vector2s16* portalSurfaceIntersectEdgeWithLoop(struct PortalSurfaceBuilde
 
         struct Vector2s16 intersectionPoint;
 
-        enum IntersectionType intersectType = portalSurfaceIntersect(pointA, pointDir, edgeA, edgeB, &intersectionPoint);
+        enum IntersectionType intersectType = portalSurfaceIntersect(pointA, &pointDir, edgeA, edgeB, &intersectionPoint);
 
         if (intersectionPoint.equalTest == pointA->equalTest) {
             continue;
@@ -571,6 +576,14 @@ struct Vector2s16* portalSurfaceIntersectEdgeWithLoop(struct PortalSurfaceBuilde
 
         if (intersectType == IntersectionTypePoint) {
             int newPointIndex;
+
+            if (vector2s16DistSqr(&intersectionPoint, pointA) <= COLLAPSE_DISTANCE * COLLAPSE_DISTANCE) {
+                intersectionPoint = *pointA;
+            }
+
+            if (vector2s16DistSqr(&intersectionPoint, pointB) <= COLLAPSE_DISTANCE * COLLAPSE_DISTANCE) {
+                intersectionPoint = *pointB;
+            }
 
             if (intersectionPoint.equalTest == edgeA->equalTest) {
                 newPointIndex = SB_GET_CURRENT_POINT(edge, currentEdge.isReverse);
@@ -618,10 +631,7 @@ struct Vector2s16* portalSurfaceIntersectEdgeWithLoop(struct PortalSurfaceBuilde
         }
     }
 
-    struct Vector2s16 pointB;
-    vector2s16Add(pointA, pointDir, &pointB);
-
-    int newPointIndex = portalSurfaceNewVertex(surfaceBuilder, &pointB);
+    int newPointIndex = portalSurfaceNewVertex(surfaceBuilder, pointB);
 
     portalSurfaceCalcVertex(surfaceBuilder, &surfaceBuilder->edgeOnSearchLoop, newPointIndex);
 
@@ -935,14 +945,12 @@ int portalSurfacePokeHole(struct PortalSurface* surface, struct Vector2s16* loop
 
     for (int index = 1; index <= PORTAL_LOOP_SIZE;) {
         struct Vector2s16* next = &loop[index == PORTAL_LOOP_SIZE ? 0 : index];
-        struct Vector2s16 dir;
 
         if (!portalSurfaceFindNextLoop(&surfaceBuilder, next)) {
             goto error;
         }
 
-        vector2s16Sub(next, prev, &dir);
-        struct Vector2s16* newPoint = portalSurfaceIntersectEdgeWithLoop(&surfaceBuilder, prev, &dir);
+        struct Vector2s16* newPoint = portalSurfaceIntersectEdgeWithLoop(&surfaceBuilder, prev, next);
 
         if (!newPoint) {
             goto error;

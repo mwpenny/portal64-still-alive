@@ -140,6 +140,8 @@ int portalSurfaceIsInside(struct PortalSurface* surface, struct Transform* porta
 
 #define MAX_POS_ADJUST_ITERATIONS   3
 
+#define PORTAL_EDGE_PADDING         3
+
 int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform* portalAt, struct Vector2s16* output, struct Vector2s16* outlineLoopOutput) {
     struct Vector2s16 minPortal;
     struct Vector2s16 maxPortal;
@@ -161,7 +163,7 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
 
     for (int i = 0; i < PORTAL_LOOP_SIZE; ++i) {
         struct Vector3 transformedPoint;
-        transformPoint(portalAt, &gPortalOutlineUnscaled[shouldReverse ? (PORTAL_LOOP_SIZE - 1) - i : i], &transformedPoint);
+        transformPoint(portalAt, &gPortalOutlineWorld[shouldReverse ? (PORTAL_LOOP_SIZE - 1) - i : i], &transformedPoint);
         portalSurface2DPoint(surface, &transformedPoint, &outlineLoopOutput[i]);
 
         minPortal.x = MIN(minPortal.x, outlineLoopOutput[i].x);
@@ -173,8 +175,8 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
 
 
     struct Vector2s16 halfSize;
-    halfSize.x = (maxPortal.x - minPortal.x) >> 1;
-    halfSize.y = (maxPortal.y - minPortal.y) >> 1;
+    halfSize.x = ((maxPortal.x - minPortal.x) >> 1) + PORTAL_EDGE_PADDING * 2;
+    halfSize.y = ((maxPortal.y - minPortal.y) >> 1) + PORTAL_EDGE_PADDING * 2;
 
     int iteration = 0;
 
