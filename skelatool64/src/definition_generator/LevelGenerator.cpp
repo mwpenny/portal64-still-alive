@@ -48,16 +48,49 @@ uint8_t getEdgeIndex(std::map<int, EdgeIndices>& edges, int edgeKey) {
     return result->second.edgeIndex;
 }
 
-std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition& fileDefinition, const CollisionQuad& quad, StaticMeshInfo& mesh, float scale) {
+#define FIXED_POINT_PRECISION   8
+#define FIXED_POINT_SCALAR      (1 << FIXED_POINT_PRECISION)
+
+void toLocalCoords(const aiVector3D& corner, const aiVector3D& edgeA, const aiVector3D& edgeB, const aiVector3D& input, short& outX, short& outY) {
+    aiVector3D relative = input - corner;
+
+    outX = (short)(relative * edgeA * FIXED_POINT_SCALAR + 0.5f);
+    outY = (short)(relative * edgeB * FIXED_POINT_SCALAR + 0.5f);
+}
+
+std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition& fileDefinition, StaticMeshInfo& mesh, float scale) {
     std::unique_ptr<StructureDataChunk> portalSurface(new StructureDataChunk());
 
     std::unique_ptr<StructureDataChunk> vertices(new StructureDataChunk());
 
     std::string name(mesh.staticMesh->mMesh->mName.C_Str());
 
+    aiVector3D origin = (mesh.staticMesh->bbMin + mesh.staticMesh->bbMax) * 0.5f * scale;
+
+    aiVector3D normal;
+
+    for (unsigned i = 0; i < mesh.staticMesh->mMesh->mNumVertices; ++i) {
+        normal = normal + mesh.staticMesh->mMesh->mNormals[i];
+    }
+
+    normal.Normalize();
+    aiVector3D right;
+    aiVector3D up;
+
+    if (fabsf(normal.z) < 0.7f) {
+        right = aiVector3D(0.0f, 1.0f, 0.0f) ^ normal;
+        right.Normalize();
+        up = normal ^ right;
+    } else {
+        right = aiVector3D(1.0f, 0.0f, 0.0f) ^ normal;
+        right.Normalize();
+        up = normal ^ right;
+    }
+
     for (unsigned i = 0; i < mesh.staticMesh->mMesh->mNumVertices; ++i) {
         short x, y;
-        quad.ToLocalCoords(mesh.staticMesh->mMesh->mVertices[i] * scale, x, y);
+
+        toLocalCoords(origin, right, up, mesh.staticMesh->mMesh->mVertices[i] * scale, x, y);
 
         std::unique_ptr<StructureDataChunk> vertexWrapperWrapper(new StructureDataChunk());
         std::unique_ptr<StructureDataChunk> vertexWrapper(new StructureDataChunk());
@@ -180,9 +213,9 @@ std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition
     // shouldCleanup
     portalSurface->AddPrimitive(0);
 
-    portalSurface->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(quad.edgeA)));
-    portalSurface->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(quad.edgeB)));
-    portalSurface->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(quad.corner)));
+    portalSurface->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(right)));
+    portalSurface->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(up)));
+    portalSurface->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(origin)));
 
     std::string vertexBufferName = fileDefinition.GetVertexBuffer(
         mesh.staticMesh, 
@@ -201,17 +234,39 @@ std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition
 void generatePortalSurfacesDefinition(const aiScene* scene, CFileDefinition& fileDefinition, StructureDataChunk& levelDef, const CollisionGeneratorOutput& collisionOutput, const StaticGeneratorOutput& staticOutput, const DisplayListSettings& settings) {
     int surfaceCount = 0;
 
-    std::unique_ptr<StructureDataChunk> portalSurfaceIndices(new StructureDataChunk());
+    std::unique_ptr<StructureDataChunk> portalMappingRange(new StructureDataChunk());
     std::unique_ptr<StructureDataChunk> portalSurfaces(new StructureDataChunk());
 
+    std::vector<int> staticToPortableSurfaceMapping;
+
+    for (auto mesh : staticOutput.staticMeshes) {
+        aiMaterial* material = scene->mMaterials[mesh.staticMesh->mMesh->mMaterialIndex];
+
+        std::string materialName = ExtendedMesh::GetMaterialName(material);
+
+        if (gPortalableSurfaces.find(materialName) == gPortalableSurfaces.end()) {
+            staticToPortableSurfaceMapping.push_back(-1);
+            continue;
+        }
+
+        portalSurfaces->Add(std::move(calculatePortalSingleSurface(fileDefinition, mesh, settings.mModelScale)));
+        staticToPortableSurfaceMapping.push_back(surfaceCount);
+        ++surfaceCount;
+    }
+
+    int mappingIndex = 0;
+    std::unique_ptr<StructureDataChunk> portalMappingData(new StructureDataChunk());
+
     for (auto& collision : collisionOutput.quads) {
-        int startSurfaceCount = surfaceCount;
+        int startMappingIndex = mappingIndex;
 
         aiAABB collisionWithPadding = collision.BoundingBox();
         collisionWithPadding.mMin = collisionWithPadding.mMin - aiVector3D(0.1f, 0.1f, 0.1f);
         collisionWithPadding.mMax = collisionWithPadding.mMax + aiVector3D(0.1f, 0.1f, 0.1f);
 
-        for (auto mesh : staticOutput.staticMeshes) {
+        for (std::size_t staticMeshIndex = 0; staticMeshIndex < staticOutput.staticMeshes.size(); ++staticMeshIndex) {
+            const StaticMeshInfo& mesh = staticOutput.staticMeshes[staticMeshIndex];
+
             aiMaterial* material = scene->mMaterials[mesh.staticMesh->mMesh->mMaterialIndex];
 
             std::string materialName = ExtendedMesh::GetMaterialName(material);
@@ -230,14 +285,19 @@ void generatePortalSurfacesDefinition(const aiScene* scene, CFileDefinition& fil
                 continue;
             }
 
-            portalSurfaces->Add(std::move(calculatePortalSingleSurface(fileDefinition, collision, mesh, settings.mModelScale)));                
-            ++surfaceCount;
+            portalMappingData->AddPrimitive(staticToPortableSurfaceMapping[staticMeshIndex]);
+            ++mappingIndex;
+        }
+
+        if (mappingIndex > 255) {
+            std::cerr << "Mapping index larger than 255" << std::endl;
+            exit(1);
         }
 
         std::unique_ptr<StructureDataChunk> indices(new StructureDataChunk());
-        indices->AddPrimitive(startSurfaceCount);
-        indices->AddPrimitive(surfaceCount);
-        portalSurfaceIndices->Add(std::move(indices));
+        indices->AddPrimitive(startMappingIndex);
+        indices->AddPrimitive(mappingIndex);
+        portalMappingRange->Add(std::move(indices));
     }
 
     std::string surfacesName = fileDefinition.GetUniqueName("portal_surfaces");
@@ -246,10 +306,19 @@ void generatePortalSurfacesDefinition(const aiScene* scene, CFileDefinition& fil
     fileDefinition.AddDefinition(std::move(portalSurfacesDef));
 
     std::string surfaceMappingName = fileDefinition.GetUniqueName("collider_to_surface");
-    fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct PortalSurfaceMapping", surfaceMappingName, true, "_geo", std::move(portalSurfaceIndices))));
+    fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct PortalSurfaceMappingRange", surfaceMappingName, true, "_geo", std::move(portalMappingRange))));
+
+    std::string portalSurfaceMappingIndices = fileDefinition.AddDataDefinition(
+        "mapping_indices",
+        "u8",
+        true,
+        "_geo",
+        std::move(portalMappingData)
+    );
 
     levelDef.AddPrimitive("portalSurfaces", surfacesName);
-    levelDef.AddPrimitive("portalSurfaceMapping", surfaceMappingName);
+    levelDef.AddPrimitive("portalSurfaceMappingRange", surfaceMappingName);
+    levelDef.AddPrimitive("portalSurfaceMappingIndices", portalSurfaceMappingIndices);
     levelDef.AddPrimitive("portalSurfaceCount", surfaceCount);
 }
 

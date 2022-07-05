@@ -136,7 +136,8 @@ struct LevelDefinition {
     struct BoundingBoxs16* staticBoundingBoxes;
     struct PortalSurface* portalSurfaces;
     // maps index of a collisionQuads to indices in portalSurfaces
-    struct PortalSurfaceMapping* portalSurfaceMapping;
+    struct PortalSurfaceMappingRange* portalSurfaceMappingRange;
+    u8* portalSurfaceMappingIndices;
     struct Trigger* triggers;
     struct Cutscene* cutscenes;
     struct Location* locations;

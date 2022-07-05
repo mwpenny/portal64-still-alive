@@ -123,16 +123,6 @@ std::unique_ptr<DataChunk> CollisionQuad::Generate() const {
     return result;
 }
 
-#define FIXED_POINT_PRECISION   8
-#define FIXED_POINT_SCALAR      (1 << FIXED_POINT_PRECISION)
-
-void CollisionQuad::ToLocalCoords(const aiVector3D& input, short& outX, short& outY) const {
-    aiVector3D relative = input - corner;
-
-    outX = (short)(relative * edgeA * FIXED_POINT_SCALAR + 0.5f);
-    outY = (short)(relative * edgeB * FIXED_POINT_SCALAR + 0.5f);
-}
-
 #define INSIDE_NORMAL_TOLERANCE 0.1f
 
 bool CollisionQuad::IsCoplanar(ExtendedMesh& mesh, float relativeScale) const {

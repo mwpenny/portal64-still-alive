@@ -17,8 +17,6 @@ struct CollisionQuad {
 
     std::unique_ptr<DataChunk> Generate() const;
 
-    void ToLocalCoords(const aiVector3D& input, short& outX, short& outY) const;
-
     bool IsCoplanar(ExtendedMesh& mesh, float relativeScale) const;
     bool IsCoplanar(const aiVector3D& input) const;
 

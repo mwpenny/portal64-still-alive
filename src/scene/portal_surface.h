@@ -40,7 +40,7 @@ struct PortalSurface {
     Gfx* triangles;
 };
 
-struct PortalSurfaceMapping {
+struct PortalSurfaceMappingRange {
     u8 minPortalIndex;
     u8 maxPortalIndex;
 };

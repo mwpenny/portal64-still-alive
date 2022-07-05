@@ -261,19 +261,19 @@ enum IntersectionType portalSurfaceIntersect(struct Vector2s16* pointA, struct V
         if (directionDot > 0) {
             // pointing towards b
             if (vector2s16DistSqr(edgeB, pointA) >= vector2s16MagSqr(pointDir)) {
-                // edge ends first
-                *intersection = *edgeB;
-            } else {
                 // point ends first
                 vector2s16Add(pointA, pointDir, intersection);
+            } else {
+                // edge ends first
+                *intersection = *edgeB;
             }
         } else {
             if (vector2s16MagSqr(&originOffset) >= vector2s16MagSqr(pointDir)) {
-                // edge ends first
-                *intersection = *edgeA;
-            } else {
                 // point ends first
                 vector2s16Add(pointA, pointDir, intersection);
+            } else {
+                // edge ends first
+                *intersection = *edgeA;
             }
         }
         
@@ -293,8 +293,10 @@ enum IntersectionType portalSurfaceIntersect(struct Vector2s16* pointA, struct V
         return IntersectionTypeNone;
     }
 
-    intersection->x = (short)((s64)pointDir->x * (s64)pointLerp / (s64)denominator) + pointA->x;
-    intersection->y = (short)((s64)pointDir->y * (s64)pointLerp / (s64)denominator) + pointA->y;
+    s64 halfDenominator = denominator >> 1;
+
+    intersection->x = (short)(((s64)edgeDir.x * (s64)edgeLerp + halfDenominator) / (s64)denominator) + edgeA->x;
+    intersection->y = (short)(((s64)edgeDir.y * (s64)edgeLerp + halfDenominator) / (s64)denominator) + edgeA->y;
 
     return IntersectionTypePoint;
 }

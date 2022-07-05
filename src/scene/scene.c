@@ -271,14 +271,16 @@ void sceneUpdate(struct Scene* scene) {
 }
 
 int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, int quadIndex, int roomIndex) {
-    struct PortalSurfaceMapping surfaceMapping = gCurrentLevel->portalSurfaceMapping[quadIndex];
+    struct PortalSurfaceMappingRange surfaceMapping = gCurrentLevel->portalSurfaceMappingRange[quadIndex];
 
-    for (int i = surfaceMapping.minPortalIndex; i < surfaceMapping.maxPortalIndex; ++i) {
-        struct PortalSurface* existingSurface = portalSurfaceGetOriginalSurface(i, portalIndex);
+    for (int indexIndex = surfaceMapping.minPortalIndex; indexIndex < surfaceMapping.maxPortalIndex; ++indexIndex) {
+        int surfaceIndex = gCurrentLevel->portalSurfaceMappingIndices[indexIndex];
+
+        struct PortalSurface* existingSurface = portalSurfaceGetOriginalSurface(surfaceIndex, portalIndex);
         struct PortalSurface newSurface;
 
         if (portalSurfaceGenerate(existingSurface, at, &newSurface)) {
-            portalSurfaceReplace(i, roomIndex, portalIndex, &newSurface);
+            portalSurfaceReplace(surfaceIndex, roomIndex, portalIndex, &newSurface);
 
             soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &at->position);
             
