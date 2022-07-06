@@ -44,6 +44,8 @@ struct RenderProps {
     short minY;
     short maxX;
     short maxY;
+    
+    s8 clippingPortalIndex;
 };
 
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex);

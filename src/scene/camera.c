@@ -5,7 +5,7 @@
 #include "../graphics/graphics.h"
 
 int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox) {
-    for (int i = 0; i < CLIPPING_PLANE_COUNT; ++i) {
+    for (int i = 0; i < frustrum->usedClippingPlaneCount; ++i) {
         struct Vector3 closestPoint;
 
         struct Vector3* normal = &frustrum->clippingPlanes[i].normal;
@@ -24,7 +24,7 @@ int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Boundi
 }
 
 int isSphereOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Vector3* scaledCenter, float scaledRadius) {
-    for (int i = 0; i < CLIPPING_PLANE_COUNT; ++i) {
+    for (int i = 0; i < frustrum->usedClippingPlaneCount; ++i) {
         if (planePointDistance(&frustrum->clippingPlanes[i], scaledCenter) < -scaledRadius) {
             return 1;
         }
@@ -34,7 +34,7 @@ int isSphereOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct 
 }
 
 int isQuadOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct CollisionQuad* quad) {
-    for (int i = 0; i < CLIPPING_PLANE_COUNT; ++i) {
+    for (int i = 0; i < frustrum->usedClippingPlaneCount; ++i) {
         struct Vector3* normal = &frustrum->clippingPlanes[i].normal;
         float aLerp = vector3Dot(normal, &quad->edgeA) < 0.0f ? 0.0f : quad->edgeALength;
         float bLerp = vector3Dot(normal, &quad->edgeB) < 0.0f ? 0.0f : quad->edgeBLength;
@@ -126,6 +126,7 @@ Mtx* cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState,
         cameraExtractClippingPlane(combined, &clippingInfo->clippingPlanes[3], 1, -1.0f);
         cameraExtractClippingPlane(combined, &clippingInfo->clippingPlanes[4], 2, 1.0f);
         clippingInfo->cameraPos = camera->transform.position;
+        clippingInfo->usedClippingPlaneCount = 5;
     }
 
     gSPMatrix(renderState->dl++, osVirtualToPhysical(&viewProjMatrix[1]), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);

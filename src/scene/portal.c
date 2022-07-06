@@ -6,6 +6,7 @@
 #include "../defs.h"
 #include "dynamic_scene.h"
 #include "../physics/collision_scene.h"
+#include "../math/mathf.h"
 
 #define CALC_SCREEN_SPACE(clip_space, screen_size) ((clip_space + 1.0f) * ((screen_size) / 2))
 
@@ -48,6 +49,8 @@ struct Quaternion gVerticalFlip = {0.0f, 1.0f, 0.0f, 0.0f};
 
 #define PORTAL_CLIPPING_PLANE_BIAS  (SCENE_SCALE * 0.25f)
 
+#define CAMERA_CLIPPING_RADIUS  0.2f
+
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex) {
     props->camera = *camera;
     props->aspectRatio = aspectRatio;
@@ -65,6 +68,40 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
     quatLook(&offset, &gUp, &externalCamera.transform.rotation);
     props->perspectiveMatrix = cameraSetupMatrices(&externalCamera, renderState, aspectRatio, &props->perspectiveCorrect, &fullscreenViewport, NULL, 0.0f);
 #endif
+
+    props->clippingPortalIndex = -1;
+
+    if (collisionSceneIsPortalOpen()) {
+        for (int i = 0; i < 2; ++i) {
+            struct Vector3 portalOffset;
+
+            vector3Sub(&camera->transform.position, &gCollisionScene.portalTransforms[i]->position, &portalOffset);
+
+            struct Vector3 portalNormal;
+            quatMultVector(&gCollisionScene.portalTransforms[i]->rotation, &gForward, &portalNormal);
+            struct Vector3 projectedPoint;
+
+            if (i == 0) {
+                vector3Negate(&portalNormal, &portalNormal);
+            }
+
+            float clippingDistnace = vector3Dot(&portalNormal, &portalOffset);
+
+            if (fabsf(clippingDistnace) > CAMERA_CLIPPING_RADIUS) {
+                continue;
+            }
+
+            vector3AddScaled(&camera->transform.position, &portalNormal, -clippingDistnace, &projectedPoint);
+
+            if (collisionSceneIsTouchingSinglePortal(&projectedPoint, &portalNormal, gCollisionScene.portalTransforms[i], i)) {
+                vector3Negate(&portalNormal, &portalNormal);
+                planeInitWithNormalAndPoint(&props->cullingInfo.clippingPlanes[5], &portalNormal, &gCollisionScene.portalTransforms[i]->position);
+                ++props->cullingInfo.usedClippingPlaneCount;
+                props->clippingPortalIndex = i;
+                break;
+            }
+        }
+    }
 
     props->minX = 0;
     props->minY = 0;
@@ -149,12 +186,15 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
     next->perspectiveMatrix = cameraSetupMatrices(&externalCamera, renderState, (float)SCREEN_WD / (float)SCREEN_HT, &next->perspectiveCorrect, &fullscreenViewport, NULL, zBias);
 #endif
 
-    // set the near clipping plane to be the exit portal surface
-    quatMultVector(&toPortal->rotation, &gForward, &next->cullingInfo.clippingPlanes[4].normal);
-    if (toPortal < fromPortal) {
-        vector3Negate(&next->cullingInfo.clippingPlanes[4].normal, &next->cullingInfo.clippingPlanes[4].normal);
+    if (current->clippingPortalIndex != -1) {
+        // set the near clipping plane to be the exit portal surface
+        quatMultVector(&toPortal->rotation, &gForward, &next->cullingInfo.clippingPlanes[4].normal);
+        if (toPortal < fromPortal) {
+            vector3Negate(&next->cullingInfo.clippingPlanes[4].normal, &next->cullingInfo.clippingPlanes[4].normal);
+        }
+        next->cullingInfo.clippingPlanes[4].d = -vector3Dot(&next->cullingInfo.clippingPlanes[4].normal, &toPortal->position) * SCENE_SCALE - PORTAL_CLIPPING_PLANE_BIAS;
     }
-    next->cullingInfo.clippingPlanes[4].d = -vector3Dot(&next->cullingInfo.clippingPlanes[4].normal, &toPortal->position) * SCENE_SCALE - PORTAL_CLIPPING_PLANE_BIAS;
+    next->clippingPortalIndex = -1;
 
     next->currentDepth = current->currentDepth - 1;
     next->fromPortalIndex = toPortal < fromPortal ? 0 : 1;
@@ -219,26 +259,35 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
         return;
     }
 
-    screenClipperInitWithCamera(&clipper, &props->camera, (float)SCREEN_WD / (float)SCREEN_HT, portalTransform);
-
-    struct Box2D clippingBounds;
-
-    screenClipperBoundingPoints(&clipper, gPortalOutline, sizeof(gPortalOutline) / sizeof(*gPortalOutline), &clippingBounds);
-
     struct RenderProps nextProps;
 
-    nextProps.minX = CALC_SCREEN_SPACE(clippingBounds.min.x, SCREEN_WD);
-    nextProps.maxX = CALC_SCREEN_SPACE(clippingBounds.max.x, SCREEN_WD);
-    nextProps.minY = CALC_SCREEN_SPACE(-clippingBounds.max.y, SCREEN_HT);
-    nextProps.maxY = CALC_SCREEN_SPACE(-clippingBounds.min.y, SCREEN_HT);
+    int portalIndex = portal < otherPortal ? 0 : 1;
 
-    nextProps.minX = MAX(nextProps.minX, props->minX);
-    nextProps.maxX = MIN(nextProps.maxX, props->maxX);
-    nextProps.minY = MAX(nextProps.minY, props->minY);
-    nextProps.maxY = MIN(nextProps.maxY, props->maxY);
+    if (props->clippingPortalIndex == portalIndex) {
+        nextProps.minX = props->minX;
+        nextProps.maxX = props->maxX;
+        nextProps.minY = props->minY;
+        nextProps.maxY = props->maxY;
+    } else {
+        screenClipperInitWithCamera(&clipper, &props->camera, (float)SCREEN_WD / (float)SCREEN_HT, portalTransform);
+
+        struct Box2D clippingBounds;
+
+        screenClipperBoundingPoints(&clipper, gPortalOutline, sizeof(gPortalOutline) / sizeof(*gPortalOutline), &clippingBounds);
+
+
+        nextProps.minX = CALC_SCREEN_SPACE(clippingBounds.min.x, SCREEN_WD);
+        nextProps.maxX = CALC_SCREEN_SPACE(clippingBounds.max.x, SCREEN_WD);
+        nextProps.minY = CALC_SCREEN_SPACE(-clippingBounds.max.y, SCREEN_HT);
+        nextProps.maxY = CALC_SCREEN_SPACE(-clippingBounds.min.y, SCREEN_HT);
+
+        nextProps.minX = MAX(nextProps.minX, props->minX);
+        nextProps.maxX = MIN(nextProps.maxX, props->maxX);
+        nextProps.minY = MAX(nextProps.minY, props->minY);
+        nextProps.maxY = MIN(nextProps.maxY, props->maxY);
+    }
 
     if (nextProps.minX < nextProps.maxX && nextProps.minY < nextProps.maxY) {
-
         renderPropsNext(props, &nextProps, &portal->transform, &otherPortal->transform, renderState);
         sceneRenderer(data, &nextProps, renderState);
 

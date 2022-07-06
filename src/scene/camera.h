@@ -11,7 +11,7 @@
 #include "../physics/collision_quad.h"
 #include "../math/boxs16.h"
 
-#define CLIPPING_PLANE_COUNT    5
+#define MAX_CLIPPING_PLANE_COUNT    6
 
 struct Camera {
     struct Transform transform;
@@ -21,7 +21,8 @@ struct Camera {
 };
 
 struct FrustrumCullingInformation {
-    struct Plane clippingPlanes[CLIPPING_PLANE_COUNT];
+    struct Plane clippingPlanes[MAX_CLIPPING_PLANE_COUNT];
+    short usedClippingPlaneCount;
 
     struct Vector3 cameraPos;
 };
