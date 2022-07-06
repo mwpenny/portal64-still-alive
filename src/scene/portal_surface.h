@@ -24,10 +24,8 @@ struct SurfaceEdge {
 
 struct PortalSurface {
     struct Vector2s16* vertices;
-    // first sideCount edges are on the side
     struct SurfaceEdge* edges;
-
-    u8 sideCount;
+    
     u8 edgeCount;
     u8 vertexCount;
     u8 shouldCleanup;
@@ -54,17 +52,21 @@ struct PortalSurfaceReplacement {
     short flags;
     short staticIndex;
     short portalSurfaceIndex;
+    short roomIndex;
 };
+
+int portalSurfaceAreBothOnSameSurface();
+int portalSurfaceShouldSwapOrder(int portalToMove);
 
 int portalSurfaceIsInside(struct PortalSurface* surface, struct Transform* portalAt);
 
-int portalSurfaceGenerate(struct PortalSurface* surface, struct Transform* portalAt, struct PortalSurface* newSurface);
+int portalSurfaceGenerate(struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt, int portalIndex, struct Transform* otherPortalAt, struct PortalSurface* newSurface);
 
 void portalSurfaceCleanup(struct PortalSurface* portalSurface);
 
 struct PortalSurface* portalSurfaceGetOriginalSurface(int portalSurfaceIndex, int portalIndex);
 
-void portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex, struct PortalSurface* with);
+struct PortalSurface* portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex, struct PortalSurface* with);
 void portalSurfaceCheckCleanupQueue();
 
 #endif

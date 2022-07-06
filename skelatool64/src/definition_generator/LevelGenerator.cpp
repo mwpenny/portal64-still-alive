@@ -176,14 +176,9 @@ std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition
         ++edgeIndex;
     }
 
-    int sideCount = 0;
-
     std::unique_ptr<StructureDataChunk> edges(new StructureDataChunk());
 
     for (auto key : edgeOrder) {
-        if (edgeUseCount[key] == 1) {
-            ++sideCount;
-        }
 
         std::unique_ptr<StructureDataChunk> edge(new StructureDataChunk());
         EdgeIndices indices = edgeDirection[key];
@@ -204,8 +199,6 @@ std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition
     // edges
     portalSurface->AddPrimitive(edgesName);
 
-    // sideCount
-    portalSurface->AddPrimitive(sideCount);
     // edgesCount
     portalSurface->AddPrimitive(edgeOrder.size());
     // vertexCount

@@ -45,6 +45,8 @@ struct PortalSurfaceBuilder {
     short currentVertex;
     short currentEdge;
 
+    short checkForEdgeReuse;
+
     u8* isLoopEdge;
     u8* edgeFlags;
     struct OriginalEdgeMapping* originalEdgeIndex;

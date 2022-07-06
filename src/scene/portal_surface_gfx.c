@@ -196,10 +196,8 @@ struct DisplayListResult newGfxFromSurfaceBuilder(struct PortalSurfaceBuilder* s
     struct GfxBuilderState builderState;
 
     int possibleTriangleCount = (
-        // double sided edge count
-        (surfaceBuilder->currentEdge - surfaceBuilder->original->sideCount) * 2 
-        // single sided edge count
-        + surfaceBuilder->original->sideCount 
+        // each edge can have 2 sides
+        surfaceBuilder->currentEdge * 2
         // round up just in case
         + 2
     ) / 3;

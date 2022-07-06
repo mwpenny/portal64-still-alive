@@ -279,7 +279,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
         struct PortalSurface* existingSurface = portalSurfaceGetOriginalSurface(surfaceIndex, portalIndex);
         struct PortalSurface newSurface;
 
-        if (portalSurfaceGenerate(existingSurface, at, &newSurface)) {
+        if (portalSurfaceGenerate(existingSurface, surfaceIndex, at, portalIndex, &scene->portals[1 - portalIndex].transform, &newSurface)) {
             portalSurfaceReplace(surfaceIndex, roomIndex, portalIndex, &newSurface);
 
             soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &at->position);

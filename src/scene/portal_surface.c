@@ -33,11 +33,30 @@ void portalSurfaceCheckCleanupQueue() {
 
 struct PortalSurfaceReplacement gPortalSurfaceReplacements[2];
 
+int portalSurfaceAreBothOnSameSurface() {
+    return (gPortalSurfaceReplacements[0].flags & PortalSurfaceReplacementFlagsIsEnabled) != 0 &&
+        (gPortalSurfaceReplacements[1].flags & PortalSurfaceReplacementFlagsIsEnabled) != 0 &&
+        gPortalSurfaceReplacements[0].portalSurfaceIndex == gPortalSurfaceReplacements[1].portalSurfaceIndex;
+}
+
+int portalSurfaceShouldSwapOrder(int portalToMove) {
+    if (!portalSurfaceAreBothOnSameSurface()) {
+        return 0;
+    }
+
+    return gPortalSurfaceReplacements[1 - portalToMove].previousSurface.shouldCleanup;
+}
+
 void portalSurfaceReplacementRevert(struct PortalSurfaceReplacement* replacement) {
     gCurrentLevel->staticContent[replacement->staticIndex].displayList = replacement->previousSurface.triangles;
     portalSurfaceCleanup(&gCurrentLevel->portalSurfaces[replacement->portalSurfaceIndex]);
     gCurrentLevel->portalSurfaces[replacement->portalSurfaceIndex] = replacement->previousSurface;
     replacement->flags = 0;
+}
+
+void portalSurfacePreSwap(int portalToMove) {
+    portalSurfaceReplacementRevert(&gPortalSurfaceReplacements[1 - portalToMove]);
+    portalSurfaceReplacementRevert(&gPortalSurfaceReplacements[portalToMove]);
 }
 
 struct PortalSurface* portalSurfaceGetOriginalSurface(int portalSurfaceIndex, int portalIndex) {
@@ -51,7 +70,7 @@ struct PortalSurface* portalSurfaceGetOriginalSurface(int portalSurfaceIndex, in
     }
 }
 
-void portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex, struct PortalSurface* with) {
+struct PortalSurface* portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex, struct PortalSurface* with) {
     int staticIndex = -1;
 
     struct PortalSurfaceReplacement* replacement = &gPortalSurfaceReplacements[portalIndex];
@@ -72,16 +91,19 @@ void portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex
 
     if (staticIndex == range.max) {
         portalSurfaceCleanup(with);
-        return;
+        return NULL;
     }
 
     replacement->previousSurface = *existing;
     replacement->flags = PortalSurfaceReplacementFlagsIsEnabled;
     replacement->staticIndex = staticIndex;
     replacement->portalSurfaceIndex = portalSurfaceIndex;
+    replacement->roomIndex = roomIndex;
 
     gCurrentLevel->staticContent[staticIndex].displayList = with->triangles;
     gCurrentLevel->portalSurfaces[portalSurfaceIndex] = *with;
+
+    return &gCurrentLevel->portalSurfaces[portalSurfaceIndex];
 }
 
 void portalSurface2DPoint(struct PortalSurface* surface, struct Vector3* at, struct Vector2s16* output) {
@@ -102,8 +124,14 @@ int portalSurfaceIsInside(struct PortalSurface* surface, struct Transform* porta
     struct Vector2s16 portalPosition;
     portalSurface2DPoint(surface, &portalAt->position, &portalPosition);
 
-    for (int i = 0; i < surface->sideCount; ++i) {
+    for (int i = 0; i < surface->edgeCount; ++i) {
         struct SurfaceEdge* edge = &surface->edges[i];
+
+        // only check edges that are one sided
+        if (edge->nextEdgeReverse != NO_EDGE_CONNECTION) {
+            continue;
+        }
+
         struct Vector2s16 a = surface->vertices[edge->aIndex];
         struct Vector2s16 b = surface->vertices[edge->bIndex];
 
@@ -184,75 +212,70 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
         int minOverlap = PORTAL_SURFACE_OVERLAP;
         struct Vector2s16 minOverlapOffset;
 
-        for (int i = 0; i < surface->sideCount; ++i) {
+        struct Vector2s16 portalMin;
+        portalMin.x = output->x - halfSize.x;
+        portalMin.y = output->y - halfSize.y;
+        struct Vector2s16 portalMax;
+        portalMax.x = output->x + halfSize.x;
+        portalMax.y = output->y + halfSize.y;
+
+        for (int i = 0; i < surface->edgeCount; ++i) {
             struct SurfaceEdge* edge = &surface->edges[i];
-            struct Vector2s16 a = surface->vertices[edge->aIndex];
 
-            int offsetX = output->x - a.x;
-            int offsetY = output->y - a.y;
-
-            int xOverlap = halfSize.x - abs(offsetX);
-            int yOverlap = halfSize.y - abs(offsetY);
-
-            // check if vertex is inside portal BB
-            if (xOverlap > 0 && yOverlap > 0) {
-                if (xOverlap < yOverlap) {
-                    if (xOverlap < minOverlap) {
-                        minOverlap = xOverlap;
-                        minOverlapOffset.x = xOverlap * sign(offsetX);
-                        minOverlapOffset.y = 0;
-                    }
-                } else {
-                    if (yOverlap < minOverlap) {
-                        minOverlap = yOverlap;
-                        minOverlapOffset.x = 0;
-                        minOverlapOffset.y = yOverlap * sign(offsetY);
-                    }
-                }
-
+            // only check edges that are one sided
+            if (edge->nextEdgeReverse != NO_EDGE_CONNECTION) {
                 continue;
             }
 
-            // check if line intersects portal BB
-
+            struct Vector2s16 a = surface->vertices[edge->aIndex];
             struct Vector2s16 b = surface->vertices[edge->bIndex];
 
+            struct Vector2s16 edgeMin;
+            edgeMin.x = MIN(a.x, b.x);
+            edgeMin.y = MIN(a.y, b.y);
+
+            struct Vector2s16 edgeMax;
+            edgeMax.x = MAX(a.x, b.x);
+            edgeMax.y = MAX(a.y, b.y);
+
+            // the line bounding box doesn't intersect the portal bounding box
+            if (portalMax.x <= edgeMin.x || portalMin.x >= edgeMax.x ||
+                portalMax.y <= edgeMin.y || portalMin.y >= edgeMax.y) {
+                continue;
+            }
+
             struct Vector2s16 offset;
-            offset.x = b.x - a.x;
-            offset.y = b.y - a.y;
+            int distance = portalMax.x - edgeMin.x;
+            offset.x = -distance;
+            offset.y = 0;
 
-            int lineAxis;
-            int crossAxis;
-            int crossDirection;
+            int distanceCheck = edgeMax.x - portalMin.x;
 
-            if (abs(offset.x) > abs(offset.y)) {
-                lineAxis = 0;
-                crossAxis = 1;
-                crossDirection = -sign(offset.x);
-            } else {
-                lineAxis = 1;
-                crossAxis = 0;
-                crossDirection = sign(offset.y);
+            if (distanceCheck < distance) {
+                distance = distanceCheck;
+                offset.x = distance;
+                offset.y = 0;
             }
 
-            int portalPosLineAxis = VECTOR2s16_AS_ARRAY(output)[lineAxis];
+            distanceCheck = portalMax.y - edgeMin.y;
 
-            // check line endpoints relative to the portal position
-            if ((VECTOR2s16_AS_ARRAY(&a)[lineAxis] - portalPosLineAxis) * (VECTOR2s16_AS_ARRAY(&b)[lineAxis] - portalPosLineAxis) >= 0) {
-                continue;
+            if (distanceCheck < distance) {
+                distance = distanceCheck;
+                offset.x = 0;
+                offset.y = -distance;
             }
 
-            int boxPosition = VECTOR2s16_AS_ARRAY(output)[crossAxis] + crossDirection * VECTOR2s16_AS_ARRAY(&halfSize)[crossAxis];
-            int distance = (boxPosition - VECTOR2s16_AS_ARRAY(&a)[crossAxis]) * crossDirection;
+            distanceCheck = edgeMax.y - portalMin.y;
 
-            if (distance <= 0 || distance >= VECTOR2s16_AS_ARRAY(&halfSize)[crossAxis]) {
-                continue;
+            if (distanceCheck < distance) {
+                distance = distanceCheck;
+                offset.x = 0;
+                offset.y = distance;
             }
 
             if (distance < minOverlap) {
                 minOverlap = distance;
-                VECTOR2s16_AS_ARRAY(&minOverlapOffset)[lineAxis] = 0;
-                VECTOR2s16_AS_ARRAY(&minOverlapOffset)[crossAxis] = -distance * crossDirection;
+                minOverlapOffset = offset;
             }
         }
 
@@ -279,7 +302,7 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
     return iteration != MAX_POS_ADJUST_ITERATIONS;
 }
 
-int portalSurfaceGenerate(struct PortalSurface* surface, struct Transform* portalAt, struct PortalSurface* newSurface) {
+int portalSurfaceGenerate(struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt, int portalIndex, struct Transform* otherPortalAt, struct PortalSurface* newSurface) {
     // determine if portal is on surface
     if (!portalSurfaceIsInside(surface, portalAt)) {
         return 0;
@@ -289,6 +312,28 @@ int portalSurfaceGenerate(struct PortalSurface* surface, struct Transform* porta
     struct Vector2s16 portalOutline[PORTAL_LOOP_SIZE];
     if (!portalSurfaceAdjustPosition(surface, portalAt, &correctPosition, portalOutline)) {
         return 0;
+    }
+
+    if (otherPortalAt && portalSurfaceShouldSwapOrder(portalIndex)) {
+        int existingSurfaceIndex = gPortalSurfaceReplacements[1 - portalIndex].portalSurfaceIndex;
+        int roomIndex = gPortalSurfaceReplacements[1 - portalIndex].roomIndex;
+
+        portalSurfacePreSwap(portalIndex);
+        struct PortalSurface newUnderSurface;
+
+        if (!portalSurfaceGenerate(&gCurrentLevel->portalSurfaces[existingSurfaceIndex], existingSurfaceIndex, otherPortalAt, 1 - portalIndex, 0, &newUnderSurface)) {
+            return 0;
+        }
+
+        struct PortalSurface* newSurface = portalSurfaceReplace(existingSurfaceIndex, roomIndex, 1 - portalIndex, &newUnderSurface);
+
+        if (!newSurface) {
+            return 0;
+        }
+
+        if (surfaceIndex == existingSurfaceIndex) {
+            surface = newSurface;
+        }
     }
 
     if (!portalSurfacePokeHole(surface, portalOutline, newSurface)) {
