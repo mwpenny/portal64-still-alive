@@ -102,7 +102,6 @@ void screenClipperBoundingPoints(struct ScreenClipper* clipper, struct Vector3* 
     pointCount = screenClipperClipBoundary(clipper, clipBufferSwap, clipBuffer, pointCount, 0, -1);
     pointCount = screenClipperClipBoundary(clipper, clipBuffer, clipBufferSwap, pointCount, 1, 1);
     pointCount = screenClipperClipBoundary(clipper, clipBufferSwap, clipBuffer, pointCount, 1, -1);
-    pointCount = screenClipperClipBoundary(clipper, clipBuffer, clipBufferSwap, pointCount, 2, -1);
 
     for (unsigned i = 0; i < pointCount; ++i) {
         screenClipperIncludePoint(&clipBufferSwap[i], output);

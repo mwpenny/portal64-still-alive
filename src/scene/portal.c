@@ -266,31 +266,22 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
 
     struct RenderProps nextProps;
 
-    int portalIndex = portal < otherPortal ? 0 : 1;
+    screenClipperInitWithCamera(&clipper, &props->camera, (float)SCREEN_WD / (float)SCREEN_HT, portalTransform);
 
-    if (props->clippingPortalIndex == portalIndex) {
-        nextProps.minX = props->minX;
-        nextProps.maxX = props->maxX;
-        nextProps.minY = props->minY;
-        nextProps.maxY = props->maxY;
-    } else {
-        screenClipperInitWithCamera(&clipper, &props->camera, (float)SCREEN_WD / (float)SCREEN_HT, portalTransform);
+    struct Box2D clippingBounds;
 
-        struct Box2D clippingBounds;
-
-        screenClipperBoundingPoints(&clipper, gPortalOutline, sizeof(gPortalOutline) / sizeof(*gPortalOutline), &clippingBounds);
+    screenClipperBoundingPoints(&clipper, gPortalOutline, sizeof(gPortalOutline) / sizeof(*gPortalOutline), &clippingBounds);
 
 
-        nextProps.minX = CALC_SCREEN_SPACE(clippingBounds.min.x, SCREEN_WD);
-        nextProps.maxX = CALC_SCREEN_SPACE(clippingBounds.max.x, SCREEN_WD);
-        nextProps.minY = CALC_SCREEN_SPACE(-clippingBounds.max.y, SCREEN_HT);
-        nextProps.maxY = CALC_SCREEN_SPACE(-clippingBounds.min.y, SCREEN_HT);
+    nextProps.minX = CALC_SCREEN_SPACE(clippingBounds.min.x, SCREEN_WD);
+    nextProps.maxX = CALC_SCREEN_SPACE(clippingBounds.max.x, SCREEN_WD);
+    nextProps.minY = CALC_SCREEN_SPACE(-clippingBounds.max.y, SCREEN_HT);
+    nextProps.maxY = CALC_SCREEN_SPACE(-clippingBounds.min.y, SCREEN_HT);
 
-        nextProps.minX = MAX(nextProps.minX, props->minX);
-        nextProps.maxX = MIN(nextProps.maxX, props->maxX);
-        nextProps.minY = MAX(nextProps.minY, props->minY);
-        nextProps.maxY = MIN(nextProps.maxY, props->maxY);
-    }
+    nextProps.minX = MAX(nextProps.minX, props->minX);
+    nextProps.maxX = MIN(nextProps.maxX, props->maxX);
+    nextProps.minY = MAX(nextProps.minY, props->minY);
+    nextProps.maxY = MIN(nextProps.maxY, props->maxY);
 
     if (nextProps.minX < nextProps.maxX && nextProps.minY < nextProps.maxY) {
         renderPropsNext(props, &nextProps, &portal->transform, &otherPortal->transform, renderState);
