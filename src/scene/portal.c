@@ -8,30 +8,38 @@
 #include "../physics/collision_scene.h"
 #include "../math/mathf.h"
 
+#include "../build/assets/models/portal/portal_blue.h"
+#include "../build/assets/models/portal/portal_orange.h"
+#include "../build/assets/models/portal/portal_blue_filled.h"
+#include "../build/assets/models/portal/portal_orange_filled.h"
+
+#include "../build/assets/models/portal/portal_face.h"
+
 #define CALC_SCREEN_SPACE(clip_space, screen_size) ((clip_space + 1.0f) * ((screen_size) / 2))
 
+#define PORTAL_SCALE_Y  0.8f
+#define PORTAL_SCALE_X  0.95f
+
 struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE] = {
-    {0.0f, 1.0f * SCENE_SCALE, 0.0f},
-    {0.353553f * SCENE_SCALE, 0.707107f * SCENE_SCALE, 0.0f},
-    {0.5f * SCENE_SCALE, 0.0f, 0.0f},
-    {0.353553f * SCENE_SCALE, -0.707107f * SCENE_SCALE, 0.0f},
-    {0.0f, -1.0f * SCENE_SCALE, 0.0f},
-    {-0.353553f * SCENE_SCALE, -0.707107f * SCENE_SCALE, 0.0f},
-    {-0.5f * SCENE_SCALE, 0.0f, 0.0f},
-    {-0.353553f * SCENE_SCALE, 0.707107f * SCENE_SCALE, 0.0f},
+    {0.0f, 1.0f * SCENE_SCALE * PORTAL_SCALE_Y, 0.0f},
+    {0.353553f * SCENE_SCALE * PORTAL_SCALE_X, 0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, 0.0f},
+    {0.5f * SCENE_SCALE * PORTAL_SCALE_X, 0.0f, 0.0f},
+    {0.353553f * SCENE_SCALE * PORTAL_SCALE_X, -0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, 0.0f},
+    {0.0f, -1.0f * SCENE_SCALE * PORTAL_SCALE_Y, 0.0f},
+    {-0.353553f * SCENE_SCALE * PORTAL_SCALE_X, -0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, 0.0f},
+    {-0.5f * SCENE_SCALE* PORTAL_SCALE_X, 0.0f, 0.0f},
+    {-0.353553f * SCENE_SCALE * PORTAL_SCALE_X, 0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, 0.0f},
 };
 
-#define PORTAL_OUTLINE_WORLD_SCALE  0.95f
-
 struct Vector3 gPortalOutlineWorld[PORTAL_LOOP_SIZE] = {
-    {-0.353553f * PORTAL_OUTLINE_WORLD_SCALE, 0.707107f * PORTAL_OUTLINE_WORLD_SCALE, 0.0f},
-    {-0.5f * PORTAL_OUTLINE_WORLD_SCALE, 0.0f, 0.0f},
-    {-0.353553f * PORTAL_OUTLINE_WORLD_SCALE, -0.707107f * PORTAL_OUTLINE_WORLD_SCALE, 0.0f},
-    {0.0f, -1.0f * PORTAL_OUTLINE_WORLD_SCALE, 0.0f},
-    {0.353553f * PORTAL_OUTLINE_WORLD_SCALE, -0.707107f * PORTAL_OUTLINE_WORLD_SCALE, 0.0f},
-    {0.5f * PORTAL_OUTLINE_WORLD_SCALE, 0.0f, 0.0f},
-    {0.353553f * PORTAL_OUTLINE_WORLD_SCALE, 0.707107f * PORTAL_OUTLINE_WORLD_SCALE, 0.0f},
-    {0.0f, 1.0f * PORTAL_OUTLINE_WORLD_SCALE, 0.0f},
+    {-0.353553f * PORTAL_SCALE_X, 0.707107f * PORTAL_SCALE_Y, 0.0f},
+    {-0.5f * PORTAL_SCALE_X, 0.0f, 0.0f},
+    {-0.353553f * PORTAL_SCALE_X, -0.707107f * PORTAL_SCALE_Y, 0.0f},
+    {0.0f, -1.0f * PORTAL_SCALE_Y, 0.0f},
+    {0.353553f * PORTAL_SCALE_X, -0.707107f * PORTAL_SCALE_Y, 0.0f},
+    {0.5f * PORTAL_SCALE_X, 0.0f, 0.0f},
+    {0.353553f * PORTAL_SCALE_X, 0.707107f * PORTAL_SCALE_Y, 0.0f},
+    {0.0f, 1.0f * PORTAL_SCALE_Y, 0.0f},
 };
 
 #define SHOW_EXTERNAL_VIEW  0
@@ -94,8 +102,8 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
             vector3AddScaled(&camera->transform.position, &portalNormal, -clippingDistnace, &projectedPoint);
 
             if (collisionSceneIsTouchingSinglePortal(&projectedPoint, &portalNormal, gCollisionScene.portalTransforms[i], i)) {
-                vector3Negate(&portalNormal, &portalNormal);
                 planeInitWithNormalAndPoint(&props->cullingInfo.clippingPlanes[5], &portalNormal, &gCollisionScene.portalTransforms[i]->position);
+                props->cullingInfo.clippingPlanes[5].d *= SCENE_SCALE;
                 ++props->cullingInfo.usedClippingPlaneCount;
                 props->clippingPortalIndex = i;
                 break;
@@ -247,14 +255,11 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
 
         guMtxF2L(portalTransform, matrix);
         gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
-        gDPPipeSync(renderState->dl++);
         if (portal->flags & PortalFlagsOddParity) {
-            gDPSetPrimColor(renderState->dl++, 0, 0, 0, 128, 255, 255);
+            gSPDisplayList(renderState->dl++, portal_portal_blue_filled_model_gfx);
         } else {
-            gDPSetPrimColor(renderState->dl++, 0, 0, 255, 128, 0, 255);
+            gSPDisplayList(renderState->dl++, portal_portal_orange_filled_model_gfx);
         }
-        gSPDisplayList(renderState->dl++, portal_outline_portal_outline_mesh);
-        gSPDisplayList(renderState->dl++, portal_mask_Circle_mesh_tri_0);
         gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
         return;
     }
@@ -302,14 +307,13 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
 
         guMtxF2L(portalTransform, matrix);
         gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
-        gSPDisplayList(renderState->dl++, portal_mask_Circle_mesh);
+        gSPDisplayList(renderState->dl++, portal_portal_face_model_gfx);
         gDPPipeSync(renderState->dl++);
         if (portal->flags & PortalFlagsOddParity) {
-            gDPSetPrimColor(renderState->dl++, 0, 0, 0, 128, 255, 255);
+            gSPDisplayList(renderState->dl++, portal_portal_blue_model_gfx);
         } else {
-            gDPSetPrimColor(renderState->dl++, 0, 0, 255, 128, 0, 255);
+            gSPDisplayList(renderState->dl++, portal_portal_orange_model_gfx);
         }
-        gSPDisplayList(renderState->dl++, portal_outline_portal_outline_mesh);
         gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
     }
 

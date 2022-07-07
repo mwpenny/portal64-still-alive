@@ -118,7 +118,13 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
         otherPortal = 1 - otherPortal;
     }
 
+    if (properties->clippingPortalIndex != -1) {
+        gForceRenderStaticIndex = portalSurfaceStaticIndexForReplacement(properties->clippingPortalIndex);
+    }
+
     staticRender(&properties->camera.transform, &properties->cullingInfo, visibleRooms, renderState);
+
+    gForceRenderStaticIndex = -1;
 }
 
 #define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT

@@ -362,3 +362,28 @@ materials:
       alpha: ["0", "0", "0", "TEXEL0"]
     gSPGeometryMode:
       clear: [G_CULL_BACK, G_CULL_FRONT]
+
+  z_update:
+    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetCombineMode: 
+      color: ["0", "0", "0", "PRIMITIVE"]
+      alpha: ["0", "0", "0", "PRIMITIVE"]
+    gDPSetRenderMode: 
+      flags:
+        - Z_CMP
+        - Z_UPD
+        - IM_RD
+        - CVG_DST_WRAP
+        - CLR_ON_CVG
+        - FORCE_BL
+        - ZMODE_XLU
+      blend:
+        - G_BL_CLR_IN
+        - G_BL_A_IN
+        - G_BL_CLR_MEM
+        - G_BL_1MA
+    gDPSetPrimColor:
+      r: 0
+      g: 0
+      b: 0
+      a: 0

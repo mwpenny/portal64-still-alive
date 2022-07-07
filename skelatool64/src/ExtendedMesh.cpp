@@ -31,6 +31,11 @@ aiMesh* copyMesh(aiMesh* mesh) {
 
             std::copy(mesh->mTextureCoords[i], mesh->mTextureCoords[i] + result->mNumVertices, result->mTextureCoords[i]);
         }
+
+        if (mesh->mColors[i]) {
+            result->mColors[i] = new aiColor4D[result->mNumVertices];
+            std::copy(mesh->mColors[i], mesh->mColors[i] + result->mNumVertices, result->mColors[i]);
+        }
     }
 
     result->mName = mesh->mName;

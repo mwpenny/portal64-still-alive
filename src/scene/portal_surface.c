@@ -59,6 +59,10 @@ void portalSurfacePreSwap(int portalToMove) {
     portalSurfaceReplacementRevert(&gPortalSurfaceReplacements[portalToMove]);
 }
 
+int portalSurfaceStaticIndexForReplacement(int portalIndex) {
+    return gPortalSurfaceReplacements[portalIndex].staticIndex;
+}
+
 struct PortalSurface* portalSurfaceGetOriginalSurface(int portalSurfaceIndex, int portalIndex) {
     struct PortalSurfaceReplacement* replacement = &gPortalSurfaceReplacements[portalIndex];
 

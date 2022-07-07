@@ -6,6 +6,8 @@
 #include "../graphics/render_scene.h"
 #include "../math/mathf.h"
 
+int gForceRenderStaticIndex = -1;
+
 void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, struct RenderScene* renderScene) {
     int currentRoom = 0;
 
@@ -18,7 +20,7 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, s
             for (int i = staticRange.min; i < staticRange.max; ++i) {
                 struct BoundingBoxs16* box = &gCurrentLevel->staticBoundingBoxes[i];
 
-                if (isOutsideFrustrum(cullingInfo, box)) {
+                if (i != gForceRenderStaticIndex && isOutsideFrustrum(cullingInfo, box)) {
                     continue;
                 }
 

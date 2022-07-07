@@ -2,9 +2,6 @@
 
 #include "sk64/skelatool_animator.h"
 
-#include "portal_mask.inc.h"
-#include "portal_outline.inc.h"
-
 #include "../../build/assets/models/portal_gun/v_portalgun.h"
 #include "../../build/assets/materials/static.h"
 #include "../../build/assets/models/props/button.h"

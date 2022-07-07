@@ -160,7 +160,12 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/radio.blend \
 	assets/models/props/round_elevator.blend \
 	assets/models/props/round_elevator_interior.blend \
-	assets/models/props/round_elevator_collision.blend
+	assets/models/props/round_elevator_collision.blend \
+	assets/models/portal/portal_blue.blend \
+	assets/models/portal/portal_blue_filled.blend \
+	assets/models/portal/portal_orange.blend \
+	assets/models/portal/portal_orange_filled.blend \
+	assets/models/portal/portal_face.blend
 
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
 MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)
@@ -171,6 +176,8 @@ build/assets/models/%.h build/assets/models/%_geo.c: build/assets/models/%.fbx a
 build/src/models/models.o: $(MODEL_HEADERS)
 
 build/src/decor/decor_object_list.o: $(MODEL_HEADERS)
+
+build/src/scene/portal.o: $(MODEL_HEADERS)
 
 ####################
 ## Test Chambers

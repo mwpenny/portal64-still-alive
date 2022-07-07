@@ -138,10 +138,10 @@ unsigned convertByteRange(float value) {
         case VertexType::PosUVColor:
             if (mTargetMesh->mMesh->mColors[0] != nullptr) {
                 aiColor4D color = mTargetMesh->mMesh->mColors[0][i];
-                vertexNormal->AddPrimitive(color.r);
-                vertexNormal->AddPrimitive(color.g);
-                vertexNormal->AddPrimitive(color.b);
-                vertexNormal->AddPrimitive(color.a);
+                vertexNormal->AddPrimitive(convertByteRange(color.r));
+                vertexNormal->AddPrimitive(convertByteRange(color.g));
+                vertexNormal->AddPrimitive(convertByteRange(color.b));
+                vertexNormal->AddPrimitive(convertByteRange(color.a));
             } else {
                 vertexNormal->AddPrimitive(0);
                 vertexNormal->AddPrimitive(0);
