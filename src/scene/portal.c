@@ -136,11 +136,24 @@ void renderPropscheckViewportSize(int* min, int* max, int screenSize) {
     }
 }
 
+int renderPropsZDistance(int currentDepth) {
+    if (currentDepth >= STARTING_RENDER_DEPTH) {
+        return 0;
+    } else if (currentDepth < 0) {
+        return G_MAXZ;
+    } else {
+        return G_MAXZ - (G_MAXZ >> (STARTING_RENDER_DEPTH - currentDepth));
+    }
+}
+
 Vp* renderPropsBuildViewport(struct RenderProps* props, struct RenderState* renderState) {
     int minX = props->minX;
     int maxX = props->maxX;
     int minY = props->minY;
     int maxY = props->maxY;
+
+    int minZ = renderPropsZDistance(props->currentDepth);
+    int maxZ = renderPropsZDistance(props->currentDepth - 1);
 
     renderPropscheckViewportSize(&minX, &maxX, SCREEN_WD);
     renderPropscheckViewportSize(&minY, &maxY, SCREEN_HT);
@@ -149,12 +162,12 @@ Vp* renderPropsBuildViewport(struct RenderProps* props, struct RenderState* rend
 
     viewport->vp.vscale[0] = (maxX - minX) << 1;
     viewport->vp.vscale[1] = (maxY - minY) << 1;
-    viewport->vp.vscale[2] = G_MAXZ/2;
+    viewport->vp.vscale[2] = (maxZ - minZ) >> 1;
     viewport->vp.vscale[3] = 0;
 
     viewport->vp.vtrans[0] = (maxX + minX) << 1;
     viewport->vp.vtrans[1] = (maxY + minY) << 1;
-    viewport->vp.vtrans[2] = G_MAXZ/2;
+    viewport->vp.vtrans[2] = (maxZ + minZ) >> 1;
     viewport->vp.vtrans[3] = 0;
 
     return viewport;
@@ -176,6 +189,7 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
     cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, current->viewport, NULL, 0.0f);
     dynamicSceneRenderTouchingPortal(&next->camera.transform, &current->cullingInfo, renderState);
 
+    next->currentDepth = current->currentDepth - 1;
     Vp* viewport = renderPropsBuildViewport(next, renderState);
 
     next->viewport = viewport;
@@ -204,7 +218,6 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
     }
     next->clippingPortalIndex = -1;
 
-    next->currentDepth = current->currentDepth - 1;
     next->fromPortalIndex = toPortal < fromPortal ? 0 : 1;
     // Gross
     next->fromRoom = gCollisionScene.portalRooms[toPortal == gCollisionScene.portalTransforms[0] ? 0 : 1];
@@ -271,7 +284,6 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
     struct Box2D clippingBounds;
 
     screenClipperBoundingPoints(&clipper, gPortalOutline, sizeof(gPortalOutline) / sizeof(*gPortalOutline), &clippingBounds);
-
 
     nextProps.minX = CALC_SCREEN_SPACE(clippingBounds.min.x, SCREEN_WD);
     nextProps.maxX = CALC_SCREEN_SPACE(clippingBounds.max.x, SCREEN_WD);

@@ -40,7 +40,7 @@ void sceneUpdateListeners(struct Scene* scene);
 void sceneInit(struct Scene* scene) {
     signalsInit(1);
 
-    cameraInit(&scene->camera, 70.0f, 0.125f * SCENE_SCALE, 80.0f * SCENE_SCALE);
+    cameraInit(&scene->camera, 70.0f, 0.125f * SCENE_SCALE, 40.0f * SCENE_SCALE);
     playerInit(&scene->player, levelGetLocation(gCurrentLevel->startLocation));
     sceneUpdateListeners(scene);
 
