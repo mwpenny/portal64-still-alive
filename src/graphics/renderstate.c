@@ -32,6 +32,10 @@ Vp* renderStateRequestViewport(struct RenderState* renderState) {
     return renderStateRequestMemory(renderState, sizeof(Vp));
 }
 
+Vtx* renderStateRequestVertices(struct RenderState* renderState, unsigned count) {
+    return renderStateRequestMemory(renderState, sizeof(Vtx) * count);
+}
+
 void renderStateFlushCache(struct RenderState* renderState) {
     osWritebackDCache(renderState, sizeof(struct RenderState));
 }

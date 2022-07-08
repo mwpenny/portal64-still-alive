@@ -22,6 +22,7 @@ void renderStateInit(struct RenderState* renderState, u16* framebuffer, u16* dep
 Mtx* renderStateRequestMatrices(struct RenderState* renderState, unsigned count);
 Light* renderStateRequestLights(struct RenderState* renderState, unsigned count);
 Vp* renderStateRequestViewport(struct RenderState* renderState);
+Vtx* renderStateRequestVertices(struct RenderState* renderState, unsigned count);
 void renderStateFlushCache(struct RenderState* renderState);
 Gfx* renderStateAllocateDLChunk(struct RenderState* renderState, unsigned count);
 Gfx* renderStateReplaceDL(struct RenderState* renderState, Gfx* nextDL);

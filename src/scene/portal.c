@@ -7,6 +7,7 @@
 #include "dynamic_scene.h"
 #include "../physics/collision_scene.h"
 #include "../math/mathf.h"
+#include "../math/vector2s16.h"
 
 #include "../build/assets/models/portal/portal_blue.h"
 #include "../build/assets/models/portal/portal_orange.h"
@@ -20,15 +21,17 @@
 #define PORTAL_SCALE_Y  0.8f
 #define PORTAL_SCALE_X  0.95f
 
+#define PORTAL_FACE_OFFSET  (-0.014106 * SCENE_SCALE)
+
 struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE] = {
-    {0.0f, 1.0f * SCENE_SCALE * PORTAL_SCALE_Y, 0.0f},
-    {0.353553f * SCENE_SCALE * PORTAL_SCALE_X, 0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, 0.0f},
-    {0.5f * SCENE_SCALE * PORTAL_SCALE_X, 0.0f, 0.0f},
-    {0.353553f * SCENE_SCALE * PORTAL_SCALE_X, -0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, 0.0f},
-    {0.0f, -1.0f * SCENE_SCALE * PORTAL_SCALE_Y, 0.0f},
-    {-0.353553f * SCENE_SCALE * PORTAL_SCALE_X, -0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, 0.0f},
-    {-0.5f * SCENE_SCALE* PORTAL_SCALE_X, 0.0f, 0.0f},
-    {-0.353553f * SCENE_SCALE * PORTAL_SCALE_X, 0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, 0.0f},
+    {-0.353553f * SCENE_SCALE * PORTAL_SCALE_X, 0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, PORTAL_FACE_OFFSET},
+    {-0.5f * SCENE_SCALE* PORTAL_SCALE_X, 0.0f, PORTAL_FACE_OFFSET},
+    {-0.353553f * SCENE_SCALE * PORTAL_SCALE_X, -0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, PORTAL_FACE_OFFSET},
+    {0.0f, -1.0f * SCENE_SCALE * PORTAL_SCALE_Y, PORTAL_FACE_OFFSET},
+    {0.353553f * SCENE_SCALE * PORTAL_SCALE_X, -0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, PORTAL_FACE_OFFSET},
+    {0.5f * SCENE_SCALE * PORTAL_SCALE_X, 0.0f, PORTAL_FACE_OFFSET},
+    {0.353553f * SCENE_SCALE * PORTAL_SCALE_X, 0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, PORTAL_FACE_OFFSET},
+    {0.0f, 1.0f * SCENE_SCALE * PORTAL_SCALE_Y, PORTAL_FACE_OFFSET},
 };
 
 struct Vector3 gPortalOutlineWorld[PORTAL_LOOP_SIZE] = {
@@ -327,6 +330,7 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
         } else {
             gSPDisplayList(renderState->dl++, portal_portal_orange_model_gfx);
         }
+        
         gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
     }
 

@@ -3,6 +3,7 @@
 
 #include "../math/transform.h"
 #include "../math/plane.h"
+#include "../math/vector2s16.h"
 #include "../graphics/renderstate.h"
 #include "camera.h"
 #include "static_scene.h"

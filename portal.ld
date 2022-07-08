@@ -35,13 +35,13 @@ SECTIONS
       build/asm/entry.o(.text);
       CODE_SEGMENT(.text);
       /usr/lib/n64/PR/rspboot.o(.text);
-      /usr/lib/n64/PR/gspF3DEX2.fifo.o(.text);
+      /usr/lib/n64/PR/gspF3DEX2.NoN.fifo.o(.text);
       /usr/lib/n64/PR/aspMain.o(.text);
 
       /* data */
       CODE_SEGMENT(.data*);
       /usr/lib/n64/PR/rspboot.o(.data*);
-      /usr/lib/n64/PR/gspF3DEX2.fifo.o(.data*);
+      /usr/lib/n64/PR/gspF3DEX2.NoN.fifo.o(.data*);
       /usr/lib/n64/PR/aspMain.o(.data*);
 
       /* rodata */
