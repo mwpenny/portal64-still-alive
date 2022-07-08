@@ -62,7 +62,7 @@ struct Quaternion gVerticalFlip = {0.0f, 1.0f, 0.0f, 0.0f};
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex) {
     props->camera = *camera;
     props->aspectRatio = aspectRatio;
-    props->perspectiveMatrix = cameraSetupMatrices(camera, renderState, aspectRatio, &props->perspectiveCorrect, &fullscreenViewport, &props->cullingInfo, 0.0f);
+    props->perspectiveMatrix = cameraSetupMatrices(camera, renderState, aspectRatio, &props->perspectiveCorrect, &fullscreenViewport, &props->cullingInfo);
     props->viewport = &fullscreenViewport;
     props->currentDepth = STARTING_RENDER_DEPTH;
     props->fromPortalIndex = NO_PORTAL;
@@ -74,7 +74,7 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
     struct Vector3 offset;
     vector3Sub(&externalLook, &externalCameraPos, &offset);
     quatLook(&offset, &gUp, &externalCamera.transform.rotation);
-    props->perspectiveMatrix = cameraSetupMatrices(&externalCamera, renderState, aspectRatio, &props->perspectiveCorrect, &fullscreenViewport, NULL, 0.0f);
+    props->perspectiveMatrix = cameraSetupMatrices(&externalCamera, renderState, aspectRatio, &props->perspectiveCorrect, &fullscreenViewport, NULL);
 #endif
 
     props->clippingPortalIndex = -1;
@@ -183,10 +183,20 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
     next->aspectRatio = current->aspectRatio;
     transformConcat(&portalCombined, &current->camera.transform, &next->camera.transform);
 
-    float zBias = (STARTING_RENDER_DEPTH - current->currentDepth - 1) * -0.005f;
+    struct Vector3 portalOffset;
+    vector3Sub(&toPortal->position, &next->camera.transform.position, &portalOffset);
+
+    struct Vector3 cameraForward;
+    quatMultVector(&next->camera.transform.rotation, &gForward, &cameraForward);
+
+    next->camera.nearPlane = (-vector3Dot(&portalOffset, &cameraForward) - PORTAL_SCALE_Y) * SCENE_SCALE;
+
+    if (next->camera.nearPlane < current->camera.nearPlane) {
+        next->camera.nearPlane = current->camera.nearPlane;
+    }
 
     // render any objects halfway through portals
-    cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, current->viewport, NULL, 0.0f);
+    cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, current->viewport, NULL);
     dynamicSceneRenderTouchingPortal(&next->camera.transform, &current->cullingInfo, renderState);
 
     next->currentDepth = current->currentDepth - 1;
@@ -194,7 +204,7 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
 
     next->viewport = viewport;
 
-    next->perspectiveMatrix = cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, viewport, &next->cullingInfo, zBias);
+    next->perspectiveMatrix = cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, viewport, &next->cullingInfo);
 
 #if SHOW_EXTERNAL_VIEW
     struct Transform externalTransform;
@@ -205,7 +215,7 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
     quatLook(&offset, &gUp, &externalTransform.rotation);
     struct Camera externalCamera = current->camera;
     transformConcat(&portalCombined, &externalTransform, &externalCamera.transform);
-    next->perspectiveMatrix = cameraSetupMatrices(&externalCamera, renderState, (float)SCREEN_WD / (float)SCREEN_HT, &next->perspectiveCorrect, &fullscreenViewport, NULL, zBias);
+    next->perspectiveMatrix = cameraSetupMatrices(&externalCamera, renderState, (float)SCREEN_WD / (float)SCREEN_HT, &next->perspectiveCorrect, &fullscreenViewport, NULL);
 #endif
 
     if (current->clippingPortalIndex != -1) {
