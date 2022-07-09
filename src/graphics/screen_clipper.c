@@ -3,6 +3,7 @@
 #include "../scene/camera.h"
 #include "../math/vector4.h"
 #include "../math/matrix.h"
+#include "./graphics.h"
 
 #include <math.h>
 
@@ -49,21 +50,23 @@ void screenClipperIncludePoint(struct Vector4* point, struct Box2D* output) {
     vector2Max(&output->max, &viewportPos, &output->max);
 }
 
-unsigned screenClipperClipBoundary(struct ScreenClipper* clipper, struct Vector4* input, struct Vector4* output, unsigned pointCount, int axis, int direction) {
+unsigned screenClipperClipBoundary(struct ScreenClipper* clipper, struct Vector4* input, struct Vector4* output, unsigned pointCount, int axis, int direction, int oppositeSide) {
     unsigned outputPointCount = 0;
 
     struct Vector4* previous = &input[pointCount - 1];
     float pos = VECTOR3_AS_ARRAY(previous)[axis];
     float wReference = previous->w;
-    int wasInside = (direction < 0 ? -pos : pos) < wReference;
+    float posReference = direction < 0 ? -pos : pos;
+    int wasInside = oppositeSide ? (posReference > wReference) : (posReference < wReference);
 
     for (unsigned i = 0; i < pointCount; ++i) {
         struct Vector4* current = &input[i];
 
         pos = VECTOR3_AS_ARRAY(current)[axis];
         wReference = current->w;
+        posReference = direction < 0 ? -pos : pos;
 
-        int isInside = (direction < 0 ? -pos : pos) < wReference;
+        int isInside = oppositeSide ? (posReference > wReference) : (posReference < wReference);
 
         if (isInside != wasInside) {
             float lerp = determineClippingDistance(VECTOR3_AS_ARRAY(previous)[axis], pos, direction < 0 ? -previous->w : previous->w, direction < 0 ? -wReference : wReference);
@@ -98,10 +101,19 @@ void screenClipperBoundingPoints(struct ScreenClipper* clipper, struct Vector3* 
         matrixVec3Mul(clipper->pointTransform, &input[i], &clipBuffer[i]);
     }
 
-    pointCount = screenClipperClipBoundary(clipper, clipBuffer, clipBufferSwap, pointCount, 0, 1);
-    pointCount = screenClipperClipBoundary(clipper, clipBufferSwap, clipBuffer, pointCount, 0, -1);
-    pointCount = screenClipperClipBoundary(clipper, clipBuffer, clipBufferSwap, pointCount, 1, 1);
-    pointCount = screenClipperClipBoundary(clipper, clipBufferSwap, clipBuffer, pointCount, 1, -1);
+    pointCount = screenClipperClipBoundary(clipper, clipBuffer, clipBufferSwap, pointCount, 0, 1, 0);
+    pointCount = screenClipperClipBoundary(clipper, clipBufferSwap, clipBuffer, pointCount, 0, -1, 0);
+    pointCount = screenClipperClipBoundary(clipper, clipBuffer, clipBufferSwap, pointCount, 1, 1, 0);
+    pointCount = screenClipperClipBoundary(clipper, clipBufferSwap, clipBuffer, pointCount, 1, -1, 0);
+
+    clipper->nearPolygonCount = screenClipperClipBoundary(clipper, clipBuffer, clipBufferSwap, pointCount, 2, -1, 1);
+
+    for (int i = 0; i < clipper->nearPolygonCount; ++i) {
+        struct Vector4* point = &clipBufferSwap[i];
+        float invW = 1.0f / point->w;
+        clipper->nearPolygon[i].x = (short)(point->x * invW * (SCREEN_WD << 1) + (SCREEN_WD << 1));
+        clipper->nearPolygon[i].y = (short)(point->y * invW * (SCREEN_HT << 1) + (SCREEN_HT << 1));
+    }
 
     for (unsigned i = 0; i < pointCount; ++i) {
         screenClipperIncludePoint(&clipBuffer[i], output);

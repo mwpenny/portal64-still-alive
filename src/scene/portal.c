@@ -192,7 +192,7 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
     struct Vector3 cameraForward;
     quatMultVector(&next->camera.transform.rotation, &gForward, &cameraForward);
 
-    next->camera.nearPlane = (-vector3Dot(&portalOffset, &cameraForward) - PORTAL_SCALE_Y) * SCENE_SCALE;
+    next->camera.nearPlane = (-vector3Dot(&portalOffset, &cameraForward)) * SCENE_SCALE;
 
     if (next->camera.nearPlane < current->camera.nearPlane) {
         next->camera.nearPlane = current->camera.nearPlane;
@@ -250,6 +250,35 @@ void portalInit(struct Portal* portal, enum PortalFlags flags) {
     portal->flags = flags;
 }
 
+struct Vector2s16 loopTest[] = {
+    {{{0 << 2, 0 << 2}}},
+    {{{0 << 2, 64 << 2}}},
+    {{{48 << 2, 48 << 2}}},
+    {{{64 << 2, 0 << 2}}},
+};
+
+void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct RenderState* renderState) {
+    gDPPipeSync(renderState->dl++);
+    gDPSetDepthSource(renderState->dl++, G_ZS_PRIM);
+    gDPSetPrimDepth(renderState->dl++, 0, 0);
+
+    for (int i = 0; i < pointCount; ++i) {
+        gSPModifyVertex(renderState->dl++, i, G_MWO_POINT_XYSCREEN, points[i].equalTest);
+        gSPModifyVertex(renderState->dl++, i, G_MWO_POINT_ZSCREEN, 0);
+    }
+
+    for (int i = 2; i < pointCount; i += 2) {
+        if (i + 1 < pointCount) {
+            gSP2Triangles(renderState->dl++, 0, i - 1, i, 0, 0, i, i + 1, 0);
+        } else {
+            gSP1Triangle(renderState->dl++, 0, i - 1, i, 0);
+        }
+    }
+
+    gDPPipeSync(renderState->dl++);
+    gDPSetDepthSource(renderState->dl++, G_ZS_PIXEL);
+}
+
 void portalRender(struct Portal* portal, struct Portal* otherPortal, struct RenderProps* props, SceneRenderCallback sceneRenderer, void* data, struct RenderState* renderState) {
     struct Vector3 forward = gForward;
     if (!(portal->flags & PortalFlagsOddParity)) {
@@ -297,19 +326,16 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
     struct RenderProps nextProps;
     int portalIndex = portal < otherPortal ? 0 : 1;
 
+    screenClipperInitWithCamera(&clipper, &props->camera, (float)SCREEN_WD / (float)SCREEN_HT, portalTransform);
+    struct Box2D clippingBounds;
+    screenClipperBoundingPoints(&clipper, gPortalOutline, sizeof(gPortalOutline) / sizeof(*gPortalOutline), &clippingBounds);
+
     if (props->clippingPortalIndex == portalIndex) {
         nextProps.minX = 0;
         nextProps.maxX = SCREEN_WD;
         nextProps.minY = 0;
         nextProps.maxY = SCREEN_HT;
     } else {
-
-        screenClipperInitWithCamera(&clipper, &props->camera, (float)SCREEN_WD / (float)SCREEN_HT, portalTransform);
-
-        struct Box2D clippingBounds;
-
-        screenClipperBoundingPoints(&clipper, gPortalOutline, sizeof(gPortalOutline) / sizeof(*gPortalOutline), &clippingBounds);
-
         nextProps.minX = CALC_SCREEN_SPACE(clippingBounds.min.x, SCREEN_WD);
         nextProps.maxX = CALC_SCREEN_SPACE(clippingBounds.max.x, SCREEN_WD);
         nextProps.minY = CALC_SCREEN_SPACE(-clippingBounds.max.y, SCREEN_HT);
@@ -344,6 +370,8 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
         } else {
             gSPDisplayList(renderState->dl++, portal_portal_orange_model_gfx);
         }
+
+        portalRenderScreenCover(loopTest, 4, renderState);
         
         gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
     }

@@ -69,7 +69,7 @@ void soundPlayerDetermine3DSound(struct Vector3* at, float* volumeIn, float* vol
     struct Vector3 offset;
     vector3Sub(at, &nearestListener->worldPos, &offset);
 
-    float pan = vector3Dot(&offset, &nearestListener->rightVector) / sqrtf(distance);
+    float pan = -vector3Dot(&offset, &nearestListener->rightVector) / sqrtf(distance);
 
     pan = pan * 64.0f + 64.0f;
 

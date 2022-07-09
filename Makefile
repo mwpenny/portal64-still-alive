@@ -8,6 +8,7 @@
 # --------------------------------------------------------------------
 include /usr/include/n64/make/PRdefs
 
+
 SKELATOOL64:=skelatool64/skeletool64
 VTF2PNG:=vtf2png
 SFZ2N64:=sfz2n64
