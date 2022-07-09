@@ -183,6 +183,28 @@ int portalSurfaceNextLoop(struct PortalSurfaceBuilder* surfaceBuilder, struct Su
     return i < MAX_SEARCH_ITERATIONS;
 }
 
+int portalSurfaceFindCurrentFace(struct PortalSurfaceBuilder* surfaceBuilder, struct Vector2s16* forPoint, struct SurfaceEdgeWithSide* edgeToAdjust) {
+    int i = 0;
+
+    while (i < MAX_SEARCH_ITERATIONS && !portalSurfacePointInsideFace(surfaceBuilder, edgeToAdjust, forPoint)) {
+        struct SurfaceEdgeWithSide nextEdge;
+
+        if (!portalSurfaceNextLoop(surfaceBuilder, edgeToAdjust, &nextEdge)) {
+            return 0;
+        }
+
+        if (i != 0 && edgeToAdjust->edgeIndex == surfaceBuilder->edgeOnSearchLoop.edgeIndex) {
+            // a full loop and no face found
+            return 0;
+        }
+
+        *edgeToAdjust = nextEdge;
+        ++i;
+    }
+
+    return i < MAX_SEARCH_ITERATIONS;
+}
+
 int portalSurfaceFindNextLoop(struct PortalSurfaceBuilder* surfaceBuilder, struct Vector2s16* forPoint) {
     if (!surfaceBuilder->hasConnected) {
         return 1;
@@ -198,40 +220,36 @@ int portalSurfaceFindNextLoop(struct PortalSurfaceBuilder* surfaceBuilder, struc
         return 1;
     }
 
-    int i = 0;
-
-    while (i < MAX_SEARCH_ITERATIONS && !portalSurfacePointInsideFace(surfaceBuilder, &currentEdge, forPoint)) {
-        struct SurfaceEdgeWithSide nextEdge;
-
-        if (!portalSurfaceNextLoop(surfaceBuilder, &currentEdge, &nextEdge)) {
-            return 0;
-        }
-
-        if (i != 0 && currentEdge.edgeIndex == surfaceBuilder->edgeOnSearchLoop.edgeIndex) {
-            // a full loop and no face found
-            return 0;
-        }
-
-        currentEdge = nextEdge;
-        ++i;
+    if (!portalSurfaceFindCurrentFace(surfaceBuilder, forPoint, &currentEdge)) {
+        return 0;
     }
 
     surfaceBuilder->edgeOnSearchLoop = currentEdge;
     surfaceBuilder->cuttingEdge = currentEdge;
 
-    return i < MAX_SEARCH_ITERATIONS;
+    return 1;
 }
 
 #define MAX_INTERSECT_LOOPS 20
 
 int portalSurfaceIsPointOnLine(struct Vector2s16* pointA, struct Vector2s16* edgeA, struct Vector2s16* edgeDir) {
     struct Vector2s16 originOffset;
+    struct Vector2s16 endpointOffset;
+
+    if (edgeDir->equalTest == 0) {
+        return 0;
+    }
+
+    vector2s16Add(edgeA, edgeDir, &endpointOffset);
+    vector2s16Sub(&endpointOffset, pointA, &endpointOffset);
+
     vector2s16Sub(edgeA, pointA, &originOffset);
 
-    s64 magProduct = (s64)vector2s16MagSqr(edgeDir) * vector2s16MagSqr(&originOffset);
-    s64 dotProduct = vector2s16Dot(edgeDir, &originOffset);
+    int crossProduct = vector2s16Cross(&originOffset, &endpointOffset);
+    int edgeDirLength = vector2s16MagSqr(edgeDir);
 
-    return magProduct == dotProduct * dotProduct;
+    s64 angleCheck = (s64)crossProduct * 50LL / (s64)edgeDirLength;
+    return angleCheck == 0;
 }
 
 enum IntersectionType {
@@ -601,8 +619,10 @@ struct Vector2s16* portalSurfaceIntersectEdgeWithLoop(struct PortalSurfaceBuilde
 
             if (intersectionPoint.equalTest == edgeA->equalTest) {
                 newPointIndex = SB_GET_CURRENT_POINT(edge, currentEdge.isReverse);
+                portalSurfaceFindCurrentFace(surfaceBuilder, pointA, &currentEdge);
             } else if (intersectionPoint.equalTest == edgeB->equalTest) {
                 newPointIndex = SB_GET_NEXT_POINT(edge, currentEdge.isReverse);
+                portalSurfaceFindCurrentFace(surfaceBuilder, pointA, &currentEdge);
             } else {
                 newPointIndex = portalSurfaceSplitEdge(surfaceBuilder, &currentEdge, &intersectionPoint);
                 

@@ -196,6 +196,10 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
 
     if (next->camera.nearPlane < current->camera.nearPlane) {
         next->camera.nearPlane = current->camera.nearPlane;
+
+        if (next->camera.nearPlane > next->camera.farPlane) {
+            next->camera.nearPlane = next->camera.farPlane;
+        }
     }
 
     // render any objects halfway through portals
@@ -221,13 +225,13 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
     next->perspectiveMatrix = cameraSetupMatrices(&externalCamera, renderState, (float)SCREEN_WD / (float)SCREEN_HT, &next->perspectiveCorrect, &fullscreenViewport, NULL);
 #endif
 
-    if (current->clippingPortalIndex != -1) {
+    if (current->clippingPortalIndex == -1) {
         // set the near clipping plane to be the exit portal surface
         quatMultVector(&toPortal->rotation, &gForward, &next->cullingInfo.clippingPlanes[4].normal);
         if (toPortal < fromPortal) {
             vector3Negate(&next->cullingInfo.clippingPlanes[4].normal, &next->cullingInfo.clippingPlanes[4].normal);
         }
-        next->cullingInfo.clippingPlanes[4].d = -vector3Dot(&next->cullingInfo.clippingPlanes[4].normal, &toPortal->position) * SCENE_SCALE - PORTAL_CLIPPING_PLANE_BIAS;
+        next->cullingInfo.clippingPlanes[4].d = -vector3Dot(&next->cullingInfo.clippingPlanes[4].normal, &toPortal->position) * SCENE_SCALE;
     }
     next->clippingPortalIndex = -1;
 
