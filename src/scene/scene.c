@@ -292,6 +292,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
             
             portal->transform = *at;
             portal->roomIndex = roomIndex;
+            portal->scale = 0.0f;
             gCollisionScene.portalTransforms[portalIndex] = &portal->transform;
             gCollisionScene.portalRooms[portalIndex] = roomIndex;
 
@@ -299,8 +300,6 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
                 // the second portal is fully transparent right away
                 portal->opacity = 0.0f;
             }
-
-            portal->scale = 0.0f;
 
             contactSolverCheckPortalContacts(&gContactSolver, &gCurrentLevel->collisionQuads[quadIndex]);
             return 1;
