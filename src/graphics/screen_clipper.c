@@ -115,6 +115,8 @@ void screenClipperBoundingPoints(struct ScreenClipper* clipper, struct Vector3* 
         clipper->nearPolygon[i].y = (short)(point->y * invW * (SCREEN_HT << 1) + (SCREEN_HT << 1));
     }
 
+    // TODO expand the polygon a few pixels
+
     for (unsigned i = 0; i < pointCount; ++i) {
         screenClipperIncludePoint(&clipBuffer[i], output);
     }

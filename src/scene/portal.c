@@ -21,17 +21,18 @@
 #define PORTAL_SCALE_Y  0.8f
 #define PORTAL_SCALE_X  0.95f
 
-#define PORTAL_FACE_OFFSET  (-0.014106 * SCENE_SCALE)
+#define PORTAL_COVER_HEIGHT 0.708084f
+#define PORTAL_COVER_WIDTH  0.84085f
 
 struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE] = {
-    {-0.353553f * SCENE_SCALE * PORTAL_SCALE_X, 0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, PORTAL_FACE_OFFSET},
-    {-0.5f * SCENE_SCALE* PORTAL_SCALE_X, 0.0f, PORTAL_FACE_OFFSET},
-    {-0.353553f * SCENE_SCALE * PORTAL_SCALE_X, -0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, PORTAL_FACE_OFFSET},
-    {0.0f, -1.0f * SCENE_SCALE * PORTAL_SCALE_Y, PORTAL_FACE_OFFSET},
-    {0.353553f * SCENE_SCALE * PORTAL_SCALE_X, -0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, PORTAL_FACE_OFFSET},
-    {0.5f * SCENE_SCALE * PORTAL_SCALE_X, 0.0f, PORTAL_FACE_OFFSET},
-    {0.353553f * SCENE_SCALE * PORTAL_SCALE_X, 0.707107f * SCENE_SCALE * PORTAL_SCALE_Y, PORTAL_FACE_OFFSET},
-    {0.0f, 1.0f * SCENE_SCALE * PORTAL_SCALE_Y, PORTAL_FACE_OFFSET},
+    {0.0f, 1.0f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
+    {0.353553f * SCENE_SCALE * PORTAL_COVER_WIDTH, 0.707107f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
+    {0.5f * SCENE_SCALE * PORTAL_COVER_WIDTH, 0.0f, 0},
+    {0.353553f * SCENE_SCALE * PORTAL_COVER_WIDTH, -0.707107f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
+    {0.0f, -1.0f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
+    {-0.353553f * SCENE_SCALE * PORTAL_COVER_WIDTH, -0.707107f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
+    {-0.5f * SCENE_SCALE * PORTAL_COVER_WIDTH, 0.0f, 0},
+    {-0.353553f * SCENE_SCALE * PORTAL_COVER_WIDTH, 0.707107f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
 };
 
 struct Vector3 gPortalOutlineWorld[PORTAL_LOOP_SIZE] = {
@@ -250,22 +251,47 @@ void portalInit(struct Portal* portal, enum PortalFlags flags) {
     portal->flags = flags;
 }
 
-struct Vector2s16 loopTest[] = {
-    {{{0 << 2, 0 << 2}}},
-    {{{0 << 2, 64 << 2}}},
-    {{{48 << 2, 48 << 2}}},
-    {{{64 << 2, 0 << 2}}},
-};
+void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct RenderProps* props, struct RenderState* renderState) {
+    if (pointCount == 0) {
+        return;
+    }
 
-void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct RenderState* renderState) {
     gDPPipeSync(renderState->dl++);
     gDPSetDepthSource(renderState->dl++, G_ZS_PRIM);
     gDPSetPrimDepth(renderState->dl++, 0, 0);
+    gDPSetRenderMode(renderState->dl++, CLR_ON_CVG | FORCE_BL | IM_RD | Z_CMP | Z_UPD | CVG_DST_WRAP | ZMODE_OPA | GBL_c1(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA), CLR_ON_CVG | FORCE_BL | IM_RD | Z_CMP | Z_UPD | CVG_DST_WRAP | ZMODE_OPA | GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA));
+    gDPSetCombineLERP(renderState->dl++, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE);
+
+    Mtx* idenity = renderStateRequestMatrices(renderState, 1);
+    guMtxIdent(idenity);
+
+    gSPMatrix(renderState->dl++, idenity, G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_PUSH);
+
+    Mtx* ortho = renderStateRequestMatrices(renderState, 1);
+    guOrtho(ortho, 0, SCREEN_WD << 2, 0, SCREEN_HT << 2, -10, 10, 1);
+
+    gSPMatrix(renderState->dl++, ortho, G_MTX_LOAD | G_MTX_PROJECTION | G_MTX_PUSH);
+
+    Vtx* vertices = renderStateRequestVertices(renderState, pointCount);
 
     for (int i = 0; i < pointCount; ++i) {
-        gSPModifyVertex(renderState->dl++, i, G_MWO_POINT_XYSCREEN, points[i].equalTest);
-        gSPModifyVertex(renderState->dl++, i, G_MWO_POINT_ZSCREEN, 0);
+        Vtx* vertex = &vertices[i];
+        vertex->v.ob[0] = points[i].x;
+        vertex->v.ob[1] = points[i].y;
+        vertex->v.ob[2] = 0;
+
+        vertex->v.flag = 0;
+
+        vertex->v.tc[0] = 0;
+        vertex->v.tc[1] = 0;
+        
+        vertex->v.cn[0] = 255;
+        vertex->v.cn[1] = 255;
+        vertex->v.cn[2] = 255;
+        vertex->v.cn[3] = 255;
     }
+
+    gSPVertex(renderState->dl++, vertices, pointCount, 0);
 
     for (int i = 2; i < pointCount; i += 2) {
         if (i + 1 < pointCount) {
@@ -276,7 +302,10 @@ void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct R
     }
 
     gDPPipeSync(renderState->dl++);
+    gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
+    gSPMatrix(renderState->dl++, props->perspectiveMatrix, G_MTX_LOAD | G_MTX_PROJECTION | G_MTX_PUSH);
     gDPSetDepthSource(renderState->dl++, G_ZS_PIXEL);
+    gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 }
 
 void portalRender(struct Portal* portal, struct Portal* otherPortal, struct RenderProps* props, SceneRenderCallback sceneRenderer, void* data, struct RenderState* renderState) {
@@ -364,14 +393,14 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
         gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
         
         gSPDisplayList(renderState->dl++, portal_portal_face_model_gfx);
+        portalRenderScreenCover(clipper.nearPolygon, clipper.nearPolygonCount, props, renderState);
+
         gDPPipeSync(renderState->dl++);
         if (portal->flags & PortalFlagsOddParity) {
             gSPDisplayList(renderState->dl++, portal_portal_blue_model_gfx);
         } else {
             gSPDisplayList(renderState->dl++, portal_portal_orange_model_gfx);
         }
-
-        portalRenderScreenCover(loopTest, 4, renderState);
         
         gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
     }
