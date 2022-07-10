@@ -95,6 +95,7 @@ src/models/sphere.h src/models/sphere_geo.inc.h: assets/fbx/Sphere.fbx
 
 portal_pak_dir: vpk/portal_pak_dir.vpk
 	vpk -x portal_pak_dir vpk/portal_pak_dir.vpk
+	vpk -x portal_pak_dir vpk/hl2/hl2_sound_misc_dir.vpk
 
 
 TEXTURE_SCRIPTS = $(shell find assets/ -type f -name '*.ims')
@@ -164,9 +165,11 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/round_elevator_collision.blend \
 	assets/models/portal/portal_blue.blend \
 	assets/models/portal/portal_blue_filled.blend \
+	assets/models/portal/portal_blue_face.blend \
 	assets/models/portal/portal_orange.blend \
 	assets/models/portal/portal_orange_filled.blend \
-	assets/models/portal/portal_face.blend
+	assets/models/portal/portal_orange_face.blend
+
 
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
 MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)

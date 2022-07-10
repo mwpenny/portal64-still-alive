@@ -8,18 +8,17 @@
 #include "../physics/collision_scene.h"
 #include "../math/mathf.h"
 #include "../math/vector2s16.h"
+#include "../util/time.h"
 
 #include "../build/assets/models/portal/portal_blue.h"
-#include "../build/assets/models/portal/portal_orange.h"
 #include "../build/assets/models/portal/portal_blue_filled.h"
+#include "../build/assets/models/portal/portal_blue_face.h"
+#include "../build/assets/models/portal/portal_orange.h"
+#include "../build/assets/models/portal/portal_orange_face.h"
 #include "../build/assets/models/portal/portal_orange_filled.h"
 
-#include "../build/assets/models/portal/portal_face.h"
 
 #define CALC_SCREEN_SPACE(clip_space, screen_size) ((clip_space + 1.0f) * ((screen_size) / 2))
-
-#define PORTAL_SCALE_Y  0.8f
-#define PORTAL_SCALE_X  0.95f
 
 #define PORTAL_COVER_HEIGHT 0.708084f
 #define PORTAL_COVER_WIDTH  0.84085f
@@ -35,15 +34,18 @@ struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE] = {
     {-0.353553f * SCENE_SCALE * PORTAL_COVER_WIDTH, 0.707107f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
 };
 
+#define PORTAL_HOLE_SCALE_X  0.945f
+#define PORTAL_HOLE_SCALE_Y  0.795f
+
 struct Vector3 gPortalOutlineWorld[PORTAL_LOOP_SIZE] = {
-    {-0.353553f * PORTAL_SCALE_X, 0.707107f * PORTAL_SCALE_Y, 0.0f},
-    {-0.5f * PORTAL_SCALE_X, 0.0f, 0.0f},
-    {-0.353553f * PORTAL_SCALE_X, -0.707107f * PORTAL_SCALE_Y, 0.0f},
-    {0.0f, -1.0f * PORTAL_SCALE_Y, 0.0f},
-    {0.353553f * PORTAL_SCALE_X, -0.707107f * PORTAL_SCALE_Y, 0.0f},
-    {0.5f * PORTAL_SCALE_X, 0.0f, 0.0f},
-    {0.353553f * PORTAL_SCALE_X, 0.707107f * PORTAL_SCALE_Y, 0.0f},
-    {0.0f, 1.0f * PORTAL_SCALE_Y, 0.0f},
+    {-0.353553f * PORTAL_HOLE_SCALE_X, 0.707107f * PORTAL_HOLE_SCALE_Y, 0.0f},
+    {-0.5f * PORTAL_HOLE_SCALE_X, 0.0f, 0.0f},
+    {-0.353553f * PORTAL_HOLE_SCALE_X, -0.707107f * PORTAL_HOLE_SCALE_Y, 0.0f},
+    {0.0f, -1.0f * PORTAL_HOLE_SCALE_Y, 0.0f},
+    {0.353553f * PORTAL_HOLE_SCALE_X, -0.707107f * PORTAL_HOLE_SCALE_Y, 0.0f},
+    {0.5f * PORTAL_HOLE_SCALE_X, 0.0f, 0.0f},
+    {0.353553f * PORTAL_HOLE_SCALE_X, 0.707107f * PORTAL_HOLE_SCALE_Y, 0.0f},
+    {0.0f, 1.0f * PORTAL_HOLE_SCALE_Y, 0.0f},
 };
 
 #define SHOW_EXTERNAL_VIEW  0
@@ -62,6 +64,11 @@ struct Quaternion gVerticalFlip = {0.0f, 1.0f, 0.0f, 0.0f};
 #define PORTAL_CLIPPING_PLANE_BIAS  (SCENE_SCALE * 0.25f)
 
 #define CAMERA_CLIPPING_RADIUS  0.2f
+
+#define PORTAL_CLIPPING_OFFSET  0.1f
+
+#define PORTAL_OPACITY_FADE_TIME    0.6f
+#define PORTAL_GROW_TIME            0.3f
 
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex) {
     props->camera = *camera;
@@ -107,7 +114,7 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
 
             if (collisionSceneIsTouchingSinglePortal(&projectedPoint, &portalNormal, gCollisionScene.portalTransforms[i], i)) {
                 planeInitWithNormalAndPoint(&props->cullingInfo.clippingPlanes[5], &portalNormal, &gCollisionScene.portalTransforms[i]->position);
-                props->cullingInfo.clippingPlanes[5].d *= SCENE_SCALE;
+                props->cullingInfo.clippingPlanes[5].d = (props->cullingInfo.clippingPlanes[5].d + PORTAL_CLIPPING_OFFSET) * SCENE_SCALE;
                 ++props->cullingInfo.usedClippingPlaneCount;
                 props->clippingPortalIndex = i;
                 break;
@@ -249,6 +256,28 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
 void portalInit(struct Portal* portal, enum PortalFlags flags) {
     transformInitIdentity(&portal->transform);
     portal->flags = flags;
+    portal->opacity = 1.0f;
+    portal->scale = 0.0f;
+}
+
+void portalUpdate(struct Portal* portal, int isOpen) {
+    if (isOpen && portal->opacity > 0.0f) {
+        portal->opacity -= FIXED_DELTA_TIME * (1.0f / PORTAL_OPACITY_FADE_TIME);
+
+        if (portal->opacity < 0.0f) {
+            portal->opacity = 0.0f;
+        }
+    } else if (!isOpen) {
+        portal->opacity = 1.0f;
+    }
+
+    if (portal->scale < 1.0f) {
+        portal->scale += FIXED_DELTA_TIME * (1.0f / PORTAL_GROW_TIME);
+
+        if (portal->scale > 1.0f) {
+            portal->scale = 1.0f;
+        }
+    }
 }
 
 void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct RenderProps* props, struct RenderState* renderState) {
@@ -336,6 +365,8 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
         quatMultiply(&portal->transform.rotation, &gVerticalFlip, &finalTransform.rotation);
     }
     
+    vector3Scale(&gOneVec, &finalTransform.scale, portal->scale);
+
     transformToMatrix(&finalTransform, portalTransform, SCENE_SCALE);
 
     if (props->currentDepth == 0 || !otherPortal) {
@@ -391,14 +422,20 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
 
         guMtxF2L(portalTransform, matrix);
         gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
-        
-        gSPDisplayList(renderState->dl++, portal_portal_face_model_gfx);
-        portalRenderScreenCover(clipper.nearPolygon, clipper.nearPolygonCount, props, renderState);
 
-        gDPPipeSync(renderState->dl++);
+        gDPSetEnvColor(renderState->dl++, 255, 255, 255, portal->opacity < 0.0f ? 0 : (portal->opacity > 1.0f ? 255 : (u8)(portal->opacity * 255.0f)));
+        
         if (portal->flags & PortalFlagsOddParity) {
+            gSPDisplayList(renderState->dl++, portal_portal_blue_face_model_gfx);
+            portalRenderScreenCover(clipper.nearPolygon, clipper.nearPolygonCount, props, renderState);
+            gDPPipeSync(renderState->dl++);
+
             gSPDisplayList(renderState->dl++, portal_portal_blue_model_gfx);
         } else {
+            gSPDisplayList(renderState->dl++, portal_portal_orange_face_model_gfx);
+            portalRenderScreenCover(clipper.nearPolygon, clipper.nearPolygonCount, props, renderState);
+            gDPPipeSync(renderState->dl++);
+
             gSPDisplayList(renderState->dl++, portal_portal_orange_model_gfx);
         }
         

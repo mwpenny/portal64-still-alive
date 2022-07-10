@@ -32,7 +32,7 @@ struct CollisionQuad gPlayerColliderFaces[8];
 
 struct CollisionCylinder gPlayerCollider = {
     0.25f,
-    0.7f,
+    0.5f,
     gPlayerColliderEdgeVectors,
     sizeof(gPlayerColliderEdgeVectors) / sizeof(*gPlayerColliderEdgeVectors),
     gPlayerColliderFaces,

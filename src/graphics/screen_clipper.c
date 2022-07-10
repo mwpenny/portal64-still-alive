@@ -3,6 +3,7 @@
 #include "../scene/camera.h"
 #include "../math/vector4.h"
 #include "../math/matrix.h"
+#include "../math/mathf.h"
 #include "./graphics.h"
 
 #include <math.h>
@@ -86,6 +87,9 @@ unsigned screenClipperClipBoundary(struct ScreenClipper* clipper, struct Vector4
     return outputPointCount;
 }
 
+// 6 is actually 1.5 pixels since it is a fixed point number with 2 decimal points
+#define PIXEL_EXPAND_COUNT  6
+
 void screenClipperBoundingPoints(struct ScreenClipper* clipper, struct Vector3* input, unsigned pointCount, struct Box2D* output) {
     vector2Scale(&gOneVec2, -1.0f, &output->max);
     output->min = gOneVec2;
@@ -115,7 +119,32 @@ void screenClipperBoundingPoints(struct ScreenClipper* clipper, struct Vector3* 
         clipper->nearPolygon[i].y = (short)(point->y * invW * (SCREEN_HT << 1) + (SCREEN_HT << 1));
     }
 
-    // TODO expand the polygon a few pixels
+    // expand the polygon a few pixels
+    for (int i = 0; i < clipper->nearPolygonCount; ++i) {
+        struct Vector2s16* curr = &clipper->nearPolygon[i];
+        struct Vector2s16* next = &clipper->nearPolygon[(i + 1) % clipper->nearPolygonCount];
+
+        struct Vector2s16 offset;
+        vector2s16Sub(next, curr, &offset);
+
+        if (abs(offset.x) > abs(offset.y)) {
+            if (curr->x < next->x) {
+                curr->x -= PIXEL_EXPAND_COUNT;
+                next->x += PIXEL_EXPAND_COUNT;
+            } else {
+                curr->x += PIXEL_EXPAND_COUNT;
+                next->y -= PIXEL_EXPAND_COUNT;
+            }
+        } else {
+            if (curr->y < next->y) {
+                curr->y -= PIXEL_EXPAND_COUNT;
+                next->y += PIXEL_EXPAND_COUNT;
+            } else {
+                curr->y += PIXEL_EXPAND_COUNT;
+                curr->y -= PIXEL_EXPAND_COUNT;
+            }
+        }
+    }
 
     for (unsigned i = 0; i < pointCount; ++i) {
         screenClipperIncludePoint(&clipBuffer[i], output);

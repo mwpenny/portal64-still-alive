@@ -20,6 +20,8 @@ enum PortalFlags {
 struct Portal {
     struct Transform transform;
     enum PortalFlags flags;
+    float opacity;
+    float scale;
 };
 
 struct RenderProps;
@@ -53,7 +55,7 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
 void renderPropsNext(struct RenderProps* current, struct RenderProps* next, struct Transform* fromPortal, struct Transform* toPortal, struct RenderState* renderState);
 
 void portalInit(struct Portal* portal, enum PortalFlags flags);
-
+void portalUpdate(struct Portal* portal, int isOpen);
 void portalRender(struct Portal* portal, struct Portal* otherPortal, struct RenderProps* props, SceneRenderCallback sceneRenderer, void* data, struct RenderState* renderState);
 
 #endif

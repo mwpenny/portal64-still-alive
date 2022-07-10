@@ -118,13 +118,7 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
         otherPortal = 1 - otherPortal;
     }
 
-    if (properties->clippingPortalIndex != -1) {
-        gForceRenderStaticIndex = portalSurfaceStaticIndexForReplacement(properties->clippingPortalIndex);
-    }
-
     staticRender(&properties->camera.transform, &properties->cullingInfo, visibleRooms, renderState);
-
-    gForceRenderStaticIndex = -1;
 }
 
 #define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
@@ -211,6 +205,11 @@ void sceneCheckPortals(struct Scene* scene) {
         sceneClosePortal(scene, 1);
         scene->player.body.flags &= ~RigidBodyFizzled;
     }
+
+    int isOpen = collisionSceneIsPortalOpen();
+
+    portalUpdate(&scene->portals[0], isOpen);
+    portalUpdate(&scene->portals[1], isOpen);
 }
 
 void sceneUpdatePortalListener(struct Scene* scene, int portalIndex, int listenerIndex) {
@@ -293,6 +292,13 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
             scene->portals[portalIndex].transform = *at;
             gCollisionScene.portalTransforms[portalIndex] = &scene->portals[portalIndex].transform;
             gCollisionScene.portalRooms[portalIndex] = roomIndex;
+
+            if (collisionSceneIsPortalOpen()) {
+                // the second portal is fully transparent right away
+                scene->portals[portalIndex].opacity = 0.0f;
+            }
+
+            scene->portals[portalIndex].scale = 0.0f;
 
             contactSolverCheckPortalContacts(&gContactSolver, &gCurrentLevel->collisionQuads[quadIndex]);
             return 1;

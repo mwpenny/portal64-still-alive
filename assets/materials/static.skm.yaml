@@ -364,10 +364,14 @@ materials:
       clear: [G_CULL_BACK, G_CULL_FRONT]
 
   z_update:
+
     gDPSetCycleType: G_CYC_1CYCLE
     gDPSetCombineMode: 
-      color: ["0", "0", "0", "PRIMITIVE"]
-      alpha: ["0", "0", "0", "PRIMITIVE"]
+      color: ["0", "0", "0", "SHADE"]
+      alpha: ["0", "0", "0", "ENVIRONMENT"]
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+      set: [G_SHADE]
     gDPSetRenderMode: 
       flags:
         - Z_CMP
