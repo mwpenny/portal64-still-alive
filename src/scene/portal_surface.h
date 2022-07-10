@@ -65,9 +65,14 @@ int portalSurfaceGenerate(struct PortalSurface* surface, int surfaceIndex, struc
 
 void portalSurfaceCleanup(struct PortalSurface* portalSurface);
 
+int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform* portalAt, struct Vector2s16* output, struct Vector2s16* outlineLoopOutput);
+
 struct PortalSurface* portalSurfaceGetOriginalSurface(int portalSurfaceIndex, int portalIndex);
+void portalSurfaceInverse(struct PortalSurface* surface, struct Vector2s16* input, struct Vector3* output);
 
 struct PortalSurface* portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex, struct PortalSurface* with);
+void portalSurfaceRevert(int portalIndex);
 void portalSurfaceCheckCleanupQueue();
+
 
 #endif

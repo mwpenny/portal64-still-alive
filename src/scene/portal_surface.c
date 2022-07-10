@@ -11,6 +11,20 @@
 
 #define MAX_PENDING_PORTAL_CLEANUP  4
 
+#define PORTAL_HOLE_SCALE_X  0.945f
+#define PORTAL_HOLE_SCALE_Y  0.795f
+
+struct Vector3 gPortalOutlineWorld[PORTAL_LOOP_SIZE] = {
+    {-0.353553f * PORTAL_HOLE_SCALE_X, 0.707107f * PORTAL_HOLE_SCALE_Y, 0.0f},
+    {-0.5f * PORTAL_HOLE_SCALE_X, 0.0f, 0.0f},
+    {-0.353553f * PORTAL_HOLE_SCALE_X, -0.707107f * PORTAL_HOLE_SCALE_Y, 0.0f},
+    {0.0f, -1.0f * PORTAL_HOLE_SCALE_Y, 0.0f},
+    {0.353553f * PORTAL_HOLE_SCALE_X, -0.707107f * PORTAL_HOLE_SCALE_Y, 0.0f},
+    {0.5f * PORTAL_HOLE_SCALE_X, 0.0f, 0.0f},
+    {0.353553f * PORTAL_HOLE_SCALE_X, 0.707107f * PORTAL_HOLE_SCALE_Y, 0.0f},
+    {0.0f, 1.0f * PORTAL_HOLE_SCALE_Y, 0.0f},
+};
+
 struct PortalSurface gPortalSurfaceCleanupQueue[MAX_PENDING_PORTAL_CLEANUP];
 int gPortalSurfaceNextToWrite;
 
@@ -110,6 +124,10 @@ struct PortalSurface* portalSurfaceReplace(int portalSurfaceIndex, int roomIndex
     return &gCurrentLevel->portalSurfaces[portalSurfaceIndex];
 }
 
+void portalSurfaceRevert(int portalIndex) {
+    portalSurfaceReplacementRevert(&gPortalSurfaceReplacements[portalIndex]);
+}
+
 void portalSurface2DPoint(struct PortalSurface* surface, struct Vector3* at, struct Vector2s16* output) {
     struct Vector3 offset;
     vector3Sub(at, &surface->corner, &offset);
@@ -193,7 +211,7 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
     minPortal = *output;
     maxPortal = *output;
 
-    for (int i = 0; i < PORTAL_LOOP_SIZE; ++i) {
+    for (int i = 0; i < PORTAL_LOOP_SIZE; ++i) {        
         struct Vector3 transformedPoint;
         transformPoint(portalAt, &gPortalOutlineWorld[shouldReverse ? (PORTAL_LOOP_SIZE - 1) - i : i], &transformedPoint);
         portalSurface2DPoint(surface, &transformedPoint, &outlineLoopOutput[i]);
@@ -304,49 +322,6 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
     // running out of iterations is a sign there isn't enough
     // room for the portal
     return iteration != MAX_POS_ADJUST_ITERATIONS;
-}
-
-int portalSurfaceGenerate(struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt, int portalIndex, struct Transform* otherPortalAt, struct PortalSurface* newSurface) {
-    // determine if portal is on surface
-    if (!portalSurfaceIsInside(surface, portalAt)) {
-        return 0;
-    }
-    // find all portal edge intersections
-    struct Vector2s16 correctPosition;
-    struct Vector2s16 portalOutline[PORTAL_LOOP_SIZE];
-    if (!portalSurfaceAdjustPosition(surface, portalAt, &correctPosition, portalOutline)) {
-        return 0;
-    }
-
-    if (otherPortalAt && portalSurfaceShouldSwapOrder(portalIndex)) {
-        int existingSurfaceIndex = gPortalSurfaceReplacements[1 - portalIndex].portalSurfaceIndex;
-        int roomIndex = gPortalSurfaceReplacements[1 - portalIndex].roomIndex;
-
-        portalSurfacePreSwap(portalIndex);
-        struct PortalSurface newUnderSurface;
-
-        if (!portalSurfaceGenerate(&gCurrentLevel->portalSurfaces[existingSurfaceIndex], existingSurfaceIndex, otherPortalAt, 1 - portalIndex, 0, &newUnderSurface)) {
-            return 0;
-        }
-
-        struct PortalSurface* newSurface = portalSurfaceReplace(existingSurfaceIndex, roomIndex, 1 - portalIndex, &newUnderSurface);
-
-        if (!newSurface) {
-            return 0;
-        }
-
-        if (surfaceIndex == existingSurfaceIndex) {
-            surface = newSurface;
-        }
-    }
-
-    if (!portalSurfacePokeHole(surface, portalOutline, newSurface)) {
-        return 0;
-    }
-
-    portalSurfaceInverse(surface, &correctPosition, &portalAt->position);
-
-    return 1;
 }
 
 void portalSurfaceCleanup(struct PortalSurface* portalSurface) {

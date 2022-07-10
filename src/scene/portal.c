@@ -9,6 +9,8 @@
 #include "../math/mathf.h"
 #include "../math/vector2s16.h"
 #include "../util/time.h"
+#include "../levels/levels.h"
+#include "./portal_surface_generator.h"
 
 #include "../build/assets/models/portal/portal_blue.h"
 #include "../build/assets/models/portal/portal_blue_filled.h"
@@ -32,20 +34,6 @@ struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE] = {
     {-0.353553f * SCENE_SCALE * PORTAL_COVER_WIDTH, -0.707107f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
     {-0.5f * SCENE_SCALE * PORTAL_COVER_WIDTH, 0.0f, 0},
     {-0.353553f * SCENE_SCALE * PORTAL_COVER_WIDTH, 0.707107f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
-};
-
-#define PORTAL_HOLE_SCALE_X  0.945f
-#define PORTAL_HOLE_SCALE_Y  0.795f
-
-struct Vector3 gPortalOutlineWorld[PORTAL_LOOP_SIZE] = {
-    {-0.353553f * PORTAL_HOLE_SCALE_X, 0.707107f * PORTAL_HOLE_SCALE_Y, 0.0f},
-    {-0.5f * PORTAL_HOLE_SCALE_X, 0.0f, 0.0f},
-    {-0.353553f * PORTAL_HOLE_SCALE_X, -0.707107f * PORTAL_HOLE_SCALE_Y, 0.0f},
-    {0.0f, -1.0f * PORTAL_HOLE_SCALE_Y, 0.0f},
-    {0.353553f * PORTAL_HOLE_SCALE_X, -0.707107f * PORTAL_HOLE_SCALE_Y, 0.0f},
-    {0.5f * PORTAL_HOLE_SCALE_X, 0.0f, 0.0f},
-    {0.353553f * PORTAL_HOLE_SCALE_X, 0.707107f * PORTAL_HOLE_SCALE_Y, 0.0f},
-    {0.0f, 1.0f * PORTAL_HOLE_SCALE_Y, 0.0f},
 };
 
 #define SHOW_EXTERNAL_VIEW  0
@@ -258,6 +246,7 @@ void portalInit(struct Portal* portal, enum PortalFlags flags) {
     portal->flags = flags;
     portal->opacity = 1.0f;
     portal->scale = 0.0f;
+    portal->portalSurfaceIndex = -1;
 }
 
 void portalUpdate(struct Portal* portal, int isOpen) {
@@ -277,6 +266,8 @@ void portalUpdate(struct Portal* portal, int isOpen) {
         if (portal->scale > 1.0f) {
             portal->scale = 1.0f;
         }
+
+        portal->flags |= PortalFlagsNeedsNewHole;
     }
 }
 
@@ -442,4 +433,74 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
         gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
     }
 
+}
+
+int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt) {
+    // determine if portal is on surface
+    if (!portalSurfaceIsInside(surface, portalAt)) {
+        return 0;
+    }
+    // find all portal edge intersections
+    struct Vector2s16 correctPosition;
+    struct Vector2s16 portalOutline[PORTAL_LOOP_SIZE];
+    if (!portalSurfaceAdjustPosition(surface, portalAt, &correctPosition, portalOutline)) {
+        return 0;
+    }
+
+    for (int i = 0; i < PORTAL_LOOP_SIZE; ++i) {
+        vector2s16Sub(&portalOutline[i], &correctPosition, &portal->originCentertedLoop[i]);
+    }
+
+    portal->flags |= PortalFlagsNeedsNewHole;
+    portal->fullSizeLoopCenter = correctPosition;
+    portal->portalSurfaceIndex = surfaceIndex;
+    
+    portalSurfaceInverse(surface, &correctPosition, &portalAt->position);
+
+    return 1;
+}
+
+int portalSurfaceCutNewHole(struct Portal* portal, int portalIndex) {
+    portal->flags &= ~PortalFlagsNeedsNewHole;
+
+    if (portal->portalSurfaceIndex == -1) {
+        return 1;
+    }
+
+    struct Vector2s16 scaledLoop[PORTAL_LOOP_SIZE];
+
+    int fixedPointScale = (int)(0x10000 * portal->scale);
+
+    for (int i = 0; i < PORTAL_LOOP_SIZE; ++i) {
+        scaledLoop[i].x = ((portal->originCentertedLoop[i].x * fixedPointScale) >> 16) + portal->fullSizeLoopCenter.x;
+        scaledLoop[i].y = ((portal->originCentertedLoop[i].y * fixedPointScale) >> 16) + portal->fullSizeLoopCenter.y;
+    }
+
+    struct PortalSurface* currentSurface = &gCurrentLevel->portalSurfaces[portal->portalSurfaceIndex];
+
+    struct PortalSurface newSurface;
+
+    if (!portalSurfacePokeHole(currentSurface, scaledLoop, &newSurface)) {
+        return 0;
+    }
+
+    portalSurfaceReplace(portal->portalSurfaceIndex, portal->roomIndex, portalIndex, &newSurface);
+
+    return 1;
+}
+
+void portalCheckForHoles(struct Portal* portals) {
+    if ((portals[1].flags & PortalFlagsNeedsNewHole) != 0 || (
+        portals[0].portalSurfaceIndex == portals[1].portalSurfaceIndex && (portals[0].flags & PortalFlagsNeedsNewHole) != 0
+    )) {
+        portalSurfaceRevert(1);
+        portals[1].flags |= PortalFlagsNeedsNewHole;
+    }
+
+    if ((portals[0].flags & PortalFlagsNeedsNewHole) != 0) {
+        portalSurfaceRevert(0);
+    }
+
+    portalSurfaceCutNewHole(&portals[0], 0);
+    portalSurfaceCutNewHole(&portals[1], 1);
 }

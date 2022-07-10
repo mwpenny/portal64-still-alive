@@ -210,6 +210,8 @@ void sceneCheckPortals(struct Scene* scene) {
 
     portalUpdate(&scene->portals[0], isOpen);
     portalUpdate(&scene->portals[1], isOpen);
+
+    portalCheckForHoles(scene->portals);
 }
 
 void sceneUpdatePortalListener(struct Scene* scene, int portalIndex, int listenerIndex) {
@@ -282,23 +284,23 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
         int surfaceIndex = gCurrentLevel->portalSurfaceMappingIndices[indexIndex];
 
         struct PortalSurface* existingSurface = portalSurfaceGetOriginalSurface(surfaceIndex, portalIndex);
-        struct PortalSurface newSurface;
 
-        if (portalSurfaceGenerate(existingSurface, surfaceIndex, at, portalIndex, &scene->portals[1 - portalIndex].transform, &newSurface)) {
-            portalSurfaceReplace(surfaceIndex, roomIndex, portalIndex, &newSurface);
+        struct Portal* portal = &scene->portals[portalIndex];
 
+        if (portalAttachToSurface(portal, existingSurface, surfaceIndex, at)) {
             soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &at->position);
             
-            scene->portals[portalIndex].transform = *at;
-            gCollisionScene.portalTransforms[portalIndex] = &scene->portals[portalIndex].transform;
+            portal->transform = *at;
+            portal->roomIndex = roomIndex;
+            gCollisionScene.portalTransforms[portalIndex] = &portal->transform;
             gCollisionScene.portalRooms[portalIndex] = roomIndex;
 
             if (collisionSceneIsPortalOpen()) {
                 // the second portal is fully transparent right away
-                scene->portals[portalIndex].opacity = 0.0f;
+                portal->opacity = 0.0f;
             }
 
-            scene->portals[portalIndex].scale = 0.0f;
+            portal->scale = 0.0f;
 
             contactSolverCheckPortalContacts(&gContactSolver, &gCurrentLevel->collisionQuads[quadIndex]);
             return 1;
@@ -344,5 +346,7 @@ void sceneClosePortal(struct Scene* scene, int portalIndex) {
     if (gCollisionScene.portalTransforms[portalIndex]) {
         soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position);
         gCollisionScene.portalTransforms[portalIndex] = NULL;
+        scene->portals[portalIndex].flags |= PortalFlagsNeedsNewHole;
+        scene->portals[portalIndex].portalSurfaceIndex = -1;
     }
 }

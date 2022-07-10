@@ -7,14 +7,14 @@
 #include "../graphics/renderstate.h"
 #include "camera.h"
 #include "static_scene.h"
+#include "./portal_surface.h"
 
 
 #define PORTAL_LOOP_SIZE    8
 
-extern struct Vector3 gPortalOutlineWorld[PORTAL_LOOP_SIZE];
-
 enum PortalFlags {
     PortalFlagsOddParity = (1 << 0),
+    PortalFlagsNeedsNewHole = (1 << 1),
 };
 
 struct Portal {
@@ -22,6 +22,10 @@ struct Portal {
     enum PortalFlags flags;
     float opacity;
     float scale;
+    struct Vector2s16 originCentertedLoop[PORTAL_LOOP_SIZE];
+    struct Vector2s16 fullSizeLoopCenter;
+    short portalSurfaceIndex;
+    short roomIndex;
 };
 
 struct RenderProps;
@@ -57,5 +61,8 @@ void renderPropsNext(struct RenderProps* current, struct RenderProps* next, stru
 void portalInit(struct Portal* portal, enum PortalFlags flags);
 void portalUpdate(struct Portal* portal, int isOpen);
 void portalRender(struct Portal* portal, struct Portal* otherPortal, struct RenderProps* props, SceneRenderCallback sceneRenderer, void* data, struct RenderState* renderState);
+
+int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt);
+void portalCheckForHoles(struct Portal* portals);
 
 #endif
