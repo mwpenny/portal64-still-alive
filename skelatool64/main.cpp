@@ -121,6 +121,7 @@ int main(int argc, char *argv[]) {
 
     if (defaultMaterial != settings.mMaterials.end()) {
         settings.mDefaultMaterialState = defaultMaterial->second->mState;
+        settings.mDefaultMaterialName = args.mDefaultMaterial;
     }
 
     const aiScene* scene = NULL;

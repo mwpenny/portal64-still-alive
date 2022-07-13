@@ -290,7 +290,7 @@ void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct R
     Mtx* ortho = renderStateRequestMatrices(renderState, 1);
     guOrtho(ortho, 0, SCREEN_WD << 2, 0, SCREEN_HT << 2, -10, 10, 1);
 
-    gSPMatrix(renderState->dl++, ortho, G_MTX_LOAD | G_MTX_PROJECTION | G_MTX_PUSH);
+    gSPMatrix(renderState->dl++, ortho, G_MTX_LOAD | G_MTX_PROJECTION | G_MTX_NOPUSH);
 
     Vtx* vertices = renderStateRequestVertices(renderState, pointCount);
 
@@ -323,7 +323,7 @@ void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct R
 
     gDPPipeSync(renderState->dl++);
     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
-    gSPMatrix(renderState->dl++, props->perspectiveMatrix, G_MTX_LOAD | G_MTX_PROJECTION | G_MTX_PUSH);
+    gSPMatrix(renderState->dl++, props->perspectiveMatrix, G_MTX_LOAD | G_MTX_PROJECTION | G_MTX_NOPUSH);
     gDPSetDepthSource(renderState->dl++, G_ZS_PIXEL);
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 }

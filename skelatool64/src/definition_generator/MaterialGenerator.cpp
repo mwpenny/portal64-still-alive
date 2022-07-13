@@ -62,7 +62,11 @@ void MaterialGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinitio
         std::string name = fileDefinition.GetUniqueName(entry->mName);
 
         DisplayList dl(name);
-        entry->Write(fileDefinition, mSettings.mDefaultMaterialState, dl.GetDataChunk());
+        if (entry->mName == mSettings.mDefaultMaterialName) {
+            entry->Write(fileDefinition, MaterialState(), dl.GetDataChunk());
+        } else {
+            entry->Write(fileDefinition, mSettings.mDefaultMaterialState, dl.GetDataChunk());
+        }
         std::unique_ptr<FileDefinition> material = dl.Generate("_mat");
         materialList->AddPrimitive(material->GetName());
         fileDefinition.AddDefinition(std::move(material));

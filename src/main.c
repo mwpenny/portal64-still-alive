@@ -141,6 +141,12 @@ static void gameProc(void* arg) {
     heapInit(_heapStart, memoryEnd);
     romInit();
 
+#ifdef WITH_DEBUGGER
+    OSThread* debugThreads[2];
+    debugThreads[0] = &gameThread;
+    gdbInitDebugger(gPiHandle, &dmaMessageQ, debugThreads, 1);
+#endif
+
     dynamicSceneInit();
     contactSolverInit(&gContactSolver);
     levelLoad(0);
@@ -148,11 +154,6 @@ static void gameProc(void* arg) {
     initAudio();
     soundPlayerInit();
     sceneInit(&gScene);
-#ifdef WITH_DEBUGGER
-    OSThread* debugThreads[2];
-    debugThreads[0] = &gameThread;
-    gdbInitDebugger(gPiHandle, &dmaMessageQ, debugThreads, 1);
-#endif
 
     while (1) {
         OSScMsg *msg = NULL;

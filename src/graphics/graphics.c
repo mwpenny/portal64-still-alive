@@ -13,6 +13,12 @@ extern OSMesgQueue	*schedulerCommandQueue;
 
 #if WITH_DEBUGGER
 #include "../../debugger/debugger.h"
+#include "../../debugger/serial.h"
+
+void graphicsOutputMessageToDebugger(char* message, unsigned len) {
+    gdbSendMessage(GDBDataTypeText, message, len);
+}
+
 #endif
 
 #define RDP_OUTPUT_SIZE 0x4000
@@ -107,17 +113,16 @@ void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callba
     scTask->state = 0;
 
 #if WITH_GFX_VALIDATOR
+#if WITH_DEBUGGER
     struct GFXValidationResult validationResult;
     zeroMemory(&validationResult, sizeof(struct GFXValidationResult));
 
-    if (!gfxValidate(&scTask->list, MAX_DL_LENGTH, &validationResult)) {
-#if WITH_DEBUGGER
+    if (gfxValidate(&scTask->list, MAX_DL_LENGTH, &validationResult) != GFXValidatorErrorNone) {
+        gfxGenerateReadableMessage(&validationResult, graphicsOutputMessageToDebugger);
         gdbBreak();
-#else
-        zeroMemory(&validationResult, sizeof(struct GFXValidationResult));
-        return;
-#endif // WITH_DEBUGGER
     }
+
+#endif // WITH_DEBUGGER
 #endif // WITH_GFX_VALIDATOR
 
     osSendMesg(schedulerCommandQueue, (OSMesg)scTask, OS_MESG_BLOCK);
