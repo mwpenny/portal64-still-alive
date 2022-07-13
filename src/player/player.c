@@ -243,8 +243,6 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         player->body.velocity.y = JUMP_IMPULSE;
     }
 
-    OSContPad* controllerInput = controllersGetControllerData(0);
-
     struct Vector3 targetVelocity = gZeroVec;
 
     if (controllerGetButton(0, L_CBUTTONS | L_JPAD)) {
@@ -313,6 +311,19 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         player->flags |= PlayerFlagsGrounded;
     } else {
         player->flags &= ~PlayerFlagsGrounded;
+
+        struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);
+
+        while (manifold) {
+            for (int contact = 0; contact < manifold->contactCount; ++contact) {
+                if (manifold->contacts[contact].id == 0xFFFF) {
+                    manifold->contactCount = 0;
+                    break;
+                }
+            }
+
+            manifold = contactSolverNextManifold(&gContactSolver, &player->collisionObject, manifold);
+        }
     }
 
     playerHandleCollision(player);
@@ -330,8 +341,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         soundPlayerPlay(soundsPortalExit[2 - didPassThroughPortal], 0.75f, 1.0f, NULL);
     }
 
-    
-
+    OSContPad* controllerInput = controllersGetControllerData(0);
     float targetYaw = -playerCleanupStickInput(controllerInput->stick_x) * ROTATE_RATE;
     float targetPitch = playerCleanupStickInput(controllerInput->stick_y) * ROTATE_RATE;
 

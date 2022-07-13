@@ -7,6 +7,14 @@ struct GraphicsTask gGraphicsTasks[2];
 extern OSMesgQueue  gfxFrameMsgQ;
 extern OSMesgQueue	*schedulerCommandQueue;
 
+#if WITH_GFX_VALIDATOR
+#include "../../gfxvalidator/validator.h"
+#endif
+
+#if WITH_DEBUGGER
+#include "../../debugger/debugger.h"
+#endif
+
 #define RDP_OUTPUT_SIZE 0x4000
 
 u64* rdpOutput;
@@ -67,8 +75,6 @@ void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callba
 
     renderStateFlushCache(renderState);
 
-
-
     OSScTask *scTask = &targetTask->task;
 
     OSTask_t *task = &scTask->list.t;
@@ -99,6 +105,20 @@ void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callba
     scTask->msgQ = &gfxFrameMsgQ;
     scTask->next = 0;
     scTask->state = 0;
+
+#if WITH_GFX_VALIDATOR
+    struct GFXValidationResult validationResult;
+    zeroMemory(&validationResult, sizeof(struct GFXValidationResult));
+
+    if (!gfxValidate(&scTask->list, MAX_DL_LENGTH, &validationResult)) {
+#if WITH_DEBUGGER
+        gdbBreak();
+#else
+        zeroMemory(&validationResult, sizeof(struct GFXValidationResult));
+        return;
+#endif // WITH_DEBUGGER
+    }
+#endif // WITH_GFX_VALIDATOR
 
     osSendMesg(schedulerCommandQueue, (OSMesg)scTask, OS_MESG_BLOCK);
 }

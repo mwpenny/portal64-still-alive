@@ -52,6 +52,10 @@ void screenClipperIncludePoint(struct Vector4* point, struct Box2D* output) {
 }
 
 unsigned screenClipperClipBoundary(struct ScreenClipper* clipper, struct Vector4* input, struct Vector4* output, unsigned pointCount, int axis, int direction, int oppositeSide) {
+    if (pointCount == 0) {
+        return 0;
+    }
+
     unsigned outputPointCount = 0;
 
     struct Vector4* previous = &input[pointCount - 1];

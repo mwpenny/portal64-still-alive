@@ -95,3 +95,4 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [x] Implement "Emancipation grid"
 - [x] Cut holes in portal walls
 - [x] Get an optimized build working
+- [x] Portal animations

@@ -62,6 +62,10 @@ int portalSurfaceShouldSwapOrder(int portalToMove) {
 }
 
 void portalSurfaceReplacementRevert(struct PortalSurfaceReplacement* replacement) {
+    if (!(replacement->flags & PortalSurfaceReplacementFlagsIsEnabled)) {
+        return;
+    }
+
     gCurrentLevel->staticContent[replacement->staticIndex].displayList = replacement->previousSurface.triangles;
     portalSurfaceCleanup(&gCurrentLevel->portalSurfaces[replacement->portalSurfaceIndex]);
     gCurrentLevel->portalSurfaces[replacement->portalSurfaceIndex] = replacement->previousSurface;

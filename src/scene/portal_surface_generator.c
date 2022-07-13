@@ -46,6 +46,10 @@ int portalSurfaceFindEnclosingFace(struct PortalSurface* surface, struct Vector2
         vector2Sub(&b, &a, &edgeOffset);
         vector2Sub(&aroundPointF, &a, &pointOffset);
 
+        if (edgeOffset.x == 0.0f && edgeOffset.y == 0.0f) {
+            continue;
+        }
+
         float lerp = vector2Dot(&edgeOffset, &pointOffset) / vector2MagSqr(&edgeOffset);
 
         if (lerp < 0.0f) {
