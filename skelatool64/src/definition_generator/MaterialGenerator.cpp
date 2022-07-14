@@ -10,22 +10,26 @@ bool MaterialGenerator::ShouldIncludeNode(aiNode* node) {
     return false;
 }
 
+#define OPAQUE_ORDER        0
+#define DECAL_ORDER         1
+#define TRANSPARENT_ORDER   2
+
 int sortOrderForMaterial(const Material& material) {
     // assume opaque
     if (!material.mState.hasRenderMode) {
-        return 0;
+        return OPAQUE_ORDER;
     }
 
     if (material.mState.cycle1RenderMode.GetZMode() == ZMODE_DEC ||
         material.mState.cycle2RenderMode.GetZMode() == ZMODE_DEC) {
-        return 1;
+        return DECAL_ORDER;
     }
 
     if ((material.mState.cycle1RenderMode.data | material.mState.cycle2RenderMode.data) & FORCE_BL) {
-        return 2;
+        return TRANSPARENT_ORDER;
     }
 
-    return 0;
+    return OPAQUE_ORDER;
 }
 
 void MaterialGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) {
@@ -85,7 +89,7 @@ void MaterialGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinitio
 
     unsigned transparentIndex = 0;
 
-    while (transparentIndex < materialsAsVector.size() && sortOrderForMaterial(*materialsAsVector[transparentIndex]) == 0) {
+    while (transparentIndex < materialsAsVector.size() && sortOrderForMaterial(*materialsAsVector[transparentIndex]) != TRANSPARENT_ORDER) {
         ++transparentIndex;
     }
 

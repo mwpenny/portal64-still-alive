@@ -119,6 +119,10 @@ void gfxBuilderFlushCache(struct GfxBuilderState* gfxBuilder, u8* vertexCacheCon
         }
     }
 
+    if (usedSlotsCount == lastStart) {
+        return;
+    }
+
     gSPVertex(gfxBuilder->gfx++, &gfxBuilder->vtxCopy[vertexCacheContents[lastStart]], usedSlotsCount - lastStart, lastStart);
 
     for (int triangleIndex = startTriangle; triangleIndex < endTriangle; triangleIndex += 2) {

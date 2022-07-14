@@ -1,4 +1,7 @@
 from glob import glob
+from math import sqrt
+from re import L
+import re
 import sys
 import traceback
 import gdb
@@ -36,6 +39,9 @@ def create_main_window():
 
     finally:
         glfw.terminate()
+
+def dot_product(a, b):
+    return a.x * b.x + a.y * b.y
     
 class Vertex:
     def __init__(self, x, y):
@@ -51,6 +57,15 @@ class Vertex:
 
     def midpoint(self, to):
         return Vertex((self.x + to.x) / 2, (self.y + to.y) / 2)
+
+    def add(self, other):
+        return Vertex(self.x + other.x, self.y + other.y)
+
+    def sub(self, other):
+        return Vertex(self.x - other.x, self.y - other.y)
+
+    def scale(self, scalar):
+        return Vertex(self.x * scalar, self.y * scalar)
 
 class Edge:
     def __init__(self, aIndex, bIndex, nextEdge, prevEdge, nextEdgeReverse, prevEdgeReverse):
@@ -204,6 +219,46 @@ class SurfaceConnections:
 
         return len(indices)
 
+    def distance_to_edge(self, edge_index, from_point):
+        edge = self.edges[edge_index]
+        a = self.vertices[edge.aIndex]
+        b = self.vertices[edge.bIndex]
+
+        edge_dir = b.sub(a)
+        point_dir = from_point.sub(a)
+
+        edge_mag_sqr = dot_product(edge_dir, edge_dir)
+
+        if edge_mag_sqr == 0:
+            return sqrt(dot_product(point_dir, point_dir))
+
+        lerp = dot_product(edge_dir, point_dir) / edge_mag_sqr
+
+        if lerp < 0:
+            lerp = 0
+        elif lerp > 1:
+            lerp = 1
+
+        compare_point = a.add(edge_dir.scale(lerp))
+
+        offset = compare_point.sub(from_point)
+
+        return sqrt(dot_product(offset, offset))
+        
+
+    def find_closest_edge(self, from_point):
+        result = 0
+        distance = self.distance_to_edge(0, from_point)
+
+        for index in range(1, len(self.edges)):
+            distance_check = self.distance_to_edge(index, from_point)
+
+            if distance_check < distance:
+                distance = distance_check
+                result = index
+
+        return result
+        
 def build_shaders():
     shaders = {
         gl.GL_VERTEX_SHADER: '''\
@@ -265,7 +320,7 @@ def build_shaders():
 
     return program_id
 
-def buildUniforms(program_id, scale):
+def buildUniforms(program_id, scale, xOffset, yOffset):
     global window_height
     global window_width
 
@@ -276,7 +331,7 @@ def buildUniforms(program_id, scale):
         scale, 0, 0, 0,
         0, scale, 0, 0,
         0, 0, scale, 0,
-        0, 0, 0, 1
+        xOffset, yOffset, 0, 1
     ])
 
 def extract_surface_data(surfaceBuilder):
@@ -288,7 +343,7 @@ def extract_surface_data(surfaceBuilder):
 
     for vertex_index in range(0, vertex_count):
         input_vertex = input_vertices[vertex_index]
-        output_vertices.append(Vertex(input_vertex["x"], input_vertex["y"]))
+        output_vertices.append(Vertex(float(input_vertex["x"]), float(input_vertex["y"])))
 
     input_edges = surfaceBuilder["edges"]
     output_edges = []
@@ -331,13 +386,58 @@ def main():
         max_extent = max_extent + 10
 
         scale = float(1) / float(max_extent)
+        xOffset = 0
+        yOffset = 0
 
-        buildUniforms(program_id, scale)
+        last_button = 0
+
+        buildUniforms(program_id, scale, xOffset, yOffset)
 
         while (
             glfw.get_key(window, glfw.KEY_ESCAPE) != glfw.PRESS and
             not glfw.window_should_close(window)
         ):
+            if glfw.get_key(window, glfw.KEY_MINUS):
+                scale = scale * 0.98
+
+            if glfw.get_key(window, glfw.KEY_EQUAL):
+                scale = scale / 0.98
+
+            if glfw.get_key(window, glfw.KEY_LEFT):
+                xOffset = xOffset + 0.01
+
+            if glfw.get_key(window, glfw.KEY_RIGHT):
+                xOffset = xOffset - 0.01
+
+            if glfw.get_key(window, glfw.KEY_UP):
+                yOffset = yOffset - 0.01
+
+            if glfw.get_key(window, glfw.KEY_DOWN):
+                yOffset = yOffset + 0.01
+
+            current_button = glfw.get_mouse_button(window, glfw.MOUSE_BUTTON_1)
+
+            if current_button and not last_button:
+                cursor_pos = glfw.get_cursor_pos(window)
+                world_pos = Vertex(
+                    ((2 * cursor_pos[0] / window_width - 1) - xOffset) / scale,
+                    ((1 - 2 * cursor_pos[1] / window_height) - yOffset) / scale
+                )
+
+                print(f"Checking for edges closest to")
+                print(world_pos)
+                closest_edge_index = surface.find_closest_edge(world_pos)
+
+                closest_edge = surface.edges[closest_edge_index]
+                print(f"Edge index {closest_edge_index}")
+                print(closest_edge)
+                print(surface.vertices[closest_edge.aIndex])
+                print(surface.vertices[closest_edge.bIndex])
+
+            last_button = current_button
+
+            buildUniforms(program_id, scale, xOffset, yOffset)
+
             gl.glClear(gl.GL_COLOR_BUFFER_BIT)
             gl.glDrawElements(gl.GL_LINES, index_count, gl.GL_UNSIGNED_SHORT, None)
 

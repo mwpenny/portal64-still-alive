@@ -501,6 +501,12 @@ void portalCheckForHoles(struct Portal* portals) {
         portalSurfaceRevert(0);
     }
 
-    portalSurfaceCutNewHole(&portals[0], 0);
-    portalSurfaceCutNewHole(&portals[1], 1);
+    if ((portals[0].flags & PortalFlagsNeedsNewHole) != 0) {
+        portalSurfaceCutNewHole(&portals[0], 0);
+    }
+
+    if ((portals[1].flags & PortalFlagsNeedsNewHole) != 0) {
+        portalSurfaceCutNewHole(&portals[1], 1);
+    }
+    
 }

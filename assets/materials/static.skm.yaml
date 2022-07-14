@@ -249,6 +249,8 @@ materials:
       filename: ../../portal_pak_modified/materials/models/props_animsigns/awe_total.png
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
+
+    gDPSetRenderMode: G_RM_ZB_OPA_DECAL
         
     gSPGeometryMode:
       clear: [G_LIGHTING]
@@ -266,6 +268,8 @@ materials:
       filename: ../../portal_pak_modified/materials/models/props_animsigns/awe_total_copy_0.png
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
+
+    gDPSetRenderMode: G_RM_ZB_OPA_DECAL
         
     gSPGeometryMode:
       clear: [G_LIGHTING]
@@ -283,6 +287,8 @@ materials:
       filename: ../../portal_pak_modified/materials/models/props_animsigns/awe_total_copy_1.png
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
+
+    gDPSetRenderMode: G_RM_ZB_OPA_DECAL
         
     gSPGeometryMode:
       clear: [G_LIGHTING]
@@ -300,6 +306,8 @@ materials:
       filename: ../../portal_pak_modified/materials/models/props_animsigns/awe_total_copy_2.png
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
+
+    gDPSetRenderMode: G_RM_ZB_OPA_DECAL
         
     gSPGeometryMode:
       clear: [G_LIGHTING]
@@ -315,6 +323,17 @@ materials:
   vertex_color:
     gDPSetCombineMode:
       color: ["0", "0", "0", SHADE]
+    gDPSetCycleType: G_CYC_1CYCLE
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+      set: [G_SHADE]
+
+  vertex_color_decal:
+    gDPSetCombineMode:
+      color: ["0", "0", "0", SHADE]
+
+    gDPSetRenderMode: G_RM_ZB_OPA_DECAL
+    
     gDPSetCycleType: G_CYC_1CYCLE
     gSPGeometryMode:
       clear: [G_LIGHTING]

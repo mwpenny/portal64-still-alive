@@ -315,10 +315,8 @@ enum IntersectionType portalSurfaceIntersect(struct Vector2s16* pointA, struct V
         return IntersectionTypeNone;
     }
 
-    s64 halfDenominator = denominator >> 1;
-
-    intersection->x = (short)(((s64)edgeDir.x * (s64)edgeLerp + halfDenominator) / (s64)denominator) + edgeA->x;
-    intersection->y = (short)(((s64)edgeDir.y * (s64)edgeLerp + halfDenominator) / (s64)denominator) + edgeA->y;
+    intersection->x = (short)(((s64)edgeDir.x * (s64)edgeLerp) / (s64)denominator) + edgeA->x;
+    intersection->y = (short)(((s64)edgeDir.y * (s64)edgeLerp) / (s64)denominator) + edgeA->y;
 
     return IntersectionTypePoint;
 }
