@@ -16,7 +16,7 @@ SFZ2N64:=sfz2n64
 $(SKELATOOL64):
 	make -C skelatool64
 
-OPTIMIZER		:= -O0
+OPTIMIZER		:= -O2
 LCDEFS			:= -DDEBUG -g -Isrc/ -I/usr/include/n64/nustd -Werror -Wall
 N64LIB			:= -lultra_rom -lnustd
 

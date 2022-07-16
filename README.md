@@ -84,8 +84,7 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 
 ## Current TODO list
 
-- [ ] Fix crash
-- [ ] Determine why bad gfx cause RDP crash
+- [ ] Fix bug where opening a portal can trigger a teleportation
 - [ ] Turn level indicator board into a game object
 - [ ] Presort portal gun polygon order
 - [ ] Implement level transitions
@@ -100,3 +99,5 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [x] Portal animations
 - [x] Figure out why clip is silent
 - [x] Fix z fighting in elevator
+- [x] Fix crash
+- [x] Determine why bad gfx cause RDP crash
