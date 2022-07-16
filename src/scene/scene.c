@@ -118,6 +118,10 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
         otherPortal = 1 - otherPortal;
     }
 
+    if (controllerGetButton(1, A_BUTTON) && properties->currentDepth == 2) {
+        return;
+    }
+
     staticRender(&properties->camera.transform, &properties->cullingInfo, visibleRooms, renderState);
 }
 

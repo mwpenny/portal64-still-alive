@@ -2,6 +2,8 @@
 #include "initgfx.h"
 #include "util/memory.h"
 
+#include "../controls/controller.h"
+
 struct GraphicsTask gGraphicsTasks[2];
 
 extern OSMesgQueue  gfxFrameMsgQ;
@@ -66,8 +68,15 @@ void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callba
     gDPSetFillColor(renderState->dl++, (GPACK_ZDZ(G_MAXFBZ,0) << 16 | GPACK_ZDZ(G_MAXFBZ,0)));
     gDPFillRectangle(renderState->dl++, 0, 0, SCREEN_WD-1, SCREEN_HT-1);
 	
+    
     gDPPipeSync(renderState->dl++);
     gDPSetColorImage(renderState->dl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WD, osVirtualToPhysical(targetTask->framebuffer));
+
+    if (controllerGetButton(1, A_BUTTON)) {
+        gDPSetFillColor(renderState->dl++, 0);
+        gDPFillRectangle(renderState->dl++, 0, 0, SCREEN_WD-1, SCREEN_HT-1);
+    }
+
     gDPPipeSync(renderState->dl++);
     gDPSetCycleType(renderState->dl++, G_CYC_1CYCLE); 
 

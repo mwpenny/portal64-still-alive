@@ -174,6 +174,10 @@ void gfxBuilderBuildGfx(struct GfxBuilderState* gfxBuilder, struct PortalSurface
             usedSlotsCount = 0;
             triangleStart = triangleIndex;
 
+            for (int i = 0; i < GFX_VERTEX_CACHE_SIZE; ++i) {
+                vertexCacheContents[i] = NO_VERTEX;
+            }
+
             for (int i = 0; i < surfaceBuilder->currentVertex; ++i) {
                 vertexToCacheIndex[i] = NO_VERTEX;
             }

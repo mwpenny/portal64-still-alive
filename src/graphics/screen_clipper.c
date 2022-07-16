@@ -91,8 +91,8 @@ unsigned screenClipperClipBoundary(struct ScreenClipper* clipper, struct Vector4
     return outputPointCount;
 }
 
-// 6 is actually 1.5 pixels since it is a fixed point number with 2 decimal points
-#define PIXEL_EXPAND_COUNT  6
+// 12 is actually 3 pixels since it is a fixed point number with 2 decimal points
+#define PIXEL_EXPAND_COUNT  12
 
 void screenClipperBoundingPoints(struct ScreenClipper* clipper, struct Vector3* input, unsigned pointCount, struct Box2D* output) {
     vector2Scale(&gOneVec2, -1.0f, &output->max);

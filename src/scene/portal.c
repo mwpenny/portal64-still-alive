@@ -11,6 +11,7 @@
 #include "../util/time.h"
 #include "../levels/levels.h"
 #include "./portal_surface_generator.h"
+#include "../controls/controller.h"
 
 #include "../build/assets/models/portal/portal_blue.h"
 #include "../build/assets/models/portal/portal_blue_filled.h"
@@ -260,6 +261,10 @@ void portalUpdate(struct Portal* portal, int isOpen) {
         portal->opacity = 1.0f;
     }
 
+    if (controllerGetButton(1, B_BUTTON)) {
+        portal->opacity = 0.5f;
+    }
+
     if (portal->scale < 1.0f) {
         portal->scale += FIXED_DELTA_TIME * (1.0f / PORTAL_GROW_TIME);
 
@@ -281,6 +286,10 @@ void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct R
     gDPSetPrimDepth(renderState->dl++, 0, 0);
     gDPSetRenderMode(renderState->dl++, CLR_ON_CVG | FORCE_BL | IM_RD | Z_CMP | Z_UPD | CVG_DST_WRAP | ZMODE_OPA | GBL_c1(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA), CLR_ON_CVG | FORCE_BL | IM_RD | Z_CMP | Z_UPD | CVG_DST_WRAP | ZMODE_OPA | GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA));
     gDPSetCombineLERP(renderState->dl++, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE, 0, 0, 0, PRIMITIVE);
+
+    if (controllerGetButton(1, D_CBUTTONS)) {
+        gDPSetPrimColor(renderState->dl++, 255, 255, 0, 0, 0, 128);
+    }
 
     Mtx* idenity = renderStateRequestMatrices(renderState, 1);
     guMtxIdent(idenity);
@@ -417,14 +426,22 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
         gDPSetEnvColor(renderState->dl++, 255, 255, 255, portal->opacity < 0.0f ? 0 : (portal->opacity > 1.0f ? 255 : (u8)(portal->opacity * 255.0f)));
         
         if (portal->flags & PortalFlagsOddParity) {
-            gSPDisplayList(renderState->dl++, portal_portal_blue_face_model_gfx);
-            portalRenderScreenCover(clipper.nearPolygon, clipper.nearPolygonCount, props, renderState);
+            if (!controllerGetButton(1, L_CBUTTONS)) {
+                gSPDisplayList(renderState->dl++, portal_portal_blue_face_model_gfx);
+                if (!controllerGetButton(1, U_CBUTTONS)) {
+                    portalRenderScreenCover(clipper.nearPolygon, clipper.nearPolygonCount, props, renderState);
+                }
+            }
             gDPPipeSync(renderState->dl++);
 
             gSPDisplayList(renderState->dl++, portal_portal_blue_model_gfx);
         } else {
-            gSPDisplayList(renderState->dl++, portal_portal_orange_face_model_gfx);
-            portalRenderScreenCover(clipper.nearPolygon, clipper.nearPolygonCount, props, renderState);
+            if (!controllerGetButton(1, L_CBUTTONS)) {
+                gSPDisplayList(renderState->dl++, portal_portal_orange_face_model_gfx);
+                if (!controllerGetButton(1, U_CBUTTONS)) {
+                    portalRenderScreenCover(clipper.nearPolygon, clipper.nearPolygonCount, props, renderState);
+                }
+            }
             gDPPipeSync(renderState->dl++);
 
             gSPDisplayList(renderState->dl++, portal_portal_orange_model_gfx);
@@ -490,6 +507,11 @@ int portalSurfaceCutNewHole(struct Portal* portal, int portalIndex) {
 }
 
 void portalCheckForHoles(struct Portal* portals) {
+    if (controllerGetButtonUp(1, R_CBUTTONS)) {
+        portals[0].flags |= PortalFlagsNeedsNewHole;
+        portals[1].flags |= PortalFlagsNeedsNewHole;
+    }
+
     if ((portals[1].flags & PortalFlagsNeedsNewHole) != 0 || (
         portalSurfaceAreBothOnSameSurface() && (portals[0].flags & PortalFlagsNeedsNewHole) != 0
     )) {
@@ -499,6 +521,12 @@ void portalCheckForHoles(struct Portal* portals) {
 
     if ((portals[0].flags & PortalFlagsNeedsNewHole) != 0) {
         portalSurfaceRevert(0);
+    }
+
+    if (controllerGetButton(1, R_CBUTTONS)) {
+        portalSurfaceRevert(1);
+        portalSurfaceRevert(0);
+        return;
     }
 
     if ((portals[0].flags & PortalFlagsNeedsNewHole) != 0) {
