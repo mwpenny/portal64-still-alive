@@ -134,12 +134,28 @@ void parsePrimColor(const YAML::Node& node, MaterialState& state, ParseResult& o
     }
 } 
 
-VertexType parseMaterialVertexType(const YAML::Node& node) {
-    if (node.IsDefined() && node.IsScalar() && node.Scalar() == "Normal") {
-        return VertexType::PosUVNormal;
+NormalSource parseMaterialNormalSource(const YAML::Node& node) {
+    if (node.IsDefined() && node.IsScalar()) {
+        std::string name = node.Scalar();
+
+        if (name == "normal") {
+            return NormalSource::Normal;
+        }
+        if (name == "tangent") {
+            return NormalSource::Tangent;
+        }
+        if (name == "-tangent") {
+            return NormalSource::MinusTangent;
+        }
+        if (name == "cotangent") {
+            return NormalSource::CoTangent;
+        }
+        if (name == "-cotangent") {
+            return NormalSource::MinusCotangent;
+        }
     }
 
-    return VertexType::PosUVColor;
+    return NormalSource::Normal;
 }
 
 G_IM_FMT parseTextureFormat(const YAML::Node& node, ParseResult& output) {
@@ -714,6 +730,8 @@ std::shared_ptr<Material> parseMaterial(const std::string& name, const YAML::Nod
     material->mState.useEnvColor = parseMaterialColor(node["gDPSetEnvColor"], material->mState.envColor, output) || material->mState.useEnvColor;
     material->mState.useFogColor = parseMaterialColor(node["gDPSetFogColor"], material->mState.fogColor, output) || material->mState.useFogColor;
     material->mState.useBlendColor = parseMaterialColor(node["gDPSetBlendColor"], material->mState.blendColor, output) || material->mState.useBlendColor;
+
+    material->mNormalSource = parseMaterialNormalSource(node["normalSource"]);
 
     auto properties = node["properties"];
 

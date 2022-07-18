@@ -10,6 +10,10 @@
 enum class VertexType {
     PosUVNormal,
     PosUVColor,
+    POSUVTangent,
+    POSUVMinusTangent,
+    POSUVCotangent,
+    POSUVMinusCotangent,
 };
 
 class ExtendedMesh {

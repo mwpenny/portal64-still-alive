@@ -4,6 +4,6 @@
 #include <assimp/scene.h>
 #include <string>
 
-aiScene* loadScene(const std::string& filename, bool isLevel, int vertexCacheSize);
+aiScene* loadScene(const std::string& filename, bool isLevel, int vertexCacheSize, unsigned int additionalPFlags);
 
 #endif

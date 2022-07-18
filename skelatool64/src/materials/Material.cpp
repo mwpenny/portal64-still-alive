@@ -4,7 +4,7 @@
 #include "../StringUtils.h"
 #include "../CFileDefinition.h"
 
-Material::Material(const std::string& name): mName(name) {}
+Material::Material(const std::string& name): mName(name), mNormalSource(NormalSource::Normal) {}
 
 void Material::Write(CFileDefinition& fileDef, const MaterialState& from, StructureDataChunk& output) {
     generateMaterial(fileDef, from, mState, output);
@@ -38,13 +38,31 @@ int Material::TextureHeight(Material* material) {
     return 0;
 }
 
+VertexType convertNormalSourceToVertexType(NormalSource normalSource) {
+    switch (normalSource) {
+        case NormalSource::Normal:
+            return VertexType::PosUVNormal;
+
+        case NormalSource::Tangent:
+            return VertexType::POSUVTangent;
+        case NormalSource::MinusTangent:
+            return VertexType::POSUVMinusTangent;
+        case NormalSource::CoTangent:
+            return VertexType::POSUVMinusCotangent;
+        case NormalSource::MinusCotangent:
+            return VertexType::POSUVMinusCotangent;
+    }
+
+    return VertexType::PosUVNormal;
+}
+
 VertexType Material::GetVertexType(Material* material) {
     if (!material) {
         return VertexType::PosUVNormal;
     }
 
     if (material->mState.geometryModes.knownFlags & material->mState.geometryModes.flags & (int)GeometryMode::G_LIGHTING) {
-        return VertexType::PosUVNormal;
+        return convertNormalSourceToVertexType(material->mNormalSource);
     }
 
     return VertexType::PosUVColor;

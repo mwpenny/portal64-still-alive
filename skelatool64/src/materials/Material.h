@@ -16,12 +16,21 @@
 
 #include "MaterialEnums.h"
 
+enum class NormalSource {
+    Normal,
+    Tangent,
+    MinusTangent,
+    CoTangent,
+    MinusCotangent,
+};
+
 class Material {
 public:
     Material(const std::string& name);
     std::string mName;
     MaterialState mState;
     std::map<std::string, std::string> mProperties;
+    NormalSource mNormalSource;
 
     void Write(CFileDefinition& fileDef, const MaterialState& from, StructureDataChunk& output);
 

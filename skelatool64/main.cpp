@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <assimp/postprocess.h>
 
 #include "src/SceneWriter.h"
 #include "src/CommandLineParser.h"
@@ -126,9 +127,16 @@ int main(int argc, char *argv[]) {
 
     const aiScene* scene = NULL;
 
+    unsigned int additionalPFlags = 0;
+
+
+    if (settings.NeedsTangents()) {
+        additionalPFlags |= aiProcess_CalcTangentSpace;
+    }
+
     if (args.mInputFile.length()) {
         std::cout << "Generating from mesh "  << args.mInputFile << std::endl;
-        scene = loadScene(args.mInputFile, args.mOutputType != FileOutputType::Mesh, settings.mVertexCacheSize);
+        scene = loadScene(args.mInputFile, args.mOutputType != FileOutputType::Mesh, settings.mVertexCacheSize, additionalPFlags);
 
         if (!scene) {
             return 1;

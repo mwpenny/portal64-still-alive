@@ -17,6 +17,16 @@ aiMesh* copyMesh(aiMesh* mesh) {
         std::copy(mesh->mNormals, mesh->mNormals + result->mNumVertices, result->mNormals);
     }
 
+    if (mesh->mTangents) {
+        result->mTangents = new aiVector3D[result->mNumVertices];
+        std::copy(mesh->mTangents, mesh->mTangents + result->mNumVertices, result->mTangents);
+    }
+
+    if (mesh->mBitangents) {
+        result->mBitangents = new aiVector3D[result->mNumVertices];
+        std::copy(mesh->mBitangents, mesh->mBitangents + result->mNumVertices, result->mBitangents);
+    }
+
     result->mMaterialIndex = mesh->mMaterialIndex;
 
     result->mNumFaces = mesh->mNumFaces;

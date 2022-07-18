@@ -5,7 +5,7 @@
 #include "SceneModification.h"
 #include <iostream>
 
-aiScene* loadScene(const std::string& filename, bool isLevel, int vertexCacheSize) {
+aiScene* loadScene(const std::string& filename, bool isLevel, int vertexCacheSize, unsigned int additionalPFlags) {
     Assimp::Importer importer;
 
     importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 1);
@@ -13,7 +13,8 @@ aiScene* loadScene(const std::string& filename, bool isLevel, int vertexCacheSiz
     unsigned int pFlags = aiProcess_JoinIdenticalVertices |
         aiProcess_Triangulate |
         aiProcess_LimitBoneWeights |
-        aiProcess_OptimizeMeshes;
+        aiProcess_OptimizeMeshes |
+        additionalPFlags;
 
     if (!isLevel) {
         importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE);

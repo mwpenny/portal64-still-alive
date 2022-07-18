@@ -114,27 +114,56 @@ unsigned convertByteRange(float value) {
 
         switch (mVertexType) {
         case VertexType::PosUVNormal:
-            if (mTargetMesh->mMesh->HasNormals()) {
-                aiVector3D normal = mTargetMesh->mMesh->mNormals[i];
+        case VertexType::POSUVTangent:
+        case VertexType::POSUVMinusTangent:
+        case VertexType::POSUVCotangent:
+        case VertexType::POSUVMinusCotangent:
+        {
+            aiVector3D normal;
 
-                if (mTargetMesh->mPointInverseTransform[i]) {
-                    normal = (*mTargetMesh->mNormalInverseTransform[i]) * normal;
-                    normal.Normalize();
-                } else {
-                    normal = rotate.Rotate(normal);
+            switch (mVertexType) {
+            case VertexType::PosUVNormal:
+                if (mTargetMesh->mMesh->HasNormals()) {
+                    normal = mTargetMesh->mMesh->mNormals[i];
                 }
-
-                vertexNormal->AddPrimitive(convertNormalizedRange(normal.x));
-                vertexNormal->AddPrimitive(convertNormalizedRange(normal.y));
-                vertexNormal->AddPrimitive(convertNormalizedRange(normal.z));
-                vertexNormal->AddPrimitive(255);
-            } else {
-                vertexNormal->AddPrimitive(0);
-                vertexNormal->AddPrimitive(0);
-                vertexNormal->AddPrimitive(0);
-                vertexNormal->AddPrimitive(255);
+                break;
+            case VertexType::POSUVTangent:
+                if (mTargetMesh->mMesh->mTangents) {
+                    normal = mTargetMesh->mMesh->mTangents[i];
+                }
+                break;
+            case VertexType::POSUVMinusTangent:
+                if (mTargetMesh->mMesh->mTangents) {
+                    normal = -mTargetMesh->mMesh->mTangents[i];
+                }
+                break;
+            case VertexType::POSUVCotangent:
+                if (mTargetMesh->mMesh->mBitangents) {
+                    normal = mTargetMesh->mMesh->mBitangents[i];
+                }
+                break;
+            case VertexType::POSUVMinusCotangent:
+                if (mTargetMesh->mMesh->mBitangents) {
+                    normal = -mTargetMesh->mMesh->mBitangents[i];
+                }
+                break;
+                default:
+                break;
             }
+
+            if (mTargetMesh->mPointInverseTransform[i]) {
+                normal = (*mTargetMesh->mNormalInverseTransform[i]) * normal;
+                normal.Normalize();
+            } else {
+                normal = rotate.Rotate(normal);
+            }
+
+            vertexNormal->AddPrimitive(convertNormalizedRange(normal.x));
+            vertexNormal->AddPrimitive(convertNormalizedRange(normal.y));
+            vertexNormal->AddPrimitive(convertNormalizedRange(normal.z));
+            vertexNormal->AddPrimitive(255);
             break;
+        }
         case VertexType::PosUVColor:
             if (mTargetMesh->mMesh->mColors[0] != nullptr) {
                 aiColor4D color = mTargetMesh->mMesh->mColors[0][i];
@@ -211,6 +240,19 @@ std::string CFileDefinition::GetVertexBuffer(std::shared_ptr<ExtendedMesh> mesh,
         case VertexType::PosUVNormal:
             requestedName += "_normal";
             break;
+        case VertexType::POSUVTangent:
+            requestedName += "_tangent";
+            break;
+        case VertexType::POSUVMinusTangent:
+            requestedName += "_ntangent";
+            break;
+        case VertexType::POSUVCotangent:
+            requestedName += "_cotangent";
+            break;
+        case VertexType::POSUVMinusCotangent:
+            requestedName += "_ncotangent";
+            break;
+
     }
 
 

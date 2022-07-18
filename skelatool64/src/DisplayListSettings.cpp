@@ -31,3 +31,13 @@ aiMatrix4x4 DisplayListSettings::CreateCollisionTransform() const {
     
     return rotation * scale;
 }
+
+bool DisplayListSettings::NeedsTangents() const {
+    for (auto& material : mMaterials) {
+        if (material.second->mNormalSource != NormalSource::Normal) {
+            return true;
+        }
+    }
+
+    return false;
+}
