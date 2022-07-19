@@ -247,10 +247,10 @@ std::string CFileDefinition::GetVertexBuffer(std::shared_ptr<ExtendedMesh> mesh,
             requestedName += "_ntangent";
             break;
         case VertexType::POSUVCotangent:
-            requestedName += "_cotangent";
+            requestedName += "_bitangent";
             break;
         case VertexType::POSUVMinusCotangent:
-            requestedName += "_ncotangent";
+            requestedName += "_nbitangent";
             break;
 
     }

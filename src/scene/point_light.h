@@ -18,7 +18,7 @@ struct PointLight {
 struct PointLightableMesh {
     struct Vector3* vertexNormals;
     struct Vector3* vertexTangents;
-    struct Vector3* vertexCoTangents;
+    struct Vector3* vertexBitangents;
     Vtx* inputVertices;
     Vtx* oututVertices;
     Gfx* drawCommand;

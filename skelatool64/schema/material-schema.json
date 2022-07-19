@@ -688,6 +688,9 @@
                             "type": "string"
                         }]
                     }
+                },
+                "normalSource": {
+                    "enum": ["normal", "tangent", "-tangent", "bitangent", "-bitangent"]
                 }
             }
         }

@@ -47,7 +47,7 @@ VertexType convertNormalSourceToVertexType(NormalSource normalSource) {
             return VertexType::POSUVTangent;
         case NormalSource::MinusTangent:
             return VertexType::POSUVMinusTangent;
-        case NormalSource::CoTangent:
+        case NormalSource::Bitangent:
             return VertexType::POSUVMinusCotangent;
         case NormalSource::MinusCotangent:
             return VertexType::POSUVMinusCotangent;

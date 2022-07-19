@@ -147,10 +147,10 @@ NormalSource parseMaterialNormalSource(const YAML::Node& node) {
         if (name == "-tangent") {
             return NormalSource::MinusTangent;
         }
-        if (name == "cotangent") {
-            return NormalSource::CoTangent;
+        if (name == "bitangent") {
+            return NormalSource::Bitangent;
         }
-        if (name == "-cotangent") {
+        if (name == "-bitangent") {
             return NormalSource::MinusCotangent;
         }
     }

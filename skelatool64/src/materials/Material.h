@@ -20,7 +20,7 @@ enum class NormalSource {
     Normal,
     Tangent,
     MinusTangent,
-    CoTangent,
+    Bitangent,
     MinusCotangent,
 };
 

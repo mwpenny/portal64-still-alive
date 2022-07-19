@@ -110,7 +110,7 @@ void pointLightableMeshInit(struct PointLightableMesh* mesh, Vtx* inputVertices,
 
     mesh->vertexNormals = malloc(sizeof(struct Vector3) * vertexCount);
     mesh->vertexTangents = malloc(sizeof(struct Vector3) * vertexCount);
-    mesh->vertexCoTangents = malloc(sizeof(struct Vector3) * vertexCount);
+    mesh->vertexBitangents = malloc(sizeof(struct Vector3) * vertexCount);
     mesh->oututVertices = malloc(sizeof(Vtx) * vertexCount);
     mesh->inputVertices = inputVertices;
     mesh->drawCommand = malloc(sizeof(Gfx) * gfxCommandCount);
@@ -137,7 +137,7 @@ void pointLightableMeshInit(struct PointLightableMesh* mesh, Vtx* inputVertices,
 
         mesh->oututVertices[i] = mesh->inputVertices[i];
 
-        vector3Cross(normal, tangent, &mesh->vertexCoTangents[i]);
+        vector3Cross(normal, tangent, &mesh->vertexBitangents[i]);
     }
 
     Gfx* currGfx = mesh->drawCommand;
@@ -172,7 +172,7 @@ void pointLightableCalc(struct PointLightableMesh* mesh, struct Transform* meshT
 
         float perpDistnace = vector3Dot(&mesh->vertexNormals[i], &offset);
         float tangentDistnace = vector3Dot(&mesh->vertexTangents[i], &offset);
-        float coTangentDistnace = vector3Dot(&mesh->vertexCoTangents[i], &offset);
+        float coTangentDistnace = vector3Dot(&mesh->vertexBitangents[i], &offset);
 
         float uvWorldSize = RENDERED_LIGHT_TEX_SIZE * perpDistnace / RENDERED_LIGHT_HEIGHT;
 
