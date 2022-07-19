@@ -102,6 +102,8 @@ aiMesh* subMesh(aiMesh* mesh, std::vector<aiFace*> faces) {
     if (mesh->mNormals) result->mNormals = new aiVector3D[result->mNumVertices];
     if (mesh->mTextureCoords[0]) result->mTextureCoords[0] = new aiVector3D[result->mNumVertices];
     if (mesh->mColors[0]) result->mColors[0] = new aiColor4D[result->mNumVertices];
+    if (mesh->mTangents) result->mTangents = new aiVector3D[result->mNumVertices];
+    if (mesh->mBitangents) result->mBitangents = new aiVector3D[result->mNumVertices];
 
     for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
         auto newIndexIt = vertexMapping.find(i);
@@ -111,6 +113,8 @@ aiMesh* subMesh(aiMesh* mesh, std::vector<aiFace*> faces) {
 
             result->mVertices[newIndex] = mesh->mVertices[i];
             if (result->mNormals) result->mNormals[newIndex] = mesh->mNormals[i];
+            if (result->mTangents) result->mTangents[newIndex] = mesh->mTangents[i];
+            if (result->mBitangents) result->mBitangents[newIndex] = mesh->mBitangents[i];
             if (result->mTextureCoords[0]) result->mTextureCoords[0][newIndex] = mesh->mTextureCoords[0][i];
             if (result->mColors[0]) result->mColors[0][newIndex] = mesh->mColors[0][i];
         }

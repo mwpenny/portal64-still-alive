@@ -346,7 +346,11 @@ void findAdjacentVertices(aiMesh* mesh, unsigned fromIndex, std::set<int>& resul
     }
 }
 
-std::string ExtendedMesh::GetMaterialName(aiMaterial* material) {
+std::string ExtendedMesh::GetMaterialName(aiMaterial* material, const std::string& forceMaterial) {
+    if (forceMaterial.length()) {
+        return forceMaterial;
+    }
+
     aiString name;
     material->Get(AI_MATKEY_NAME, name);
     return name.C_Str();

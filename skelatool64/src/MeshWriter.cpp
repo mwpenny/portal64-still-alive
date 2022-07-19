@@ -37,7 +37,7 @@ void MaterialCollector::UseMaterial(const std::string& material, DisplayListSett
 
 void MaterialCollector::CollectMaterialResources(const aiScene* scene, std::vector<RenderChunk>& renderChunks, DisplayListSettings& settings) {
     for (auto chunk = renderChunks.begin(); chunk != renderChunks.end(); ++chunk) {
-        UseMaterial(ExtendedMesh::GetMaterialName(scene->mMaterials[chunk->mMesh->mMesh->mMaterialIndex]), settings);
+        UseMaterial(ExtendedMesh::GetMaterialName(scene->mMaterials[chunk->mMesh->mMesh->mMaterialIndex], settings.mForceMaterialName), settings);
     }
     ++mSceneCount;
 }
@@ -71,7 +71,7 @@ void generateMeshIntoDLWithMaterials(const aiScene* scene, CFileDefinition& file
 
     for (auto chunk = renderChunks.begin(); chunk != renderChunks.end(); ++chunk) {
         if (materials) {
-            std::string materialName = ExtendedMesh::GetMaterialName(scene->mMaterials[chunk->mMesh->mMesh->mMaterialIndex]);
+            std::string materialName = ExtendedMesh::GetMaterialName(scene->mMaterials[chunk->mMesh->mMesh->mMaterialIndex], settings.mForceMaterialName);
             displayList.AddCommand(std::unique_ptr<DisplayListCommand>(new CommentCommand("Material " + materialName)));
             auto mappedMaterialName = materials->mMaterialNameMapping.find(materialName);
 

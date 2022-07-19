@@ -24,6 +24,7 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
     output.mOutputType = FileOutputType::Mesh;
     output.mEulerAngles = aiVector3D(0.0f, 0.0f, 0.0f);
     output.mDefaultMaterial = "default";
+    output.mForceMaterialName = "";
 
     std::string lastParameter = "";
     bool hasError = false;
@@ -51,6 +52,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
                 parseEulerAngles(curr, output.mEulerAngles);
             } else if (lastParameter == "default-material") {
                 output.mDefaultMaterial = curr;
+            } else if (lastParameter == "force-material") {
+                output.mForceMaterialName = curr;
             }
 
             lastParameter = "";
@@ -87,6 +90,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
                     output.mExportAnimation = false;
         } else if (strcmp(curr, "--default-material") == 0) {
             lastParameter = "default-material";
+        } else if (strcmp(curr, "--force-material") == 0) {
+            lastParameter = "force-material";
         } else {
             if (curr[0] == '-') {
                 hasError = true;

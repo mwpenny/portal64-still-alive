@@ -40,7 +40,7 @@ public:
     bool isFaceOneBone(aiFace* face);
     std::pair<Bone*, Bone*> findTransitionPairForFace(aiFace* face);
 
-    static std::string GetMaterialName(aiMaterial* material);
+    static std::string GetMaterialName(aiMaterial* material, const std::string& forceMaterial);
 private:
     void PopulateFacesForBone();
 };

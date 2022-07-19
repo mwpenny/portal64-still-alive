@@ -31,11 +31,11 @@ const std::vector<aiFace*>& RenderChunk::GetFaces() {
     }
 }
 
-void extractChunks(const aiScene* scene, std::vector<std::shared_ptr<ExtendedMesh>>& meshes, std::vector<RenderChunk>& result, std::map<std::string, std::shared_ptr<Material>>& materials) {
+void extractChunks(const aiScene* scene, std::vector<std::shared_ptr<ExtendedMesh>>& meshes, std::vector<RenderChunk>& result, std::map<std::string, std::shared_ptr<Material>>& materials, const std::string& forceMaterial) {
     for (auto it = meshes.begin(); it != meshes.end(); ++it) {
         Material* materialPtr = NULL;
 
-        auto material = materials.find(ExtendedMesh::GetMaterialName(scene->mMaterials[(*it)->mMesh->mMaterialIndex]));
+        auto material = materials.find(ExtendedMesh::GetMaterialName(scene->mMaterials[(*it)->mMesh->mMaterialIndex], forceMaterial));
 
         if (material != materials.end()) {
             materialPtr = material->second.get();

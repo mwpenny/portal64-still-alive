@@ -36,7 +36,7 @@ void generateMeshFromScene(const aiScene* scene, CFileDefinition& fileDefinition
 
     std::vector<RenderChunk> renderChunks;
 
-    extractChunks(scene, extendedMeshes, renderChunks, settings.mMaterials);
+    extractChunks(scene, extendedMeshes, renderChunks, settings.mMaterials, settings.mForceMaterialName);
     orderChunks(renderChunks);
 
     std::string renderDLName;

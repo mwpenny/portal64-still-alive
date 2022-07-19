@@ -235,7 +235,7 @@ void generatePortalSurfacesDefinition(const aiScene* scene, CFileDefinition& fil
     for (auto mesh : staticOutput.staticMeshes) {
         aiMaterial* material = scene->mMaterials[mesh.staticMesh->mMesh->mMaterialIndex];
 
-        std::string materialName = ExtendedMesh::GetMaterialName(material);
+        std::string materialName = ExtendedMesh::GetMaterialName(material, settings.mForceMaterialName);
 
         if (gPortalableSurfaces.find(materialName) == gPortalableSurfaces.end()) {
             staticToPortableSurfaceMapping.push_back(-1);
@@ -262,7 +262,7 @@ void generatePortalSurfacesDefinition(const aiScene* scene, CFileDefinition& fil
 
             aiMaterial* material = scene->mMaterials[mesh.staticMesh->mMesh->mMaterialIndex];
 
-            std::string materialName = ExtendedMesh::GetMaterialName(material);
+            std::string materialName = ExtendedMesh::GetMaterialName(material, settings.mForceMaterialName);
 
             if (gPortalableSurfaces.find(materialName) == gPortalableSurfaces.end()) {
                 continue;
