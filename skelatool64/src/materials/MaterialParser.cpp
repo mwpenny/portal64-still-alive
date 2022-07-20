@@ -263,6 +263,24 @@ std::shared_ptr<TextureDefinition> parseTextureDefinition(const YAML::Node& node
                 hasFormat = true;
             }
         }
+
+        auto normalMap = node["normalMap"];
+        if (normalMap.IsDefined() && normalMap.as<bool>()) {
+            effects = (TextureDefinitionEffect)((int)effects | (int)TextureDefinitionEffect::NormalMap);
+        }
+
+        auto selectChannel = node["selectChannel"];
+        if (selectChannel.IsDefined()) {
+            auto channel = selectChannel.as<std::string>();
+
+            if (channel == "r") {
+                effects = (TextureDefinitionEffect)((int)effects | (int)TextureDefinitionEffect::SelectR);
+            } else if (channel == "g") {
+                effects = (TextureDefinitionEffect)((int)effects | (int)TextureDefinitionEffect::SelectG);
+            } else if (channel == "b") {
+                effects = (TextureDefinitionEffect)((int)effects | (int)TextureDefinitionEffect::SelectB);
+            }
+        }
     } else {
         output.mErrors.push_back(ParseError(formatError(std::string("Tile should be a file name or object") + filename, node.Mark())));
         return NULL;

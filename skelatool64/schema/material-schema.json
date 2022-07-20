@@ -458,6 +458,12 @@
                         },
                         "twoTone": {
                             "type": "boolean"
+                        },
+                        "normalMap": {
+                            "type": "boolean"
+                        },
+                        "selectChannel": {
+                            "enum": ["r", "g", "b"]
                         }
                     },
                     "required": [

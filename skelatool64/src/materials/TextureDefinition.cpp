@@ -10,6 +10,8 @@
 #include <iomanip>
 #include <algorithm>
 #include <iomanip>
+#include <assimp/vector3.h>
+#include <assimp/vector3.inl>
 
 DataChunkStream::DataChunkStream() :
     mCurrentBufferPos(0),
@@ -181,6 +183,23 @@ struct PixelIAu8 readIAPixel(cimg_library_suffixed::CImg<unsigned char>& input, 
     return PixelIAu8(0, alpha);
 }
 
+void writeRGBAPixel(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y, struct PixelRGBAu8 value) {
+    switch (input.spectrum()) {
+        case 4:
+            input(x, y, 0, 3) = value.a;
+        case 3:
+            input(x, y, 0, 0) = value.r;
+            input(x, y, 0, 1) = value.g;
+            input(x, y, 0, 2) = value.b;
+            break;
+        case 2:
+            input(x, y, 0, 1) = value.a;
+        case 1:
+            input(x, y, 0, 0) = value.r;
+            break;
+    }
+}
+
 void writeIAPixel(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y, struct PixelIAu8 value) {
     switch (input.spectrum()) {
         case 4:
@@ -310,6 +329,51 @@ void applyTwoToneEffect(cimg_library_suffixed::CImg<unsigned char>& input, Pixel
     minColor.a = floatToByte(a.PredictY(minAlpha));
 }
 
+#define NORMAL_45_STEEPNESS 16
+
+void calculateNormalMap(cimg_library_suffixed::CImg<unsigned char>& input) {
+    cimg_library_suffixed::CImg<unsigned char> result(input.width(), input.height(), 1, 3);
+
+    for (int y = 0; y < input.height(); ++y) {
+        for (int x = 0; x < input.width(); ++x) {
+            PixelIAu8 colorValue = readIAPixel(input, x, y);
+            PixelIAu8 nextX = readIAPixel(input, (x + 1) % input.width(), y);
+            PixelIAu8 nextY = readIAPixel(input, x, (y + 1) % input.height());
+            
+            aiVector3D xDir(NORMAL_45_STEEPNESS, 0, (nextX.i - colorValue.i) * colorValue.a * (1.0f / 256.0f));
+            aiVector3D yDir(0, NORMAL_45_STEEPNESS, (nextY.i - colorValue.i) * colorValue.a * (1.0f / 256.0f));
+
+            aiVector3D normal = xDir ^ yDir;
+            normal.Normalize();
+
+            writeRGBAPixel(result, x, y, PixelRGBAu8(
+                (uint8_t)(127.0f * normal.x + 127.0f),
+                (uint8_t)(127.0f * normal.y + 127.0f),
+                (uint8_t)(127.0f * normal.z + 127.0f),
+                255
+            ));
+        }
+    }
+
+    input = result;
+}
+
+void selectChannel(cimg_library_suffixed::CImg<unsigned char>& input, TextureDefinitionEffect effects) {
+    for (int y = 0; y < input.height(); ++y) {
+        for (int x = 0; x < input.width(); ++x) {
+            PixelRGBAu8 colorValue = readRGBAPixel(input, x, y);
+
+            if ((int)effects & (int)TextureDefinitionEffect::SelectR) {
+                writeIAPixel(input, x, y, PixelIAu8(colorValue.r, colorValue.a));
+            } else if ((int)effects & (int)TextureDefinitionEffect::SelectG) {
+                writeIAPixel(input, x, y, PixelIAu8(colorValue.g, colorValue.a));
+            } else if ((int)effects & (int)TextureDefinitionEffect::SelectB) {
+                writeIAPixel(input, x, y, PixelIAu8(colorValue.b, colorValue.a));
+            }
+        }
+    }
+}
+
 TextureDefinition::TextureDefinition(const std::string& filename, G_IM_FMT fmt, G_IM_SIZ siz, TextureDefinitionEffect effects) :
     mName(getBaseName(replaceExtension(filename, "")) + "_" + gFormatShortName[(int)fmt] + "_" + gSizeName[(int)siz]),
     mFmt(fmt),
@@ -320,6 +384,16 @@ TextureDefinition::TextureDefinition(const std::string& filename, G_IM_FMT fmt, 
 
     if (HasEffect(TextureDefinitionEffect::TwoToneGrayscale)) {
         applyTwoToneEffect(imageData, mTwoToneMax, mTwoToneMin);
+    }
+
+    if (HasEffect(TextureDefinitionEffect::NormalMap)) {
+        calculateNormalMap(imageData);
+    }
+
+    if (HasEffect(TextureDefinitionEffect::SelectR) || 
+        HasEffect(TextureDefinitionEffect::SelectG) || 
+        HasEffect(TextureDefinitionEffect::SelectB)) {
+        selectChannel(imageData, mEffects);
     }
 
     mWidth = imageData.width();
