@@ -130,7 +130,6 @@ int main(int argc, char *argv[]) {
 
     unsigned int additionalPFlags = 0;
 
-
     if (settings.NeedsTangents()) {
         additionalPFlags |= aiProcess_CalcTangentSpace;
     }

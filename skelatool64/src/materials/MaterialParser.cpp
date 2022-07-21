@@ -269,6 +269,11 @@ std::shared_ptr<TextureDefinition> parseTextureDefinition(const YAML::Node& node
             effects = (TextureDefinitionEffect)((int)effects | (int)TextureDefinitionEffect::NormalMap);
         }
 
+        auto invert = node["invert"];
+        if (invert.IsDefined() && invert.as<bool>()) {
+            effects = (TextureDefinitionEffect)((int)effects | (int)TextureDefinitionEffect::Invert);
+        }
+
         auto selectChannel = node["selectChannel"];
         if (selectChannel.IsDefined()) {
             auto channel = selectChannel.as<std::string>();

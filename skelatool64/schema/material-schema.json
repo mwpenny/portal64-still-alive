@@ -462,6 +462,9 @@
                         "normalMap": {
                             "type": "boolean"
                         },
+                        "invert": {
+                            "type": "boolean"
+                        },
                         "selectChannel": {
                             "enum": ["r", "g", "b"]
                         }

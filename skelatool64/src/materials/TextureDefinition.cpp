@@ -358,6 +358,15 @@ void calculateNormalMap(cimg_library_suffixed::CImg<unsigned char>& input) {
     input = result;
 }
 
+void invertImage(cimg_library_suffixed::CImg<unsigned char>& input) {
+    for (int y = 0; y < input.height(); ++y) {
+        for (int x = 0; x < input.width(); ++x) {
+            PixelRGBAu8 colorValue = readRGBAPixel(input, x, y);
+            writeRGBAPixel(input, x, y, PixelRGBAu8(0xFF - colorValue.r, 0xFF - colorValue.g, 0xFF - colorValue.b, colorValue.a));
+        }
+    }
+}
+
 void selectChannel(cimg_library_suffixed::CImg<unsigned char>& input, TextureDefinitionEffect effects) {
     for (int y = 0; y < input.height(); ++y) {
         for (int x = 0; x < input.width(); ++x) {
@@ -388,6 +397,10 @@ TextureDefinition::TextureDefinition(const std::string& filename, G_IM_FMT fmt, 
 
     if (HasEffect(TextureDefinitionEffect::NormalMap)) {
         calculateNormalMap(imageData);
+    }
+
+    if (HasEffect(TextureDefinitionEffect::Invert)) {
+        invertImage(imageData);
     }
 
     if (HasEffect(TextureDefinitionEffect::SelectR) || 

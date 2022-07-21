@@ -53,6 +53,60 @@ aiMesh* copyMesh(aiMesh* mesh) {
     return result;
 }
 
+aiVector3D vector3ProjectPlane(aiVector3D& in, aiVector3D& normal) {
+    float mag = in * normal;
+    return in - normal * mag;
+}
+
+void recalcTangents(aiMesh* mesh) {
+    if (!mesh->mTangents || !mesh->mTextureCoords[0]) {
+        return;
+    }
+
+    for (unsigned i = 0; i < mesh->mNumVertices; ++i) {
+        mesh->mTangents[i] = aiVector3D();
+        mesh->mBitangents[i] = aiVector3D();
+    }
+
+    for (unsigned faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex) { 
+        aiFace* face = &mesh->mFaces[faceIndex];
+
+        aiVector3D uvOrigin = mesh->mTextureCoords[0][face->mIndices[0]];
+        aiVector3D uvOffsetX = mesh->mTextureCoords[0][face->mIndices[1]] - uvOrigin;
+
+        aiVector3D uvOffsetY = aiVector3D(-uvOffsetX.y, uvOffsetX.x, 0.0f);
+
+        if (uvOffsetY * (mesh->mTextureCoords[0][face->mIndices[2]] - uvOrigin) < 0) {
+            uvOffsetY = -uvOffsetY;
+        }
+
+        aiVector3D posOrigin = mesh->mVertices[face->mIndices[0]];
+        aiVector3D posOffsetX = mesh->mVertices[face->mIndices[1]] - posOrigin;
+        aiVector3D posOffsetY = mesh->mVertices[face->mIndices[2]] - posOrigin;
+
+        aiVector3D tangent = posOffsetX * uvOffsetX.x + posOffsetY * uvOffsetY.x;
+
+        for (unsigned index = 0; index < face->mNumIndices; ++index) {
+            int vertexIndex = face->mIndices[index];
+            
+            aiVector3D vertexTangent = vector3ProjectPlane(tangent, mesh->mNormals[vertexIndex]);
+            vertexTangent.NormalizeSafe();
+
+            aiVector3D vertexBitangent = mesh->mNormals[vertexIndex] ^ vertexTangent;
+            vertexBitangent = vector3ProjectPlane(vertexBitangent, mesh->mNormals[vertexIndex]);
+            vertexBitangent = vector3ProjectPlane(vertexBitangent, vertexTangent);
+            vertexBitangent.NormalizeSafe();
+
+            mesh->mTangents[vertexIndex] += vertexTangent;
+            mesh->mBitangents[vertexIndex] += vertexBitangent;
+        }
+    }
+
+    for (unsigned i = 0; i < mesh->mNumVertices; ++i) {
+        mesh->mTangents[i].NormalizeSafe();
+        mesh->mBitangents[i].NormalizeSafe();
+    }
+}
 
 ExtendedMesh::ExtendedMesh(const ExtendedMesh& other):
     mMesh(copyMesh(other.mMesh)),

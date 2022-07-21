@@ -56,9 +56,10 @@ struct PixelIAu8 {
 enum class TextureDefinitionEffect {
     TwoToneGrayscale = (1 << 0),
     NormalMap = (1 << 1),
-    SelectR = (1 << 2),
-    SelectG = (1 << 3),
-    SelectB = (1 << 4),
+    Invert = (1 << 2),
+    SelectR = (1 << 3),
+    SelectG = (1 << 4),
+    SelectB = (1 << 5),
 };
 
 class TextureDefinition {
