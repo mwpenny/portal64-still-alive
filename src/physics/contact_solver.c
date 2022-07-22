@@ -97,6 +97,9 @@ void contactSolverRemoveUnusedContacts(struct ContactSolver* contactSolver) {
 			contactSolver->unusedContacts = curr;
 			curr = next;
 		} else {
+			curr->shapeA->flags |= COLLISION_OBJECT_HAS_CONTACTS;
+			curr->shapeB->flags |= COLLISION_OBJECT_HAS_CONTACTS;
+
 			prev = curr;
 			curr = curr->next;
 		}

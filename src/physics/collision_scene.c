@@ -110,6 +110,15 @@ void collisionObjectCollideWithScene(struct CollisionObject* object, struct Coll
     }
 }
 
+void collisionObjectCollideWithSceneSwept(struct CollisionObject* object, struct Vector3* objectPrevPos, struct CollisionScene* scene, struct ContactSolver* contactSolver) {    
+    short colliderIndices[MAX_COLLIDERS];
+    int quadCount = collisionObjectRoomColliders(&scene->world->rooms[object->body->currentRoom], &object->boundingBox, colliderIndices);
+
+    for (int i = 0; i < quadCount; ++i) {
+        collisionObjectCollideWithQuadSwept(object, objectPrevPos, &scene->quads[colliderIndices[i]], contactSolver);
+    }
+}
+
 int collisionSceneFilterPortalContacts(struct ContactManifold* contact) {
     int writeIndex = 0;
 
@@ -540,14 +549,27 @@ void collisionSceneCollideDynamicPairs(struct CollisionScene* collisionScene) {
 }
 
 void collisionSceneUpdateDynamics() {
+    for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
+        // added back in by contactSolverRemoveUnusedContacts if there are actually contacts
+        gCollisionScene.dynamicObjects[i]->flags &= ~COLLISION_OBJECT_HAS_CONTACTS;
+    }
+
 	contactSolverRemoveUnusedContacts(&gContactSolver);
 
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
-        if (!collisionObjectShouldGenerateConctacts(gCollisionScene.dynamicObjects[i])) {
+        struct CollisionObject* object = gCollisionScene.dynamicObjects[i];
+        if (!collisionObjectShouldGenerateConctacts(object)) {
             continue;
         }
 
-        collisionObjectCollideWithScene(gCollisionScene.dynamicObjects[i], &gCollisionScene, &gContactSolver);
+        if (object->flags & COLLISION_OBJECT_HAS_CONTACTS || !collisionObjectIsActive(object)) {
+            collisionObjectCollideWithScene(object, &gCollisionScene, &gContactSolver);
+        } else {
+            struct Vector3 prevPos = object->body->transform.position;
+            rigidBodyUpdate(object->body);
+            collisionObjectUpdateBB(object);
+            collisionObjectCollideWithSceneSwept(object, &prevPos, &gCollisionScene, &gContactSolver);
+        }
     }
 
     collisionSceneCollideDynamicPairs(&gCollisionScene);
@@ -568,7 +590,11 @@ void collisionSceneUpdateDynamics() {
             continue;
         }
 
-        rigidBodyUpdate(collisionObject->body);
+        // if the object has no contacts then the rigidBodyUpdate
+        // was already done before before doing a swept collision
+        if (collisionObject->flags & COLLISION_OBJECT_HAS_CONTACTS) {
+            rigidBodyUpdate(collisionObject->body);
+        }
         rigidBodyCheckPortals(collisionObject->body);
         collisionObjectUpdateBB(collisionObject);
     }

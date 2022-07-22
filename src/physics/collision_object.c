@@ -84,6 +84,72 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
     contactInsert(contact, &result);
 }
 
+void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct Vector3* objectPrevPos, struct CollisionObject* quadObject, struct ContactSolver* contactSolver) {
+    if ((object->collisionLayers & quadObject->collisionLayers) == 0) {
+        return;
+    }
+
+    if (!box3DHasOverlap(&object->boundingBox, &quadObject->boundingBox)) {
+        return;
+    }
+
+    if (object->trigger && quadObject->trigger) {
+        return;
+    }
+
+    struct Simplex simplex;
+
+    struct CollisionQuad* quad = (struct CollisionQuad*)quadObject->collider->data;
+
+    struct SweptCollisionObject sweptObject;
+    sweptObject.object = object;
+    sweptObject.prevPos = objectPrevPos;
+
+    if (!gjkCheckForOverlap(&simplex, 
+                quad, minkowsiSumAgainstQuad, 
+                &sweptObject, minkowsiSumAgainstSweptObject, 
+                &quad->plane.normal)) {
+        return;
+    }
+
+    if (object->trigger) {
+        object->trigger(object->data, quadObject);
+        return;
+    }
+
+    if (quadObject->trigger) {
+        quadObject->trigger(quadObject->data, object);
+        return;
+    }
+
+    struct EpaResult result;
+    epaSolveSwept(
+        &simplex, 
+        quad, minkowsiSumAgainstQuad, 
+        &sweptObject, minkowsiSumAgainstSweptObject,
+        objectPrevPos,
+        &object->body->transform.position,
+        &result
+    );
+
+    if (collisionSceneIsTouchingPortal(&result.contactA, &result.normal)) {
+        object->body->flags |= RigidBodyIsTouchingPortal;
+        return;
+    }
+
+    struct ContactManifold* contact = contactSolverGetContactManifold(contactSolver, quadObject, object);
+
+    if (!contact) {
+        return;
+    }
+
+    contact->friction = MAX(object->collider->friction, quadObject->collider->friction);
+    contact->restitution = MIN(object->collider->bounce, quadObject->collider->bounce);
+
+    transformPointInverseNoScale(&object->body->transform, &result.contactB, &result.contactB);
+    contactInsert(contact, &result);
+}
+
 
 void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct CollisionObject* b, struct ContactSolver* contactSolver) {
     if (!box3DHasOverlap(&a->boundingBox, &b->boundingBox)) {
@@ -191,6 +257,20 @@ int minkowsiSumAgainstQuad(void* data, struct Vector3* direction, struct Vector3
         }
     } else {
         result |= 0x20;
+    }
+
+    return result;
+}
+
+int minkowsiSumAgainstSweptObject(void* data, struct Vector3* direction, struct Vector3* output) {
+    struct SweptCollisionObject* sweptObject = (struct SweptCollisionObject*)data;
+
+    int result = sweptObject->object->collider->callbacks->minkowsiSum(sweptObject->object->collider->data, &sweptObject->object->body->rotationBasis, direction, output);
+
+    if (vector3Dot(&sweptObject->object->body->transform.position, direction) > vector3Dot(sweptObject->prevPos, direction)) {
+        vector3Add(output, &sweptObject->object->body->transform.position, output);
+    } else {
+        vector3Add(output, sweptObject->prevPos, output);
     }
 
     return result;
