@@ -37,6 +37,9 @@ void vector3ProjectPlane(struct Vector3* in, struct Vector3* normal, struct Vect
 int vector3MoveTowards(struct Vector3* from, struct Vector3* towards, float maxDistance, struct Vector3* out);
 void vector3TripleProduct(struct Vector3* a, struct Vector3* b, struct Vector3* c, struct Vector3* output);
 
+void vector3Max(struct Vector3* a, struct Vector3* b, struct Vector3* out);
+void vector3Min(struct Vector3* a, struct Vector3* b, struct Vector3* out);
+
 int vector3IsZero(struct Vector3* vector);
 
 void vector3ToVector3u8(struct Vector3* input, struct Vector3u8* output);

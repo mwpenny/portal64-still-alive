@@ -89,6 +89,8 @@ void sceneInit(struct Scene* scene) {
     for (int i = 0; i < scene->elevatorCount; ++i) {
         elevatorInit(&scene->elevators[i], &gCurrentLevel->elevators[i]);
     }
+
+    // scene->player.grabbing = &scene->decor[0]->collisionObject;
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {

@@ -110,12 +110,12 @@ void collisionObjectCollideWithScene(struct CollisionObject* object, struct Coll
     }
 }
 
-void collisionObjectCollideWithSceneSwept(struct CollisionObject* object, struct Vector3* objectPrevPos, struct CollisionScene* scene, struct ContactSolver* contactSolver) {    
+void collisionObjectCollideWithSceneSwept(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionScene* scene, struct ContactSolver* contactSolver) {    
     short colliderIndices[MAX_COLLIDERS];
-    int quadCount = collisionObjectRoomColliders(&scene->world->rooms[object->body->currentRoom], &object->boundingBox, colliderIndices);
+    int quadCount = collisionObjectRoomColliders(&scene->world->rooms[object->body->currentRoom], sweptBB, colliderIndices);
 
     for (int i = 0; i < quadCount; ++i) {
-        collisionObjectCollideWithQuadSwept(object, objectPrevPos, &scene->quads[colliderIndices[i]], contactSolver);
+        collisionObjectCollideWithQuadSwept(object, objectPrevPos, sweptBB, &scene->quads[colliderIndices[i]], contactSolver);
     }
 }
 
@@ -566,9 +566,14 @@ void collisionSceneUpdateDynamics() {
             collisionObjectCollideWithScene(object, &gCollisionScene, &gContactSolver);
         } else {
             struct Vector3 prevPos = object->body->transform.position;
+            struct Box3D sweptBB = object->boundingBox;
+
             rigidBodyUpdate(object->body);
             collisionObjectUpdateBB(object);
-            collisionObjectCollideWithSceneSwept(object, &prevPos, &gCollisionScene, &gContactSolver);
+            box3DUnion(&sweptBB, &object->boundingBox, &sweptBB);
+
+            collisionObjectCollideWithSceneSwept(object, &prevPos, &sweptBB, &gCollisionScene, &gContactSolver);
+            collisionObjectUpdateBB(object);
         }
     }
 

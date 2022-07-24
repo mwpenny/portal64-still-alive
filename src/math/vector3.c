@@ -2,6 +2,8 @@
 #include "vector3.h"
 #include "mathf.h"
 
+#include <ultra64.h>
+
 struct Vector3 gRight = {1.0f, 0.0f, 0.0f};
 struct Vector3 gUp = {0.0f, 1.0f, 0.0f};
 struct Vector3 gForward = {0.0f, 0.0f, 1.0f};
@@ -132,6 +134,18 @@ int vector3MoveTowards(struct Vector3* from, struct Vector3* towards, float maxD
 void vector3TripleProduct(struct Vector3* a, struct Vector3* b, struct Vector3* c, struct Vector3* output) {
     vector3Scale(b, output, vector3Dot(a, c));
     vector3AddScaled(output, a, -vector3Dot(b, c), output);
+}
+
+void vector3Max(struct Vector3* a, struct Vector3* b, struct Vector3* out) {
+    out->x = MAX(a->x, b->x);
+    out->y = MAX(a->y, b->y);
+    out->z = MAX(a->z, b->z);
+}
+
+void vector3Min(struct Vector3* a, struct Vector3* b, struct Vector3* out) {
+    out->x = MIN(a->x, b->x);
+    out->y = MIN(a->y, b->y);
+    out->z = MIN(a->z, b->z);
 }
 
 int vector3IsZero(struct Vector3* vector) {

@@ -13,7 +13,7 @@ struct EpaResult {
 };
 
 void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct EpaResult* result);
-void epaSolveSwept(struct Simplex* startingSimplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct Vector3* bStart, struct Vector3* bEnd, struct EpaResult* result);
+int epaSolveSwept(struct Simplex* startingSimplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct Vector3* bStart, struct Vector3* bEnd, struct EpaResult* result);
 void epaSwapResult(struct EpaResult* result);
 
 #endif

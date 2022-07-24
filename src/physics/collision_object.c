@@ -84,12 +84,12 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
     contactInsert(contact, &result);
 }
 
-void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct Vector3* objectPrevPos, struct CollisionObject* quadObject, struct ContactSolver* contactSolver) {
+void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionObject* quadObject, struct ContactSolver* contactSolver) {
     if ((object->collisionLayers & quadObject->collisionLayers) == 0) {
         return;
     }
 
-    if (!box3DHasOverlap(&object->boundingBox, &quadObject->boundingBox)) {
+    if (!box3DHasOverlap(sweptBB, &quadObject->boundingBox)) {
         return;
     }
 
@@ -123,14 +123,16 @@ void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct 
     }
 
     struct EpaResult result;
-    epaSolveSwept(
+    if (!epaSolveSwept(
         &simplex, 
         quad, minkowsiSumAgainstQuad, 
         &sweptObject, minkowsiSumAgainstSweptObject,
         objectPrevPos,
         &object->body->transform.position,
         &result
-    );
+    )) {
+        return;
+    }
 
     if (collisionSceneIsTouchingPortal(&result.contactA, &result.normal)) {
         object->body->flags |= RigidBodyIsTouchingPortal;
@@ -145,6 +147,8 @@ void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct 
 
     contact->friction = MAX(object->collider->friction, quadObject->collider->friction);
     contact->restitution = MIN(object->collider->bounce, quadObject->collider->bounce);
+
+    object->body->velocity = gZeroVec;
 
     transformPointInverseNoScale(&object->body->transform, &result.contactB, &result.contactB);
     contactInsert(contact, &result);
