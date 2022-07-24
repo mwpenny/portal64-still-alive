@@ -70,6 +70,8 @@ SECTIONS
    }
    END_SEG(sound_data)
 
+#include "build/levels.ld"
+
    /* Discard everything not specifically mentioned above. */
    /DISCARD/ :
    {

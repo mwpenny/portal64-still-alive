@@ -192,7 +192,7 @@ build/src/scene/portal.o: $(MODEL_HEADERS)
 ## Test Chambers
 ####################
 
-TEST_CHAMBERS = $(shell find assets/test_chambers -type f -name '*.blend')
+TEST_CHAMBERS = assets/test_chambers/test_chamber_00/test_chamber_00.blend
 
 TEST_CHAMBER_HEADERS = $(TEST_CHAMBERS:%.blend=build/%.h)
 TEST_CHAMBER_OBJECTS = $(TEST_CHAMBERS:%.blend=build/%_geo.o)
@@ -220,6 +220,10 @@ levels: $(TEST_CHAMBER_HEADERS)
 build/assets/test_chambers/level_list.h: $(TEST_CHAMBER_HEADERS) tools/generate_level_list.js
 	@mkdir -p $(@D)
 	node tools/generate_level_list.js $@ $(TEST_CHAMBER_HEADERS)
+
+build/levels.ld: $(TEST_CHAMBER_OBJECTS) tools/generate_level_ld.js
+	@mkdir -p $(@D)
+	node tools/generate_level_ld.js $@ $(TEST_CHAMBER_OBJECTS)
 
 build/src/levels/levels.o: build/assets/test_chambers/level_list.h build/assets/materials/static.h
 
@@ -275,7 +279,7 @@ $(BOOT_OBJ): $(BOOT)
 
 # without debugger
 
-CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) $(TEST_CHAMBER_OBJECTS) $(MODEL_OBJECTS) build/assets/materials/static_mat.o build/assets/materials/hud_mat.o
+CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) $(MODEL_OBJECTS) build/assets/materials/static_mat.o build/assets/materials/hud_mat.o
 
 CODEOBJECTS_NO_DEBUG = $(CODEOBJECTS)
 
@@ -287,7 +291,7 @@ $(CODESEGMENT)_no_debug.o:	$(CODEOBJECTS_NO_DEBUG)
 	$(LD) -o $(CODESEGMENT)_no_debug.o -r $(CODEOBJECTS_NO_DEBUG) $(LDFLAGS)
 
 
-$(CP_LD_SCRIPT)_no_debug.ld: $(LD_SCRIPT)
+$(CP_LD_SCRIPT)_no_debug.ld: $(LD_SCRIPT) build/levels.ld
 	cpp -P -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_no_debug.o -o $@ $<
 
 $(BASE_TARGET_NAME).z64: $(CODESEGMENT)_no_debug.o $(OBJECTS) $(CP_LD_SCRIPT)_no_debug.ld
@@ -305,7 +309,7 @@ endif
 $(CODESEGMENT)_debug.o:	$(CODEOBJECTS_DEBUG)
 	$(LD) -o $(CODESEGMENT)_debug.o -r $(CODEOBJECTS_DEBUG) $(LDFLAGS)
 
-$(CP_LD_SCRIPT)_debug.ld: $(LD_SCRIPT)
+$(CP_LD_SCRIPT)_debug.ld: $(LD_SCRIPT) build/levels.ld
 	cpp -P -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_debug.o -o $@ $<
 
 $(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(CP_LD_SCRIPT)_debug.ld
