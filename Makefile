@@ -192,7 +192,7 @@ build/src/scene/portal.o: $(MODEL_HEADERS)
 ## Test Chambers
 ####################
 
-TEST_CHAMBERS = assets/test_chambers/test_chamber_00/test_chamber_00.blend
+TEST_CHAMBERS = assets/test_chambers/test_chamber_00.blend
 
 TEST_CHAMBER_HEADERS = $(TEST_CHAMBERS:%.blend=build/%.h)
 TEST_CHAMBER_OBJECTS = $(TEST_CHAMBERS:%.blend=build/%_geo.o)

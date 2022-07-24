@@ -9,6 +9,8 @@ struct GraphicsTask gGraphicsTasks[2];
 extern OSMesgQueue  gfxFrameMsgQ;
 extern OSMesgQueue	*schedulerCommandQueue;
 
+void* gLevelSegment;
+
 #if WITH_GFX_VALIDATOR
 #include "../../gfxvalidator/validator.h"
 #endif
@@ -53,6 +55,7 @@ void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callba
 
     renderStateInit(renderState, targetTask->framebuffer, zbuffer);
     gSPSegment(renderState->dl++, 0, 0);
+    gSPSegment(renderState->dl++, LEVEL_SEGMENT, gLevelSegment);
 
     gSPDisplayList(renderState->dl++, setup_rspstate);
     if (firsttime) {

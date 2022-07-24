@@ -16,6 +16,8 @@
 #define SCHEDULER_PRIORITY	13
 #define NUM_FIELDS      1 
 
+#define LEVEL_SEGMENT 2
+
 #define DMA_QUEUE_SIZE  200
 
 #define SCENE_SCALE 256
