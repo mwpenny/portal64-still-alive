@@ -4,8 +4,14 @@
 #include "physics/collision_object.h"
 #include "level_definition.h"
 
+#define NO_QUEUED_LEVEL -2
+#define NEXT_LEVEL      -1
+
 int levelCount();
 void levelLoad(int index);
+
+void levelQueueLoad(int index, struct Transform* relativeExitTransform);
+int levelGetQueued();
 
 extern struct LevelDefinition* gCurrentLevel;
 

@@ -65,7 +65,8 @@ struct CutsceneStep {
         } teleportPlayer;
         struct {
             u16 fromLocation;
-            u16 levelIndex;
+            // -1 signals loading the next level
+            s16 levelIndex;
         } loadLevel;
         struct {
             s16 relativeInstructionIndex;

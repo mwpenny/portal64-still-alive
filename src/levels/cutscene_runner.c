@@ -76,6 +76,15 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 gCurrentLevel->locations[step->teleportPlayer.toLocation].roomIndex
             );
             break;
+        case CutsceneStepTypeLoadLevel:
+        {
+            struct Transform exitInverse;
+            transformInvert(&gCurrentLevel->locations[step->loadLevel.fromLocation].transform, &exitInverse);
+            struct Transform relativeExit;
+            transformConcat(&exitInverse, &gScene.player.body.transform, &relativeExit);
+            levelQueueLoad(step->loadLevel.levelIndex, &relativeExit);
+            break;
+        }
         case CutsceneStepTypeGoto:
             runner->currentStep += step->gotoStep.relativeInstructionIndex;
             break;

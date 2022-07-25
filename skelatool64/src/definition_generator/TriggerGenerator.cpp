@@ -107,6 +107,18 @@ std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, int
             result->Add("teleportPlayer", std::move(teleportPlayer));
             return result;
         }
+    } else if (step.command == "load_level" && step.args.size() >= 1) {
+        short fromLocation = roomOutput.FindLocationIndex(step.args[0]);
+
+        if (fromLocation != -1) {
+            result->AddPrimitive<const char*>("CutsceneStepTypeLoadLevel");
+            std::unique_ptr<StructureDataChunk> loadLevel(new StructureDataChunk());
+            loadLevel->AddPrimitive(fromLocation);
+            // -1 means next level
+            loadLevel->AddPrimitive(-1);
+            result->Add("loadLevel", std::move(loadLevel));
+            return result;
+        }
     } else if (step.command == "goto" && step.args.size() >= 1) {
         auto gotoLabel = labels.find(step.args[0]);
 

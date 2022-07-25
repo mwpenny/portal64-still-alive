@@ -12,7 +12,15 @@
 #include "../util/memory.h"
 
 struct LevelDefinition* gCurrentLevel;
+int gCurrentLevelIndex;
 u64 gTriggeredCutscenes;
+
+int gQueuedLevel = NO_QUEUED_LEVEL;
+struct Transform gRelativeTransform = {
+    {0.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, 0.0f, 1.0f},
+    {1.0f, 1.0f, 1.0f},
+};
 
 int levelCount() {
     return LEVEL_COUNT;
@@ -85,9 +93,23 @@ void levelLoad(int index) {
     gLevelSegment = memory;
 
     gCurrentLevel = levelFixPointers(metadata->levelDefinition, (char*)memory - metadata->segmentStart);
+    gCurrentLevelIndex = index;
     gTriggeredCutscenes = 0;
 
     collisionSceneInit(&gCollisionScene, gCurrentLevel->collisionQuads, gCurrentLevel->collisionQuadCount, &gCurrentLevel->world);
+}
+
+void levelQueueLoad(int index, struct Transform* relativeExitTransform) {
+    if (index == NEXT_LEVEL) {
+        gQueuedLevel = gCurrentLevelIndex;
+    } else {
+        gQueuedLevel = index;
+    }
+    gRelativeTransform = *relativeExitTransform;
+}
+
+int levelGetQueued() {
+    return gQueuedLevel;
 }
 
 int levelMaterialCount() {
