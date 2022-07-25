@@ -551,7 +551,7 @@ void collisionSceneCollideDynamicPairs(struct CollisionScene* collisionScene) {
 void collisionSceneUpdateDynamics() {
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
         // added back in by contactSolverRemoveUnusedContacts if there are actually contacts
-        gCollisionScene.dynamicObjects[i]->flags &= ~COLLISION_OBJECT_HAS_CONTACTS;
+        gCollisionScene.dynamicObjects[i]->flags |= COLLISION_OBJECT_HAS_CONTACTS;
     }
 
 	contactSolverRemoveUnusedContacts(&gContactSolver);

@@ -70,6 +70,12 @@ void controllersUpdate(void)
         --gControllerDeadFrames;
         zeroMemory(gControllerData, sizeof(gControllerData));
     }
+
+    for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
+        if (gControllerStatus[i].errno & CONT_NO_RESPONSE_ERROR) {
+            zeroMemory(&gControllerData[i], sizeof(OSContPad));
+        }
+    }
 }
 
 int controllerHasPendingMessage() {
