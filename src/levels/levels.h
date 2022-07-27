@@ -12,6 +12,7 @@ void levelLoad(int index);
 
 void levelQueueLoad(int index, struct Transform* relativeExitTransform);
 int levelGetQueued();
+struct Transform* levelRelativeTransform();
 
 extern struct LevelDefinition* gCurrentLevel;
 

@@ -149,7 +149,7 @@ static void gameProc(void* arg) {
 
     dynamicSceneInit();
     contactSolverInit(&gContactSolver);
-    levelLoad(1);
+    levelLoad(0);
     controllersInit();
     initAudio();
     soundPlayerInit();
@@ -164,6 +164,19 @@ static void gameProc(void* arg) {
                 // control the framerate
                 frameControl = (frameControl + 1) % (FRAME_SKIP + 1);
                 if (frameControl != 0) {
+                    break;
+                }
+
+                if (levelGetQueued() != NO_QUEUED_LEVEL) {
+                    if (pendingGFX == 0) {
+                        dynamicSceneInit();
+                        portalSurfaceRevert(1);
+                        portalSurfaceRevert(0);
+                        heapInit(_heapStart, memoryEnd);
+                        levelLoad(levelGetQueued());
+                        sceneInit(&gScene);
+                    }
+
                     break;
                 }
 

@@ -574,6 +574,28 @@ void collisionSceneUpdateDynamics() {
 
             collisionObjectCollideWithSceneSwept(object, &prevPos, &sweptBB, &gCollisionScene, &gContactSolver);
             collisionObjectUpdateBB(object);
+
+            struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, object, NULL);
+
+            struct ContactManifold* contact = NULL;
+
+            while (manifold) {
+		        contactSolverCleanupManifold(manifold);
+
+                if (manifold->contactCount) {
+                    contact = manifold;
+                }
+
+                manifold = contactSolverNextManifold(&gContactSolver, object, manifold);
+            }
+
+            if (contact) {
+                float velocityDot = vector3Dot(&contact->normal, &object->body->velocity);
+
+                if (velocityDot < 0.0f) {
+                    vector3AddScaled(&object->body->velocity, &contact->normal, (1 + contact->restitution) * -velocityDot, &object->body->velocity);
+                }
+            }
         }
     }
 

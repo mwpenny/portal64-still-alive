@@ -64,6 +64,7 @@ struct ContactManifold* contactSolverNextManifold(struct ContactSolver* solver, 
 
 void contactSolverRemoveUnusedContacts(struct ContactSolver* contactSolver);
 void contactSolverCheckPortalContacts(struct ContactSolver* contactSolver, struct CollisionObject* objectWithNewPortal);
+void contactSolverCleanupManifold(struct ContactManifold* manifold);
 
 #endif
 

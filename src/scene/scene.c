@@ -41,7 +41,13 @@ void sceneInit(struct Scene* scene) {
     signalsInit(1);
 
     cameraInit(&scene->camera, 70.0f, 0.125f * SCENE_SCALE, 40.0f * SCENE_SCALE);
-    playerInit(&scene->player, levelGetLocation(gCurrentLevel->startLocation));
+
+    struct Location* startLocation = levelGetLocation(gCurrentLevel->startLocation);
+    struct Location combinedLocation;
+    combinedLocation.roomIndex = startLocation->roomIndex;
+    transformConcat(&startLocation->transform, levelRelativeTransform(), &combinedLocation.transform);
+
+    playerInit(&scene->player, &combinedLocation);
     sceneUpdateListeners(scene);
 
     portalInit(&scene->portals[0], 0);
@@ -89,8 +95,6 @@ void sceneInit(struct Scene* scene) {
     for (int i = 0; i < scene->elevatorCount; ++i) {
         elevatorInit(&scene->elevators[i], &gCurrentLevel->elevators[i]);
     }
-
-    // scene->player.grabbing = &scene->decor[0]->collisionObject;
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {

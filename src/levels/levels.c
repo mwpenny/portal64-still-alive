@@ -95,13 +95,14 @@ void levelLoad(int index) {
     gCurrentLevel = levelFixPointers(metadata->levelDefinition, (char*)memory - metadata->segmentStart);
     gCurrentLevelIndex = index;
     gTriggeredCutscenes = 0;
+    gQueuedLevel = NO_QUEUED_LEVEL;
 
     collisionSceneInit(&gCollisionScene, gCurrentLevel->collisionQuads, gCurrentLevel->collisionQuadCount, &gCurrentLevel->world);
 }
 
 void levelQueueLoad(int index, struct Transform* relativeExitTransform) {
     if (index == NEXT_LEVEL) {
-        gQueuedLevel = gCurrentLevelIndex;
+        gQueuedLevel = gCurrentLevelIndex + 1;
     } else {
         gQueuedLevel = index;
     }
@@ -110,6 +111,10 @@ void levelQueueLoad(int index, struct Transform* relativeExitTransform) {
 
 int levelGetQueued() {
     return gQueuedLevel;
+}
+
+struct Transform* levelRelativeTransform() {
+    return &gRelativeTransform;
 }
 
 int levelMaterialCount() {

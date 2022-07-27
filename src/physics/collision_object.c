@@ -148,8 +148,6 @@ void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct 
     contact->friction = MAX(object->collider->friction, quadObject->collider->friction);
     contact->restitution = MIN(object->collider->bounce, quadObject->collider->bounce);
 
-    object->body->velocity = gZeroVec;
-
     transformPointInverseNoScale(&object->body->transform, &result.contactB, &result.contactB);
     contactInsert(contact, &result);
 }

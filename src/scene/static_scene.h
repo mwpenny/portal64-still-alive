@@ -32,6 +32,4 @@ struct StaticScene {
     u16 gridHeight;
 };
 
-void staticSceneInit();
-
 #endif

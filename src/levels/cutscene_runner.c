@@ -81,7 +81,8 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             struct Transform exitInverse;
             transformInvert(&gCurrentLevel->locations[step->loadLevel.fromLocation].transform, &exitInverse);
             struct Transform relativeExit;
-            transformConcat(&exitInverse, &gScene.player.body.transform, &relativeExit);
+
+            transformConcat(&exitInverse, &gScene.player.lookTransform, &relativeExit);
             levelQueueLoad(step->loadLevel.levelIndex, &relativeExit);
             break;
         }
