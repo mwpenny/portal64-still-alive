@@ -5,6 +5,7 @@
 #include "epa.h"
 #include "contact_solver.h"
 #include "../util/memory.h"
+#include "../scene/portal.h"
 
 struct CollisionScene gCollisionScene;
 
@@ -168,7 +169,7 @@ int collisionSceneIsTouchingPortal(struct Vector3* contactPoint, struct Vector3*
 
     for (int i = 0; i < 2; ++i) {
         if (collisionSceneIsTouchingSinglePortal(contactPoint, contactNormal, gCollisionScene.portalTransforms[i], i)) {
-            return 1;
+            return RigidBodyIsTouchingPortalA << i;
         }
     }
 
@@ -548,10 +549,22 @@ void collisionSceneCollideDynamicPairs(struct CollisionScene* collisionScene) {
     stackMallocFree(dynamicBroadphase.edges);
 }
 
+int collisionSceneObjectIsTouchingPortal(struct CollisionObject* object, int portalIndex) {
+    struct Simplex simplex;
+    struct Vector3 direction;
+    quatMultVector(&gCollisionScene.portalTransforms[portalIndex]->rotation, &gRight, &direction);
+    return gjkCheckForOverlap(&simplex, 
+        object, minkowsiSumAgainstObject,
+        gCollisionScene.portalTransforms[portalIndex], minkowsiSumAgainstPortal,
+        &direction
+    );   
+}
+
 void collisionSceneUpdateDynamics() {
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
         // added back in by contactSolverRemoveUnusedContacts if there are actually contacts
         gCollisionScene.dynamicObjects[i]->flags &= ~COLLISION_OBJECT_HAS_CONTACTS;
+        // gCollisionScene.dynamicObjects[i]->flags |= COLLISION_OBJECT_HAS_CONTACTS;
     }
 
 	contactSolverRemoveUnusedContacts(&gContactSolver);
@@ -560,6 +573,18 @@ void collisionSceneUpdateDynamics() {
         struct CollisionObject* object = gCollisionScene.dynamicObjects[i];
         if (!collisionObjectShouldGenerateConctacts(object)) {
             continue;
+        }
+
+        if (object->body->flags & (RigidBodyIsTouchingPortalA | RigidBodyWasTouchingPortalA)) {
+            if (collisionSceneObjectIsTouchingPortal(object, 0)) {
+                object->body->flags |= RigidBodyIsTouchingPortalA;
+            }
+        }
+
+        if (object->body->flags & (RigidBodyIsTouchingPortalB | RigidBodyWasTouchingPortalB)) {
+            if (collisionSceneObjectIsTouchingPortal(object, 1)) {
+                object->body->flags |= RigidBodyIsTouchingPortalB;
+            }
         }
 
         if (object->flags & COLLISION_OBJECT_HAS_CONTACTS || !collisionObjectIsActive(object)) {
@@ -573,7 +598,6 @@ void collisionSceneUpdateDynamics() {
             box3DUnion(&sweptBB, &object->boundingBox, &sweptBB);
 
             collisionObjectCollideWithSceneSwept(object, &prevPos, &sweptBB, &gCollisionScene, &gContactSolver);
-            collisionObjectUpdateBB(object);
 
             struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, object, NULL);
 
@@ -594,8 +618,11 @@ void collisionSceneUpdateDynamics() {
 
                 if (velocityDot < 0.0f) {
                     vector3AddScaled(&object->body->velocity, &contact->normal, (1 + contact->restitution) * -velocityDot, &object->body->velocity);
+                    vector3AddScaled(&object->body->transform.position, &contact->normal, -0.01f, &object->body->transform.position);
                 }
             }
+
+            collisionObjectUpdateBB(object);
         }
     }
 

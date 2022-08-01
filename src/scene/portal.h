@@ -65,4 +65,7 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
 int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt);
 void portalCheckForHoles(struct Portal* portals);
 
+// data should be of type struct Transform
+int minkowsiSumAgainstPortal(void* data, struct Vector3* direction, struct Vector3* output);
+
 #endif

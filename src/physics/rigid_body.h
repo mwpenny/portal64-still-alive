@@ -7,6 +7,8 @@
 
 #define RIGID_BODY_NO_ROOM  0xFFFF
 
+#define MAX_PORTAL_SPEED (1000.0f / 64.0f)
+
 enum RigidBodyFlags {
     RigidBodyFlagsInFrontPortal0 = (1 << 0),
     RigidBodyFlagsInFrontPortal1 = (1 << 1),
@@ -14,17 +16,19 @@ enum RigidBodyFlags {
     RigidBodyFlagsCrossedPortal0 = (1 << 3),
     RigidBodyFlagsCrossedPortal1 = (1 << 4),
     RigidBodyFlagsGrabbable = (1 << 5),
-    RigidBodyIsTouchingPortal = (1 << 6),
-    RigidBodyWasTouchingPortal = (1 << 7),
+    RigidBodyIsTouchingPortalA = (1 << 6),
+    RigidBodyIsTouchingPortalB = (1 << 7),
+    RigidBodyWasTouchingPortalA = (1 << 8),
+    RigidBodyWasTouchingPortalB = (1 << 9),
 
-    RigidBodyIsKinematic = (1 << 8),
-    RigidBodyIsSleeping = (1 << 9),
+    RigidBodyIsKinematic = (1 << 10),
+    RigidBodyIsSleeping = (1 << 11),
     // for kinematic bodies that should generate 
     // contacts with other kinematic bodies
-    RigidBodyGenerateContacts = (1 << 10),
+    RigidBodyGenerateContacts = (1 << 12),
 
-    RigidBodyFizzled = (1 << 11),
-    RigidBodyDisableGravity = (1 << 12),
+    RigidBodyFizzled = (1 << 13),
+    RigidBodyDisableGravity = (1 << 14),
 };
 
 struct RigidBody {

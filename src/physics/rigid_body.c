@@ -53,7 +53,7 @@ void rigidBodyUpdate(struct RigidBody* rigidBody) {
     vector3AddScaled(&rigidBody->transform.position, &rigidBody->velocity, FIXED_DELTA_TIME, &rigidBody->transform.position);
     quatApplyAngularVelocity(&rigidBody->transform.rotation, &rigidBody->angularVelocity, FIXED_DELTA_TIME, &rigidBody->transform.rotation);
 
-    vector3Scale(&rigidBody->velocity, &rigidBody->velocity, ENERGY_SCALE_PER_STEP);
+    // vector3Scale(&rigidBody->velocity, &rigidBody->velocity, ENERGY_SCALE_PER_STEP);
     vector3Scale(&rigidBody->angularVelocity, &rigidBody->angularVelocity, ENERGY_SCALE_PER_STEP);
 }
 
@@ -87,13 +87,21 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
 
     enum RigidBodyFlags newFlags = 0;
 
-    if (rigidBody->flags & RigidBodyIsTouchingPortal) {
-        newFlags |= RigidBodyWasTouchingPortal;
+    if (rigidBody->flags & RigidBodyIsTouchingPortalA) {
+        newFlags |= RigidBodyWasTouchingPortalA;
+    }
+
+    if (rigidBody->flags & RigidBodyIsTouchingPortalB) {
+        newFlags |= RigidBodyWasTouchingPortalB;
     }
 
     int result = 0;
 
     for (int i = 0; i < 2; ++i) {
+        if (!((RigidBodyIsTouchingPortalA << i) & rigidBody->flags) || !((RigidBodyWasTouchingPortalA << i) & rigidBody->flags)) {
+            continue;
+        }
+
         transformPointInverseNoScale(gCollisionScene.portalTransforms[i], &rigidBody->transform.position, &localPoint);
 
         int mask = (1 << i);
@@ -126,20 +134,18 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
             continue;
         }
 
-        struct Vector3 scaledPoint;
-
-        scaledPoint.x = localPoint.x * (1.0f / PORTAL_X_RADIUS);
-        scaledPoint.y = localPoint.y;
-        scaledPoint.z = 0.0f;
-
-        if (vector3MagSqrd(&scaledPoint) > 1.0f) {
-            continue;
-        }
-
         struct Transform* otherPortal = gCollisionScene.portalTransforms[1 - i];
         rigidBodyTeleport(rigidBody, gCollisionScene.portalTransforms[i], otherPortal, gCollisionScene.portalRooms[1 - i]);
 
+        float speedSqrd = vector3MagSqrd(&rigidBody->velocity);
+
+        if (speedSqrd > MAX_PORTAL_SPEED * MAX_PORTAL_SPEED) {
+            vector3Normalize(&rigidBody->velocity, &rigidBody->velocity);
+            vector3Scale(&rigidBody->velocity, &rigidBody->velocity, MAX_PORTAL_SPEED);
+        }
+
         newFlags |= RigidBodyFlagsCrossedPortal0 << i;
+        newFlags |= RigidBodyIsTouchingPortalA << (1 - i);
         result = i + 1;
     }
 
@@ -149,8 +155,10 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
         RigidBodyFlagsPortalsInactive |
         RigidBodyFlagsCrossedPortal0 |
         RigidBodyFlagsCrossedPortal1 |
-        RigidBodyIsTouchingPortal |
-        RigidBodyWasTouchingPortal
+        RigidBodyIsTouchingPortalA |
+        RigidBodyIsTouchingPortalB |
+        RigidBodyWasTouchingPortalA |
+        RigidBodyWasTouchingPortalB
     );
     rigidBody->flags |= newFlags;
 

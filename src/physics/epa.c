@@ -519,13 +519,19 @@ int epaSolveSwept(struct Simplex* startingSimplex, void* objectA, MinkowsiSum ob
             goto error;
         }
 
+
         result->penetration = 0;
 
         struct Vector3 planePos;
         vector3Scale(&raycastDir, &planePos, distance);
+        float moveOffset = vector3DistSqrd(bStart, bEnd);
+        
+        if (distance * distance > moveOffset + 0.1f) {
+            goto error;
+        }
+
         // move the swept object back to the first point of contact
         vector3Add(bEnd, &planePos, bEnd);
-
         epaCalculateContact(simplex, closestFace, &planePos, result);
     }
 

@@ -538,3 +538,44 @@ void portalCheckForHoles(struct Portal* portals) {
     }
     
 }
+
+int minkowsiSumAgainstPortal(void* data, struct Vector3* direction, struct Vector3* output) {
+    struct Transform* transform = (struct Transform*)data;
+    struct Vector3 localDir;
+    struct Quaternion inverseRotation;
+
+    quatConjugate(&transform->rotation, &inverseRotation);
+    quatMultVector(&inverseRotation, direction, &localDir);
+
+    float maxDot = vector3Dot(&gPortalOutline[0], &localDir);
+    int maxDotIndex = 0;
+
+    for (int i = 0; i < 9; ++i) {
+        if (maxDot < 0.0f) {
+            maxDotIndex = (maxDotIndex + 4) & 0x7;
+            maxDot = vector3Dot(&gPortalOutline[maxDotIndex], &localDir);
+        } else {
+            int prevIndex = (i - 1) & 0x7;
+            int nextIndex = (i + 1) & 0x7;
+
+            float prevDot = vector3Dot(&gPortalOutline[prevIndex], &localDir);
+            float nextDot = vector3Dot(&gPortalOutline[nextIndex], &localDir);
+
+            if (prevDot > maxDot) {
+                maxDotIndex = prevIndex;
+                maxDot = prevDot;
+            } else if (nextDot > maxDot) {
+                maxDotIndex = nextIndex;
+                maxDot = nextDot;
+            } else {
+                break;
+            }
+        }
+    }
+
+    quatMultVector(&transform->rotation, &gPortalOutline[maxDotIndex], output);
+    vector3Scale(output, output, 1.2f / SCENE_SCALE);
+    vector3Add(output, &transform->position, output);
+
+    return 1 << maxDotIndex;
+}

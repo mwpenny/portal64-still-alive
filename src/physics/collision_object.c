@@ -66,8 +66,10 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
         &result
     );
 
-    if (collisionSceneIsTouchingPortal(&result.contactA, &result.normal)) {
-        object->body->flags |= RigidBodyIsTouchingPortal;
+    int touchingPortals = collisionSceneIsTouchingPortal(&result.contactA, &result.normal);
+
+    if (touchingPortals) {
+        object->body->flags |= touchingPortals;
         return;
     }
 
@@ -123,19 +125,24 @@ void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct 
     }
 
     struct EpaResult result;
+    struct Vector3 objectEnd = object->body->transform.position;
+
     if (!epaSolveSwept(
         &simplex, 
         quad, minkowsiSumAgainstQuad, 
         &sweptObject, minkowsiSumAgainstSweptObject,
         objectPrevPos,
-        &object->body->transform.position,
+        &objectEnd,
         &result
     )) {
+        collisionObjectCollideWithQuad(object, quadObject, contactSolver);
         return;
     }
 
-    if (collisionSceneIsTouchingPortal(&result.contactA, &result.normal)) {
-        object->body->flags |= RigidBodyIsTouchingPortal;
+    int touchingPortals = collisionSceneIsTouchingPortal(&result.contactA, &result.normal);
+
+    if (touchingPortals) {
+        object->body->flags |= touchingPortals;
         return;
     }
 
@@ -144,6 +151,8 @@ void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct 
     if (!contact) {
         return;
     }
+
+    object->body->transform.position = objectEnd;
 
     contact->friction = MAX(object->collider->friction, quadObject->collider->friction);
     contact->restitution = MIN(object->collider->bounce, quadObject->collider->bounce);
