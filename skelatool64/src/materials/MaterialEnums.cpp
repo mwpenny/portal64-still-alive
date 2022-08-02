@@ -36,7 +36,7 @@ const char* gColorCombineSourceNames[(int)ColorCombineSource::Count] = {
     "TEXEL0_ALPHA",
     "TEXEL1_ALPHA",
     "PRIMITIVE_ALPHA",
-    "SHADED_ALPHA",
+    "SHADE_ALPHA",
     "ENVIRONMENT_ALPHA",
     "LOD_FRACTION",
     "PRIM_LOD_FRAC",

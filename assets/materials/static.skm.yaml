@@ -4,9 +4,10 @@ materials:
     gDPSetTextureFilter: G_TF_BILERP
     gDPSetTexturePersp: G_TP_PERSP
     gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetAlphaCompare: G_AC_NONE
     gSPGeometryMode:
       set: [G_CULL_BACK, G_ZBUFFER]
-      clear: [G_CULL_FRONT]
+      clear: [G_CULL_FRONT, G_TEXTURE_GEN, G_TEXTURE_GEN_LINEAR]
 
   concrete_modular_wall001d:
     gDPSetTile: 
@@ -47,6 +48,92 @@ materials:
     properties:
       tileSizeS: 0.5
       tileSizeT: 0.5
+
+  metalwall_bts_006a:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalwall_bts_006a.png
+      siz: G_IM_SIZ_16b
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+    
+    gDPSetCombineMode:
+      color: ["TEXEL0", "PRIMITIVE", "SHADE", "PRIMITIVE"]
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gDPSetPrimColor:
+      r: 217
+      g: 71
+      b: 24
+
+    properties:
+      tileSizeS: 1
+      tileSizeT: 1
+
+  metalgrate018:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalgrate018.png
+      siz: G_IM_SIZ_16b
+    
+    gDPSetCombineMode: G_CC_DECALRGBA
+    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetAlphaCompare: G_AC_THRESHOLD
+    gDPSetRenderMode: G_RM_AA_ZB_TEX_EDGE
+    gDPSetBlendColor:
+      r: 255
+      g: 255
+      b: 255
+      a: 128
+
+    properties:
+      tileSizeS: 0.125
+      tileSizeT: 0.125
+
+  metal_lift001:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalwall_bts_006a.png
+      siz: G_IM_SIZ_16b
+      s:
+        wrap: false
+      t:
+        wrap: false
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_TEXTURE_GEN, G_TEXTURE_GEN_LINEAR, G_SHADE]
+    
+    gDPSetCombineMode:
+      color: ["TEXEL0", "PRIMITIVE", "SHADE_ALPHA", "PRIMITIVE"]
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gDPSetPrimColor:
+      r: 217
+      g: 71
+      b: 24
+
+    
+  light_orange001:
+    gDPSetCombineMode:
+      color: ["0", "0", "0", "PRIMITIVE"]
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gDPSetPrimColor:
+      r: 217
+      g: 71
+      b: 24
+
+  hazard_orange_03b:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/signage/hazard_orange_03b.png
+      siz: G_IM_SIZ_16b
+    
+    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    properties:
+      tileSizeS: 0.5
+      tileSizeT: 0.125
+
 
   concrete_modular_ceiling001a:
     gDPSetTile:

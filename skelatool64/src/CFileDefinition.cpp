@@ -158,15 +158,26 @@ unsigned convertByteRange(float value) {
                 normal = rotate.Rotate(normal);
             }
 
+            float a = 1.0f;
+
+            if (mTargetMesh->mMesh->mColors[1] != nullptr) {
+                a = mTargetMesh->mMesh->mColors[1][i].r;
+            }
+
             vertexNormal->AddPrimitive(convertNormalizedRange(normal.x));
             vertexNormal->AddPrimitive(convertNormalizedRange(normal.y));
             vertexNormal->AddPrimitive(convertNormalizedRange(normal.z));
-            vertexNormal->AddPrimitive(255);
+            vertexNormal->AddPrimitive(convertByteRange(a));
             break;
         }
         case VertexType::PosUVColor:
             if (mTargetMesh->mMesh->mColors[0] != nullptr) {
                 aiColor4D color = mTargetMesh->mMesh->mColors[0][i];
+                
+                if (mTargetMesh->mMesh->mColors[1] != nullptr) {
+                    color.a = mTargetMesh->mMesh->mColors[1][i].r;
+                }
+
                 vertexNormal->AddPrimitive(convertByteRange(color.r));
                 vertexNormal->AddPrimitive(convertByteRange(color.g));
                 vertexNormal->AddPrimitive(convertByteRange(color.b));

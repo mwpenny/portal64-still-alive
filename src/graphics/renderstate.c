@@ -36,6 +36,10 @@ Vtx* renderStateRequestVertices(struct RenderState* renderState, unsigned count)
     return renderStateRequestMemory(renderState, sizeof(Vtx) * count);
 }
 
+LookAt* renderStateRequestLookAt(struct RenderState* renderState) {
+    return renderStateRequestMemory(renderState, sizeof(LookAt));
+}
+
 void renderStateFlushCache(struct RenderState* renderState) {
     osWritebackDCache(renderState, sizeof(struct RenderState));
 }

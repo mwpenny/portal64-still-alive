@@ -338,6 +338,8 @@ void cubeProjectSingleFace(aiMesh* mesh, std::set<aiFace*>& faces, double sTile,
     aiVector3D up;
     float minLeft = 10000000000.0f;
     float minUp = 10000000000.0f;
+    float maxLeft = -minLeft;
+    float maxUp = -minUp;
 
     if (fabs(normal.y) > 0.7) {
         up = aiVector3D(0.0f, 0.0f, 1.0f);
@@ -356,8 +358,14 @@ void cubeProjectSingleFace(aiMesh* mesh, std::set<aiFace*>& faces, double sTile,
 
             minLeft = std::min(minLeft, vertex * left);
             minUp = std::min(minUp, vertex * up);
+
+            maxLeft = std::max(maxLeft, vertex * left);
+            maxUp = std::max(maxUp, vertex * up);
         }
     }
+
+    float leftHalfSize = floor((maxLeft - minLeft) * 0.5f * sTile);
+    float upHalfSize = floor((maxUp - minUp) * 0.5f * tTile);
 
     for (auto face : faces) {
         for (unsigned i = 0; i < face->mNumIndices; ++i) {
@@ -367,7 +375,7 @@ void cubeProjectSingleFace(aiMesh* mesh, std::set<aiFace*>& faces, double sTile,
             float sCoord = vertex * left - minLeft;
             float tCoord = vertex * up - minUp;
 
-            mesh->mTextureCoords[0][index] = aiVector3D(sCoord * sTile, tCoord * tTile, 0.0f);
+            mesh->mTextureCoords[0][index] = aiVector3D(sCoord * sTile - leftHalfSize, tCoord * tTile - upHalfSize, 0.0f);
         }
     }
 }

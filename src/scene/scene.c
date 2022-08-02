@@ -164,8 +164,13 @@ void sceneRenderPortalGun(struct Scene* scene, struct RenderState* renderState) 
     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
 }
 
+LookAt gLookAt = gdSPDefLookAt(127, 0, 0, 0, 127, 0);
+
 void sceneRender(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
     gSPSetLights1(renderState->dl++, gSceneLights);
+    LookAt* lookAt = renderStateRequestLookAt(renderState);
+    *lookAt = gLookAt;
+    gSPLookAt(renderState->dl++, lookAt);
     
     struct RenderProps renderProperties;
 
