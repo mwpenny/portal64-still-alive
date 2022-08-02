@@ -190,9 +190,11 @@ void cutscenesUpdate() {
     struct CutsceneRunner* current = gRunningCutscenes;
 
     while (current) {
-        cutsceneRunnerUpdate(current);
-
-        if (!cutsceneRunnerIsRunning(current)) {
+        if (cutsceneRunnerIsRunning(current)) {
+            cutsceneRunnerUpdate(current);
+            previousCutscene = current;
+            current = current->nextRunner;
+        } else {
             struct CutsceneRunner* toRemove = current;
             current = current->nextRunner;
 
@@ -204,9 +206,6 @@ void cutscenesUpdate() {
 
             toRemove->nextRunner = gUnusedRunners;
             gUnusedRunners = toRemove;            
-        } else {
-            previousCutscene = current;
-            current = current->nextRunner;
-        }
+        } 
     }
 }

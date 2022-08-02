@@ -82,10 +82,14 @@ void doorUpdate(struct Door* door) {
     if (door->forDoorway) {
         if (door->openAmount == 0.0f) {
             door->forDoorway->flags &= ~DoorwayFlagsOpen;
-            door->collisionObject.collisionLayers = COLLISION_LAYERS_TANGIBLE;
         } else {
             door->forDoorway->flags |= DoorwayFlagsOpen;
-            door->collisionObject.collisionLayers = 0;
         }
+    }
+
+    if (door->openAmount == 0.0f) {
+        door->collisionObject.collisionLayers = COLLISION_LAYERS_TANGIBLE;
+    } else {
+        door->collisionObject.collisionLayers = 0;
     }
 }

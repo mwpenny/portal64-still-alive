@@ -71,9 +71,9 @@ void playerInit(struct Player* player, struct Location* startLocation) {
     collisionObjectUpdateBB(&player->collisionObject);
 }
 
-#define PLAYER_SPEED    (3.0f)
-#define PLAYER_ACCEL    (30.0f)
-#define PLAYER_STOP_ACCEL    (80.0f)
+#define PLAYER_SPEED    (150.0f / 64.0f)
+#define PLAYER_ACCEL    (5.875f)
+#define PLAYER_STOP_ACCEL    (5.875f)
 
 #define ROTATE_RATE     (M_PI * 2.0f)
 #define ROTATE_RATE_DELTA     (M_PI * 0.125f)
