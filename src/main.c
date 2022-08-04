@@ -149,7 +149,7 @@ static void gameProc(void* arg) {
 
     dynamicSceneInit();
     contactSolverInit(&gContactSolver);
-    levelLoad(1);
+    levelLoad(0);
     controllersInit();
     initAudio();
     soundPlayerInit();

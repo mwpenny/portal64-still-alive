@@ -95,6 +95,12 @@ void sceneInit(struct Scene* scene) {
     for (int i = 0; i < scene->elevatorCount; ++i) {
         elevatorInit(&scene->elevators[i], &gCurrentLevel->elevators[i]);
     }
+
+    scene->pedestalCount = gCurrentLevel->pedestalCount;
+    scene->pedestals = malloc(sizeof(struct Pedestal) * scene->pedestalCount);
+    for (int i = 0; i < scene->pedestalCount; ++i) {
+        pedestalInit(&scene->pedestals[i], &gCurrentLevel->pedestals[i]);
+    }
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {
@@ -103,7 +109,7 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
     u64 visibleRooms = 0;
     staticRenderDetermineVisibleRooms(&properties->cullingInfo, properties->fromRoom, &visibleRooms);
 
-    int closerPortal = vector3DistSqrd(&properties->camera.transform.position, &scene->portals[0].transform.position) > vector3DistSqrd(&properties->camera.transform.position, &scene->portals[1].transform.position) ? 0 : 1;
+    int closerPortal = vector3DistSqrd(&properties->camera.transform.position, &scene->portals[0].transform.position) < vector3DistSqrd(&properties->camera.transform.position, &scene->portals[1].transform.position) ? 0 : 1;
     int otherPortal = 1 - closerPortal;
 
     for (int i = 0; i < 2; ++i) {

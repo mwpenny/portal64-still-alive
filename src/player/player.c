@@ -79,7 +79,7 @@ void playerInit(struct Player* player, struct Location* startLocation) {
 #define ROTATE_RATE_DELTA     (M_PI * 0.125f)
 #define ROTATE_RATE_STOP_DELTA (M_PI * 0.25f)
 
-#define JUMP_IMPULSE   3.2f
+#define JUMP_IMPULSE   2.7f
 
 void playerHandleCollision(struct Player* player) {
     struct ContactManifold* contact = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);

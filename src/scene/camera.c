@@ -3,6 +3,7 @@
 #include "math/transform.h"
 #include "defs.h"
 #include "../graphics/graphics.h"
+#include "../math/mathf.h"
 
 int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox) {
     for (int i = 0; i < frustrum->usedClippingPlaneCount; ++i) {
@@ -90,12 +91,18 @@ void cameraExtractClippingPlane(float viewPersp[4][4], struct Plane* output, int
     output->d *= mult;
 }
 
+int cameraIsValidMatrix(float matrix[4][4]) {
+    return fabsf(matrix[3][0]) <= 0x7fff && fabsf(matrix[3][1]) <= 0x7fff && fabsf(matrix[3][2]) <= 0x7fff;
+}
+
 Mtx* cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, float aspectRatio, u16* perspNorm, Vp* viewport, struct FrustrumCullingInformation* clippingInfo) {
     Mtx* viewProjMatrix = renderStateRequestMatrices(renderState, 2);
     
     if (!viewProjMatrix) {
         return NULL;
     }
+
+    Gfx* renderStateStart = renderState->dl;
 
     guMtxIdent(&viewProjMatrix[0]);
     gSPMatrix(renderState->dl++, osVirtualToPhysical(&viewProjMatrix[0]), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
@@ -117,6 +124,11 @@ Mtx* cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState,
 
     cameraBuildViewMatrix(camera, view);
     guMtxCatF(view, persp, combined);
+
+    if (!cameraIsValidMatrix(combined)) {
+        goto error;
+    }
+
     guMtxF2L(combined, &viewProjMatrix[1]);
 
     if (clippingInfo) {
@@ -137,4 +149,8 @@ Mtx* cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState,
     }
 
     return &viewProjMatrix[1];
+
+error:
+    renderState->dl = renderStateStart;
+    return NULL;
 }

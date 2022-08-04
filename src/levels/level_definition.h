@@ -130,6 +130,11 @@ struct ElevatorDefinition {
     short isExit;
 };
 
+struct PedestalDefinition {
+    struct Vector3 position;
+    short roomIndex;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
@@ -149,6 +154,7 @@ struct LevelDefinition {
     struct DecorDefinition* decor;
     struct FizzlerDefinition* fizzlers;
     struct ElevatorDefinition* elevators;
+    struct PedestalDefinition* pedestals;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
@@ -161,6 +167,7 @@ struct LevelDefinition {
     short decorCount;
     short fizzlerCount;
     short elevatorCount;
+    short pedestalCount;
     short startLocation;
 };
 

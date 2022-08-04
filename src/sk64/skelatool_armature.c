@@ -7,9 +7,16 @@
 void skArmatureInit(struct SKArmature* object, Gfx* displayList, u32 numberOfBones, struct Transform* initialPose, unsigned short* boneParentIndex) {
     object->displayList = displayList;
     object->numberOfBones = numberOfBones;
-    object->boneTransforms = malloc(sizeof(Mtx) * numberOfBones);
+
+    unsigned transformSize = sizeof(Mtx) * numberOfBones;
+
+    object->boneTransforms = malloc(transformSize);
     if (initialPose) {
-        romCopy((void*)initialPose, (void*)object->boneTransforms, sizeof(Mtx) * numberOfBones);
+        if (IS_KSEG0(initialPose)) {
+            memCopy(object->boneTransforms, initialPose, transformSize);
+        } else {
+            romCopy((void*)initialPose, (void*)object->boneTransforms, transformSize);
+        }
     }
     object->boneParentIndex = boneParentIndex;
 }

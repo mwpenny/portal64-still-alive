@@ -664,6 +664,44 @@ void generateElevatorDefinitions(
     levelDef.AddPrimitive("elevatorCount", elevatorCount);
 }
 
+void generatePedestalDefinitions(
+    const aiScene* scene, 
+    CFileDefinition& fileDefinition, 
+    StructureDataChunk& levelDef, 
+    const RoomGeneratorOutput& roomOutput, 
+    const DisplayListSettings& settings,
+    NodeGroups& nodeGroups) {
+
+    int pedestalCount = 0;
+    std::unique_ptr<StructureDataChunk> pedestals(new StructureDataChunk());
+
+    aiMatrix4x4 baseTransform = settings.CreateCollisionTransform();
+
+    for (auto& nodeInfo : nodeGroups.NodesForType("@pedestal")) {
+        std::unique_ptr<StructureDataChunk> pedestalsData(new StructureDataChunk());
+        aiVector3D pos;
+        aiQuaternion rot;
+        aiVector3D scale;
+        (baseTransform * nodeInfo.node->mTransformation).Decompose(scale, rot, pos);
+        pedestalsData->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(pos)));
+        pedestalsData->AddPrimitive(roomOutput.RoomForNode(nodeInfo.node));
+
+        pedestals->Add(std::move(pedestalsData));
+        ++pedestalCount;
+    }
+
+    std::string pedestalsCount = fileDefinition.AddDataDefinition(
+        "pedestals",
+        "struct PedestalDefinition",
+        true,
+        "_geo",
+        std::move(pedestals)
+    );
+
+    levelDef.AddPrimitive("pedestals", pedestalsCount);
+    levelDef.AddPrimitive("pedestalCount", pedestalCount);
+}
+
 void generateLevel(
         const aiScene* scene, 
         CFileDefinition& fileDefinition,
@@ -706,6 +744,8 @@ void generateLevel(
     generateFizzlerDefinitions(scene, fileDefinition, *levelDef, roomOutput, settings, nodeGroups);
 
     generateElevatorDefinitions(scene, fileDefinition, *levelDef, roomOutput, settings, signals, nodeGroups);
+
+    generatePedestalDefinitions(scene, fileDefinition, *levelDef, roomOutput, settings, nodeGroups);
 
     fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct LevelDefinition", fileDefinition.GetUniqueName("level"), false, "_geo", std::move(levelDef))));
 }
