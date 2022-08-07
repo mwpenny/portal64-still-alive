@@ -22,8 +22,8 @@ public:
     ExtendedMesh(aiMesh* mesh, BoneHierarchy& boneHierarchy);
     ~ExtendedMesh();
     aiMesh* mMesh;
-    std::vector<aiMatrix4x4*> mPointInverseTransform;
-    std::vector<aiMatrix3x3*> mNormalInverseTransform;
+    std::vector<aiMatrix4x4> mPointInverseTransform;
+    std::vector<aiMatrix3x3> mNormalInverseTransform;
     std::vector<Bone*> mVertexBones;
     std::map<Bone*, std::vector<aiFace*>> mFacesForBone;
     // first bone in pair is always the parent of the second

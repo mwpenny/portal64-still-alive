@@ -93,7 +93,7 @@ int Bone::GetBoneIndex(Bone* a) {
     }
 }
 
-void BoneHierarchy::PopulateWithAnimationNodeInfo(const NodeAnimationInfo& animInfo, float fixedPointScale) {
+void BoneHierarchy::PopulateWithAnimationNodeInfo(const NodeAnimationInfo& animInfo, float fixedPointScale, aiQuaternion& rotation) {
     for (auto& node : animInfo.nodesWithAnimation) {
         Bone* parent = nullptr;
 

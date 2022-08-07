@@ -65,7 +65,7 @@ public:
     void SearchForBones(aiNode* node, Bone* currentBoneParent, std::set<std::string>& knownBones, bool parentIsBone, float fixedPointScale);
     void SearchForBonesInScene(const aiScene* scene, float fixedPointScale);
 
-    void PopulateWithAnimationNodeInfo(const NodeAnimationInfo& animInfo, float fixedPointScale);
+    void PopulateWithAnimationNodeInfo(const NodeAnimationInfo& animInfo, float fixedPointScale, aiQuaternion& rotation);
 
     Bone* BoneByIndex(unsigned index);
     Bone* BoneForName(std::string name);

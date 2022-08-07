@@ -6,7 +6,7 @@
 #include <string>
 #include <map>
 
-std::shared_ptr<NodeAnimationInfo> findNodesForWithAnimation(const aiScene* scene, const std::vector<aiNode*>& usedNodes, const aiMatrix4x4& baseTransform) {
+std::shared_ptr<NodeAnimationInfo> findNodesForWithAnimation(const aiScene* scene, const std::vector<aiNode*>& usedNodes, float modelScale) {
     std::set<std::string> animatedNodeNames;
 
     for (unsigned animIndex = 0; animIndex < scene->mNumAnimations; ++animIndex) {
@@ -56,7 +56,7 @@ std::shared_ptr<NodeAnimationInfo> findNodesForWithAnimation(const aiScene* scen
         }
 
         if (!currentNode->mParent) {
-            nodeInfo->relativeTransform = baseTransform * nodeInfo->relativeTransform;
+            nodeInfo->relativeTransform = aiMatrix4x4(aiVector3D(1, 1, 1) * modelScale, aiQuaternion(), aiVector3D()) * nodeInfo->relativeTransform;
         }
 
         nodeInfo->node = node;

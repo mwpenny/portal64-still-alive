@@ -2,9 +2,20 @@
 #include "RenderChunk.h"
 #include <algorithm>
 
-RenderChunk::RenderChunk(std::pair<Bone*, Bone*> bonePair, std::shared_ptr<ExtendedMesh> mesh, Material* material): 
+RenderChunk::RenderChunk(std::pair<Bone*, Bone*> bonePair, std::shared_ptr<ExtendedMesh> mesh, aiNode* meshRoot, Material* material): 
     mBonePair(bonePair),
     mMesh(mesh),
+    mMeshRoot(meshRoot),
+    mAttachedDLIndex(-1),
+    mMaterial(material) {
+
+}
+
+RenderChunk::RenderChunk(std::pair<Bone*, Bone*> bonePair, int attachedDLIndex, Material* material): 
+    mBonePair(bonePair),
+    mMesh(NULL),
+    mMeshRoot(nullptr),
+    mAttachedDLIndex(attachedDLIndex),
     mMaterial(material) {
 
 }
@@ -45,12 +56,13 @@ void extractChunks(const aiScene* scene, std::vector<std::shared_ptr<ExtendedMes
             result.push_back(RenderChunk(
                 std::make_pair(boneSegment->first, boneSegment->first),
                 *it,
+                nullptr,
                 materialPtr
             ));
         }
 
         for (auto pairSegment = (*it)->mBoneSpanningFaces.begin(); pairSegment != (*it)->mBoneSpanningFaces.end(); ++pairSegment) {
-            result.push_back(RenderChunk(pairSegment->first, *it, materialPtr));
+            result.push_back(RenderChunk(pairSegment->first, *it, nullptr, materialPtr));
         }
     }
 }

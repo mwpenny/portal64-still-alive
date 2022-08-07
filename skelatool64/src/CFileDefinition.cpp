@@ -61,12 +61,10 @@ unsigned convertByteRange(float value) {
 
         aiVector3D pos = mTargetMesh->mMesh->mVertices[i];
 
-        pos = pos * modelScale;
-
-        if (mTargetMesh->mPointInverseTransform[i]) {
-            pos = (*mTargetMesh->mPointInverseTransform[i]) * pos;
+        if (mTargetMesh->mPointInverseTransform.size()) {
+            pos = mTargetMesh->mPointInverseTransform[i] * pos;
         } else {
-            pos = rotate.Rotate(pos);
+            pos = rotate.Rotate(pos) * modelScale;
         }
 
         pos = pos * fixedPointScale;
@@ -151,9 +149,9 @@ unsigned convertByteRange(float value) {
                 break;
             }
 
-            if (mTargetMesh->mPointInverseTransform[i]) {
-                normal = (*mTargetMesh->mNormalInverseTransform[i]) * normal;
-                normal.Normalize();
+            if (mTargetMesh->mPointInverseTransform.size()) {
+                normal = mTargetMesh->mNormalInverseTransform[i] * normal;
+                normal.NormalizeSafe();
             } else {
                 normal = rotate.Rotate(normal);
             }

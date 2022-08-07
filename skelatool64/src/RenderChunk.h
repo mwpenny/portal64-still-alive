@@ -13,11 +13,14 @@
 
 class RenderChunk {
 public:
-    RenderChunk(std::pair<Bone*, Bone*> bonePair, std::shared_ptr<ExtendedMesh> mesh, Material* material);
+    RenderChunk(std::pair<Bone*, Bone*> bonePair, std::shared_ptr<ExtendedMesh> mesh, aiNode* meshRoot, Material* material);
+    RenderChunk(std::pair<Bone*, Bone*> bonePair, int attachedDLIndex, Material* material);
     // if bones are the same, chunk cooresponds to a single bone
     // the bones can be null
     std::pair<Bone*, Bone*> mBonePair;
     std::shared_ptr<ExtendedMesh> mMesh;
+    aiNode* mMeshRoot;
+    int mAttachedDLIndex;
     Material* mMaterial;
 
     VertexType GetVertexType();

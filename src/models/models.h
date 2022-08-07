@@ -3,6 +3,8 @@
 
 extern Gfx* v_portal_gun_gfx;
 
+extern Gfx* w_portal_gun_gfx;
+
 extern Gfx* button_gfx;
 extern short button_material_index;
 

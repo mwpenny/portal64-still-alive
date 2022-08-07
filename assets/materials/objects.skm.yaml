@@ -128,8 +128,29 @@ materials:
 
   blue_glow:
     gDPSetPrimColor:
+      r: 89
+      g: 197
+      b: 240
+    gDPSetCombineMode: 
+      color: ["0", "0", "0", "PRIMITIVE"]
+
+  solid_black_two_sided:
+    gDPSetPrimColor:
       r: 32
       g: 32
       b: 32
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+      clear: [G_CULL_BACK]
+    gDPSetCombineMode: 
+      color: ["PRIMITIVE", "0", "SHADE", "0"]
+
+  blue_glow_two_sided:
+    gDPSetPrimColor:
+      r: 89
+      g: 197
+      b: 240
+    gSPGeometryMode:
+      clear: [G_CULL_BACK]
     gDPSetCombineMode: 
       color: ["0", "0", "0", "PRIMITIVE"]

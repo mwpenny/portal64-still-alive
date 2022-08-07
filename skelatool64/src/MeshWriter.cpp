@@ -71,7 +71,7 @@ void generateMeshIntoDLWithMaterials(const aiScene* scene, CFileDefinition& file
 
     for (auto chunk = renderChunks.begin(); chunk != renderChunks.end(); ++chunk) {
         if (materials) {
-            std::string materialName = ExtendedMesh::GetMaterialName(scene->mMaterials[chunk->mMesh->mMesh->mMaterialIndex], settings.mForceMaterialName);
+            std::string materialName = chunk->mMesh ? ExtendedMesh::GetMaterialName(scene->mMaterials[chunk->mMesh->mMesh->mMaterialIndex], settings.mForceMaterialName) : settings.mDefaultMaterialName;
             displayList.AddCommand(std::unique_ptr<DisplayListCommand>(new CommentCommand("Material " + materialName)));
             auto mappedMaterialName = materials->mMaterialNameMapping.find(materialName);
 
@@ -98,14 +98,20 @@ void generateMeshIntoDLWithMaterials(const aiScene* scene, CFileDefinition& file
             displayList.AddCommand(std::unique_ptr<DisplayListCommand>(new CommentCommand("End Material " + materialName)));
         }
 
-        std::string vertexBuffer = fileDefinition.GetVertexBuffer(
-            chunk->mMesh, 
-            Material::GetVertexType(chunk->mMaterial), 
-            Material::TextureWidth(chunk->mMaterial),
-            Material::TextureHeight(chunk->mMaterial),
-            modelSuffix
-        );
-        generateGeometry(*chunk, rcpState, vertexBuffer, displayList, settings.mHasTri2);
+        if (chunk->mMesh) {
+            std::string vertexBuffer = fileDefinition.GetVertexBuffer(
+                chunk->mMesh, 
+                Material::GetVertexType(chunk->mMaterial), 
+                Material::TextureWidth(chunk->mMaterial),
+                Material::TextureHeight(chunk->mMaterial),
+                modelSuffix
+            );
+            generateGeometry(*chunk, rcpState, vertexBuffer, displayList, settings.mHasTri2);
+        } else if (chunk->mAttachedDLIndex != -1) {
+            rcpState.TraverseToBone(chunk->mBonePair.first, displayList);
+            displayList.AddCommand(std::unique_ptr<DisplayListCommand>(new CallDisplayListByNameCommand(std::string("(Gfx*)BONE_ATTACHMENT_SEGMENT_ADDRESS + " + std::to_string(chunk->mAttachedDLIndex)))));
+        }
+
     }
     rcpState.TraverseToBone(nullptr, displayList);
 

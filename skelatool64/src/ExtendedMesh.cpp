@@ -134,19 +134,16 @@ ExtendedMesh::ExtendedMesh(const ExtendedMesh& other):
         
         mBoneSpanningFaces[it.first] = faces;
     }
-
-    for (auto& it : mNormalInverseTransform) {
-        if (it) {
-            it = new aiMatrix3x3(*it);
-        }
-    }
 }
 
 ExtendedMesh::ExtendedMesh(aiMesh* mesh, BoneHierarchy& boneHierarchy) :
     mMesh(mesh) {
     mVertexBones.resize(mMesh->mNumVertices);
-    mPointInverseTransform.resize(mMesh->mNumVertices);
-    mNormalInverseTransform.resize(mMesh->mNumVertices);
+
+    if (mesh->mNumBones) {
+        mPointInverseTransform.resize(mMesh->mNumVertices);
+        mNormalInverseTransform.resize(mMesh->mNumVertices);
+    }
 
     std::set<Bone*> bonesAsSet;
 
@@ -154,15 +151,15 @@ ExtendedMesh::ExtendedMesh(aiMesh* mesh, BoneHierarchy& boneHierarchy) :
         aiBone* bone = mMesh->mBones[boneIndex];
         Bone* hierarchyBone = boneHierarchy.BoneForName(bone->mName.C_Str());
         bonesAsSet.insert(hierarchyBone);
-
+        
         aiMatrix3x3 normalTransform(bone->mOffsetMatrix);
         normalTransform = normalTransform.Transpose().Inverse();
 
         for (unsigned int vertexIndex = 0; vertexIndex < bone->mNumWeights; ++vertexIndex) {
             unsigned int vertexId = bone->mWeights[vertexIndex].mVertexId;
             mVertexBones[vertexId] = hierarchyBone;
-            mPointInverseTransform[vertexId] = &bone->mOffsetMatrix;
-            mNormalInverseTransform[vertexId] = new aiMatrix3x3(normalTransform);
+            mPointInverseTransform[vertexId] = bone->mOffsetMatrix;
+            mNormalInverseTransform[vertexId] = normalTransform;
         }
     }
 
@@ -171,11 +168,7 @@ ExtendedMesh::ExtendedMesh(aiMesh* mesh, BoneHierarchy& boneHierarchy) :
 }
 
 ExtendedMesh::~ExtendedMesh() {
-    for (unsigned int i = 0; i < mNormalInverseTransform.size(); ++i) {
-        if (mNormalInverseTransform[i]) {
-            delete mNormalInverseTransform[i];
-        }
-    }
+
 }
 
 void ExtendedMesh::RecalcBB() {
@@ -234,6 +227,10 @@ std::shared_ptr<ExtendedMesh> ExtendedMesh::Transform(const aiMatrix4x4& transfo
     std::shared_ptr<ExtendedMesh> result(new ExtendedMesh(*this));
 
     aiMatrix3x3 rotationOnly(transform);
+
+    aiMatrix4x4 inverseTransform = transform;
+    inverseTransform.Inverse();
+
     for (unsigned i = 0; i < result->mMesh->mNumVertices; ++i) {
         result->mMesh->mVertices[i] = transform * result->mMesh->mVertices[i];
 
@@ -241,7 +238,12 @@ std::shared_ptr<ExtendedMesh> ExtendedMesh::Transform(const aiMatrix4x4& transfo
             result->mMesh->mNormals[i] = rotationOnly * result->mMesh->mNormals[i];
             result->mMesh->mNormals[i].NormalizeSafe();
         }
+
+        if (result->mPointInverseTransform.size()) {
+            result->mPointInverseTransform[i] = result->mPointInverseTransform[i] * inverseTransform;
+        }
     }
+    
     result->RecalcBB();
 
     return result;

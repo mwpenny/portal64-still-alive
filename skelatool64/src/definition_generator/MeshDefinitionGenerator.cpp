@@ -3,6 +3,7 @@
 #include "../RenderChunk.h"
 #include "../MeshWriter.h"
 #include "AnimationGenerator.h"
+#include "../StringUtils.h"
 
 bool extractMaterialAutoTileParameters(Material* material, double& sTile, double& tTile) {
     if (!material) {
@@ -64,21 +65,38 @@ void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* n
             renderChunks.push_back(RenderChunk(
                 std::make_pair(boneSegment->first, boneSegment->first),
                 mesh,
+                node,
                 materialPtr
             ));
         }
 
         for (auto pairSegment = mesh->mBoneSpanningFaces.begin(); pairSegment != mesh->mBoneSpanningFaces.end(); ++pairSegment) {
-            renderChunks.push_back(RenderChunk(pairSegment->first, mesh, materialPtr));
+            renderChunks.push_back(RenderChunk(pairSegment->first, mesh, node, materialPtr));
         }
     }
+
+    BoneHierarchy& bones = fileDefinition.GetBoneHierarchy();
+
+    int attachmentCount = 0;
+
+    for (unsigned i = 0; i < bones.GetBoneCount(); ++i) {
+        Bone* bone = bones.BoneByIndex(i);
+
+        if (StartsWith(bone->GetName(), "attachment ")) {
+            fileDefinition.AddMacro(fileDefinition.GetMacroName(std::string("ATTACHMENT_") + bone->GetName().substr(strlen("attachment "))), std::to_string(attachmentCount));
+            renderChunks.push_back(RenderChunk(std::make_pair(bone, bone), attachmentCount, NULL));
+            ++attachmentCount;
+        }
+    }
+
+    fileDefinition.AddMacro(fileDefinition.GetMacroName("ATTACHMENT_COUNT"), std::to_string(attachmentCount));
 }
 
 void MeshDefinitionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) {
     std::vector<RenderChunk> renderChunks;
 
-    auto animInfo = findNodesForWithAnimation(scene, mIncludedNodes, mSettings.CreateCollisionTransform());
-    fileDefinition.GetBoneHierarchy().PopulateWithAnimationNodeInfo(*animInfo, mSettings.mFixedPointScale);
+    auto animInfo = findNodesForWithAnimation(scene, mIncludedNodes, mSettings.mModelScale);
+    fileDefinition.GetBoneHierarchy().PopulateWithAnimationNodeInfo(*animInfo, mSettings.mFixedPointScale, mSettings.mRotateModel);
 
     for (auto node = mIncludedNodes.begin(); node != mIncludedNodes.end(); ++node) {
         AppendRenderChunks(scene, *node, fileDefinition, mSettings, renderChunks);
