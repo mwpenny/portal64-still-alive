@@ -95,6 +95,11 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         case CutsceneStepTypeStopCutscene:
             cutsceneStop(&gCurrentLevel->cutscenes[step->cutscene.cutsceneIndex]);
             break;
+        case CutsceneStepTypeHidePedestal:
+            for (unsigned i = 0; i < gScene.pedestalCount; ++i) {
+                pedestalHide(&gScene.pedestals[i]);
+            }
+            break;
         default:
     }
 }

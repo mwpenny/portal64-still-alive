@@ -288,6 +288,10 @@ void sceneUpdate(struct Scene* scene) {
     for (int i = 0; i < scene->elevatorCount; ++i) {
         elevatorUpdate(&scene->elevators[i], &scene->player);
     }
+
+    for (int i = 0; i < scene->pedestalCount; ++i) {
+        pedestalUpdate(&scene->pedestals[i]);
+    }
     
     collisionSceneUpdateDynamics();
 

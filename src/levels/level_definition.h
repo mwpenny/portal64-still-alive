@@ -36,6 +36,7 @@ enum CutsceneStepType {
     CutsceneStepTypeStartCutscene,
     CutsceneStepTypeStopCutscene,
     CutsceneStepTypeWaitForCutscene,
+    CutsceneStepTypeHidePedestal,
 };
 
 struct CutsceneStep {

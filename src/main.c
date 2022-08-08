@@ -14,6 +14,7 @@
 #include "audio/soundplayer.h"
 #include "audio/audio.h"
 #include "scene/portal_surface.h"
+#include "sk64/skelatool_defs.h"
 
 #include "levels/levels.h"
 
@@ -91,6 +92,8 @@ extern OSMesgQueue dmaMessageQ;
 
 extern char _heapStart[];
 
+extern char _animation_segmentSegmentRomStart[];
+
 static void gameProc(void* arg) {
     u8 schedulerMode = OS_VI_NTSC_LPF1;
 
@@ -154,6 +157,8 @@ static void gameProc(void* arg) {
     initAudio();
     soundPlayerInit();
     sceneInit(&gScene);
+    skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
+    skInitDataPool(gPiHandle);
 
     while (1) {
         OSScMsg *msg = NULL;
@@ -187,6 +192,7 @@ static void gameProc(void* arg) {
                 }
 
                 controllersTriggerRead();
+                skReadMessages();
                 if (inputIgnore) {
                     --inputIgnore;
                 } else {

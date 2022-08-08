@@ -131,7 +131,7 @@ bool keyframeSortFn(const SKBoneKeyframeChain& a, const SKBoneKeyframeChain& b) 
     return (a.keyframe.usedAttributes & 0x7) < (b.keyframe.usedAttributes & 0x7);
 }
 
-void populateKeyframes(const aiAnimation& input, BoneHierarchy& bones, float modelScale, float timeScalar, std::vector<SKBoneKeyframeChain>& output, aiQuaternion rotation) {
+void populateKeyframes(const aiAnimation& input, BoneHierarchy& bones, float fixedPointScale, float modelScale, const aiQuaternion& rotation, float timeScalar, std::vector<SKBoneKeyframeChain>& output) {
     for (unsigned i = 0; i < input.mNumChannels; ++i) {
         aiNodeAnim* node = input.mChannels[i];
 
@@ -154,12 +154,12 @@ void populateKeyframes(const aiAnimation& input, BoneHierarchy& bones, float mod
             aiVector3D origin = vectorKey->mValue;
 
             if (!targetBone->GetParent()) {
-                origin = rotation.Rotate(origin);
+                origin = rotation.Rotate(origin) * modelScale;
             }
 
-            keyframe.keyframe.attributeData.push_back((short)(origin.x * modelScale));
-            keyframe.keyframe.attributeData.push_back((short)(origin.y * modelScale));
-            keyframe.keyframe.attributeData.push_back((short)(origin.z * modelScale));
+            keyframe.keyframe.attributeData.push_back((short)(origin.x * fixedPointScale));
+            keyframe.keyframe.attributeData.push_back((short)(origin.y * fixedPointScale));
+            keyframe.keyframe.attributeData.push_back((short)(origin.z * fixedPointScale));
             output.push_back(keyframe);
         }
 
@@ -364,11 +364,11 @@ void buildInitialState(std::map<unsigned short, SKBoneKeyframeChain*>& firstKeyF
     combineChunk(keyframes, output);
 }
 
-bool translateAnimationToSK(const aiAnimation& input, struct SKAnimation& output, BoneHierarchy& bones, float modelScale, unsigned short targetTicksPerSecond, aiQuaternion rotation) {
+bool translateAnimationToSK(const aiAnimation& input, struct SKAnimation& output, BoneHierarchy& bones, float fixedPointScale, float modelScale, const aiQuaternion& rotation, unsigned short targetTicksPerSecond) {
     float timeScalar = (float)targetTicksPerSecond / (float)1000.0f;
 
     std::vector<SKBoneKeyframeChain> keyframes;
-    populateKeyframes(input, bones, modelScale, timeScalar, keyframes, rotation);
+    populateKeyframes(input, bones, fixedPointScale, modelScale, rotation, timeScalar, keyframes);
 
     if (keyframes.size() == 0) {
         return false;

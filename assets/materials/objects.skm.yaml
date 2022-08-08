@@ -134,6 +134,17 @@ materials:
     gDPSetCombineMode: 
       color: ["0", "0", "0", "PRIMITIVE"]
 
+  solid_white_two_sided:
+    gDPSetPrimColor:
+      r: 255
+      g: 255
+      b: 255
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+      clear: [G_CULL_BACK]
+    gDPSetCombineMode: 
+      color: ["PRIMITIVE", "0", "SHADE", "0"]
+
   solid_black_two_sided:
     gDPSetPrimColor:
       r: 32

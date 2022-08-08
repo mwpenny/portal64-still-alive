@@ -11,8 +11,6 @@
 void pedestalRender(void* data, struct RenderScene* renderScene) {
     struct Pedestal* pedestal = (struct Pedestal*)data;
 
-    quatAxisAngle(&gUp, gTimePassed, &pedestal->armature.boneTransforms[PEDESTAL_HOLDER_BONE].rotation);
-
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
     transformToMatrixL(&pedestal->transform, matrix, SCENE_SCALE);
 
@@ -20,7 +18,7 @@ void pedestalRender(void* data, struct RenderScene* renderScene) {
 
     skCalculateTransforms(&pedestal->armature, armature);
 
-    Gfx* attachments = skBuildAttachments(&pedestal->armature, &w_portal_gun_gfx, renderScene->renderState);
+    Gfx* attachments = skBuildAttachments(&pedestal->armature, (pedestal->flags & PedstalFlagsDown) ? NULL : &w_portal_gun_gfx, renderScene->renderState);
 
     Gfx* objectRender = renderStateAllocateDLChunk(renderScene->renderState, 4);
     Gfx* dl = objectRender;
@@ -57,5 +55,21 @@ void pedestalInit(struct Pedestal* pedestal, struct PedestalDefinition* definiti
         PEDESTAL_ATTACHMENT_COUNT
     );
 
+    skAnimatorInit(&pedestal->animator, PEDESTAL_DEFAULT_BONES_COUNT, NULL, NULL);
+
     pedestal->dynamicId = dynamicSceneAdd(pedestal, pedestalRender, &pedestal->transform, 0.8f);
+
+    pedestal->flags = 0;
+}
+
+void pedestalUpdate(struct Pedestal* pedestal) {
+    skAnimatorUpdate(&pedestal->animator, pedestal->armature.boneTransforms, FIXED_DELTA_TIME);
+
+    quatAxisAngle(&gUp, gTimePassed, &pedestal->armature.boneTransforms[PEDESTAL_HOLDER_BONE].rotation);
+}
+
+void pedestalHide(struct Pedestal* pedestal) {
+    pedestal->flags |= PedstalFlagsDown;
+
+    skAnimatorRunClip(&pedestal->animator, &pedestal_animations[0], 0);
 }

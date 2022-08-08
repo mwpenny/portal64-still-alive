@@ -72,12 +72,12 @@ std::shared_ptr<NodeAnimationInfo> findNodesForWithAnimation(const aiScene* scen
     return result;
 }
 
-std::vector<SKAnimationHeader> generateAnimationData(const aiScene* scene, BoneHierarchy& bones, CFileDefinition& fileDef, float modelScale, unsigned short targetTicksPerSecond, aiQuaternion rotate) {
+std::vector<SKAnimationHeader> generateAnimationData(const aiScene* scene, BoneHierarchy& bones, CFileDefinition& fileDef, float fixedPointScale, float modelScale, const aiQuaternion& rotation, unsigned short targetTicksPerSecond) {
     std::vector<SKAnimationHeader> animations;
 
     for (unsigned i = 0; i < scene->mNumAnimations; ++i) {
         SKAnimation animation;
-        if (translateAnimationToSK(*scene->mAnimations[i], animation, bones, modelScale, targetTicksPerSecond, rotate)) {
+        if (translateAnimationToSK(*scene->mAnimations[i], animation, bones, fixedPointScale, modelScale, rotation, targetTicksPerSecond)) {
             std::string animationName = fileDef.GetUniqueName(scene->mAnimations[i]->mName.C_Str());
             unsigned short firstChunkSize = formatAnimationChunks(animationName, animation.chunks, fileDef);
 
@@ -104,8 +104,14 @@ void generateAnimationForScene(const aiScene* scene, CFileDefinition &fileDefini
     std::transform(boneCountName.begin(), boneCountName.end(), boneCountName.begin(), ::toupper);
     fileDefinition.AddMacro(boneCountName, std::to_string(bones.GetBoneCount()));
 
+    aiMatrix4x4 baseTransform(
+        aiVector3D(settings.mModelScale, settings.mModelScale, settings.mModelScale), 
+        settings.mRotateModel, 
+        aiVector3D(0, 0, 0)
+    );
+
     std::string animationsName = fileDefinition.GetUniqueName("animations");
-    auto animations = generateAnimationData(scene, bones, fileDefinition, settings.mFixedPointScale * settings.mModelScale, settings.mTicksPerSecond, settings.mRotateModel);
+    auto animations = generateAnimationData(scene, bones, fileDefinition, settings.mFixedPointScale, settings.mModelScale, settings.mRotateModel, settings.mTicksPerSecond);
 
     std::unique_ptr<StructureDataChunk> animationNameData(new StructureDataChunk());
 

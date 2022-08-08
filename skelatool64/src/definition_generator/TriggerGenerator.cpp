@@ -163,6 +163,9 @@ std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, int
 
             return result;
         }
+    } else if (step.command == "hide_pedestal") {
+        result->AddPrimitive<const char*>("CutsceneStepTypeHidePedestal");
+        return result;
     }
 
     result->AddPrimitive<const char*>("CutsceneStepTypeNoop");
