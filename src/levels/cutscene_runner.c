@@ -100,6 +100,11 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 pedestalHide(&gScene.pedestals[i]);
             }
             break;
+        case CutsceneStepTypePointPedestal:
+            for (unsigned i = 0; i < gScene.pedestalCount; ++i) {
+                pedestalPointAt(&gScene.pedestals[i], &gCurrentLevel->locations[step->pointPedestal.atLocation].transform.position);
+            }
+            break;
         default:
     }
 }

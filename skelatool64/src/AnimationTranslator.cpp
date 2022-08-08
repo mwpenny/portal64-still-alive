@@ -190,9 +190,15 @@ void populateKeyframes(const aiAnimation& input, BoneHierarchy& bones, float fix
             keyframe.keyframe.usedAttributes = SKBoneAttrMaskScale;
             keyframe.keyframe.boneIndex = (unsigned char)targetBone->GetIndex();
 
-            keyframe.keyframe.attributeData.push_back((short)(vectorKey->mValue.x * 0x100));
-            keyframe.keyframe.attributeData.push_back((short)(vectorKey->mValue.y * 0x100));
-            keyframe.keyframe.attributeData.push_back((short)(vectorKey->mValue.z * 0x100));
+            aiVector3D scale = vectorKey->mValue;
+
+            if (!targetBone->GetParent()) {
+                scale = scale * modelScale;
+            }
+
+            keyframe.keyframe.attributeData.push_back((short)(scale.x * 0x100));
+            keyframe.keyframe.attributeData.push_back((short)(scale.y * 0x100));
+            keyframe.keyframe.attributeData.push_back((short)(scale.z * 0x100));
             output.push_back(keyframe);
         }
     }

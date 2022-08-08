@@ -5,8 +5,9 @@
 #include "../sk64/skelatool_animator.h"
 #include "../levels/level_definition.h"
 
-enum PedstalFlags {
-    PedstalFlagsDown = (1 << 0),
+enum PedestalFlags {
+    PedestalFlagsDown = (1 << 0),
+    PedestalFlagsIsPointing = (1 << 1),
 };
 
 struct Pedestal {
@@ -18,11 +19,15 @@ struct Pedestal {
     short roomIndex;
 
     short flags;
+
+    struct Vector3 pointAt;
+    struct Vector2 currentRotation;
 };
 
 void pedestalInit(struct Pedestal* pedestal, struct PedestalDefinition* definition);
 void pedestalUpdate(struct Pedestal* pedestal);
 
 void pedestalHide(struct Pedestal* pedestal);
+void pedestalPointAt(struct Pedestal* pedestal, struct Vector3* target);
 
 #endif

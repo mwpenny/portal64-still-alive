@@ -12,7 +12,7 @@ extern struct Vector2 gOneVec2;
 
 void vector2ComplexMul(struct Vector2* a, struct Vector2* b, struct Vector2* out);
 void vector2ComplexConj(struct Vector2* a, struct Vector2* out);
-void vector2RotateTowards(struct Vector2* from, struct Vector2* towards, struct Vector2* max, struct Vector2* out);
+int vector2RotateTowards(struct Vector2* from, struct Vector2* towards, struct Vector2* max, struct Vector2* out);
 void vector2ComplexFromAngle(float radians, struct Vector2* out);
 void vector2Rotate90(struct Vector2* input, struct Vector2* out);
 float vector2Cross(struct Vector2* a, struct Vector2* b);

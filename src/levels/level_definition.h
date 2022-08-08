@@ -37,6 +37,7 @@ enum CutsceneStepType {
     CutsceneStepTypeStopCutscene,
     CutsceneStepTypeWaitForCutscene,
     CutsceneStepTypeHidePedestal,
+    CutsceneStepTypePointPedestal,
 };
 
 struct CutsceneStep {
@@ -75,6 +76,9 @@ struct CutsceneStep {
         struct {
             u16 cutsceneIndex;
         } cutscene;
+        struct {
+            u16 atLocation;
+        } pointPedestal;
         int noop;
     };
 };

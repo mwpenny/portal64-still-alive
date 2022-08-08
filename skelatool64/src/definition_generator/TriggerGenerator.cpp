@@ -166,6 +166,16 @@ std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, int
     } else if (step.command == "hide_pedestal") {
         result->AddPrimitive<const char*>("CutsceneStepTypeHidePedestal");
         return result;
+    } else if (step.command == "point_pedestal" && step.args.size() >= 1) {
+        short atLocation = roomOutput.FindLocationIndex(step.args[0]);
+
+        if (atLocation != -1) {
+            result->AddPrimitive<const char*>("CutsceneStepTypePointPedestal");
+            std::unique_ptr<StructureDataChunk> pointPedestal(new StructureDataChunk());
+            pointPedestal->AddPrimitive(atLocation);
+            result->Add("pointPedestal", std::move(pointPedestal));
+            return result;
+        }
     }
 
     result->AddPrimitive<const char*>("CutsceneStepTypeNoop");
