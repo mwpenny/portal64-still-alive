@@ -157,8 +157,8 @@ static void gameProc(void* arg) {
     initAudio();
     soundPlayerInit();
     sceneInit(&gScene);
-    skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
     skInitDataPool(gPiHandle);
+    skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
 
     while (1) {
         OSScMsg *msg = NULL;
