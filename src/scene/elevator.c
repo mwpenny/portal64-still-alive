@@ -5,6 +5,8 @@
 #include "./signals.h"
 #include "../math/mathf.h"
 #include "../util/time.h"
+#include "../audio/soundplayer.h"
+#include "../audio/clips.h"
 
 #include "../../build/assets/models/props/round_elevator_collision.h"
 #include "../../build/assets/models/props/round_elevator_interior.h"
@@ -140,6 +142,10 @@ void elevatorUpdate(struct Elevator* elevator, struct Player* player) {
             props_round_elevator_collision_collider.children[PROPS_ROUND_ELEVATOR_COLLISION_DOOR_RIGHT_COLLISION_INDEX].collisionLayers = gElevatorCollisionLayers;
             props_round_elevator_collision_collider.children[PROPS_ROUND_ELEVATOR_COLLISION_DOOR_LEFT_COLLISION_INDEX].collisionLayers = gElevatorCollisionLayers;
         }
+    }
+
+    if ((elevator->openAmount == 0.0f && shouldBeOpen) || (elevator->openAmount && !shouldBeOpen)) {
+        soundPlayerPlay(soundsElevatorDoor, 1.0f, 0.5f, &elevator->rigidBody.transform.position);
     }
 
     elevator->openAmount = mathfMoveTowards(elevator->openAmount, shouldBeOpen ? 1.0f : 0.0f, OPEN_SPEED * FIXED_DELTA_TIME);

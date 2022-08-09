@@ -326,6 +326,8 @@ materials:
         wrap: false
       t:
         wrap: false
+
+    gDPSetRenderMode: G_RM_ZB_OPA_SURF
         
     gSPGeometryMode:
       clear: [G_LIGHTING]
@@ -411,6 +413,7 @@ materials:
     gDPSetCombineMode:
       color: ["0", "0", "0", SHADE]
     gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetRenderMode: G_RM_ZB_OPA_SURF
     gSPGeometryMode:
       clear: [G_LIGHTING]
       set: [G_SHADE]

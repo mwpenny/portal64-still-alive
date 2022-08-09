@@ -140,6 +140,13 @@ struct PedestalDefinition {
     short roomIndex;
 };
 
+struct SignageDefinition {
+    struct Vector3 position;
+    struct Quaternion rotation;
+    short roomIndex;
+    short testChamberNumber;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
@@ -160,6 +167,7 @@ struct LevelDefinition {
     struct FizzlerDefinition* fizzlers;
     struct ElevatorDefinition* elevators;
     struct PedestalDefinition* pedestals;
+    struct SignageDefinition* signage;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
@@ -173,6 +181,7 @@ struct LevelDefinition {
     short fizzlerCount;
     short elevatorCount;
     short pedestalCount;
+    short signageCount;
     short startLocation;
 };
 

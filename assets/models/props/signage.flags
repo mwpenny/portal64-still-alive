@@ -1,0 +1,1 @@
+-r 90,0,0 -m assets/materials/static.skm.yaml -m assets/materials/elevator.skm.yaml --default-material default --boneless

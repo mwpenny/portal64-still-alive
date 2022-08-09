@@ -702,6 +702,51 @@ void generatePedestalDefinitions(
     levelDef.AddPrimitive("pedestalCount", pedestalCount);
 }
 
+
+void generateSignageDefinitions(
+    const aiScene* scene, 
+    CFileDefinition& fileDefinition, 
+    StructureDataChunk& levelDef, 
+    const RoomGeneratorOutput& roomOutput, 
+    const DisplayListSettings& settings,
+    NodeGroups& nodeGroups) {
+
+    int signageCount = 0;
+    std::unique_ptr<StructureDataChunk> signage(new StructureDataChunk());
+
+    aiMatrix4x4 baseTransform = settings.CreateCollisionTransform();
+
+    for (auto& nodeInfo : nodeGroups.NodesForType("@signage")) {
+        if (nodeInfo.arguments.size() == 0) {
+            continue;
+        }
+
+        std::unique_ptr<StructureDataChunk> signageData(new StructureDataChunk());
+        aiVector3D pos;
+        aiQuaternion rot;
+        aiVector3D scale;
+        (baseTransform * nodeInfo.node->mTransformation).Decompose(scale, rot, pos);
+        signageData->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(pos)));
+        signageData->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(rot)));
+        signageData->AddPrimitive(roomOutput.RoomForNode(nodeInfo.node));
+        signageData->AddPrimitive(std::atoi(nodeInfo.arguments[0].c_str()));
+
+        signage->Add(std::move(signageData));
+        ++signageCount;
+    }
+
+    std::string signageDef = fileDefinition.AddDataDefinition(
+        "signage",
+        "struct SignageDefinition",
+        true,
+        "_geo",
+        std::move(signage)
+    );
+
+    levelDef.AddPrimitive("signage", signageDef);
+    levelDef.AddPrimitive("signageCount", signageCount);
+}
+
 void generateLevel(
         const aiScene* scene, 
         CFileDefinition& fileDefinition,
@@ -746,6 +791,8 @@ void generateLevel(
     generateElevatorDefinitions(scene, fileDefinition, *levelDef, roomOutput, settings, signals, nodeGroups);
 
     generatePedestalDefinitions(scene, fileDefinition, *levelDef, roomOutput, settings, nodeGroups);
+
+    generateSignageDefinitions(scene, fileDefinition, *levelDef, roomOutput, settings, nodeGroups);
 
     fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct LevelDefinition", fileDefinition.GetUniqueName("level"), false, "_geo", std::move(levelDef))));
 }

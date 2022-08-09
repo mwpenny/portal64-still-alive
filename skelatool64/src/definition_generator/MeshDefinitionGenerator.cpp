@@ -96,7 +96,10 @@ void MeshDefinitionGenerator::GenerateDefinitions(const aiScene* scene, CFileDef
     std::vector<RenderChunk> renderChunks;
 
     auto animInfo = findNodesForWithAnimation(scene, mIncludedNodes, mSettings.mModelScale);
-    fileDefinition.GetBoneHierarchy().PopulateWithAnimationNodeInfo(*animInfo, mSettings.mFixedPointScale, mSettings.mRotateModel);
+
+    if (!mSettings.mBonesAsVertexGroups) {
+        fileDefinition.GetBoneHierarchy().PopulateWithAnimationNodeInfo(*animInfo, mSettings.mFixedPointScale, mSettings.mRotateModel);
+    }
 
     for (auto node = mIncludedNodes.begin(); node != mIncludedNodes.end(); ++node) {
         AppendRenderChunks(scene, *node, fileDefinition, mSettings, renderChunks);
@@ -104,7 +107,7 @@ void MeshDefinitionGenerator::GenerateDefinitions(const aiScene* scene, CFileDef
 
     generateMesh(scene, fileDefinition, renderChunks, mSettings, "_geo");
 
-    if (fileDefinition.GetBoneHierarchy().HasData()) {
+    if (fileDefinition.GetBoneHierarchy().HasData() && !mSettings.mBonesAsVertexGroups) {
         generateAnimationForScene(scene, fileDefinition, mSettings);
     }
 }

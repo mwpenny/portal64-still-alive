@@ -88,7 +88,7 @@ void filterOutFaces(aiMesh* source, aiMesh* target, std::map<unsigned int, unsig
     }
 }
 
-aiMesh* subMesh(aiMesh* mesh, std::vector<aiFace*> faces) {
+aiMesh* subMesh(aiMesh* mesh, std::vector<aiFace*> faces, std::string name) {
     aiMesh* result = new aiMesh();
 
     std::map<unsigned int, unsigned int> vertexMapping;
@@ -98,7 +98,7 @@ aiMesh* subMesh(aiMesh* mesh, std::vector<aiFace*> faces) {
     result->mVertices = new aiVector3D[result->mNumVertices];
     result->mMaterialIndex = mesh->mMaterialIndex;
     result->mMethod = mesh->mMethod;
-    result->mName = mesh->mName;
+    result->mName = std::string(mesh->mName.C_Str()) + "_" + name;
     if (mesh->mNormals) result->mNormals = new aiVector3D[result->mNumVertices];
     if (mesh->mTextureCoords[0]) result->mTextureCoords[0] = new aiVector3D[result->mNumVertices];
     if (mesh->mColors[0]) result->mColors[0] = new aiColor4D[result->mNumVertices];
@@ -126,6 +126,14 @@ aiMesh* subMesh(aiMesh* mesh, std::vector<aiFace*> faces) {
     return result;
 }
 
+std::string boneName(Bone* bone) {
+    if (bone) {
+        return bone->GetName();
+    } else {
+        return "";
+    }
+}
+
 void splitSceneByBones(aiScene* targetScene) {
     std::vector<aiMesh*> newMeshes;
     std::vector<std::pair<std::size_t, std::size_t>> meshIndexMapping;
@@ -141,11 +149,11 @@ void splitSceneByBones(aiScene* targetScene) {
         int startIndex = newMeshes.size();
         
         for (auto newFaces = extendedMesh->mFacesForBone.begin(); newFaces != extendedMesh->mFacesForBone.end(); ++newFaces) {
-            newMeshes.push_back(subMesh(currMesh, newFaces->second));
+            newMeshes.push_back(subMesh(currMesh, newFaces->second, boneName(newFaces->first)));
         }
 
         for (auto newFaces = extendedMesh->mBoneSpanningFaces.begin(); newFaces != extendedMesh->mBoneSpanningFaces.end(); ++newFaces) {
-            newMeshes.push_back(subMesh(currMesh, newFaces->second));
+            newMeshes.push_back(subMesh(currMesh, newFaces->second, boneName(newFaces->first.first)));
         }
 
         meshIndexMapping.push_back(std::make_pair(startIndex, newMeshes.size()));

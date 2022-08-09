@@ -105,6 +105,7 @@ int main(int argc, char *argv[]) {
     settings.mPrefix = args.mPrefix;
     settings.mExportAnimation = args.mExportAnimation;
     settings.mExportGeometry = args.mExportGeometry;
+    settings.mBonesAsVertexGroups = args.mBonesAsVertexGroups;
 
     bool hasError = false;
 

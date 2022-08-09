@@ -26,6 +26,7 @@ struct CommandLineArguments {
     float mModelScale;
     bool mExportAnimation;
     bool mExportGeometry;
+    bool mBonesAsVertexGroups;
     aiVector3D mEulerAngles;
 };
 

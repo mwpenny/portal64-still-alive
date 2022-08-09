@@ -6,6 +6,8 @@
 #include "defs.h"
 #include <math.h>
 
+#define KILL_PLANE_Y    -10.0f
+
 void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniteria) {
     transformInitIdentity(&rigidBody->transform);
     rigidBody->velocity = gZeroVec;
@@ -55,6 +57,13 @@ void rigidBodyUpdate(struct RigidBody* rigidBody) {
 
     // vector3Scale(&rigidBody->velocity, &rigidBody->velocity, ENERGY_SCALE_PER_STEP);
     vector3Scale(&rigidBody->angularVelocity, &rigidBody->angularVelocity, ENERGY_SCALE_PER_STEP);
+
+    if (rigidBody->transform.position.y < KILL_PLANE_Y) {
+        rigidBody->transform.position.y = KILL_PLANE_Y;
+        rigidBody->velocity.y = 0.0f;
+
+        rigidBody->flags |= RigidBodyFizzled;
+    }
 }
 
 void rigidBodyVelocityAtLocalPoint(struct RigidBody* rigidBody, struct Vector3* localPoint, struct Vector3* worldVelocity) {

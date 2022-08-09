@@ -6,7 +6,7 @@
 #include <vector>
 
 // Caller is responsible for freeing memory
-aiMesh* subMesh(aiMesh* mesh, std::vector<aiFace*> faces);
+aiMesh* subMesh(aiMesh* mesh, std::vector<aiFace*> faces, std::string name);
 
 void splitSceneByBones(aiScene* targetScene);
 

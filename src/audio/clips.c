@@ -22,3 +22,5 @@ unsigned short soundsPortalgunShoot[2] = {
 unsigned short soundsPortalOpen2 = SOUNDS_PORTAL_OPEN2;
 
 unsigned short soundsPortalFizzle = SOUNDS_PORTAL_FIZZLE2;
+
+unsigned short soundsElevatorDoor = SOUNDS_DOORMOVE1;

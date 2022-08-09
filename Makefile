@@ -169,6 +169,7 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/round_elevator.blend \
 	assets/models/props/round_elevator_interior.blend \
 	assets/models/props/round_elevator_collision.blend \
+	assets/models/props/signage.blend \
 	assets/models/portal/portal_blue.blend \
 	assets/models/portal/portal_blue_filled.blend \
 	assets/models/portal/portal_blue_face.blend \
@@ -190,6 +191,8 @@ build/src/models/models.o: $(MODEL_HEADERS)
 build/src/decor/decor_object_list.o: $(MODEL_HEADERS)
 
 build/src/scene/portal.o: $(MODEL_HEADERS)
+
+build/src/scene/signage.o: $(MODEL_HEADERS)
 
 build/assets/models/%_anim.o: build/assets/models/%.h
 
@@ -244,12 +247,13 @@ build/src/levels/levels.o: build/assets/test_chambers/level_list.h build/assets/
 ####################
 
 SOUND_ATTRIBUTES = $(shell find assets/ -type f -name '*.sox')
+SOUND_JATTRIBUTES = $(shell find assets/ -type f -name '*.jsox')
 
 MUSIC_ATTRIBUTES = $(shell find assets/sound/music/ -type f -name '*.msox')
 
 INS_SOUNDS = $(shell find assets/ -type f -name '*.ins')
 
-SOUND_CLIPS = $(SOUND_ATTRIBUTES:%.sox=build/%.aifc) $(INS_SOUNDS) $(MUSIC_ATTRIBUTES:%.msox=build/%.aifc)
+SOUND_CLIPS = $(SOUND_ATTRIBUTES:%.sox=build/%.aifc) $(SOUND_JATTRIBUTES:%.jsox=build/%.aifc) $(INS_SOUNDS) $(MUSIC_ATTRIBUTES:%.msox=build/%.aifc)
 
 $(INS_SOUNDS): portal_pak_dir
 
@@ -258,6 +262,11 @@ portal_pak_dir/sound/music/%.wav: portal_pak_dir/sound/music/%.mp3
 build/%.aifc: %.sox portal_pak_dir
 	@mkdir -p $(@D)
 	sox $(<:assets/%.sox=portal_pak_dir/%.wav) $(shell cat $<) $(@:%.aifc=%.wav)
+	$(SFZ2N64) -o $@ $(@:%.aifc=%.wav)
+
+build/%.aifc: %.jsox tools/jsox.js portal_pak_dir
+	@mkdir -p $(@D)
+	node tools/jsox.js $< $(<:assets/%.jsox=portal_pak_dir/%.wav) $(@:%.aifc=%.wav)
 	$(SFZ2N64) -o $@ $(@:%.aifc=%.wav)
 
 build/%.aifc: %.msox portal_pak_dir

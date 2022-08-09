@@ -21,6 +21,7 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
     output.mModelScale = 1.0f;
     output.mExportAnimation = true;
     output.mExportGeometry = true;
+    output.mBonesAsVertexGroups = false;
     output.mOutputType = FileOutputType::Mesh;
     output.mEulerAngles = aiVector3D(0.0f, 0.0f, 0.0f);
     output.mDefaultMaterial = "default";
@@ -85,6 +86,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
             strcmp(curr, "-a") == 0 || 
             strcmp(curr, "--animations-only") == 0) {
             output.mExportGeometry = false;
+        } else if (strcmp(curr, "--boneless") == 0) {
+            output.mBonesAsVertexGroups = true;
         } else if (strcmp(curr, "--level") == 0) {
                     output.mOutputType = FileOutputType::Level;
                     output.mExportAnimation = false;

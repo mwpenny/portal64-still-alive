@@ -140,14 +140,14 @@ ExtendedMesh::ExtendedMesh(aiMesh* mesh, BoneHierarchy& boneHierarchy) :
     mMesh(mesh) {
     mVertexBones.resize(mMesh->mNumVertices);
 
-    if (mesh->mNumBones) {
+    if (mesh->mNumBones && boneHierarchy.HasData()) {
         mPointInverseTransform.resize(mMesh->mNumVertices);
         mNormalInverseTransform.resize(mMesh->mNumVertices);
     }
 
     std::set<Bone*> bonesAsSet;
 
-    for (unsigned int boneIndex = 0; boneIndex < mMesh->mNumBones; ++boneIndex) {
+    for (unsigned int boneIndex = 0; boneIndex < mMesh->mNumBones && boneHierarchy.HasData(); ++boneIndex) {
         aiBone* bone = mMesh->mBones[boneIndex];
         Bone* hierarchyBone = boneHierarchy.BoneForName(bone->mName.C_Str());
         bonesAsSet.insert(hierarchyBone);

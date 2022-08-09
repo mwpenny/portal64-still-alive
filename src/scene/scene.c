@@ -101,6 +101,12 @@ void sceneInit(struct Scene* scene) {
     for (int i = 0; i < scene->pedestalCount; ++i) {
         pedestalInit(&scene->pedestals[i], &gCurrentLevel->pedestals[i]);
     }
+
+    scene->signageCount = gCurrentLevel->signageCount;
+    scene->signage = malloc(sizeof(struct Signage) * scene->signageCount);
+    for (int i = 0; i < scene->signageCount; ++i) {
+        signageInit(&scene->signage[i], &gCurrentLevel->signage[i]);
+    }
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {

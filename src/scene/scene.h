@@ -14,6 +14,7 @@
 #include "./fizzler.h"
 #include "elevator.h"
 #include "pedestal.h"
+#include "signage.h"
 
 struct Scene {
     struct Camera camera;
@@ -25,6 +26,7 @@ struct Scene {
     struct Fizzler* fizzlers;
     struct Elevator* elevators;
     struct Pedestal* pedestals;
+    struct Signage* signage;
     OSTime cpuTime;
     OSTime lastFrameStart;
     OSTime lastFrameTime;
@@ -34,6 +36,7 @@ struct Scene {
     u8 fizzlerCount;
     u8 elevatorCount;
     u8 pedestalCount;
+    u8 signageCount;
 };
 
 extern struct Scene gScene;

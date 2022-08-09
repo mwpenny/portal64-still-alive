@@ -26,6 +26,7 @@ struct DisplayListSettings {
     bool mExportAnimation;
     bool mExportGeometry;
     bool mIncludeCulling;
+    bool mBonesAsVertexGroups;
 
     aiMatrix4x4 CreateGlobalTransform() const;
     aiMatrix4x4 CreateCollisionTransform() const;
