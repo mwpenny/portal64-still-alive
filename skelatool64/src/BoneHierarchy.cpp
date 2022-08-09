@@ -94,6 +94,8 @@ int Bone::GetBoneIndex(Bone* a) {
 }
 
 void BoneHierarchy::PopulateWithAnimationNodeInfo(const NodeAnimationInfo& animInfo, float fixedPointScale, aiQuaternion& rotation) {
+    aiMatrix4x4 rotationMatrix(rotation.GetMatrix());
+
     for (auto& node : animInfo.nodesWithAnimation) {
         Bone* parent = nullptr;
 
@@ -112,6 +114,10 @@ void BoneHierarchy::PopulateWithAnimationNodeInfo(const NodeAnimationInfo& animI
         aiVector3D restScale;
 
         aiMatrix4x4 fullRestTransform = node->relativeTransform * node->node->mTransformation;
+
+        if (parent == nullptr) {
+            fullRestTransform = rotationMatrix * fullRestTransform;
+        }
 
         fullRestTransform.Decompose(restScale, restRotation, restPosition);
 

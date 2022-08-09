@@ -87,9 +87,9 @@ void pedestalUpdate(struct Pedestal* pedestal) {
         if (vector2RotateTowards(&pedestal->currentRotation, &target, &gMaxPedistalRotation, &pedestal->currentRotation)) {
             pedestal->flags &= ~PedestalFlagsIsPointing;
         }
-
-        quatAxisComplex(&gUp, &pedestal->currentRotation, &pedestal->armature.boneTransforms[PEDESTAL_HOLDER_BONE].rotation);
     }
+    
+    quatAxisComplex(&gUp, &pedestal->currentRotation, &pedestal->armature.boneTransforms[PEDESTAL_HOLDER_BONE].rotation);
 }
 
 void pedestalHide(struct Pedestal* pedestal) {

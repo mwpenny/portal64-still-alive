@@ -53,6 +53,9 @@ unsigned convertByteRange(float value) {
 
  ErrorResult VertexBufferDefinition::Generate(float fixedPointScale, float modelScale, aiQuaternion rotate, std::unique_ptr<FileDefinition>& output, const std::string& fileSuffix) {
     std::unique_ptr<StructureDataChunk> dataChunk(new StructureDataChunk());
+
+    // aiQuaternion rotateInverse = rotate;
+    // rotateInverse.Conjugate();
     
     for (unsigned int i = 0; i < mTargetMesh->mMesh->mNumVertices; ++i) {
         std::unique_ptr<StructureDataChunk> vertexWrapper(new StructureDataChunk());
