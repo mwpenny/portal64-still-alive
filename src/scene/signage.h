@@ -7,6 +7,7 @@
 struct Signage {
     struct Transform transform;
     short roomIndex;
+    short testChamberNumber;
 };
 
 void signageInit(struct Signage* signage, struct SignageDefinition* definition);
