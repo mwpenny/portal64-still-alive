@@ -86,11 +86,12 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 
 - [ ] Prevent Glados from talking over herself
 - [ ] Elevator and door sounds
-- [ ] Turn level indicator board into a game object
 - [ ] Presort portal gun polygon order
 - [ ] Change the way player standing logic works
 - [ ] Cube dispenser
-- [ ] NAN in overlap
+- [ ] Signage should not always be on
+- [x] NAN in overlap
+- [x] Turn level indicator board into a game object
 - [x] kill plane
 - [x] Portal gun pedistal
 - [x] Fix portal overlapping bug
