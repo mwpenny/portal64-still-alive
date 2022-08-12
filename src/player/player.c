@@ -48,8 +48,8 @@ struct ColliderTypeData gPlayerColliderData = {
 
 void playerInit(struct Player* player, struct Location* startLocation) {
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
-    rigidBodyMarkKinematic(&player->body);
-    player->body.flags |= RigidBodyGenerateContacts;
+    // rigidBodyMarkKinematic(&player->body);
+    player->body.flags |= RigidBodyIsKinematic | RigidBodyIsPlayer;
     collisionSceneAddDynamicObject(&player->collisionObject);
 
     player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
@@ -275,7 +275,15 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
     player->body.velocity.y += GRAVITY_CONSTANT * FIXED_DELTA_TIME;
 
+    struct Vector3 prevPos = player->body.transform.position;
+
     vector3AddScaled(&player->body.transform.position, &player->body.velocity, FIXED_DELTA_TIME, &player->body.transform.position);
+
+    struct Box3D sweptBB = player->collisionObject.boundingBox;
+    collisionObjectUpdateBB(&player->collisionObject);
+    box3DUnion(&sweptBB, &player->collisionObject.boundingBox, &sweptBB);
+
+    collisionObjectCollideWithSceneSwept(&player->collisionObject, &prevPos, &sweptBB, &gCollisionScene, &gContactSolver);
 
     struct RaycastHit hit;
     struct Ray ray;
@@ -330,6 +338,13 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
             manifold = contactSolverNextManifold(&gContactSolver, &player->collisionObject, manifold);
         }
+    }
+    
+    struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);
+
+    while (manifold) {
+        contactSolverCleanupManifold(manifold);
+        manifold = contactSolverNextManifold(&gContactSolver, &player->collisionObject, manifold);
     }
 
     playerHandleCollision(player);

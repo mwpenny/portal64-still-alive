@@ -587,6 +587,10 @@ void collisionSceneUpdateDynamics() {
             }
         }
 
+        if (!collisionObjectIsActive(object)) {
+            continue;
+        }
+
         if (object->flags & COLLISION_OBJECT_HAS_CONTACTS || !collisionObjectIsActive(object)) {
             collisionObjectCollideWithScene(object, &gCollisionScene, &gContactSolver);
         } else {

@@ -49,7 +49,7 @@ void contactSolverCleanupManifold(struct ContactManifold* manifold) {
 		contactPoint->penetration = vector3Dot(&offset, &manifold->normal);
 
 		// skip this point to remove it
-		if (contactPoint->penetration > SEPERATION_TOLERANCE) {
+		if (fabsf(contactPoint->penetration) > SEPERATION_TOLERANCE) {
 			continue;
 		}
 

@@ -25,7 +25,7 @@ enum RigidBodyFlags {
     RigidBodyIsSleeping = (1 << 11),
     // for kinematic bodies that should generate 
     // contacts with other kinematic bodies
-    RigidBodyGenerateContacts = (1 << 12),
+    RigidBodyIsPlayer = (1 << 12),
 
     RigidBodyFizzled = (1 << 13),
     RigidBodyDisableGravity = (1 << 14),

@@ -366,7 +366,15 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
     if (fabsf(hit.normal.y) < 0.8) {
         quatLook(&hitDirection, &gUp, &portalLocation.rotation);
     } else {
-        quatLook(&hitDirection, playerUp, &portalLocation.rotation);
+        struct Vector3 upDir;
+
+        if (ray->dir.y > 0.0f) {
+            vector3Negate(playerUp, &upDir);
+        } else {
+            upDir = *playerUp;
+        }
+
+        quatLook(&hitDirection, &upDir, &portalLocation.rotation);
     }
 
     return sceneOpenPortal(scene, &portalLocation, portalIndex, quadIndex, hit.roomIndex);

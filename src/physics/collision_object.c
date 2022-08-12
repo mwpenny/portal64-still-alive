@@ -17,11 +17,11 @@ void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData
 }
 
 int collisionObjectIsActive(struct CollisionObject* object) {
-    return object->body && (object->body->flags & (RigidBodyIsKinematic | RigidBodyIsSleeping)) == 0;
+    return object->body && ((object->body->flags & (RigidBodyIsKinematic | RigidBodyIsSleeping)) == 0);
 }
 
 int collisionObjectShouldGenerateConctacts(struct CollisionObject* object) {
-    return collisionObjectIsActive(object) || (object->body->flags & RigidBodyGenerateContacts) != 0;
+    return collisionObjectIsActive(object) || (object->body->flags & RigidBodyIsPlayer) != 0;
 }
 
 void collisionObjectCollideWithQuad(struct CollisionObject* object, struct CollisionObject* quadObject, struct ContactSolver* contactSolver) {

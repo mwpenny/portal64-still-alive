@@ -113,7 +113,7 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
 
         transformPointInverseNoScale(gCollisionScene.portalTransforms[i], &rigidBody->transform.position, &localPoint);
 
-        int mask = (1 << i);
+        int mask = (RigidBodyFlagsInFrontPortal0 << i);
 
         if (localPoint.z < 0.0f) {
             newFlags |= mask;
