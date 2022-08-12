@@ -107,7 +107,7 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
     int result = 0;
 
     for (int i = 0; i < 2; ++i) {
-        if (!((RigidBodyIsTouchingPortalA << i) & rigidBody->flags) || !((RigidBodyWasTouchingPortalA << i) & rigidBody->flags)) {
+        if (!((RigidBodyIsTouchingPortalA << i) & rigidBody->flags) && !((RigidBodyWasTouchingPortalA << i) & rigidBody->flags)) {
             continue;
         }
 
