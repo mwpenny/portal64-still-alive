@@ -45,6 +45,12 @@ void portalSurfaceCheckCleanupQueue() {
     }
 }
 
+void portalSurfaceCleanupQueueInit() {
+    for (int searchIterator = 0; searchIterator < MAX_PENDING_PORTAL_CLEANUP; ++searchIterator) {
+        gPortalSurfaceCleanupQueue[searchIterator].shouldCleanup = 0;
+    }
+}
+
 struct PortalSurfaceReplacement gPortalSurfaceReplacements[2];
 
 int portalSurfaceAreBothOnSameSurface() {

@@ -84,12 +84,15 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 
 ## Current TODO list
 
-- [ ] Prevent Glados from talking over herself
+- [ ] It is too easy to fall through portals
 - [ ] Elevator and door sounds
 - [ ] Presort portal gun polygon order
 - [ ] Change the way player standing logic works
 - [ ] Cube dispenser
 - [ ] Signage should not always be on
+- [ ] Camera shake
+- [x] crash on level transition
+- [x] Prevent Glados from talking over herself
 - [x] NAN in overlap
 - [x] Turn level indicator board into a game object
 - [x] kill plane

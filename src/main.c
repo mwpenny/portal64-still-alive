@@ -15,6 +15,7 @@
 #include "audio/audio.h"
 #include "scene/portal_surface.h"
 #include "sk64/skelatool_defs.h"
+#include "levels/cutscene_runner.h"
 
 #include "levels/levels.h"
 
@@ -152,7 +153,9 @@ static void gameProc(void* arg) {
 
     dynamicSceneInit();
     contactSolverInit(&gContactSolver);
+    portalSurfaceCleanupQueueInit();
     levelLoad(0);
+    cutsceneRunnerReset();
     controllersInit();
     initAudio();
     soundPlayerInit();
@@ -175,10 +178,13 @@ static void gameProc(void* arg) {
                 if (levelGetQueued() != NO_QUEUED_LEVEL) {
                     if (pendingGFX == 0) {
                         dynamicSceneInit();
+                        contactSolverInit(&gContactSolver);
                         portalSurfaceRevert(1);
                         portalSurfaceRevert(0);
+                        portalSurfaceCleanupQueueInit();
                         heapInit(_heapStart, memoryEnd);
                         levelLoad(levelGetQueued());
+                        cutsceneRunnerReset();
                         sceneInit(&gScene);
                     }
 

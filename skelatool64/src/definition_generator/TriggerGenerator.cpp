@@ -50,7 +50,12 @@ std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, int
     if ((step.command == "play_sound" || step.command == "start_sound") && step.args.size() >= 1) {
         result->AddPrimitive<const char*>(step.command == "play_sound" ? "CutsceneStepTypePlaySound" : "CutsceneStepTypeStartSound");
         std::unique_ptr<StructureDataChunk> playSound(new StructureDataChunk());
-        playSound->AddPrimitive(step.args[0]);
+
+        if (StartsWith(step.args[0], "SOUNDS_")) {
+            playSound->AddPrimitive(step.args[0]);
+        } else {
+            playSound->AddPrimitive(std::string("SOUNDS_") + step.args[0]);
+        }
 
         if (step.args.size() >= 2) {
             playSound->AddPrimitive((int)(std::atof(step.args[1].c_str()) * 255.0f));
@@ -66,6 +71,35 @@ std::unique_ptr<StructureDataChunk> generateCutsceneStep(CutsceneStep& step, int
 
         result->Add("playSound", std::move(playSound));
 
+        return result;
+    } else if (step.command == "q_sound" && step.args.size() >= 2) {
+        result->AddPrimitive<const char*>("CutsceneStepTypeQueueSound");
+        std::unique_ptr<StructureDataChunk> queueSound(new StructureDataChunk());
+
+        if (StartsWith(step.args[0], "SOUNDS_")) {
+            queueSound->AddPrimitive(step.args[0]);
+        } else {
+            queueSound->AddPrimitive(std::string("SOUNDS_") + step.args[0]);
+        }
+
+        // channel
+        queueSound->AddPrimitive(step.args[1]);
+
+        // volume
+        if (step.args.size() >= 3) {
+            queueSound->AddPrimitive((int)(std::atof(step.args[2].c_str()) * 255.0f));
+        } else {
+            queueSound->AddPrimitive(255);
+        }
+
+        result->Add("queueSound", std::move(queueSound));
+
+        return result;
+    } else if (step.command == "wait_for_channel" && step.args.size() >= 1) {
+        result->AddPrimitive<const char*>("CutsceneStepTypeWaitForChannel");
+        std::unique_ptr<StructureDataChunk> waitForChannel(new StructureDataChunk());
+        waitForChannel->AddPrimitive(step.args[0]);
+        result->Add("waitForChannel", std::move(waitForChannel));
         return result;
     } else if (step.command == "delay" && step.args.size() >= 1) {
         result->AddPrimitive<const char*>("CutsceneStepTypeDelay");

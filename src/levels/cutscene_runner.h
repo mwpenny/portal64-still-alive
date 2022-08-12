@@ -18,7 +18,7 @@ struct CutsceneRunner {
     struct CutsceneRunner* nextRunner;
 };
 
-
+void cutsceneRunnerReset();
 void cutsceneStart(struct Cutscene* cutscene);
 void cutsceneStop(struct Cutscene* cutscene);
 int cutsceneIsRunning(struct Cutscene* cutscene);

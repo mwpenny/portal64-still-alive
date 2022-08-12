@@ -55,6 +55,8 @@ struct PortalSurfaceReplacement {
     short roomIndex;
 };
 
+void portalSurfaceCleanupQueueInit();
+
 int portalSurfaceAreBothOnSameSurface();
 int portalSurfaceShouldSwapOrder(int portalToMove);
 int portalSurfaceStaticIndexForReplacement(int portalIndex);

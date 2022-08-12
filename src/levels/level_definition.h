@@ -26,6 +26,8 @@ enum CutsceneStepType {
     CutsceneStepTypeNoop,
     CutsceneStepTypePlaySound,
     CutsceneStepTypeStartSound,
+    CutsceneStepTypeQueueSound,
+    CutsceneStepTypeWaitForChannel,
     CutsceneStepTypeDelay,
     CutsceneStepTypeOpenPortal,
     CutsceneStepTypeSetSignal,
@@ -40,6 +42,11 @@ enum CutsceneStepType {
     CutsceneStepTypePointPedestal,
 };
 
+#define CH_NONE    0xFF
+#define CH_GLADOS  0
+
+#define CH_COUNT   1
+
 struct CutsceneStep {
     enum CutsceneStepType type;
 
@@ -49,6 +56,14 @@ struct CutsceneStep {
             u8 volume;
             u8 pitch;
         } playSound;
+        struct {
+            u16 soundId;
+            u8 channel;
+            u8 volume;
+        } queueSound;
+        struct {
+            u8 channel;
+        } waitForChannel;
         struct {
             u16 locationIndex;
             u16 portalIndex;
