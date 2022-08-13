@@ -98,6 +98,11 @@ void buttonUpdate(struct Button* button) {
         manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, manifold);
     }
 
+    if (button->collisionObject.flags & COLLISION_OBJECT_PLAYER_STANDING) {
+        button->collisionObject.flags &= ~COLLISION_OBJECT_PLAYER_STANDING;
+        shouldPress = 1;
+    }
+
     struct Vector3 targetPos = button->originalPos;
     
     if (shouldPress) {

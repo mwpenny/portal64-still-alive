@@ -231,6 +231,11 @@ std::shared_ptr<ExtendedMesh> ExtendedMesh::Transform(const aiMatrix4x4& transfo
     aiMatrix4x4 inverseTransform = transform;
     inverseTransform.Inverse();
 
+    aiMatrix3x3 inverseRotation = rotationOnly;
+    inverseRotation.Inverse();
+
+
+
     for (unsigned i = 0; i < result->mMesh->mNumVertices; ++i) {
         result->mMesh->mVertices[i] = transform * result->mMesh->mVertices[i];
 
@@ -241,6 +246,7 @@ std::shared_ptr<ExtendedMesh> ExtendedMesh::Transform(const aiMatrix4x4& transfo
 
         if (result->mPointInverseTransform.size()) {
             result->mPointInverseTransform[i] = result->mPointInverseTransform[i] * inverseTransform;
+            result->mNormalInverseTransform[i] = result->mNormalInverseTransform[i] * inverseRotation;
         }
     }
     

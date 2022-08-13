@@ -290,54 +290,17 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     ray.origin = player->body.transform.position;
     vector3Scale(&gUp, &ray.dir, -1.0f);
     if (collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_TANGIBLE, PLAYER_HEAD_HEIGHT + 0.2f, 1, &hit)) {
-        struct ContactManifold* collisionManifold = contactSolverGetContactManifold(&gContactSolver, &player->collisionObject, hit.object);
+        float penetration = hit.distance - PLAYER_HEAD_HEIGHT;
 
-        struct EpaResult newContact;
-
-        newContact.id = 0xFFFF;
-
-        struct Vector3* playerContact;
-        struct Vector3* otherContact;
-        
-        if (collisionManifold->shapeA == &player->collisionObject) {
-            playerContact = &newContact.contactA;
-            otherContact = &newContact.contactB;
-            vector3Negate(&hit.normal, &newContact.normal);
-        } else {
-            playerContact = &newContact.contactB;
-            otherContact = &newContact.contactA;
-            newContact.normal = hit.normal;
-        }
-
-        playerContact->x = 0.0f; playerContact->y = -PLAYER_HEAD_HEIGHT; playerContact->z = 0.0f;
-        *otherContact = hit.at;
-
-        newContact.penetration = hit.distance - PLAYER_HEAD_HEIGHT;
-
-        if (hit.object && hit.object->body) {
-            transformPointInverseNoScale(&hit.object->body->transform, otherContact, otherContact);
-        }
-
-        collisionManifold->friction = MAX(player->collisionObject.collider->friction, hit.object->collider->friction);
-        collisionManifold->restitution = MIN(player->collisionObject.collider->bounce, hit.object->collider->bounce);
-
-        contactInsert(collisionManifold, &newContact);
-        player->flags |= PlayerFlagsGrounded;
-    } else {
-        player->flags &= ~PlayerFlagsGrounded;
-
-        struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);
-
-        while (manifold) {
-            for (int contact = 0; contact < manifold->contactCount; ++contact) {
-                if (manifold->contacts[contact].id == 0xFFFF) {
-                    manifold->contactCount = 0;
-                    break;
-                }
+        if (penetration < 0.0f) {
+            vector3AddScaled(&player->body.transform.position, &gUp, -penetration, &player->body.transform.position);
+            if (player->body.velocity.y < 0.0f) {
+                player->body.velocity.y = 0.0f;
             }
-
-            manifold = contactSolverNextManifold(&gContactSolver, &player->collisionObject, manifold);
         }
+
+        hit.object->flags |= COLLISION_OBJECT_PLAYER_STANDING;
+        player->flags |= PlayerFlagsGrounded;
     }
     
     struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);
@@ -347,6 +310,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         manifold = contactSolverNextManifold(&gContactSolver, &player->collisionObject, manifold);
     }
 
+    collisionObjectUpdateBB(&player->collisionObject);
     playerHandleCollision(player);
 
     player->body.transform.rotation = player->lookTransform.rotation;    
