@@ -82,12 +82,6 @@ void decorObjectUpdate(struct DecorObject* decorObject) {
         soundPlayerUpdatePosition(decorObject->playingSound, &decorObject->rigidBody.transform.position);
     }
 
-    if (decorObject->rigidBody.flags & (RigidBodyIsTouchingPortalA | RigidBodyWasTouchingPortalA | RigidBodyIsTouchingPortalB | RigidBodyWasTouchingPortalB)) {
-        dynamicSceneSetFlags(decorObject->dynamicId, DYNAMIC_SCENE_OBJECT_FLAGS_TOUCHING_PORTAL);
-    } else {
-        dynamicSceneClearFlags(decorObject->dynamicId, DYNAMIC_SCENE_OBJECT_FLAGS_TOUCHING_PORTAL);
-    }
-
     if (decorObject->rigidBody.flags & RigidBodyFizzled) {
         if (decorObject->fizzleTime == 0.0f) {
             vector3Scale(&decorObject->rigidBody.velocity, &decorObject->rigidBody.velocity, 0.25f);

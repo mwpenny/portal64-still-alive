@@ -14,6 +14,7 @@ void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData
     object->collisionLayers = collisionLayers;
     object->data = 0;
     object->trigger = 0;
+    object->manifoldIds = 0;
 }
 
 int collisionObjectIsActive(struct CollisionObject* object) {

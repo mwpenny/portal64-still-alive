@@ -81,7 +81,8 @@ void meshColliderCollideObject(struct CollisionObject* meshColliderObject, struc
             continue;
         }
 
-        // contactA is already in the local space for the mesh object
+        // contactA should be in world coordinates
+        transformPoint(&meshColliderObject->body->transform, &result.contactA, &result.contactA);
 
         // transform contactB to be in the localspace of the other object
         transformPoint(&meshColliderObject->body->transform, &result.contactB, &result.contactB);

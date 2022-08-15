@@ -5,17 +5,15 @@
 
 struct DynamicScene gDynamicScene;
 
-#define FLAG_MASK (DYNAMIC_SCENE_OBJECT_FLAGS_USED | DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE | DYNAMIC_SCENE_OBJECT_FLAGS_TOUCHING_PORTAL)
+#define FLAG_MASK (DYNAMIC_SCENE_OBJECT_FLAGS_USED | DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE)
 
 #define FLAG_VALUE_NOT_TOUCHING_PORTAL (DYNAMIC_SCENE_OBJECT_FLAGS_USED | DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE)
-#define FLAG_VALUE_TOUCHING_PORTAL (DYNAMIC_SCENE_OBJECT_FLAGS_USED | DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE | DYNAMIC_SCENE_OBJECT_FLAGS_TOUCHING_PORTAL)
 
 void dynamicSceneInit() {
     for (int i = 0; i < MAX_DYNAMIC_SCENE_OBJECTS; ++i) {
         gDynamicScene.objects[i].flags = 0;
     }
 }
-
 
 void dynamicScenePopulateWithFlags(struct FrustrumCullingInformation* cullingInfo, struct RenderScene* renderScene, int flags) {
     for (int i = 0; i < MAX_DYNAMIC_SCENE_OBJECTS; ++i) {
@@ -31,13 +29,6 @@ void dynamicScenePopulateWithFlags(struct FrustrumCullingInformation* cullingInf
             object->renderCallback(object->data, renderScene);
         }
     }
-}
-
-void dynamicSceneRenderTouchingPortal(struct Transform* cameraTransform, struct FrustrumCullingInformation* cullingInfo, struct RenderState* renderState) {
-    struct RenderScene* tmpScene = renderSceneNew(cameraTransform, renderState, MAX_DYNAMIC_SCENE_OBJECTS, ~0);
-    dynamicScenePopulateWithFlags(cullingInfo, tmpScene, FLAG_VALUE_TOUCHING_PORTAL);
-    renderSceneGenerate(tmpScene, renderState);
-    renderSceneFree(tmpScene);
 }
 
 int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Transform* transform, float radius) {

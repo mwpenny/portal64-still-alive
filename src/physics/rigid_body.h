@@ -23,8 +23,7 @@ enum RigidBodyFlags {
 
     RigidBodyIsKinematic = (1 << 10),
     RigidBodyIsSleeping = (1 << 11),
-    // for kinematic bodies that should generate 
-    // contacts with other kinematic bodies
+    // tells the collision system to generate contacts with the player
     RigidBodyIsPlayer = (1 << 12),
 
     RigidBodyFizzled = (1 << 13),

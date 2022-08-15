@@ -25,6 +25,7 @@ struct CollisionObject {
     short flags;
     void* data;
     TriggerCallback trigger;
+    u32 manifoldIds;
 };
 
 struct SweptCollisionObject {

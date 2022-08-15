@@ -26,7 +26,7 @@ struct Player {
     enum PlayerFlags flags;
 };
 
-void playerInit(struct Player* player, struct Location* startLocation);
+void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity);
 void playerUpdate(struct Player* player, struct Transform* cameraTransform);
 
 void playerRender(struct Player* player, struct RenderState* renderState);

@@ -148,9 +148,11 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             struct Transform exitInverse;
             transformInvert(&gCurrentLevel->locations[step->loadLevel.fromLocation].transform, &exitInverse);
             struct Transform relativeExit;
+            struct Vector3 relativeVelocity;
 
             transformConcat(&exitInverse, &gScene.player.lookTransform, &relativeExit);
-            levelQueueLoad(step->loadLevel.levelIndex, &relativeExit);
+            quatMultVector(&exitInverse.rotation, &gScene.player.body.velocity, &relativeVelocity);
+            levelQueueLoad(step->loadLevel.levelIndex, &relativeExit, &relativeVelocity);
             break;
         }
         case CutsceneStepTypeGoto:

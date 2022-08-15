@@ -46,12 +46,13 @@ struct ColliderTypeData gPlayerColliderData = {
     &gCollisionCylinderCallbacks,
 };
 
-void playerInit(struct Player* player, struct Location* startLocation) {
+void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity) {
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
     // rigidBodyMarkKinematic(&player->body);
     player->body.flags |= RigidBodyIsKinematic | RigidBodyIsPlayer;
     collisionSceneAddDynamicObject(&player->collisionObject);
 
+    player->body.velocity = *velocity;
     player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
     player->grabbing = NULL;
     player->pitchVelocity = 0.0f;
@@ -65,7 +66,6 @@ void playerInit(struct Player* player, struct Location* startLocation) {
         transformInitIdentity(&player->lookTransform);
         player->body.currentRoom = 0;
     }
-    player->lookTransform.position.y += PLAYER_HEAD_HEIGHT;
     player->body.transform = player->lookTransform;
 
     collisionObjectUpdateBB(&player->collisionObject);
@@ -283,7 +283,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     collisionObjectUpdateBB(&player->collisionObject);
     box3DUnion(&sweptBB, &player->collisionObject.boundingBox, &sweptBB);
 
-    collisionObjectCollideWithSceneSwept(&player->collisionObject, &prevPos, &sweptBB, &gCollisionScene, &gContactSolver);
+    collisionObjectCollideMixed(&player->collisionObject, &prevPos, &sweptBB, &gCollisionScene, &gContactSolver);
 
     struct RaycastHit hit;
     struct Ray ray;

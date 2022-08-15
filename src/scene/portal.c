@@ -204,8 +204,6 @@ int renderPropsNext(struct RenderProps* current, struct RenderProps* next, struc
         return 0;
     }
 
-    dynamicSceneRenderTouchingPortal(&next->camera.transform, &current->cullingInfo, renderState);
-
     next->currentDepth = current->currentDepth - 1;
     Vp* viewport = renderPropsBuildViewport(next, renderState);
 

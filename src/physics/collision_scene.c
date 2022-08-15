@@ -120,6 +120,21 @@ void collisionObjectCollideWithSceneSwept(struct CollisionObject* object, struct
     }
 }
 
+void collisionObjectCollideMixed(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionScene* scene, struct ContactSolver* contactSolver) {    
+    short colliderIndices[MAX_COLLIDERS];
+    int quadCount = collisionObjectRoomColliders(&scene->world->rooms[object->body->currentRoom], sweptBB, colliderIndices);
+
+    for (int i = 0; i < quadCount; ++i) {
+        struct CollisionObject* quad = &scene->quads[colliderIndices[i]];
+        if (quad->manifoldIds & object->manifoldIds) {
+            collisionObjectCollideWithQuad(object, quad, contactSolver);
+        } else {
+            collisionObjectCollideWithQuadSwept(object, objectPrevPos, sweptBB, quad, contactSolver);
+        }
+    }
+}
+
+
 int collisionSceneFilterPortalContacts(struct ContactManifold* contact) {
     int writeIndex = 0;
 

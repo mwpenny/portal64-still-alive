@@ -12,7 +12,6 @@ typedef void (*DynamicRender)(void* data, struct RenderScene* renderScene);
 
 #define DYNAMIC_SCENE_OBJECT_FLAGS_USED                 (1 << 0)
 #define DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE               (1 << 1)
-#define DYNAMIC_SCENE_OBJECT_FLAGS_TOUCHING_PORTAL      (1 << 2)
 
 #define INVALID_DYNAMIC_OBJECT  -1
 
@@ -29,8 +28,6 @@ struct DynamicScene {
 };
 
 void dynamicSceneInit();
-
-void dynamicSceneRenderTouchingPortal(struct Transform* cameraTransform, struct FrustrumCullingInformation* cullingInfo, struct RenderState* renderState);
 
 int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Transform* transform, float radius);
 void dynamicSceneRemove(int id);

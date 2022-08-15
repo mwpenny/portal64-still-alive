@@ -40,14 +40,16 @@ void sceneUpdateListeners(struct Scene* scene);
 void sceneInit(struct Scene* scene) {
     signalsInit(1);
 
-    cameraInit(&scene->camera, 70.0f, 0.125f * SCENE_SCALE, 40.0f * SCENE_SCALE);
+    cameraInit(&scene->camera, 70.0f, 0.125f * SCENE_SCALE, 30.0f * SCENE_SCALE);
 
     struct Location* startLocation = levelGetLocation(gCurrentLevel->startLocation);
     struct Location combinedLocation;
+    struct Vector3 startVelocity;
     combinedLocation.roomIndex = startLocation->roomIndex;
     transformConcat(&startLocation->transform, levelRelativeTransform(), &combinedLocation.transform);
+    quatMultVector(&startLocation->transform.rotation, levelRelativeVelocity(), &startVelocity);
 
-    playerInit(&scene->player, &combinedLocation);
+    playerInit(&scene->player, &combinedLocation, &startVelocity);
     sceneUpdateListeners(scene);
 
     portalInit(&scene->portals[0], 0);
@@ -191,8 +193,6 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     renderProperties.camera = scene->camera;
 
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
-
-    dynamicSceneRenderTouchingPortal(&scene->camera.transform, &renderProperties.cullingInfo, renderState);
 
     sceneRenderWithProperties(scene, &renderProperties, renderState);
 

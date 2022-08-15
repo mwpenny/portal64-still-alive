@@ -7,6 +7,7 @@
 void contactInsert(struct ContactManifold* contactState, struct EpaResult* epaResult) {
     int shouldReplace = 1;
     int replacementIndex = 0;
+    int idMask = 1 << (contactState - gContactSolver.contacts);
     float smallestOverlap = -10000.0f;
 
     int insertIndex;
@@ -40,6 +41,9 @@ void contactInsert(struct ContactManifold* contactState, struct EpaResult* epaRe
     vector3Perp(&contactState->normal, &contactState->tangentVectors[0]);
     vector3Normalize(&contactState->tangentVectors[0], &contactState->tangentVectors[0]);
     vector3Cross(&contactState->normal, &contactState->tangentVectors[0], &contactState->tangentVectors[1]);
+
+    contactState->shapeA->manifoldIds |= idMask;
+    contactState->shapeB->manifoldIds |= idMask;
 
     if (insertIndex == MAX_CONTACTS_PER_MANIFOLD) {
         if (!shouldReplace) {

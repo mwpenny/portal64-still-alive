@@ -7,6 +7,7 @@
 #include "static_render.h"
 #include "cutscene_runner.h"
 #include "../graphics/graphics.h"
+#include "../player/player.h"
 
 #include "../util/rom.h"
 #include "../util/memory.h"
@@ -17,10 +18,12 @@ u64 gTriggeredCutscenes;
 
 int gQueuedLevel = NO_QUEUED_LEVEL;
 struct Transform gRelativeTransform = {
-    {0.0f, 0.0f, 0.0f},
+    {0.0f, PLAYER_HEAD_HEIGHT, 0.0f},
     {0.0f, 0.0f, 0.0f, 1.0f},
     {1.0f, 1.0f, 1.0f},
 };
+
+struct Vector3 gRelativeVelocity;
 
 int levelCount() {
     return LEVEL_COUNT;
@@ -102,13 +105,14 @@ void levelLoad(int index) {
     collisionSceneInit(&gCollisionScene, gCurrentLevel->collisionQuads, gCurrentLevel->collisionQuadCount, &gCurrentLevel->world);
 }
 
-void levelQueueLoad(int index, struct Transform* relativeExitTransform) {
+void levelQueueLoad(int index, struct Transform* relativeExitTransform, struct Vector3* relativeVelocity) {
     if (index == NEXT_LEVEL) {
         gQueuedLevel = gCurrentLevelIndex + 1;
     } else {
         gQueuedLevel = index;
     }
     gRelativeTransform = *relativeExitTransform;
+    gRelativeVelocity = *relativeVelocity;
 }
 
 int levelGetQueued() {
@@ -117,6 +121,10 @@ int levelGetQueued() {
 
 struct Transform* levelRelativeTransform() {
     return &gRelativeTransform;
+}
+
+struct Vector3* levelRelativeVelocity() {
+    return &gRelativeVelocity;
 }
 
 int levelMaterialCount() {
