@@ -99,12 +99,13 @@ void playerHandleCollision(struct Player* player) {
                 (contact->shapeA == &player->collisionObject ? offset : -offset) * 0.95f, 
                 &player->body.transform.position
             );
+        }
 
-            float relativeVelocity = vector3Dot(&contact->normal, &player->body.velocity);
 
-            if ((contact->shapeA == &player->collisionObject) == (relativeVelocity > 0.0f)) {
-                vector3ProjectPlane(&player->body.velocity, &contact->normal, &player->body.velocity);
-            }
+        float relativeVelocity = vector3Dot(&contact->normal, &player->body.velocity);
+
+        if ((contact->shapeA == &player->collisionObject) == (relativeVelocity > 0.0f)) {
+            vector3ProjectPlane(&player->body.velocity, &contact->normal, &player->body.velocity);
         }
 
         contact = contactSolverNextManifold(&gContactSolver, &player->collisionObject, contact);

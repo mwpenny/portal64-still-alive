@@ -107,16 +107,16 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
     int result = 0;
 
     for (int i = 0; i < 2; ++i) {
-        if (!((RigidBodyIsTouchingPortalA << i) & rigidBody->flags) && !((RigidBodyWasTouchingPortalA << i) & rigidBody->flags)) {
-            continue;
-        }
-
         transformPointInverseNoScale(gCollisionScene.portalTransforms[i], &rigidBody->transform.position, &localPoint);
 
         int mask = (RigidBodyFlagsInFrontPortal0 << i);
 
         if (localPoint.z < 0.0f) {
             newFlags |= mask;
+        }
+
+        if (!((RigidBodyIsTouchingPortalA << i) & rigidBody->flags) && !((RigidBodyWasTouchingPortalA << i) & rigidBody->flags)) {
+            continue;
         }
 
         // skip checking if portal was crossed if this is the

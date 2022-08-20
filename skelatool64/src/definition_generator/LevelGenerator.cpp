@@ -78,7 +78,7 @@ std::unique_ptr<StructureDataChunk> calculatePortalSingleSurface(CFileDefinition
     aiVector3D up;
 
     if (fabsf(normal.z) < 0.7f) {
-        right = aiVector3D(0.0f, 1.0f, 0.0f) ^ normal;
+        right = aiVector3D(0.0f, 0.0f, 1.0f) ^ normal;
         right.Normalize();
         up = normal ^ right;
     } else {
