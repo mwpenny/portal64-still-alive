@@ -121,9 +121,9 @@ void playerApplyPortalGrab(struct Player* player, int portalIndex) {
 }
 
 void playerUpdateGrabbedObject(struct Player* player) {
-    if (controllerGetButtonDown(0, B_BUTTON) || controllerGetButtonDown(0, U_JPAD)) {
+    if (controllerGetButtonDown(0, B_BUTTON) || controllerGetButtonDown(1, U_JPAD)) {
         if (player->grabbing) {
-            if (controllerGetButtonDown(0, U_JPAD)) {
+            if (controllerGetButtonDown(1, U_JPAD)) {
                 struct Vector3 forward;
                 quatMultVector(&player->lookTransform.rotation, &gForward, &forward);
                 vector3AddScaled(&player->grabbing->body->velocity, &forward, -50.0f, &player->grabbing->body->velocity);
