@@ -170,6 +170,8 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/round_elevator_interior.blend \
 	assets/models/props/round_elevator_collision.blend \
 	assets/models/props/signage.blend \
+	assets/models/props/box_dropper.blend \
+	assets/models/props/box_dropper_glass.blend \
 	assets/models/portal/portal_blue.blend \
 	assets/models/portal/portal_blue_filled.blend \
 	assets/models/portal/portal_blue_face.blend \
@@ -178,7 +180,7 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/portal/portal_orange_face.blend \
 	assets/models/pedestal.blend
 
-ANIM_LIST = build/assets/models/pedestal_anim.o
+ANIM_LIST = build/assets/models/pedestal_anim.o build/assets/models/props/box_dropper_anim.o
 
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
 MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)
@@ -194,6 +196,8 @@ build/src/scene/portal.o: $(MODEL_HEADERS)
 
 build/src/scene/signage.o: $(MODEL_HEADERS)
 
+build/src/scene/box_dropper.o: $(MODEL_HEADERS)
+
 build/anims.ld: $(ANIM_LIST) tools/generate_animation_ld.js
 	@mkdir -p $(@D)
 	node tools/generate_animation_ld.js $@ $(ANIM_LIST)
@@ -203,7 +207,8 @@ build/anims.ld: $(ANIM_LIST) tools/generate_animation_ld.js
 ####################
 
 TEST_CHAMBERS = assets/test_chambers/test_chamber_00/test_chamber_00.blend \
-	assets/test_chambers/test_chamber_01/test_chamber_01.blend
+	assets/test_chambers/test_chamber_01/test_chamber_01.blend \
+	assets/test_chambers/test_chamber_02/test_chamber_02.blend
 
 TEST_CHAMBER_HEADERS = $(TEST_CHAMBERS:%.blend=build/%.h)
 TEST_CHAMBER_OBJECTS = $(TEST_CHAMBERS:%.blend=build/%_geo.o)

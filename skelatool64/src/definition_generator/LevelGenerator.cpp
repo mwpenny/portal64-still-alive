@@ -747,6 +747,51 @@ void generateSignageDefinitions(
     levelDef.AddPrimitive("signageCount", signageCount);
 }
 
+
+void generateBoxDropperDefinitions(
+    const aiScene* scene, 
+    CFileDefinition& fileDefinition, 
+    StructureDataChunk& levelDef, 
+    const RoomGeneratorOutput& roomOutput, 
+    const DisplayListSettings& settings,
+    NodeGroups& nodeGroups,
+    Signals& signals) {
+
+    int boxDropperCount = 0;
+    std::unique_ptr<StructureDataChunk> signage(new StructureDataChunk());
+
+    aiMatrix4x4 baseTransform = settings.CreateCollisionTransform();
+
+    for (auto& nodeInfo : nodeGroups.NodesForType("@box_dropper")) {
+        if (nodeInfo.arguments.size() == 0) {
+            continue;
+        }
+
+        std::unique_ptr<StructureDataChunk> boxDropperData(new StructureDataChunk());
+        aiVector3D pos;
+        aiQuaternion rot;
+        aiVector3D scale;
+        (baseTransform * nodeInfo.node->mTransformation).Decompose(scale, rot, pos);
+        boxDropperData->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(pos)));
+        boxDropperData->AddPrimitive(roomOutput.RoomForNode(nodeInfo.node));
+        boxDropperData->AddPrimitive(signals.SignalIndexForName(nodeInfo.arguments[0]));
+
+        signage->Add(std::move(boxDropperData));
+        ++boxDropperCount;
+    }
+
+    std::string boxDropperDef = fileDefinition.AddDataDefinition(
+        "box_dropper",
+        "struct BoxDropperDefinition",
+        true,
+        "_geo",
+        std::move(signage)
+    );
+
+    levelDef.AddPrimitive("boxDroppers", boxDropperDef);
+    levelDef.AddPrimitive("boxDropperCount", boxDropperCount);
+}
+
 void generateLevel(
         const aiScene* scene, 
         CFileDefinition& fileDefinition,
@@ -793,6 +838,8 @@ void generateLevel(
     generatePedestalDefinitions(scene, fileDefinition, *levelDef, roomOutput, settings, nodeGroups);
 
     generateSignageDefinitions(scene, fileDefinition, *levelDef, roomOutput, settings, nodeGroups);
+
+    generateBoxDropperDefinitions(scene, fileDefinition, *levelDef, roomOutput, settings, nodeGroups, signals);
 
     fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("struct LevelDefinition", fileDefinition.GetUniqueName("level"), false, "_geo", std::move(levelDef))));
 }

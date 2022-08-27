@@ -277,10 +277,18 @@ int minkowsiSumAgainstQuad(void* data, struct Vector3* direction, struct Vector3
 int minkowsiSumAgainstSweptObject(void* data, struct Vector3* direction, struct Vector3* output) {
     struct SweptCollisionObject* sweptObject = (struct SweptCollisionObject*)data;
 
-    int result = sweptObject->object->collider->callbacks->minkowsiSum(sweptObject->object->collider->data, &sweptObject->object->body->rotationBasis, direction, output);
+    struct ColliderTypeData* collider = sweptObject->object->collider;
+    struct RigidBody* body = sweptObject->object->body;
 
-    if (vector3Dot(&sweptObject->object->body->transform.position, direction) > vector3Dot(sweptObject->prevPos, direction)) {
-        vector3Add(output, &sweptObject->object->body->transform.position, output);
+    int result = collider->callbacks->minkowsiSum(
+        collider->data, 
+        &body->rotationBasis, 
+        direction, 
+        output
+    );
+
+    if (vector3Dot(&body->transform.position, direction) > vector3Dot(sweptObject->prevPos, direction)) {
+        vector3Add(output, &body->transform.position, output);
     } else {
         vector3Add(output, sweptObject->prevPos, output);
     }

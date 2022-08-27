@@ -162,6 +162,12 @@ struct SignageDefinition {
     short testChamberNumber;
 };
 
+struct BoxDropperDefinition {
+    struct Vector3 position;
+    short roomIndex;
+    short signalIndex;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
@@ -183,6 +189,7 @@ struct LevelDefinition {
     struct ElevatorDefinition* elevators;
     struct PedestalDefinition* pedestals;
     struct SignageDefinition* signage;
+    struct BoxDropperDefinition* boxDroppers;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
@@ -197,6 +204,7 @@ struct LevelDefinition {
     short elevatorCount;
     short pedestalCount;
     short signageCount;
+    short boxDropperCount;
     short startLocation;
 };
 

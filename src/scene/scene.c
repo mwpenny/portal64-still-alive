@@ -109,6 +109,12 @@ void sceneInit(struct Scene* scene) {
     for (int i = 0; i < scene->signageCount; ++i) {
         signageInit(&scene->signage[i], &gCurrentLevel->signage[i]);
     }
+
+    scene->boxDropperCount = gCurrentLevel->boxDropperCount;
+    scene->boxDroppers = malloc(sizeof(struct BoxDropper) * scene->boxDropperCount);
+    for (int i = 0; i < scene->boxDropperCount; ++i) {
+        boxDropperInit(&scene->boxDroppers[i], &gCurrentLevel->boxDroppers[i]);
+    }
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {
@@ -283,9 +289,22 @@ void sceneUpdate(struct Scene* scene) {
         doorUpdate(&scene->doors[i]);
     }
 
+    int decorWriteIndex = 0;
+
     for (int i = 0; i < scene->decorCount; ++i) {
-        decorObjectUpdate(scene->decor[i]);
+        if (!decorObjectUpdate(scene->decor[i])) {
+            decorObjectDelete(scene->decor[i]);
+            continue;;
+        }
+
+        if (decorWriteIndex != i) {
+            scene->decor[decorWriteIndex] = scene->decor[i];
+        }
+
+        ++decorWriteIndex;
     }
+
+    scene->decorCount = decorWriteIndex;
 
     for (int i = 0; i < scene->fizzlerCount; ++i) {
         fizzlerUpdate(&scene->fizzlers[i]);
@@ -297,6 +316,10 @@ void sceneUpdate(struct Scene* scene) {
 
     for (int i = 0; i < scene->pedestalCount; ++i) {
         pedestalUpdate(&scene->pedestals[i]);
+    }
+
+    for (int i = 0; i < scene->boxDropperCount; ++i) {
+        boxDropperUpdate(&scene->boxDroppers[i]);
     }
     
     collisionSceneUpdateDynamics();

@@ -26,8 +26,9 @@ struct DecorObject {
 
 struct DecorObject* decorObjectNew(struct DecorObjectDefinition* definition, struct Transform* at, int room);
 void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* definition, struct Transform* at, int room);
+void decorObjectClenaup(struct DecorObject* decorObject);
 void decorObjectDelete(struct DecorObject* decorObject);
 
-void decorObjectUpdate(struct DecorObject* decorObject);
+int decorObjectUpdate(struct DecorObject* decorObject);
 
 #endif

@@ -49,6 +49,19 @@ materials:
       tileSizeS: 0.5
       tileSizeT: 0.5
 
+
+  metal_modular_floor001:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metal_modular_floor001.png
+      siz: G_IM_SIZ_16b
+    
+    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    properties:
+      tileSizeS: 0.5
+      tileSizeT: 0.5
+
   metalwall_bts_006a:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/metal/metalwall_bts_006a.png

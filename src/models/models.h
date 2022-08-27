@@ -19,4 +19,10 @@ extern short cylinder_material_index;
 
 extern short fizzler_material_index;
 
+extern Gfx* box_dropper_gfx;
+extern Gfx* box_dropper_glass_gfx;
+extern short box_dropper_material_index;
+extern short box_dropper_glass_material_index;
+
+
 #endif
