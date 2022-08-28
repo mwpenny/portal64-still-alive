@@ -311,7 +311,29 @@ void sceneUpdate(struct Scene* scene) {
     }
     
     for (int i = 0; i < scene->elevatorCount; ++i) {
-        elevatorUpdate(&scene->elevators[i], &scene->player);
+        int teleportTo = elevatorUpdate(&scene->elevators[i], &scene->player);
+
+        if (teleportTo != -1) {
+            if (teleportTo >= scene->elevatorCount) {
+                struct Transform exitInverse;
+                transformInvert(&scene->elevators[i].rigidBody.transform, &exitInverse);
+                struct Transform relativeExit;
+                struct Vector3 relativeVelocity;
+
+                transformConcat(&exitInverse, &scene->player.lookTransform, &relativeExit);
+                quatMultVector(&exitInverse.rotation, &scene->player.body.velocity, &relativeVelocity);
+                levelQueueLoad(NEXT_LEVEL, &relativeExit, &relativeVelocity);
+            } else {
+                rigidBodyTeleport(
+                    &scene->player.body,
+                    &scene->elevators[i].rigidBody.transform,
+                    &scene->elevators[teleportTo].rigidBody.transform,
+                    scene->elevators[teleportTo].roomIndex
+                );
+
+                scene->elevators[teleportTo].flags |= ElevatorFlagsHasHadPlayer;
+            }
+        }
     }
 
     for (int i = 0; i < scene->pedestalCount; ++i) {

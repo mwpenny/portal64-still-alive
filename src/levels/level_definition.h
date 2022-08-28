@@ -146,8 +146,7 @@ struct ElevatorDefinition {
     struct Vector3 position;
     struct Quaternion rotation;
     short roomIndex;
-    short signalIndex;
-    short isExit;
+    short targetElevator;
 };
 
 struct PedestalDefinition {

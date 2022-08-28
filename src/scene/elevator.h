@@ -17,13 +17,14 @@ struct Elevator {
     struct RigidBody rigidBody;
     short dynamicId;
     short flags;
-    short signalIndex;
+    short targetElevator;
     short roomIndex;
     float openAmount;
+    float timer;
 };
 
 void elevatorInit(struct Elevator* elevator, struct ElevatorDefinition* elevatorDefinition);
 
-void elevatorUpdate(struct Elevator* elevator, struct Player* player);
+int elevatorUpdate(struct Elevator* elevator, struct Player* player);
 
 #endif

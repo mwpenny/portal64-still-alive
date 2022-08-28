@@ -632,7 +632,9 @@ void generateElevatorDefinitions(
 
     aiMatrix4x4 baseTransform = settings.CreateCollisionTransform();
 
-    for (auto& nodeInfo : nodeGroups.NodesForType("@elevator")) {
+    auto nodes = nodeGroups.NodesForType("@elevator");
+
+    for (auto& nodeInfo : nodes) {
         if (nodeInfo.arguments.size() == 0) {
             continue;
         }
@@ -645,8 +647,25 @@ void generateElevatorDefinitions(
         elevatorData->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(pos)));
         elevatorData->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(rot)));
         elevatorData->AddPrimitive(roomOutput.RoomForNode(nodeInfo.node));
-        elevatorData->AddPrimitive(signals.SignalIndexForName(nodeInfo.arguments[0]));
-        elevatorData->AddPrimitive(nodeInfo.arguments.size() >= 2 && nodeInfo.arguments[1] == "isExit" ? 1 : 0);
+
+        if (nodeInfo.arguments.size() > 1) {
+            std::string targetElevator = nodeInfo.arguments[1];
+
+            if (targetElevator == "next_level") {
+                elevatorData->AddPrimitive(nodes.size());
+            } else {
+                unsigned targetIndex = 0;
+                for (targetIndex = 0; targetIndex < nodes.size(); ++targetIndex) {
+                    if (nodes[targetIndex].arguments.size() && nodes[targetIndex].arguments[0] == targetElevator) {
+                        break;
+                    }
+                }
+
+                elevatorData->AddPrimitive(targetIndex);
+            }
+        } else {
+            elevatorData->AddPrimitive(-1);
+        }
 
         elevators->Add(std::move(elevatorData));
         ++elevatorCount;
