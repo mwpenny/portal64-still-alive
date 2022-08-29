@@ -184,7 +184,7 @@ ANIM_LIST = build/assets/models/pedestal_anim.o
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
 MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)
 
-build/assets/models/%.h build/assets/models/%_geo.c build/assets/models/%_anim.c: build/assets/models/%.fbx assets/models/%.flags assets/materials/elevator.skm.yaml assets/materials/objects.skm.yaml assets/materials/static.skm.yaml $(SKELATOOL64)
+build/assets/models/%.h build/assets/models/%_geo.c build/assets/models/%_anim.c: build/assets/models/%.fbx assets/models/%.flags assets/materials/elevator.skm.yaml assets/materials/objects.skm.yaml assets/materials/static.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
 	$(SKELATOOL64) --fixed-point-scale 256 --model-scale 0.01 --name $(<:build/assets/models/%.fbx=%) $(shell cat $(<:build/assets/models/%.fbx=assets/models/%.flags)) -o $(<:%.fbx=%.h) $<
 
 build/src/models/models.o: $(MODEL_HEADERS)
