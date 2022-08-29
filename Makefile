@@ -195,6 +195,8 @@ build/src/scene/portal.o: $(MODEL_HEADERS)
 
 build/src/scene/signage.o: $(MODEL_HEADERS)
 
+build/src/scene/pedestal.o: $(MODEL_HEADERS)
+
 build/anims.ld: $(ANIM_LIST) tools/generate_animation_ld.js
 	@mkdir -p $(@D)
 	node tools/generate_animation_ld.js $@ $(ANIM_LIST)
@@ -287,8 +289,6 @@ build/src/audio/clips.h: tools/generate_sound_ids.js $(SOUND_CLIPS)
 
 build/src/audio/clips.o: build/src/audio/clips.h
 build/src/decor/decor_object_list.o: build/src/audio/clips.h
-
-build/src/scene/pedestal.o: build/assets/models/pedestal.h
 
 ####################
 ## Linking
