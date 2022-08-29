@@ -14,6 +14,7 @@ VTF2PNG:=vtf2png
 SFZ2N64:=sfz2n64
 
 $(SKELATOOL64):
+	skelatool64/setup_dependencies.sh
 	make -C skelatool64
 
 OPTIMIZER		:= -O0
