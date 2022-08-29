@@ -101,7 +101,7 @@ src/models/sphere.h src/models/sphere_geo.inc.h: assets/fbx/Sphere.fbx
 
 portal_pak_dir: vpk/portal_pak_dir.vpk
 	vpk -x portal_pak_dir vpk/portal_pak_dir.vpk
-	vpk -x portal_pak_dir vpk/hl2/hl2_sound_misc_dir.vpk
+	vpk -x portal_pak_dir vpk/hl2_sound_misc_dir.vpk
 
 
 TEXTURE_SCRIPTS = $(shell find assets/ -type f -name '*.ims')
