@@ -84,7 +84,8 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 
 ## Current TODO list
 
-- [ ] level transition jump
+- [ ] stop looping sounds betwen levels
+- [ ] calculateBarycentricCoords when two points are the same
 - [ ] Z buffer allocation
 - [ ] Release grabbed objects when line of sight is cut
 - [ ] Correct elevator timing
@@ -93,6 +94,7 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [ ] Cube dispenser
 - [ ] Signage should not always be on
 - [ ] Camera shake
+- [x] level transition jump
 - [x] collide player with dynamic objects
 - [x] Render objects intersecting portals differently
 - [x] Sliding against walls

@@ -27,6 +27,8 @@ float gCutsceneChannelPitch[CH_COUNT] = {
     [CH_GLADOS] = 0.5f,
 };
 
+void cutsceneRunnerCancel(struct CutsceneRunner* runner);
+
 void cutsceneRunnerReset() {
     gRunningCutscenes = NULL;
 
@@ -40,6 +42,19 @@ void cutsceneRunnerReset() {
         gCutsceneSoundQueues[i] = NULL;
         gCutsceneCurrentSound[i] = SOUND_ID_NONE;
     }
+
+    struct CutsceneRunner* current = gRunningCutscenes;
+
+
+    while (current) {
+        cutsceneRunnerCancel(current);
+        current = current->nextRunner;
+    }
+
+    gRunningCutscenes = NULL;
+    // the heap is reset on level transition so there
+    // is no need to free any cutscene runners
+    gUnusedRunners = NULL;
 }
 
 struct CutsceneRunner* cutsceneRunnerNew() {
