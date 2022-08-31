@@ -14,6 +14,7 @@ VTF2PNG:=vtf2png
 SFZ2N64:=sfz2n64
 
 $(SKELATOOL64):
+	skelatool64/setup_dependencies.sh
 	make -C skelatool64
 
 OPTIMIZER		:= -O0
@@ -100,14 +101,14 @@ src/models/sphere.h src/models/sphere_geo.inc.h: assets/fbx/Sphere.fbx
 
 portal_pak_dir: vpk/portal_pak_dir.vpk
 	vpk -x portal_pak_dir vpk/portal_pak_dir.vpk
-	vpk -x portal_pak_dir vpk/hl2/hl2_sound_misc_dir.vpk
+	vpk -x portal_pak_dir vpk/hl2_sound_misc_dir.vpk
 
 
 TEXTURE_SCRIPTS = $(shell find assets/ -type f -name '*.ims')
 TEXTURE_IMAGES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_modified/%.png)
 TEXTURE_VTF_SOURCES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_dir/%.vtf)
 
-ALL_VTF_IMAGES = $(shell find portal_pak_dir/ -type f -name '*.vtf')
+ALL_VTF_IMAGES = $(shell find portal_pak_dir/ -type f ! -name 'portal_create_warp_dudv.vtf' -name '*.vtf')
 ALL_PNG_IMAGES = $(ALL_VTF_IMAGES:%.vtf=%.png)
 
 $(TEXTURE_VTF_SOURCES): portal_pak_dir
@@ -126,7 +127,7 @@ portal_pak_dir/%_copy_1.png: portal_pak_dir/%.png
 portal_pak_dir/%_copy_2.png: portal_pak_dir/%.png
 	cp $< $@
 
-portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims 
+portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims convert_all_png
 	@mkdir -p $(@D)
 	convert $< $(shell cat $(@:portal_pak_modified/%.png=assets/%.ims)) $@
 
@@ -183,7 +184,7 @@ ANIM_LIST = build/assets/models/pedestal_anim.o
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
 MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)
 
-build/assets/models/%.h build/assets/models/%_geo.c build/assets/models/%_anim.c: build/assets/models/%.fbx assets/models/%.flags assets/materials/elevator.skm.yaml assets/materials/objects.skm.yaml assets/materials/static.skm.yaml $(SKELATOOL64)
+build/assets/models/%.h build/assets/models/%_geo.c build/assets/models/%_anim.c: build/assets/models/%.fbx assets/models/%.flags assets/materials/elevator.skm.yaml assets/materials/objects.skm.yaml assets/materials/static.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
 	$(SKELATOOL64) --fixed-point-scale 256 --model-scale 0.01 --name $(<:build/assets/models/%.fbx=%) $(shell cat $(<:build/assets/models/%.fbx=assets/models/%.flags)) -o $(<:%.fbx=%.h) $<
 
 build/src/models/models.o: $(MODEL_HEADERS)
@@ -193,6 +194,8 @@ build/src/decor/decor_object_list.o: $(MODEL_HEADERS)
 build/src/scene/portal.o: $(MODEL_HEADERS)
 
 build/src/scene/signage.o: $(MODEL_HEADERS)
+
+build/src/scene/pedestal.o: $(MODEL_HEADERS)
 
 build/anims.ld: $(ANIM_LIST) tools/generate_animation_ld.js
 	@mkdir -p $(@D)
@@ -286,8 +289,6 @@ build/src/audio/clips.h: tools/generate_sound_ids.js $(SOUND_CLIPS)
 
 build/src/audio/clips.o: build/src/audio/clips.h
 build/src/decor/decor_object_list.o: build/src/audio/clips.h
-
-build/src/scene/pedestal.o: build/assets/models/pedestal.h
 
 ####################
 ## Linking
