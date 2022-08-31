@@ -20,7 +20,7 @@
 #define OPEN_SPEED              2.0f
 
 #define OPEN_DELAY              1.0f
-#define CLOSE_DELAY             1.0f
+#define CLOSE_DELAY             13.0f
 
 struct ColliderTypeData gElevatorColliderType = {
     CollisionShapeTypeMesh,

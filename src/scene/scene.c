@@ -271,6 +271,12 @@ void sceneUpdateListeners(struct Scene* scene) {
     }
 }
 
+struct Transform gRelativeElevatorTransform = {
+    {0.0f, 0.0f, 0.0f},
+    {0.5f, -0.5f, -0.5f, 0.5f},
+    {1.0f, 1.0f, 1.0f},
+};
+
 void sceneUpdate(struct Scene* scene) {
     OSTime frameStart = osGetTime();
     scene->lastFrameTime = frameStart - scene->lastFrameStart;
@@ -316,7 +322,11 @@ void sceneUpdate(struct Scene* scene) {
         if (teleportTo != -1) {
             if (teleportTo >= scene->elevatorCount) {
                 struct Transform exitInverse;
-                transformInvert(&scene->elevators[i].rigidBody.transform, &exitInverse);
+                struct Transform fullExitTransform;
+
+                transformConcat(&scene->elevators[i].rigidBody.transform, &gRelativeElevatorTransform, &fullExitTransform);
+
+                transformInvert(&fullExitTransform, &exitInverse);
                 struct Transform relativeExit;
                 struct Vector3 relativeVelocity;
 
@@ -330,8 +340,6 @@ void sceneUpdate(struct Scene* scene) {
                     &scene->elevators[teleportTo].rigidBody.transform,
                     scene->elevators[teleportTo].roomIndex
                 );
-
-                scene->elevators[teleportTo].flags |= ElevatorFlagsHasHadPlayer;
             }
         }
     }
