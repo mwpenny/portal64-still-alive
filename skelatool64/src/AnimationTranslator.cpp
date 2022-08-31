@@ -154,7 +154,8 @@ void populateKeyframes(const aiAnimation& input, BoneHierarchy& bones, float fix
             aiVector3D origin = vectorKey->mValue;
 
             if (!targetBone->GetParent()) {
-                origin = rotation.Rotate(origin) * modelScale;
+                aiQuaternion &constRot = const_cast <aiQuaternion&>(rotation);
+                origin = constRot.Rotate(origin) * modelScale;
             }
 
             keyframe.keyframe.attributeData.push_back((short)(origin.x * fixedPointScale));
