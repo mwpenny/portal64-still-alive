@@ -70,3 +70,31 @@ void signalsSetDefault(unsigned signalIndex, int value) {
 
     gDefaultSignals[bin] = (gDefaultSignals[bin] & ~mask) | (value ? mask : 0);
 }
+
+void signalsEvaluateSignal(struct SignalOperator* operator) {
+    switch (operator->type) {
+        case SignalOperatorTypeAnd:
+            if (signalsRead(operator->inputSignals[0]) && signalsRead(operator->inputSignals[1])) {
+                signalsSend(operator->outputSignal);
+            }
+            break;
+        case SignalOperatorTypeOr:
+            if (signalsRead(operator->inputSignals[0]) || signalsRead(operator->inputSignals[1])) {
+                signalsSend(operator->outputSignal);
+            }
+            break;
+        case SignalOperatorTypeNot:
+            if (!signalsRead(operator->inputSignals[0])) {
+                signalsSend(operator->outputSignal);
+            }
+            break;
+        case SignalOperatorTypeTimer:
+            break;
+    }
+}
+
+void signalsEvaluateSignals(struct SignalOperator* operator, unsigned count) {
+    for (unsigned i = 0; i < count; ++i) {
+        signalsEvaluateSignal(&operator[i]);
+    }
+}

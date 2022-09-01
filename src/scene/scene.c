@@ -291,6 +291,8 @@ void sceneUpdate(struct Scene* scene) {
         buttonUpdate(&scene->buttons[i]);
     }
 
+    signalsEvaluateSignals(gCurrentLevel->signalOperators, gCurrentLevel->signalOperatorCount);
+
     for (int i = 0; i < scene->doorCount; ++i) {
         doorUpdate(&scene->doors[i]);
     }
