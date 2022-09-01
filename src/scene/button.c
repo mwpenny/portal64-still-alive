@@ -44,6 +44,11 @@ struct ColliderTypeData gButtonCollider = {
 
 void buttonRender(void* data, struct RenderScene* renderScene) {
     struct Button* button = (struct Button*)data;
+
+    if (!RENDER_SCENE_IS_ROOM_VISIBLE(renderScene, button->rigidBody.currentRoom)) {
+        return;
+    }
+
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
 
     guTranslate(matrix, button->originalPos.x * SCENE_SCALE, button->originalPos.y * SCENE_SCALE, button->originalPos.z * SCENE_SCALE);

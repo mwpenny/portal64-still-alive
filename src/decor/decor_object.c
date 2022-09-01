@@ -11,6 +11,11 @@
 
 void decorObjectRender(void* data, struct RenderScene* renderScene) {
     struct DecorObject* object = (struct DecorObject*)data;
+
+    if (!RENDER_SCENE_IS_ROOM_VISIBLE(renderScene, object->rigidBody.currentRoom)) {
+        return;
+    }
+
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
     transformToMatrixL(&object->rigidBody.transform, matrix, SCENE_SCALE);
 

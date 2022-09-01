@@ -30,6 +30,11 @@ void boxDropperFakePos(struct BoxDropper* dropper, struct Transform* result) {
 
 void boxDropperRender(void* data, struct RenderScene* renderScene) {
     struct BoxDropper* dropper = (struct BoxDropper*)data;
+
+    if (!RENDER_SCENE_IS_ROOM_VISIBLE(renderScene, dropper->roomIndex)) {
+        return;
+    }
+
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
     transformToMatrixL(&dropper->transform, matrix, SCENE_SCALE);
 

@@ -45,6 +45,11 @@ struct Vector3 gOpenPosition[] = {
 
 void elevatorRender(void* data, struct RenderScene* renderScene) {
     struct Elevator* elevator = (struct Elevator*)data;
+
+    if (!RENDER_SCENE_IS_ROOM_VISIBLE(renderScene, elevator->roomIndex)) {
+        return;
+    }
+
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
     transformToMatrixL(&elevator->rigidBody.transform, matrix, SCENE_SCALE);
 
