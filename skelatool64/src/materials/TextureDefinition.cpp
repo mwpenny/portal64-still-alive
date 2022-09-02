@@ -217,7 +217,7 @@ void writeIAPixel(cimg_library_suffixed::CImg<unsigned char>& input, int x, int 
     }
 }
 
-bool convertPixel(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y, DataChunkStream& output, G_IM_FMT fmt, G_IM_SIZ siz) {
+bool convertPixel(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y, DataChunkStream& output, G_IM_FMT fmt, G_IM_SIZ siz, const std::shared_ptr<PalleteDefinition>& pallete) {
     switch (fmt) {
         case G_IM_FMT::G_IM_FMT_RGBA: {
             PixelRGBAu8 pixel = readRGBAPixel(input, x, y);
@@ -229,6 +229,10 @@ bool convertPixel(cimg_library_suffixed::CImg<unsigned char>& input, int x, int 
         }
         case G_IM_FMT::G_IM_FMT_IA: {
             PixelIAu8 pixel = readIAPixel(input, x, y);
+            return pixel.WriteToStream(output, siz);
+        }
+        case G_IM_FMT::G_IM_FMT_CI: {
+            PixelIu8 pixel = pallete ? pallete->FindIndex(readRGBAPixel(input, x, y)) : readIPixel(input, x, y);
             return pixel.WriteToStream(output, siz);
         }
         default:
@@ -383,10 +387,52 @@ void selectChannel(cimg_library_suffixed::CImg<unsigned char>& input, TextureDef
     }
 }
 
-TextureDefinition::TextureDefinition(const std::string& filename, G_IM_FMT fmt, G_IM_SIZ siz, TextureDefinitionEffect effects) :
+PalleteDefinition::PalleteDefinition(const std::string& filename) {
+    cimg_library_suffixed::CImg<unsigned char> imageData(filename.c_str());
+
+    DataChunkStream dataStream;
+    
+    for (int y = 0; y < imageData.height(); ++y) {
+        for (int x = 0; x < imageData.width(); ++x) {
+            PixelRGBAu8 colorValue = readRGBAPixel(imageData, x, y);
+            mColors.push_back(colorValue);
+
+            colorValue.WriteToStream(dataStream, G_IM_SIZ::G_IM_SIZ_16b);
+        }
+    }
+
+    auto data = dataStream.GetData();
+    mData.resize(data.size());
+
+    std::copy(data.begin(), data.end(), mData.begin());
+}
+
+PixelIu8 PalleteDefinition::FindIndex(PixelRGBAu8 color) const {
+    unsigned result = 0;
+    unsigned distance = ~0;
+
+    for (unsigned i = 0; i < mColors.size(); ++i) {
+        auto& colorAtIndex = mColors[i];
+        int rOffset = (int)colorAtIndex.r - (int)color.r;
+        int gOffset = (int)colorAtIndex.g - (int)color.g;
+        int bOffset = (int)colorAtIndex.b - (int)color.b;
+
+        unsigned currentDistance = rOffset * rOffset + gOffset * gOffset + bOffset * bOffset;
+
+        if (currentDistance < distance) {
+            distance = currentDistance;
+            result = i;
+        }
+    }
+
+    return PixelIu8(result);
+}
+
+TextureDefinition::TextureDefinition(const std::string& filename, G_IM_FMT fmt, G_IM_SIZ siz, TextureDefinitionEffect effects, std::shared_ptr<PalleteDefinition> pallete) :
     mName(getBaseName(replaceExtension(filename, "")) + "_" + gFormatShortName[(int)fmt] + "_" + gSizeName[(int)siz]),
     mFmt(fmt),
     mSiz(siz),
+    mPallete(pallete),
     mEffects(effects) {
 
     cimg_library_suffixed::CImg<unsigned char> imageData(filename.c_str());
@@ -416,7 +462,7 @@ TextureDefinition::TextureDefinition(const std::string& filename, G_IM_FMT fmt, 
 
     for (int y = 0; y < mHeight; ++y) {
         for (int x = 0; x < mWidth; ++x) {
-            convertPixel(imageData, x, y, dataStream, fmt, siz);
+            convertPixel(imageData, x, y, dataStream, fmt, siz, pallete);
         }
     }
 

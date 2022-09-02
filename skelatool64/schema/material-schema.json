@@ -467,6 +467,9 @@
                         },
                         "selectChannel": {
                             "enum": ["r", "g", "b"]
+                        },
+                        "usePallete": {
+                            "type": "string"
                         }
                     },
                     "required": [

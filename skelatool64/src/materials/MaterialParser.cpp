@@ -229,6 +229,7 @@ std::shared_ptr<TextureDefinition> parseTextureDefinition(const YAML::Node& node
     }
 
     std::string filename;
+    std::string palleteFilename;
 
     bool hasFormat = false;
     G_IM_FMT requestedFormat;
@@ -286,6 +287,16 @@ std::shared_ptr<TextureDefinition> parseTextureDefinition(const YAML::Node& node
                 effects = (TextureDefinitionEffect)((int)effects | (int)TextureDefinitionEffect::SelectB);
             }
         }
+
+        auto usePallete = node["usePallete"];
+
+        if (usePallete.IsDefined()) {
+            if (usePallete.IsScalar()) {
+                palleteFilename = usePallete.as<std::string>();
+            } else {
+                output.mErrors.push_back(ParseError(formatError(std::string("usePallete should be a file path to a pallete") + filename, usePallete.Mark())));
+            }
+        }
     } else {
         output.mErrors.push_back(ParseError(formatError(std::string("Tile should be a file name or object") + filename, node.Mark())));
         return NULL;
@@ -324,7 +335,7 @@ std::shared_ptr<TextureDefinition> parseTextureDefinition(const YAML::Node& node
         return NULL;
     }
 
-    return gTextureCache.GetTexture(filename, format, size, effects);
+    return gTextureCache.GetTexture(filename, format, size, effects, palleteFilename);
 }
 
 int parseRenderModeFlags(const YAML::Node& node, ParseResult& output) {

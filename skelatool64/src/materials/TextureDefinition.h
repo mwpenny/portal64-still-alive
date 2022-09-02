@@ -62,9 +62,19 @@ enum class TextureDefinitionEffect {
     SelectB = (1 << 5),
 };
 
+class PalleteDefinition {
+public:
+    PalleteDefinition(const std::string& filename);
+
+    PixelIu8 FindIndex(PixelRGBAu8 color) const;
+private:
+    std::vector<PixelRGBAu8> mColors;
+    std::vector<unsigned long long> mData;
+};
+
 class TextureDefinition {
 public:
-    TextureDefinition(const std::string& filename, G_IM_FMT fmt, G_IM_SIZ siz, TextureDefinitionEffect effects);
+    TextureDefinition(const std::string& filename, G_IM_FMT fmt, G_IM_SIZ siz, TextureDefinitionEffect effects, std::shared_ptr<PalleteDefinition> pallete);
 
     static void DetermineIdealFormat(const std::string& filename, G_IM_FMT& fmt, G_IM_SIZ& siz);
 
@@ -93,6 +103,7 @@ private:
     int mWidth;
     int mHeight;
     std::vector<unsigned long long> mData;
+    std::shared_ptr<PalleteDefinition> mPallete;
     TextureDefinitionEffect mEffects;
 
     PixelRGBAu8 mTwoToneMin;
