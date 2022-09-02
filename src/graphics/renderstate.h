@@ -4,7 +4,7 @@
 #include <ultra64.h>
 
 #define MAX_DL_LENGTH           2000
-#define MAX_RENDER_STATE_MEMORY 6400
+#define MAX_RENDER_STATE_MEMORY 12800
 #define MAX_RENDER_STATE_MEMORY_CHUNKS (MAX_RENDER_STATE_MEMORY / sizeof(u64))
 #define MAX_DYNAMIC_LIGHTS      128
 
