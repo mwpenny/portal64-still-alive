@@ -21,6 +21,7 @@ struct DisplayListSettings {
     std::map<std::string, std::shared_ptr<Material>> mMaterials;
     std::string mDefaultMaterialName;
     std::string mForceMaterialName;
+    std::string mForcePallete;
     MaterialState mDefaultMaterialState;
     aiQuaternion mRotateModel;
     bool mExportAnimation;

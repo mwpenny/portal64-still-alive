@@ -21,6 +21,7 @@ public:
 
     unsigned mSceneCount;
     std::set<std::shared_ptr<TextureDefinition>> mUsedTextures;
+    std::set<std::shared_ptr<PalleteDefinition>> mUsedPalletes;
     std::map<std::string, int> mMaterialUseCount;
     std::map<std::string, std::string> mMaterialNameMapping;
     std::map<std::string, std::string> mResourceNameMapping;

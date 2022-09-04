@@ -31,6 +31,7 @@ public:
     MaterialState mState;
     std::map<std::string, std::string> mProperties;
     NormalSource mNormalSource;
+    bool mExcludeFromOutut;
 
     void Write(CFileDefinition& fileDef, const MaterialState& from, StructureDataChunk& output);
 

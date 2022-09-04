@@ -55,6 +55,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
                 output.mDefaultMaterial = curr;
             } else if (lastParameter == "force-material") {
                 output.mForceMaterialName = curr;
+            } else if (lastParameter == "pallete") {
+                output.mForcePallete = curr;
             }
 
             lastParameter = "";
@@ -82,6 +84,9 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
             strcmp(curr, "-r") == 0 || 
             strcmp(curr, "--rotate") == 0) {
             lastParameter = "rotate";
+        } else if (
+            strcmp(curr, "--pallete") == 0) {
+            lastParameter = "pallete";
         } else if (
             strcmp(curr, "-a") == 0 || 
             strcmp(curr, "--animations-only") == 0) {

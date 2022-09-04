@@ -387,7 +387,8 @@ void selectChannel(cimg_library_suffixed::CImg<unsigned char>& input, TextureDef
     }
 }
 
-PalleteDefinition::PalleteDefinition(const std::string& filename) {
+PalleteDefinition::PalleteDefinition(const std::string& filename):
+    mName(getBaseName(replaceExtension(filename, "")) + "_tlut") {
     cimg_library_suffixed::CImg<unsigned char> imageData(filename.c_str());
 
     DataChunkStream dataStream;
@@ -426,6 +427,46 @@ PixelIu8 PalleteDefinition::FindIndex(PixelRGBAu8 color) const {
     }
 
     return PixelIu8(result);
+}
+
+
+std::unique_ptr<FileDefinition> PalleteDefinition::GenerateDefinition(const std::string& name, const std::string& location) const {
+    std::unique_ptr<StructureDataChunk> dataChunk(new StructureDataChunk());
+
+    for (unsigned chunkIndex = 0; chunkIndex < mData.size(); ++chunkIndex) {
+        std::ostringstream stream;
+        stream << "0x" << std::hex << std::setw(16) << std::setfill('0') << mData[chunkIndex];
+        dataChunk->AddPrimitive(stream.str());
+    }
+
+    return std::unique_ptr<FileDefinition>(new DataFileDefinition("u64", name, true, location, std::move(dataChunk), this));
+}
+
+const std::string& PalleteDefinition::Name() const {
+    return mName;
+}
+
+
+int gSizeInc[] = {3, 1, 0, 0};
+int gSizeShift[] = {2, 1, 0, 0};
+
+int PalleteDefinition::LoadBlockSize() const {
+    return mColors.size() - 1;
+}
+
+#define	G_TX_DTX_FRAC	11
+
+int PalleteDefinition::DTX() const {
+    int lineSize = mColors.size() / 4;
+
+    if (!lineSize) {
+        lineSize = 1;
+    }
+    return ((1 << G_TX_DTX_FRAC) + lineSize - 1) / lineSize;
+}
+
+unsigned PalleteDefinition::ColorCount() const {
+    return mColors.size();
 }
 
 TextureDefinition::TextureDefinition(const std::string& filename, G_IM_FMT fmt, G_IM_SIZ siz, TextureDefinitionEffect effects, std::shared_ptr<PalleteDefinition> pallete) :
@@ -582,11 +623,6 @@ G_IM_SIZ TextureDefinition::Size() const {
     return mSiz;
 }
 
-#define	G_TX_DTX_FRAC	11
-
-int gSizeInc[] = {3, 1, 0, 0};
-int gSizeShift[] = {2, 1, 0, 0};
-
 int TextureDefinition::LoadBlockSize() const {
     return ((Height() * Width() + gSizeInc[(int)mSiz]) >> gSizeShift[(int)mSiz]) - 1;
 }
@@ -625,4 +661,8 @@ PixelRGBAu8 TextureDefinition::GetTwoToneMin() const {
 
 PixelRGBAu8 TextureDefinition::GetTwoToneMax() const {
     return mTwoToneMax;
+}
+
+std::shared_ptr<PalleteDefinition> TextureDefinition::GetPallete() const {
+    return mPallete;
 }

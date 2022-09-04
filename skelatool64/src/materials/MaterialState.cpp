@@ -424,10 +424,60 @@ void generateTile(CFileDefinition& fileDef, const MaterialState& from, const Til
 
     bool needsToLoadImage = to.texture != nullptr;
 
+    std::shared_ptr<PalleteDefinition> palleteToLoad = to.texture ? to.texture->GetPallete() : nullptr;
+
     for (int i = 0; i < MAX_TILE_COUNT && needsToLoadImage; ++i) {
         if (from.tiles[i].texture == to.texture && from.tiles[i].tmem == to.tmem) {
             needsToLoadImage = false;
         }
+
+        if (from.tiles[i].texture && from.tiles[i].texture->GetPallete() == palleteToLoad) {
+            palleteToLoad = nullptr;
+        }
+    }
+
+    if (palleteToLoad) {
+        std::string palleteName;
+        if (!fileDef.GetResourceName(palleteToLoad.get(), palleteName)) {
+            std::cerr << "Texture " << palleteToLoad->Name() << " needs to be added to the file definition before being used in a material" << std::endl;
+            return;
+        }
+
+        output.Add(std::unique_ptr<MacroDataChunk>(new MacroDataChunk("gsDPTileSync")));
+
+        std::unique_ptr<MacroDataChunk> setTextureImage(new MacroDataChunk("gsDPSetTextureImage"));
+        setTextureImage->AddPrimitive(nameForImageFormat(G_IM_FMT::G_IM_FMT_RGBA));
+        setTextureImage->AddPrimitive(std::string(nameForImageSize(G_IM_SIZ::G_IM_SIZ_16b)) + "_LOAD_BLOCK");
+        setTextureImage->AddPrimitive(1);
+        setTextureImage->AddPrimitive(palleteName);
+        output.Add(std::move(setTextureImage));
+
+        std::unique_ptr<MacroDataChunk> setTile(new MacroDataChunk("gsDPSetTile"));
+        setTile->AddPrimitive(nameForImageFormat(G_IM_FMT::G_IM_FMT_RGBA));
+        setTile->AddPrimitive(std::string(nameForImageSize(G_IM_SIZ::G_IM_SIZ_16b)) + "_LOAD_BLOCK");
+        setTile->AddPrimitive(0);
+        setTile->AddPrimitive(256);
+        setTile->AddPrimitive<const char*>("G_TX_LOADTILE");
+        setTile->AddPrimitive(0);
+        setTile->AddPrimitive(buildClampAndWrap(false, false));
+        setTile->AddPrimitive(0);
+        setTile->AddPrimitive(0);
+        setTile->AddPrimitive(buildClampAndWrap(false, false));
+        setTile->AddPrimitive(0);
+        setTile->AddPrimitive(0);
+        output.Add(std::move(setTile));
+
+        output.Add(std::unique_ptr<MacroDataChunk>(new MacroDataChunk("gsDPLoadSync")));
+
+        std::unique_ptr<MacroDataChunk> loadBlock(new MacroDataChunk("gsDPLoadBlock"));
+        loadBlock->AddPrimitive<const char*>("G_TX_LOADTILE");
+        loadBlock->AddPrimitive(0);
+        loadBlock->AddPrimitive(0);
+        loadBlock->AddPrimitive(palleteToLoad->LoadBlockSize());
+        loadBlock->AddPrimitive(palleteToLoad->DTX());
+        output.Add(std::move(loadBlock));
+
+        output.Add(std::unique_ptr<MacroDataChunk>(new MacroDataChunk("gsDPPipeSync")));
     }
 
     if (needsToLoadImage) {

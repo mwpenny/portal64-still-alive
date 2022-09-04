@@ -22,6 +22,7 @@ struct CommandLineArguments {
     std::vector<std::string> mMaterialFiles;
     std::string mDefaultMaterial;
     std::string mForceMaterialName;
+    std::string mForcePallete;
     float mFixedPointScale;
     float mModelScale;
     bool mExportAnimation;

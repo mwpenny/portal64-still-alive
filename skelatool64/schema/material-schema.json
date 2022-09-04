@@ -703,6 +703,9 @@
                 },
                 "normalSource": {
                     "enum": ["normal", "tangent", "-tangent", "bitangent", "-bitangent"]
+                },
+                "excludeFromOutput": {
+                    "type": "boolean"
                 }
             }
         }

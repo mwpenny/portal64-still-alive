@@ -67,7 +67,16 @@ public:
     PalleteDefinition(const std::string& filename);
 
     PixelIu8 FindIndex(PixelRGBAu8 color) const;
+
+    std::unique_ptr<FileDefinition> GenerateDefinition(const std::string& name, const std::string& location) const;
+
+    const std::string& Name() const;
+
+    int LoadBlockSize() const;
+    int DTX() const;
+    unsigned ColorCount() const;
 private:
+    std::string mName;
     std::vector<PixelRGBAu8> mColors;
     std::vector<unsigned long long> mData;
 };
@@ -96,6 +105,8 @@ public:
 
     PixelRGBAu8 GetTwoToneMin() const;
     PixelRGBAu8 GetTwoToneMax() const;
+
+    std::shared_ptr<PalleteDefinition> GetPallete() const;
 private:
     std::string mName;
     G_IM_FMT mFmt;

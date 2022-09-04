@@ -119,6 +119,22 @@ bool StartsWith(const std::string& input, const std::string& prefix) {
     return true;
 }
 
+bool EndsWith(const std::string& input, const std::string& suffix) {
+    if (suffix.length() > input.length()) {
+        return false;
+    }
+
+    unsigned indexOffset = input.size() - suffix.size();
+
+    for (unsigned i = 0; i < suffix.length(); ++i) {
+        if (input[i + indexOffset] != suffix[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void SplitString(const std::string& input, char delimeter, std::vector<std::string>& output) {
     std::size_t lastStart = 0;
     std::size_t curr = 0;

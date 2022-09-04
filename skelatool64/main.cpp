@@ -23,6 +23,8 @@
 #include "src/definition_generator/LevelGenerator.h"
 #include "src/definition_generator/TriggerGenerator.h"
 #include "src/materials/MaterialState.h"
+#include "src/materials/MaterialTranslator.h"
+#include "src/StringUtils.h"
 
 void handler(int sig) {
   void *array[10];
@@ -42,6 +44,7 @@ bool parseMaterials(const std::string& filename, DisplayListSettings& output) {
     std::fstream file(filename, std::ios::in);
 
     struct ParseResult parseResult(DirectoryName(filename));
+    parseResult.mForcePallete = output.mForcePallete;
     parseMaterialFile(file, parseResult);
     output.mMaterials.insert(parseResult.mMaterialFile.mMaterials.begin(), parseResult.mMaterialFile.mMaterials.end());
 
@@ -106,12 +109,23 @@ int main(int argc, char *argv[]) {
     settings.mExportAnimation = args.mExportAnimation;
     settings.mExportGeometry = args.mExportGeometry;
     settings.mBonesAsVertexGroups = args.mBonesAsVertexGroups;
+    settings.mForcePallete = args.mForcePallete;
 
     bool hasError = false;
 
     for (auto materialFile = args.mMaterialFiles.begin(); materialFile != args.mMaterialFiles.end(); ++materialFile) {
-        if (!parseMaterials(*materialFile, settings)) {
-            hasError = true;
+        if (EndsWith(*materialFile, ".yaml") || EndsWith(*materialFile, ".yml") || EndsWith(*materialFile, ".json")) {
+            if (!parseMaterials(*materialFile, settings)) {
+                hasError = true;
+            }
+        } else {
+            aiScene* materialScene = loadScene(*materialFile, false, settings.mVertexCacheSize, 0);
+
+            if (!materialScene) {
+                hasError = true;
+            }
+
+            fillMissingMaterials(gTextureCache, materialScene, settings);
         }
     }
 
@@ -142,6 +156,8 @@ int main(int argc, char *argv[]) {
         if (!scene) {
             return 1;
         }
+
+        fillMissingMaterials(gTextureCache, scene, settings);
     }
 
     std::cout << "Saving to "  << args.mOutputFile << std::endl;

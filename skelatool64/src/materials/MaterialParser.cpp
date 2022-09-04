@@ -14,8 +14,6 @@
 #include "./RenderMode.h"
 #include "CombineMode.h"
 
-TextureCache gTextureCache;
-
 ParseError::ParseError(const std::string& message) :
     mMessage(message) {
     
@@ -229,7 +227,7 @@ std::shared_ptr<TextureDefinition> parseTextureDefinition(const YAML::Node& node
     }
 
     std::string filename;
-    std::string palleteFilename;
+    std::string palleteFilename = output.mForcePallete;
 
     bool hasFormat = false;
     G_IM_FMT requestedFormat;
@@ -766,6 +764,10 @@ std::shared_ptr<Material> parseMaterial(const std::string& name, const YAML::Nod
     material->mState.useBlendColor = parseMaterialColor(node["gDPSetBlendColor"], material->mState.blendColor, output) || material->mState.useBlendColor;
 
     material->mNormalSource = parseMaterialNormalSource(node["normalSource"]);
+
+    auto excludeFromOutput = node["excludeFromOutput"];
+
+    material->mExcludeFromOutut = excludeFromOutput.IsDefined() && excludeFromOutput.as<bool>();
 
     auto properties = node["properties"];
 

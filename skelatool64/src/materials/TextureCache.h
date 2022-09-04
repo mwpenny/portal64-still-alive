@@ -15,4 +15,6 @@ private:
     std::map<std::string, std::shared_ptr<TextureDefinition>> mCache;
 };
 
+extern TextureCache gTextureCache;
+
 #endif

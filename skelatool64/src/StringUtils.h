@@ -14,6 +14,8 @@ void makeCCompatible(std::string& target);
 
 bool StartsWith(const std::string& input, const std::string& prefix);
 
+bool EndsWith(const std::string& input, const std::string& suffix);
+
 void SplitString(const std::string& input, char delimeter, std::vector<std::string>& output);
 
 #endif

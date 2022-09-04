@@ -4,7 +4,7 @@
 #include "../StringUtils.h"
 #include "../CFileDefinition.h"
 
-Material::Material(const std::string& name): mName(name), mNormalSource(NormalSource::Normal) {}
+Material::Material(const std::string& name): mName(name), mNormalSource(NormalSource::Normal), mExcludeFromOutut(false) {}
 
 void Material::Write(CFileDefinition& fileDef, const MaterialState& from, StructureDataChunk& output) {
     generateMaterial(fileDef, from, mState, output);

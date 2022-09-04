@@ -2,6 +2,8 @@
 
 #include "../FileUtils.h"
 
+TextureCache gTextureCache;
+
 std::shared_ptr<PalleteDefinition> TextureCache::GetPallete(const std::string& filename) {
     auto check = mPalletes.find(filename);
 
@@ -31,6 +33,16 @@ std::shared_ptr<TextureDefinition> TextureCache::GetTexture(const std::string& f
 
     if (palleteFilename.length()) {
         pallete = GetPallete(palleteFilename);
+    }
+
+    if (pallete) {
+        format = G_IM_FMT::G_IM_FMT_CI;
+
+        if (pallete->ColorCount() <= 16) {
+            size = G_IM_SIZ::G_IM_SIZ_4b;
+        } else {
+            size = G_IM_SIZ::G_IM_SIZ_8b;
+        }
     }
 
     std::shared_ptr<TextureDefinition> result(new TextureDefinition(filename, format, size, effects, pallete));
