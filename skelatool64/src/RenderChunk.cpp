@@ -2,6 +2,15 @@
 #include "RenderChunk.h"
 #include <algorithm>
 
+
+RenderChunk::RenderChunk(): mBonePair(nullptr, nullptr),
+    mMesh(nullptr),
+    mMeshRoot(nullptr),
+    mAttachedDLIndex(-1),
+    mMaterial(nullptr) {
+    
+}
+
 RenderChunk::RenderChunk(std::pair<Bone*, Bone*> bonePair, std::shared_ptr<ExtendedMesh> mesh, aiNode* meshRoot, Material* material): 
     mBonePair(bonePair),
     mMesh(mesh),

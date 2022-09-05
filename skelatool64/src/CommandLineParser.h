@@ -12,6 +12,7 @@ enum class FileOutputType {
     Level,
     Materials,
     CollisionMesh,
+    Script,
 };
 
 struct CommandLineArguments {
@@ -20,6 +21,7 @@ struct CommandLineArguments {
     FileOutputType mOutputType;
     std::string mPrefix;
     std::vector<std::string> mMaterialFiles;
+    std::vector<std::string> mScriptFiles;
     std::string mDefaultMaterial;
     std::string mForceMaterialName;
     std::string mForcePallete;

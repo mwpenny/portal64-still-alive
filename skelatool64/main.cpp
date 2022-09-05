@@ -25,6 +25,7 @@
 #include "src/materials/MaterialState.h"
 #include "src/materials/MaterialTranslator.h"
 #include "src/StringUtils.h"
+#include "src/lua_generator/LuaGenerator.h"
 
 void handler(int sig) {
   void *array[10];
@@ -224,6 +225,15 @@ int main(int argc, char *argv[]) {
             std::cout << "Generating collider definitions" << std::endl;
             auto collisionOutput = generateCollision(scene, fileDef, settings, NULL, nodesByGroup);
             generateMeshCollider(fileDef, *collisionOutput);
+            break;
+        }
+        case FileOutputType::Script:
+        {
+            NodeGroups nodesByGroup(scene);
+            for (auto script : args.mScriptFiles) {
+                std::cout << "Generating definitions from script " << script << std::endl;
+                generateFromLuaScript(script, scene, fileDef, nodesByGroup, settings);
+            }
             break;
         }
     }

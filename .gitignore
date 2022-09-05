@@ -5,6 +5,8 @@
 *.z64
 *.blend1
 
+lua-5.4.4/
+
 build/
 debugger
 gfxvalidator

@@ -57,6 +57,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
                 output.mForceMaterialName = curr;
             } else if (lastParameter == "pallete") {
                 output.mForcePallete = curr;
+            } else if (lastParameter == "script") {
+                output.mScriptFiles.push_back(curr);
             }
 
             lastParameter = "";
@@ -100,6 +102,9 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
             lastParameter = "default-material";
         } else if (strcmp(curr, "--force-material") == 0) {
             lastParameter = "force-material";
+        } else if (strcmp(curr, "--script") == 0) {
+            output.mOutputType = FileOutputType::Script;
+            lastParameter = "script";
         } else {
             if (curr[0] == '-') {
                 hasError = true;

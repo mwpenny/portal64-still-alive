@@ -45,7 +45,7 @@ std::string StringDataChunk::EscapeAndWrapString(const std::string& string) {
         if (escapeChar) {
             result << '\\' << escapeChar;
         } else {
-            result << escapeChar;
+            result << currChar;
         }
     }
 
