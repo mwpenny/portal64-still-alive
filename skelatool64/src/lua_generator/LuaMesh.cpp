@@ -1,12 +1,18 @@
 #include "LuaMesh.h"
 
 #include "../definition_generator/MeshDefinitionGenerator.h"
+#include "../definition_generator/MaterialGenerator.h"
 #include "./LuaBasicTypes.h"
 #include "./LuaScene.h"
 #include "../MeshWriter.h"
 #include "./LuaDisplayListSettings.h"
 
 void toLua(lua_State* L, Material* material) {
+    if (!material) {
+        lua_pushnil(L);
+        return;
+    }
+
     lua_createtable(L, 1, 0);
 
     luaL_getmetatable(L, "Material");
@@ -15,11 +21,20 @@ void toLua(lua_State* L, Material* material) {
     toLua(L, material->mName);
     lua_setfield(L, -2, "name");
 
+    toLua(L, MaterialGenerator::MaterialIndexMacroName(material->mName));
+    lua_setfield(L, -2, "macro_name");
+
     lua_pushlightuserdata(L, material);
     lua_setfield(L, -2, "ptr");
 }
 
 void fromLua(lua_State* L, Material *& material) {
+    if (lua_isnil(L, -1)) {
+        material = nullptr;
+        lua_pop(L, 1);
+        return;
+    }
+
     lua_getfield(L, -1, "ptr");
     material = (Material*)lua_touserdata(L, -1);
     lua_pop(L, 2);

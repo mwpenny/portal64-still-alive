@@ -136,6 +136,13 @@ void processCFileDefinition(lua_State* L, CFileDefinition& fileDef, const char* 
     fileDef.AddDefinition(std::move(definition));
 }
 
+int luaAddHeader(lua_State* L) {
+    CFileDefinition* fileDefinition = (CFileDefinition*)lua_touserdata(L, lua_upvalueindex(1));
+    const char* header = luaL_checkstring(L, 1);
+    fileDefinition->AddHeader(header);
+    return 0;
+}
+
 void dumpDefinitions(lua_State* L, CFileDefinition& fileDef, const char* filename) {
     int topStart = lua_gettop(L);
 
@@ -184,6 +191,11 @@ void dumpDefinitions(lua_State* L, CFileDefinition& fileDef, const char* filenam
         lua_pop(L, 1);
     }
 
-
     lua_settop(L, topStart);
+}
+
+void populateLuaDefinitionWrite(lua_State* L, CFileDefinition& fileDef) {
+    lua_pushlightuserdata(L, &fileDef);
+    lua_pushcclosure(L, luaAddHeader, 1);
+    lua_setglobal(L, "add_header");
 }

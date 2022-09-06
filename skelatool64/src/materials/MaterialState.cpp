@@ -55,7 +55,10 @@ TextureCoordinateState::TextureCoordinateState():
 
 TileState::TileState():
     isOn(false),
+    format(G_IM_FMT::G_IM_FMT_RGBA),
+    size(G_IM_SIZ::G_IM_SIZ_16b),
     line(0),
+    tmem(0),
     pallete(0) {
 
 }

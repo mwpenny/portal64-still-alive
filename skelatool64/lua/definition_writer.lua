@@ -120,6 +120,10 @@ local function populate_name_mapping(path, object, result)
         return
     end
 
+    if (result[object]) then
+        error("Path already set for object " .. result[object] .. " with new path " .. path)
+    end
+
     result[object] = path
 
     for k, v in pairs(object) do
@@ -189,10 +193,12 @@ function process_definitions(definitions)
     local name_mapping = {}
     
     for k, v in pairs(definitions) do
+        print("populating name mapping for " .. v.name)
         populate_name_mapping(v.name, v.data, name_mapping)
     end
 
     for k, v in pairs(definitions) do
+        print("replacing references for " .. v.name)
         v.data = replace_references(v.data, name_mapping, v.name)
     end
 end

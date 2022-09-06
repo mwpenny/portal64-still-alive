@@ -13,6 +13,10 @@ void loadTextureFromAiMaterial(TextureCache& cache, Material& material, aiString
     state.isOn = true;
     state.texture = useTexture;
 
+    state.format = fmt;
+    state.size = siz;
+    state.tmem = 0;
+
     state.sCoord.mask = log2(state.texture->Width());
     state.tCoord.mask = log2(state.texture->Height());
 

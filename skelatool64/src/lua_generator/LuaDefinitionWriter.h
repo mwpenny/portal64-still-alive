@@ -6,4 +6,6 @@
 
 void dumpDefinitions(lua_State* L, CFileDefinition& fileDef, const char* filename);
 
+void populateLuaDefinitionWrite(lua_State* L, CFileDefinition& fileDef);
+
 #endif

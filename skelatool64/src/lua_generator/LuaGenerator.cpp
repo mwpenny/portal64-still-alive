@@ -55,6 +55,7 @@ void generateFromLuaScript(
     populateLuaScene(L, scene);
     populateLuaNodeGroups(L, nodeGroups);
     populateLuaMesh(L, scene, fileDefinition, settings);
+    populateLuaDefinitionWrite(L, fileDefinition);
 
     for (unsigned i = 0; i < sizeof(luaFiles) / sizeof(*luaFiles); ++i) {
         struct LuaFile* file = &luaFiles[i];

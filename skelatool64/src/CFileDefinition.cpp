@@ -230,6 +230,10 @@ void CFileDefinition::AddMacro(const std::string& name, const std::string& value
     mMacros.push_back(name + " " + value);
 }
 
+void CFileDefinition::AddHeader(const std::string& name) {
+    mHeaders.insert(name);
+}
+
 std::string CFileDefinition::GetVertexBuffer(std::shared_ptr<ExtendedMesh> mesh, VertexType vertexType, int textureWidth, int textureHeight, const std::string& modelSuffix) {
     for (auto existing = mVertexBuffers.begin(); existing != mVertexBuffers.end(); ++existing) {
         if (existing->second.mTargetMesh == mesh && existing->second.mVertexType == vertexType) {
@@ -379,7 +383,7 @@ void CFileDefinition::Generate(std::ostream& output, const std::string& location
 }
 
 void CFileDefinition::GenerateHeader(std::ostream& output, const std::string& headerFileName) {
-    std::string infdef = std::string("__") + headerFileName + "_H__";
+    std::string infdef = std::string("__SKOUT_") + headerFileName + "_H__";
 
     makeCCompatible(infdef);
     std::transform(infdef.begin(), infdef.end(), infdef.begin(), ::toupper);
@@ -388,7 +392,7 @@ void CFileDefinition::GenerateHeader(std::ostream& output, const std::string& he
     output << "#define " << infdef << std::endl;
     output << std::endl;
 
-    std::set<std::string> includes;
+    std::set<std::string> includes = mHeaders;
 
     for (auto it = mDefinitions.begin(); it != mDefinitions.end(); ++it) {
         auto headers = (*it)->GetTypeHeaders();

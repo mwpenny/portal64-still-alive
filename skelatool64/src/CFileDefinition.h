@@ -34,6 +34,8 @@ public:
     std::string AddDataDefinition(const std::string& nameHint, const std::string& dataType, bool isArray, const std::string& location, std::unique_ptr<DataChunk> data);
     void AddMacro(const std::string& name, const std::string& value);
 
+    void AddHeader(const std::string& name);
+
     std::string GetVertexBuffer(std::shared_ptr<ExtendedMesh> mesh, VertexType vertexType, int textureWidth, int textureHeight, const std::string& modelSuffix);
     std::string GetCullingBuffer(const std::string& name, const aiVector3D& min, const aiVector3D& max, const std::string& modelSuffix);
 
@@ -60,6 +62,7 @@ private:
     float mFixedPointScale;
     float mModelScale;
     aiQuaternion mModelRotate;
+    std::set<std::string> mHeaders;
     std::set<std::string> mUsedNames;
     std::map<std::string, VertexBufferDefinition> mVertexBuffers;
     std::vector<std::unique_ptr<FileDefinition>> mDefinitions;
