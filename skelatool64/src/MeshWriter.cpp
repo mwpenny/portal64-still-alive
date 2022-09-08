@@ -63,7 +63,7 @@ void MaterialCollector::GenerateMaterials(DisplayListSettings& settings, CFileDe
             }
 
             DisplayList materialDL(fileDefinition.GetUniqueName(useCount->first));
-            material->second->Write(fileDefinition, settings.mDefaultMaterialState, materialDL.GetDataChunk());
+            material->second->Write(fileDefinition, settings.mDefaultMaterialState, materialDL.GetDataChunk(), settings.mTargetCIBuffer);
             mMaterialNameMapping[useCount->first] = materialDL.GetName();
             
             auto dl = materialDL.Generate(fileSuffix);
@@ -99,7 +99,7 @@ void generateMeshIntoDLWithMaterials(const aiScene* scene, CFileDefinition& file
                         }
                     }
 
-                    material->second->Write(fileDefinition, materialState, displayList.GetDataChunk());
+                    material->second->Write(fileDefinition, materialState, displayList.GetDataChunk(), settings.mTargetCIBuffer);
                     applyMaterial(material->second->mState, materialState);
                 }
             }
@@ -124,7 +124,7 @@ void generateMeshIntoDLWithMaterials(const aiScene* scene, CFileDefinition& file
     }
     rcpState.TraverseToBone(nullptr, displayList);
 
-    generateMaterial(fileDefinition, rcpState.GetMaterialState(), settings.mDefaultMaterialState, displayList.GetDataChunk());
+    generateMaterial(fileDefinition, rcpState.GetMaterialState(), settings.mDefaultMaterialState, displayList.GetDataChunk(), settings.mTargetCIBuffer);
 }
 
 

@@ -145,7 +145,7 @@ public:
     bool IsTextureLoaded(std::shared_ptr<TextureDefinition> texture, int tmem) const;
 };
 
-void generateMaterial(CFileDefinition& fileDef, const MaterialState& from, const MaterialState& to, StructureDataChunk& output);
+void generateMaterial(CFileDefinition& fileDef, const MaterialState& from, const MaterialState& to, StructureDataChunk& output, bool targetCIBuffer);
 
 void applyMaterial(const MaterialState& from, MaterialState& to);
 

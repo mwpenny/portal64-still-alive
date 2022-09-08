@@ -30,6 +30,7 @@ struct CommandLineArguments {
     bool mExportAnimation;
     bool mExportGeometry;
     bool mBonesAsVertexGroups;
+    bool mTargetCIBuffer;
     aiVector3D mEulerAngles;
 };
 

@@ -511,6 +511,11 @@ TextureDefinition::TextureDefinition(const std::string& filename, G_IM_FMT fmt, 
     mData.resize(data.size());
 
     std::copy(data.begin(), data.end(), mData.begin());
+
+    if (pallete) {
+        mFmt = G_IM_FMT::G_IM_FMT_CI;
+        mSiz = pallete->ColorCount() <= 16 ? G_IM_SIZ::G_IM_SIZ_4b : G_IM_SIZ::G_IM_SIZ_8b;
+    }
 }
 
 bool isGrayscale(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y) {

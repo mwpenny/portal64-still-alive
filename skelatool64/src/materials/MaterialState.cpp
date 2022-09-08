@@ -420,14 +420,14 @@ std::string buildClampAndWrap(bool wrap, bool mirror) {
     return result.str();
 }
 
-void generateTile(CFileDefinition& fileDef, const MaterialState& from, const TileState& to, int tileIndex, StructureDataChunk& output) {
+void generateTile(CFileDefinition& fileDef, const MaterialState& from, const TileState& to, int tileIndex, StructureDataChunk& output, bool targetCIBuffer) {
     if (!to.isOn) {
         return;
     }
 
     bool needsToLoadImage = to.texture != nullptr;
 
-    std::shared_ptr<PalleteDefinition> palleteToLoad = to.texture ? to.texture->GetPallete() : nullptr;
+    std::shared_ptr<PalleteDefinition> palleteToLoad = (to.texture && !targetCIBuffer) ? to.texture->GetPallete() : nullptr;
 
     for (int i = 0; i < MAX_TILE_COUNT && needsToLoadImage; ++i) {
         if (from.tiles[i].texture == to.texture && from.tiles[i].tmem == to.tmem) {
@@ -582,7 +582,7 @@ void generateTexture(const TextureState& from, const TextureState& to, Structure
     output.Add(std::move(setTexture));
 }
 
-void generateMaterial(CFileDefinition& fileDef, const MaterialState& from, const MaterialState& to, StructureDataChunk& output) {
+void generateMaterial(CFileDefinition& fileDef, const MaterialState& from, const MaterialState& to, StructureDataChunk& output, bool targetCIBuffer) {
     output.Add(std::unique_ptr<DataChunk>(new MacroDataChunk("gsDPPipeSync")));
 
     generateEnumMacro((int)from.pipelineMode, (int)to.pipelineMode, "gsDPPipelineMode", gPipelineModeNames, output);
@@ -631,7 +631,7 @@ void generateMaterial(CFileDefinition& fileDef, const MaterialState& from, const
     generateTexture(from.textureState, to.textureState, output);
 
     for (int i = 0; i < MAX_TILE_COUNT; ++i) {
-        generateTile(fileDef, from, to.tiles[i], i, output);
+        generateTile(fileDef, from, to.tiles[i], i, output, targetCIBuffer);
     }
 
     // TODO fill color

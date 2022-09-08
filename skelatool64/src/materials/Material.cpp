@@ -6,8 +6,8 @@
 
 Material::Material(const std::string& name): mName(name), mNormalSource(NormalSource::Normal), mExcludeFromOutut(false) {}
 
-void Material::Write(CFileDefinition& fileDef, const MaterialState& from, StructureDataChunk& output) {
-    generateMaterial(fileDef, from, mState, output);
+void Material::Write(CFileDefinition& fileDef, const MaterialState& from, StructureDataChunk& output, bool targetCIBuffer) {
+    generateMaterial(fileDef, from, mState, output, targetCIBuffer);
 }
 
 int Material::TextureWidth(Material* material) {

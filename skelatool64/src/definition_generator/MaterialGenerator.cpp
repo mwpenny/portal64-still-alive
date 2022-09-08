@@ -85,9 +85,9 @@ void MaterialGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinitio
 
         DisplayList dl(name);
         if (entry->mName == mSettings.mDefaultMaterialName) {
-            entry->Write(fileDefinition, MaterialState(), dl.GetDataChunk());
+            entry->Write(fileDefinition, MaterialState(), dl.GetDataChunk(), mSettings.mTargetCIBuffer);
         } else {
-            entry->Write(fileDefinition, mSettings.mDefaultMaterialState, dl.GetDataChunk());
+            entry->Write(fileDefinition, mSettings.mDefaultMaterialState, dl.GetDataChunk(), mSettings.mTargetCIBuffer);
         }
         std::unique_ptr<FileDefinition> material = dl.Generate("_mat");
         materialList->AddPrimitive(material->GetName());
@@ -95,7 +95,7 @@ void MaterialGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinitio
 
         std::string revertName = fileDefinition.GetUniqueName(entry->mName + "_revert");
         DisplayList revertDL(revertName);
-        generateMaterial(fileDefinition, entry->mState, mSettings.mDefaultMaterialState, revertDL.GetDataChunk());
+        generateMaterial(fileDefinition, entry->mState, mSettings.mDefaultMaterialState, revertDL.GetDataChunk(), mSettings.mTargetCIBuffer);
         std::unique_ptr<FileDefinition> materialRevert = revertDL.Generate("_mat");
         revertList->AddPrimitive(materialRevert->GetName());
         fileDefinition.AddDefinition(std::move(materialRevert));

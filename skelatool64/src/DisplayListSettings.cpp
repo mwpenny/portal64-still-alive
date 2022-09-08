@@ -13,7 +13,8 @@ DisplayListSettings::DisplayListSettings():
     mTicksPerSecond(30),
     mExportAnimation(true),
     mExportGeometry(true),
-    mIncludeCulling(true) {
+    mIncludeCulling(true),
+    mTargetCIBuffer(false) {
 }
 
 aiMatrix4x4 DisplayListSettings::CreateGlobalTransform() const {

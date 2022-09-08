@@ -46,6 +46,7 @@ bool parseMaterials(const std::string& filename, DisplayListSettings& output) {
 
     struct ParseResult parseResult(DirectoryName(filename));
     parseResult.mForcePallete = output.mForcePallete;
+    parseResult.mTargetCIBuffer = output.mTargetCIBuffer;
     parseMaterialFile(file, parseResult);
     output.mMaterials.insert(parseResult.mMaterialFile.mMaterials.begin(), parseResult.mMaterialFile.mMaterials.end());
 
@@ -111,6 +112,7 @@ int main(int argc, char *argv[]) {
     settings.mExportGeometry = args.mExportGeometry;
     settings.mBonesAsVertexGroups = args.mBonesAsVertexGroups;
     settings.mForcePallete = args.mForcePallete;
+    settings.mTargetCIBuffer = args.mTargetCIBuffer;
 
     bool hasError = false;
 

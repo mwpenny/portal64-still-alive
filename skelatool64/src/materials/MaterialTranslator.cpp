@@ -6,15 +6,26 @@ void loadTextureFromAiMaterial(TextureCache& cache, Material& material, aiString
     G_IM_FMT fmt;
     G_IM_SIZ siz;
     TextureDefinition::DetermineIdealFormat(filename.C_Str(), fmt, siz);
+    
     std::shared_ptr<TextureDefinition> useTexture = cache.GetTexture(filename.C_Str(), fmt, siz, (TextureDefinitionEffect)0, settings.mForcePallete);
+
+    material.mState.textureState.isOn = 1;
+    material.mState.textureState.level = 0;
+    material.mState.textureState.sc = 0xffff;
+    material.mState.textureState.tc = 0xffff;
+    material.mState.textureState.tile = 0;
 
     TileState& state = material.mState.tiles[0];
 
     state.isOn = true;
     state.texture = useTexture;
 
-    state.format = fmt;
-    state.size = siz;
+    if (!state.texture->GetLine(state.line)) {
+        std::cerr << "Texture line width should be a multiple of 64 bits" << std::endl;
+    }
+    useTexture->GetLine(state.line);
+    state.format = useTexture->Format();
+    state.size = useTexture->Size();
     state.tmem = 0;
 
     state.sCoord.mask = log2(state.texture->Width());
@@ -64,6 +75,8 @@ void fillDefaultMaterials(DisplayListSettings& settings) {
         textureLit->mState.cycle1Combine.alpha[2] = AlphaCombineSource::_0;
         textureLit->mState.cycle1Combine.alpha[3] = AlphaCombineSource::Texture0Alpha;
 
+        textureLit->mState.cycle2Combine = textureLit->mState.cycle1Combine;
+
         textureLit->mState.geometryModes.SetFlag((int)GeometryMode::G_LIGHTING, true);
         textureLit->mState.geometryModes.SetFlag((int)GeometryMode::G_SHADE, true);
 
@@ -85,6 +98,8 @@ void fillDefaultMaterials(DisplayListSettings& settings) {
         textureUnlit->mState.cycle1Combine.alpha[1] = AlphaCombineSource::_0;
         textureUnlit->mState.cycle1Combine.alpha[2] = AlphaCombineSource::_0;
         textureUnlit->mState.cycle1Combine.alpha[3] = AlphaCombineSource::Texture0Alpha;
+
+        textureUnlit->mState.cycle2Combine = textureUnlit->mState.cycle1Combine;
 
         textureUnlit->mState.geometryModes.SetFlag((int)GeometryMode::G_LIGHTING, false);
         textureUnlit->mState.geometryModes.SetFlag((int)GeometryMode::G_SHADE, true);
@@ -108,6 +123,8 @@ void fillDefaultMaterials(DisplayListSettings& settings) {
         solidLit->mState.cycle1Combine.alpha[2] = AlphaCombineSource::_0;
         solidLit->mState.cycle1Combine.alpha[3] = AlphaCombineSource::PrimitiveAlpha;
 
+        solidLit->mState.cycle2Combine = solidLit->mState.cycle1Combine;
+
         solidLit->mState.geometryModes.SetFlag((int)GeometryMode::G_LIGHTING, true);
         solidLit->mState.geometryModes.SetFlag((int)GeometryMode::G_SHADE, true);
 
@@ -129,6 +146,8 @@ void fillDefaultMaterials(DisplayListSettings& settings) {
         solidUnlit->mState.cycle1Combine.alpha[1] = AlphaCombineSource::_0;
         solidUnlit->mState.cycle1Combine.alpha[2] = AlphaCombineSource::_0;
         solidUnlit->mState.cycle1Combine.alpha[3] = AlphaCombineSource::PrimitiveAlpha;
+
+        solidUnlit->mState.cycle2Combine = solidUnlit->mState.cycle1Combine;
 
         solidUnlit->mState.geometryModes.SetFlag((int)GeometryMode::G_LIGHTING, true);
         solidUnlit->mState.geometryModes.SetFlag((int)GeometryMode::G_SHADE, true);
@@ -194,15 +213,27 @@ void fillMissingMaterials(TextureCache& cache, const aiScene* fromScene, Display
         } else if (hasEmmissiveTexture) {
             loadTextureFromAiMaterial(cache, *result, emmisiveFilename, emitTextureMapmode, settings);
         } else if (hasEmmisiveColor) {
+            result->mState.usePrimitiveColor = true;
             result->mState.primitiveColor.r = (uint8_t)(emmisiveColor.r * 255.0f);
             result->mState.primitiveColor.g = (uint8_t)(emmisiveColor.g * 255.0f);
             result->mState.primitiveColor.b = (uint8_t)(emmisiveColor.b * 255.0f);
             result->mState.primitiveColor.a = 255;
         } else {
+            result->mState.usePrimitiveColor = true;
             result->mState.primitiveColor.r = (uint8_t)(diffuseColor.r * 255.0f);
             result->mState.primitiveColor.g = (uint8_t)(diffuseColor.g * 255.0f);
             result->mState.primitiveColor.b = (uint8_t)(diffuseColor.b * 255.0f);
             result->mState.primitiveColor.a = (uint8_t)(diffuseColor.a * 255.0f);
+        }
+
+        if (result->mState.usePrimitiveColor && settings.mTargetCIBuffer && settings.mForcePallete.length()) {
+            std::shared_ptr<PalleteDefinition> pallete = gTextureCache.GetPallete(settings.mForcePallete);
+
+            PixelIu8 index = pallete->FindIndex(result->mState.primitiveColor);
+
+            result->mState.primitiveColor.r = index.i;
+            result->mState.primitiveColor.g = index.i;
+            result->mState.primitiveColor.b = index.i;
         }
 
         settings.mMaterials[materialName] = result;

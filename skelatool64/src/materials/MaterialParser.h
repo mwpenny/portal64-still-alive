@@ -21,6 +21,7 @@ struct ParseResult {
     ParseResult(const std::string& insideFolder);
     std::string mInsideFolder;
     std::string mForcePallete;
+    bool mTargetCIBuffer;
     MaterialFile mMaterialFile;
     std::vector<ParseError> mErrors;
 };

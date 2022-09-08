@@ -22,6 +22,7 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
     output.mExportAnimation = true;
     output.mExportGeometry = true;
     output.mBonesAsVertexGroups = false;
+    output.mTargetCIBuffer = false;
     output.mOutputType = FileOutputType::Mesh;
     output.mEulerAngles = aiVector3D(0.0f, 0.0f, 0.0f);
     output.mDefaultMaterial = "default";
@@ -105,6 +106,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
         } else if (strcmp(curr, "--script") == 0) {
             output.mOutputType = FileOutputType::Script;
             lastParameter = "script";
+        } else if (strcmp(curr, "--ci-buffer") == 0) {
+            output.mTargetCIBuffer = true;
         } else {
             if (curr[0] == '-') {
                 hasError = true;
