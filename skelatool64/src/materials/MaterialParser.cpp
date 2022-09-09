@@ -109,7 +109,11 @@ bool parseMaterialColor(const YAML::Node& node, PixelRGBAu8& color, ParseResult&
     color.b = parseInteger(node["b"], output, 0, 255);
     color.a = parseOptionalInteger(node["a"], output, 0, 255, 255);
 
-    if (output.mForcePallete.length() && output.mTargetCIBuffer) {
+    auto bypassNode = node["bypassEffects"];
+    
+    bool bypass = bypassNode.IsDefined() && bypassNode.as<bool>();
+
+    if (!bypass && output.mForcePallete.length() && output.mTargetCIBuffer) {
         std::shared_ptr<PalleteDefinition> pallete = gTextureCache.GetPallete(output.mForcePallete);
 
         PixelIu8 colorindex = pallete->FindIndex(color);

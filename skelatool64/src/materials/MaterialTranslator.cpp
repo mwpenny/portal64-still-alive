@@ -2,7 +2,7 @@
 
 #include "MaterialEnums.h"
 
-void loadTextureFromAiMaterial(TextureCache& cache, Material& material, aiString filename, aiTextureMapMode textureMapMode, DisplayListSettings& settings) {
+void loadTextureFromAiMaterial(TextureCache& cache, Material& material, aiString filename, DisplayListSettings& settings) {
     G_IM_FMT fmt;
     G_IM_SIZ siz;
     TextureDefinition::DetermineIdealFormat(filename.C_Str(), fmt, siz);
@@ -34,25 +34,11 @@ void loadTextureFromAiMaterial(TextureCache& cache, Material& material, aiString
     state.sCoord.limit = (state.texture->Width() - 1) * 4;
     state.tCoord.limit = (state.texture->Height() - 1) * 4;
 
-    if (textureMapMode == aiTextureMapMode_Wrap) {
-        state.sCoord.wrap = true;
-        state.tCoord.wrap = true;
+    state.sCoord.wrap = true;
+    state.tCoord.wrap = true;
 
-        state.sCoord.mirror = false;
-        state.tCoord.mirror = false;
-    } else if (textureMapMode == aiTextureMapMode_Mirror) {
-        state.sCoord.wrap = true;
-        state.tCoord.wrap = true;
-
-        state.sCoord.mirror = true;
-        state.tCoord.mirror = true;
-    } else {
-        state.sCoord.wrap = false;
-        state.tCoord.wrap = false;
-
-        state.sCoord.mirror = false;
-        state.tCoord.mirror = false;
-    }
+    state.sCoord.mirror = false;
+    state.tCoord.mirror = false;
 }
 
 #define TEXTURE_LIT "texture_lit"
@@ -209,9 +195,9 @@ void fillMissingMaterials(TextureCache& cache, const aiScene* fromScene, Display
         result->mExcludeFromOutut = false;
 
         if (hasDiffuseTexture) {
-            loadTextureFromAiMaterial(cache, *result, diffuseFilename, diffuseTextureMapmode, settings);
+            loadTextureFromAiMaterial(cache, *result, diffuseFilename, settings);
         } else if (hasEmmissiveTexture) {
-            loadTextureFromAiMaterial(cache, *result, emmisiveFilename, emitTextureMapmode, settings);
+            loadTextureFromAiMaterial(cache, *result, emmisiveFilename, settings);
         } else if (hasEmmisiveColor) {
             result->mState.usePrimitiveColor = true;
             result->mState.primitiveColor.r = (uint8_t)(emmisiveColor.r * 255.0f);

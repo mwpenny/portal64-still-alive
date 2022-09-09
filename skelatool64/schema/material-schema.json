@@ -356,6 +356,9 @@
                     "type": "number",
                     "minimum": 0,
                     "maximum": 255
+                },
+                "bypassEffects": {
+                    "type": "boolean"
                 }
             },
             "required": [
