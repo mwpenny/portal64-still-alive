@@ -1,4 +1,5 @@
 
+#include <iostream>
 #include "BoneHierarchy.h"
 #include "CFileDefinition.h"
 

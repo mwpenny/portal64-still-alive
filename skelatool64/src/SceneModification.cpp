@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <memory>
+#include <iostream>
 #include "./BoneHierarchy.h"
 #include "./ExtendedMesh.h"
 #include "./definition_generator/DefinitionGenerator.h"
@@ -140,6 +141,7 @@ void splitSceneByBones(aiScene* targetScene) {
     
     BoneHierarchy bones;
 
+    std::cout << "SearchForBonesInScene" << std::endl;
     bones.SearchForBonesInScene(targetScene, 1.0f);
 
     for (unsigned int i = 0; i < targetScene->mNumMeshes; ++i) {

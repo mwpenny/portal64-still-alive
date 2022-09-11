@@ -84,6 +84,7 @@ void generateFromLuaScript(
     int errCode = luaL_dofile(L, filename.c_str());
     if (checkLuaError(L, errCode, filename.c_str())) {
         lua_close(L);
+        exit(1);
         return;
     }
 

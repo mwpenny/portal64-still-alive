@@ -59,6 +59,11 @@ void guessInterpolatedValue(struct SKBoneKeyframeChain* prev, struct SKBoneKeyfr
     unsigned short timeOffset = next->tick - prev->tick;
     unsigned short timeToCurr = tick - prev->tick;
 
+    if (timeOffset == 0) {
+        timeOffset = 1;
+        timeToCurr = 0;
+    }
+
     if (isRotation) {
         aiQuaternion prevRotation = getRotation(prev->keyframe);
         aiQuaternion nextRotation = getRotation(next->keyframe);

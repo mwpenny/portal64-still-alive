@@ -29,6 +29,7 @@ aiScene* loadScene(const std::string& filename, bool isLevel, int vertexCacheSiz
     }
 
     if (!isLevel) {
+        std::cout << "Splitting scenes by bones" << std::endl;
         splitSceneByBones(const_cast<aiScene*>(scene));
     }
 
