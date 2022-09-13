@@ -79,11 +79,47 @@ int luaTransformIndex(lua_State* L) {
     return 0;
 }
 
+bool luaIsTransform(lua_State* L, int idx) {
+    if (lua_type(L, idx) != LUA_TUSERDATA) {
+        return false;
+    }
+    
+    if (!lua_getmetatable(L, idx)) {
+        return false;
+    }
+
+    luaL_getmetatable(L, "aiMatrix4x4");
+
+    bool result = lua_rawequal(L, -2, -1);
+    lua_pop(L, 2);
+    return result;
+}
+
+int luaTransformMul(lua_State* L) {
+    aiMatrix4x4* a = (aiMatrix4x4*)luaL_checkudata(L, 1, "aiMatrix4x4");
+
+    if (luaIsTransform(L, 2)) {
+        aiMatrix4x4* b = (aiMatrix4x4*)luaL_checkudata(L, 2, "aiMatrix4x4");
+
+        aiMatrix4x4 result = (*a) * (*b);
+
+        toLua(L, result);
+
+        return 1;
+    }
+
+    luaL_checkudata(L, 2, "aiMatrix4x4");
+    return 0;
+}
+
 void generateLuaTransform(lua_State* L) {
     luaL_newmetatable(L, "aiMatrix4x4");
 
     lua_pushcfunction(L, luaTransformIndex);
     lua_setfield(L, -2, "__index");
+
+    lua_pushcfunction(L, luaTransformMul);
+    lua_setfield(L, -2, "__mul");
 
     lua_pop(L, 1);
 }

@@ -56,7 +56,6 @@ template <typename T> void toLua(lua_State* L, const T* array, unsigned count) {
     for (unsigned i = 0; i < count; ++i) {
         toLua(L, array[i]);
         lua_seti(L, tableIndex, i + 1);
-        ++i;
     }
 }
 

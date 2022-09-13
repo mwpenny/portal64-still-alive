@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include "./LuaMesh.h"
+#include "LuaTransform.h"
 
 Material* luaGetMaterial(lua_State* L, const DisplayListSettings& defaults) {
     int materialType = lua_type(L, -1);
@@ -51,4 +52,16 @@ void fromLua(lua_State* L, DisplayListSettings& result, const DisplayListSetting
         lua_pop(L, 1);
     }
 
+}
+
+void populateDisplayListSettings(lua_State* L, const DisplayListSettings& defaults) {
+    lua_newtable(L);
+
+    toLua(L, defaults.CreateCollisionTransform());
+    lua_setfield(L, -2, "model_transform");
+
+    toLua(L, defaults.CreateGlobalTransform());
+    lua_setfield(L, -2, "fixed_point_transform");
+
+    lua_setglobal(L, "settings");
 }

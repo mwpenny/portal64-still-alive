@@ -24,11 +24,25 @@ void DefinitionGenerator::TraverseScene(const aiScene* scene) {
 void DefinitionGenerator::BeforeTraversal(const aiScene* scene) {}
 
 NodeGroups::NodeGroups(const aiScene* scene) {
-    forEachNode(scene->mRootNode, [&](aiNode* node) -> void {
-        if (node->mName.data[0] == '@') {
-            AddNode(node);
-        }
-    });
+    RecurseAddNode(scene->mRootNode, false);
+}
+
+void NodeGroups::RecurseAddNode(aiNode* node, bool isSpecialNode) {
+    if (!node) {
+        return;
+    }
+
+    if (node->mName.data[0] == '@') {
+        AddNode(node);
+        isSpecialNode = true;
+    } else if (!isSpecialNode) {
+        AddNode(node);
+    }
+
+
+    for (unsigned int i = 0; i < node->mNumChildren; ++i) {
+        RecurseAddNode(node->mChildren[i], isSpecialNode);
+    }
 }
 
 std::vector<NodeWithArguments>& NodeGroups::NodesForType(const std::string& typeName) {
@@ -47,9 +61,14 @@ void NodeGroups::PrintUnusedTypes() {
 void NodeGroups::AddNode(aiNode* node) {
     NodeWithArguments result;
     SplitString(node->mName.C_Str(), ' ', result.arguments);
-    std::string typeName = result.arguments[0];
+    std::string typeName;
     result.node = node;
-    result.arguments.erase(result.arguments.begin());
+
+    if (result.arguments[0][0] == '@') {
+        typeName = result.arguments[0];
+        result.arguments.erase(result.arguments.begin());
+    }
+
     mNodesByType[typeName].push_back(result);
 }
 

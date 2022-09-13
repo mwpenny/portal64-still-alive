@@ -42,6 +42,8 @@ public:
 private:
     void AddNode(aiNode* node);
 
+    void RecurseAddNode(aiNode* node, bool isSpecialNode);
+
     std::map<std::string, std::vector<NodeWithArguments>> mNodesByType;
     std::set<std::string> mTypesReferenced;
 };

@@ -6,6 +6,7 @@
 #include "LuaNodeGroups.h"
 #include "LuaScene.h"
 #include "LuaMesh.h"
+#include "LuaDisplayListSettings.h"
 
 #include <lua.hpp>
 #include <iostream>
@@ -52,10 +53,10 @@ void generateFromLuaScript(
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
     generateLuaTransform(L);
-    populateLuaScene(L, scene);
     populateLuaNodeGroups(L, nodeGroups);
     populateLuaMesh(L, scene, fileDefinition, settings);
     populateLuaDefinitionWrite(L, fileDefinition);
+    populateDisplayListSettings(L, settings);
 
     for (unsigned i = 0; i < sizeof(luaFiles) / sizeof(*luaFiles); ++i) {
         struct LuaFile* file = &luaFiles[i];
@@ -70,6 +71,8 @@ void generateFromLuaScript(
 
         lua_settop(L, stackSize);
     }
+
+    populateLuaScene(L, scene);
 
     std::string directory = DirectoryName(filename) + "/?.lua;";
 

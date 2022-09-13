@@ -20,3 +20,7 @@ function Vector3.__add(a, b)
 
     return vector3(a.x + b.x, a.y + b.y, a.z + b.z)
 end
+
+function Vector3.__tostring(v)
+    return 'vector3(' .. v.x .. ', ' .. v.y .. ', ' .. v.z .. ')'
+end

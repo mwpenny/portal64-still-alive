@@ -6,4 +6,6 @@
 
 void fromLua(lua_State* L, DisplayListSettings& result, const DisplayListSettings& defaults);
 
+void populateDisplayListSettings(lua_State* L, const DisplayListSettings& defaults);
+
 #endif
