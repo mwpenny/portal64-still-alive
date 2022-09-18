@@ -3,6 +3,7 @@
 #include <string.h>
 #include "./LuaMesh.h"
 #include "LuaTransform.h"
+#include "LuaBasicTypes.h"
 
 Material* luaGetMaterial(lua_State* L, const DisplayListSettings& defaults) {
     int materialType = lua_type(L, -1);
@@ -62,6 +63,12 @@ void populateDisplayListSettings(lua_State* L, const DisplayListSettings& defaul
 
     toLua(L, defaults.CreateGlobalTransform());
     lua_setfield(L, -2, "fixed_point_transform");
+
+    toLua(L, defaults.mModelScale);
+    lua_setfield(L, -2, "model_scale");
+
+    toLua(L, defaults.mFixedPointScale);
+    lua_setfield(L, -2, "fixed_point_scale");
 
     lua_setglobal(L, "settings");
 }

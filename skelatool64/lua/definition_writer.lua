@@ -21,6 +21,9 @@ function is_raw(value)
     return getmetatable(value) == RawType
 end
 
+
+null_value = raw("NULL")
+
 local MacroType = {}
 
 function macro(name, ...)
@@ -141,6 +144,10 @@ local function replace_references(object, name_mapping, name_path)
     end
 
     if (is_reference_type(object)) then
+        if (object.value == nil) then
+            return null_value
+        end
+
         local referenceName = name_mapping[object.value]
 
         if (referenceName == nil) then
@@ -151,6 +158,7 @@ local function replace_references(object, name_mapping, name_path)
     end
 
     local changes = {}
+    local hasChange = {}
     local hasChanges = false
 
     for k, v in pairs(object) do
@@ -165,7 +173,8 @@ local function replace_references(object, name_mapping, name_path)
         local replacement = replace_references(v, name_mapping, name)
 
         if (replacement ~= v) then
-            changes[k] = replacement;
+            changes[k] = replacement
+            hasChange[k] = true
             hasChanges = true
         end
     end
@@ -177,7 +186,11 @@ local function replace_references(object, name_mapping, name_path)
     local result = {}
 
     for k, v in pairs(object) do
-        result[k] = changes[k] or object[k]
+        if (hasChange[k]) then
+            result[k] = changes[k]
+        else
+            result[k] = object[k]
+        end
     end
 
     return result

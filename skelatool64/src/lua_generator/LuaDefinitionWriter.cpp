@@ -30,6 +30,8 @@ std::unique_ptr<DataChunk> buildStructureChunk(lua_State* L) {
     int topStart = lua_gettop(L);
     
     std::unique_ptr<StructureDataChunk> result(new StructureDataChunk());
+
+    std::vector<std::pair<std::string, std::unique_ptr<DataChunk>>> namedEntries;
     
     lua_pushnil(L);  /* first key */
     while (lua_next(L, topStart) != 0) {
@@ -37,9 +39,18 @@ std::unique_ptr<DataChunk> buildStructureChunk(lua_State* L) {
         if (keyType == LUA_TNUMBER) {
             result->Add(std::move(buildDataChunk(L)));
         } else if (keyType == LUA_TSTRING) {
-            result->Add(lua_tostring(L, -2), std::move(buildDataChunk(L)));
+            namedEntries.push_back(std::pair<std::string, std::unique_ptr<DataChunk>>(
+                lua_tostring(L, -2),
+                std::move(buildDataChunk(L))
+            ));
         }
         lua_pop(L, 1);
+    }
+
+    std::sort(namedEntries.begin(), namedEntries.end());
+
+    for (auto& entry : namedEntries) {
+        result->Add(entry.first, std::move(entry.second));
     }
 
     return result;

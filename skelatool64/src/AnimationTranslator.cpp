@@ -322,8 +322,6 @@ void markConstantKeyframes(std::map<unsigned short, SKBoneKeyframeChain*>& first
             curr = curr->next;
         }
     }
-
-    std::cout << "maxJump " << thresholdCheck << std::endl;
 }
 
 void combineChunk(std::vector<SKBoneKeyframeChain>& chunkKeyframes, struct SKAnimationChunk& output) {
