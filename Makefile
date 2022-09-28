@@ -17,7 +17,7 @@ $(SKELATOOL64):
 	skelatool64/setup_dependencies.sh
 	make -C skelatool64
 
-OPTIMIZER		:= -O0
+OPTIMIZER		:= -O2
 LCDEFS			:= -DDEBUG -g -Isrc/ -I/usr/include/n64/nustd -Werror -Wall
 N64LIB			:= -lultra_rom -lnustd
 
@@ -218,7 +218,7 @@ TEST_CHAMBER_OBJECTS = $(TEST_CHAMBERS:%.blend=build/%_geo.o)
 
 build/%.fbx: %.blend
 	@mkdir -p $(@D)
-	$(BLENDER_2_9) $< --background --python tools/export_fbx.py -- $@
+	$(BLENDER_3_0) $< --background --python tools/export_fbx.py -- $@
 
 build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c: build/assets/test_chambers/%.fbx build/assets/materials/static.h $(SKELATOOL64) $(TEXTURE_IMAGES)
 	$(SKELATOOL64) --level --fixed-point-scale 256 --model-scale 0.01 --name $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<

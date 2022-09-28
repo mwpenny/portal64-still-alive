@@ -29,6 +29,7 @@ struct Scene {
     struct Pedestal* pedestals;
     struct Signage* signage;
     struct BoxDropper* boxDroppers;
+    struct Vector3 freeCameraOffset;
     OSTime cpuTime;
     OSTime lastFrameStart;
     OSTime lastFrameTime;

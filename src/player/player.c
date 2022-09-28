@@ -221,30 +221,30 @@ float playerCleanupStickInput(s8 input) {
     return ((float)input + (input > 0 ? -DEADZONE_SIZE : DEADZONE_SIZE)) * (1.0f / (MAX_JOYSTICK_RANGE - DEADZONE_SIZE));
 }
 
+void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, struct Vector3* right) {
+    quatMultVector(&transform->rotation, &gForward, forward);
+    quatMultVector(&transform->rotation, &gRight, right);
+
+    if (forward->y > 0.7f) {
+        quatMultVector(&transform->rotation, &gUp, forward);
+        vector3Negate(forward, forward);
+    } else if (forward->y < -0.7f) {
+        quatMultVector(&transform->rotation, &gUp, forward);
+    }
+
+    forward->y = 0.0f;
+    right->y = 0.0f;
+
+    vector3Normalize(forward, forward);
+    vector3Normalize(right, right);
+}
+
 void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Vector3 forward;
     struct Vector3 right;
 
     int doorwayMask = worldCheckDoorwaySides(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom);
-
-    struct Transform* transform = &player->lookTransform;
-
-    quatMultVector(&transform->rotation, &gForward, &forward);
-    quatMultVector(&transform->rotation, &gRight, &right);
-
-    if (forward.y > 0.7f) {
-        quatMultVector(&transform->rotation, &gUp, &forward);
-        vector3Negate(&forward, &forward);
-    } else if (forward.y < -0.7f) {
-        quatMultVector(&transform->rotation, &gUp, &forward);
-    }
-
-    forward.y = 0.0f;
-    right.y = 0.0f;
-
-    vector3Normalize(&gForward, &gForward);
-    vector3Normalize(&gRight, &gRight);
-
+    playerGetMoveBasis(&player->lookTransform, &forward, &right);
 
     if ((player->flags & PlayerFlagsGrounded) && controllerGetButtonDown(0, A_BUTTON)) {
         player->body.velocity.y = JUMP_IMPULSE;

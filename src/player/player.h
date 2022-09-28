@@ -31,4 +31,6 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform);
 
 void playerRender(struct Player* player, struct RenderState* renderState);
 
+void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, struct Vector3* right);
+
 #endif

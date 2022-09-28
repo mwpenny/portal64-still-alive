@@ -10,6 +10,7 @@
 #define KEYFRAME_REMOVE_TOLERNACE   8
 
 struct SKBoneKeyframeChain {
+    SKBoneKeyframeChain();
     SKBoneKeyframe keyframe;
     unsigned short tick;
     bool isNeeded;
@@ -17,6 +18,15 @@ struct SKBoneKeyframeChain {
     struct SKBoneKeyframeChain* next;
     struct SKBoneKeyframeChain* prev;
 };
+
+SKBoneKeyframeChain::SKBoneKeyframeChain():
+    tick(0),
+    isNeeded(false),
+    removalScore(0),
+    next(nullptr),
+    prev(nullptr) {
+
+}
 
 bool chainIsLess(SKBoneKeyframeChain* a, SKBoneKeyframeChain* b) {
     return a->removalScore > b->removalScore;
@@ -136,7 +146,7 @@ bool keyframeSortFn(const SKBoneKeyframeChain& a, const SKBoneKeyframeChain& b) 
     return (a.keyframe.usedAttributes & 0x7) < (b.keyframe.usedAttributes & 0x7);
 }
 
-void populateKeyframes(const aiAnimation& input, BoneHierarchy& bones, float fixedPointScale, float modelScale, const aiQuaternion& rotation, float timeScalar, std::vector<SKBoneKeyframeChain>& output) {
+void populateKeyframes(const aiAnimation& input, BoneHierarchy& bones, float fixedPointScale, float modelScale, const aiQuaternion& rotation, std::vector<SKBoneKeyframeChain>& output) {
     for (unsigned i = 0; i < input.mNumChannels; ++i) {
         aiNodeAnim* node = input.mChannels[i];
 
@@ -150,7 +160,7 @@ void populateKeyframes(const aiAnimation& input, BoneHierarchy& bones, float fix
             aiVectorKey* vectorKey = &node->mPositionKeys[keyIndex];
 
             SKBoneKeyframeChain keyframe;
-            keyframe.tick = (unsigned short)(vectorKey->mTime * timeScalar + 0.5f);
+            keyframe.tick = (unsigned short)(vectorKey->mTime);
             keyframe.next = nullptr;
             keyframe.prev = nullptr;
             keyframe.keyframe.usedAttributes = SKBoneAttrMaskPosition;
@@ -173,7 +183,7 @@ void populateKeyframes(const aiAnimation& input, BoneHierarchy& bones, float fix
             aiQuatKey* quatKey = &node->mRotationKeys[keyIndex];
 
             SKBoneKeyframeChain keyframe;
-            keyframe.tick = (unsigned short)(quatKey->mTime * timeScalar + 0.5f);
+            keyframe.tick = (unsigned short)(quatKey->mTime);
             keyframe.next = nullptr;
             keyframe.prev = nullptr;
             keyframe.keyframe.usedAttributes = SKBoneAttrMaskRotation;
@@ -190,7 +200,7 @@ void populateKeyframes(const aiAnimation& input, BoneHierarchy& bones, float fix
             aiVectorKey* vectorKey = &node->mScalingKeys[keyIndex];
 
             SKBoneKeyframeChain keyframe;
-            keyframe.tick = (unsigned short)(vectorKey->mTime * timeScalar + 0.5f);
+            keyframe.tick = (unsigned short)(vectorKey->mTime);
             keyframe.next = nullptr;
             keyframe.prev = nullptr;
             keyframe.keyframe.usedAttributes = SKBoneAttrMaskScale;
@@ -375,10 +385,8 @@ void buildInitialState(std::map<unsigned short, SKBoneKeyframeChain*>& firstKeyF
 }
 
 bool translateAnimationToSK(const aiAnimation& input, struct SKAnimation& output, BoneHierarchy& bones, float fixedPointScale, float modelScale, const aiQuaternion& rotation, unsigned short targetTicksPerSecond) {
-    float timeScalar = (float)targetTicksPerSecond / (float)1000.0f;
-
     std::vector<SKBoneKeyframeChain> keyframes;
-    populateKeyframes(input, bones, fixedPointScale, modelScale, rotation, timeScalar, keyframes);
+    populateKeyframes(input, bones, fixedPointScale, modelScale, rotation, keyframes);
 
     if (keyframes.size() == 0) {
         return false;
@@ -397,8 +405,8 @@ bool translateAnimationToSK(const aiAnimation& input, struct SKAnimation& output
 
     buildInitialState(firstKeyFrame, currentChunk);
 
-    output.ticksPerSecond = targetTicksPerSecond;
-    output.maxTicks = (unsigned short)(input.mDuration * timeScalar);
+    output.ticksPerSecond = (unsigned short)input.mTicksPerSecond;
+    output.maxTicks = (unsigned short)(input.mDuration);
 
     while (currentIndex < keyframes.size()) {
         unsigned short tick = keyframes[currentIndex].tick;

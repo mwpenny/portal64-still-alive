@@ -115,6 +115,8 @@ void sceneInit(struct Scene* scene) {
     for (int i = 0; i < scene->boxDropperCount; ++i) {
         boxDropperInit(&scene->boxDroppers[i], &gCurrentLevel->boxDroppers[i]);
     }
+
+    scene->freeCameraOffset = gZeroVec;
 }
 
 void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {
@@ -277,6 +279,8 @@ struct Transform gRelativeElevatorTransform = {
     {1.0f, 1.0f, 1.0f},
 };
 
+#define FREE_CAM_VELOCITY   2.0f
+
 void sceneUpdate(struct Scene* scene) {
     OSTime frameStart = osGetTime();
     scene->lastFrameTime = frameStart - scene->lastFrameStart;
@@ -361,6 +365,49 @@ void sceneUpdate(struct Scene* scene) {
 
     scene->cpuTime = osGetTime() - frameStart;
     scene->lastFrameStart = frameStart;
+
+    OSContPad* freecam = controllersGetControllerData(1);
+
+
+    struct Vector3 lookDir;
+    struct Vector3 rightDir;
+
+    playerGetMoveBasis(&scene->camera.transform, &lookDir, &rightDir);
+
+    if (freecam->stick_y) {
+        if (controllerGetButton(1, Z_TRIG)) {
+            vector3AddScaled(
+                &scene->freeCameraOffset, 
+                &lookDir, 
+                -freecam->stick_y * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f), 
+                &scene->freeCameraOffset
+            );
+        } else {
+            scene->freeCameraOffset.y += freecam->stick_y * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f);
+        }
+    }
+
+    if (freecam->stick_x) {
+        vector3AddScaled(
+            &scene->freeCameraOffset, 
+            &rightDir, 
+            freecam->stick_x * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f), 
+            &scene->freeCameraOffset
+        );
+    }
+
+    if (controllerGetButtonDown(1, START_BUTTON)) {
+        scene->freeCameraOffset = gZeroVec;
+    }
+
+    vector3Add(&scene->camera.transform.position, &scene->freeCameraOffset, &scene->camera.transform.position);
+
+    if (controllerGetButtonDown(1, L_TRIG)) {
+        struct Transform identityTransform;
+        transformInitIdentity(&identityTransform);
+        identityTransform.position.y = 1.0f;
+        levelQueueLoad(NEXT_LEVEL, &identityTransform, &gZeroVec);
+    }
 }
 
 int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, int quadIndex, int roomIndex) {
