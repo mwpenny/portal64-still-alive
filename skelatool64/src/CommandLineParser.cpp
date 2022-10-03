@@ -97,8 +97,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
         } else if (strcmp(curr, "--boneless") == 0) {
             output.mBonesAsVertexGroups = true;
         } else if (strcmp(curr, "--level") == 0) {
-                    output.mOutputType = FileOutputType::Level;
-                    output.mExportAnimation = false;
+            output.mOutputType = FileOutputType::Level;
+            output.mExportAnimation = false;
         } else if (strcmp(curr, "--default-material") == 0) {
             lastParameter = "default-material";
         } else if (strcmp(curr, "--force-material") == 0) {

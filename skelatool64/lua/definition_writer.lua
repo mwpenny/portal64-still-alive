@@ -46,11 +46,11 @@ local function validate_definition(data, visited, name_path)
 
     local data_type = type(data)
 
-    if (data_type == "nil" or data_type == "boolean" or data_type == "number" or data_type == "string") then
+    if (data_type == "nil" or data_type == "boolean" or data_type == "number" or data_type == "string" or data_type == "userdata") then
         return true
     end
 
-    if (data_type == "function" or data_type == "userdata" or data_type == "thread") then
+    if (data_type == "function" or data_type == "thread") then
         error("Cannot use '" .. data_type .. "' in a c file definition for path '" .. name_path .. "'")
         return false
     end

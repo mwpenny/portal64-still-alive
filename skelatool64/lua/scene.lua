@@ -17,3 +17,18 @@ function node_with_name(name)
 
     return node_name_cache[name]
 end
+
+function export_default_mesh()
+    local allNodes = {}
+
+
+    for k, value in pairs(nodes_for_type("")) do
+        local renderChunks = generate_render_chunks(value.node)
+    
+        for _, toAdd in pairs(renderChunks) do
+            table.insert(allNodes, toAdd)
+        end
+    end
+    
+    generate_mesh(allNodes, "_geo")
+end

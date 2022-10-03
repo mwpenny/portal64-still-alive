@@ -2,6 +2,7 @@
 
 #include "LuaGenerator.h"
 #include "../StringUtils.h"
+#include "LuaMesh.h"
 
 std::unique_ptr<DataChunk> buildDataChunk(lua_State* L);
 
@@ -112,6 +113,20 @@ std::unique_ptr<DataChunk> buildDataChunk(lua_State* L) {
         lua_pop(L, 1);
 
         return buildStructureChunk(L);
+    }
+
+    if (type == LUA_TUSERDATA) {
+        if (luaIsLazyVector3DArray(L, -1)) {
+            struct aiVector3DArray* array = (struct aiVector3DArray*)lua_touserdata(L, -1);
+
+            std::unique_ptr<StructureDataChunk> result(new StructureDataChunk());
+
+            for (int i = 0; i < array->length; ++i) {
+                result->Add(std::unique_ptr<StructureDataChunk>(new StructureDataChunk(array->vertices[i])));
+            }
+
+            return result;
+        }
     }
 
     return std::unique_ptr<DataChunk>(nullptr);

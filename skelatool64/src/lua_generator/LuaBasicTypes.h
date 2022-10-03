@@ -13,12 +13,15 @@ void toLua(lua_State* L, const std::string& string);
 void fromLua(lua_State* L, std::string& string);
 
 void toLua(lua_State* L, int number);
+void toLua(lua_State* L, unsigned int number);
 
 void fromLua(lua_State* L, int& number);
 
 void toLua(lua_State* L, double number);
 
 void fromLua(lua_State* L, double& number);
+
+void fromLua(lua_State* L, float& number);
 
 template <typename T> void toLua(lua_State* L, const std::vector<T> vector) {
     lua_createtable(L, vector.size(), 0);

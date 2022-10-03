@@ -72,7 +72,7 @@ void generateFromLuaScript(
         lua_settop(L, stackSize);
     }
 
-    populateLuaScene(L, scene);
+    populateLuaScene(L, scene, fileDefinition, settings);
 
     std::string directory = DirectoryName(filename) + "/?.lua;";
 

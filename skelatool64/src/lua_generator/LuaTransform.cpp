@@ -2,29 +2,21 @@
 
 #include "LuaBasicTypes.h"
 
-void toLua(lua_State* L, const aiVector3D& vector) {
-    lua_getglobal(L, "vector3");
-    toLua(L, vector.x);
-    toLua(L, vector.y);
-    toLua(L, vector.z);
-    lua_call(L, 3, 1);
-}
-
-void toLua(lua_State* L, const aiQuaternion& quaternion) {
-    lua_getglobal(L, "quaternion");
-    toLua(L, quaternion.x);
-    toLua(L, quaternion.y);
-    toLua(L, quaternion.z);
-    toLua(L, quaternion.w);
-    lua_call(L, 4, 1);
-}
-
 void toLua(lua_State* L, const aiMatrix4x4& matrix) {
     aiMatrix4x4* result = (aiMatrix4x4*)lua_newuserdata(L, sizeof(aiMatrix4x4));
     new(result) aiMatrix4x4(matrix);
 
     luaL_getmetatable(L, "aiMatrix4x4");
     lua_setmetatable(L, -2);
+}
+
+
+void fromLua(lua_State* L, aiMatrix4x4& matrix) {
+    aiMatrix4x4* ptr = (aiMatrix4x4*)luaL_checkudata(L, -1, "aiMatrix4x4");
+    if (ptr) {
+        matrix = *ptr;
+    }
+    lua_pop(L, 1);
 }
 
 int luaTransformDecomponse(lua_State* L) {

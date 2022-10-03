@@ -46,3 +46,6 @@ build/skeletool.deb: skeletool64 control
 	mkdir build/skeletool/DEBIAN -p
 	cp control build/skeletool/DEBIAN
 	dpkg-deb --build build/skeletool
+
+docs:
+	ldoc .

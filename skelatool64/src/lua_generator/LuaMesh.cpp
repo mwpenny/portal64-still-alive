@@ -7,6 +7,71 @@
 #include "../MeshWriter.h"
 #include "./LuaDisplayListSettings.h"
 
+#include "./LuaGeometry.h"
+#include "./LuaTransform.h"
+
+int luaGetVector3ArrayElement(lua_State* L) {
+    struct aiVector3DArray* array = (struct aiVector3DArray*)luaL_checkudata(L, 1, "aiVector3DArray");
+    int index = luaL_checkinteger(L, 2);
+
+    if (index <= 0 || index > array->length) {
+        lua_pushnil(L);
+        return 1;
+    }
+
+    toLua(L, array->vertices[index - 1]);
+
+    return 1;
+}
+
+int luaSetVector3ArrayElement(lua_State* L) {
+    lua_settop(L, 3);
+    
+    aiVector3D value;
+    fromLua(L, value);
+
+    struct aiVector3DArray* array = (struct aiVector3DArray*)luaL_checkudata(L, 1, "aiVector3DArray");
+    int index = luaL_checkinteger(L, 2);
+
+    if (index <= 0 || index > array->length) {
+        return 0;
+    }
+
+    array->vertices[index - 1] = value;
+
+    return 0;
+}
+
+int luaGetVector3ArrayLength(lua_State* L) {
+    struct aiVector3DArray* array = (struct aiVector3DArray*)luaL_checkudata(L, 1, "aiVector3DArray");
+    lua_pushinteger(L, array->length);
+    return 1;
+}
+
+void toLuaLazyArray(lua_State* L, aiVector3D* vertices, unsigned count) {
+    struct aiVector3DArray* result = (struct aiVector3DArray*)lua_newuserdata(L, sizeof(struct aiVector3DArray));
+
+    result->vertices = vertices;
+    result->length = count;
+
+    if(luaL_newmetatable(L, "aiVector3DArray")) {
+        lua_pushcfunction(L, luaGetVector3ArrayElement);
+        lua_setfield(L, -2, "__index");
+
+        lua_pushcfunction(L, luaSetVector3ArrayElement);
+        lua_setfield(L, -2, "__newindex");
+
+        lua_pushcfunction(L, luaGetVector3ArrayLength);
+        lua_setfield(L, -2, "__len");
+    }
+
+    lua_setmetatable(L, -2);
+}
+
+bool luaIsLazyVector3DArray(lua_State* L, int index) {
+    return luaL_testudata(L, index, "aiVector3DArray");
+}
+
 void toLua(lua_State* L, Material* material) {
     if (!material) {
         lua_pushnil(L);
@@ -15,7 +80,7 @@ void toLua(lua_State* L, Material* material) {
 
     lua_createtable(L, 1, 0);
 
-    luaL_getmetatable(L, "Material");
+    lua_getglobal(L, "Material");
     lua_setmetatable(L, -2);
 
     toLua(L, material->mName);
@@ -40,11 +105,51 @@ void fromLua(lua_State* L, Material *& material) {
     lua_pop(L, 2);
 }
 
+void toLua(lua_State* L, const aiFace& face) {
+    toLua(L, face.mIndices, face.mNumIndices);
+}
+
+int luaTransformMesh(lua_State* L) {
+    lua_settop(L, 2);
+
+    aiMatrix4x4 transform;
+    fromLua(L, transform);
+
+    std::shared_ptr<ExtendedMesh> mesh;
+    meshFromLua(L, mesh);
+
+    std::shared_ptr<ExtendedMesh> result = mesh->Transform(transform);
+
+    meshToLua(L, result);
+    return 1;
+}
+
 void meshToLua(lua_State* L, std::shared_ptr<ExtendedMesh> mesh) {
     lua_createtable(L, 0, 1);
+    
+    lua_getglobal(L, "Mesh");
+    lua_setmetatable(L, -2);
 
     toLua(L, mesh);
     lua_setfield(L, -2, "ptr");
+
+    toLua(L, mesh->bbMin);
+    lua_setfield(L, -2, "bbMin");
+
+    toLua(L, mesh->bbMax);
+    lua_setfield(L, -2, "bbMax");
+
+    lua_pushcfunction(L, luaTransformMesh);
+    lua_setfield(L, -2, "transform");
+
+    toLuaLazyArray(L, mesh->mMesh->mVertices, mesh->mMesh->mNumVertices);
+    lua_setfield(L, -2, "vertices");
+
+    toLuaLazyArray(L, mesh->mMesh->mNormals, mesh->mMesh->mNumVertices);
+    lua_setfield(L, -2, "normals");
+
+    toLua(L, mesh->mMesh->mFaces, mesh->mMesh->mNumFaces);
+    lua_setfield(L, -2, "faces");
 }
 
 void meshFromLua(lua_State* L, std::shared_ptr<ExtendedMesh>& mesh) {
@@ -156,7 +261,10 @@ int luaGenerateMesh(lua_State* L) {
 
 void populateLuaMesh(lua_State* L, const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings) {
     lua_newtable(L);
-    luaL_setmetatable(L, "Material");
+    lua_setglobal(L, "Material");
+
+    lua_newtable(L);
+    lua_setglobal(L, "Mesh");
 
     lua_pushlightuserdata(L, const_cast<aiScene*>(scene));
     lua_pushlightuserdata(L, &fileDefinition);

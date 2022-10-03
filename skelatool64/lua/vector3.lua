@@ -1,6 +1,12 @@
+---
+-- @module vector3
 
 Vector3 = {}
 
+--- creates a new 3d vector
+--- @param x the x value for the vector
+--- @param y the x value for the vector
+--- @param z the x value for the vector
 function vector3(x, y, z) 
     return setmetatable({ x = x, y = y, z = z }, Vector3)
 end

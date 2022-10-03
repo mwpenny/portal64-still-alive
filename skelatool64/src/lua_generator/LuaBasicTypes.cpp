@@ -15,6 +15,11 @@ void toLua(lua_State* L, int number) {
     lua_pushinteger(L, number);
 }
 
+
+void toLua(lua_State* L, unsigned int number) {
+    lua_pushinteger(L, number);
+}
+
 void fromLua(lua_State* L, int& number) {
     number = lua_tointeger(L, -1);
     lua_pop(L, 1);
@@ -26,5 +31,10 @@ void toLua(lua_State* L, double number) {
 
 void fromLua(lua_State* L, double& number) {
     number = lua_tonumber(L, -1);
+    lua_pop(L, 1);
+}
+
+void fromLua(lua_State* L, float& number) {
+    number = (float)lua_tonumber(L, -1);
     lua_pop(L, 1);
 }
