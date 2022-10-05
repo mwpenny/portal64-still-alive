@@ -66,6 +66,7 @@ void generateFromLuaScript(
         int errCode = lua_pcall(L, 0, LUA_MULTRET, 0);
         if (checkLuaError(L, errCode, file->name)) {
             lua_close(L);
+            exit(1);
             return;
         }
 
@@ -91,7 +92,11 @@ void generateFromLuaScript(
         return;
     }
 
-    dumpDefinitions(L, fileDefinition, filename.c_str());
+    if (!dumpDefinitions(L, fileDefinition, filename.c_str())) {
+        lua_close(L);
+        exit(1);
+        return;
+    }
 
     lua_close(L);
 }

@@ -30,3 +30,7 @@ end
 function Vector3.__tostring(v)
     return 'vector3(' .. v.x .. ', ' .. v.y .. ', ' .. v.z .. ')'
 end
+
+function isVector3(obj)
+    return type(obj) == 'table' and type(obj.x) == 'number' and type(obj.y) == 'number' and type(obj.z) == 'number' and obj.w == nil
+end

@@ -4,7 +4,7 @@
 #include <lua.hpp>
 #include "../CFileDefinition.h"
 
-void dumpDefinitions(lua_State* L, CFileDefinition& fileDef, const char* filename);
+bool dumpDefinitions(lua_State* L, CFileDefinition& fileDef, const char* filename);
 
 void populateLuaDefinitionWrite(lua_State* L, CFileDefinition& fileDef);
 

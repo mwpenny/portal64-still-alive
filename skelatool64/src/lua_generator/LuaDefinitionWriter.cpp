@@ -169,7 +169,7 @@ int luaAddHeader(lua_State* L) {
     return 0;
 }
 
-void dumpDefinitions(lua_State* L, CFileDefinition& fileDef, const char* filename) {
+bool dumpDefinitions(lua_State* L, CFileDefinition& fileDef, const char* filename) {
     int topStart = lua_gettop(L);
 
     lua_getglobal(L, "consume_pending_definitions");
@@ -177,7 +177,7 @@ void dumpDefinitions(lua_State* L, CFileDefinition& fileDef, const char* filenam
 
     if (checkLuaError(L, errcode, filename)) {
         lua_settop(L, topStart);
-        return;
+        return false;
     }
 
     int definitionArray = lua_gettop(L);
@@ -206,7 +206,7 @@ void dumpDefinitions(lua_State* L, CFileDefinition& fileDef, const char* filenam
 
     if (checkLuaError(L, errcode, filename)) {
         lua_settop(L, topStart);
-        return;
+        return false;
     }
 
     lua_settop(L, definitionArray);
@@ -218,6 +218,8 @@ void dumpDefinitions(lua_State* L, CFileDefinition& fileDef, const char* filenam
     }
 
     lua_settop(L, topStart);
+
+    return true;
 }
 
 void populateLuaDefinitionWrite(lua_State* L, CFileDefinition& fileDef) {
