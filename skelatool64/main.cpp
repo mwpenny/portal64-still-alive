@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
 
     if (args.mInputFile.length()) {
         std::cout << "Generating from mesh "  << args.mInputFile << std::endl;
-        scene = loadScene(args.mInputFile, args.mOutputType != FileOutputType::Mesh, settings.mVertexCacheSize, additionalPFlags);
+        scene = loadScene(args.mInputFile, args.mProcessAsModel || args.mOutputType != FileOutputType::Mesh, settings.mVertexCacheSize, additionalPFlags);
 
         if (!scene) {
             return 1;
@@ -173,6 +173,7 @@ int main(int argc, char *argv[]) {
             MeshDefinitionGenerator meshGenerator(settings);
             std::cout << "Generating mesh definitions" << std::endl;
             meshGenerator.TraverseScene(scene);
+            meshGenerator.PopulateBones(scene, fileDef);
             meshGenerator.GenerateDefinitions(scene, fileDef);
             break;
         }
@@ -232,9 +233,10 @@ int main(int argc, char *argv[]) {
         case FileOutputType::Script:
         {
             NodeGroups nodesByGroup(scene);
+
             for (auto script : args.mScriptFiles) {
                 std::cout << "Generating definitions from script " << script << std::endl;
-                generateFromLuaScript(script, scene, fileDef, nodesByGroup, settings);
+                generateFromLuaScript(args.mInputFile, script, scene, fileDef, nodesByGroup, settings);
             }
             break;
         }

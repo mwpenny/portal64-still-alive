@@ -106,7 +106,12 @@ void fromLua(lua_State* L, Material *& material) {
 }
 
 void toLua(lua_State* L, const aiFace& face) {
-    toLua(L, face.mIndices, face.mNumIndices);
+    lua_createtable(L, face.mNumIndices, 0);
+    
+    for (unsigned i = 0; i < face.mNumIndices; ++i) {
+        toLua(L, face.mIndices[i] + 1);
+        lua_seti(L, -2, i + 1);
+    }
 }
 
 int luaTransformMesh(lua_State* L) {
@@ -132,6 +137,9 @@ void meshToLua(lua_State* L, std::shared_ptr<ExtendedMesh> mesh) {
 
     toLua(L, mesh);
     lua_setfield(L, -2, "ptr");
+
+    toLua(L, mesh->mMesh->mName.C_Str());
+    lua_setfield(L, -2, "name");
 
     toLua(L, mesh->bbMin);
     lua_setfield(L, -2, "bbMin");

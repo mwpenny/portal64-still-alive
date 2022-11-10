@@ -174,12 +174,10 @@ Generates mesh and animation data from the current scene
 int luaExportDefaultMesh(lua_State* L) {
     const aiScene* scene = (const aiScene*)lua_touserdata(L, lua_upvalueindex(1));
     CFileDefinition* fileDefinition = (CFileDefinition*)lua_touserdata(L, lua_upvalueindex(2));
-    DisplayListSettings* settings = (DisplayListSettings*)lua_touserdata(L, lua_upvalueindex(3));
+    std::shared_ptr<MeshDefinitionGenerator>* meshGenerator = (std::shared_ptr<MeshDefinitionGenerator>*)lua_touserdata(L, lua_upvalueindex(3));
 
-    MeshDefinitionGenerator meshGenerator(*settings);
     std::cout << "Generating mesh definitions" << std::endl;
-    meshGenerator.TraverseScene(scene);
-    MeshDefinitionResults results = meshGenerator.GenerateDefinitionsWithResults(scene, *fileDefinition);
+    MeshDefinitionResults results = (*meshGenerator)->GenerateDefinitionsWithResults(scene, *fileDefinition);
     
 
     lua_createtable(L, 0, 2);
@@ -202,6 +200,11 @@ void populateLuaScene(lua_State* L, const aiScene* scene, CFileDefinition& fileD
     gLuaCurrentFileDefinition = &fileDefinition;
     gLuaCurrentSettings = &settings;
 
+    std::shared_ptr<MeshDefinitionGenerator> meshGenerator(new MeshDefinitionGenerator(settings));
+    meshGenerator->TraverseScene(scene);
+    meshGenerator->PopulateBones(scene, fileDefinition);
+
+
     lua_newtable(L);
     lua_setglobal(L, "node_cache");
 
@@ -210,7 +213,7 @@ void populateLuaScene(lua_State* L, const aiScene* scene, CFileDefinition& fileD
 
     lua_pushlightuserdata(L, const_cast<aiScene*>(scene));
     lua_pushlightuserdata(L, &fileDefinition);
-    lua_pushlightuserdata(L, const_cast<DisplayListSettings*>(&settings));
+    toLua(L, meshGenerator);
     lua_pushcclosure(L, luaExportDefaultMesh, 3);
     lua_setglobal(L, "export_default_mesh");
 }

@@ -32,6 +32,7 @@ public:
     std::map<std::string, std::string> mProperties;
     NormalSource mNormalSource;
     bool mExcludeFromOutut;
+    int mSortOrder;
 
     void Write(CFileDefinition& fileDef, const MaterialState& from, StructureDataChunk& output, bool targetCIBuffer);
 

@@ -4,7 +4,7 @@
 #include "../StringUtils.h"
 #include "../CFileDefinition.h"
 
-Material::Material(const std::string& name): mName(name), mNormalSource(NormalSource::Normal), mExcludeFromOutut(false) {}
+Material::Material(const std::string& name): mName(name), mNormalSource(NormalSource::Normal), mExcludeFromOutut(false), mSortOrder(0) {}
 
 void Material::Write(CFileDefinition& fileDef, const MaterialState& from, StructureDataChunk& output, bool targetCIBuffer) {
     generateMaterial(fileDef, from, mState, output, targetCIBuffer);

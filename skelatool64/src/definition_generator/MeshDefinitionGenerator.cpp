@@ -93,18 +93,20 @@ void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* n
     fileDefinition.AddMacro(fileDefinition.GetMacroName("ATTACHMENT_COUNT"), std::to_string(attachmentCount));
 }
 
+void MeshDefinitionGenerator::PopulateBones(const aiScene* scene, CFileDefinition& fileDefinition) {
+    auto animInfo = findNodesForWithAnimation(scene, mIncludedNodes, mSettings.mModelScale);
+
+    if (!mSettings.mBonesAsVertexGroups) {
+        fileDefinition.GetBoneHierarchy().PopulateWithAnimationNodeInfo(*animInfo, mSettings.mFixedPointScale, mSettings.mRotateModel);
+    }
+}
+
 void MeshDefinitionGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) {
     GenerateDefinitionsWithResults(scene, fileDefinition);
 }
 
 MeshDefinitionResults MeshDefinitionGenerator::GenerateDefinitionsWithResults(const aiScene* scene, CFileDefinition& fileDefinition) {
     std::vector<RenderChunk> renderChunks;
-
-    auto animInfo = findNodesForWithAnimation(scene, mIncludedNodes, mSettings.mModelScale);
-
-    if (!mSettings.mBonesAsVertexGroups) {
-        fileDefinition.GetBoneHierarchy().PopulateWithAnimationNodeInfo(*animInfo, mSettings.mFixedPointScale, mSettings.mRotateModel);
-    }
 
     for (auto node = mIncludedNodes.begin(); node != mIncludedNodes.end(); ++node) {
         AppendRenderChunks(scene, *node, fileDefinition, mSettings, renderChunks);

@@ -10,6 +10,7 @@
 bool checkLuaError(lua_State *L, int errCode, const char* filename);
 
 void generateFromLuaScript(
+    const std::string& levelFilename,
     const std::string& filename,
     const aiScene* scene,
     CFileDefinition& fileDefinition,

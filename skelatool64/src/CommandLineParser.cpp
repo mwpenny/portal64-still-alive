@@ -27,6 +27,7 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
     output.mEulerAngles = aiVector3D(0.0f, 0.0f, 0.0f);
     output.mDefaultMaterial = "default";
     output.mForceMaterialName = "";
+    output.mProcessAsModel = false;
 
     std::string lastParameter = "";
     bool hasError = false;
@@ -108,6 +109,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
             lastParameter = "script";
         } else if (strcmp(curr, "--ci-buffer") == 0) {
             output.mTargetCIBuffer = true;
+        } else if (strcmp(curr, "--model") == 0) {
+            output.mProcessAsModel = true;
         } else {
             if (curr[0] == '-') {
                 hasError = true;

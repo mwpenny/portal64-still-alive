@@ -473,6 +473,9 @@
                         },
                         "usePallete": {
                             "type": "string"
+                        },
+                        "bypassEffects": {
+                            "type": "boolean"
                         }
                     },
                     "required": [
@@ -709,6 +712,9 @@
                 },
                 "excludeFromOutput": {
                     "type": "boolean"
+                },
+                "sortOrder": {
+                    "type": "integer"
                 }
             }
         }

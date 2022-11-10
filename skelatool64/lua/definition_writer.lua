@@ -3,8 +3,8 @@ local pending_definitions = {}
 
 local RefType = {}
 
-function reference_to(value)
-    return setmetatable({ value = value }, RefType)
+function reference_to(value, index)
+    return setmetatable({ value = value, index = index }, RefType)
 end
 
 function is_reference_type(value)
@@ -148,13 +148,17 @@ local function replace_references(object, name_mapping, name_path)
             return null_value
         end
 
-        local referenceName = name_mapping[object.value]
+        local reference_name = name_mapping[object.value]
 
-        if (referenceName == nil) then
+        if (reference_name == nil) then
             error("A reference '" .. name_path .. "' was used on an object not exported in a definition")
         end
 
-        return raw("&" .. referenceName)
+        if object.index then
+            reference_name = reference_name .. '[' .. (object.index - 1) .. ']'
+        end
+
+        return raw("&" .. reference_name)
     end
 
     local changes = {}

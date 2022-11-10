@@ -62,14 +62,14 @@ bool renderModeGetFlagValue(const std::string& name, int& output) {
 
     it = gCVG_DST_VALUES.find(name);
 
-    if (it != gRenderModeFlags.end()) {
+    if (it != gCVG_DST_VALUES.end()) {
         output = it->second;
         return true;
     }
 
     it = gZMODE_VALUES.find(name);
 
-    if (it != gRenderModeFlags.end()) {
+    if (it != gZMODE_VALUES.end()) {
         output = it->second;
         return true;
     }

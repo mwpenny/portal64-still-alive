@@ -77,7 +77,14 @@ void MaterialGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinitio
     }
 
     std::sort(materialsAsVector.begin(), materialsAsVector.end(), [&](const std::shared_ptr<Material>& a, const std::shared_ptr<Material>& b) -> bool {
-        return sortOrderForMaterial(*a) < sortOrderForMaterial(*b);
+        int aOrder = sortOrderForMaterial(*a);
+        int bOrder = sortOrderForMaterial(*b);
+
+        if (aOrder != bOrder) {
+            return aOrder < bOrder;
+        }
+
+        return a->mSortOrder < b->mSortOrder;
     });
 
     for (auto& entry : materialsAsVector) {
