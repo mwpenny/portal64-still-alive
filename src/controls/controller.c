@@ -4,6 +4,9 @@
 #include "util/memory.h"
 #include <sched.h>
 
+// 0 = disable 1 = record 2 = playbakc
+#define CONTROLLER_LOG_CONTROLLER_DATA  0
+
 #if CONTROLLER_LOG_CONTROLLER_DATA
     #include "../debugger/serial.h"
 #endif
@@ -145,7 +148,6 @@ enum ControllerDirection controllerGetDirectionDown(int index) {
     return controllerGetDirection(REMAP_PLAYER_INDEX(index)) & ~gControllerLastDirection[REMAP_PLAYER_INDEX(index)];
 }
 
-#if CONTROLLER_LOG_CONTROLLER_DATA
 
 struct ControllerData {
     OSContPad contPad;
@@ -171,5 +173,3 @@ void controllerHandlePlayback() {
     }
 #endif
 }
-
-#endif

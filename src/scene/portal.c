@@ -199,17 +199,16 @@ int renderPropsNext(struct RenderProps* current, struct RenderProps* next, struc
         }
     }
 
-    // render any objects halfway through portals
-    if (!cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, current->viewport, NULL)) {
-        return 0;
-    }
-
     next->currentDepth = current->currentDepth - 1;
     Vp* viewport = renderPropsBuildViewport(next, renderState);
 
     next->viewport = viewport;
 
     next->perspectiveMatrix = cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, viewport, &next->cullingInfo);
+
+    if (!next->perspectiveMatrix) {
+        return 0;
+    }
 
 #if SHOW_EXTERNAL_VIEW
     struct Transform externalTransform;

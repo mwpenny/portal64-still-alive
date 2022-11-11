@@ -199,9 +199,7 @@ static void gameProc(void* arg) {
 
                 controllersTriggerRead();
                 skReadMessages();
-#if CONTROLLER_LOG_CONTROLLER_DATA
                 controllerHandlePlayback();
-#endif
                 
                 if (inputIgnore) {
                     --inputIgnore;
