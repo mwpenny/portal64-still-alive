@@ -3,8 +3,12 @@
 
 #include <ultra64.h>
 
+// 0 = disable 1 = record 2 = playbakc
+#define CONTROLLER_LOG_CONTROLLER_DATA  2
+
 void controllersInit(void);
-void controllersUpdate(void);
+void controllersReadPendingData(void);
+void controllersSavePreviousState(void);
 void controllersTriggerRead(void);
 
 enum ControllerDirection {
@@ -25,5 +29,9 @@ u16 controllerGetButtonDown(int index, u16 button);
 u16 controllerGetButtonUp(int index, u16 button);
 enum ControllerDirection controllerGetDirection(int index);
 enum ControllerDirection controllerGetDirectionDown(int index);
+
+#if CONTROLLER_LOG_CONTROLLER_DATA
+void controllerHandlePlayback();
+#endif
 
 #endif

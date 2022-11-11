@@ -4,6 +4,10 @@
 #include "util/memory.h"
 #include <sched.h>
 
+#if CONTROLLER_LOG_CONTROLLER_DATA
+    #include "../debugger/serial.h"
+#endif
+
 #define MAX_PLAYERS 4
 
 static u8    validcontrollers = 0;
@@ -56,13 +60,8 @@ void controllersInit(void)
     osSetEventMesg(OS_EVENT_SI, &gfxFrameMsgQ, (OSMesg)&gControllerMessage);
 }
 
-void controllersUpdate(void)
-{
-    for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
-        gControllerLastDirection[i] = controllerGetDirection(i);
-        gControllerLastButton[i] = gControllerData[i].button;
-    }
 
+void controllersReadPendingData(void) {
     osContGetReadData(gControllerData);
     cntrlReadInProg = 0;
 
@@ -75,6 +74,13 @@ void controllersUpdate(void)
         if (gControllerStatus[i].errno & CONT_NO_RESPONSE_ERROR) {
             zeroMemory(&gControllerData[i], sizeof(OSContPad));
         }
+    }
+}
+
+void controllersSavePreviousState(void) {
+    for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
+        gControllerLastDirection[i] = controllerGetDirection(i);
+        gControllerLastButton[i] = gControllerData[i].button;
     }
 }
 
@@ -138,3 +144,32 @@ enum ControllerDirection controllerGetDirection(int index) {
 enum ControllerDirection controllerGetDirectionDown(int index) {
     return controllerGetDirection(REMAP_PLAYER_INDEX(index)) & ~gControllerLastDirection[REMAP_PLAYER_INDEX(index)];
 }
+
+#if CONTROLLER_LOG_CONTROLLER_DATA
+
+struct ControllerData {
+    OSContPad contPad;
+};
+
+int currentFrame = 0;
+
+#if CONTROLLER_LOG_CONTROLLER_DATA == 2
+struct ControllerData gRecordedControllerData[] = {
+    #include "controller-data.h"
+};
+#endif
+
+void controllerHandlePlayback() {
+#if CONTROLLER_LOG_CONTROLLER_DATA == 1
+    struct ControllerData data;
+    data.contPad = gControllerData[0];
+    gdbSendMessage(GDBDataTypeControllerData, (char*)&data, sizeof(struct ControllerData));
+#elif CONTROLLER_LOG_CONTROLLER_DATA == 2
+    if (currentFrame < sizeof(gRecordedControllerData) / sizeof(*gRecordedControllerData)) {
+        gControllerData[0] = gRecordedControllerData[currentFrame].contPad;
+        ++currentFrame;
+    }
+#endif
+}
+
+#endif

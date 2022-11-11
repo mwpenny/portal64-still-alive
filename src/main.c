@@ -154,7 +154,7 @@ static void gameProc(void* arg) {
     dynamicSceneInit();
     contactSolverInit(&gContactSolver);
     portalSurfaceCleanupQueueInit();
-    levelLoad(0);
+    levelLoad(2);
     cutsceneRunnerReset();
     controllersInit();
     initAudio();
@@ -199,6 +199,10 @@ static void gameProc(void* arg) {
 
                 controllersTriggerRead();
                 skReadMessages();
+#if CONTROLLER_LOG_CONTROLLER_DATA
+                controllerHandlePlayback();
+#endif
+                
                 if (inputIgnore) {
                     --inputIgnore;
                 } else {
@@ -207,6 +211,7 @@ static void gameProc(void* arg) {
                 }
                 timeUpdateDelta();
                 soundPlayerUpdate();
+                controllersSavePreviousState();
 
                 break;
 
@@ -218,7 +223,7 @@ static void gameProc(void* arg) {
                 pendingGFX += 2;
                 break;
             case SIMPLE_CONTROLLER_MSG:
-                controllersUpdate();
+                controllersReadPendingData();
                 break;
         }
     }

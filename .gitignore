@@ -17,3 +17,5 @@ portal_pak_modified/
 
 tools/skeletool64
 tools/vtf2png
+
+src/controls/controller-data.h

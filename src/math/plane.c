@@ -28,7 +28,22 @@ void planeProjectPoint(struct Plane* plane, struct Vector3* point, struct Vector
     vector3AddScaled(point, &plane->normal, distance, output);
 }
 
-// TODO figure out what to do when two points are the same
+float calculateLerp(struct Vector3* a, struct Vector3* b, struct Vector3* point) {
+    struct Vector3 v0;
+    vector3Sub(b, a, &v0);
+
+    float denom = vector3MagSqrd(&v0);
+
+    if (denom < 0.00000001f) {
+        return 0.5f;
+    }
+
+    struct Vector3 pointOffset;
+    vector3Sub(point, a, &pointOffset);
+
+    return vector3Dot(&pointOffset, &v0) / denom;
+}
+
 void calculateBarycentricCoords(struct Vector3* a, struct Vector3* b, struct Vector3* c, struct Vector3* point, struct Vector3* output) {
     struct Vector3 v0;
     struct Vector3 v1;
@@ -44,9 +59,27 @@ void calculateBarycentricCoords(struct Vector3* a, struct Vector3* b, struct Vec
     float d20 = vector3Dot(&v2, &v0);
     float d21 = vector3Dot(&v2, &v1);
 
-    float denom = 1.0f / (d00 * d11 - d01 * d01);
-    output->y = (d11 * d20 - d01 * d21) * denom;
-    output->z = (d00 * d21 - d01 * d20) * denom;
+    float denom = d00 * d11 - d01 * d01;
+
+    if (fabsf(denom) < 0.000001f) {
+        if (d00 > d11) {
+            // b is other point
+            output->y = calculateLerp(a, b, point);
+            output->x = 1.0 - output->y;
+            output->z = 0.0f;
+
+        } else {
+            // c is other point
+            output->z = calculateLerp(a, c, point);
+            output->x = 1.0f - output->z;
+            output->z = 0.0f;
+        }
+        return;
+    }
+
+    float denomInv = 1.0f / (d00 * d11 - d01 * d01);
+    output->y = (d11 * d20 - d01 * d21) * denomInv;
+    output->z = (d00 * d21 - d01 * d20) * denomInv;
     output->x = 1.0f - output->y - output->z;
 }
 

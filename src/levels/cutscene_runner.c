@@ -141,10 +141,13 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         {
             struct Location* location = &gCurrentLevel->locations[step->openPortal.locationIndex];
             struct Ray firingRay;
+            struct Vector3 transformUp;
             firingRay.origin = location->transform.position;
             quatMultVector(&location->transform.rotation, &gForward, &firingRay.dir);
+            quatMultVector(&location->transform.rotation, &gRight, &transformUp);
+            vector3Negate(&transformUp, &transformUp);
             vector3AddScaled(&location->transform.position, &firingRay.dir, -0.1f, &firingRay.origin);
-            sceneFirePortal(&gScene, &firingRay, &gUp, step->openPortal.portalIndex, location->roomIndex);
+            sceneFirePortal(&gScene, &firingRay, &transformUp, step->openPortal.portalIndex, location->roomIndex);
             break;
         }
         case CutsceneStepTypeSetSignal:
