@@ -160,6 +160,10 @@ Vp* renderPropsBuildViewport(struct RenderProps* props, struct RenderState* rend
 
     Vp* viewport = renderStateRequestViewport(renderState);
 
+    if (viewport) {
+        return NULL;
+    }
+
     viewport->vp.vscale[0] = (maxX - minX) << 1;
     viewport->vp.vscale[1] = (maxY - minY) << 1;
     viewport->vp.vscale[2] = (maxZ - minZ) >> 1;
@@ -201,6 +205,10 @@ int renderPropsNext(struct RenderProps* current, struct RenderProps* next, struc
 
     next->currentDepth = current->currentDepth - 1;
     Vp* viewport = renderPropsBuildViewport(next, renderState);
+
+    if (!viewport) {
+        return 0;
+    }
 
     next->viewport = viewport;
 
@@ -294,16 +302,30 @@ void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct R
     }
 
     Mtx* idenity = renderStateRequestMatrices(renderState, 1);
+
+    if (!idenity) {
+        return;
+    }
+
     guMtxIdent(idenity);
 
     gSPMatrix(renderState->dl++, idenity, G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_PUSH);
 
     Mtx* ortho = renderStateRequestMatrices(renderState, 1);
+
+    if (!ortho) {
+        return;
+    }
+
     guOrtho(ortho, 0, SCREEN_WD << 2, 0, SCREEN_HT << 2, -10, 10, 1);
 
     gSPMatrix(renderState->dl++, ortho, G_MTX_LOAD | G_MTX_PROJECTION | G_MTX_NOPUSH);
 
     Vtx* vertices = renderStateRequestVertices(renderState, pointCount);
+
+    if (!vertices) {
+        return;
+    }
 
     for (int i = 0; i < pointCount; ++i) {
         Vtx* vertex = &vertices[i];
@@ -341,6 +363,10 @@ void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct R
 
 void portalRenderCover(struct Portal* portal, float portalTransform[4][4], struct RenderState* renderState) {
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
+
+    if (!matrix) {
+        return;
+    }
 
     guMtxF2L(portalTransform, matrix);
     gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
@@ -429,6 +455,10 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
 
         // render the front portal cover
         Mtx* matrix = renderStateRequestMatrices(renderState, 1);
+
+        if (!matrix) {
+            return;
+        }
 
         guMtxF2L(portalTransform, matrix);
         gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);

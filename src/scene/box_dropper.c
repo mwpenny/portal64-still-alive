@@ -36,9 +36,19 @@ void boxDropperRender(void* data, struct RenderScene* renderScene) {
     }
 
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+
+    if (!matrix) {
+        return;
+    }
+
     transformToMatrixL(&dropper->transform, matrix, SCENE_SCALE);
 
     Mtx* armature = renderStateRequestMatrices(renderScene->renderState, PROPS_BOX_DROPPER_DEFAULT_BONES_COUNT);
+
+    if (!armature) {
+        return;
+    }
+
     skCalculateTransforms(&dropper->armature, armature);
 
     renderSceneAdd(
@@ -64,6 +74,11 @@ void boxDropperRender(void* data, struct RenderScene* renderScene) {
         boxDropperFakePos(dropper, &pendingCubePos);
 
         Mtx* pendingBoxMatrix = renderStateRequestMatrices(renderScene->renderState, 1);
+
+        if (!pendingBoxMatrix) {
+            return;
+        }
+
         transformToMatrixL(&pendingCubePos, pendingBoxMatrix, SCENE_SCALE);
 
         renderSceneAdd(
@@ -87,14 +102,7 @@ void boxDropperInit(struct BoxDropper* dropper, struct BoxDropperDefinition* def
     dropper->roomIndex = definition->roomIndex;
     dropper->signalIndex = definition->signalIndex;
 
-    skArmatureInit(
-        &dropper->armature, 
-        props_box_dropper_model_gfx, 
-        PROPS_BOX_DROPPER_DEFAULT_BONES_COUNT, 
-        props_box_dropper_default_bones, 
-        props_box_dropper_bone_parent, 
-        PROPS_BOX_DROPPER_ATTACHMENT_COUNT
-    );
+    skArmatureInit(&dropper->armature, &props_box_dropper_armature);
 
     skAnimatorInit(&dropper->animator, PROPS_BOX_DROPPER_DEFAULT_BONES_COUNT, NULL, NULL);
 

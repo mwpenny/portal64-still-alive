@@ -51,9 +51,18 @@ void buttonRender(void* data, struct RenderScene* renderScene) {
 
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
 
+    if (!matrix) {
+        return;
+    }
+
     guTranslate(matrix, button->originalPos.x * SCENE_SCALE, button->originalPos.y * SCENE_SCALE, button->originalPos.z * SCENE_SCALE);
 
     Mtx* armature = renderStateRequestMatrices(renderScene->renderState, PROPS_BUTTON_DEFAULT_BONES_COUNT);
+
+    if (!armature) {
+        return;
+    }
+
     transformToMatrixL(&props_button_default_bones[PROPS_BUTTON_BUTTONBASE_BONE], &armature[PROPS_BUTTON_BUTTONBASE_BONE], 1.0f);
 
     // reusing global memory

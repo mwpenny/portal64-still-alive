@@ -18,6 +18,11 @@ void fizzlerRender(void* data, struct RenderScene* renderScene) {
     struct Fizzler* fizzler = (struct Fizzler*)data;
 
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+    
+    if (!matrix) {
+        return;
+    }
+    
     transformToMatrixL(&fizzler->rigidBody.transform, matrix, SCENE_SCALE);
 
     renderSceneAdd(renderScene, fizzler->modelGraphics, matrix, fizzler_material_index, &fizzler->rigidBody.transform.position, NULL);

@@ -120,6 +120,11 @@ void signageRender(void* data, struct RenderScene* renderScene) {
     signageCheckIndex(signage->testChamberNumber);
 
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+
+    if (!matrix) {
+        return;
+    }
+
     transformToMatrixL(&signage->transform, matrix, SCENE_SCALE);
 
     renderSceneAdd(

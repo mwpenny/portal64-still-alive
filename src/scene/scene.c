@@ -179,6 +179,11 @@ void sceneRenderPortalGun(struct Scene* scene, struct RenderState* renderState) 
     quatMultiply(&scene->player.lookTransform.rotation, &relativeRotation, &gunTransform.rotation);
     gunTransform.scale = gOneVec;
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
+
+    if (!matrix) {
+        return;
+    }
+
     transformToMatrixL(&gunTransform, matrix, SCENE_SCALE);
 
     gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
@@ -191,6 +196,11 @@ LookAt gLookAt = gdSPDefLookAt(127, 0, 0, 0, 127, 0);
 void sceneRender(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
     gSPSetLights1(renderState->dl++, gSceneLights);
     LookAt* lookAt = renderStateRequestLookAt(renderState);
+
+    if (!lookAt) {
+        return;
+    }
+    
     *lookAt = gLookAt;
     gSPLookAt(renderState->dl++, lookAt);
     

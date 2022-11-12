@@ -153,6 +153,11 @@ void shadowRendererRender(
     unsigned recieverCount
 ) {
     Mtx* recieverMatrices = renderStateRequestMatrices(renderState, recieverCount);
+
+    if (!recieverMatrices) {
+        return;
+    }
+ 
     unsigned lightCount = 0;
 
     for (unsigned i = 0; i < recieverCount; ++i) {
@@ -165,6 +170,10 @@ void shadowRendererRender(
     }
     
     Light* lights = renderStateRequestLights(renderState, lightCount);
+
+    if (!lights) {
+        return;
+    }
     
     unsigned currentLight = 0;
 
@@ -189,6 +198,9 @@ void shadowRendererRender(
 
     // calculate position of top and bottom of shadow
     Mtx* shadowMatrices = renderStateRequestMatrices(renderState, 2);
+    if (shadowMatrices) {
+        return;
+    }
     transformToMatrixL(&shadowRenderer->casterTransform, &shadowMatrices[TOP_MATRIX_INDEX], SCENE_SCALE);
 
     struct Vector3 lightOffset;
@@ -301,6 +313,10 @@ void shadowRendererRenderProjection(
     vector3Scale(&gOneVec, &finalTransform.scale, uniformScale);
 
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
+
+    if (!matrix) {
+        return;
+    }
 
     transformToMatrixL(&finalTransform, matrix, SCENE_SCALE);
     

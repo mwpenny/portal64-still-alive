@@ -9,9 +9,16 @@
 #include "../DisplayListSettings.h"
 #include "../Animation.h"
 
+struct AnimationResults {
+    std::string initialPoseReference;
+    std::string boneParentReference;
+    std::string boneCountMacro;
+    std::string numberOfAttachmentMacros;
+};
+
 std::shared_ptr<NodeAnimationInfo> findNodesForWithAnimation(const aiScene* scene, const std::vector<aiNode*>& usedNodes, float modelScale);
 
 std::vector<SKAnimationHeader> generateAnimationData(const aiScene* scene, BoneHierarchy& bones, CFileDefinition& fileDef, float fixedPointScale, float modelScale, const aiQuaternion& rotation, unsigned short targetTicksPerSecond);
-void generateAnimationForScene(const aiScene* scene, CFileDefinition &fileDefinition, DisplayListSettings& settings);
+AnimationResults generateAnimationForScene(const aiScene* scene, CFileDefinition &fileDefinition, DisplayListSettings& settings);
 
 #endif

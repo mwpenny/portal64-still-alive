@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 #include <map>
+#include "../StringUtils.h"
 
 std::shared_ptr<NodeAnimationInfo> findNodesForWithAnimation(const aiScene* scene, const std::vector<aiNode*>& usedNodes, float modelScale) {
     std::set<std::string> animatedNodeNames;
@@ -94,7 +95,9 @@ std::vector<SKAnimationHeader> generateAnimationData(const aiScene* scene, BoneH
     return animations;
 }
 
-void generateAnimationForScene(const aiScene* scene, CFileDefinition &fileDefinition, DisplayListSettings& settings) {
+AnimationResults generateAnimationForScene(const aiScene* scene, CFileDefinition &fileDefinition, DisplayListSettings& settings) {
+    AnimationResults result;
+
     BoneHierarchy& bones = fileDefinition.GetBoneHierarchy();
 
     std::string bonesName = fileDefinition.GetUniqueName("default_bones");
@@ -103,6 +106,10 @@ void generateAnimationForScene(const aiScene* scene, CFileDefinition &fileDefini
     std::string boneCountName = bonesName + "_COUNT";
     std::transform(boneCountName.begin(), boneCountName.end(), boneCountName.begin(), ::toupper);
     fileDefinition.AddMacro(boneCountName, std::to_string(bones.GetBoneCount()));
+
+    result.initialPoseReference = bonesName;
+    result.boneParentReference = boneParentName;
+    result.boneCountMacro = boneCountName;
 
     aiMatrix4x4 baseTransform(
         aiVector3D(settings.mModelScale, settings.mModelScale, settings.mModelScale), 
@@ -150,4 +157,21 @@ void generateAnimationForScene(const aiScene* scene, CFileDefinition &fileDefini
     }
 
     fileDefinition.AddDefinition(std::unique_ptr<FileDefinition>(new DataFileDefinition("unsigned short", boneParentName, true, "_geo", std::move(boneParentDataChunk))));
+
+    int attachmentCount = 0;
+
+    for (unsigned i = 0; i < bones.GetBoneCount(); ++i) {
+        Bone* bone = bones.BoneByIndex(i);
+
+        if (StartsWith(bone->GetName(), "attachment ")) {
+            fileDefinition.AddMacro(fileDefinition.GetMacroName(std::string("ATTACHMENT_") + bone->GetName().substr(strlen("attachment "))), std::to_string(attachmentCount));
+            ++attachmentCount;
+        }
+    }
+
+    result.numberOfAttachmentMacros = fileDefinition.GetMacroName("ATTACHMENT_COUNT");
+
+    fileDefinition.AddMacro(result.numberOfAttachmentMacros, std::to_string(attachmentCount));
+
+    return result;
 }

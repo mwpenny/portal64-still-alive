@@ -159,6 +159,10 @@ void shadowMapRender(struct ShadowMap* shadowMap, struct RenderState* renderStat
 
     Mtx* lightMtx = renderStateRequestMatrices(renderState, 1);
 
+    if (!lightMtx) {
+        return;
+    }
+
     guMtxF2L(projMatrix, lightMtx);
     gSPForceMatrix(renderState->dl++, lightMtx);
     gDPPipeSync(renderState->dl++);
@@ -183,6 +187,10 @@ void shadowMapRender(struct ShadowMap* shadowMap, struct RenderState* renderStat
     gDPSetColorImage(renderState->dl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WD, osVirtualToPhysical(gfxTask->framebuffer));
 
     Mtx* identity = renderStateRequestMatrices(renderState, 1);
+
+    if (!identity) {
+        return;
+    }
 
     guMtxIdent(identity);
     gSPMatrix(renderState->dl++, identity, G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_NOPUSH);

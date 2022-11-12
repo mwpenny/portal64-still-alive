@@ -4,22 +4,22 @@
 #include "util/memory.h"
 #include "util/rom.h"
 
-void skArmatureInit(struct SKArmature* object, Gfx* displayList, u32 numberOfBones, struct Transform* initialPose, unsigned short* boneParentIndex, u32 numberOfAttachments) {
-    object->displayList = displayList;
-    object->numberOfBones = numberOfBones;
-    object->numberOfAttachments = numberOfAttachments;
+void skArmatureInit(struct SKArmature* object, struct SKArmatureDefinition* definition) {
+    object->displayList = definition->displayList;
+    object->numberOfBones = definition->numberOfBones;
+    object->numberOfAttachments = definition->numberOfAttachments;
 
-    unsigned transformSize = sizeof(Mtx) * numberOfBones;
+    unsigned transformSize = sizeof(Mtx) * definition->numberOfBones;
 
     object->boneTransforms = malloc(transformSize);
-    if (initialPose) {
-        if (IS_KSEG0(initialPose)) {
-            memCopy(object->boneTransforms, initialPose, transformSize);
+    if (definition->initialPose) {
+        if (IS_KSEG0(definition->initialPose)) {
+            memCopy(object->boneTransforms, definition->initialPose, transformSize);
         } else {
-            romCopy((void*)initialPose, (void*)object->boneTransforms, transformSize);
+            romCopy((void*)definition->initialPose, (void*)object->boneTransforms, transformSize);
         }
     }
-    object->boneParentIndex = boneParentIndex;
+    object->boneParentIndex = definition->boneParentIndex;
 }
 
 void skCleanupObject(struct SKArmature* object) {

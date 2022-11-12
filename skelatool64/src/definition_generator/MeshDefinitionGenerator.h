@@ -5,6 +5,14 @@
 #include "../DisplayListSettings.h"
 #include "../RenderChunk.h"
 
+struct ArmatureDefinitionResults {
+    std::string modelName;
+    std::string initialPoseReference;
+    std::string boneParentReference;
+    std::string boneCountMacro;
+    std::string numberOfAttachmentMacros;
+};
+
 struct MeshDefinitionResults {
 public:
     std::string modelName;

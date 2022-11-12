@@ -84,13 +84,10 @@ void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* n
         Bone* bone = bones.BoneByIndex(i);
 
         if (StartsWith(bone->GetName(), "attachment ")) {
-            fileDefinition.AddMacro(fileDefinition.GetMacroName(std::string("ATTACHMENT_") + bone->GetName().substr(strlen("attachment "))), std::to_string(attachmentCount));
             renderChunks.push_back(RenderChunk(std::make_pair(bone, bone), attachmentCount, NULL));
             ++attachmentCount;
         }
     }
-
-    fileDefinition.AddMacro(fileDefinition.GetMacroName("ATTACHMENT_COUNT"), std::to_string(attachmentCount));
 }
 
 void MeshDefinitionGenerator::PopulateBones(const aiScene* scene, CFileDefinition& fileDefinition) {
@@ -118,7 +115,19 @@ MeshDefinitionResults MeshDefinitionGenerator::GenerateDefinitionsWithResults(co
     result.materialMacro = MaterialGenerator::MaterialIndexMacroName(mSettings.mDefaultMaterialName);
 
     if (fileDefinition.GetBoneHierarchy().HasData() && !mSettings.mBonesAsVertexGroups) {
-        generateAnimationForScene(scene, fileDefinition, mSettings);
+        AnimationResults animationResults = generateAnimationForScene(scene, fileDefinition, mSettings);
+
+        std::unique_ptr<StructureDataChunk> armatureDef(new StructureDataChunk());
+
+        fileDefinition.AddHeader("\"sk64/skelatool_armature.h\"");
+
+        armatureDef->AddPrimitive(result.modelName);
+        armatureDef->AddPrimitive(animationResults.initialPoseReference);
+        armatureDef->AddPrimitive(animationResults.boneParentReference);
+        armatureDef->AddPrimitive(animationResults.boneCountMacro);
+        armatureDef->AddPrimitive(animationResults.numberOfAttachmentMacros);
+
+        fileDefinition.AddDataDefinition("armature", "struct SKArmatureDefinition", false, "_geo", std::move(armatureDef));
     }
     
     return result;

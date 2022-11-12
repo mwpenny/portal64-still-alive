@@ -31,6 +31,11 @@ struct ColliderTypeData gDoorCollider = {
 void doorRender(void* data, struct RenderScene* renderScene) {
     struct Door* door = (struct Door*)data;
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+
+    if (!matrix) {
+        return;
+    }
+
     struct Transform originalTransform;
     originalTransform.position = door->doorDefinition->location;
     originalTransform.rotation = door->doorDefinition->rotation;
@@ -42,6 +47,11 @@ void doorRender(void* data, struct RenderScene* renderScene) {
     props_door_01_default_bones[PROPS_DOOR_01_DOORR_BONE].position.x = door->openAmount * 0.625f * SCENE_SCALE;
 
     Mtx* armature = renderStateRequestMatrices(renderScene->renderState, PROPS_DOOR_01_DEFAULT_BONES_COUNT);
+
+    if (armature) {
+        return;
+    }
+
     transformToMatrixL(&props_door_01_default_bones[PROPS_DOOR_01_FRAME_BONE], &armature[PROPS_DOOR_01_FRAME_BONE], 1.0f);
     transformToMatrixL(&props_door_01_default_bones[PROPS_DOOR_01_DOORL_BONE], &armature[PROPS_DOOR_01_DOORL_BONE], 1.0f);
     transformToMatrixL(&props_door_01_default_bones[PROPS_DOOR_01_DOORR_BONE], &armature[PROPS_DOOR_01_DOORR_BONE], 1.0f);

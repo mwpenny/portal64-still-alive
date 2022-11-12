@@ -17,6 +17,11 @@ void decorObjectRender(void* data, struct RenderScene* renderScene) {
     }
 
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+
+    if (!matrix) {
+        return;
+    }
+
     transformToMatrixL(&object->rigidBody.transform, matrix, SCENE_SCALE);
 
     Gfx* gfxToRender;

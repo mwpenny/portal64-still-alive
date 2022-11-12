@@ -55,6 +55,10 @@ void elevatorRender(void* data, struct RenderScene* renderScene) {
 
     Mtx* armature = renderStateRequestMatrices(renderScene->renderState, PROPS_ROUND_ELEVATOR_DEFAULT_BONES_COUNT);
 
+    if (!armature) {
+        return;
+    }
+
     for (int i = 0; i < PROPS_ROUND_ELEVATOR_DEFAULT_BONES_COUNT; ++i) {
         vector3Lerp(&gClosedPosition[i], &gOpenPosition[i], elevator->openAmount, &props_round_elevator_default_bones[i].position);
         transformToMatrixL(&props_round_elevator_default_bones[i], &armature[i], 1.0f);

@@ -15,9 +15,18 @@ void pedestalRender(void* data, struct RenderScene* renderScene) {
     struct Pedestal* pedestal = (struct Pedestal*)data;
 
     Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+
+    if (!matrix) {
+        return;
+    }
+
     transformToMatrixL(&pedestal->transform, matrix, SCENE_SCALE);
 
     Mtx* armature = renderStateRequestMatrices(renderScene->renderState, pedestal->armature.numberOfBones);
+
+    if (!armature) {
+        return;
+    }
 
     skCalculateTransforms(&pedestal->armature, armature);
 
@@ -49,14 +58,7 @@ void pedestalInit(struct Pedestal* pedestal, struct PedestalDefinition* definiti
     pedestal->transform.position = definition->position;
     pedestal->roomIndex = definition->roomIndex;
 
-    skArmatureInit(
-        &pedestal->armature,
-        pedestal_model_gfx,
-        PEDESTAL_DEFAULT_BONES_COUNT,
-        pedestal_default_bones,
-        pedestal_bone_parent,
-        PEDESTAL_ATTACHMENT_COUNT
-    );
+    skArmatureInit(&pedestal->armature, &pedestal_armature);
 
     skAnimatorInit(&pedestal->animator, PEDESTAL_DEFAULT_BONES_COUNT, NULL, NULL);
 

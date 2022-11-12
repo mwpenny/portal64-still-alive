@@ -60,6 +60,11 @@ void contactConstraintStateDebugDraw(struct ContactManifold* constraintState, st
         mat[3][3] = 1.0f;
 
         Mtx* mtx = renderStateRequestMatrices(renderState, 1);
+
+        if (!mtx) {
+            return;
+        }
+
         guMtxF2L(mat, mtx);
 
         gSPMatrix(renderState->dl++, mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);

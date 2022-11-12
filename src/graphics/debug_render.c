@@ -30,6 +30,10 @@ Gfx gfx_quad[] = {
 
 void debugRenderQuad(struct Vector3* origin, struct Vector3* edgeA, struct Vector3* edgeB, float edgeLengthA, float edgeLengthB, struct RenderState* renderState) {
     Mtx* mtx = renderStateRequestMatrices(renderState, 1);
+
+    if (!mtx) {
+        return;
+    }
     
     struct Vector3 normal;
     struct Vector3 x;
