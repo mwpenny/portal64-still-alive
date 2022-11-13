@@ -327,7 +327,7 @@ void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct R
 
     gDPPipeSync(renderState->dl++);
     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
-    gSPMatrix(renderState->dl++, props->cameraMatrixInfo.perspectiveNormalize, G_MTX_LOAD | G_MTX_PROJECTION | G_MTX_NOPUSH);
+    gSPMatrix(renderState->dl++, props->cameraMatrixInfo.projectionView, G_MTX_LOAD | G_MTX_PROJECTION | G_MTX_NOPUSH);
     gDPSetDepthSource(renderState->dl++, G_ZS_PIXEL);
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 }
