@@ -123,7 +123,7 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
     struct Scene* scene = (struct Scene*)data;
 
     u64 visibleRooms = 0;
-    staticRenderDetermineVisibleRooms(&properties->cullingInfo, properties->fromRoom, &visibleRooms);
+    staticRenderDetermineVisibleRooms(&properties->cameraMatrixInfo.cullingInformation, properties->fromRoom, &visibleRooms);
 
     int closerPortal = vector3DistSqrd(&properties->camera.transform.position, &scene->portals[0].transform.position) < vector3DistSqrd(&properties->camera.transform.position, &scene->portals[1].transform.position) ? 0 : 1;
     int otherPortal = 1 - closerPortal;
@@ -150,7 +150,7 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
         return;
     }
 
-    staticRender(&properties->camera.transform, &properties->cullingInfo, visibleRooms, renderState);
+    staticRender(&properties->camera.transform, &properties->cameraMatrixInfo.cullingInformation, visibleRooms, renderState);
 }
 
 #define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT

@@ -198,7 +198,7 @@ void shadowRendererRender(
 
     // calculate position of top and bottom of shadow
     Mtx* shadowMatrices = renderStateRequestMatrices(renderState, 2);
-    if (shadowMatrices) {
+    if (!shadowMatrices) {
         return;
     }
     transformToMatrixL(&shadowRenderer->casterTransform, &shadowMatrices[TOP_MATRIX_INDEX], SCENE_SCALE);

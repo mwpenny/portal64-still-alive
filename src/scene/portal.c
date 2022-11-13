@@ -37,15 +37,6 @@ struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE] = {
     {-0.353553f * SCENE_SCALE * PORTAL_COVER_WIDTH, 0.707107f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
 };
 
-#define SHOW_EXTERNAL_VIEW  0
-
-#if SHOW_EXTERNAL_VIEW
-
-struct Vector3 externalCameraPos = {16.0f, 8.0f, -16.0f};
-struct Vector3 externalLook = {4.0f, 2.0f, -4.0f};
-
-#endif
-
 struct Quaternion gVerticalFlip = {0.0f, 1.0f, 0.0f, 0.0f};
 
 #define STARTING_RENDER_DEPTH       2
@@ -62,20 +53,12 @@ struct Quaternion gVerticalFlip = {0.0f, 1.0f, 0.0f, 0.0f};
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex) {
     props->camera = *camera;
     props->aspectRatio = aspectRatio;
-    props->perspectiveMatrix = cameraSetupMatrices(camera, renderState, aspectRatio, &props->perspectiveCorrect, &fullscreenViewport, &props->cullingInfo);
+    cameraSetupMatrices(camera, renderState, aspectRatio, &fullscreenViewport, &props->cameraMatrixInfo);
+    cameraApplyMatrices(renderState, &props->cameraMatrixInfo);
     props->viewport = &fullscreenViewport;
     props->currentDepth = STARTING_RENDER_DEPTH;
     props->fromPortalIndex = NO_PORTAL;
     props->fromRoom = roomIndex;
-
-#if SHOW_EXTERNAL_VIEW
-    struct Camera externalCamera = *camera;
-    externalCamera.transform.position = externalCameraPos;
-    struct Vector3 offset;
-    vector3Sub(&externalLook, &externalCameraPos, &offset);
-    quatLook(&offset, &gUp, &externalCamera.transform.rotation);
-    props->perspectiveMatrix = cameraSetupMatrices(&externalCamera, renderState, aspectRatio, &props->perspectiveCorrect, &fullscreenViewport, NULL);
-#endif
 
     props->clippingPortalIndex = -1;
 
@@ -102,9 +85,9 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
             vector3AddScaled(&camera->transform.position, &portalNormal, -clippingDistnace, &projectedPoint);
 
             if (collisionSceneIsTouchingSinglePortal(&projectedPoint, &portalNormal, gCollisionScene.portalTransforms[i], i)) {
-                planeInitWithNormalAndPoint(&props->cullingInfo.clippingPlanes[5], &portalNormal, &gCollisionScene.portalTransforms[i]->position);
-                props->cullingInfo.clippingPlanes[5].d = (props->cullingInfo.clippingPlanes[5].d + PORTAL_CLIPPING_OFFSET) * SCENE_SCALE;
-                ++props->cullingInfo.usedClippingPlaneCount;
+                planeInitWithNormalAndPoint(&props->cameraMatrixInfo.cullingInformation.clippingPlanes[5], &portalNormal, &gCollisionScene.portalTransforms[i]->position);
+                props->cameraMatrixInfo.cullingInformation.clippingPlanes[5].d = (props->cameraMatrixInfo.cullingInformation.clippingPlanes[5].d + PORTAL_CLIPPING_OFFSET) * SCENE_SCALE;
+                ++props->cameraMatrixInfo.cullingInformation.usedClippingPlaneCount;
                 props->clippingPortalIndex = i;
                 break;
             }
@@ -160,7 +143,7 @@ Vp* renderPropsBuildViewport(struct RenderProps* props, struct RenderState* rend
 
     Vp* viewport = renderStateRequestViewport(renderState);
 
-    if (viewport) {
+    if (!viewport) {
         return NULL;
     }
 
@@ -212,31 +195,21 @@ int renderPropsNext(struct RenderProps* current, struct RenderProps* next, struc
 
     next->viewport = viewport;
 
-    next->perspectiveMatrix = cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, &next->perspectiveCorrect, viewport, &next->cullingInfo);
-
-    if (!next->perspectiveMatrix) {
+    if (!cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, viewport, &next->cameraMatrixInfo)) {
         return 0;
     }
 
-#if SHOW_EXTERNAL_VIEW
-    struct Transform externalTransform;
-    externalTransform.position = externalCameraPos;
-    externalTransform.scale = gOneVec;
-    struct Vector3 offset;
-    vector3Sub(&externalLook, &externalCameraPos, &offset);
-    quatLook(&offset, &gUp, &externalTransform.rotation);
-    struct Camera externalCamera = current->camera;
-    transformConcat(&portalCombined, &externalTransform, &externalCamera.transform);
-    next->perspectiveMatrix = cameraSetupMatrices(&externalCamera, renderState, (float)SCREEN_WD / (float)SCREEN_HT, &next->perspectiveCorrect, &fullscreenViewport, NULL);
-#endif
+    if (!cameraApplyMatrices(renderState, &next->cameraMatrixInfo)) {
+        return 0;
+    }
 
     if (current->clippingPortalIndex == -1) {
         // set the near clipping plane to be the exit portal surface
-        quatMultVector(&toPortal->rotation, &gForward, &next->cullingInfo.clippingPlanes[4].normal);
+        quatMultVector(&toPortal->rotation, &gForward, &next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal);
         if (toPortal < fromPortal) {
-            vector3Negate(&next->cullingInfo.clippingPlanes[4].normal, &next->cullingInfo.clippingPlanes[4].normal);
+            vector3Negate(&next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal, &next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal);
         }
-        next->cullingInfo.clippingPlanes[4].d = -vector3Dot(&next->cullingInfo.clippingPlanes[4].normal, &toPortal->position) * SCENE_SCALE;
+        next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].d = -vector3Dot(&next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal, &toPortal->position) * SCENE_SCALE;
     }
     next->clippingPortalIndex = -1;
 
@@ -244,10 +217,8 @@ int renderPropsNext(struct RenderProps* current, struct RenderProps* next, struc
     // Gross
     next->fromRoom = gCollisionScene.portalRooms[toPortal == gCollisionScene.portalTransforms[0] ? 0 : 1];
 
-#if !SHOW_EXTERNAL_VIEW
     gSPViewport(renderState->dl++, viewport);
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, next->minX, next->minY, next->maxX, next->maxY);
-#endif
 
     return 1;
 }
@@ -356,7 +327,7 @@ void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct R
 
     gDPPipeSync(renderState->dl++);
     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
-    gSPMatrix(renderState->dl++, props->perspectiveMatrix, G_MTX_LOAD | G_MTX_PROJECTION | G_MTX_NOPUSH);
+    gSPMatrix(renderState->dl++, props->cameraMatrixInfo.perspectiveNormalize, G_MTX_LOAD | G_MTX_PROJECTION | G_MTX_NOPUSH);
     gDPSetDepthSource(renderState->dl++, G_ZS_PIXEL);
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 }
@@ -448,8 +419,8 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
         sceneRenderer(data, &nextProps, renderState);
 
         // revert to previous state
-        gSPMatrix(renderState->dl++, osVirtualToPhysical(props->perspectiveMatrix), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-        gSPPerspNormalize(renderState->dl++, props->perspectiveCorrect);
+        gSPMatrix(renderState->dl++, osVirtualToPhysical(props->cameraMatrixInfo.projectionView), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+        gSPPerspNormalize(renderState->dl++, props->cameraMatrixInfo.perspectiveNormalize);
         gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, props->minX, props->minY, props->maxX, props->maxY);       
         gSPViewport(renderState->dl++, props->viewport);
 

@@ -37,11 +37,11 @@ typedef void SceneRenderCallback(void* data, struct RenderProps* properties, str
 struct RenderProps {
     struct Camera camera;
     float aspectRatio;
-    Mtx* perspectiveMatrix;
-    Vp* viewport;
-    struct FrustrumCullingInformation cullingInfo;
 
-    u16 perspectiveCorrect;
+    struct CameraMatrixInfo cameraMatrixInfo; 
+
+    Vp* viewport;
+
     u8 currentDepth;
     u8 fromPortalIndex;
 

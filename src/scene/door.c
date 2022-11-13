@@ -48,7 +48,7 @@ void doorRender(void* data, struct RenderScene* renderScene) {
 
     Mtx* armature = renderStateRequestMatrices(renderScene->renderState, PROPS_DOOR_01_DEFAULT_BONES_COUNT);
 
-    if (armature) {
+    if (!armature) {
         return;
     }
 
