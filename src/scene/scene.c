@@ -28,6 +28,7 @@
 #include "../util/memory.h"
 #include "../decor/decor_object_list.h"
 #include "signals.h"
+#include "render_plan.h"
 
 struct Vector3 gPortalGunOffset = {0.120957, -0.113587, -0.20916};
 struct Vector3 gPortalGunForward = {0.1f, -0.1f, 1.0f};
@@ -207,12 +208,16 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     struct RenderProps renderProperties;
 
     renderPropsInit(&renderProperties, &scene->camera, (float)SCREEN_WD / (float)SCREEN_HT, renderState, scene->player.body.currentRoom);
-
-    renderProperties.camera = scene->camera;
+    cameraApplyMatrices(renderState, &renderProperties.cameraMatrixInfo);
 
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 
-    sceneRenderWithProperties(scene, &renderProperties, renderState);
+    struct RenderPlan renderPlan;
+
+    renderPlanBuild(&renderPlan, scene, renderState);
+    renderPlanExecute(&renderPlan, scene, renderState);
+
+    // sceneRenderWithProperties(scene, &renderProperties, renderState);
 
     sceneRenderPortalGun(scene, renderState);
 

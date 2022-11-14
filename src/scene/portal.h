@@ -40,6 +40,8 @@ typedef void SceneRenderCallback(void* data, struct RenderProps* properties, str
 #define PORTAL_RENDER_TYPE_ENABLED_0    (1 << 2)
 #define PORTAL_RENDER_TYPE_ENABLED_1    (1 << 3)
 
+#define PORTAL_RENDER_TYPE_SECOND_CLOSER    (1 << 4)
+
 #define PORTAL_RENDER_TYPE_VISIBLE(portalIndex) (PORTAL_RENDER_TYPE_VISIBLE_0 << (portalIndex))
 #define PORTAL_RENDER_TYPE_ENABLED(portalIndex) (PORTAL_RENDER_TYPE_ENABLED_0 << (portalIndex))
 

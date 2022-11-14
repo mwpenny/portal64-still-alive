@@ -54,7 +54,7 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
     props->camera = *camera;
     props->aspectRatio = aspectRatio;
     cameraSetupMatrices(camera, renderState, aspectRatio, &fullscreenViewport, &props->cameraMatrixInfo);
-    cameraApplyMatrices(renderState, &props->cameraMatrixInfo);
+    
     props->viewport = &fullscreenViewport;
     props->currentDepth = STARTING_RENDER_DEPTH;
     props->exitPortalIndex = NO_PORTAL;
