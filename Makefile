@@ -201,6 +201,8 @@ build/src/scene/box_dropper.o: $(MODEL_HEADERS)
 
 build/src/scene/pedestal.o: $(MODEL_HEADERS)
 
+build/src/scene/render_plan.o: $(MODEL_HEADERS)
+
 build/anims.ld: $(ANIM_LIST) tools/generate_animation_ld.js
 	@mkdir -p $(@D)
 	node tools/generate_animation_ld.js $@ $(ANIM_LIST)

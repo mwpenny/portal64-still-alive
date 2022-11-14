@@ -57,7 +57,7 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
     cameraApplyMatrices(renderState, &props->cameraMatrixInfo);
     props->viewport = &fullscreenViewport;
     props->currentDepth = STARTING_RENDER_DEPTH;
-    props->fromPortalIndex = NO_PORTAL;
+    props->exitPortalIndex = NO_PORTAL;
     props->fromRoom = roomIndex;
 
     props->clippingPortalIndex = -1;
@@ -98,6 +98,10 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
     props->minY = 0;
     props->maxX = SCREEN_WD;
     props->maxY = SCREEN_HT;
+
+    props->previousProperties = NULL;
+
+    props->portalRenderType = 0;
 }
 
 #define MIN_VP_WIDTH 64
@@ -213,9 +217,8 @@ int renderPropsNext(struct RenderProps* current, struct RenderProps* next, struc
     }
     next->clippingPortalIndex = -1;
 
-    next->fromPortalIndex = toPortal < fromPortal ? 0 : 1;
-    // Gross
-    next->fromRoom = gCollisionScene.portalRooms[toPortal == gCollisionScene.portalTransforms[0] ? 0 : 1];
+    next->exitPortalIndex = toPortal < fromPortal ? 0 : 1;
+    next->fromRoom = gCollisionScene.portalRooms[next->exitPortalIndex];
 
     gSPViewport(renderState->dl++, viewport);
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, next->minX, next->minY, next->maxX, next->maxY);
@@ -332,6 +335,19 @@ void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct R
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 }
 
+void portalDetermineTransform(struct Portal* portal, float portalTransform[4][4]) {
+    struct Transform finalTransform;
+    finalTransform = portal->transform;
+
+    if (portal->flags & PortalFlagsOddParity) {
+        quatMultiply(&portal->transform.rotation, &gVerticalFlip, &finalTransform.rotation);
+    }
+    
+    vector3Scale(&gOneVec, &finalTransform.scale, portal->scale);
+
+    transformToMatrix(&finalTransform, portalTransform, SCENE_SCALE);
+}
+
 void portalRenderCover(struct Portal* portal, float portalTransform[4][4], struct RenderState* renderState) {
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
@@ -369,17 +385,7 @@ void portalRender(struct Portal* portal, struct Portal* otherPortal, struct Rend
     struct ScreenClipper clipper;
     float portalTransform[4][4];
 
-    struct Transform finalTransform;
-
-    finalTransform = portal->transform;
-
-    if (portal->flags & PortalFlagsOddParity) {
-        quatMultiply(&portal->transform.rotation, &gVerticalFlip, &finalTransform.rotation);
-    }
-    
-    vector3Scale(&gOneVec, &finalTransform.scale, portal->scale);
-
-    transformToMatrix(&finalTransform, portalTransform, SCENE_SCALE);
+    portalDetermineTransform(portal, portalTransform);
 
     if (props->currentDepth == 0 || !otherPortal) {
         portalRenderCover(portal, portalTransform, renderState);

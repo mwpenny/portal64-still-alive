@@ -130,7 +130,7 @@ void sceneRenderWithProperties(void* data, struct RenderProps* properties, struc
 
     for (int i = 0; i < 2; ++i) {
         if (gCollisionScene.portalTransforms[closerPortal] && 
-            properties->fromPortalIndex != closerPortal && 
+            properties->exitPortalIndex != closerPortal && 
             staticRenderIsRoomVisible(visibleRooms, gCollisionScene.portalRooms[closerPortal])) {
             portalRender(
                 &scene->portals[closerPortal], 
