@@ -68,6 +68,7 @@ struct RenderProps {
     u64 visiblerooms;
 
     struct RenderProps* previousProperties;
+    struct RenderProps* nextProperites[2];
     struct ScreenClipper clipper;
 };
 

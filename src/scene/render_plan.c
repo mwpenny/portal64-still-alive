@@ -21,7 +21,7 @@ extern struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE];
 
 #define CALC_SCREEN_SPACE(clip_space, screen_size) ((clip_space + 1.0f) * ((screen_size) / 2))
 
-int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderProps* current, int portalIndex, struct RenderState* renderState) {
+int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderProps* current, int portalIndex, struct RenderProps** prevSiblingPtr, struct RenderState* renderState) {
     int exitPortalIndex = 1 - portalIndex;
     struct Portal* portal = &scene->portals[portalIndex];
 
@@ -72,6 +72,16 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
         next->maxX = MIN(next->maxX, current->maxX);
         next->minY = MAX(next->minY, current->minY);
         next->maxY = MIN(next->maxY, current->maxY);
+    }
+
+    struct RenderProps* prevSibling = prevSiblingPtr ? *prevSiblingPtr : NULL;
+
+    if (prevSibling) {
+        if (next->minX < prevSibling->minX) {
+            next->maxX = MIN(next->maxX, prevSibling->minX);
+        } else {
+            next->minX = MAX(next->minX, prevSibling->maxX);
+        }
     }
 
     if (next->minX >= next->maxX || next->minY >= next->maxY) {
@@ -133,8 +143,13 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
     ++renderPlan->stageCount;
 
     next->previousProperties = current;
+    current->nextProperites[portalIndex] = next;
+    next->nextProperites[0] = NULL;
+    next->nextProperites[1] = NULL;
 
     next->portalRenderType = 0;
+
+    *prevSiblingPtr = next;
 
     renderPlanFinishView(renderPlan, scene, next, renderState);
 
@@ -145,27 +160,32 @@ void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, st
     
     staticRenderDetermineVisibleRooms(&properties->cameraMatrixInfo.cullingInformation, properties->fromRoom, &properties->visiblerooms);
 
-    int furtherPortal = vector3DistSqrd(&properties->camera.transform.position, &scene->portals[0].transform.position) > vector3DistSqrd(&properties->camera.transform.position, &scene->portals[1].transform.position) ? 0 : 1;
-    int otherPortal = 1 - furtherPortal;
+    int closerPortal = vector3DistSqrd(&properties->camera.transform.position, &scene->portals[0].transform.position) < vector3DistSqrd(&properties->camera.transform.position, &scene->portals[1].transform.position) ? 0 : 1;
+    int otherPortal = 1 - closerPortal;
     
-    if (!furtherPortal) {
+    if (closerPortal) {
         properties->portalRenderType |= PORTAL_RENDER_TYPE_SECOND_CLOSER;
     }
 
+    struct RenderProps* prevSibling = NULL;
+
     for (int i = 0; i < 2; ++i) {
-        if (gCollisionScene.portalTransforms[furtherPortal] && 
-            properties->exitPortalIndex != furtherPortal && 
-            staticRenderIsRoomVisible(properties->visiblerooms, gCollisionScene.portalRooms[furtherPortal])) {
-            properties->portalRenderType |= renderPlanPortal(
+        if (gCollisionScene.portalTransforms[closerPortal] && 
+            properties->exitPortalIndex != closerPortal && 
+            staticRenderIsRoomVisible(properties->visiblerooms, gCollisionScene.portalRooms[closerPortal])) {
+            int planResult = renderPlanPortal(
                 renderPlan,
                 scene,
                 properties,
-                furtherPortal,
+                closerPortal,
+                &prevSibling,
                 renderState
             );
+
+            properties->portalRenderType |= planResult;
         }
 
-        furtherPortal = 1 - furtherPortal;
+        closerPortal = 1 - closerPortal;
         otherPortal = 1 - otherPortal;
     }
 }
@@ -196,7 +216,9 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, struc
                 struct Portal* portal = &scene->portals[portalIndex];
                 portalDetermineTransform(portal, portalTransform);
 
-                if (current->portalRenderType & PORTAL_RENDER_TYPE_ENABLED(portalIndex)) {
+                struct RenderProps* portalProps = current->nextProperites[portalIndex];
+
+                if (portalProps && current->portalRenderType & PORTAL_RENDER_TYPE_ENABLED(portalIndex)) {
                     // render the front portal cover
                     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
@@ -211,13 +233,13 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, struc
                     
                     if (portal->flags & PortalFlagsOddParity) {
                         gSPDisplayList(renderState->dl++, portal_portal_blue_face_model_gfx);
-                        portalRenderScreenCover(current->clipper.nearPolygon, current->clipper.nearPolygonCount, current, renderState);
+                        portalRenderScreenCover(portalProps->clipper.nearPolygon, portalProps->clipper.nearPolygonCount, current, renderState);
                         gDPPipeSync(renderState->dl++);
 
                         gSPDisplayList(renderState->dl++, portal_portal_blue_model_gfx);
                     } else {
                         gSPDisplayList(renderState->dl++, portal_portal_orange_face_model_gfx);
-                        portalRenderScreenCover(current->clipper.nearPolygon, current->clipper.nearPolygonCount, current, renderState);
+                        portalRenderScreenCover(portalProps->clipper.nearPolygon, portalProps->clipper.nearPolygonCount, current, renderState);
                         gDPPipeSync(renderState->dl++);
 
                         gSPDisplayList(renderState->dl++, portal_portal_orange_model_gfx);
