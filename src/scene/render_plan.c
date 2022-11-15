@@ -213,6 +213,8 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
     next->nextProperites[0] = NULL;
     next->nextProperites[1] = NULL;
 
+    next->visiblerooms = 0;
+
     next->portalRenderType = 0;
 
     *prevSiblingPtr = next;

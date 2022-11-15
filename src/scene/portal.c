@@ -100,6 +100,7 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
     props->nextProperites[1] = NULL;
 
     props->portalRenderType = 0;
+    props->visiblerooms = 0;
 }
 
 void portalInit(struct Portal* portal, enum PortalFlags flags) {
