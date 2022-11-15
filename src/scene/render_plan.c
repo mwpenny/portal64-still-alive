@@ -5,19 +5,77 @@
 #include "../physics/collision_scene.h"
 #include "../levels/static_render.h"
 
+#include "../util/memory.h"
+
+#include "portal_render.h"
+
 #include "../build/assets/models/portal/portal_blue.h"
-#include "../build/assets/models/portal/portal_blue_filled.h"
 #include "../build/assets/models/portal/portal_blue_face.h"
 #include "../build/assets/models/portal/portal_orange.h"
 #include "../build/assets/models/portal/portal_orange_face.h"
-#include "../build/assets/models/portal/portal_orange_filled.h"
 
-Vp* renderPropsBuildViewport(struct RenderProps* props, struct RenderState* renderState);
+#define MIN_VP_WIDTH 64
+
+void renderPropscheckViewportSize(int* min, int* max, int screenSize) {
+    if (*max < MIN_VP_WIDTH) {
+        *max = MIN_VP_WIDTH;
+    }
+
+    if (*min > screenSize - MIN_VP_WIDTH) {
+        *min = screenSize - MIN_VP_WIDTH;
+    }
+
+    int widthGrowBy = MIN_VP_WIDTH - (*max - *min);
+
+    if (widthGrowBy > 0) {
+        *min -= widthGrowBy >> 1;
+        *max += (widthGrowBy + 1) >> 1;
+    }
+}
+
+int renderPropsZDistance(int currentDepth) {
+    if (currentDepth >= STARTING_RENDER_DEPTH) {
+        return 0;
+    } else if (currentDepth < 0) {
+        return G_MAXZ;
+    } else {
+        return G_MAXZ - (G_MAXZ >> (STARTING_RENDER_DEPTH - currentDepth));
+    }
+}
+
+Vp* renderPropsBuildViewport(struct RenderProps* props, struct RenderState* renderState) {
+    int minX = props->minX;
+    int maxX = props->maxX;
+    int minY = props->minY;
+    int maxY = props->maxY;
+
+    int minZ = renderPropsZDistance(props->currentDepth);
+    int maxZ = renderPropsZDistance(props->currentDepth - 1);
+
+    renderPropscheckViewportSize(&minX, &maxX, SCREEN_WD);
+    renderPropscheckViewportSize(&minY, &maxY, SCREEN_HT);
+
+    Vp* viewport = renderStateRequestViewport(renderState);
+
+    if (!viewport) {
+        return NULL;
+    }
+
+    viewport->vp.vscale[0] = (maxX - minX) << 1;
+    viewport->vp.vscale[1] = (maxY - minY) << 1;
+    viewport->vp.vscale[2] = (maxZ - minZ) >> 1;
+    viewport->vp.vscale[3] = 0;
+
+    viewport->vp.vtrans[0] = (maxX + minX) << 1;
+    viewport->vp.vtrans[1] = (maxY + minY) << 1;
+    viewport->vp.vtrans[2] = (maxZ + minZ) >> 1;
+    viewport->vp.vtrans[3] = 0;
+
+    return viewport;
+}
+
 void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderProps* properties, struct RenderState* renderState);
-void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct RenderProps* props, struct RenderState* renderState);
-void portalRenderCover(struct Portal* portal, float portalTransform[4][4], struct RenderState* renderState);
-extern struct Quaternion gVerticalFlip;
-extern struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE];
+
 
 #define CALC_SCREEN_SPACE(clip_space, screen_size) ((clip_space + 1.0f) * ((screen_size) / 2))
 
@@ -53,9 +111,17 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
 
     struct RenderProps* next = &renderPlan->stageProps[renderPlan->stageCount];
 
-    screenClipperInitWithCamera(&next->clipper, &current->camera, (float)SCREEN_WD / (float)SCREEN_HT, portalTransform);
+    struct ScreenClipper clipper;
+
+    screenClipperInitWithCamera(&clipper, &current->camera, (float)SCREEN_WD / (float)SCREEN_HT, portalTransform);
     struct Box2D clippingBounds;
-    screenClipperBoundingPoints(&next->clipper, gPortalOutline, sizeof(gPortalOutline) / sizeof(*gPortalOutline), &clippingBounds);
+    screenClipperBoundingPoints(&clipper, gPortalOutline, sizeof(gPortalOutline) / sizeof(*gPortalOutline), &clippingBounds);
+
+    if (clipper.nearPolygonCount) {
+        renderPlan->nearPolygonCount = clipper.nearPolygonCount;
+        memCopy(renderPlan->nearPolygon, clipper.nearPolygon, sizeof(struct Vector2s16) * clipper.nearPolygonCount);
+        renderPlan->clippedPortalIndex = portalIndex;
+    }
 
     if (current->clippingPortalIndex == portalIndex) {
         next->minX = 0;
@@ -193,6 +259,8 @@ void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, st
 void renderPlanBuild(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderState* renderState) {
     renderPropsInit(&renderPlan->stageProps[0], &scene->camera, (float)SCREEN_WD / (float)SCREEN_HT, renderState, scene->player.body.currentRoom);
     renderPlan->stageCount = 1;
+    renderPlan->clippedPortalIndex = -1;
+    renderPlan->nearPolygonCount = 0;
 
     renderPlanFinishView(renderPlan, scene, &renderPlan->stageProps[0], renderState);
 }
@@ -231,19 +299,24 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, struc
 
                     gDPSetEnvColor(renderState->dl++, 255, 255, 255, portal->opacity < 0.0f ? 0 : (portal->opacity > 1.0f ? 255 : (u8)(portal->opacity * 255.0f)));
                     
+                    Gfx* faceModel;
+                    Gfx* portalModel;
+
                     if (portal->flags & PortalFlagsOddParity) {
-                        gSPDisplayList(renderState->dl++, portal_portal_blue_face_model_gfx);
-                        portalRenderScreenCover(portalProps->clipper.nearPolygon, portalProps->clipper.nearPolygonCount, current, renderState);
-                        gDPPipeSync(renderState->dl++);
-
-                        gSPDisplayList(renderState->dl++, portal_portal_blue_model_gfx);
+                        faceModel = portal_portal_blue_face_model_gfx;
+                        portalModel = portal_portal_blue_model_gfx;
                     } else {
-                        gSPDisplayList(renderState->dl++, portal_portal_orange_face_model_gfx);
-                        portalRenderScreenCover(portalProps->clipper.nearPolygon, portalProps->clipper.nearPolygonCount, current, renderState);
-                        gDPPipeSync(renderState->dl++);
-
-                        gSPDisplayList(renderState->dl++, portal_portal_orange_model_gfx);
+                        faceModel = portal_portal_orange_face_model_gfx;
+                        portalModel = portal_portal_orange_model_gfx;
                     }
+
+                    gSPDisplayList(renderState->dl++, faceModel);
+                    if (current->previousProperties == NULL && portalIndex == renderPlan->clippedPortalIndex && renderPlan->nearPolygonCount) {
+                        portalRenderScreenCover(renderPlan->nearPolygon, renderPlan->nearPolygonCount, current, renderState);
+                    }
+                    gDPPipeSync(renderState->dl++);
+
+                    gSPDisplayList(renderState->dl++, portalModel);
                     
                     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
                 } else {

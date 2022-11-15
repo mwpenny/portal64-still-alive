@@ -120,40 +120,6 @@ void sceneInit(struct Scene* scene) {
     scene->freeCameraOffset = gZeroVec;
 }
 
-void sceneRenderWithProperties(void* data, struct RenderProps* properties, struct RenderState* renderState) {
-    struct Scene* scene = (struct Scene*)data;
-
-    u64 visibleRooms = 0;
-    staticRenderDetermineVisibleRooms(&properties->cameraMatrixInfo.cullingInformation, properties->fromRoom, &visibleRooms);
-
-    int closerPortal = vector3DistSqrd(&properties->camera.transform.position, &scene->portals[0].transform.position) < vector3DistSqrd(&properties->camera.transform.position, &scene->portals[1].transform.position) ? 0 : 1;
-    int otherPortal = 1 - closerPortal;
-
-    for (int i = 0; i < 2; ++i) {
-        if (gCollisionScene.portalTransforms[closerPortal] && 
-            properties->exitPortalIndex != closerPortal && 
-            staticRenderIsRoomVisible(visibleRooms, gCollisionScene.portalRooms[closerPortal])) {
-            portalRender(
-                &scene->portals[closerPortal], 
-                gCollisionScene.portalTransforms[otherPortal] ? &scene->portals[otherPortal] : NULL, 
-                properties, 
-                sceneRenderWithProperties, 
-                data, 
-                renderState
-            );
-        }
-
-        closerPortal = 1 - closerPortal;
-        otherPortal = 1 - otherPortal;
-    }
-
-    if (controllerGetButton(1, A_BUTTON) && properties->currentDepth == 2) {
-        return;
-    }
-
-    staticRender(&properties->camera.transform, &properties->cameraMatrixInfo.cullingInformation, visibleRooms, renderState);
-}
-
 #define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
 
 void sceneRenderPerformanceMetrics(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
@@ -204,11 +170,6 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     
     *lookAt = gLookAt;
     gSPLookAt(renderState->dl++, lookAt);
-    
-    struct RenderProps renderProperties;
-
-    renderPropsInit(&renderProperties, &scene->camera, (float)SCREEN_WD / (float)SCREEN_HT, renderState, scene->player.body.currentRoom);
-    cameraApplyMatrices(renderState, &renderProperties.cameraMatrixInfo);
 
     gDPSetRenderMode(renderState->dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 
@@ -216,8 +177,6 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     renderPlanBuild(&renderPlan, scene, renderState);
     renderPlanExecute(&renderPlan, scene, renderState);
-
-    // sceneRenderWithProperties(scene, &renderProperties, renderState);
 
     sceneRenderPortalGun(scene, renderState);
 

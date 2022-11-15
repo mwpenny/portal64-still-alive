@@ -8,9 +8,8 @@
 #include "camera.h"
 #include "static_scene.h"
 #include "./portal_surface.h"
-#include "../graphics/screen_clipper.h"
 
-
+#define STARTING_RENDER_DEPTH       2
 #define PORTAL_LOOP_SIZE    8
 
 enum PortalFlags {
@@ -45,6 +44,8 @@ typedef void SceneRenderCallback(void* data, struct RenderProps* properties, str
 #define PORTAL_RENDER_TYPE_VISIBLE(portalIndex) (PORTAL_RENDER_TYPE_VISIBLE_0 << (portalIndex))
 #define PORTAL_RENDER_TYPE_ENABLED(portalIndex) (PORTAL_RENDER_TYPE_ENABLED_0 << (portalIndex))
 
+extern struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE];
+
 struct RenderProps {
     struct Camera camera;
     float aspectRatio;
@@ -69,17 +70,12 @@ struct RenderProps {
 
     struct RenderProps* previousProperties;
     struct RenderProps* nextProperites[2];
-    struct ScreenClipper clipper;
 };
 
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex);
-int renderPropsNext(struct RenderProps* current, struct RenderProps* next, struct Transform* fromPortal, struct Transform* toPortal, struct RenderState* renderState);
 
 void portalInit(struct Portal* portal, enum PortalFlags flags);
 void portalUpdate(struct Portal* portal, int isOpen);
-void portalRender(struct Portal* portal, struct Portal* otherPortal, struct RenderProps* props, SceneRenderCallback sceneRenderer, void* data, struct RenderState* renderState);
-
-void portalDetermineTransform(struct Portal* portal, float portalTransform[4][4]);
 
 int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt);
 void portalCheckForHoles(struct Portal* portals);
