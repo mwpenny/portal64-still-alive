@@ -3,6 +3,8 @@
 
 #include "collision_object.h"
 #include "../math/range.h"
+#include "../math/box3d.h"
+#include "../math/ray.h"
 
 enum DoorwayFlags {
     DoorwayFlagsOpen = (1 << 0),
@@ -23,6 +25,8 @@ struct Room {
     short cornerX;
     short cornerZ;
 
+    struct Box3D boundingBox;
+
     short* doorwayIndices;
     short doorwayCount;
 };
@@ -36,5 +40,7 @@ struct World {
 
 int worldCheckDoorwaySides(struct World* world, struct Vector3* position, int currentRoom);
 int worldCheckDoorwayCrossings(struct World* world, struct Vector3* position, int currentRoom, int sideMask);
+
+float worldMaxDistanceInDirection(struct World* world, struct Ray* ray, u64 roomMask);
 
 #endif

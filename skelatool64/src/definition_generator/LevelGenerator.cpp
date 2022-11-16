@@ -525,6 +525,7 @@ void generateWorldDefinition(const aiScene* scene, CFileDefinition& fileDefiniti
         room->AddPrimitive(collisionOutput.roomGrids[i].spanZ);
         room->AddPrimitive(collisionOutput.roomGrids[i].x);
         room->AddPrimitive(collisionOutput.roomGrids[i].z);
+        room->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(roomOutput.roomBoundingBoxes[i])));        
         room->AddPrimitive(std::move(doorwayListName));
         room->AddPrimitive(roomDoorways[i].size());
         rooms->Add(std::move(room));

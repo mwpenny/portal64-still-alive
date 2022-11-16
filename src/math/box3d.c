@@ -21,3 +21,9 @@ void box3DUnion(struct Box3D* a, struct Box3D* b, struct Box3D* out) {
     vector3Max(&a->max, &b->max, &out->max);
     vector3Min(&a->min, &b->min, &out->min);
 }
+
+void box3DSupportFunction(struct Box3D* box, struct Vector3* input, struct Vector3* output) {
+    output->x = input->x > 0.0f ? box->max.x : box->min.x;
+    output->y = input->y > 0.0f ? box->max.y : box->min.y;
+    output->z = input->z > 0.0f ? box->max.z : box->min.z;
+}

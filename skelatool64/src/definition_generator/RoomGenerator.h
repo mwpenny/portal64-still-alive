@@ -36,6 +36,7 @@ struct RoomGeneratorOutput {
     std::vector<Doorway> doorways;
     std::vector<Door> doors;
     int roomCount;
+    std::vector<aiAABB> roomBoundingBoxes;
 
     short FindLocationRoom(const std::string& name) const;
     short FindLocationIndex(const std::string& name) const;

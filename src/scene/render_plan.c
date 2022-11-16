@@ -10,6 +10,7 @@
 
 #include "portal_render.h"
 #include "../scene/dynamic_scene.h"
+#include "../levels/levels.h"
 
 #include "../build/assets/models/portal/portal_blue.h"
 #include "../build/assets/models/portal/portal_blue_face.h"
@@ -285,9 +286,31 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
     return flags | PORTAL_RENDER_TYPE_ENABLED(portalIndex);
 }
 
+#define MIN_FAR_PLANE   (5.0f * SCENE_SCALE)
+#define FAR_PLANE_EXTRA  1.0f
+
+void renderPlanDetermineFarPlane(struct RenderProps* properties) {
+    struct Ray cameraRay;
+    quatMultVector(&properties->camera.transform.rotation, &gForward, &cameraRay.dir);
+    cameraRay.origin = properties->camera.transform.position;
+    vector3Negate(&cameraRay.dir, &cameraRay.dir);
+
+    float furthestDistance = (worldMaxDistanceInDirection(&gCurrentLevel->world, &cameraRay, properties->visiblerooms) + FAR_PLANE_EXTRA) * SCENE_SCALE;
+
+    if (furthestDistance < MIN_FAR_PLANE) {
+        properties->camera.farPlane = MIN_FAR_PLANE;
+    } else {
+        properties->camera.farPlane = MIN(properties->camera.farPlane, furthestDistance);
+    }
+}
+
 void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderProps* properties, struct RenderState* renderState) {
     
     staticRenderDetermineVisibleRooms(&properties->cameraMatrixInfo.cullingInformation, properties->fromRoom, &properties->visiblerooms);
+
+    renderPlanDetermineFarPlane(properties);
+
+    cameraSetupMatrices(&properties->camera, renderState, properties->aspectRatio, properties->viewport, &properties->cameraMatrixInfo);
 
     int closerPortal = vector3DistSqrd(&properties->camera.transform.position, &scene->portals[0].transform.position) < vector3DistSqrd(&properties->camera.transform.position, &scene->portals[1].transform.position) ? 0 : 1;
     int otherPortal = 1 - closerPortal;

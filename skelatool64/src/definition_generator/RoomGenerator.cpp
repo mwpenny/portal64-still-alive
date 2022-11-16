@@ -195,5 +195,27 @@ std::shared_ptr<RoomGeneratorOutput> generateRooms(const aiScene* scene, CFileDe
         door.doorwayIndex = doorwayIndex;
     }
 
+    for (int i = 0; i < output->roomCount; ++i) {
+        aiAABB boundingBox;
+        
+        for (auto& block : roomBlocks) {
+            if (block.roomIndex != i) {
+                continue;
+            }
+
+            if (boundingBox.mMin == boundingBox.mMax) {
+                boundingBox = block.boundingBox;
+            } else {
+                boundingBox.mMin = min(boundingBox.mMin, block.boundingBox.mMin);
+                boundingBox.mMax = max(boundingBox.mMax, block.boundingBox.mMax);
+            }
+        }
+
+        boundingBox.mMin *= settings.mModelScale;
+        boundingBox.mMax *= settings.mModelScale;
+
+        output->roomBoundingBoxes.push_back(boundingBox);
+    }
+
     return output;
 }
