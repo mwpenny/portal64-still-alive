@@ -39,69 +39,8 @@ struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE] = {
 
 #define PORTAL_CLIPPING_PLANE_BIAS  (SCENE_SCALE * 0.25f)
 
-#define CAMERA_CLIPPING_RADIUS  0.2f
-
-#define PORTAL_CLIPPING_OFFSET  0.1f
-
 #define PORTAL_OPACITY_FADE_TIME    0.6f
 #define PORTAL_GROW_TIME            0.3f
-
-void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex) {
-    props->camera = *camera;
-    props->aspectRatio = aspectRatio;
-    cameraSetupMatrices(camera, renderState, aspectRatio, &fullscreenViewport, &props->cameraMatrixInfo);
-
-    props->viewport = &fullscreenViewport;
-    props->currentDepth = STARTING_RENDER_DEPTH;
-    props->exitPortalIndex = NO_PORTAL;
-    props->fromRoom = roomIndex;
-
-    props->clippingPortalIndex = -1;
-
-    if (collisionSceneIsPortalOpen()) {
-        for (int i = 0; i < 2; ++i) {
-            struct Vector3 portalOffset;
-
-            vector3Sub(&camera->transform.position, &gCollisionScene.portalTransforms[i]->position, &portalOffset);
-
-            struct Vector3 portalNormal;
-            quatMultVector(&gCollisionScene.portalTransforms[i]->rotation, &gForward, &portalNormal);
-            struct Vector3 projectedPoint;
-
-            if (i == 0) {
-                vector3Negate(&portalNormal, &portalNormal);
-            }
-
-            float clippingDistnace = vector3Dot(&portalNormal, &portalOffset);
-
-            if (fabsf(clippingDistnace) > CAMERA_CLIPPING_RADIUS) {
-                continue;
-            }
-
-            vector3AddScaled(&camera->transform.position, &portalNormal, -clippingDistnace, &projectedPoint);
-
-            if (collisionSceneIsTouchingSinglePortal(&projectedPoint, &portalNormal, gCollisionScene.portalTransforms[i], i)) {
-                planeInitWithNormalAndPoint(&props->cameraMatrixInfo.cullingInformation.clippingPlanes[5], &portalNormal, &gCollisionScene.portalTransforms[i]->position);
-                props->cameraMatrixInfo.cullingInformation.clippingPlanes[5].d = (props->cameraMatrixInfo.cullingInformation.clippingPlanes[5].d + PORTAL_CLIPPING_OFFSET) * SCENE_SCALE;
-                ++props->cameraMatrixInfo.cullingInformation.usedClippingPlaneCount;
-                props->clippingPortalIndex = i;
-                break;
-            }
-        }
-    }
-
-    props->minX = 0;
-    props->minY = 0;
-    props->maxX = SCREEN_WD;
-    props->maxY = SCREEN_HT;
-
-    props->previousProperties = NULL;
-    props->nextProperites[0] = NULL;
-    props->nextProperites[1] = NULL;
-
-    props->portalRenderType = 0;
-    props->visiblerooms = 0;
-}
 
 void portalInit(struct Portal* portal, enum PortalFlags flags) {
     transformInitIdentity(&portal->transform);

@@ -28,9 +28,9 @@ struct ColliderTypeData gDoorCollider = {
     &gCollisionBoxCallbacks,  
 };
 
-void doorRender(void* data, struct RenderScene* renderScene) {
+void doorRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Door* door = (struct Door*)data;
-    Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
     if (!matrix) {
         return;
@@ -46,7 +46,7 @@ void doorRender(void* data, struct RenderScene* renderScene) {
     props_door_01_default_bones[PROPS_DOOR_01_DOORL_BONE].position.x = door->openAmount * -0.625f * SCENE_SCALE;
     props_door_01_default_bones[PROPS_DOOR_01_DOORR_BONE].position.x = door->openAmount * 0.625f * SCENE_SCALE;
 
-    Mtx* armature = renderStateRequestMatrices(renderScene->renderState, PROPS_DOOR_01_DEFAULT_BONES_COUNT);
+    Mtx* armature = renderStateRequestMatrices(renderState, PROPS_DOOR_01_DEFAULT_BONES_COUNT);
 
     if (!armature) {
         return;
@@ -56,7 +56,7 @@ void doorRender(void* data, struct RenderScene* renderScene) {
     transformToMatrixL(&props_door_01_default_bones[PROPS_DOOR_01_DOORL_BONE], &armature[PROPS_DOOR_01_DOORL_BONE], 1.0f);
     transformToMatrixL(&props_door_01_default_bones[PROPS_DOOR_01_DOORR_BONE], &armature[PROPS_DOOR_01_DOORR_BONE], 1.0f);
 
-    renderSceneAdd(renderScene, door_01_gfx, matrix, door_01_material_index, &door->rigidBody.transform.position, armature);
+    dynamicRenderListAddData(renderList, door_01_gfx, matrix, door_01_material_index, &door->rigidBody.transform.position, armature);
 }
 
 void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct World* world) {
@@ -78,11 +78,13 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct W
     if (doorDefinition->doorwayIndex >= 0 && doorDefinition->doorwayIndex < world->doorwayCount) {
         door->forDoorway = &world->doorways[doorDefinition->doorwayIndex];
         door->forDoorway->flags &= ~DoorwayFlagsOpen;
+        dynamicSceneSetRoomFlags(door->dynamicId, ROOM_FLAG_FROM_INDEX(door->forDoorway->roomA) | ROOM_FLAG_FROM_INDEX(door->forDoorway->roomB));
     } else {
         door->forDoorway = NULL;
     }
 
     door->doorDefinition = doorDefinition;
+
 }
 
 void doorUpdate(struct Door* door) {

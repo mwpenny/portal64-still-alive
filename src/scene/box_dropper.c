@@ -28,14 +28,10 @@ void boxDropperFakePos(struct BoxDropper* dropper, struct Transform* result) {
 }
 
 
-void boxDropperRender(void* data, struct RenderScene* renderScene) {
+void boxDropperRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct BoxDropper* dropper = (struct BoxDropper*)data;
 
-    if (!RENDER_SCENE_IS_ROOM_VISIBLE(renderScene, dropper->roomIndex)) {
-        return;
-    }
-
-    Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
     if (!matrix) {
         return;
@@ -43,7 +39,7 @@ void boxDropperRender(void* data, struct RenderScene* renderScene) {
 
     transformToMatrixL(&dropper->transform, matrix, SCENE_SCALE);
 
-    Mtx* armature = renderStateRequestMatrices(renderScene->renderState, PROPS_BOX_DROPPER_DEFAULT_BONES_COUNT);
+    Mtx* armature = renderStateRequestMatrices(renderState, PROPS_BOX_DROPPER_DEFAULT_BONES_COUNT);
 
     if (!armature) {
         return;
@@ -51,8 +47,8 @@ void boxDropperRender(void* data, struct RenderScene* renderScene) {
 
     skCalculateTransforms(&dropper->armature, armature);
 
-    renderSceneAdd(
-        renderScene,
+    dynamicRenderListAddData(
+        renderList,
         props_box_dropper_model_gfx,
         matrix,
         box_dropper_material_index,
@@ -60,8 +56,8 @@ void boxDropperRender(void* data, struct RenderScene* renderScene) {
         armature
     );
 
-    renderSceneAdd(
-        renderScene, 
+    dynamicRenderListAddData(
+        renderList, 
         box_dropper_glass_gfx, 
         matrix, 
         box_dropper_glass_material_index, 
@@ -73,7 +69,7 @@ void boxDropperRender(void* data, struct RenderScene* renderScene) {
         struct Transform pendingCubePos;
         boxDropperFakePos(dropper, &pendingCubePos);
 
-        Mtx* pendingBoxMatrix = renderStateRequestMatrices(renderScene->renderState, 1);
+        Mtx* pendingBoxMatrix = renderStateRequestMatrices(renderState, 1);
 
         if (!pendingBoxMatrix) {
             return;
@@ -81,8 +77,8 @@ void boxDropperRender(void* data, struct RenderScene* renderScene) {
 
         transformToMatrixL(&pendingCubePos, pendingBoxMatrix, SCENE_SCALE);
 
-        renderSceneAdd(
-            renderScene, 
+        dynamicRenderListAddData(
+            renderList, 
             cube_cube_model_gfx, 
             pendingBoxMatrix, 
             CUBE_INDEX, 
@@ -108,6 +104,8 @@ void boxDropperInit(struct BoxDropper* dropper, struct BoxDropperDefinition* def
 
     dropper->flags = 0;
     dropper->reloadTimer = DROOPER_RELOAD_TIME;
+
+    dynamicSceneSetRoomFlags(dropper->dynamicId, ROOM_FLAG_FROM_INDEX(dropper->roomIndex));
 }
 
 void boxDropperUpdate(struct BoxDropper* dropper) {

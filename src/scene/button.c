@@ -42,14 +42,10 @@ struct ColliderTypeData gButtonCollider = {
 
 #define PRESSED_WITH_CUBE               2
 
-void buttonRender(void* data, struct RenderScene* renderScene) {
+void buttonRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Button* button = (struct Button*)data;
 
-    if (!RENDER_SCENE_IS_ROOM_VISIBLE(renderScene, button->rigidBody.currentRoom)) {
-        return;
-    }
-
-    Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
     if (!matrix) {
         return;
@@ -57,7 +53,7 @@ void buttonRender(void* data, struct RenderScene* renderScene) {
 
     guTranslate(matrix, button->originalPos.x * SCENE_SCALE, button->originalPos.y * SCENE_SCALE, button->originalPos.z * SCENE_SCALE);
 
-    Mtx* armature = renderStateRequestMatrices(renderScene->renderState, PROPS_BUTTON_DEFAULT_BONES_COUNT);
+    Mtx* armature = renderStateRequestMatrices(renderState, PROPS_BUTTON_DEFAULT_BONES_COUNT);
 
     if (!armature) {
         return;
@@ -69,7 +65,7 @@ void buttonRender(void* data, struct RenderScene* renderScene) {
     props_button_default_bones[PROPS_BUTTON_BUTTONPAD_BONE].position.y = (button->rigidBody.transform.position.y - button->originalPos.y) * SCENE_SCALE;
     transformToMatrixL(&props_button_default_bones[PROPS_BUTTON_BUTTONPAD_BONE], &armature[PROPS_BUTTON_BUTTONPAD_BONE], 1.0f);
 
-    renderSceneAdd(renderScene, button_gfx, matrix, button_material_index, &button->rigidBody.transform.position, armature);
+    dynamicRenderListAddData(renderList, button_gfx, matrix, button_material_index, &button->rigidBody.transform.position, armature);
 }
 
 void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
@@ -89,6 +85,8 @@ void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
 
     button->originalPos = definition->location;
     button->cubeSignalIndex = definition->cubeSignalIndex;
+
+    dynamicSceneSetRoomFlags(button->dynamicId, ROOM_FLAG_FROM_INDEX(button->rigidBody.currentRoom));
 }
 
 void buttonUpdate(struct Button* button) {

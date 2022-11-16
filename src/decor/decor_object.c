@@ -9,14 +9,10 @@
 #define TIME_TO_FIZZLE      2.0f
 #define FIZZLE_TIME_STEP    (FIXED_DELTA_TIME / TIME_TO_FIZZLE)
 
-void decorObjectRender(void* data, struct RenderScene* renderScene) {
+void decorObjectRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct DecorObject* object = (struct DecorObject*)data;
 
-    if (!RENDER_SCENE_IS_ROOM_VISIBLE(renderScene, object->rigidBody.currentRoom)) {
-        return;
-    }
-
-    Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
     if (!matrix) {
         return;
@@ -27,7 +23,7 @@ void decorObjectRender(void* data, struct RenderScene* renderScene) {
     Gfx* gfxToRender;
     
     if (object->fizzleTime > 0.0f) {
-        gfxToRender = renderStateAllocateDLChunk(renderScene->renderState, 3);
+        gfxToRender = renderStateAllocateDLChunk(renderState, 3);
 
         Gfx* curr = gfxToRender;
 
@@ -44,8 +40,8 @@ void decorObjectRender(void* data, struct RenderScene* renderScene) {
         gfxToRender = object->definition->graphics;
     }
 
-    renderSceneAdd(
-        renderScene, 
+    dynamicRenderListAddData(
+        renderList, 
         gfxToRender, 
         matrix, 
         (object->fizzleTime > 0.0f) ? object->definition->materialIndexFizzled : object->definition->materialIndex, 
@@ -73,6 +69,8 @@ void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* d
     collisionObjectUpdateBB(&object->collisionObject);
 
     object->dynamicId = dynamicSceneAdd(object, decorObjectRender, &object->rigidBody.transform, definition->radius);
+
+    dynamicSceneSetRoomFlags(object->dynamicId, ROOM_FLAG_FROM_INDEX(room));
 
     if (definition->soundClipId != -1) {
         object->playingSound = soundPlayerPlay(definition->soundClipId, 1.0f, 1.0f, &object->rigidBody.transform.position);
@@ -116,6 +114,8 @@ int decorObjectUpdate(struct DecorObject* decorObject) {
             return 0;
         }
     }
+
+    dynamicSceneSetRoomFlags(decorObject->dynamicId, ROOM_FLAG_FROM_INDEX(decorObject->rigidBody.currentRoom));
 
     return 1;
 }

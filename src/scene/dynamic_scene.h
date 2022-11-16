@@ -6,7 +6,9 @@
 #include "../scene/camera.h"
 #include "../graphics/render_scene.h"
 
-typedef void (*DynamicRender)(void* data, struct RenderScene* renderScene);
+struct DynamicRenderDataList;
+
+typedef void (*DynamicRender)(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState);
 
 #define MAX_DYNAMIC_SCENE_OBJECTS 32
 
@@ -15,12 +17,15 @@ typedef void (*DynamicRender)(void* data, struct RenderScene* renderScene);
 
 #define INVALID_DYNAMIC_OBJECT  -1
 
+#define ROOM_FLAG_FROM_INDEX(flag) (1 << (flag))
+
 struct DynamicSceneObject {
     void* data;
     DynamicRender renderCallback;
     struct Transform* transform;
     float scaledRadius;
     u16 flags;
+    u64 roomFlags;
 };
 
 struct DynamicScene {
@@ -34,6 +39,15 @@ void dynamicSceneRemove(int id);
 void dynamicSceneSetFlags(int id, int flags);
 void dynamicSceneClearFlags(int id, int flags);
 
-void dynamicScenePopulate(struct FrustrumCullingInformation* cullingInfo, struct RenderScene* renderScene);
+void dynamicSceneSetRoomFlags(int id, u64 roomFlags);
+
+void dynamicRenderListAddData(
+    struct DynamicRenderDataList* list,
+    Gfx* model,
+    Mtx* transform,
+    short materialIndex,
+    struct Vector3* position,
+    Mtx* armature
+);
 
 #endif

@@ -110,16 +110,12 @@ void signageCheckIndex(int neededIndex) {
     signageSetWarnings(gLevelWarnings[neededIndex]);
 }
 
-void signageRender(void* data, struct RenderScene* renderScene) {
+void signageRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Signage* signage = (struct Signage*)data;
-
-    if (!RENDER_SCENE_IS_ROOM_VISIBLE(renderScene, signage->roomIndex)) {
-        return;
-    }
 
     signageCheckIndex(signage->testChamberNumber);
 
-    Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
     if (!matrix) {
         return;
@@ -127,8 +123,8 @@ void signageRender(void* data, struct RenderScene* renderScene) {
 
     transformToMatrixL(&signage->transform, matrix, SCENE_SCALE);
 
-    renderSceneAdd(
-        renderScene,
+    dynamicRenderListAddData(
+        renderList,
         props_signage_model_gfx,
         matrix,
         DEFAULT_INDEX,
@@ -144,5 +140,7 @@ void signageInit(struct Signage* signage, struct SignageDefinition* definition) 
     signage->roomIndex = definition->roomIndex;
     signage->testChamberNumber = definition->testChamberNumber;
 
-    dynamicSceneAdd(signage, signageRender, &signage->transform, 1.7f);
+    int dynamicId = dynamicSceneAdd(signage, signageRender, &signage->transform, 1.7f);
+
+    dynamicSceneSetRoomFlags(dynamicId, ROOM_FLAG_FROM_INDEX(definition->roomIndex));
 }

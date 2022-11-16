@@ -28,10 +28,6 @@ struct Portal {
     short roomIndex;
 };
 
-struct RenderProps;
-
-typedef void SceneRenderCallback(void* data, struct RenderProps* properties, struct RenderState* renderState);
-
 #define NO_PORTAL 0xFF
 
 #define PORTAL_RENDER_TYPE_VISIBLE_0    (1 << 0)
@@ -45,34 +41,6 @@ typedef void SceneRenderCallback(void* data, struct RenderProps* properties, str
 #define PORTAL_RENDER_TYPE_ENABLED(portalIndex) (PORTAL_RENDER_TYPE_ENABLED_0 << (portalIndex))
 
 extern struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE];
-
-struct RenderProps {
-    struct Camera camera;
-    float aspectRatio;
-
-    struct CameraMatrixInfo cameraMatrixInfo; 
-
-    Vp* viewport;
-
-    u8 currentDepth;
-    u8 exitPortalIndex;
-    s8 clippingPortalIndex;
-    u8 portalRenderType;
-
-    u16 fromRoom;
-
-    short minX;
-    short minY;
-    short maxX;
-    short maxY;
-
-    u64 visiblerooms;
-
-    struct RenderProps* previousProperties;
-    struct RenderProps* nextProperites[2];
-};
-
-void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex);
 
 void portalInit(struct Portal* portal, enum PortalFlags flags);
 void portalUpdate(struct Portal* portal, int isOpen);

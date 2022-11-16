@@ -2,6 +2,7 @@
 
 #include "../defs.h"
 #include "../graphics/graphics.h"
+#include "render_plan.h"
 
 #include "../build/assets/models/portal/portal_blue_filled.h"
 #include "../build/assets/models/portal/portal_orange_filled.h"

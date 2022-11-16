@@ -14,10 +14,10 @@ void fizzlerTrigger(void* data, struct CollisionObject* objectEnteringTrigger) {
     }
 }
 
-void fizzlerRender(void* data, struct RenderScene* renderScene) {
+void fizzlerRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Fizzler* fizzler = (struct Fizzler*)data;
 
-    Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
     
     if (!matrix) {
         return;
@@ -25,7 +25,7 @@ void fizzlerRender(void* data, struct RenderScene* renderScene) {
     
     transformToMatrixL(&fizzler->rigidBody.transform, matrix, SCENE_SCALE);
 
-    renderSceneAdd(renderScene, fizzler->modelGraphics, matrix, fizzler_material_index, &fizzler->rigidBody.transform.position, NULL);
+    dynamicRenderListAddData(renderList, fizzler->modelGraphics, matrix, fizzler_material_index, &fizzler->rigidBody.transform.position, NULL);
 }
 
 void fizzlerSpawnParticle(struct Fizzler* fizzler, int particleIndex) {
@@ -153,6 +153,8 @@ void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float wid
 
     fizzler->oldestParticleIndex = 0;
     fizzler->dynamicId = dynamicSceneAdd(fizzler, fizzlerRender, &fizzler->rigidBody.transform, sqrtf(width * width + height * height) * 0.5f);
+
+    dynamicSceneSetRoomFlags(fizzler->dynamicId, ROOM_FLAG_FROM_INDEX(room));
 }
 
 void fizzlerUpdate(struct Fizzler* fizzler) {

@@ -6,6 +6,32 @@
 
 #define MAX_PORTAL_STEPS    6
 
+struct RenderProps {
+    struct Camera camera;
+    float aspectRatio;
+
+    struct CameraMatrixInfo cameraMatrixInfo; 
+
+    Vp* viewport;
+
+    u8 currentDepth;
+    u8 exitPortalIndex;
+    s8 clippingPortalIndex;
+    u8 portalRenderType;
+
+    u16 fromRoom;
+
+    short minX;
+    short minY;
+    short maxX;
+    short maxY;
+
+    u64 visiblerooms;
+
+    struct RenderProps* previousProperties;
+    struct RenderProps* nextProperites[2];
+};
+
 struct RenderPlan {
     struct RenderProps stageProps[MAX_PORTAL_STEPS];
     short stageCount;

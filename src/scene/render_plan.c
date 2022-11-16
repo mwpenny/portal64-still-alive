@@ -6,8 +6,10 @@
 #include "../levels/static_render.h"
 
 #include "../util/memory.h"
+#include "../math/mathf.h"
 
 #include "portal_render.h"
+#include "../scene/dynamic_scene.h"
 
 #include "../build/assets/models/portal/portal_blue.h"
 #include "../build/assets/models/portal/portal_blue_face.h"
@@ -15,6 +17,65 @@
 #include "../build/assets/models/portal/portal_orange_face.h"
 
 #define MIN_VP_WIDTH 64
+#define CAMERA_CLIPPING_RADIUS  0.2f
+#define PORTAL_CLIPPING_OFFSET  0.1f
+
+void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex) {
+    props->camera = *camera;
+    props->aspectRatio = aspectRatio;
+    cameraSetupMatrices(camera, renderState, aspectRatio, &fullscreenViewport, &props->cameraMatrixInfo);
+
+    props->viewport = &fullscreenViewport;
+    props->currentDepth = STARTING_RENDER_DEPTH;
+    props->exitPortalIndex = NO_PORTAL;
+    props->fromRoom = roomIndex;
+
+    props->clippingPortalIndex = -1;
+
+    if (collisionSceneIsPortalOpen()) {
+        for (int i = 0; i < 2; ++i) {
+            struct Vector3 portalOffset;
+
+            vector3Sub(&camera->transform.position, &gCollisionScene.portalTransforms[i]->position, &portalOffset);
+
+            struct Vector3 portalNormal;
+            quatMultVector(&gCollisionScene.portalTransforms[i]->rotation, &gForward, &portalNormal);
+            struct Vector3 projectedPoint;
+
+            if (i == 0) {
+                vector3Negate(&portalNormal, &portalNormal);
+            }
+
+            float clippingDistnace = vector3Dot(&portalNormal, &portalOffset);
+
+            if (fabsf(clippingDistnace) > CAMERA_CLIPPING_RADIUS) {
+                continue;
+            }
+
+            vector3AddScaled(&camera->transform.position, &portalNormal, -clippingDistnace, &projectedPoint);
+
+            if (collisionSceneIsTouchingSinglePortal(&projectedPoint, &portalNormal, gCollisionScene.portalTransforms[i], i)) {
+                planeInitWithNormalAndPoint(&props->cameraMatrixInfo.cullingInformation.clippingPlanes[5], &portalNormal, &gCollisionScene.portalTransforms[i]->position);
+                props->cameraMatrixInfo.cullingInformation.clippingPlanes[5].d = (props->cameraMatrixInfo.cullingInformation.clippingPlanes[5].d + PORTAL_CLIPPING_OFFSET) * SCENE_SCALE;
+                ++props->cameraMatrixInfo.cullingInformation.usedClippingPlaneCount;
+                props->clippingPortalIndex = i;
+                break;
+            }
+        }
+    }
+
+    props->minX = 0;
+    props->minY = 0;
+    props->maxX = SCREEN_WD;
+    props->maxY = SCREEN_HT;
+
+    props->previousProperties = NULL;
+    props->nextProperites[0] = NULL;
+    props->nextProperites[1] = NULL;
+
+    props->portalRenderType = 0;
+    props->visiblerooms = 0;
+}
 
 void renderPropscheckViewportSize(int* min, int* max, int screenSize) {
     if (*max < MIN_VP_WIDTH) {
@@ -268,6 +329,10 @@ void renderPlanBuild(struct RenderPlan* renderPlan, struct Scene* scene, struct 
 }
 
 void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderState* renderState) {
+    struct DynamicRenderDataList* dynamicList = dynamicRenderListNew(MAX_DYNAMIC_SCENE_OBJECTS);
+
+    dynamicRenderListPopulate(dynamicList, renderPlan->stageProps, renderPlan->stageCount, renderState);
+
     for (int i = renderPlan->stageCount - 1; i >= 0; --i) {
         struct RenderProps* current = &renderPlan->stageProps[i];
 
@@ -329,6 +394,8 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, struc
             portalIndex = 1 - portalIndex;
         }
 
-        staticRender(&current->camera.transform, &current->cameraMatrixInfo.cullingInformation, current->visiblerooms, renderState);
+        staticRender(&current->camera.transform, &current->cameraMatrixInfo.cullingInformation, current->visiblerooms, dynamicList, i, renderState);
     }
+
+    dynamicRenderListFree(dynamicList);
 }

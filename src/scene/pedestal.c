@@ -11,10 +11,10 @@
 struct Vector2 gMaxPedistalRotation;
 #define MAX_PEDISTAL_ROTATION_DEGREES_PER_SEC   (M_PI / 3.0f)
 
-void pedestalRender(void* data, struct RenderScene* renderScene) {
+void pedestalRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Pedestal* pedestal = (struct Pedestal*)data;
 
-    Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
     if (!matrix) {
         return;
@@ -22,7 +22,7 @@ void pedestalRender(void* data, struct RenderScene* renderScene) {
 
     transformToMatrixL(&pedestal->transform, matrix, SCENE_SCALE);
 
-    Mtx* armature = renderStateRequestMatrices(renderScene->renderState, pedestal->armature.numberOfBones);
+    Mtx* armature = renderStateRequestMatrices(renderState, pedestal->armature.numberOfBones);
 
     if (!armature) {
         return;
@@ -30,9 +30,9 @@ void pedestalRender(void* data, struct RenderScene* renderScene) {
 
     skCalculateTransforms(&pedestal->armature, armature);
 
-    Gfx* attachments = skBuildAttachments(&pedestal->armature, (pedestal->flags & PedestalFlagsDown) ? NULL : &w_portal_gun_gfx, renderScene->renderState);
+    Gfx* attachments = skBuildAttachments(&pedestal->armature, (pedestal->flags & PedestalFlagsDown) ? NULL : &w_portal_gun_gfx, renderState);
 
-    Gfx* objectRender = renderStateAllocateDLChunk(renderScene->renderState, 4);
+    Gfx* objectRender = renderStateAllocateDLChunk(renderState, 4);
     Gfx* dl = objectRender;
 
     if (attachments) {
@@ -42,8 +42,8 @@ void pedestalRender(void* data, struct RenderScene* renderScene) {
     gSPDisplayList(dl++, pedestal_model_gfx);
     gSPEndDisplayList(dl++);
 
-    renderSceneAdd(
-        renderScene,
+    dynamicRenderListAddData(
+        renderList,
         objectRender,
         matrix,
         DEFAULT_INDEX,
@@ -63,6 +63,8 @@ void pedestalInit(struct Pedestal* pedestal, struct PedestalDefinition* definiti
     skAnimatorInit(&pedestal->animator, PEDESTAL_DEFAULT_BONES_COUNT, NULL, NULL);
 
     pedestal->dynamicId = dynamicSceneAdd(pedestal, pedestalRender, &pedestal->transform, 0.8f);
+
+    dynamicSceneSetRoomFlags(pedestal->dynamicId, ROOM_FLAG_FROM_INDEX(definition->roomIndex));
 
     pedestal->flags = 0;
 

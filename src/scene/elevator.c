@@ -43,17 +43,13 @@ struct Vector3 gOpenPosition[] = {
     [PROPS_ROUND_ELEVATOR_DOORRIGHT_BONE] = {1.188716 * SCENE_SCALE, 0.0f, -0.653916 * SCENE_SCALE},
 };
 
-void elevatorRender(void* data, struct RenderScene* renderScene) {
+void elevatorRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Elevator* elevator = (struct Elevator*)data;
 
-    if (!RENDER_SCENE_IS_ROOM_VISIBLE(renderScene, elevator->roomIndex)) {
-        return;
-    }
-
-    Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
     transformToMatrixL(&elevator->rigidBody.transform, matrix, SCENE_SCALE);
 
-    Mtx* armature = renderStateRequestMatrices(renderScene->renderState, PROPS_ROUND_ELEVATOR_DEFAULT_BONES_COUNT);
+    Mtx* armature = renderStateRequestMatrices(renderState, PROPS_ROUND_ELEVATOR_DEFAULT_BONES_COUNT);
 
     if (!armature) {
         return;
@@ -64,8 +60,8 @@ void elevatorRender(void* data, struct RenderScene* renderScene) {
         transformToMatrixL(&props_round_elevator_default_bones[i], &armature[i], 1.0f);
     }
 
-    renderSceneAdd(
-        renderScene, 
+    dynamicRenderListAddData(
+        renderList, 
         props_round_elevator_model_gfx, 
         matrix, 
         DEFAULT_INDEX, 
@@ -78,8 +74,8 @@ void elevatorRender(void* data, struct RenderScene* renderScene) {
     int isPlayerInside = insideCheck == ElevatorFlagsIsLocked || insideCheck == ElevatorFlagsIsExit;
 
     if (elevator->openAmount > 0.0f || isPlayerInside) {
-        renderSceneAdd(
-            renderScene, 
+        dynamicRenderListAddData(
+            renderList, 
             props_round_elevator_interior_model_gfx, 
             matrix, 
             DEFAULT_INDEX, 
@@ -106,6 +102,8 @@ void elevatorInit(struct Elevator* elevator, struct ElevatorDefinition* elevator
     elevator->targetElevator = elevatorDefinition->targetElevator;
 
     elevator->timer = elevatorDefinition->targetElevator == -1 ? OPEN_DELAY : CLOSE_DELAY;
+    
+    dynamicSceneSetRoomFlags(elevator->dynamicId, ROOM_FLAG_FROM_INDEX(elevatorDefinition->roomIndex));
 }
 
 int elevatorUpdate(struct Elevator* elevator, struct Player* player) {

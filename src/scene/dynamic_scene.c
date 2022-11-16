@@ -5,29 +5,9 @@
 
 struct DynamicScene gDynamicScene;
 
-#define FLAG_MASK (DYNAMIC_SCENE_OBJECT_FLAGS_USED | DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE)
-
-#define FLAG_VALUE_NOT_TOUCHING_PORTAL (DYNAMIC_SCENE_OBJECT_FLAGS_USED | DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE)
-
 void dynamicSceneInit() {
     for (int i = 0; i < MAX_DYNAMIC_SCENE_OBJECTS; ++i) {
         gDynamicScene.objects[i].flags = 0;
-    }
-}
-
-void dynamicScenePopulateWithFlags(struct FrustrumCullingInformation* cullingInfo, struct RenderScene* renderScene, int flags) {
-    for (int i = 0; i < MAX_DYNAMIC_SCENE_OBJECTS; ++i) {
-        struct DynamicSceneObject* object = &gDynamicScene.objects[i];
-        if ((object->flags & FLAG_MASK) == flags) {
-            struct Vector3 scaledPos;
-            vector3Scale(&object->transform->position, &scaledPos, SCENE_SCALE);
-
-            if (isSphereOutsideFrustrum(cullingInfo, &scaledPos, object->scaledRadius)) {
-                continue;
-            }
-
-            object->renderCallback(object->data, renderScene);
-        }
     }
 }
 
@@ -41,6 +21,7 @@ int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Transform* 
             object->renderCallback = renderCallback;
             object->transform = transform;
             object->scaledRadius = radius * SCENE_SCALE;
+            object->roomFlags = ~0;
             return i;
         }
     }
@@ -64,6 +45,6 @@ void dynamicSceneClearFlags(int id, int flags) {
     gDynamicScene.objects[id].flags &= ~flags;
 }
 
-void dynamicScenePopulate(struct FrustrumCullingInformation* cullingInfo, struct RenderScene* renderScene) {
-    dynamicScenePopulateWithFlags(cullingInfo, renderScene, FLAG_VALUE_NOT_TOUCHING_PORTAL);
+void dynamicSceneSetRoomFlags(int id, u64 roomFlags) {
+    gDynamicScene.objects[id].roomFlags = roomFlags;
 }
