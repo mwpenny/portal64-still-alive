@@ -287,7 +287,7 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
 }
 
 #define MIN_FAR_PLANE   (5.0f * SCENE_SCALE)
-#define FAR_PLANE_EXTRA  1.0f
+#define FAR_PLANE_EXTRA  2.0f
 
 void renderPlanDetermineFarPlane(struct RenderProps* properties) {
     struct Ray cameraRay;
@@ -342,6 +342,53 @@ void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, st
     }
 }
 
+void renderPlanAdjustViewportDepth(struct RenderPlan* renderPlan) {
+    float depthWeight[STARTING_RENDER_DEPTH + 1];
+
+    for (int i = 0; i <= STARTING_RENDER_DEPTH; ++i) {
+        depthWeight[i] = 0.0f;
+    }
+
+    for (int i = 0; i < renderPlan->stageCount; ++i) {
+        struct RenderProps* current = &renderPlan->stageProps[i];
+
+        float depth = current->camera.farPlane - current->camera.nearPlane;
+
+        depthWeight[current->currentDepth] = MAX(depthWeight[current->currentDepth], depth);
+    }
+
+    float totalWeight = 0.0f;
+
+    for (int i = 0; i <= STARTING_RENDER_DEPTH; ++i) {
+        totalWeight += depthWeight[i];
+    }
+
+    // give the main view a larger slice of the depth buffer
+    totalWeight += depthWeight[STARTING_RENDER_DEPTH];
+    depthWeight[STARTING_RENDER_DEPTH] *= 2.0f;
+
+    float scale = (float)G_MAXZ / totalWeight;
+
+    short zBufferBoundary[STARTING_RENDER_DEPTH + 2];
+
+    zBufferBoundary[STARTING_RENDER_DEPTH + 1] = 0;
+
+    for (int i = STARTING_RENDER_DEPTH; i >= 0; --i) {
+        zBufferBoundary[i] = (short)(scale * depthWeight[i]) + zBufferBoundary[i + 1];
+
+        zBufferBoundary[i] = MIN(zBufferBoundary[i], G_MAXZ);
+    }
+
+    for (int i = 0; i < renderPlan->stageCount; ++i) {
+        struct RenderProps* current = &renderPlan->stageProps[i];
+        short minZ = zBufferBoundary[current->currentDepth + 1];
+        short maxZ = zBufferBoundary[current->currentDepth];
+
+        current->viewport->vp.vscale[2] = (maxZ - minZ) >> 1;
+        current->viewport->vp.vtrans[2] = (maxZ + minZ) >> 1;
+    }
+}
+
 void renderPlanBuild(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderState* renderState) {
     renderPropsInit(&renderPlan->stageProps[0], &scene->camera, (float)SCREEN_WD / (float)SCREEN_HT, renderState, scene->player.body.currentRoom);
     renderPlan->stageCount = 1;
@@ -349,6 +396,8 @@ void renderPlanBuild(struct RenderPlan* renderPlan, struct Scene* scene, struct 
     renderPlan->nearPolygonCount = 0;
 
     renderPlanFinishView(renderPlan, scene, &renderPlan->stageProps[0], renderState);
+
+    renderPlanAdjustViewportDepth(renderPlan);
 }
 
 void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderState* renderState) {
