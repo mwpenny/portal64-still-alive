@@ -41,7 +41,7 @@ void sceneUpdateListeners(struct Scene* scene);
 void sceneInit(struct Scene* scene) {
     signalsInit(1);
 
-    cameraInit(&scene->camera, 70.0f, 0.125f * SCENE_SCALE, 30.0f * SCENE_SCALE);
+    cameraInit(&scene->camera, 70.0f, DEFAULT_NEAR_PLANE * SCENE_SCALE, DEFAULT_FAR_PLANE * SCENE_SCALE);
 
     struct Location* startLocation = levelGetLocation(gCurrentLevel->startLocation);
     struct Location combinedLocation;

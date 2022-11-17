@@ -4,6 +4,9 @@
 #include "./scene.h"
 #include "../graphics/screen_clipper.h"
 
+#define DEFAULT_FAR_PLANE       30.0f
+#define DEFAULT_NEAR_PLANE      0.125f
+
 #define MAX_PORTAL_STEPS    6
 
 struct RenderProps {

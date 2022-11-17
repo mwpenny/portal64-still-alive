@@ -84,6 +84,7 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 
 ## Current TODO list
 
+- [ ] Passing into a cieling portal can sometimes mess with the player rotation
 - [ ] render callback only once
 - [ ] check for null allocations in render process
 - [ ] stop looping sounds betwen levels

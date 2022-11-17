@@ -225,6 +225,8 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
     transformConcat(exitPortal, &otherInverse, &portalCombined);
 
     next->camera = current->camera;
+    next->camera.farPlane = DEFAULT_FAR_PLANE * SCENE_SCALE;
+    next->camera.nearPlane = DEFAULT_NEAR_PLANE * SCENE_SCALE;
     next->aspectRatio = current->aspectRatio;
     transformConcat(&portalCombined, &current->camera.transform, &next->camera.transform);
 
