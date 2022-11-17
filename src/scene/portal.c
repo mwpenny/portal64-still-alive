@@ -131,7 +131,7 @@ int portalSurfaceCutNewHole(struct Portal* portal, int portalIndex) {
 }
 
 void portalCheckForHoles(struct Portal* portals) {
-    if (controllerGetButtonUp(1, R_CBUTTONS)) {
+    if (controllerGetButtonUp(0, R_JPAD)) {
         portals[0].flags |= PortalFlagsNeedsNewHole;
         portals[1].flags |= PortalFlagsNeedsNewHole;
     }

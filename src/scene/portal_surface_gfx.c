@@ -132,12 +132,12 @@ void gfxBuilderFlushCache(struct GfxBuilderState* gfxBuilder, u8* vertexCacheCon
             struct GfxTraingleIndices* nextTriangle = &gfxBuilder->triangles[triangleIndex + 1];
 
             gSP2Triangles(gfxBuilder->gfx++, 
-                triangle->indices[0], triangle->indices[1], triangle->indices[2], 0, 
-                nextTriangle->indices[0], nextTriangle->indices[1], nextTriangle->indices[2], 0
+                vertexToCacheIndex[triangle->indices[0]], vertexToCacheIndex[triangle->indices[1]], vertexToCacheIndex[triangle->indices[2]], 0, 
+                vertexToCacheIndex[nextTriangle->indices[0]], vertexToCacheIndex[nextTriangle->indices[1]], vertexToCacheIndex[nextTriangle->indices[2]], 0
             );
         } else {
             gSP1Triangle(gfxBuilder->gfx++,
-                triangle->indices[0], triangle->indices[1], triangle->indices[2], 0
+                vertexToCacheIndex[triangle->indices[0]], vertexToCacheIndex[triangle->indices[1]], vertexToCacheIndex[triangle->indices[2]], 0
             );
         }
     }
