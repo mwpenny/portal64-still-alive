@@ -17,6 +17,8 @@ struct RenderProps {
 
     Vp* viewport;
 
+    float maxZOverlap;
+
     u8 currentDepth;
     u8 exitPortalIndex;
     s8 clippingPortalIndex;

@@ -27,6 +27,18 @@ void matrixPerspective(float matrix[4][4], unsigned short* perspNorm, float l, f
 	}
 }
 
+float matrixNormalizedZValue(float depth, float near, float far) {
+    if (depth >= -near) {
+        return -1.0f;
+    }
+
+    if (depth <= -far) {
+        return 1.0f;
+    }
+
+    return (far * (depth + near) + 2.0 * far * near) / (depth * (far - near));
+}
+
 void matrixVec3Mul(float matrix[4][4], struct Vector3* input, struct Vector4* output) {
     output->x = matrix[0][0] * input->x + matrix[1][0] * input->y + matrix[2][0] * input->z + matrix[3][0];
     output->y = matrix[0][1] * input->x + matrix[1][1] * input->y + matrix[2][1] * input->z + matrix[3][1];

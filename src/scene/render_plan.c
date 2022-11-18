@@ -7,6 +7,7 @@
 
 #include "../util/memory.h"
 #include "../math/mathf.h"
+#include "../math/matrix.h"
 
 #include "portal_render.h"
 #include "../scene/dynamic_scene.h"
@@ -291,13 +292,9 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
 #define MIN_FAR_PLANE   (5.0f * SCENE_SCALE)
 #define FAR_PLANE_EXTRA  2.0f
 
-void renderPlanDetermineFarPlane(struct RenderProps* properties) {
-    struct Ray cameraRay;
-    quatMultVector(&properties->camera.transform.rotation, &gForward, &cameraRay.dir);
-    cameraRay.origin = properties->camera.transform.position;
-    vector3Negate(&cameraRay.dir, &cameraRay.dir);
+void renderPlanDetermineFarPlane(struct Ray* cameraRay, struct RenderProps* properties) {
 
-    float furthestDistance = (worldMaxDistanceInDirection(&gCurrentLevel->world, &cameraRay, properties->visiblerooms) + FAR_PLANE_EXTRA) * SCENE_SCALE;
+    float furthestDistance = (worldMaxDistanceInDirection(&gCurrentLevel->world, cameraRay, properties->visiblerooms) + FAR_PLANE_EXTRA) * SCENE_SCALE;
 
     if (furthestDistance < MIN_FAR_PLANE) {
         properties->camera.farPlane = MIN_FAR_PLANE;
@@ -310,7 +307,12 @@ void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, st
     
     staticRenderDetermineVisibleRooms(&properties->cameraMatrixInfo.cullingInformation, properties->fromRoom, &properties->visiblerooms);
 
-    renderPlanDetermineFarPlane(properties);
+    struct Ray cameraRay;
+    quatMultVector(&properties->camera.transform.rotation, &gForward, &cameraRay.dir);
+    cameraRay.origin = properties->camera.transform.position;
+    vector3Negate(&cameraRay.dir, &cameraRay.dir);
+
+    renderPlanDetermineFarPlane(&cameraRay, properties);
 
     cameraSetupMatrices(&properties->camera, renderState, properties->aspectRatio, properties->viewport, &properties->cameraMatrixInfo);
 
@@ -322,6 +324,8 @@ void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, st
     }
 
     struct RenderProps* prevSibling = NULL;
+
+    float furthestPortal = 0.0f;
 
     for (int i = 0; i < 2; ++i) {
         if (gCollisionScene.portalTransforms[closerPortal] && 
@@ -337,11 +341,19 @@ void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, st
             );
 
             properties->portalRenderType |= planResult;
+
+            if (planResult) {
+                float portalDistance = rayDetermineDistance(&cameraRay, &gCollisionScene.portalTransforms[closerPortal]->position) + 1.0f;
+
+                furthestPortal = MAX(furthestPortal, portalDistance);
+            }
         }
 
         closerPortal = 1 - closerPortal;
         otherPortal = 1 - otherPortal;
     }
+
+    properties->maxZOverlap = matrixNormalizedZValue(-furthestPortal * SCENE_SCALE, properties->camera.nearPlane, properties->camera.farPlane);
 }
 
 void renderPlanAdjustViewportDepth(struct RenderPlan* renderPlan) {
@@ -385,6 +397,18 @@ void renderPlanAdjustViewportDepth(struct RenderPlan* renderPlan) {
         struct RenderProps* current = &renderPlan->stageProps[i];
         short minZ = zBufferBoundary[current->currentDepth + 1];
         short maxZ = zBufferBoundary[current->currentDepth];
+
+        if (current->maxZOverlap <= -1.0f) {
+            maxZ = G_MAXZ;
+        } else {
+            float newZ = 0.5f * (float)maxZ / (current->maxZOverlap + 1.0f);
+
+            if (newZ >= G_MAXZ) {
+                maxZ = G_MAXZ;
+            } else {
+                maxZ = (short)newZ;
+            }
+        }
 
         current->viewport->vp.vscale[2] = (maxZ - minZ) >> 1;
         current->viewport->vp.vtrans[2] = (maxZ + minZ) >> 1;
