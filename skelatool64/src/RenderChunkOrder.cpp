@@ -6,6 +6,7 @@
 #include <queue>
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 struct RenderChunkPath {
     RenderChunkPath(int size);
@@ -15,6 +16,7 @@ struct RenderChunkPath {
     double currentLength;
     int startIndex;
     int currentIndex;
+    int edgeCount;
     // map to index to from index
     std::vector<int> path;
 
@@ -29,6 +31,7 @@ RenderChunkPath::RenderChunkPath(int size) :
     currentLength(0.0),
     startIndex(-1),
     currentIndex(0),
+    edgeCount(0),
     path(size) {
     for (int i = 0; i < size; ++i) {
         path[i] = -1;
@@ -36,7 +39,7 @@ RenderChunkPath::RenderChunkPath(int size) :
 }
 
 bool RenderChunkPath::IsDone() const {
-    return startIndex == currentIndex;
+    return startIndex == currentIndex && edgeCount > 0;
 }
 
 bool RenderChunkPath::operator <(const RenderChunkPath& other) const {
@@ -49,11 +52,11 @@ bool RenderChunkPath::operator <(const RenderChunkPath& other) const {
 
 class RenderChunkPathCompare {
     public:
-       bool operator()(RenderChunkPath a, RenderChunkPath b){
-           if(a.bestCase == b.bestCase){
-               return a.worstCase > b.worstCase;
+       bool operator()(const std::shared_ptr<RenderChunkPath>& a, const std::shared_ptr<RenderChunkPath>& b){
+           if(a->bestCase == b->bestCase){
+               return a->worstCase > b->worstCase;
            }
-           return a.bestCase > b.bestCase;
+           return a->bestCase > b->bestCase;
       }
 };
 
@@ -66,18 +69,18 @@ struct RenderChunkDistanceGraph {
     double bestWorstCase;
     int numberOfEdges;
 
-    std::priority_queue<RenderChunkPath, std::vector<RenderChunkPath>, RenderChunkPathCompare> currentChunks;
+    std::priority_queue<std::shared_ptr<RenderChunkPath>, std::vector<std::shared_ptr<RenderChunkPath>>, RenderChunkPathCompare> currentChunks;
 
     double GetDistance(int from, int to) const;
     void SetDistance(int from, int to, double value);
 
-    struct RenderChunkPath currentBest;
+    std::shared_ptr<RenderChunkPath> currentBest;
 };
 
 RenderChunkDistanceGraph::RenderChunkDistanceGraph(int numberOfEdges) :
     bestWorstCase(0.0),
     numberOfEdges(numberOfEdges),
-    currentBest(numberOfEdges) {
+    currentBest(nullptr) {
     edgeDistance.resize(numberOfEdges * numberOfEdges);
     maxDistanceTo.resize(numberOfEdges);
     minDistanceTo.resize(numberOfEdges);
@@ -94,18 +97,18 @@ void RenderChunkDistanceGraph::SetDistance(int from, int to, double value) {
 
 void orderRenderGreedy(struct RenderChunkDistanceGraph& graph, struct RenderChunkPath& path);
 
-void orderRenderAddNext(struct RenderChunkDistanceGraph& graph, struct RenderChunkPath& next) {
-    if (next.bestCase > graph.bestWorstCase) {
+void orderRenderAddNext(struct RenderChunkDistanceGraph& graph, std::shared_ptr<RenderChunkPath>& next) {
+    if (next->bestCase > graph.bestWorstCase) {
         return;
     }
 
-    if (next.worstCase < graph.bestWorstCase) {
-        graph.bestWorstCase = next.worstCase;
+    if (next->worstCase < graph.bestWorstCase) {
+        graph.bestWorstCase = next->worstCase;
     }
 
-    if (!next.IsDone()) {
+    if (!next->IsDone()) {
         graph.currentChunks.push(next);
-    } else if (graph.currentBest.currentLength > next.currentLength) {
+    } else if (graph.currentBest == nullptr || graph.currentBest->currentLength > next->currentLength) {
         graph.currentBest = next;
     }
 }
@@ -129,27 +132,28 @@ void orderRenderPopulateNext(struct RenderChunkDistanceGraph& graph, struct Rend
 
         double edgeDistnace = graph.GetDistance(current.currentIndex, i);
 
-        struct RenderChunkPath next(current);
+        std::shared_ptr<RenderChunkPath> next(new RenderChunkPath(current));
 
-        next.bestCase += edgeDistnace - graph.minDistanceTo[i];
-        next.worstCase += edgeDistnace - graph.maxDistanceTo[i];
+        next->bestCase += edgeDistnace - graph.minDistanceTo[i];
+        next->worstCase += edgeDistnace - graph.maxDistanceTo[i];
 
-        next.currentLength += edgeDistnace;
-        next.path[i] = current.currentIndex;
+        next->currentLength += edgeDistnace;
+        next->edgeCount += 1;
+        next->path[i] = current.currentIndex;
 
-        if (next.startIndex == -1) {
-            next.startIndex = next.currentIndex;
+        if (next->startIndex == -1) {
+            next->startIndex = next->currentIndex;
         }
 
-        next.currentIndex = i;
+        next->currentIndex = i;
 
-        if ((int)next.path.size() + 1 == graph.numberOfEdges) {
-            next.currentLength += graph.GetDistance(next.currentIndex, next.startIndex);
-            next.path[next.startIndex] = next.currentIndex;
-            next.currentIndex = next.startIndex;
+        if (next->edgeCount + 1 == graph.numberOfEdges) {
+            next->currentLength += graph.GetDistance(next->currentIndex, next->startIndex);
+            next->path[next->startIndex] = next->currentIndex;
+            next->currentIndex = next->startIndex;
 
-            next.bestCase = next.currentLength;
-            next.worstCase = next.currentLength;
+            next->bestCase = next->currentLength;
+            next->worstCase = next->currentLength;
         }
 
         orderRenderAddNext(graph, next);
@@ -169,23 +173,27 @@ void orderRenderBnB(struct RenderChunkDistanceGraph& graph, int maxIterations) {
         first.worstCase += graph.maxDistanceTo[i];
     }
 
+    graph.currentBest = std::shared_ptr<RenderChunkPath>(new RenderChunkPath(graph.numberOfEdges));
+
     // get a base case
-    orderRenderGreedy(graph, graph.currentBest);
-    graph.bestWorstCase = graph.currentBest.worstCase;
+    orderRenderGreedy(graph, *graph.currentBest);
+    graph.bestWorstCase = graph.currentBest->worstCase;
 
     orderRenderPopulateNext(graph, first);
 
     int iteration = 0;
 
     while (iteration < maxIterations && graph.currentChunks.size()) {
-        struct RenderChunkPath current = graph.currentChunks.top();
+        std::shared_ptr<RenderChunkPath> current = graph.currentChunks.top();
         graph.currentChunks.pop();
 
-        if (current.bestCase > graph.currentBest.worstCase) {
+        if (current->bestCase > graph.currentBest->worstCase) {
             break;
         }
 
-        orderRenderPopulateNext(graph, current);
+        orderRenderPopulateNext(graph, *current);
+
+        iteration += 1;
     }
 }
 
@@ -196,7 +204,7 @@ void orderRenderGreedy(struct RenderChunkDistanceGraph& graph, struct RenderChun
     path.startIndex = 0;
     path.currentIndex = 0;
 
-    while ((int)path.path.size() < graph.numberOfEdges) {
+    while (!path.IsDone()) {
         int toIndex = path.startIndex;
         double minPathLength = graph.GetDistance(path.currentIndex, path.startIndex);
         
@@ -227,6 +235,7 @@ void orderRenderGreedy(struct RenderChunkDistanceGraph& graph, struct RenderChun
         path.currentLength += minPathLength;
         path.path[toIndex] = path.currentIndex;
         path.currentIndex = toIndex;
+        path.edgeCount += 1;
     }
 
     path.bestCase = path.currentLength;
@@ -338,7 +347,7 @@ void orderRenderChunks(std::vector<RenderChunk>& chunks, const DisplayListSettin
     orderRenderBnB(graph, settings.mMaxOptimizationIterations);
 
     std::vector<RenderChunk> result;
-    orderRenderExtract(graph.currentBest, chunks, startIndex, result);
+    orderRenderExtract(*graph.currentBest, chunks, startIndex, result);
 
     if (result[0].mMesh == nullptr) {
         result.erase(result.begin());
