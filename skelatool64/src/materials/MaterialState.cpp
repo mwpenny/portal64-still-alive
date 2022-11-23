@@ -5,6 +5,8 @@
 #include "RenderMode.h"
 #include <iostream>
 
+#include "MaterialTransitionTiming.h"
+
 
 FlagList::FlagList() : flags(0), knownFlags(0) {}
 
@@ -23,7 +25,7 @@ void FlagList::DeleteFlag(int mask) {
     knownFlags &= ~mask;
 }
 
-struct FlagList FlagList::GetDeltaFrom(struct FlagList& other) {
+struct FlagList FlagList::GetDeltaFrom(const struct FlagList& other) const {
     struct FlagList result;
 
     result.knownFlags = 
@@ -741,3 +743,130 @@ void applyMaterial(const MaterialState& from, MaterialState& to) {
         to.blendColor = from.blendColor;
     }
 } 
+
+double materialOtherModeH(int from, int to) {
+    if (from != to && to != 0) {
+        return TIMING_SP_OTHER_MODE_H;
+    }
+
+    return 0.0f;
+}
+
+double materialOtherModeL(int from, int to) {
+    if (from != to && to != 0) {
+        return TIMING_SP_OTHER_MODE_L;
+    }
+
+    return 0.0f;
+}
+
+double materialTileTime(const MaterialState& from, const TileState& toTile) {
+    if (!toTile.isOn) {
+        return 0.0f;
+    }
+
+    int existingTile = -1;
+
+    for (int i = 0; i < MAX_TILE_COUNT; ++i) {
+        if (from.tiles[i].texture == toTile.texture) {
+            existingTile = i;
+            break;
+        }
+    }
+
+    float result = 0.0f;
+
+    if ((existingTile == -1 ||
+        from.tiles[existingTile].tmem != toTile.tmem) && toTile.texture != nullptr) {
+
+        result += TIMING_DP_TILE_SYNC;
+        result += TIMING_DP_TEXTURE_IMAGE;
+        result += TIMING_DP_SET_TILE;
+        result += TIMING_DP_LOAD_SYNC;
+        result += TIMING_DP_LOAD_BLOCK(toTile.texture->NBytes());
+        result += TIMING_DP_PIPE_SYNC;
+    }
+
+    if (toTile.texture != nullptr && toTile.texture->GetPallete() != nullptr && (
+        existingTile == -1 || from.tiles[existingTile].texture == nullptr || from.tiles[existingTile].texture->GetPallete() != toTile.texture->GetPallete())
+    ) {
+        result += TIMING_DP_TILE_SYNC;
+        result += TIMING_DP_TEXTURE_IMAGE;
+        result += TIMING_DP_SET_TILE;
+        result += TIMING_DP_LOAD_SYNC;
+        result += TIMING_DP_LOAD_BLOCK(toTile.texture->GetPallete()->NBytes());
+        result += TIMING_DP_PIPE_SYNC;
+    }
+
+    if ((existingTile == -1 ||
+        from.tiles[existingTile].IsTileStateEqual(toTile))) {
+        result += TIMING_DP_SET_TILE;
+    }
+
+    if ((existingTile == -1 ||
+        from.tiles[existingTile].IsTileSizeEqual(toTile))) {
+        result += TIMING_DP_SET_TILE_SIZE;
+    }
+
+    return result;
+}
+
+double materialTransitionTime(const MaterialState& from, const MaterialState& to) {
+    double result = 0.0f;
+
+    if (to.geometryModes.GetDeltaFrom(from.geometryModes).knownFlags) {
+        result += TIMING_SP_GEOMETRY_MODE;
+    }
+
+    result += materialOtherModeH((int)from.pipelineMode, (int)to.pipelineMode);
+    result += materialOtherModeH((int)from.cycleType, (int)to.cycleType);
+    result += materialOtherModeH((int)from.perspectiveMode, (int)to.perspectiveMode);
+    result += materialOtherModeH((int)from.textureDetail, (int)to.textureDetail);
+    result += materialOtherModeH((int)from.textureLOD, (int)to.textureLOD);
+    result += materialOtherModeH((int)from.textureLUT, (int)to.textureLUT);
+    result += materialOtherModeH((int)from.textureFilter, (int)to.textureFilter);
+    result += materialOtherModeH((int)from.textureConvert, (int)to.textureConvert);
+    result += materialOtherModeH((int)from.combineKey, (int)to.combineKey);
+    result += materialOtherModeH((int)from.colorDither, (int)to.colorDither);
+    result += materialOtherModeH((int)from.alphaDither, (int)to.alphaDither);
+
+    result += materialOtherModeH((int)from.alphaCompare, (int)to.alphaCompare);
+    result += materialOtherModeH((int)from.depthSource, (int)to.depthSource);
+
+    if (to.hasRenderMode && !(from.cycle1RenderMode == to.cycle1RenderMode && from.cycle2RenderMode == to.cycle2RenderMode)) {
+        result += TIMING_SP_OTHER_MODE_L;
+    }
+
+    if (to.hasCombineMode && !(from.cycle1Combine == to.cycle1Combine && from.cycle2Combine == to.cycle2Combine)) {
+        result += 0.395;
+    }
+
+    if (to.usePrimitiveColor && !(from.primitiveColor == to.primitiveColor && from.primitiveM == to.primitiveM && from.primitiveL == to.primitiveL)) {
+        result += TIMING_DP_COLOR;
+    }
+
+    if (to.useFillColor && !(from.fillColor == to.fillColor)) {
+        result += TIMING_DP_COLOR;
+    }
+
+    if (to.useFogColor && !(from.fogColor == to.fogColor)) {
+        result += TIMING_DP_COLOR;
+    }
+
+    if (to.useBlendColor && !(from.blendColor == to.blendColor)) {
+        result += TIMING_DP_COLOR;
+    }
+
+    for (int i = 0; i < MAX_TILE_COUNT; ++i) {
+        result += materialTileTime(from, to.tiles[i]);
+    }
+
+    if (to.textureState.isOn && !(from.textureState.sc == to.textureState.sc || 
+        from.textureState.tc == to.textureState.tc ||
+        from.textureState.level == to.textureState.level ||
+        from.textureState.tile == to.textureState.tile)) {
+        result += TIMING_DP_TEXTURE;
+    }
+
+    return result;
+}

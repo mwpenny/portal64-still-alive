@@ -465,6 +465,10 @@ int PalleteDefinition::DTX() const {
     return ((1 << G_TX_DTX_FRAC) + lineSize - 1) / lineSize;
 }
 
+int PalleteDefinition::NBytes() const {
+    return mColors.size() * 2;
+}
+
 unsigned PalleteDefinition::ColorCount() const {
     return mColors.size();
 }
@@ -644,6 +648,12 @@ int TextureDefinition::DTX() const {
         lineSize = 1;
     }
     return ((1 << G_TX_DTX_FRAC) + lineSize - 1) / lineSize;
+}
+
+int TextureDefinition::NBytes() const {
+    int line;
+    GetLine(line);
+    return mHeight * line * 8;
 }
 
 bool TextureDefinition::GetLine(int& line) const {

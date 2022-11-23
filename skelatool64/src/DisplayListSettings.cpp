@@ -9,6 +9,7 @@ DisplayListSettings::DisplayListSettings():
     mFixedPointScale(256.0f),
     mModelScale(1.0f),
     mMaxMatrixDepth(10),
+    mMaxOptimizationIterations(DEFAULT_MAX_OPTIMIZATION_ITERATIONS),
     mCanPopMultipleMatrices(true),
     mTicksPerSecond(30),
     mExportAnimation(true),

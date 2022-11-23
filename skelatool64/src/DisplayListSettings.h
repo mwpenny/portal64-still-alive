@@ -8,6 +8,8 @@
 #include "./materials/Material.h"
 #include "./materials/MaterialState.h"
 
+#define DEFAULT_MAX_OPTIMIZATION_ITERATIONS 1000000
+
 struct DisplayListSettings {
     DisplayListSettings();
     std::string mPrefix;
@@ -16,6 +18,7 @@ struct DisplayListSettings {
     float mFixedPointScale;
     float mModelScale;
     int mMaxMatrixDepth;
+    int mMaxOptimizationIterations;
     bool mCanPopMultipleMatrices;
     unsigned short mTicksPerSecond;
     std::map<std::string, std::shared_ptr<Material>> mMaterials;

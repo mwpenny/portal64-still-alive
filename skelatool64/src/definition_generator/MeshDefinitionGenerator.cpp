@@ -5,6 +5,7 @@
 #include "AnimationGenerator.h"
 #include "../StringUtils.h"
 #include "MaterialGenerator.h"
+#include "../RenderChunkOrder.h"
 
 bool extractMaterialAutoTileParameters(Material* material, double& sTile, double& tTile) {
     if (!material) {
@@ -108,6 +109,8 @@ MeshDefinitionResults MeshDefinitionGenerator::GenerateDefinitionsWithResults(co
     for (auto node = mIncludedNodes.begin(); node != mIncludedNodes.end(); ++node) {
         AppendRenderChunks(scene, *node, fileDefinition, mSettings, renderChunks);
     }
+
+    orderRenderChunks(renderChunks, mSettings);
 
     MeshDefinitionResults result;
 

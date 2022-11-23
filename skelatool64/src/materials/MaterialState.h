@@ -14,7 +14,7 @@ struct FlagList {
     void SetFlag(int mask, bool value);
     void DeleteFlag(int mask);
 
-    struct FlagList GetDeltaFrom(struct FlagList& other);
+    struct FlagList GetDeltaFrom(const struct FlagList& other) const;
 
     void ApplyFrom(const FlagList& other);
 };
@@ -148,5 +148,6 @@ public:
 void generateMaterial(CFileDefinition& fileDef, const MaterialState& from, const MaterialState& to, StructureDataChunk& output, bool targetCIBuffer);
 
 void applyMaterial(const MaterialState& from, MaterialState& to);
+double materialTransitionTime(const MaterialState& from, const MaterialState& to);
 
 #endif

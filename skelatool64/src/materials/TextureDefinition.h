@@ -74,6 +74,7 @@ public:
 
     int LoadBlockSize() const;
     int DTX() const;
+    int NBytes() const;
     unsigned ColorCount() const;
 private:
     std::string mName;
@@ -98,6 +99,7 @@ public:
     bool GetLine(int& line) const;
     int LoadBlockSize() const;
     int DTX() const;
+    int NBytes() const;
 
     const std::string& Name() const;
 
