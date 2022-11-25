@@ -8,6 +8,19 @@
 #include <algorithm>
 #include <memory>
 
+EstimatedTime::EstimatedTime(): materialSwitching(0.0), matrixSwitching(0.0) {
+    
+}
+
+EstimatedTime::EstimatedTime(double total, double materialSwitching, double matrixSwitching): 
+    materialSwitching(materialSwitching), matrixSwitching(matrixSwitching) {
+
+}
+
+double EstimatedTime::GetTotal() const {
+    return matrixSwitching + materialSwitching;
+}
+
 struct RenderChunkPath {
     RenderChunkPath(int size);
 
@@ -64,6 +77,8 @@ struct RenderChunkDistanceGraph {
     RenderChunkDistanceGraph(int numberOfEdges);
 
     std::vector<double> edgeDistance;
+    std::vector<double> materialDistance;
+    std::vector<double> matrixDistance;
     std::vector<double> minDistanceTo;
     std::vector<double> maxDistanceTo;
     double bestWorstCase;
@@ -72,7 +87,9 @@ struct RenderChunkDistanceGraph {
     std::priority_queue<std::shared_ptr<RenderChunkPath>, std::vector<std::shared_ptr<RenderChunkPath>>, RenderChunkPathCompare> currentChunks;
 
     double GetDistance(int from, int to) const;
-    void SetDistance(int from, int to, double value);
+    double GetMaterialDistance(int from, int to) const;
+    double GetMatrixDistance(int from, int to) const;
+    void SetDistance(int from, int to, struct EstimatedTime estimatedTime);
 
     std::shared_ptr<RenderChunkPath> currentBest;
 };
@@ -82,6 +99,8 @@ RenderChunkDistanceGraph::RenderChunkDistanceGraph(int numberOfEdges) :
     numberOfEdges(numberOfEdges),
     currentBest(nullptr) {
     edgeDistance.resize(numberOfEdges * numberOfEdges);
+    materialDistance.resize(numberOfEdges * numberOfEdges);
+    matrixDistance.resize(numberOfEdges * numberOfEdges);
     maxDistanceTo.resize(numberOfEdges);
     minDistanceTo.resize(numberOfEdges);
 }
@@ -91,8 +110,18 @@ double RenderChunkDistanceGraph::GetDistance(int from, int to) const {
     return edgeDistance[from * numberOfEdges + to];
 }
 
-void RenderChunkDistanceGraph::SetDistance(int from, int to, double value) {
-    edgeDistance[from * numberOfEdges + to] = value;
+double RenderChunkDistanceGraph::GetMaterialDistance(int from, int to) const{
+    return materialDistance[from * numberOfEdges + to];
+}
+
+double RenderChunkDistanceGraph::GetMatrixDistance(int from, int to) const {
+    return matrixDistance[from * numberOfEdges + to];
+}
+
+void RenderChunkDistanceGraph::SetDistance(int from, int to, struct EstimatedTime estimatedTime) {
+    edgeDistance[from * numberOfEdges + to] = estimatedTime.GetTotal();
+    materialDistance[from * numberOfEdges + to] = estimatedTime.materialSwitching;
+    matrixDistance[from * numberOfEdges + to] = estimatedTime.matrixSwitching;
 }
 
 void orderRenderGreedy(struct RenderChunkDistanceGraph& graph, struct RenderChunkPath& path);
@@ -179,6 +208,8 @@ void orderRenderBnB(struct RenderChunkDistanceGraph& graph, int maxIterations) {
     orderRenderGreedy(graph, *graph.currentBest);
     graph.bestWorstCase = graph.currentBest->worstCase;
 
+    double greedyLength = graph.currentBest->currentLength;
+
     orderRenderPopulateNext(graph, first);
 
     int iteration = 0;
@@ -194,6 +225,12 @@ void orderRenderBnB(struct RenderChunkDistanceGraph& graph, int maxIterations) {
         orderRenderPopulateNext(graph, *current);
 
         iteration += 1;
+    }
+
+    if (graph.currentBest->currentLength == greedyLength) {
+        std::cout << "Branch and bound could not find a better solution" << std::endl;
+    } else {
+        std::cout << "Branch and bound found a solution better by " << (graph.currentBest->currentLength / greedyLength) << std::endl;
     }
 }
 
@@ -242,11 +279,11 @@ void orderRenderGreedy(struct RenderChunkDistanceGraph& graph, struct RenderChun
     path.worstCase = path.currentLength;
 }
 
-double orderRenderDistance(const RenderChunk& from, const RenderChunk& to) {
-    double result = 0.0;
+struct EstimatedTime orderRenderDistance(const RenderChunk& from, const RenderChunk& to) {
+    struct EstimatedTime result;
     
     if (from.mMaterial && to.mMaterial) {
-        result += materialTransitionTime(from.mMaterial->mState, to.mMaterial->mState);
+        result.materialSwitching += materialTransitionTime(from.mMaterial->mState, to.mMaterial->mState);
     };
 
     Bone* ancestor = Bone::FindCommonAncestor(from.mBonePair.second, to.mBonePair.first);
@@ -268,10 +305,10 @@ double orderRenderDistance(const RenderChunk& from, const RenderChunk& to) {
     }
 
     if (fromBoneHeight) {
-        result += TIMING_DP_MATRIX_POP;
+        result.matrixSwitching += TIMING_DP_MATRIX_POP;
     }
 
-    result += toBoneHeight * TIMING_DP_MATRIX_MUL;
+    result.matrixSwitching += toBoneHeight * TIMING_DP_MATRIX_MUL;
 
     return result;
 }
@@ -330,9 +367,11 @@ void orderRenderChunks(std::vector<RenderChunk>& chunks, const DisplayListSettin
                 continue;;
             }
 
-            double distance = orderRenderDistance(chunks[from], chunks[to]);
+            EstimatedTime time = orderRenderDistance(chunks[from], chunks[to]);
 
-            graph.SetDistance(from, to, distance);
+            graph.SetDistance(from, to, time);
+
+            double distance = time.GetTotal();
 
             if (from == 0 || distance < graph.minDistanceTo[to]) {
                 graph.minDistanceTo[to] = distance;

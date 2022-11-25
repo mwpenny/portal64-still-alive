@@ -6,6 +6,16 @@
 #include "CFileDefinition.h"
 #include "DisplayListSettings.h"
 
+struct EstimatedTime {
+    EstimatedTime();
+    EstimatedTime(double total, double materialSwitching, double matrixSwitching);
+    
+    double GetTotal() const;
+
+    double materialSwitching;
+    double matrixSwitching;
+};
+
 void orderRenderChunks(std::vector<RenderChunk>& chunks, const DisplayListSettings& settings);
 
 #endif

@@ -1,0 +1,135 @@
+materials:
+  chell_face:
+    gDPSetTile: 
+      filename: ./models/player/chell_face.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode: G_CC_MODULATEI
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+
+  chell_head:
+    gDPSetTile: 
+      filename: ./models/player/chell_head.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode: G_CC_MODULATEI
+    gDPSetCycleType: G_CYC_1CYCLE
+    
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+
+  chell_pants:
+    gDPSetTile: 
+      filename: ./models/player/chell_pants.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode: G_CC_MODULATEI
+    gDPSetCycleType: G_CYC_1CYCLE
+    
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+
+  chell_shirt:
+    gDPSetTile: 
+      filename: ./models/player/chell_shirt.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode: G_CC_MODULATEI
+    gDPSetCycleType: G_CYC_1CYCLE
+    
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+
+  chell_neck:
+    gDPSetCombineMode:
+      color: [PRIMITIVE, "0", SHADE, "0"]
+      alpha: ["0", "0", "0", PRIMITIVE]
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gDPSetPrimColor:
+      r: 184
+      g: 127
+      b: 101
+      a: 255
+    
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+
+  chell_arm:
+    gDPSetTile: 
+      filename: ./models/player/chell_shirt.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode:
+      color: [PRIMITIVE, "0", SHADE, "0"]
+      alpha: ["0", "0", "0", PRIMITIVE]
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gDPSetPrimColor:
+      r: 184
+      g: 127
+      b: 101
+      a: 255
+    
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+
+  chell_leg:
+    gDPSetTile: 
+      filename: ./models/player/chell_pants.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode:
+      color: [PRIMITIVE, "0", SHADE, "0"]
+      alpha: ["0", "0", "0", PRIMITIVE]
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gDPSetPrimColor:
+      r: 184
+      g: 127
+      b: 101
+      a: 255
+    
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+
+  chell_boots_white:
+    gDPSetTile: 
+      filename: ./models/player/chell_pants.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode:
+      color: [PRIMITIVE, "0", SHADE, "0"]
+      alpha: ["0", "0", "0", PRIMITIVE]
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gDPSetPrimColor:
+      r: 220
+      g: 220
+      b: 220
+      a: 255
+    
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+
+  chell_boots_black:
+    gDPSetTile: 
+      filename: ./models/player/chell_pants.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode:
+      color: [PRIMITIVE, "0", SHADE, "0"]
+      alpha: ["0", "0", "0", PRIMITIVE]
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gDPSetPrimColor:
+      r: 20
+      g: 20
+      b: 20
+      a: 20
+    
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
