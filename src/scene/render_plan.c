@@ -25,6 +25,7 @@
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex) {
     props->camera = *camera;
     props->aspectRatio = aspectRatio;
+
     cameraSetupMatrices(camera, renderState, aspectRatio, &fullscreenViewport, &props->cameraMatrixInfo);
 
     props->viewport = &fullscreenViewport;

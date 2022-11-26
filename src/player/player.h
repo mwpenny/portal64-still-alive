@@ -7,6 +7,8 @@
 #include "../physics/collision_object.h"
 #include "../levels/level_definition.h"
 #include "../scene/dynamic_scene.h"
+#include "../sk64/skelatool_animator.h"
+#include "../sk64/skelatool_armature.h"
 
 #define PLAYER_GRABBING_THROUGH_NOTHING -1
 
@@ -20,6 +22,7 @@ struct Player {
     struct CollisionObject collisionObject;
     struct RigidBody body;
     struct Transform lookTransform;
+    struct SKArmature armature;
     short grabbingThroughPortal;
     short dynamicId;
     struct CollisionObject* grabbing;

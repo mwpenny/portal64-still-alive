@@ -73,13 +73,13 @@ void playerRender(void* data, struct DynamicRenderDataList* renderList, struct R
 
     transformToMatrixL(&finalPlayerTransform, matrix, SCENE_SCALE);
 
-    // Mtx* armature = renderStateRequestMatrices(renderState, PROPS_BOX_DROPPER_DEFAULT_BONES_COUNT);
+    Mtx* armature = renderStateRequestMatrices(renderState, PLAYER_CHELL_DEFAULT_BONES_COUNT);
 
-    // if (!armature) {
-    //     return;
-    // }
+    if (!armature) {
+        return;
+    }
 
-    // skCalculateTransforms(&player->armature, armature);
+    skCalculateTransforms(&player->armature, armature);
 
     dynamicRenderListAddData(
         renderList,
@@ -87,7 +87,7 @@ void playerRender(void* data, struct DynamicRenderDataList* renderList, struct R
         matrix,
         DEFAULT_INDEX,
         &player->body.transform.position,
-        NULL
+        armature
     );
 }
 
@@ -96,6 +96,8 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     // rigidBodyMarkKinematic(&player->body);
     player->body.flags |= RigidBodyIsKinematic | RigidBodyIsPlayer;
     collisionSceneAddDynamicObject(&player->collisionObject);
+
+    skArmatureInit(&player->armature, &player_chell_armature);
 
     player->body.velocity = *velocity;
     player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
