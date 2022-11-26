@@ -186,22 +186,15 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
         renderPlan->clippedPortalIndex = portalIndex;
     }
 
-    if (current->clippingPortalIndex == portalIndex) {
-        next->minX = 0;
-        next->maxX = SCREEN_WD;
-        next->minY = 0;
-        next->maxY = SCREEN_HT;
-    } else {
-        next->minX = CALC_SCREEN_SPACE(clippingBounds.min.x, SCREEN_WD);
-        next->maxX = CALC_SCREEN_SPACE(clippingBounds.max.x, SCREEN_WD);
-        next->minY = CALC_SCREEN_SPACE(-clippingBounds.max.y, SCREEN_HT);
-        next->maxY = CALC_SCREEN_SPACE(-clippingBounds.min.y, SCREEN_HT);
+    next->minX = CALC_SCREEN_SPACE(clippingBounds.min.x, SCREEN_WD);
+    next->maxX = CALC_SCREEN_SPACE(clippingBounds.max.x, SCREEN_WD);
+    next->minY = CALC_SCREEN_SPACE(-clippingBounds.max.y, SCREEN_HT);
+    next->maxY = CALC_SCREEN_SPACE(-clippingBounds.min.y, SCREEN_HT);
 
-        next->minX = MAX(next->minX, current->minX);
-        next->maxX = MIN(next->maxX, current->maxX);
-        next->minY = MAX(next->minY, current->minY);
-        next->maxY = MIN(next->maxY, current->maxY);
-    }
+    next->minX = MAX(next->minX, current->minX);
+    next->maxX = MIN(next->maxX, current->maxX);
+    next->minY = MAX(next->minY, current->minY);
+    next->maxY = MIN(next->maxY, current->maxY);
 
     struct RenderProps* prevSibling = prevSiblingPtr ? *prevSiblingPtr : NULL;
 
@@ -397,18 +390,6 @@ void renderPlanAdjustViewportDepth(struct RenderPlan* renderPlan) {
         struct RenderProps* current = &renderPlan->stageProps[i];
         short minZ = zBufferBoundary[current->currentDepth + 1];
         short maxZ = zBufferBoundary[current->currentDepth];
-
-        if (current->maxZOverlap <= -1.0f) {
-            maxZ = G_MAXZ;
-        } else {
-            float newZ = 0.5f * (float)maxZ / (current->maxZOverlap + 1.0f);
-
-            if (newZ >= G_MAXZ) {
-                maxZ = G_MAXZ;
-            } else {
-                maxZ = (short)newZ;
-            }
-        }
 
         current->viewport->vp.vscale[2] = (maxZ - minZ) >> 1;
         current->viewport->vp.vtrans[2] = (maxZ + minZ) >> 1;

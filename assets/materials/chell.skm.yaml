@@ -3,45 +3,61 @@ materials:
     gDPSetTile: 
       filename: ./models/player/chell_face.png
       siz: G_IM_SIZ_16b
+      s:
+        wrap: false
+      t:
+        wrap: false
 
     gDPSetCombineMode: G_CC_MODULATEI
     gDPSetCycleType: G_CYC_1CYCLE
 
     gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
 
   chell_head:
     gDPSetTile: 
       filename: ./models/player/chell_head.png
       siz: G_IM_SIZ_16b
+      s:
+        wrap: false
+      t:
+        wrap: false
 
     gDPSetCombineMode: G_CC_MODULATEI
     gDPSetCycleType: G_CYC_1CYCLE
     
     gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
 
   chell_pants:
     gDPSetTile: 
       filename: ./models/player/chell_pants.png
       siz: G_IM_SIZ_16b
+      s:
+        wrap: false
+      t:
+        wrap: false
 
     gDPSetCombineMode: G_CC_MODULATEI
     gDPSetCycleType: G_CYC_1CYCLE
     
     gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
 
   chell_shirt:
     gDPSetTile: 
       filename: ./models/player/chell_shirt.png
       siz: G_IM_SIZ_16b
+      s:
+        wrap: false
+      t:
+        wrap: false
 
     gDPSetCombineMode: G_CC_MODULATEI
     gDPSetCycleType: G_CYC_1CYCLE
     
     gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
 
   chell_neck:
     gDPSetCombineMode:
@@ -56,7 +72,7 @@ materials:
       a: 255
     
     gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
 
   chell_arm:
     gDPSetTile: 
@@ -75,7 +91,7 @@ materials:
       a: 255
     
     gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
 
   chell_leg:
     gDPSetTile: 
@@ -94,7 +110,7 @@ materials:
       a: 255
     
     gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
 
   chell_boots_white:
     gDPSetTile: 
@@ -113,7 +129,7 @@ materials:
       a: 255
     
     gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
 
   chell_boots_black:
     gDPSetTile: 
@@ -133,3 +149,4 @@ materials:
     
     gSPGeometryMode:
       set: [G_LIGHTING, G_SHADE]
+      clear: [G_CULL_BACK]

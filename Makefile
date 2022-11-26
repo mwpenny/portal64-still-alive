@@ -208,6 +208,8 @@ build/src/scene/portal_render.o: $(MODEL_HEADERS)
 
 build/src/player/player.o: build/assets/models/player/chell.h build/assets/materials/static.h
 
+build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
+
 build/anims.ld: $(ANIM_LIST) tools/generate_animation_ld.js
 	@mkdir -p $(@D)
 	node tools/generate_animation_ld.js $@ $(ANIM_LIST)
