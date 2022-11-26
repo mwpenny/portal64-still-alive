@@ -14,6 +14,9 @@
 #include "../util/time.h"
 #include "../physics/contact_insertion.h"
 
+#include "../build/assets/models/player/chell.h"
+#include "../build/assets/materials/static.h"
+
 #define GRAB_RAYCAST_DISTANCE   2.5f
 
 #define PLAYER_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER)
@@ -46,6 +49,48 @@ struct ColliderTypeData gPlayerColliderData = {
     &gCollisionCylinderCallbacks,
 };
 
+void playerRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
+    struct Player* player = (struct Player*)data;
+
+    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
+
+    if (!matrix) {
+        return;
+    }
+
+    struct Transform finalPlayerTransform;
+
+    struct Vector3 forwardVector;
+    struct Vector3 unusedRight;
+
+    playerGetMoveBasis(&player->lookTransform, &forwardVector, &unusedRight);
+    
+    finalPlayerTransform.position = player->body.transform.position;
+    quatLook(&forwardVector, &gUp, &finalPlayerTransform.rotation);
+    finalPlayerTransform.scale = gOneVec;
+    
+    finalPlayerTransform.position.y -= PLAYER_HEAD_HEIGHT;
+
+    transformToMatrixL(&finalPlayerTransform, matrix, SCENE_SCALE);
+
+    // Mtx* armature = renderStateRequestMatrices(renderState, PROPS_BOX_DROPPER_DEFAULT_BONES_COUNT);
+
+    // if (!armature) {
+    //     return;
+    // }
+
+    // skCalculateTransforms(&player->armature, armature);
+
+    dynamicRenderListAddData(
+        renderList,
+        player_chell_model_gfx,
+        matrix,
+        DEFAULT_INDEX,
+        &player->body.transform.position,
+        NULL
+    );
+}
+
 void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity) {
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
     // rigidBodyMarkKinematic(&player->body);
@@ -59,6 +104,9 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->yawVelocity = 0.0f;
     player->flags = 0;
 
+    player->dynamicId = dynamicSceneAdd(player, playerRender, &player->body.transform, 1.5f);
+    dynamicSceneSetFlags(player->dynamicId, DYNAMIC_SCENE_OBJECT_SKIP_ROOT);
+
     if (startLocation) {
         player->lookTransform = startLocation->transform;
         player->body.currentRoom = startLocation->roomIndex;
@@ -69,6 +117,8 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->body.transform = player->lookTransform;
 
     collisionObjectUpdateBB(&player->collisionObject);
+
+    dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
 }
 
 #define PLAYER_SPEED    (150.0f / 64.0f)
@@ -389,4 +439,6 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     collisionObjectUpdateBB(&player->collisionObject);
 
     player->body.currentRoom = worldCheckDoorwayCrossings(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom, doorwayMask);
+
+    dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
 }

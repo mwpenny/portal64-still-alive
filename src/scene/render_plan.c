@@ -431,8 +431,8 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, struc
 
     dynamicRenderListPopulate(dynamicList, renderPlan->stageProps, renderPlan->stageCount, renderState);
 
-    for (int i = renderPlan->stageCount - 1; i >= 0; --i) {
-        struct RenderProps* current = &renderPlan->stageProps[i];
+    for (int stageIndex = renderPlan->stageCount - 1; stageIndex >= 0; --stageIndex) {
+        struct RenderProps* current = &renderPlan->stageProps[stageIndex];
 
         if (!cameraApplyMatrices(renderState, &current->cameraMatrixInfo)) {
             return;
@@ -492,7 +492,7 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, struc
             portalIndex = 1 - portalIndex;
         }
 
-        staticRender(&current->camera.transform, &current->cameraMatrixInfo.cullingInformation, current->visiblerooms, dynamicList, i, renderState);
+        staticRender(&current->camera.transform, &current->cameraMatrixInfo.cullingInformation, current->visiblerooms, dynamicList, stageIndex, renderState);
     }
 
     dynamicRenderListFree(dynamicList);

@@ -6,6 +6,7 @@
 #include "../physics/rigid_body.h"
 #include "../physics/collision_object.h"
 #include "../levels/level_definition.h"
+#include "../scene/dynamic_scene.h"
 
 #define PLAYER_GRABBING_THROUGH_NOTHING -1
 
@@ -20,6 +21,7 @@ struct Player {
     struct RigidBody body;
     struct Transform lookTransform;
     short grabbingThroughPortal;
+    short dynamicId;
     struct CollisionObject* grabbing;
     float pitchVelocity;
     float yawVelocity;
@@ -28,8 +30,6 @@ struct Player {
 
 void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity);
 void playerUpdate(struct Player* player, struct Transform* cameraTransform);
-
-void playerRender(struct Player* player, struct RenderState* renderState);
 
 void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, struct Vector3* right);
 

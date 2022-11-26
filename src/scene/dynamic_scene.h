@@ -14,6 +14,7 @@ typedef void (*DynamicRender)(void* data, struct DynamicRenderDataList* renderLi
 
 #define DYNAMIC_SCENE_OBJECT_FLAGS_USED                 (1 << 0)
 #define DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE               (1 << 1)
+#define DYNAMIC_SCENE_OBJECT_SKIP_ROOT                  (1 << 2)
 
 #define INVALID_DYNAMIC_OBJECT  -1
 

@@ -61,6 +61,10 @@ void dynamicRenderListPopulate(struct DynamicRenderDataList* list, struct Render
                 continue;
             }
 
+            if (stages[stageIndex].currentDepth == STARTING_RENDER_DEPTH && (object->flags & DYNAMIC_SCENE_OBJECT_SKIP_ROOT)) {
+                continue;
+            }
+
             if (isSphereOutsideFrustrum(&stages[stageIndex].cameraMatrixInfo.cullingInformation, &scaledPos, object->scaledRadius)) {
                 continue;
             }
