@@ -1,23 +1,23 @@
 # Portal64
 
-A demake of portal for the Nintendo 64
+A demake of Portal for the Nintendo 64.
 
 ## How to build
 
-First, you will need to setup [modern sdk](https://crashoveride95.github.io/n64hbrew/modernsdk/startoff.html)
+First, you will need to setup [Modern SDK](https://crashoveride95.github.io/n64hbrew/modernsdk/startoff.html).
 
-Next, you will need to download blender 3.0 or higher. Then set the environment variable `BLENDER_3_0` to be the absolute path where the blender executable is located on your system.
+Next, you will need to download Blender 3.0 or higher. Then set the environment variable `BLENDER_3_0` to be the absolute path where the Blender executable is located on your system.
 
 <br />
 
-You will need to install python `vpk`
+You will need to install Python `vpk`.
 ```
 pip install vpk
 ```
 
 <br />
 
-Install `vtf2png`, `sfz2n64` and `skeletool64`
+Install `vtf2png`, `sfz2n64`, and `skeletool64`.
 ```sh
 echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" \
     | tee /etc/apt/sources.list.d/lambertjamesd.list
@@ -27,14 +27,14 @@ sudo apt install vtf2png sfz2n64 skeletool64 mpg123
 
 <br />
 
-Install image magic
+Install ImageMagick.
 ```
 sudo apt install imagemagick
 ```
 
 <br />
 
-You then need to add the following files from where portal is installed to the folder `vpk`
+You then need to add the following files from where Portal is installed to the folder `vpk`.
 ```
 portal_pak_000.vpk  
 portal_pak_001.vpk  
@@ -45,7 +45,7 @@ portal_pak_005.vpk
 portal_pak_dir.vpk
 ```
 
-Finally run `make` to build the project.
+Finally, run `make` to build the project.
 
 <br />
 
@@ -53,14 +53,14 @@ Finally run `make` to build the project.
 ## Build with Docker
 
 
-Build the docker image
+Build the Docker image.
 ```
 docker build . -t portal64
 ```
 
 <br />
 
-Then build
+Then build.
 ```sh
 # Set the environment variable
 BLENDER_3_0=/blender/blender
@@ -84,10 +84,10 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 
 ## Current TODO list
 
-- [ ] Passing into a cieling portal can sometimes mess with the player rotation
-- [ ] render callback only once
-- [ ] check for null allocations in render process
-- [ ] stop looping sounds betwen levels
+- [ ] Passing into a ceiling portal can sometimes mess with the player rotation
+- [ ] Render callback only once
+- [ ] Check for null allocations in render process
+- [ ] Stop looping sounds betwen levels
 - [ ] Z buffer allocation
 - [ ] Release grabbed objects when line of sight is cut
 - [ ] Correct elevator timing
@@ -97,18 +97,18 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [ ] Signage should not always be on
 - [ ] Camera shake
 - [x] calculateBarycentricCoords when two points are the same
-- [x] level transition jump
-- [x] collide player with dynamic objects
+- [x] Level transition jump
+- [x] Collide player with dynamic objects
 - [x] Render objects intersecting portals differently
 - [x] Sliding against walls
 - [x] It is too easy to fall through portals
 - [x] Change the way player standing logic works
-- [x] crash on level transition
-- [x] Prevent Glados from talking over herself
+- [x] Crash on level transition
+- [x] Prevent GLaDOS from talking over herself
 - [x] NAN in overlap
 - [x] Turn level indicator board into a game object
-- [x] kill plane
-- [x] Portal gun pedistal
+- [x] Kill plane
+- [x] Portal gun pedestal
 - [x] Fix portal overlapping bug
 - [x] Fix bug where opening a portal can trigger a teleportation
 - [x] Implement level transitions
