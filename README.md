@@ -108,7 +108,7 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [x] NAN in overlap
 - [x] Turn level indicator board into a game object
 - [x] Kill plane
-- [x] Portal gun pedistal
+- [x] Portal gun pedestal
 - [x] Fix portal overlapping bug
 - [x] Fix bug where opening a portal can trigger a teleportation
 - [x] Implement level transitions
