@@ -1,6 +1,6 @@
 # Portal64
 
-A demake of Portal for the Nintendo 64
+A demake of Portal for the Nintendo 64.
 
 ## How to build
 
@@ -45,7 +45,7 @@ portal_pak_005.vpk
 portal_pak_dir.vpk
 ```
 
-Finally run `make` to build the project.
+Finally, run `make` to build the project.
 
 <br />
 
