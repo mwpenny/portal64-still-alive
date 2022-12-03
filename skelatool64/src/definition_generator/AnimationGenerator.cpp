@@ -95,6 +95,173 @@ std::vector<SKAnimationHeader> generateAnimationData(const aiScene* scene, BoneH
     return animations;
 }
 
+struct FrameData {
+    aiVector3D position;
+    aiQuaternion rotation;
+};
+
+template <typename T>
+void findStartValue(const T* keys, unsigned keyCount, double at, unsigned& startValue, double& lerp) {
+    for (startValue = 0; startValue < keyCount; ++startValue) {
+        if (keys[startValue].mTime >= at) {
+            if (startValue == 0) {
+                lerp = 0.0f;
+            } else {
+                --startValue;
+                double deltaTime = keys[startValue + 1].mTime - keys[startValue].mTime;
+
+                if (deltaTime == 1.0) {
+                    lerp = 0.0f;
+                } else {
+                    lerp = (at - keys[startValue].mTime) / deltaTime;
+                }
+            }
+
+            break;
+        }
+    }
+}
+
+aiVector3D evaluateVectorAt(const aiVectorKey* keys, unsigned keyCount, double at) {
+    if (keyCount == 0) {
+        return aiVector3D();
+    }
+
+    if (keyCount == 1) {
+        return keys[0].mValue;
+    }
+
+    unsigned startValue;
+    double lerp = 0.0f;
+
+    findStartValue(keys, keyCount, at, startValue, lerp);
+ 
+    if (startValue == keyCount) {
+        return keys[keyCount - 1].mValue;
+    }
+
+    aiVector3D from = keys[startValue].mValue;
+    aiVector3D to = keys[startValue + 1].mValue;
+
+    return (to - from) * (float)lerp + from;
+}
+
+aiQuaternion evaluateQuaternionAt(const aiQuatKey* keys, unsigned keyCount, double at) {
+    if (keyCount == 0) {
+        return aiQuaternion();
+    }
+
+    if (keyCount == 1) {
+        return keys[0].mValue;
+    }
+
+    unsigned startValue;
+    double lerp = 0.0f;
+    
+    findStartValue(keys, keyCount, at, startValue, lerp);
+ 
+    if (startValue == keyCount) {
+        return keys[keyCount - 1].mValue;
+    }
+
+    aiQuaternion from = keys[startValue].mValue;
+    aiQuaternion to = keys[startValue + 1].mValue;
+    aiQuaternion output;
+
+    aiQuaternion::Interpolate(output, from, to, lerp);
+    
+    return output;
+}
+
+void generateanimationV2(const aiAnimation& animation, BoneHierarchy& bones, CFileDefinition& fileDef, const DisplayListSettings& settings) {
+    int nFrames = ceil(animation.mDuration * settings.mTicksPerSecond / animation.mTicksPerSecond);
+
+    std::vector<std::vector<FrameData>> allFrameData(nFrames);
+
+    for (int i = 0; i < nFrames; ++i) {
+        allFrameData[i].resize(bones.GetBoneCount());
+    }
+
+    for (unsigned boneIndex = 0; boneIndex < bones.GetBoneCount(); ++boneIndex) {
+        Bone* bone = bones.BoneByIndex(boneIndex);
+
+        aiNodeAnim* nodeAnim = nullptr;
+
+        // find the animation channel for the given frame
+        for (unsigned channelIndex = 0; channelIndex < animation.mNumChannels; ++channelIndex) {
+            if (bone->GetName() == animation.mChannels[channelIndex]->mNodeName.C_Str()) {
+                nodeAnim = animation.mChannels[channelIndex];
+                break;
+            }
+        }
+
+        if (!nodeAnim) {
+            continue;
+        }
+
+        // populate the frame data for the given channel
+        for (int frame = 0; frame < nFrames; ++frame) {
+            double at = frame * animation.mTicksPerSecond / settings.mTicksPerSecond;
+
+            aiVector3D origin = evaluateVectorAt(nodeAnim->mPositionKeys, nodeAnim->mNumPositionKeys, at);
+            aiQuaternion rotation = evaluateQuaternionAt(nodeAnim->mRotationKeys, nodeAnim->mNumRotationKeys, at);
+
+            if (!bone->GetParent()) {
+                aiQuaternion constRot = settings.mRotateModel;
+                origin = constRot.Rotate(origin) * settings.mModelScale;
+                rotation = constRot * rotation;
+            }
+
+            allFrameData[frame][boneIndex].position = origin * settings.mFixedPointScale;
+            allFrameData[frame][boneIndex].rotation = rotation;
+
+        }
+    }
+
+    std::unique_ptr<StructureDataChunk> frames(new StructureDataChunk());
+
+    for (int frame = 0; frame < nFrames; ++frame) {
+        for (auto& frameBone : allFrameData[frame]) {
+            std::unique_ptr<StructureDataChunk> posData(new StructureDataChunk());
+            std::unique_ptr<StructureDataChunk> rotData(new StructureDataChunk());
+
+            posData->AddPrimitive((short)(frameBone.position.x));
+            posData->AddPrimitive((short)(frameBone.position.y));
+            posData->AddPrimitive((short)(frameBone.position.z));
+
+            if (frameBone.rotation.w < 0.0f) {
+                rotData->AddPrimitive((short)(-frameBone.rotation.x * std::numeric_limits<short>::max()));
+                rotData->AddPrimitive((short)(-frameBone.rotation.y * std::numeric_limits<short>::max()));
+                rotData->AddPrimitive((short)(-frameBone.rotation.z * std::numeric_limits<short>::max()));
+            } else {
+                rotData->AddPrimitive((short)(frameBone.rotation.x * std::numeric_limits<short>::max()));
+                rotData->AddPrimitive((short)(frameBone.rotation.y * std::numeric_limits<short>::max()));
+                rotData->AddPrimitive((short)(frameBone.rotation.z * std::numeric_limits<short>::max()));
+            }
+
+            std::unique_ptr<StructureDataChunk> frameData(new StructureDataChunk());
+            frameData->Add(std::move(posData));
+            frameData->Add(std::move(rotData));
+            frames->Add(std::move(frameData));
+        }
+    }
+
+    std::string framesName = fileDef.AddDataDefinition(std::string(animation.mName.C_Str()) + "_data", "struct SKAnimationBoneFrame", true, "_anim", std::move(frames));
+
+    std::unique_ptr<StructureDataChunk> clip(new StructureDataChunk());
+    clip->AddPrimitive(nFrames);
+    clip->AddPrimitive(bones.GetBoneCount());
+    clip->AddPrimitive(framesName);
+    clip->AddPrimitive(settings.mTicksPerSecond);
+    fileDef.AddDataDefinition(std::string(animation.mName.C_Str()) + "_clip", "struct SKAnimationClip", false, "_geo", std::move(clip));
+}
+
+void generateAnimationDataV2(const aiScene* scene, BoneHierarchy& bones, CFileDefinition& fileDef, const DisplayListSettings& settings) {
+    for (unsigned animationIndex = 0; animationIndex < scene->mNumAnimations; ++animationIndex) {
+        generateanimationV2(*scene->mAnimations[animationIndex], bones, fileDef, settings);
+    }
+}
+
 AnimationResults generateAnimationForScene(const aiScene* scene, CFileDefinition &fileDefinition, DisplayListSettings& settings) {
     AnimationResults result;
 
@@ -172,6 +339,8 @@ AnimationResults generateAnimationForScene(const aiScene* scene, CFileDefinition
     result.numberOfAttachmentMacros = fileDefinition.GetMacroName("ATTACHMENT_COUNT");
 
     fileDefinition.AddMacro(result.numberOfAttachmentMacros, std::to_string(attachmentCount));
+
+    generateAnimationDataV2(scene, bones, fileDefinition, settings);
 
     return result;
 }

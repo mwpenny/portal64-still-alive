@@ -113,6 +113,7 @@ int main(int argc, char *argv[]) {
     settings.mBonesAsVertexGroups = args.mBonesAsVertexGroups;
     settings.mForcePallete = args.mForcePallete;
     settings.mTargetCIBuffer = args.mTargetCIBuffer;
+    settings.mTicksPerSecond = args.mFPS;
 
     bool hasError = false;
 

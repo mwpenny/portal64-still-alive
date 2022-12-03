@@ -27,6 +27,7 @@ struct CommandLineArguments {
     std::string mForcePallete;
     float mFixedPointScale;
     float mModelScale;
+    float mFPS;
     bool mExportAnimation;
     bool mExportGeometry;
     bool mBonesAsVertexGroups;

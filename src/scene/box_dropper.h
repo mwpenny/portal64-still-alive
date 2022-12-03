@@ -3,7 +3,7 @@
 
 #include "../math/transform.h"
 #include "../sk64/skelatool_armature.h"
-#include "../sk64/skelatool_animator.h"
+#include "../sk64/skelatool_animator_v2.h"
 #include "../levels/level_definition.h"
 
 #include "../decor/decor_object.h"
@@ -17,7 +17,7 @@ enum BoxDropperFlags {
 struct BoxDropper {
     struct Transform transform;
     struct SKArmature armature;
-    struct SKAnimator animator;
+    struct SKAnimatorV2 animator;
 
     struct DecorObject activeCube;
     float reloadTimer;

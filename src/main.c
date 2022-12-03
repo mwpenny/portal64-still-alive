@@ -159,9 +159,9 @@ static void gameProc(void* arg) {
     controllersInit();
     initAudio();
     soundPlayerInit();
-    sceneInit(&gScene);
     skInitDataPool(gPiHandle);
     skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
+    sceneInit(&gScene);
 
     while (1) {
         OSScMsg *msg = NULL;

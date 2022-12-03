@@ -98,6 +98,9 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     collisionSceneAddDynamicObject(&player->collisionObject);
 
     skArmatureInit(&player->armature, &player_chell_armature);
+    skAnimatorV2Init(&player->animator, player_chell_armature.numberOfBones);
+
+    skAnimatorV2RunClip(&player->animator, &player_chell_Armature_WalkForward_clip, 0.0f, SKAnimatorV2FlagsLoop);
 
     player->body.velocity = *velocity;
     player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
@@ -294,6 +297,8 @@ void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, st
 void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Vector3 forward;
     struct Vector3 right;
+
+    skAnimatorV2Update(&player->animator, player->armature.boneTransforms, FIXED_DELTA_TIME);
 
     int doorwayMask = worldCheckDoorwaySides(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom);
     playerGetMoveBasis(&player->lookTransform, &forward, &right);

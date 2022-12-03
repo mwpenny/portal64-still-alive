@@ -8,6 +8,7 @@
 #define TICK_UNDEFINED      ~((u16)(0))
 
 static struct SKAnimationDataPool gSKAnimationPool;
+static unsigned gSegmentLocations[SK_SEGMENT_COUNT];
 
 void skWaitForNextMessage();
 
@@ -177,7 +178,7 @@ void skProcess(OSIoMesg* message) {
 void skInitDataPool(OSPiHandle* handle) {
     gSKAnimationPool.handle = handle;
     osCreateMesgQueue(&gSKAnimationPool.mesgQueue, gSKAnimationPool.mesgBuffer, SK_POOL_QUEUE_SIZE);
-    zeroMemory(gSKAnimationPool.segmentLocations, sizeof(gSKAnimationPool.segmentLocations));
+    zeroMemory(gSegmentLocations, sizeof(gSegmentLocations));
     skResetDataPool();
 }
 
@@ -203,12 +204,12 @@ int skHasPendingMessages() {
 }
 
 void skSetSegmentLocation(unsigned segmentNumber, unsigned segmentLocation) {
-    gSKAnimationPool.segmentLocations[segmentNumber] = segmentLocation;
+    gSegmentLocations[segmentNumber] = segmentLocation;
 }
 
 u32 skTranslateSegment(unsigned address) {
     unsigned segment = (address >> 24) & 0xF;
-    return (address & 0xFFFFFF) + gSKAnimationPool.segmentLocations[segment];
+    return (address & 0xFFFFFF) + gSegmentLocations[segment];
 }
 
 void skWaitForNextMessage() {

@@ -91,3 +91,9 @@ void transformConcat(struct Transform* left, struct Transform* right, struct Tra
     output->position.y = left->position.y + rotatedOffset.y * left->scale.y;
     output->position.z = left->position.z + rotatedOffset.z * left->scale.z;
 }
+
+void transformLerp(struct Transform* a, struct Transform* b, float t, struct Transform* output) {
+    vector3Lerp(&a->position, &b->position, t, &output->position);
+    quatLerp(&a->rotation, &b->rotation, t, &output->rotation);
+    vector3Lerp(&a->scale, &b->scale, t, &output->scale);
+}

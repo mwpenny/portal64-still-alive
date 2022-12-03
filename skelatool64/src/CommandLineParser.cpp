@@ -28,6 +28,7 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
     output.mDefaultMaterial = "default";
     output.mForceMaterialName = "";
     output.mProcessAsModel = false;
+    output.mFPS = 30.0f;
 
     std::string lastParameter = "";
     bool hasError = false;
@@ -61,6 +62,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
                 output.mForcePallete = curr;
             } else if (lastParameter == "script") {
                 output.mScriptFiles.push_back(curr);
+            } else if (lastParameter == "fps") {
+                output.mFPS = (float)atof(curr);
             }
 
             lastParameter = "";
@@ -111,6 +114,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
             output.mTargetCIBuffer = true;
         } else if (strcmp(curr, "--model") == 0) {
             output.mProcessAsModel = true;
+        } else if (strcmp(curr, "--fps") == 0) {
+            lastParameter = "fps";
         } else {
             if (curr[0] == '-') {
                 hasError = true;

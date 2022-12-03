@@ -4,6 +4,12 @@
 #define SK_ANIMATION_EVENT_END      0xFFFF
 #define SK_ANIMATION_EVENT_START    0xFFFE
 
+struct SKU16Vector3 {
+    short x;
+    short y;
+    short z;
+};
+
 enum SKBoneAttrMask {
     SKBoneAttrMaskPosition = (1 << 0),
     SKBoneAttrMaskRotation = (1 << 1),
@@ -46,6 +52,18 @@ struct SKAnimationHeader {
     unsigned short numEvents;
     struct SKAnimationChunk* firstChunk;
     struct SKAnimationEvent* animationEvents;
+};
+
+struct SKAnimationBoneFrame {
+    struct SKU16Vector3 position;
+    struct SKU16Vector3 rotation;
+};
+
+struct SKAnimationClip {
+    short nFrames;
+    short nBones;
+    struct SKAnimationBoneFrame* frames;
+    float fps;
 };
 
 #endif

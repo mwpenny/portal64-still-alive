@@ -225,6 +225,10 @@ void orderRenderBnB(struct RenderChunkDistanceGraph& graph, int maxIterations) {
         orderRenderPopulateNext(graph, *current);
 
         iteration += 1;
+
+        if ((iteration % 10000) == 0) {
+            std::cout << iteration << "/" << maxIterations << " searching for better solution. current improvement:" << (graph.currentBest->currentLength / greedyLength) << std::endl;
+        }
     }
 
     if (graph.currentBest->currentLength == greedyLength) {

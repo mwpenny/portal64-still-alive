@@ -11,7 +11,7 @@ DisplayListSettings::DisplayListSettings():
     mMaxMatrixDepth(10),
     mMaxOptimizationIterations(DEFAULT_MAX_OPTIMIZATION_ITERATIONS),
     mCanPopMultipleMatrices(true),
-    mTicksPerSecond(30),
+    mTicksPerSecond(30.0f),
     mExportAnimation(true),
     mExportGeometry(true),
     mIncludeCulling(true),

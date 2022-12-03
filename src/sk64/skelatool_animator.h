@@ -6,12 +6,6 @@
 #include "math/transform.h"
 #include "skelatool_clip.h"
 
-struct SKU16Vector3 {
-    short x;
-    short y;
-    short z;
-};
-
 struct SKBoneState {
     unsigned short positionTick;
     unsigned short rotationTick;
@@ -75,7 +69,6 @@ struct SKAnimationDataPool {
     struct SKAnimator* animatorsForMessages[SK_POOL_QUEUE_SIZE];
     int nextMessage;
     struct SKRingMemory memoryPool;
-    unsigned segmentLocations[SK_SEGMENT_COUNT];
 };
 
 void skInitDataPool(OSPiHandle* handle);
@@ -83,6 +76,7 @@ void skResetDataPool();
 void skReadMessages();
 int skHasPendingMessages();
 void skSetSegmentLocation(unsigned segmentNumber, unsigned segmentLocatoin);
+u32 skTranslateSegment(unsigned address);
 
 void skAnimatorInit(struct SKAnimator* animator, unsigned boneCount, SKAnimationEventCallback animtionCallback, void* callbackData);
 void skAnimatorCleanup(struct SKAnimator* animator);

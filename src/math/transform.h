@@ -20,4 +20,6 @@ void transformPointInverse(struct Transform* transform, struct Vector3* in, stru
 void transformPointInverseNoScale(struct Transform* transform, struct Vector3* in, struct Vector3* out);
 void transformConcat(struct Transform* left, struct Transform* right, struct Transform* output);
 
+void transformLerp(struct Transform* a, struct Transform* b, float t, struct Transform* output);
+
 #endif
