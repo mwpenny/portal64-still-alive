@@ -2,7 +2,7 @@
 #define __SCENE_PEDESTAL_H__
 
 #include "../sk64/skelatool_armature.h"
-#include "../sk64/skelatool_animator.h"
+#include "../sk64/skelatool_animator_v2.h"
 #include "../levels/level_definition.h"
 
 enum PedestalFlags {
@@ -13,7 +13,7 @@ enum PedestalFlags {
 struct Pedestal {
     struct Transform transform;
     struct SKArmature armature; 
-    struct SKAnimator animator;
+    struct SKAnimatorV2 animator;
 
     short dynamicId;
     short roomIndex;
