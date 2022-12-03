@@ -12,7 +12,6 @@
 #include "./BoneHierarchy.h"
 #include "./ExtendedMesh.h"
 #include "./RenderChunk.h"
-#include "AnimationTranslator.h"
 #include "MeshWriter.h"
 #include "FileUtils.h"
 #include "./definition_generator/AnimationGenerator.h"

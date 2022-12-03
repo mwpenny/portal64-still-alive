@@ -160,7 +160,6 @@ static void gameProc(void* arg) {
     controllersInit();
     initAudio();
     soundPlayerInit();
-    skInitDataPool(gPiHandle);
     skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
     sceneInit(&gScene);
 
@@ -199,7 +198,6 @@ static void gameProc(void* arg) {
                 }
 
                 controllersTriggerRead();
-                skReadMessages();
                 controllerHandlePlayback();
                 
                 if (inputIgnore) {

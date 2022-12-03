@@ -7,7 +7,6 @@
 
 #include "../CFileDefinition.h"
 #include "../DisplayListSettings.h"
-#include "../Animation.h"
 
 struct AnimationResults {
     std::string initialPoseReference;
@@ -18,7 +17,6 @@ struct AnimationResults {
 
 std::shared_ptr<NodeAnimationInfo> findNodesForWithAnimation(const aiScene* scene, const std::vector<aiNode*>& usedNodes, float modelScale);
 
-std::vector<SKAnimationHeader> generateAnimationData(const aiScene* scene, BoneHierarchy& bones, CFileDefinition& fileDef, float fixedPointScale, float modelScale, const aiQuaternion& rotation, unsigned short targetTicksPerSecond);
 AnimationResults generateAnimationForScene(const aiScene* scene, CFileDefinition &fileDefinition, DisplayListSettings& settings);
 
 #endif

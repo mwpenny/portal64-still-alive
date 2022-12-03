@@ -3,7 +3,7 @@
 
 #include "../math/transform.h"
 #include "../sk64/skelatool_armature.h"
-#include "../sk64/skelatool_animator_v2.h"
+#include "../sk64/skelatool_animator.h"
 #include "../levels/level_definition.h"
 
 #include "../decor/decor_object.h"

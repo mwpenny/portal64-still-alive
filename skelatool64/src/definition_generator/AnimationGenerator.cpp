@@ -1,7 +1,6 @@
 #include "AnimationGenerator.h"
 
 #include "./DefinitionGenerator.h"
-#include "../AnimationTranslator.h"
 #include <set>
 #include <string>
 #include <map>
@@ -71,28 +70,6 @@ std::shared_ptr<NodeAnimationInfo> findNodesForWithAnimation(const aiScene* scen
     });
 
     return result;
-}
-
-std::vector<SKAnimationHeader> generateAnimationData(const aiScene* scene, BoneHierarchy& bones, CFileDefinition& fileDef, float fixedPointScale, float modelScale, const aiQuaternion& rotation, unsigned short targetTicksPerSecond) {
-    std::vector<SKAnimationHeader> animations;
-
-    for (unsigned i = 0; i < scene->mNumAnimations; ++i) {
-        SKAnimation animation;
-        if (translateAnimationToSK(*scene->mAnimations[i], animation, bones, fixedPointScale, modelScale, rotation, targetTicksPerSecond)) {
-            std::string animationName = fileDef.GetUniqueName(scene->mAnimations[i]->mName.C_Str());
-            unsigned short firstChunkSize = formatAnimationChunks(animationName, animation.chunks, fileDef);
-
-            SKAnimationHeader header;
-            header.firstChunkSize = firstChunkSize;
-            header.ticksPerSecond = targetTicksPerSecond;
-            header.maxTicks = animation.maxTicks;
-            header.animationName = animationName;
-
-            animations.push_back(header);
-        }
-    }
-
-    return animations;
 }
 
 struct FrameData {
@@ -284,33 +261,7 @@ AnimationResults generateAnimationForScene(const aiScene* scene, CFileDefinition
         aiVector3D(0, 0, 0)
     );
 
-    std::string animationsName = fileDefinition.GetUniqueName("animations");
-    auto animations = generateAnimationData(scene, bones, fileDefinition, settings.mFixedPointScale, settings.mModelScale, settings.mRotateModel, settings.mTicksPerSecond);
-
-    std::unique_ptr<StructureDataChunk> animationNameData(new StructureDataChunk());
-
-    int index = 0;
-    for (auto it = animations.begin(); it != animations.end(); ++it) {
-        std::unique_ptr<StructureDataChunk> animationChunk(new StructureDataChunk());
-
-        animationChunk->AddPrimitive(it->firstChunkSize);
-        animationChunk->AddPrimitive(it->ticksPerSecond);
-        animationChunk->AddPrimitive(it->maxTicks);
-        animationChunk->AddPrimitive(0);
-        animationChunk->AddPrimitive(std::string("(struct SKAnimationChunk*)") + it->animationName);
-        animationChunk->AddPrimitive(0);
-
-        animationNameData->Add(std::move(animationChunk));
-
-        std::string animationIndex = fileDefinition.GetUniqueName(it->animationName + "_INDEX");
-        std::transform(animationIndex.begin(), animationIndex.end(), animationIndex.begin(), ::toupper);
-        fileDefinition.AddMacro(animationIndex, std::to_string(index));
-
-        ++index;
-    }
-    std::unique_ptr<DataFileDefinition> headerDef(new DataFileDefinition("struct SKAnimationHeader", animationsName, true, "_geo", std::move(animationNameData)));
-    headerDef->AddTypeHeader("\"sk64/skelatool_clip.h\"");
-    fileDefinition.AddDefinition(std::move(headerDef));
+    fileDefinition.AddHeader("\"sk64/skelatool_clip.h\"");
 
     std::unique_ptr<StructureDataChunk> boneParentDataChunk(new StructureDataChunk());
 
