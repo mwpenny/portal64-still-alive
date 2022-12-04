@@ -1,1 +1,1 @@
--m assets/materials/static.skm.yaml -m assets/materials/chell.skm.yaml --default-material default
+-m assets/materials/static.skm.yaml -m assets/materials/chell.skm.yaml --fps 15 --default-material default

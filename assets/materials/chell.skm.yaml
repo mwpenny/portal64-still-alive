@@ -59,6 +59,21 @@ materials:
     gSPGeometryMode:
       set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
 
+  chell_back_logo:
+    gDPSetTile: 
+      filename: ./models/player/chell_back_logo.png
+      siz: G_IM_SIZ_16b
+      s:
+        wrap: false
+      t:
+        wrap: false
+
+    gDPSetCombineMode: G_CC_MODULATEI
+    gDPSetCycleType: G_CYC_1CYCLE
+    
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+
   chell_neck:
     gDPSetCombineMode:
       color: [PRIMITIVE, "0", SHADE, "0"]
