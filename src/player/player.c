@@ -100,7 +100,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     skArmatureInit(&player->armature, &player_chell_armature);
     skAnimatorV2Init(&player->animator, player_chell_armature.numberOfBones);
 
-    skAnimatorV2RunClip(&player->animator, &player_chell_Armature_WalkForward_clip, 0.0f, SKAnimatorV2FlagsLoop);
+    skAnimatorV2RunClip(&player->animator, &player_chell_Armature_runn_clip, 0.0f, SKAnimatorV2FlagsLoop);
 
     player->body.velocity = *velocity;
     player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
