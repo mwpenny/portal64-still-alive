@@ -239,16 +239,19 @@ void quatLook(struct Vector3* lookDir, struct Vector3* up, struct Quaternion* ou
 }
 
 void quatLerp(struct Quaternion* a, struct Quaternion* b, float t, struct Quaternion* out) {
-    if (a->x * b->x + a->y * b->y + a->z * b->z + a->w * b->w < 0) {
-        quatNegate(a, a);
-    }
-
     float tInv = 1.0f - t;
 
-    out->x = tInv * a->x + t * b->x;
-    out->y = tInv * a->y + t * b->y;
-    out->z = tInv * a->z + t * b->z;
-    out->w = tInv * a->w + t * b->w;
+    if (quatDot(a, b) < 0) {
+        out->x = tInv * a->x - t * b->x;
+        out->y = tInv * a->y - t * b->y;
+        out->z = tInv * a->z - t * b->z;
+        out->w = tInv * a->w - t * b->w;
+    } else {
+        out->x = tInv * a->x + t * b->x;
+        out->y = tInv * a->y + t * b->y;
+        out->z = tInv * a->z + t * b->z;
+        out->w = tInv * a->w + t * b->w;
+    }
 
     quatNormalize(out, out);
 }
@@ -283,4 +286,8 @@ void quatDecompose(struct Quaternion* input, struct Vector3* axis, float* angle)
     axis->y = input->y * magInv;
     axis->z = input->z * magInv;
     *angle = sinf(axisMag) * 2.0f;
+}
+
+float quatDot(struct Quaternion* a, struct Quaternion* b) {
+    return a->x * b->x + a->y * b->y + a->z * b->z + a->w * b->w;
 }

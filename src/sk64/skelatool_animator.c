@@ -117,11 +117,19 @@ void skAnimatorBlendTransform(struct SKAnimationBoneFrame* frame, struct Transfo
         skAnimatorExtractBone(&frame[i], &boneTransform);
         
         vector3AddScaled(&transforms[i].position, &boneTransform.position, weight, &transforms[i].position);
+
+        if (quatDot(&transforms[i].rotation, &boneTransform.rotation) < 0) {
+            transforms[i].rotation.x -= boneTransform.rotation.x * weight;
+            transforms[i].rotation.y -= boneTransform.rotation.y * weight;
+            transforms[i].rotation.z -= boneTransform.rotation.z * weight;
+            transforms[i].rotation.w -= boneTransform.rotation.w * weight;
+        } else {
+            transforms[i].rotation.x += boneTransform.rotation.x * weight;
+            transforms[i].rotation.y += boneTransform.rotation.y * weight;
+            transforms[i].rotation.z += boneTransform.rotation.z * weight;
+            transforms[i].rotation.w += boneTransform.rotation.w * weight;
+        }
         
-        transforms[i].rotation.x += boneTransform.rotation.x * weight;
-        transforms[i].rotation.y += boneTransform.rotation.y * weight;
-        transforms[i].rotation.z += boneTransform.rotation.z * weight;
-        transforms[i].rotation.w += boneTransform.rotation.w * weight;
     }
 }
 
