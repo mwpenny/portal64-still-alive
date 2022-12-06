@@ -5,6 +5,8 @@
 #include "mathf.h"
 #include <math.h>
 
+struct Quaternion gQuaternionZero = {0.0f, 0.0f, 0.0f, 0.0f};
+
 void quatIdent(struct Quaternion* q) {
     q->x = 0.0f;
     q->y = 0.0f;

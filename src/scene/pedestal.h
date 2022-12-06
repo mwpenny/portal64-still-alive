@@ -13,7 +13,7 @@ enum PedestalFlags {
 struct Pedestal {
     struct Transform transform;
     struct SKArmature armature; 
-    struct SKAnimatorV2 animator;
+    struct SKAnimator animator;
 
     short dynamicId;
     short roomIndex;

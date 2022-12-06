@@ -23,7 +23,7 @@ struct Player {
     struct RigidBody body;
     struct Transform lookTransform;
     struct SKArmature armature;
-    struct SKAnimatorV2 animator;
+    struct SKAnimatorBlender animator;
     short grabbingThroughPortal;
     short dynamicId;
     struct CollisionObject* grabbing;

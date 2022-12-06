@@ -17,7 +17,7 @@ enum BoxDropperFlags {
 struct BoxDropper {
     struct Transform transform;
     struct SKArmature armature;
-    struct SKAnimatorV2 animator;
+    struct SKAnimator animator;
 
     struct DecorObject activeCube;
     float reloadTimer;

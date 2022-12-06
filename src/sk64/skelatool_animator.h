@@ -4,11 +4,11 @@
 #include "skelatool_clip.h"
 #include "../math/transform.h"
 
-enum SKAnimatorV2Flags {
-    SKAnimatorV2FlagsLoop = (1 << 0),
+enum SKAnimatorFlags {
+    SKAnimatorFlagsLoop = (1 << 0),
 };
 
-struct SKAnimatorV2 {
+struct SKAnimator {
     struct SKAnimationClip* currentClip;
     float currentTime;
     float blendLerp;
@@ -19,15 +19,26 @@ struct SKAnimatorV2 {
     short nBones;
 };
 
-void skAnimatorV2Init(struct SKAnimatorV2* animator, int nBones);
-void skAnimatorV2Cleanup(struct SKAnimatorV2* animator);
-void skAnimatorV2Update(struct SKAnimatorV2* animator, struct Transform* transforms, float deltaTime);
+void skAnimatorInit(struct SKAnimator* animator, int nBones);
+void skAnimatorCleanup(struct SKAnimator* animator);
+void skAnimatorUpdate(struct SKAnimator* animator, struct Transform* transforms, float deltaTime);
 
-void skAnimatorV2RunClip(struct SKAnimatorV2* animator, struct SKAnimationClip* clip, float startTime, int flags);
+void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip, float startTime, int flags);
 
 #define SK_SEGMENT_COUNT 16
 
 void skSetSegmentLocation(unsigned segmentNumber, unsigned segmentLocatoin);
 u32 skTranslateSegment(unsigned address);
+
+struct SKAnimatorBlender {
+    struct SKAnimator from;
+    struct SKAnimator to;
+
+    float blendLerp;
+};
+
+void skBlenderInit(struct SKAnimatorBlender* blender, int nBones);
+void skBlenderCleanup(struct SKAnimatorBlender* animator);
+void skBlenderUpdate(struct SKAnimatorBlender* blender, struct Transform* transforms, float deltaTime);
 
 #endif

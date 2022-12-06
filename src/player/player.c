@@ -98,9 +98,10 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     collisionSceneAddDynamicObject(&player->collisionObject);
 
     skArmatureInit(&player->armature, &player_chell_armature);
-    skAnimatorV2Init(&player->animator, player_chell_armature.numberOfBones);
+    skBlenderInit(&player->animator, player_chell_armature.numberOfBones);
 
-    skAnimatorV2RunClip(&player->animator, &player_chell_Armature_runn_clip, 0.0f, SKAnimatorV2FlagsLoop);
+    skAnimatorRunClip(&player->animator.from, &player_chell_Armature_runn_clip, 0.0f, SKAnimatorFlagsLoop);
+    skAnimatorRunClip(&player->animator.to, &player_chell_Armature_runc_clip, 0.0f, SKAnimatorFlagsLoop);
 
     player->body.velocity = *velocity;
     player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
@@ -294,11 +295,53 @@ void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, st
     vector3Normalize(right, right);
 }
 
+struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* blendLerp, float* startTime, struct Vector3* forwardDir, struct Vector3* rightDir) {
+    float horzSpeed = player->body.velocity.x * player->body.velocity.x + player->body.velocity.z * player->body.velocity.z;
+
+    if (horzSpeed < 0.0001f) {
+        *blendLerp = 0.0f;
+        *startTime = 0.0f;
+        return &player_chell_Armature_idle_clip;
+    }
+
+    horzSpeed = sqrtf(horzSpeed);
+
+    *blendLerp = 1.0f - horzSpeed * (1.0f / PLAYER_SPEED);
+
+    if (*blendLerp < 0.0f) {
+        *blendLerp = 0.0f;
+    }
+
+    if (*blendLerp > 1.0f) {
+        *blendLerp = 1.0f;
+    }
+
+    *startTime = player->animator.from.currentTime;
+
+    float forward = forwardDir->x * player->body.velocity.x + forwardDir->z * player->body.velocity.z;
+    float right = rightDir->x * player->body.velocity.x + rightDir->z * player->body.velocity.z;
+
+    if (fabsf(forward) > fabsf(right)) {
+        if (forward > 0.0f) {
+            return &player_chell_Armature_runs_clip;
+        } else {
+            return &player_chell_Armature_runn_clip;
+        }
+    } else {
+        if (right > 0.0f) {
+            return &player_chell_Armature_rune_clip;
+        } else {
+            return &player_chell_Armature_runw_clip;
+        }
+    }
+
+}
+
 void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Vector3 forward;
     struct Vector3 right;
 
-    skAnimatorV2Update(&player->animator, player->armature.boneTransforms, FIXED_DELTA_TIME);
+    skBlenderUpdate(&player->animator, player->armature.boneTransforms, FIXED_DELTA_TIME);
 
     int doorwayMask = worldCheckDoorwaySides(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom);
     playerGetMoveBasis(&player->lookTransform, &forward, &right);
@@ -448,4 +491,11 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     player->body.currentRoom = worldCheckDoorwayCrossings(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom, doorwayMask);
 
     dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
+
+    float startTime = 0.0f;
+    struct SKAnimationClip* clip = playerDetermineNextClip(player, &player->animator.blendLerp, &startTime, &forward, &right);
+
+    if (clip != player->animator.from.currentClip) {
+        skAnimatorRunClip(&player->animator.from, clip, startTime, SKAnimatorFlagsLoop);
+    }
 }

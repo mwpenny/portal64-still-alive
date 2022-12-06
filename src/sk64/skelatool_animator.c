@@ -31,7 +31,7 @@ void skAnimatorCopy(u32 romAddress, void* target, u32 size) {
     osEPiStartDma(gAnimationPiHandle, ioMesg, OS_READ);
 }
 
-void skAnimatorV2Init(struct SKAnimatorV2* animator, int nBones) {
+void skAnimatorInit(struct SKAnimator* animator, int nBones) {
     animator->currentClip = NULL;
     animator->currentTime = 0.0f;
     animator->blendLerp = 0.0f;
@@ -43,7 +43,7 @@ void skAnimatorV2Init(struct SKAnimatorV2* animator, int nBones) {
     animator->nBones = nBones;
 }
 
-void skAnimatorV2Cleanup(struct SKAnimatorV2* animator) {
+void skAnimatorCleanup(struct SKAnimator* animator) {
     free(animator->boneState[0]);
     free(animator->boneState[1]);
 
@@ -51,7 +51,7 @@ void skAnimatorV2Cleanup(struct SKAnimatorV2* animator) {
     animator->boneState[1] = NULL;
 }
 
-void skAnimatorV2RequestNext(struct SKAnimatorV2* animator) {
+void skAnimatorRequestNext(struct SKAnimator* animator) {
     struct SKAnimationClip* currentClip = animator->currentClip;
 
     if (!currentClip) {
@@ -77,55 +77,80 @@ void skAnimatorV2RequestNext(struct SKAnimatorV2* animator) {
     skAnimatorCopy((u32)currentClip->frames + frameSize * nextFrame, (void*)animator->boneState[animator->latestBoneState], sizeof(struct SKAnimationBoneFrame) * boneCount);
 }
 
-void skAnimatorV2Extractstate(struct SKAnimationBoneFrame* frames, int boneCount, struct Transform* result) {
-    for (int i = 0; i < boneCount; ++i) {
-        result[i].position.x = (float)frames[i].position.x;
-        result[i].position.y = (float)frames[i].position.y;
-        result[i].position.z = (float)frames[i].position.z;
+void skAnimatorExtractBone(struct SKAnimationBoneFrame* bone, struct Transform* result) {
+    result->position.x = (float)bone->position.x;
+    result->position.y = (float)bone->position.y;
+    result->position.z = (float)bone->position.z;
 
-        result[i].rotation.x = frames[i].rotation.x * (1.0f / 32767.0f);
-        result[i].rotation.y = frames[i].rotation.y * (1.0f / 32767.0f);
-        result[i].rotation.z = frames[i].rotation.z * (1.0f / 32767.0f);
-        float wSqrd = 1.0f - (result[i].rotation.x * result[i].rotation.x + result[i].rotation.y * result[i].rotation.y + result[i].rotation.z * result[i].rotation.z);
-        if (wSqrd <= 0.0f) {
-            result[i].rotation.w = 0.0f;
-        } else {
-            result[i].rotation.w = sqrtf(wSqrd);
-        }
-
-        result[i].scale = gOneVec;
+    result->rotation.x = bone->rotation.x * (1.0f / 32767.0f);
+    result->rotation.y = bone->rotation.y * (1.0f / 32767.0f);
+    result->rotation.z = bone->rotation.z * (1.0f / 32767.0f);
+    float wSqrd = 1.0f - (result->rotation.x * result->rotation.x + result->rotation.y * result->rotation.y + result->rotation.z * result->rotation.z);
+    if (wSqrd <= 0.0f) {
+        result->rotation.w = 0.0f;
+    } else {
+        result->rotation.w = sqrtf(wSqrd);
     }
 }
 
-void skAnimatorV2ReadTransform(struct SKAnimatorV2* animator, struct Transform* transforms) {
+void skAnimatorInitZeroTransform(struct SKAnimator* animator, struct Transform* transforms) {
     if (animator->latestBoneState == -1) {
         return;
     }
 
-    if (animator->blendLerp >= 1.0f) {
-        skAnimatorV2Extractstate(animator->boneState[animator->latestBoneState], animator->nBones, transforms);
-        return;
-    }
-
-    struct Transform fromState[animator->nBones];
-    struct Transform toState[animator->nBones];
-
-    skAnimatorV2Extractstate(animator->boneState[animator->latestBoneState], animator->nBones, toState);
-    skAnimatorV2Extractstate(animator->boneState[animator->latestBoneState ^ 1], animator->nBones, fromState);
-
     for (int i = 0; i < animator->nBones; ++i) {
-        transformLerp(&fromState[i], &toState[i], animator->blendLerp, &transforms[i]);
+        transforms[i].position = gZeroVec;
+        transforms[i].rotation = gQuaternionZero;
+        transforms[i].scale = gOneVec;
     }
 }
 
-void skAnimatorV2Update(struct SKAnimatorV2* animator, struct Transform* transforms, float deltaTime) {
+void skAnimatorNormalize(struct SKAnimator* animator, struct Transform* transforms) {
+    for (int i = 0; i < animator->nBones; ++i) {
+        quatNormalize(&transforms[i].rotation, &transforms[i].rotation);
+    }
+}
+
+void skAnimatorBlendTransform(struct SKAnimationBoneFrame* frame, struct Transform* transforms, int nBones, float weight) {
+    for (int i = 0; i < nBones; ++i) {
+        struct Transform boneTransform;
+        skAnimatorExtractBone(&frame[i], &boneTransform);
+        
+        vector3AddScaled(&transforms[i].position, &boneTransform.position, weight, &transforms[i].position);
+        
+        transforms[i].rotation.x += boneTransform.rotation.x * weight;
+        transforms[i].rotation.y += boneTransform.rotation.y * weight;
+        transforms[i].rotation.z += boneTransform.rotation.z * weight;
+        transforms[i].rotation.w += boneTransform.rotation.w * weight;
+    }
+}
+
+void skAnimatorReadTransformWithWeight(struct SKAnimator* animator, struct Transform* transforms, float weight) {
+    if (animator->blendLerp >= 1.0f) {
+        skAnimatorBlendTransform(animator->boneState[animator->latestBoneState], transforms, animator->nBones, weight);
+        return;
+    }
+
+    skAnimatorBlendTransform(animator->boneState[animator->latestBoneState], transforms, animator->nBones, animator->blendLerp * weight);
+    skAnimatorBlendTransform(animator->boneState[animator->latestBoneState ^ 1], transforms, animator->nBones, (1.0f - animator->blendLerp) * weight);
+}
+
+void skAnimatorReadTransform(struct SKAnimator* animator, struct Transform* transforms) {
+    if (animator->latestBoneState == -1) {
+        return;
+    }
+
+    skAnimatorInitZeroTransform(animator, transforms);
+    skAnimatorReadTransformWithWeight(animator, transforms, 1.0f);
+    skAnimatorNormalize(animator, transforms);
+}
+
+void skAnimatorStep(struct SKAnimator* animator, float deltaTime) {
     struct SKAnimationClip* currentClip = animator->currentClip;
 
     if (!currentClip) {
         return;
     }
-
-    skAnimatorV2ReadTransform(animator, transforms);
 
     animator->currentTime += deltaTime;
 
@@ -133,7 +158,7 @@ void skAnimatorV2Update(struct SKAnimatorV2* animator, struct Transform* transfo
     int currentFrame = (int)ceilf(currentFrameFractional);
 
     while (currentFrame >= currentClip->nFrames) {
-        if (!(animator->flags & SKAnimatorV2FlagsLoop)) {
+        if (!(animator->flags & SKAnimatorFlagsLoop)) {
             animator->blendLerp = 1.0f;
             return;
         }
@@ -162,10 +187,22 @@ void skAnimatorV2Update(struct SKAnimatorV2* animator, struct Transform* transfo
         animator->blendLerp = 1.0f;
     }
 
-    skAnimatorV2RequestNext(animator);
+    skAnimatorRequestNext(animator);
 }
 
-void skAnimatorV2RunClip(struct SKAnimatorV2* animator, struct SKAnimationClip* clip, float startTime, int flags) {
+void skAnimatorUpdate(struct SKAnimator* animator, struct Transform* transforms, float deltaTime) {
+    struct SKAnimationClip* currentClip = animator->currentClip;
+
+    if (!currentClip) {
+        return;
+    }
+
+    skAnimatorReadTransform(animator, transforms);
+
+    skAnimatorStep(animator, deltaTime);
+}
+
+void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip, float startTime, int flags) {
     animator->currentClip = clip;
 
     if (!clip) {
@@ -184,7 +221,7 @@ void skAnimatorV2RunClip(struct SKAnimatorV2* animator, struct SKAnimationClip* 
     animator->currentTime = startTime;
     animator->flags = flags;
 
-    skAnimatorV2RequestNext(animator);
+    skAnimatorRequestNext(animator);
 }
 
 static unsigned gSegmentLocations[SK_SEGMENT_COUNT];
@@ -196,4 +233,48 @@ void skSetSegmentLocation(unsigned segmentNumber, unsigned segmentLocation) {
 u32 skTranslateSegment(unsigned address) {
     unsigned segment = (address >> 24) & 0xF;
     return (address & 0xFFFFFF) + gSegmentLocations[segment];
+}
+
+void skBlenderInit(struct SKAnimatorBlender* blender, int nBones) {
+    skAnimatorInit(&blender->from, nBones);
+    skAnimatorInit(&blender->to, nBones);
+    blender->blendLerp = 0.0f;
+}
+
+void skBlenderApply(struct SKAnimatorBlender* blender, struct Transform* transforms) {
+    float lerp = blender->blendLerp;
+
+    if (blender->from.latestBoneState == -1) {
+        if (blender->to.latestBoneState == -1) {
+            return;
+        }
+
+        lerp = 1.0f;
+    }
+
+    if (blender->to.latestBoneState == -1) {
+        lerp = 0.0f;
+    }
+
+    skAnimatorInitZeroTransform(&blender->from, transforms);
+
+    if (lerp == 1.0f) {
+        skAnimatorReadTransformWithWeight(&blender->to, transforms, 1.0f);
+    } else if (lerp == 0.0f) {
+        skAnimatorReadTransformWithWeight(&blender->from, transforms, 1.0f);
+    } else {
+        skAnimatorReadTransformWithWeight(&blender->to, transforms, lerp);
+        skAnimatorReadTransformWithWeight(&blender->from, transforms, 1.0f - lerp);
+    }
+}
+
+void skBlenderCleanup(struct SKAnimatorBlender* blender) {
+    skAnimatorCleanup(&blender->from);
+    skAnimatorCleanup(&blender->to);
+}
+
+void skBlenderUpdate(struct SKAnimatorBlender* blender, struct Transform* transforms, float deltaTime) {
+    skBlenderApply(blender, transforms);
+    skAnimatorStep(&blender->from, deltaTime);
+    skAnimatorStep(&blender->to, deltaTime);
 }

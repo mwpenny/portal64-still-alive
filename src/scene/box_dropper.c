@@ -100,7 +100,7 @@ void boxDropperInit(struct BoxDropper* dropper, struct BoxDropperDefinition* def
 
     skArmatureInit(&dropper->armature, &props_box_dropper_armature);
 
-    skAnimatorV2Init(&dropper->animator, PROPS_BOX_DROPPER_DEFAULT_BONES_COUNT);
+    skAnimatorInit(&dropper->animator, PROPS_BOX_DROPPER_DEFAULT_BONES_COUNT);
 
     dropper->flags = 0;
     dropper->reloadTimer = DROOPER_RELOAD_TIME;
@@ -109,7 +109,7 @@ void boxDropperInit(struct BoxDropper* dropper, struct BoxDropperDefinition* def
 }
 
 void boxDropperUpdate(struct BoxDropper* dropper) {
-    skAnimatorV2Update(&dropper->animator, dropper->armature.boneTransforms, FIXED_DELTA_TIME);
+    skAnimatorUpdate(&dropper->animator, dropper->armature.boneTransforms, FIXED_DELTA_TIME);
 
     if (dropper->reloadTimer > 0.0f) {
         dropper->reloadTimer -= FIXED_DELTA_TIME;
@@ -143,7 +143,7 @@ void boxDropperUpdate(struct BoxDropper* dropper) {
         boxDropperFakePos(dropper, &pendingCubePos);
 
         decorObjectInit(&dropper->activeCube, decorObjectDefinitionForId(DECOR_TYPE_CUBE), &pendingCubePos, dropper->roomIndex);
-        skAnimatorV2RunClip(&dropper->animator, &props_box_dropper_Armature_DropCube_clip, 0.0f, 0);
+        skAnimatorRunClip(&dropper->animator, &props_box_dropper_Armature_DropCube_clip, 0.0f, 0);
 
         dropper->flags &= ~BoxDropperFlagsCubeRequested;
         dropper->flags |= BoxDropperFlagsCubeIsActive;

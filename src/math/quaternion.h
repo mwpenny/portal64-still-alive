@@ -9,6 +9,8 @@ struct Quaternion {
     float x, y, z, w;
 };
 
+extern struct Quaternion gQuaternionZero;
+
 void quatIdent(struct Quaternion* q);
 void quatAxisAngle(struct Vector3* axis, float angle, struct Quaternion* out);
 void quatAxisComplex(struct Vector3* axis, struct Vector2* complex, struct Quaternion* out);

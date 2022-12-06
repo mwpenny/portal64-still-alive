@@ -60,7 +60,7 @@ void pedestalInit(struct Pedestal* pedestal, struct PedestalDefinition* definiti
 
     skArmatureInit(&pedestal->armature, &pedestal_armature);
 
-    skAnimatorV2Init(&pedestal->animator, PEDESTAL_DEFAULT_BONES_COUNT);
+    skAnimatorInit(&pedestal->animator, PEDESTAL_DEFAULT_BONES_COUNT);
 
     pedestal->dynamicId = dynamicSceneAdd(pedestal, pedestalRender, &pedestal->transform, 0.8f);
 
@@ -82,7 +82,7 @@ void pedestalDetermineHolderAngle(struct Pedestal* pedestal, struct Vector2* out
 }
 
 void pedestalUpdate(struct Pedestal* pedestal) {
-    skAnimatorV2Update(&pedestal->animator, pedestal->armature.boneTransforms, FIXED_DELTA_TIME);
+    skAnimatorUpdate(&pedestal->animator, pedestal->armature.boneTransforms, FIXED_DELTA_TIME);
 
     if (pedestal->flags & PedestalFlagsIsPointing) {
         struct Vector2 target;
@@ -99,7 +99,7 @@ void pedestalUpdate(struct Pedestal* pedestal) {
 void pedestalHide(struct Pedestal* pedestal) {
     pedestal->flags |= PedestalFlagsDown;
 
-    skAnimatorV2RunClip(&pedestal->animator, &pedestal_Armature_Hide_clip, 0.0f, 0);
+    skAnimatorRunClip(&pedestal->animator, &pedestal_Armature_Hide_clip, 0.0f, 0);
 }
 
 void pedestalPointAt(struct Pedestal* pedestal, struct Vector3* target) {
