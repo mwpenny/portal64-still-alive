@@ -84,18 +84,22 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 
 ## Current TODO list
 
+- [ ] Portal not rending recursively sometimes
 - [ ] Passing into a ceiling portal can sometimes mess with the player rotation
-- [ ] Render callback only once
-- [ ] Check for null allocations in render process
 - [ ] Stop looping sounds betwen levels
-- [ ] Z buffer allocation
 - [ ] Release grabbed objects when line of sight is cut
 - [ ] Correct elevator timing
 - [ ] Elevator and door sounds
 - [ ] Presort portal gun polygon order
-- [ ] Cube dispenser
 - [ ] Signage should not always be on
 - [ ] Camera shake
+- [x] Fix last test chamber wall gap
+- [x] Fix last test chamber by splitting wall
+- [x] Chell animations
+- [x] Render callback only once
+- [x] Check for null allocations in render process
+- [x] Z buffer allocation
+- [x] Cube dispenser
 - [x] calculateBarycentricCoords when two points are the same
 - [x] Level transition jump
 - [x] Collide player with dynamic objects
