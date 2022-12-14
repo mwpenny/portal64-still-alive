@@ -95,7 +95,7 @@ int cameraIsValidMatrix(float matrix[4][4]) {
     return fabsf(matrix[3][0]) <= 0x7fff && fabsf(matrix[3][1]) <= 0x7fff && fabsf(matrix[3][2]) <= 0x7fff;
 }
 
-int cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, float aspectRatio, Vp* viewport, struct CameraMatrixInfo* output) {
+int cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, float aspectRatio, Vp* viewport, int extractClippingPlanes, struct CameraMatrixInfo* output) {
     float view[4][4];
     float persp[4][4];
     float combined[4][4];
@@ -125,13 +125,15 @@ int cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, 
 
     guMtxF2L(combined, output->projectionView);
 
-    cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[0], 0, 1.0f);
-    cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[1], 0, -1.0f);
-    cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[2], 1, 1.0f);
-    cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[3], 1, -1.0f);
-    cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[4], 2, 1.0f);
-    output->cullingInformation.cameraPos = camera->transform.position;
-    output->cullingInformation.usedClippingPlaneCount = 5;
+    if (extractClippingPlanes) {
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[0], 0, 1.0f);
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[1], 0, -1.0f);
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[2], 1, 1.0f);
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[3], 1, -1.0f);
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[4], 2, 1.0f);
+        output->cullingInformation.cameraPos = camera->transform.position;
+        output->cullingInformation.usedClippingPlaneCount = 5;
+    }
 
     return 1;
 error:

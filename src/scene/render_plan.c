@@ -26,7 +26,7 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
     props->camera = *camera;
     props->aspectRatio = aspectRatio;
 
-    cameraSetupMatrices(camera, renderState, aspectRatio, &fullscreenViewport, &props->cameraMatrixInfo);
+    cameraSetupMatrices(camera, renderState, aspectRatio, &fullscreenViewport, 1, &props->cameraMatrixInfo);
 
     props->viewport = &fullscreenViewport;
     props->currentDepth = STARTING_RENDER_DEPTH;
@@ -248,14 +248,14 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
         return flags;
     }
 
-    if (!cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, next->viewport, &next->cameraMatrixInfo)) {
+    if (!cameraSetupMatrices(&next->camera, renderState, next->aspectRatio, next->viewport, 1, &next->cameraMatrixInfo)) {
         return flags;
     }
 
     if (current->clippingPortalIndex == -1) {
         // set the near clipping plane to be the exit portal surface
         quatMultVector(&exitPortal->rotation, &gForward, &next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal);
-        if (exitPortal < fromPortal) {
+        if (portalIndex == 1) {
             vector3Negate(&next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal, &next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal);
         }
         next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].d = -vector3Dot(&next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal, &exitPortal->position) * SCENE_SCALE;
@@ -308,7 +308,7 @@ void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, st
 
     renderPlanDetermineFarPlane(&cameraRay, properties);
 
-    cameraSetupMatrices(&properties->camera, renderState, properties->aspectRatio, properties->viewport, &properties->cameraMatrixInfo);
+    cameraSetupMatrices(&properties->camera, renderState, properties->aspectRatio, properties->viewport, 0, &properties->cameraMatrixInfo);
 
     int closerPortal = vector3DistSqrd(&properties->camera.transform.position, &scene->portals[0].transform.position) < vector3DistSqrd(&properties->camera.transform.position, &scene->portals[1].transform.position) ? 0 : 1;
     int otherPortal = 1 - closerPortal;

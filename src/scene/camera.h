@@ -40,7 +40,7 @@ int isQuadOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Co
 void cameraInit(struct Camera* camera, float fov, float near, float far);
 void cameraBuildViewMatrix(struct Camera* camera, float matrix[4][4]);
 void cameraBuildProjectionMatrix(struct Camera* camera, float matrix[4][4], u16* perspectiveNorm, float aspectRatio);
-int cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, float aspectRatio, Vp* viewport, struct CameraMatrixInfo* output);
+int cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, float aspectRatio, Vp* viewport, int extractClippingPlanes, struct CameraMatrixInfo* output);
 
 int cameraApplyMatrices(struct RenderState* renderState, struct CameraMatrixInfo* matrixInfo);
 
