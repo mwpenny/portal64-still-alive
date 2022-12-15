@@ -66,6 +66,8 @@ char gLevelWarnings[] = {
     0,
     LevelWarningsCubeDispense | LevelWarningsCubeHit,
     LevelWarningsCubeHit,
+    LevelWarningsBallHit | LevelWarningsBallCollect,
+    LevelWarningsBallHit | LevelWarningsBallCollect,
 };
 
 static struct Coloru8 gSignageOnColor = {0, 0, 0, 255};
