@@ -34,6 +34,31 @@ bool MeshDefinitionGenerator::ShouldIncludeNode(aiNode* node) {
     return node->mName.C_Str()[0] != '@' && node->mNumMeshes > 0;
 }
 
+double extractStaticUVScale(const std::string& nodeName) {
+    std::size_t uvScaleAt = nodeName.find(" uvscale ");
+
+    if (uvScaleAt == std::string::npos) {
+        return 1.0;
+    }
+
+    std::size_t endUvScaleAt = uvScaleAt + strlen(" uvscale ");
+    std::size_t spacePos = nodeName.find(" ", endUvScaleAt);
+
+    if (spacePos == std::string::npos) {
+        spacePos = nodeName.size();
+    }
+
+    std::string scale = nodeName.substr(endUvScaleAt, spacePos - endUvScaleAt);
+
+    double result = atof(scale.c_str());
+
+    if (result == 0.0) {
+        return 1.0f;
+    }
+
+    return result;
+}
+
 void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* node, CFileDefinition& fileDefinition, const DisplayListSettings& settings, std::vector<RenderChunk>& renderChunks) {
     for (unsigned meshIndex = 0; meshIndex < node->mNumMeshes; ++meshIndex) {
         std::shared_ptr<ExtendedMesh> mesh = fileDefinition.GetExtendedMesh(scene->mMeshes[node->mMeshes[meshIndex]]);
@@ -56,9 +81,10 @@ void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* n
         double tTile;
 
         if (extractMaterialAutoTileParameters(materialPtr, sTile, tTile)) {
+            double uvScale = extractStaticUVScale(node->mName.C_Str());
             mesh->CubeProjectTex(
-                settings.mModelScale / (double)sTile,
-                settings.mModelScale / (double)tTile
+                uvScale * settings.mModelScale / (double)sTile,
+                uvScale * settings.mModelScale / (double)tTile
             );
         }
 
