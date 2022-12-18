@@ -1,0 +1,488 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>skeletool64</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/sk_input.html">sk_input</a></li>
+  <li><a href="../modules/LuaMesh.html">LuaMesh</a></li>
+  <li><a href="../modules/sk_transform.html">sk_transform</a></li>
+  <li><strong>sk_definition_writer</strong></li>
+  <li><a href="../modules/sk_math.html">sk_math</a></li>
+  <li><a href="../modules/sk_scene.html">sk_scene</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>sk_definition_writer</code></h1>
+<p></p>
+<p></p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#reference_to">reference_to (value[, index])</a></td>
+	<td class="summary">creates a pointer to another piece of data
+ the data being referenced must be added to the output
+ via add_definition</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#is_reference_type">is_reference_type (value)</a></td>
+	<td class="summary">returns true if value is a reference</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#raw">raw (value)</a></td>
+	<td class="summary">renders a string directly in the ouptut instead of wrapping the output in quotes</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#is_raw">is_raw (value)</a></td>
+	<td class="summary">returns true if value is a RawType</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#macro">macro (name, ...)</a></td>
+	<td class="summary">Generates as a macro eg `macro("MACRO_NAME", 1, 2)` will be displayed as
+ MACRO_NAME(1, 2) in the c file output</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#is_macro">is_macro (value)</a></td>
+	<td class="summary">Returns true if value is of type MacroType</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#add_definition">add_definition (nameHint, dataType, location, data)</a></td>
+	<td class="summary">Outputs a c file defintion</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#consume_pending_definitions">consume_pending_definitions ()</a></td>
+	<td class="summary">Returns and clears all definitions that have been created using add_definiton
+ meant for use in the c code</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#process_definitions">process_definitions (definitions)</a></td>
+	<td class="summary">Processes definitions correctly connecting references
+ meant for use in the c code</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#RefType">RefType</a></td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawType">RawType</a></td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#null_value">null_value</a></td>
+	<td class="summary">alias for raw("NULL")</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#MacroType">MacroType</a></td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#PendingDefinition">PendingDefinition</a></td>
+	<td class="summary"></td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "reference_to"></a>
+    <strong>reference_to (value[, index])</strong>
+    </dt>
+    <dd>
+    creates a pointer to another piece of data
+ the data being referenced must be added to the output
+ via add_definition
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">any</span></span>
+         the value to reference
+        </li>
+        <li><span class="parameter">index</span>
+            <span class="types"><span class="type">integer</span></span>
+         if value is an array, you can specify the element to reference using this index
+         (<em>optional</em>)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_definition_writer.html#RefType">RefType</a></span>
+        result
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "is_reference_type"></a>
+    <strong>is_reference_type (value)</strong>
+    </dt>
+    <dd>
+    returns true if value is a reference
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">any</span></span>
+         any
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        result
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "raw"></a>
+    <strong>raw (value)</strong>
+    </dt>
+    <dd>
+    renders a string directly in the ouptut instead of wrapping the output in quotes
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_definition_writer.html#RawType">RawType</a></span>
+        result
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "is_raw"></a>
+    <strong>is_raw (value)</strong>
+    </dt>
+    <dd>
+    returns true if value is a RawType
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">any</span></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+        result
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "macro"></a>
+    <strong>macro (name, ...)</strong>
+    </dt>
+    <dd>
+    Generates as a macro eg `macro("MACRO_NAME", 1, 2)` will be displayed as
+ MACRO_NAME(1, 2) in the c file output
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+        </li>
+        <li><span class="parameter">...</span>
+            <span class="types"><span class="type">{any,...}</span></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_definition_writer.html#MacroType">MacroType</a></span>
+        result
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "is_macro"></a>
+    <strong>is_macro (value)</strong>
+    </dt>
+    <dd>
+    Returns true if value is of type MacroType
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">any</span></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "add_definition"></a>
+    <strong>add_definition (nameHint, dataType, location, data)</strong>
+    </dt>
+    <dd>
+    Outputs a c file defintion
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">nameHint</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+        </li>
+        <li><span class="parameter">dataType</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         the c type the definition is, if it is an array it should end in []
+        </li>
+        <li><span class="parameter">location</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         the file suffix where this definiton should be located in
+        </li>
+        <li><span class="parameter">data</span>
+            <span class="types"><span class="type">any</span></span>
+         The data of the file definition
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "consume_pending_definitions"></a>
+    <strong>consume_pending_definitions ()</strong>
+    </dt>
+    <dd>
+    Returns and clears all definitions that have been created using add_definiton
+ meant for use in the c code
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_definition_writer.html#PendingDefinition">{PendingDefinition,...}</a></span>
+        result
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "process_definitions"></a>
+    <strong>process_definitions (definitions)</strong>
+    </dt>
+    <dd>
+    Processes definitions correctly connecting references
+ meant for use in the c code
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">definitions</span>
+            <span class="types"><a class="type" href="../modules/sk_definition_writer.html#PendingDefinition">{PendingDefinition,...}</a></span>
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "RefType"></a>
+    <strong>RefType</strong>
+    </dt>
+    <dd>
+
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawType"></a>
+    <strong>RawType</strong>
+    </dt>
+    <dd>
+
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "null_value"></a>
+    <strong>null_value</strong>
+    </dt>
+    <dd>
+    alias for raw("NULL")
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "MacroType"></a>
+    <strong>MacroType</strong>
+    </dt>
+    <dd>
+
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "PendingDefinition"></a>
+    <strong>PendingDefinition</strong>
+    </dt>
+    <dd>
+
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">nameHint</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+        </li>
+        <li><span class="parameter">dataType</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+        </li>
+        <li><span class="parameter">location</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+        </li>
+        <li><span class="parameter">data</span>
+            <span class="types"><span class="type">any</span></span>
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-12-18 16:40:03 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

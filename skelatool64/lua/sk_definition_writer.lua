@@ -1,32 +1,74 @@
+--- @module sk_definition_writer
+
+local exports = {}
 
 local pending_definitions = {}
 
+--- @table RefType
 local RefType = {}
 
-function reference_to(value, index)
+--- creates a pointer to another piece of data
+--- the data being referenced must be added to the output
+--- via add_definition
+---@function reference_to
+---@tparam any value the value to reference
+---@tparam[opt] integer index if value is an array, you can specify the element to reference using this index
+---@treturn RefType result
+local function reference_to(value, index)
     return setmetatable({ value = value, index = index }, RefType)
 end
 
-function is_reference_type(value)
+exports.reference_to = reference_to
+
+--- returns true if value is a reference
+---@function is_reference_type
+---@tparam any value any
+---@treturn boolean result
+local function is_reference_type(value)
     return getmetatable(value) == RefType
 end
 
+exports.is_reference_type = is_reference_type
+
+--- @table RawType
 local RawType = {}
 
-function raw(value)
+local function raw(value)
     return setmetatable({ value = value}, RawType)
 end
 
-function is_raw(value)
+--- renders a string directly in the ouptut instead of wrapping the output in quotes
+---@function raw
+---@tparam string value
+---@treturn RawType result
+exports.raw = raw
+
+--- returns true if value is a RawType
+---@function is_raw
+---@tparam any value
+---@treturn boolean result
+local function is_raw(value)
     return getmetatable(value) == RawType
 end
 
+exports.is_raw = is_raw
 
-null_value = raw("NULL")
+--- alias for raw("NULL")
+--- @table null_value
+local null_value = raw("NULL")
 
+exports.null_value = null_value
+
+--- @table MacroType
 local MacroType = {}
 
-function macro(name, ...)
+--- Generates as a macro eg `macro("MACRO_NAME", 1, 2)` will be displayed as
+--- MACRO_NAME(1, 2) in the c file output
+---@function macro
+---@tparam string name
+---@tparam {any,...} ...
+---@treturn MacroType result
+local function macro(name, ...)
     if (type(name) ~= "string") then
         error("name should be of type string got " .. type(name))
     end
@@ -34,9 +76,17 @@ function macro(name, ...)
     return setmetatable({ name = name, args = {...}}, MacroType)
 end
 
-function is_macro(value)
+exports.macro = macro
+
+--- Returns true if value is of type MacroType
+---@function is_macro
+---@tparam any value
+---@treturn boolean
+local function is_macro(value)
     return getmetatable(value) == MacroType
 end
+
+exports.is_macro = is_macro
 
 local function validate_definition(data, visited, name_path)
     if (visited[data]) then
@@ -87,7 +137,13 @@ local function validate_definition(data, visited, name_path)
     return true
 end
 
-function add_definition(nameHint, dataType, location, data)
+--- Outputs a c file defintion 
+---@function add_definition
+---@tparam string nameHint
+---@tparam string dataType the c type the definition is, if it is an array it should end in []
+---@tparam string location the file suffix where this definiton should be located in
+---@tparam any data The data of the file definition
+local function add_definition(nameHint, dataType, location, data)
     if (type(nameHint) ~= "string") then
         error("nameHint should be a string")
     end
@@ -113,6 +169,8 @@ function add_definition(nameHint, dataType, location, data)
 
     return true
 end
+
+exports.add_definition = add_definition
 
 local function populate_name_mapping(path, object, result)
     if (type(object) ~= "table") then
@@ -200,13 +258,29 @@ local function replace_references(object, name_mapping, name_path)
     return result
 end
 
-function consume_pending_definitions()
+---@table PendingDefinition
+---@tfield string nameHint 
+---@tfield string dataType 
+---@tfield string location 
+---@tfield any data 
+
+--- Returns and clears all definitions that have been created using add_definiton
+--- meant for use in the c code
+---@function consume_pending_definitions
+---@treturn {PendingDefinition,...} result
+local function consume_pending_definitions()
     local result = pending_definitions
     consume_pending_definitions = {}
     return result
 end
 
-function process_definitions(definitions)
+exports.consume_pending_definitions = consume_pending_definitions
+
+--- Processes definitions correctly connecting references
+--- meant for use in the c code
+---@function process_definitions
+---@tparam {PendingDefinition,...} definitions
+local function process_definitions(definitions)
     local name_mapping = {}
     
     for k, v in pairs(definitions) do
@@ -219,3 +293,7 @@ function process_definitions(definitions)
         v.data = replace_references(v.data, name_mapping, v.name)
     end
 end
+
+exports.process_definitions = process_definitions
+
+return exports

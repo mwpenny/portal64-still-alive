@@ -1,3 +1,5 @@
+/// @module LuaMesh
+
 #include "LuaMesh.h"
 
 #include "../definition_generator/MeshDefinitionGenerator.h"
@@ -9,6 +11,7 @@
 
 #include "./LuaGeometry.h"
 #include "./LuaTransform.h"
+#include "./LuaUtils.h"
 
 int luaGetVector3ArrayElement(lua_State* L) {
     struct aiVector3DArray* array = (struct aiVector3DArray*)luaL_checkudata(L, 1, "aiVector3DArray");
@@ -80,7 +83,7 @@ void toLua(lua_State* L, Material* material) {
 
     lua_createtable(L, 1, 0);
 
-    lua_getglobal(L, "Material");
+    luaLoadModuleFunction(L, "sk_mesh", "Material");
     lua_setmetatable(L, -2);
 
     toLua(L, material->mName);
@@ -132,7 +135,7 @@ int luaTransformMesh(lua_State* L) {
 void meshToLua(lua_State* L, std::shared_ptr<ExtendedMesh> mesh) {
     lua_createtable(L, 0, 1);
     
-    lua_getglobal(L, "Mesh");
+    luaLoadModuleFunction(L, "sk_mesh", "Mesh");
     lua_setmetatable(L, -2);
 
     toLua(L, mesh);
@@ -141,11 +144,8 @@ void meshToLua(lua_State* L, std::shared_ptr<ExtendedMesh> mesh) {
     toLua(L, mesh->mMesh->mName.C_Str());
     lua_setfield(L, -2, "name");
 
-    toLua(L, mesh->bbMin);
-    lua_setfield(L, -2, "bbMin");
-
-    toLua(L, mesh->bbMax);
-    lua_setfield(L, -2, "bbMax");
+    toLua(L, aiAABB(mesh->bbMin, mesh->bbMax));
+    lua_setfield(L, -2, "bb");
 
     lua_pushcfunction(L, luaTransformMesh);
     lua_setfield(L, -2, "transform");
@@ -237,6 +237,13 @@ int luaBuildRenderChunks(lua_State* L) {
     return 1;
 }
 
+/*** 
+Generates a mesh
+@function generate_mesh
+@tparam {RenderChunk,...} renderChunks
+@tparam string file suffix where the mesh definition is written to
+@tparam[opt] DisplayListOverrides changes to the display list
+ */
 int luaGenerateMesh(lua_State* L) {
     const aiScene* scene = (const aiScene*)lua_touserdata(L, lua_upvalueindex(1));
     CFileDefinition* fileDefinition = (CFileDefinition*)lua_touserdata(L, lua_upvalueindex(2));
@@ -267,22 +274,38 @@ int luaGenerateMesh(lua_State* L) {
     return 1;
 }
 
-void populateLuaMesh(lua_State* L, const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings) {
-    lua_newtable(L);
-    lua_setglobal(L, "Material");
+int buildMeshModule(lua_State* L) {
+    aiScene* scene = (aiScene*)lua_touserdata(L, lua_upvalueindex(1));
+    CFileDefinition* fileDefinition = (CFileDefinition*)lua_touserdata(L, lua_upvalueindex(2));
+    DisplayListSettings* settings = (DisplayListSettings*)lua_touserdata(L, lua_upvalueindex(3));
 
     lua_newtable(L);
-    lua_setglobal(L, "Mesh");
 
-    lua_pushlightuserdata(L, const_cast<aiScene*>(scene));
-    lua_pushlightuserdata(L, &fileDefinition);
-    lua_pushlightuserdata(L, const_cast<DisplayListSettings*>(&settings));
+    lua_newtable(L);
+    lua_setfield(L, -2, "Material");
+
+    lua_newtable(L);
+    lua_setfield(L, -2, "Mesh");
+
+    lua_pushlightuserdata(L, scene);
+    lua_pushlightuserdata(L, fileDefinition);
+    lua_pushlightuserdata(L, settings);
     lua_pushcclosure(L, luaBuildRenderChunks, 3);
-    lua_setglobal(L, "generate_render_chunks");
+    lua_setfield(L, -2, "generate_render_chunks");
 
+    lua_pushlightuserdata(L, scene);
+    lua_pushlightuserdata(L, fileDefinition);
+    lua_pushlightuserdata(L, settings);
+    lua_pushcclosure(L, luaGenerateMesh, 3);
+    lua_setfield(L, -2, "generate_mesh");
+
+    return 1;
+}
+
+void populateLuaMesh(lua_State* L, const aiScene* scene, CFileDefinition& fileDefinition, const DisplayListSettings& settings) {
     lua_pushlightuserdata(L, const_cast<aiScene*>(scene));
     lua_pushlightuserdata(L, &fileDefinition);
     lua_pushlightuserdata(L, const_cast<DisplayListSettings*>(&settings));
-    lua_pushcclosure(L, luaGenerateMesh, 3);
-    lua_setglobal(L, "generate_mesh");
+    lua_pushcclosure(L, buildMeshModule, 3);
+    luaSetModuleLoader(L, "sk_mesh");
 }

@@ -1,9 +1,10 @@
 #include "LuaGeometry.h"
 
 #include "LuaBasicTypes.h"
+#include "LuaUtils.h"
 
 void toLua(lua_State* L, const aiVector3D& vector) {
-    lua_getglobal(L, "vector3");
+    luaLoadModuleFunction(L, "sk_math", "vector3");
     toLua(L, vector.x);
     toLua(L, vector.y);
     toLua(L, vector.z);
@@ -11,7 +12,7 @@ void toLua(lua_State* L, const aiVector3D& vector) {
 }
 
 void toLua(lua_State* L, const aiQuaternion& quaternion) {
-    lua_getglobal(L, "quaternion");
+    luaLoadModuleFunction(L, "sk_math", "quaternion");
     toLua(L, quaternion.x);
     toLua(L, quaternion.y);
     toLua(L, quaternion.z);
@@ -20,7 +21,7 @@ void toLua(lua_State* L, const aiQuaternion& quaternion) {
 }
 
 void toLua(lua_State* L, const aiAABB& box) {
-    lua_getglobal(L, "box3");
+    luaLoadModuleFunction(L, "sk_math", "box3");
     toLua(L, box.mMin);
     toLua(L, box.mMax);
     lua_call(L, 2, 1);

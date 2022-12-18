@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>skeletool64</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/sk_input.html">sk_input</a></li>
+  <li><a href="../modules/LuaMesh.html">LuaMesh</a></li>
+  <li><a href="../modules/sk_transform.html">sk_transform</a></li>
+  <li><a href="../modules/sk_definition_writer.html">sk_definition_writer</a></li>
+  <li><a href="../modules/sk_math.html">sk_math</a></li>
+  <li><strong>sk_scene</strong></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>sk_scene</code></h1>
+<p></p>
+<p></p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#export_default_mesh">export_default_mesh ()</a></td>
+	<td class="summary">Generates mesh and animation data from the current scene</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#nodes_for_type">nodes_for_type (prefix)</a></td>
+	<td class="summary">Returns a list of nodes with the given string prefix</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#node_with_name">node_with_name (name)</a></td>
+	<td class="summary">Returns a node with the given name</td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Node">Node</a></td>
+	<td class="summary">A scene node</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#NodeWithArguments">NodeWithArguments</a></td>
+	<td class="summary">A pairing of nodes and pre parsed node arguments</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "export_default_mesh"></a>
+    <strong>export_default_mesh ()</strong>
+    </dt>
+    <dd>
+    Generates mesh and animation data from the current scene
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">sk_definition_writer.RawType</span></span>
+        model</li>
+        <li>
+           <span class="types"><span class="type">sk_definition_writer.RawType</span></span>
+        material</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "nodes_for_type"></a>
+    <strong>nodes_for_type (prefix)</strong>
+    </dt>
+    <dd>
+    Returns a list of nodes with the given string prefix
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">prefix</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         the string prefix to search
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_scene.html#NodeWithArguments">NodeWithArguments</a></span>
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "node_with_name"></a>
+    <strong>node_with_name (name)</strong>
+    </dt>
+    <dd>
+    Returns a node with the given name
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_scene.html#Node">Node</a></span>
+        result
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "Node"></a>
+    <strong>Node</strong>
+    </dt>
+    <dd>
+    A scene node
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+        </li>
+        <li><span class="parameter">transformation</span>
+            <span class="types"><span class="type">sk_transform.Transform</span></span>
+
+        </li>
+        <li><span class="parameter">full_transformation</span>
+            <span class="types"><span class="type">sk_transform.Transform</span></span>
+
+        </li>
+        <li><span class="parameter">parent</span>
+            <span class="types"><a class="type" href="../modules/sk_scene.html#Node">Node</a></span>
+
+        </li>
+        <li><span class="parameter">children</span>
+            <span class="types"><a class="type" href="../modules/sk_scene.html#Node">{Node,...}</a></span>
+
+        </li>
+        <li><span class="parameter">meshes</span>
+            <span class="types"><span class="type">{LuaMesh.Mesh,...}</span></span>
+
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "NodeWithArguments"></a>
+    <strong>NodeWithArguments</strong>
+    </dt>
+    <dd>
+    A pairing of nodes and pre parsed node arguments
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">node</span>
+            <span class="types"><a class="type" href="../modules/sk_scene.html#Node">Node</a></span>
+
+        </li>
+        <li><span class="parameter">arguments</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">{string,...}</a></span>
+         the list is strings produced by splitting the node name by spaces
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2022-12-18 16:40:03 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

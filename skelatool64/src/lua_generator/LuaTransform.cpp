@@ -1,6 +1,13 @@
+/// @module sk_transform
+
 #include "LuaTransform.h"
 
 #include "LuaBasicTypes.h"
+
+/***
+A 4x4 matrix transform
+@type Transform
+*/
 
 void toLua(lua_State* L, const aiMatrix4x4& matrix) {
     aiMatrix4x4* result = (aiMatrix4x4*)lua_newuserdata(L, sizeof(aiMatrix4x4));
@@ -19,6 +26,12 @@ void fromLua(lua_State* L, aiMatrix4x4& matrix) {
     lua_pop(L, 1);
 }
 
+/***
+@function decompose
+@treturn vector3.Vector3 scale
+@treturn quaternion.Quaternion rotation
+@treturn vector3.Vector3 position
+ */
 int luaTransformDecomponse(lua_State* L) {
     aiMatrix4x4* mtx = (aiMatrix4x4*)luaL_checkudata(L, 1, "aiMatrix4x4");
 

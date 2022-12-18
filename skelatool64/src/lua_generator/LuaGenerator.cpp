@@ -20,10 +20,11 @@ struct LuaFile {
     const char* start;
     const char* end;
     const char* name;
+    const char* moduleName;
 };
 
 struct LuaFile luaFiles[] = {
-#define EMIT(name) {_binary_build_lua_##name##_out_start, _binary_build_lua_##name##_out_end, "lua/" #name ".lua"},
+#define EMIT(name) {_binary_build_lua_##name##_out_start, _binary_build_lua_##name##_out_end, "lua/" #name ".lua", #name},
 #include "LuaFiles.h"
 #undef EMIT
 };
@@ -44,6 +45,32 @@ bool checkLuaError(lua_State *L, int errCode, const char* filename) {
     return false;
 }
 
+int loadPrecompiledModule(lua_State* L) {
+    const char* moduleName = lua_tostring(L, lua_upvalueindex(1));
+
+    for (unsigned i = 0; i < sizeof(luaFiles) / sizeof(*luaFiles); ++i) {
+        struct LuaFile* file = &luaFiles[i];
+
+        if (strcmp(moduleName, file->moduleName) != 0) {
+            continue;
+        }
+
+        luaL_loadbuffer(L, file->start, file->end - file->start, file->name);
+
+        int errCode = lua_pcall(L, 0, 1, 0);
+
+        if (checkLuaError(L, errCode, file->name)) {
+            lua_close(L);
+            exit(1);
+            return 0;
+        }
+
+        return 1;
+    }
+
+    return 0;
+}
+
 void generateFromLuaScript(
     const std::string& levelFilename,
     const std::string& filename,
@@ -55,27 +82,25 @@ void generateFromLuaScript(
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
     generateLuaTransform(L);
-    populateLuaNodeGroups(L, nodeGroups);
     populateLuaMesh(L, scene, fileDefinition, settings);
-    populateLuaDefinitionWrite(L, fileDefinition);
-    populateDisplayListSettings(L, settings);
+
+    lua_getglobal(L, "package");
+    lua_getfield(L, -1, "preload");
 
     for (unsigned i = 0; i < sizeof(luaFiles) / sizeof(*luaFiles); ++i) {
         struct LuaFile* file = &luaFiles[i];
-        luaL_loadbuffer(L, file->start, file->end - file->start, file->name);
-
-        int stackSize = lua_gettop(L);
-        int errCode = lua_pcall(L, 0, LUA_MULTRET, 0);
-        if (checkLuaError(L, errCode, file->name)) {
-            lua_close(L);
-            exit(1);
-            return;
-        }
-
-        lua_settop(L, stackSize);
+        lua_pushstring(L, file->moduleName);
+        lua_pushcclosure(L, loadPrecompiledModule, 1);
+        lua_setfield(L, -2, file->moduleName);
     }
 
+    // pop package and preload
+    lua_pop(L, 2);
+
+    populateDisplayListSettings(L, settings, levelFilename);
+    populateLuaDefinitionWrite(L, fileDefinition);
     populateLuaScene(L, scene, fileDefinition, settings);
+    populateLuaNodeGroups(L, nodeGroups);
 
     std::string directory = DirectoryName(filename) + "/?.lua;";
 
@@ -86,9 +111,6 @@ void generateFromLuaScript(
     lua_getfield(L, packageLocation, "path");
     lua_concat(L, 2);
     lua_setfield(L, packageLocation, "path");
-
-    toLua(L, levelFilename);
-    lua_setglobal(L, "input_filename");
 
     int errCode = luaL_dofile(L, filename.c_str());
     if (checkLuaError(L, errCode, filename.c_str())) {

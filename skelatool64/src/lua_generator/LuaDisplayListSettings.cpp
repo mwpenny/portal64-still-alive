@@ -1,9 +1,12 @@
+/// @module sk_input
+
 #include "LuaDisplayListSettings.h"
 
 #include <string.h>
 #include "./LuaMesh.h"
 #include "LuaTransform.h"
 #include "LuaBasicTypes.h"
+#include "LuaUtils.h"
 
 Material* luaGetMaterial(lua_State* L, const DisplayListSettings& defaults) {
     int materialType = lua_type(L, -1);
@@ -55,20 +58,36 @@ void fromLua(lua_State* L, DisplayListSettings& result, const DisplayListSetting
 
 }
 
-void populateDisplayListSettings(lua_State* L, const DisplayListSettings& defaults) {
+int luaInputModuleLoader(lua_State* L) {
     lua_newtable(L);
 
-    toLua(L, defaults.CreateCollisionTransform());
+    DisplayListSettings* defaults = (DisplayListSettings*)lua_touserdata(L, lua_upvalueindex(1));
+    const char* levelFilename = lua_tostring(L, lua_upvalueindex(2));
+
+    lua_newtable(L);
+    toLua(L, defaults->CreateCollisionTransform());
     lua_setfield(L, -2, "model_transform");
 
-    toLua(L, defaults.CreateGlobalTransform());
+    toLua(L, defaults->CreateGlobalTransform());
     lua_setfield(L, -2, "fixed_point_transform");
 
-    toLua(L, defaults.mModelScale);
+    toLua(L, defaults->mModelScale);
     lua_setfield(L, -2, "model_scale");
 
-    toLua(L, defaults.mFixedPointScale);
+    toLua(L, defaults->mFixedPointScale);
     lua_setfield(L, -2, "fixed_point_scale");
 
-    lua_setglobal(L, "settings");
+    lua_setfield(L, -3, "settings");
+
+    lua_pushstring(L, levelFilename);
+    lua_setfield(L, -3, "input_filename");
+
+    return 1;
+}
+
+void populateDisplayListSettings(lua_State* L, const DisplayListSettings& defaults, const std::string& levelFilename) {
+    lua_pushlightuserdata(L, const_cast<DisplayListSettings*>(&defaults));
+    lua_pushstring(L, levelFilename.c_str());
+    lua_pushcclosure(L, luaInputModuleLoader, 2);
+    luaSetModuleLoader(L, "sk_input");
 }
