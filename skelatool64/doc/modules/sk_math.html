@@ -33,14 +33,16 @@
 <h2>Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
-<li><a href="#Tables">Tables</a></li>
+<li><a href="#Class_Vector3">Class Vector3 </a></li>
+<li><a href="#Class_Box3">Class Box3 </a></li>
+<li><a href="#Class_Quaternion">Class Quaternion </a></li>
 </ul>
 
 
 <h2>Modules</h2>
 <ul class="nowrap">
   <li><a href="../modules/sk_input.html">sk_input</a></li>
-  <li><a href="../modules/LuaMesh.html">LuaMesh</a></li>
+  <li><a href="../modules/sk_mesh.html">sk_mesh</a></li>
   <li><a href="../modules/sk_transform.html">sk_transform</a></li>
   <li><a href="../modules/sk_definition_writer.html">sk_definition_writer</a></li>
   <li><strong>sk_math</strong></li>
@@ -63,6 +65,10 @@
 	<td class="summary">creates a new 3d vector</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#isVector3">isVector3 (obj)</a></td>
+	<td class="summary">determines if the input is a Vector3</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#box3">box3 (min, max)</a></td>
 	<td class="summary">creates a box3</td>
 	</tr>
@@ -70,19 +76,75 @@
 	<td class="name" nowrap><a href="#quaternion">quaternion (x, y, z, w)</a></td>
 	<td class="summary">creates a new quaternion</td>
 	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#isQuaternion">isQuaternion (obj)</a></td>
+	<td class="summary">determines if the input is a Quaternion</td>
+	</tr>
 </table>
-<h2><a href="#Tables">Tables</a></h2>
+<h2><a href="#Class_Vector3">Class Vector3 </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#Vector3">Vector3</a></td>
+	<td class="name" nowrap><a href="#Vector3:__add">Vector3:__add (b)</a></td>
 	<td class="summary"></td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Box3">Box3</a></td>
+	<td class="name" nowrap><a href="#Vector3:__sub">Vector3:__sub (b)</a></td>
 	<td class="summary"></td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#Quaternion">Quaternion</a></td>
+	<td class="name" nowrap><a href="#Vector3:__mul">Vector3:__mul (b)</a></td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Vector3:__div">Vector3:__div (b)</a></td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Vector3:magnitude">Vector3:magnitude ()</a></td>
+	<td class="summary">Get the magnitude of the vector</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Vector3:min">Vector3:min (other)</a></td>
+	<td class="summary">Get the magnitude of the vector</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Vector3:max">Vector3:max (other)</a></td>
+	<td class="summary">Get the magnitude of the vector</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Vector3:dot">Vector3:dot (b)</a></td>
+	<td class="summary">Get the dot product between two vectors</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Vector3:cross">Vector3:cross (b)</a></td>
+	<td class="summary">Get the cross product between two vectors</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Vector3:lerp">Vector3:lerp (b)</a></td>
+	<td class="summary">Linearly interpolates between two points</td>
+	</tr>
+</table>
+<h2><a href="#Class_Box3">Class Box3 </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Box3:nearest_point_in_box">Box3:nearest_point_in_box (point)</a></td>
+	<td class="summary">Returns the point inside or on the box that is nearest to the given point</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Box3:distance_to_point">Box3:distance_to_point (point)</a></td>
+	<td class="summary">Gets the distance from the box to the point
+ If the box contains the point then the negative distance to
+ the nearest edge is returned</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Box3:lerp">Box3:lerp ()</a></td>
+	<td class="summary">Linearly interpolates between the min and max of the box</td>
+	</tr>
+</table>
+<h2><a href="#Class_Quaternion">Class Quaternion </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Quaternion:conjugate">Quaternion:conjugate ()</a></td>
 	<td class="summary"></td>
 	</tr>
 </table>
@@ -122,6 +184,33 @@
     <ol>
 
            <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "isVector3"></a>
+    <strong>isVector3 (obj)</strong>
+    </dt>
+    <dd>
+    determines if the input is a Vector3
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+            <span class="types"><span class="type">any</span></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
 
     </ol>
 
@@ -199,92 +288,399 @@
 
 
 </dd>
+    <dt>
+    <a name = "isQuaternion"></a>
+    <strong>isQuaternion (obj)</strong>
+    </dt>
+    <dd>
+    determines if the input is a Quaternion
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+            <span class="types"><span class="type">any</span></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+
+    </ol>
+
+
+
+
+</dd>
 </dl>
-    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+    <h2 class="section-header "><a name="Class_Vector3"></a>Class Vector3 </h2>
 
     <dl class="function">
     <dt>
-    <a name = "Vector3"></a>
-    <strong>Vector3</strong>
+    <a name = "Vector3:__add"></a>
+    <strong>Vector3:__add (b)</strong>
     </dt>
     <dd>
 
 
 
-    <h3>Fields:</h3>
+    <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">x</span>
-            <span class="types"><span class="type">number</span></span>
-
-        </li>
-        <li><span class="parameter">y</span>
-            <span class="types"><span class="type">number</span></span>
-
-        </li>
-        <li><span class="parameter">z</span>
-            <span class="types"><span class="type">number</span></span>
+        <li><span class="parameter">b</span>
+            <span class="types"><span class="type">number</span> or <a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
 
         </li>
     </ul>
 
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+    </ol>
 
 
 
 
 </dd>
     <dt>
-    <a name = "Box3"></a>
-    <strong>Box3</strong>
+    <a name = "Vector3:__sub"></a>
+    <strong>Vector3:__sub (b)</strong>
     </dt>
     <dd>
 
 
 
-    <h3>Fields:</h3>
+    <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">min</span>
-            <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
-
-        </li>
-        <li><span class="parameter">max</span>
-            <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+        <li><span class="parameter">b</span>
+            <span class="types"><span class="type">number</span> or <a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
 
         </li>
     </ul>
 
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+    </ol>
 
 
 
 
 </dd>
     <dt>
-    <a name = "Quaternion"></a>
-    <strong>Quaternion</strong>
+    <a name = "Vector3:__mul"></a>
+    <strong>Vector3:__mul (b)</strong>
     </dt>
     <dd>
 
 
 
-    <h3>Fields:</h3>
+    <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">x</span>
-            <span class="types"><span class="type">number</span></span>
-
-        </li>
-        <li><span class="parameter">y</span>
-            <span class="types"><span class="type">number</span></span>
-
-        </li>
-        <li><span class="parameter">z</span>
-            <span class="types"><span class="type">number</span></span>
-
-        </li>
-        <li><span class="parameter">w</span>
-            <span class="types"><span class="type">number</span></span>
+        <li><span class="parameter">b</span>
+            <span class="types"><span class="type">number</span> or <a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
 
         </li>
     </ul>
 
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Vector3:__div"></a>
+    <strong>Vector3:__div (b)</strong>
+    </dt>
+    <dd>
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">b</span>
+            <span class="types"><span class="type">number</span> or <a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Vector3:magnitude"></a>
+    <strong>Vector3:magnitude ()</strong>
+    </dt>
+    <dd>
+    Get the magnitude of the vector
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Vector3:min"></a>
+    <strong>Vector3:min (other)</strong>
+    </dt>
+    <dd>
+    Get the magnitude of the vector
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+            <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+         vector
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Vector3:max"></a>
+    <strong>Vector3:max (other)</strong>
+    </dt>
+    <dd>
+    Get the magnitude of the vector
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">other</span>
+            <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+         vector
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Vector3:dot"></a>
+    <strong>Vector3:dot (b)</strong>
+    </dt>
+    <dd>
+    Get the dot product between two vectors
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">b</span>
+            <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Vector3:cross"></a>
+    <strong>Vector3:cross (b)</strong>
+    </dt>
+    <dd>
+    Get the cross product between two vectors
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">b</span>
+            <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Vector3:lerp"></a>
+    <strong>Vector3:lerp (b)</strong>
+    </dt>
+    <dd>
+    Linearly interpolates between two points
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">b</span>
+            <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Class_Box3"></a>Class Box3 </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "Box3:nearest_point_in_box"></a>
+    <strong>Box3:nearest_point_in_box (point)</strong>
+    </dt>
+    <dd>
+    Returns the point inside or on the box that is nearest to the given point
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">point</span>
+            <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Box3:distance_to_point"></a>
+    <strong>Box3:distance_to_point (point)</strong>
+    </dt>
+    <dd>
+    Gets the distance from the box to the point
+ If the box contains the point then the negative distance to
+ the nearest edge is returned
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">point</span>
+            <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Box3:lerp"></a>
+    <strong>Box3:lerp ()</strong>
+    </dt>
+    <dd>
+    Linearly interpolates between the min and max of the box
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_math.html#Vector3">Vector3</a></span>
+
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Class_Quaternion"></a>Class Quaternion </h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "Quaternion:conjugate"></a>
+    <strong>Quaternion:conjugate ()</strong>
+    </dt>
+    <dd>
+
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_math.html#Quaternion">Quaternion</a></span>
+
+    </ol>
 
 
 
@@ -297,7 +693,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2022-12-18 16:40:03 </i>
+<i style="float:right;">Last updated 2022-12-18 19:38:08 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

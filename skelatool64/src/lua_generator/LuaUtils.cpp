@@ -23,14 +23,14 @@ void luaChainModuleLoader(lua_State* L, const char* moduleName, lua_CFunction fu
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "preload");
 
-    lua_getfield(L, -1, "sk_scene");
+    lua_getfield(L, -1, moduleName);
 
     if (additionalClosure) {
         lua_rotate(L, startingTop - additionalClosure + 1, -additionalClosure);
     }
 
     lua_pushcclosure(L, function, 1 + additionalClosure);
-    lua_setfield(L, -2, "sk_scene");
+    lua_setfield(L, -2, moduleName);
 
     // pop package and preload
     lua_pop(L, 2);

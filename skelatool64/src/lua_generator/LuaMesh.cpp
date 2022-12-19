@@ -1,4 +1,4 @@
-/// @module LuaMesh
+/// @module sk_mesh
 
 #include "LuaMesh.h"
 
@@ -75,6 +75,11 @@ bool luaIsLazyVector3DArray(lua_State* L, int index) {
     return luaL_testudata(L, index, "aiVector3DArray");
 }
 
+/***
+ @table Material
+ @tfield string name
+ @tfield string macro_name
+ */
 void toLua(lua_State* L, Material* material) {
     if (!material) {
         lua_pushnil(L);
@@ -132,6 +137,17 @@ int luaTransformMesh(lua_State* L) {
     return 1;
 }
 
+/***
+ @table Mesh
+ @tfield string name
+ @tfield bb sk_math.Box3
+ @tfield sk_transform.Transform transform
+ @tfield {sk_math.Vector3,...} vertices
+ @tfield {sk_math.Vector3,...} normals
+ @tfield {{number,number,number},...} faces
+ @tfield Material material
+ */
+
 void meshToLua(lua_State* L, std::shared_ptr<ExtendedMesh> mesh) {
     lua_createtable(L, 0, 1);
     
@@ -176,6 +192,15 @@ void fromLua(lua_State*L, Bone *& bone) {
     lua_pop(L, 1);
 }
 
+/***
+ @table RenderChunk
+ @tfield {Bone,Bone} bone_pair
+ @tfield Mesh mesh
+ @tfield sk_scene.Node meshRoot
+ @tfield number attached_dl_index
+ @tfield Material material
+ */
+
 void toLua(lua_State* L, const RenderChunk& renderChunk) {
     lua_createtable(L, 0, 5);
 
@@ -215,6 +240,13 @@ void fromLua(lua_State* L, RenderChunk& result) {
 
     lua_pop(L, 1);
 }
+
+/***
+ generate runder chunks for a node
+ @function generate_render_chunks
+ @tparam sk_scene.Node node
+ @treturn {RenderChunk,...} result
+ */
 
 int luaBuildRenderChunks(lua_State* L) {
     const aiScene* scene = (const aiScene*)lua_touserdata(L, lua_upvalueindex(1));

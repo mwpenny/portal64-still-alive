@@ -58,6 +58,19 @@ void fromLua(lua_State* L, DisplayListSettings& result, const DisplayListSetting
 
 }
 
+/***
+ @table settings
+ @tfield sk_transform.Transform model_transform
+ @tfield sk_transform.Transform fixed_point_transform
+ @tfield number model_scale
+ @tfield number fixed_point_scale
+ */
+
+/***
+ @table input_filename
+ @tfield foo bar
+ */
+
 int luaInputModuleLoader(lua_State* L) {
     lua_newtable(L);
 
@@ -77,10 +90,10 @@ int luaInputModuleLoader(lua_State* L) {
     toLua(L, defaults->mFixedPointScale);
     lua_setfield(L, -2, "fixed_point_scale");
 
-    lua_setfield(L, -3, "settings");
+    lua_setfield(L, -2, "settings");
 
     lua_pushstring(L, levelFilename);
-    lua_setfield(L, -3, "input_filename");
+    lua_setfield(L, -2, "input_filename");
 
     return 1;
 }

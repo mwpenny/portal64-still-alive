@@ -13,7 +13,7 @@ bool bottomRightMost(const aiVector3D& a, const aiVector3D& b) {
         return a.y < b.y;
     }
 
-    return a.z - b.z;
+    return a.z < b.z;
 }
 
 const aiVector3D* findMostOppositeEdge(const aiVector3D& fromEdge, const std::vector<aiVector3D>& edges) {

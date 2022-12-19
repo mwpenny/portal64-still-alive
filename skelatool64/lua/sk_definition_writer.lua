@@ -2,6 +2,11 @@
 
 local exports = {}
 
+-- From LuaDefinitionWriter.cpp
+
+---@function add_header
+---@tparam string include
+
 local pending_definitions = {}
 
 --- @table RefType

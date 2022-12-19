@@ -113,8 +113,12 @@ int luaTransformMul(lua_State* L) {
         return 1;
     }
 
-    luaL_checkudata(L, 2, "aiMatrix4x4");
-    return 0;
+    aiVector3D asPoint;
+    fromLua(L, asPoint);
+
+    toLua(L, (*a) * asPoint);
+
+    return 1;
 }
 
 void generateLuaTransform(lua_State* L) {

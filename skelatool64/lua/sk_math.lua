@@ -1,14 +1,8 @@
 --- @module sk_math
 
-local exports = {}
-
---- @table Vector3
---- @tfield number x
---- @tfield number y
---- @tfield number z
 local Vector3 = {}
-
-exports.Vector3 = exports
+local Box3 = {}
+local Quaternion = {}
 
 --- creates a new 3d vector
 --- @function vector3
@@ -20,40 +14,13 @@ local function vector3(x, y, z)
     return setmetatable({ x = x, y = y, z = z }, Vector3)
 end
 
-exports.vector3 = vector3
-
-function Vector3.__add(a, b)
-    if (type(a) == 'number') then
-        return vector3(a + b.x, a + b.y, a + b.z)
-    end
-
-    if (type(b) == 'number') then
-        return vector3(a.x + b, a.y + b, a.z + b)
-    end
-
-    if (type(b) ~= 'table' or type(b.x) ~= 'number' or type(b.y) ~= 'number' or type(b.z) ~= 'number') then
-        error('Vector3.__add expected another vector as second operand')
-    end
-
-    return vector3(a.x + b.x, a.y + b.y, a.z + b.z)
-end
-
-function Vector3.__tostring(v)
-    return 'vector3(' .. v.x .. ', ' .. v.y .. ', ' .. v.z .. ')'
-end
-
+--- determines if the input is a Vector3
+--- @function isVector3
+--- @tparam any obj
+--- @treturn boolean
 local function isVector3(obj)
     return type(obj) == 'table' and type(obj.x) == 'number' and type(obj.y) == 'number' and type(obj.z) == 'number' and obj.w == nil
 end
-
-exports.isVector3 = isVector3
-
---- @table Box3
---- @tfield Vector3 min
---- @tfield Vector3 max
-local Box3 = {}
-
-exports.Box3 = Box3
 
 --- creates a box3
 --- @function box3
@@ -63,17 +30,6 @@ exports.Box3 = Box3
 local function box3(min, max)
     return setmetatable({ min = min, max = max }, Box3)
 end
-
-exports.box3 = box3
-
---- @table Quaternion
---- @tfield number x
---- @tfield number y
---- @tfield number z
---- @tfield number w
-local Quaternion = {}
-
-exports.Quaternion = Quaternion
 
 --- creates a new quaternion
 --- @function quaternion
@@ -86,13 +42,227 @@ local function quaternion(x, y, z, w)
     return setmetatable({ x = x, y = y, z = z, w = w }, Quaternion)
 end
 
-exports.quaternion = quaternion
-
-local function quaternionConjugate(input)
-    return quaternion(-input.x, -input.y, -input.z, input.w)
+--- determines if the input is a Quaternion
+--- @function isQuaternion
+--- @tparam any obj
+--- @treturn boolean
+local function isQuaternion(obj)
+    return type(obj) == 'table' and type(obj.x) == 'number' and type(obj.y) == 'number' and type(obj.z) == 'number' and type(obj.w) == 'number'
 end
 
-exports.quaternionConjugate = quaternionConjugate
+--- @type Vector3
+--- @tfield number x
+--- @tfield number y
+--- @tfield number z
+Vector3.__index = Vector3;
+
+--- @function __eq
+--- @tparam number|Vector3 b
+--- @treturn Vector3
+function Vector3.__eq(a, b)
+    if (type(a) == 'number') then
+        return a == b.x and a == b.y and a == b.z
+    end
+
+    if (type(b) == 'number') then
+        return a.x == b and a.y == b and a.z + b
+    end
+
+    if (not isVector3(b)) then
+        error('Vector3.__add expected another vector as second operand')
+    end
+
+    return a.x == b.x and a.y == b.y and a.z == b.z
+end
+
+--- @function __add
+--- @tparam number|Vector3 b
+--- @treturn Vector3
+function Vector3.__add(a, b)
+    if (type(a) == 'number') then
+        return vector3(a + b.x, a + b.y, a + b.z)
+    end
+
+    if (type(b) == 'number') then
+        return vector3(a.x + b, a.y + b, a.z + b)
+    end
+
+    if (not isVector3(b)) then
+        error('Vector3.__add expected another vector as second operand')
+    end
+
+    return vector3(a.x + b.x, a.y + b.y, a.z + b.z)
+end
+
+--- @function __sub
+--- @tparam number|Vector3 b
+--- @treturn Vector3
+function Vector3.__sub(a, b)
+    if (type(a) == 'number') then
+        return vector3(a - b.x, a - b.y, a - b.z)
+    end
+
+    if (type(b) == 'number') then
+        return vector3(a.x - b, a.y - b, a.z - b)
+    end
+
+    if (not isVector3(b)) then
+        error('Vector3.__add expected another vector as second operand')
+    end
+
+    return vector3(a.x - b.x, a.y - b.y, a.z - b.z)
+end
+
+--- @function __mul
+--- @tparam number|Vector3 b
+--- @treturn Vector3
+function Vector3.__mul(a, b)
+    if (type(a) == 'number') then
+        return vector3(a * b.x, a * b.y, a * b.z)
+    end
+
+    if (type(b) == 'number') then
+        return vector3(a.x * b, a.y * b, a.z * b)
+    end
+
+    if (not isVector3(b)) then
+        error('Vector3.__add expected another vector as second operand')
+    end
+
+    return vector3(a.x * b.x, a.y * b.y, a.z * b.z)
+end
+
+--- @function __div
+--- @tparam number|Vector3 b
+--- @treturn Vector3
+function Vector3.__div(a, b)
+    if (type(a) == 'number') then
+        return vector3(a / b.x, a / b.y, a / b.z)
+    end
+
+    if (type(b) == 'number') then
+        local mul_value = 1 / b
+        
+        return vector3(a.x * mul_value, a.y * mul_value, a.z * mul_value)
+    end
+
+    if (not isVector3(b)) then
+        error('Vector3.__add expected another vector as second operand')
+    end
+
+    return vector3(a.x / b.x, a.y / b.y, a.z / b.z)
+end
+
+function Vector3.__tostring(v)
+    return 'vector3(' .. v.x .. ', ' .. v.y .. ', ' .. v.z .. ')'
+end
+
+--- Get the magnitude of the vector
+--- @function magnitude
+--- @treturn number
+function Vector3.magnitude(v)
+    return math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
+end
+
+--- Get the magnitude of the vector
+--- @function min
+--- @tparam Vector3 other vector
+--- @treturn Vector3
+function Vector3.min(a, b)
+    return vector3(math.min(a.x, b.x), math.min(a.y, b.y), math.min(a.z, b.z))
+end
+
+--- Get the magnitude of the vector
+--- @function max
+--- @tparam Vector3 other vector
+--- @treturn Vector3
+function Vector3.max(a, b)
+    return vector3(math.max(a.x, b.x), math.max(a.y, b.y), math.max(a.z, b.z))
+end
+
+--- Get the dot product between two vectors
+--- @function dot
+--- @tparam Vector3 b
+--- @treturn number
+function Vector3.dot(a, b)
+    return a.x * b.x + a.y * b.y + a.z * b.z
+end
+
+--- Get the cross product between two vectors
+--- @function cross
+--- @tparam Vector3 b
+--- @treturn Vector3
+function Vector3.cross(a, b)
+    return vector3(
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x
+    )
+end
+
+--- Linearly interpolates between two points
+--- @function lerp
+--- @tparam Vector3 b
+--- @treturn Vector3
+function Vector3.lerp(a, b, lerp)
+    return a * (1 - lerp) + b * lerp
+end
+
+--- @type Box3
+--- @tfield Vector3 min
+--- @tfield Vector3 max
+Box3.__index = Box3;
+
+--- Returns the point inside or on the box that is nearest to the given point
+--- @function nearest_point_in_box
+--- @tparam Vector3 point
+--- @treturn Vector3
+function Box3.nearest_point_in_box(box, point)
+    return Vector3.min(box.max, point):max(box.min)
+end
+
+--- Gets the distance from the box to the point
+--- If the box contains the point then the negative distance to
+--- the nearest edge is returned
+--- @function distance_to_point
+--- @tparam Vector3 point
+--- @treturn number
+function Box3.distance_to_point(box, point)
+    local nearest_point = Box3.nearest_point_in_box(box, point)
+
+    if (nearest_point == point) then
+        local max_offset = Vector3.__sub(point, box.max)
+        local min_offset = Vector3.__sub(box.min, point)
+
+        return math.max(
+            max_offset.x, max_offset.y, max_offset.z, 
+            min_offset.x, min_offset.y, min_offset.z
+        )
+    end
+
+    return (nearest_point - point):magnitude()
+end
+
+
+--- Linearly interpolates between the min and max of the box
+--- @function lerp
+--- @treturn Vector3
+function Box3.lerp(box, lerp)
+    return Vector3.lerp(box.min, box.max, lerp)
+end
+
+--- @type Quaternion
+--- @tfield number x
+--- @tfield number y
+--- @tfield number z
+--- @tfield number w
+Quaternion.__index = Quaternion;
+
+--- @function conjugate
+--- @treturn Quaternion
+function Quaternion.conjugate(input)
+    return quaternion(-input.x, -input.y, -input.z, input.w)
+end
 
 function Quaternion.__tostring(v)
     return 'quaternion(' .. v.x .. ', ' .. v.y .. ', ' .. v.z .. ', ' .. v.w .. ')'
@@ -114,10 +284,13 @@ function Quaternion.__mul(a, b)
     end
 end
 
-local function isQuaternion(obj)
-    return type(obj) == 'table' and type(obj.x) == 'number' and type(obj.y) == 'number' and type(obj.z) == 'number' and type(obj.w) == 'number'
-end
-
-exports.isQuaternion = isQuaternion
-
-return exports
+return {
+    vector3 = vector3,
+    Vector3 = Vector3,
+    isVector3 = isVector3,
+    box3 = box3,
+    Box3 = Box3,
+    Quaternion = Quaternion,
+    quaternion = quaternion,
+    isQuaternion = isQuaternion,
+}
