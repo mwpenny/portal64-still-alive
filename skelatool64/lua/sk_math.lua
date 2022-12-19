@@ -164,6 +164,26 @@ function Vector3.magnitude(v)
     return math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
 end
 
+--- Get the magnitude squared of the vector
+--- @function magnitudeSqrd
+--- @treturn number
+function Vector3.magnitudeSqrd(v)
+    return v.x * v.x + v.y * v.y + v.z * v.z
+end
+
+--- Returns a normalized version of this vector
+--- @function normalized
+--- @treturn Vector3
+function Vector3.normalized(v)
+    local magnitude = v.magnitude()
+
+    if (magnitude == 0) then
+        return vector3(0, 0, 0)
+    end
+
+    return v / magnitude
+end
+
 --- Get the magnitude of the vector
 --- @function min
 --- @tparam Vector3 other vector
@@ -249,6 +269,10 @@ end
 --- @treturn Vector3
 function Box3.lerp(box, lerp)
     return Vector3.lerp(box.min, box.max, lerp)
+end
+
+function Box3.__tostring(b)
+    return 'box3(' .. tostring(b.min) .. ', ' .. tostring(b.max) .. ')'
 end
 
 --- @type Quaternion

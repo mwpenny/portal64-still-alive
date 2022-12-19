@@ -113,6 +113,11 @@ int luaTransformMul(lua_State* L) {
         return 1;
     }
 
+    if (!lua_istable(L, -1)) {
+        luaL_checkudata(L, 2, "aiMatrix4x4");
+        return 0;
+    }
+
     aiVector3D asPoint;
     fromLua(L, asPoint);
 

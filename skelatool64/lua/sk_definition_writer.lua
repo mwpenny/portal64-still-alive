@@ -6,6 +6,17 @@ local exports = {}
 
 ---@function add_header
 ---@tparam string include
+exports.add_header = function(include)
+    -- implmentation in LuaDefinitionWriter.cpp
+end
+
+---@function add_macro
+---@tparam string name a hint on how to name the macro
+---@tparam string value the value of the macro
+---@treturn string the final name for the macro
+exports.add_macro = function(name, value)
+    -- implmentation in LuaDefinitionWriter.cpp
+end
 
 local pending_definitions = {}
 

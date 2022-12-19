@@ -249,6 +249,14 @@ bool dumpDefinitions(lua_State* L, CFileDefinition& fileDef, const char* filenam
     return true;
 }
 
+int luaAddMacro(lua_State* L) {
+    CFileDefinition* fileDef = (CFileDefinition*)lua_touserdata(L, lua_upvalueindex(1));
+    std::string name = fileDef->GetMacroName(luaL_checkstring(L, 1));
+    fileDef->AddMacro(name, luaL_checkstring(L, 2));
+    lua_pushstring(L, name.c_str());
+    return 1;
+}
+
 int luaDefinitonWriterAppend(lua_State* L) {
     int moduleIndex = luaGetPrevModuleLoader(L);
     CFileDefinition* fileDef = (CFileDefinition*)lua_touserdata(L, lua_upvalueindex(2));
@@ -256,6 +264,10 @@ int luaDefinitonWriterAppend(lua_State* L) {
     lua_pushlightuserdata(L, fileDef);
     lua_pushcclosure(L, luaAddHeader, 1);
     lua_setfield(L, moduleIndex, "add_header");
+
+    lua_pushlightuserdata(L, fileDef);
+    lua_pushcclosure(L, luaAddMacro, 1);
+    lua_setfield(L, moduleIndex, "add_macro");
 
     return 1;
 }
