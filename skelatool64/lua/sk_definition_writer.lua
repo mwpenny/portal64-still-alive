@@ -193,7 +193,7 @@ local function populate_name_mapping(path, object, result)
         return
     end
 
-    if (is_reference_type(object) or is_macro(object)) then
+    if (is_reference_type(object) or is_macro(object) or is_raw(object)) then
         return
     end
 

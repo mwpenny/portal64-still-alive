@@ -110,6 +110,10 @@ function Vector3.__sub(a, b)
         error('Vector3.__add expected another vector as second operand')
     end
 
+    if (a == nil) then
+        print(debug.traceback())
+    end
+
     return vector3(a.x - b.x, a.y - b.y, a.z - b.z)
 end
 
@@ -175,7 +179,7 @@ end
 --- @function normalized
 --- @treturn Vector3
 function Vector3.normalized(v)
-    local magnitude = v.magnitude()
+    local magnitude = v:magnitude()
 
     if (magnitude == 0) then
         return vector3(0, 0, 0)

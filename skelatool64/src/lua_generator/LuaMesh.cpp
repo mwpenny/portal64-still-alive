@@ -51,6 +51,45 @@ int luaGetVector3ArrayLength(lua_State* L) {
     return 1;
 }
 
+int luaVector3ArrayNext(lua_State* L) {
+    struct aiVector3DArray* array = (struct aiVector3DArray*)luaL_checkudata(L, 1, "aiVector3DArray");
+
+    if (lua_isnil(L, 2)) {
+        if (array->length) {
+            lua_pushinteger(L, 1);
+            toLua(L, array->vertices[0]);
+            return 2;
+        }
+
+        lua_pushnil(L);
+        return 1;
+    }
+
+    if (lua_isinteger(L, 2)) {
+        int current = lua_tointeger(L, 2);
+
+        if (array->length <= current) {
+            lua_pushnil(L);
+            return 1;
+        }
+
+        lua_pushinteger(L, current + 1);
+        toLua(L, array->vertices[current]);
+        return 2;
+    }
+
+    lua_pushnil(L);
+    return 1;
+}
+
+int luaVector3ArrayPairs(lua_State* L) {
+    lua_pushcfunction(L, luaVector3ArrayNext);
+    lua_pushnil(L);
+    lua_copy(L, 1, -1);
+    lua_pushnil(L);
+    return 3;
+}
+
 void toLuaLazyArray(lua_State* L, aiVector3D* vertices, unsigned count) {
     struct aiVector3DArray* result = (struct aiVector3DArray*)lua_newuserdata(L, sizeof(struct aiVector3DArray));
 
@@ -66,6 +105,9 @@ void toLuaLazyArray(lua_State* L, aiVector3D* vertices, unsigned count) {
 
         lua_pushcfunction(L, luaGetVector3ArrayLength);
         lua_setfield(L, -2, "__len");
+
+        lua_pushcfunction(L, luaVector3ArrayPairs);
+        lua_setfield(L, -2, "__pairs");
     }
 
     lua_setmetatable(L, -2);
