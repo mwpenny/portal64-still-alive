@@ -1,4 +1,5 @@
 local static_export = require('tools.level_scripts.static_export')
+local collision_export = require('tools.level_scripts.collision_export')
 local sk_input = require('sk_input')
 local sk_math = require('sk_math')
 local sk_mesh = require('sk_mesh')
@@ -199,6 +200,55 @@ end
 
 sk_definition_writer.add_definition("portal_surfaces", "struct PortalSurface[]", "_geo", portal_surfaces)
 
+local function is_coplanar_portal_surface(quad, mesh, collision_bb)
+    if not mesh.material or not portalable_surfaces[mesh.material.name] then
+        return false
+    end
+
+    if not collision_export.is_coplanar(quad, mesh, sk_input.settings.model_scale) then
+        return false
+    end
+
+    local mesh_bb = mesh.bb * sk_input.settings.model_scale
+
+    if not mesh_bb:overlaps(collision_bb) then
+        return false
+    end
+
+    return true
+end
+
+local portal_mapping_data = {}
+local portal_mapping_range = {}
+
+local mapping_index = 0
+
+for _, quad in pairs(collision_export.colliders) do
+    local start_mapping_index = mapping_index
+
+    local collision_with_padding = collision_export.collision_quad_bb(quad)
+    collision_with_padding.min = collision_with_padding.min - 0.1
+    collision_with_padding.max = collision_with_padding.max + 0.1
+
+    for static_index, surface in pairs(static_export.static_nodes) do
+        if is_coplanar_portal_surface(quad, surface.mesh, collision_with_padding) then
+            table.insert(portal_mapping_data, static_to_portable_surface_mapping[static_index])
+            mapping_index = mapping_index + 1
+        end
+    end
+
+    if mapping_index > 255 then
+        error("mapping_index was greater than 255")
+    end
+
+    table.insert(portal_mapping_range, {start_mapping_index, mapping_index})
+end
+
+sk_definition_writer.add_definition("mapping_indices", "u8[]", "_geo", portal_mapping_data)
+sk_definition_writer.add_definition("collider_to_surface", "struct PortalSurfaceMappingRange[]", "_geo", portal_mapping_range)
+
 return {
     portal_surfaces = portal_surfaces,
+    portal_mapping_data = portal_mapping_data,
+    portal_mapping_range = portal_mapping_range,
 }

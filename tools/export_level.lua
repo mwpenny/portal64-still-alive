@@ -13,4 +13,6 @@ sk_definition_writer.add_definition("level", "struct LevelDefinition", "_geo", {
     roomStaticMapping = sk_definition_writer.reference_to(static_export.room_ranges, 1),
     portalSurfaces = sk_definition_writer.reference_to(portal_surfaces.portal_surfaces, 1),
     portalSurfaceCount = #portal_surfaces.portal_surfaces,
+    portalSurfaceMappingRange = sk_definition_writer.reference_to(portal_surfaces.portal_mapping_range, 1),
+    portalSurfaceMappingIndices = sk_definition_writer.reference_to(portal_surfaces.portal_mapping_data, 1),
 })

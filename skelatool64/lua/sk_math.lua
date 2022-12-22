@@ -245,6 +245,37 @@ function Box3.nearest_point_in_box(box, point)
     return Vector3.min(box.max, point):max(box.min)
 end
 
+--- Returns the point inside or on the box that is nearest to the given point
+--- @function overlaps
+--- @tparam Vector3|Box3 box_or_point
+--- @treturn boolean
+function Box3.overlaps(box, box_or_point)
+    if isVector3(box_or_point) then
+        return box_or_point.x >= box.min.x and box_or_point.x <= box.max.x and
+            box_or_point.y >= box.min.y and box_or_point.y <= box.max.y and
+            box_or_point.z >= box.min.z and box_or_point.z <= box.max.z
+    end
+
+    return box.min.x < box_or_point.max.x and box_or_point.min.x < box.max.x and
+        box.min.y < box_or_point.max.y and box_or_point.min.y < box.max.y and
+        box.min.z < box_or_point.max.z and box_or_point.min.z < box.max.z;
+end
+
+--- @function __mul
+--- @tparam number|Box3
+--- @treturn Box3
+function Box3.__mul(a, b)
+    if type(a) == 'number' then
+        return box3(a * b.min, a * b.max)
+    end
+
+    if type(b) == 'number' then
+        return box3(a.min * b, a.max * b)
+    end
+
+    return box3(a.min * b.min, a.max * b.max)
+end
+
 --- Gets the distance from the box to the point
 --- If the box contains the point then the negative distance to
 --- the nearest edge is returned

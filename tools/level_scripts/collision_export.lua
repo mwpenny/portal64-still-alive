@@ -212,6 +212,22 @@ local function collision_quad_bb(collision_quad)
     return sk_math.box3(min, max)
 end
 
+local INSIDE_NORMAL_TOLERANCE = 0.1
+
+local function is_coplanar(collision_quad, mesh, relative_scale)
+    for _, vertex in pairs(mesh.vertices) do
+        local offset = vertex * relative_scale - collision_quad.corner
+
+        local z = offset:dot(collision_quad.plane.normal)
+
+        if math.abs(z) >= INSIDE_NORMAL_TOLERANCE then
+            return false
+        end
+    end
+
+    return true
+end 
+
 local colliders = {}
 local collider_types = {}
 local collision_objects = {}
@@ -258,5 +274,8 @@ sk_definition_writer.add_definition("collider_types", "struct ColliderTypeData[]
 sk_definition_writer.add_definition("collision_objects", "struct CollisionObject[]", "_geo", collision_objects)
 
 return {
+    is_coplanar = is_coplanar,
+    colliders = colliders,
+    collision_quad_bb = collision_quad_bb,
     collision_objects = collision_objects,
 }
