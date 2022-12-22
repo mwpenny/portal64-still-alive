@@ -216,6 +216,16 @@ void meshToLua(lua_State* L, std::shared_ptr<ExtendedMesh> mesh) {
 
     toLua(L, mesh->mMesh->mFaces, mesh->mMesh->mNumFaces);
     lua_setfield(L, -2, "faces");
+
+    if (mesh->mMesh->mMaterialIndex >= 0 && mesh->mMesh->mMaterialIndex < gLuaCurrentScene->mNumMaterials) {
+        auto material = gLuaCurrentSettings->mMaterials.find(gLuaCurrentScene->mMaterials[mesh->mMesh->mMaterialIndex]->GetName().C_Str());
+
+        if (material != gLuaCurrentSettings->mMaterials.end()) {
+            toLua(L, material->second.get());
+            lua_setfield(L, -2, "material");
+        }
+    }
+
 }
 
 void meshFromLua(lua_State* L, std::shared_ptr<ExtendedMesh>& mesh) {
@@ -348,6 +358,60 @@ int luaGenerateMesh(lua_State* L) {
     return 1;
 }
 
+/***
+ Generates a vertex buffer for a given mesh and material pair
+ Materials are important since it will determine if the vertex
+ buffer uses normals or colors and the size of the texture
+ used for calculated uv coordinates
+ @function generate_vertex_buffer
+ @tparam Mesh mesh
+ @tparam[opt] Material material
+ @tparam[opt] string file_suffix defaults to "_geo"
+ */
+int luaGetMeshVertexBuffer(lua_State* L) {
+    CFileDefinition* fileDefinition = (CFileDefinition*)lua_touserdata(L, lua_upvalueindex(1));
+
+    int nArgs = lua_gettop(L);
+
+    if (nArgs > 3) {
+        lua_settop(L, 3);
+        nArgs = 3;
+    }
+
+    std::string suffix;
+
+    if (nArgs == 3) {
+        fromLua(L, suffix);
+        --nArgs;
+    } else {
+        suffix = "_geo";
+    }
+
+    Material* material = nullptr;
+
+    if (nArgs == 2) {
+        fromLua(L, material);
+    }
+
+    std::shared_ptr<ExtendedMesh> mesh;
+    meshFromLua(L, mesh);
+
+
+    std::string result = fileDefinition->GetVertexBuffer(
+        mesh, 
+        Material::GetVertexType(material), 
+        Material::TextureWidth(material), 
+        Material::TextureHeight(material), 
+        suffix
+    );
+
+    luaLoadModuleFunction(L, "sk_definition_writer", "raw");
+    toLua(L, result);
+    lua_call(L, 1, 1);
+
+    return 1;
+}
+
 int buildMeshModule(lua_State* L) {
     aiScene* scene = (aiScene*)lua_touserdata(L, lua_upvalueindex(1));
     CFileDefinition* fileDefinition = (CFileDefinition*)lua_touserdata(L, lua_upvalueindex(2));
@@ -372,6 +436,10 @@ int buildMeshModule(lua_State* L) {
     lua_pushlightuserdata(L, settings);
     lua_pushcclosure(L, luaGenerateMesh, 3);
     lua_setfield(L, -2, "generate_mesh");
+
+    lua_pushlightuserdata(L, fileDefinition);
+    lua_pushcclosure(L, luaGetMeshVertexBuffer, 1);
+    lua_setfield(L, -2, "generate_vertex_buffer");
 
     return 1;
 }

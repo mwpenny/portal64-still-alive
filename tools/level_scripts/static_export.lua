@@ -18,6 +18,7 @@ local function proccessStaticNodes(nodes)
     
             table.insert(result, {
                 node = v.node, 
+                mesh = chunkV.mesh,
                 display_list = sk_definition_writer.raw(gfxName), 
                 material_index = sk_definition_writer.raw(chunkV.material.macro_name)
             })

@@ -13,7 +13,7 @@ local exports = {}
 ---@tfield sk_transform.Transform full_transformation
 ---@tfield Node parent
 ---@tfield {Node,...} children
----@tfield {LuaMesh.Mesh,...} meshes 
+---@tfield {sk_mesh.Mesh,...} meshes 
 
 --- Generates mesh and animation data from the current scene
 ---@function export_default_mesh
