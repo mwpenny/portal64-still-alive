@@ -49,8 +49,8 @@ typedef struct {
 } amConfig;
 
 
-void amCreateAudioMgr(ALSynConfig *c, OSPri priority, amConfig *amc);
-void initAudio(void);
+void amCreateAudioMgr(ALSynConfig *c, OSPri priority, amConfig *amc, int fps);
+void initAudio(int fps);
 
 extern u64        audYieldBuf[];
 extern u8*        gAudioHeapBuffer;

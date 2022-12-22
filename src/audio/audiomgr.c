@@ -89,7 +89,7 @@ static void __clearAudioDMA(void);
 /******************************************************************************
  * Audio Manager API
  *****************************************************************************/
-void amCreateAudioMgr(ALSynConfig *c, OSPri pri, amConfig *amc)
+void amCreateAudioMgr(ALSynConfig *c, OSPri pri, amConfig *amc, int fps)
 {
     u32     i;
     f32     fsize;
@@ -103,7 +103,7 @@ void amCreateAudioMgr(ALSynConfig *c, OSPri pri, amConfig *amc)
      * Calculate the frame sample parameters from the
      * video field rate and the output rate
      */
-    fsize = (f32) amc->framesPerField * c->outputRate / (f32) 60;
+    fsize = (f32) amc->framesPerField * c->outputRate / (f32) fps;
     frameSize = (s32) fsize;
     if (frameSize < fsize)
         frameSize++;

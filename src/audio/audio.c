@@ -8,7 +8,7 @@
 u8* gAudioHeapBuffer;
 ALHeap             gAudioHeap;
 
-void initAudio(void) 
+void initAudio(int fps) 
 {
     ALSynConfig   c;
     amConfig      amc;
@@ -30,5 +30,5 @@ void initAudio(void)
     amc.framesPerField = NUM_FIELDS;
     amc.maxACMDSize = MAX_RSP_CMDS;
  
-    amCreateAudioMgr(&c, AUDIO_PRIORITY, &amc);
+    amCreateAudioMgr(&c, AUDIO_PRIORITY, &amc, fps);
 }

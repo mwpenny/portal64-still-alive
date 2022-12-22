@@ -99,9 +99,12 @@ extern char _animation_segmentSegmentRomStart[];
 static void gameProc(void* arg) {
     u8 schedulerMode = OS_VI_NTSC_LPF1;
 
+    int fps = 60;
+
 	switch (osTvType) {
 		case 0: // PAL
 			schedulerMode = HIGH_RES ? OS_VI_PAL_HPF1 : OS_VI_PAL_LPF1;
+            fps = 50;
 			break;
 		case 1: // NTSC
 			schedulerMode = HIGH_RES ? OS_VI_NTSC_HPF1 : OS_VI_NTSC_LPF1;
@@ -155,10 +158,10 @@ static void gameProc(void* arg) {
     dynamicSceneInit();
     contactSolverInit(&gContactSolver);
     portalSurfaceCleanupQueueInit();
-    levelLoad(3);
+    levelLoad(0);
     cutsceneRunnerReset();
     controllersInit();
-    initAudio();
+    initAudio(fps);
     soundPlayerInit();
     skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
     sceneInit(&gScene);
