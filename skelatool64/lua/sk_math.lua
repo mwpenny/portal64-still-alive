@@ -262,7 +262,7 @@ function Box3.overlaps(box, box_or_point)
 end
 
 --- @function __mul
---- @tparam number|Box3
+--- @tparam number|Box3 b
 --- @treturn Box3
 function Box3.__mul(a, b)
     if type(a) == 'number' then
