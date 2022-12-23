@@ -1,9 +1,27 @@
 
 local sk_definition_writer = require('sk_definition_writer')
 local sk_scene = require('sk_scene')
+local room_export = require('tools.level_scripts.room_export')
 
 sk_definition_writer.add_header('"../build/src/audio/clips.h"')
 
+local signals = {
+    name_to_index = {},
+    signal_count = 0,
+}
+
+local function signal_index_for_name(name)
+    local result = signals.name_to_index[name]
+
+    if result then
+        return result
+    end
+
+    local result = signals.signal_count
+    signals.name_to_index[name] = result
+    signals.signal_count = signals.signal_count + 1
+    return result
+end
 
 local function does_belong_to_cutscene(first_step, step)
     local offset = step.position - first_step.position
@@ -28,6 +46,49 @@ local function cutscene_index(cutscenes, name)
     return -1
 end
 
+local function generate_locations()
+    local result = {}
+    local location_data = {}
+
+    for _, location in pairs(sk_scene.nodes_for_type("@location")) do
+        local scale, rotation, position = location.node.full_transformation:decompose()
+
+        local room_index = room_export.node_nearest_room_index(location.node)
+
+        table.insert(result, {
+            name = location.arguments[1] or '',
+            room_index = room_index,
+        })
+
+        table.insert(location_data, {
+            {
+                position = position,
+                rotation = rotation,
+                scale = scale,
+            },
+            roomIndex = room_index,
+        })
+    end
+
+    sk_definition_writer.add_definition("locations", "struct Location[]", "_geo", location_data)
+    
+    return result, location_data
+end
+
+local locations, location_data = generate_locations()
+
+local function find_location_index(name)
+    for index, location in pairs(locations) do
+        if location.name == name then
+            return index - 1
+        end
+    end
+
+    print('Could not find a location with the name ' .. name)
+
+    return 0
+end
+
 local function find_label_locations(steps)
     local result = {}
     local current_index = 1
@@ -46,13 +107,96 @@ local function find_label_locations(steps)
     return result
 end
 
-local function generate_cutscene_step(step)
+local function string_starts_with(str, prefix)
+    return string.sub(str, 1, #prefix) == prefix
+end
+
+local function generate_cutscene_step(step, step_index, label_locations, cutscenes)
     local result = {}
 
     if step.command == "play_sound" or step.command == "start_sound" and #step.args >= 1 then
         result.type = step.command == "play_sound" and 
             sk_definition_writer.raw('CutsceneStepTypePlaySound') or 
             sk_definition_writer.raw('CutsceneStepTypeStartSound')
+        result.playSound = {
+            string_starts_with(step.args[1], "SOUNDS_") and step.args[1] or ("SOUNDS_" .. step.args[1]),
+            tonumber(step.args[2] or "1") * 255,
+            math.floor(tonumber(step.args[3] or "1") * 64 + 0.5),
+        }
+    elseif step.command == "q_sound" and #step.args >= 2 then
+        result.type = sk_definition_writer.raw('CutsceneStepTypeQueueSound')
+        result.queueSound = {
+            string_starts_with(step.args[1], "SOUNDS_") and step.args[1] or ("SOUNDS_" .. step.args[1]),
+            sk_definition_writer.raw(step.args[2]),
+            tonumber(step.args[2] or "1") * 255,
+        }
+    elseif step.command == "wait_for_channel" and #step.args >= 1 then
+        result.type = sk_definition_writer.raw('CutsceneStepTypeWaitForChannel')
+        result.waitForChannel = {
+            sk_definition_writer.raw(step.args[1]),
+        }
+    elseif step.command == "delay" and #step.args >= 1 then
+        result.type = sk_definition_writer.raw('CutsceneStepTypeDelay')
+        result.delay = {
+            tonumber(step.args[1])
+        }
+    elseif step.command == "open_portal" and #step.args >= 1 then
+        result.type = sk_definition_writer.raw('CutsceneStepTypeOpenPortal')
+        result.openPortal = {
+            find_location_index(step.args[1]),
+            step.args[2] == "1" and 1 or 0,
+        }
+    elseif (step.command == "set_signal" or step.command == "clear_signal") and #step.args >= 1 then
+        result.type = sk_definition_writer.raw('CutsceneStepTypeSetSignal')
+        result.setSignal = {
+            signal_index_for_name(step.args[1]),
+            step.command == 'set_signal' and 1 or 0,
+        }
+    elseif step.command == "wait_for_signal" and #step.args >= 1 then
+        result.type = sk_definition_writer.raw('CutsceneStepTypeWaitForSignal')
+        result.waitForSignal = {
+            signal_index_for_name(step.args[1]),
+        }
+    elseif step.command == "teleport_player" and #step.args >= 2 then
+        result.type = sk_definition_writer.raw('CutsceneStepTypeTeleportPlayer')
+        result.teleportPlayer = {
+            find_location_index(step.args[1]),
+            find_location_index(step.args[2]),
+        }
+    elseif step.command == "load_level" and #step.args >= 1 then
+        result.type = sk_definition_writer.raw('CutsceneStepTypeLoadLevel')
+        result.loadLevel = {
+            find_location_index(step.args[1]),
+            -- -1 means next level
+            -1,
+        }
+    elseif step.command == "goto" and #step.args >= 1 then
+        result.type = sk_definition_writer.raw('CutsceneStepTypeGoto')
+        result.gotoStep = {
+            label_locations[step.args[1]] - step_index - 1,
+        }
+    elseif step.command == "start_cutscene" and #step.args >= 1 then
+        result.type = sk_definition_writer.raw('CutsceneStepTypeStartCutscene')
+        result.cutscene = {
+            cutscene_index(cutscenes, step.args[1]),
+        }
+    elseif step.command == "stop_cutscene" and #step.args >= 1 then
+        result.type = sk_definition_writer.raw('CutsceneStepTypeStopCutscene')
+        result.cutscene = {
+            cutscene_index(cutscenes, step.args[1]),
+        }
+    elseif step.command == "wait_for_cutscene" and #step.args >= 1 then
+        result.type = sk_definition_writer.raw('CutsceneStepTypeWaitForCutscene')
+        result.cutscene = {
+            cutscene_index(cutscenes, step.args[1]),
+        }
+    elseif step.command == "hide_pedestal" then
+        result.type = sk_definition_writer.raw('CutsceneStepTypeHidePedestal')
+    elseif step.command == "point_pedestal" and #step.args >= 1 then
+        result.type = sk_definition_writer.raw('CutsceneStepTypePointPedestal')
+        result.pointPedestal = {
+            find_location_index(step.args[1]),
+        }
     else
         result.type = sk_definition_writer.raw('CutsceneStepTypeNoop')
         table.noop = 0;
@@ -101,6 +245,7 @@ local function generate_cutscenes()
     end
 
     local cutscenes_result = {}
+    local cutscene_data = {}
 
     for _, cutscene in pairs(cutscenes) do
         local first_step = cutscene.steps[1]
@@ -115,7 +260,7 @@ local function generate_cutscenes()
         local steps = {}
 
         for step_index, step in pairs(other_steps) do
-            table.insert(steps, generate_cutscene_step())
+            table.insert(steps, generate_cutscene_step(step, step_index, label_locations, cutscenes))
         end
 
         sk_definition_writer.add_definition(cutscene.name .. '_steps', 'struct CutsceneStep[]', '_geo', steps)
@@ -124,9 +269,14 @@ local function generate_cutscenes()
             name = cutscene.name,
             steps = steps,
         })
+
+        table.insert(cutscene_data, {
+            sk_definition_writer.reference_to(cutscene.steps, 1),
+            #cutscene.steps,
+        })
     end
 
-    return cutscenes_result
+    return cutscenes_result, cutscene_data
 end
 
 local function generate_triggers(cutscenes)
@@ -148,12 +298,15 @@ local function generate_triggers(cutscenes)
 
     return result
 end
-
-local cutscenes = generate_cutscenes()
+local cutscenes, cutscene_data = generate_cutscenes()
 local triggers = generate_triggers(cutscenes)
 
 sk_definition_writer.add_definition("triggers", "struct Trigger[]", "_geo", triggers)
 
 return {
     triggers = triggers,
+    cutscene_data = cutscene_data,
+    location_data = location_data,
+    signal_index_for_name = signal_index_for_name,
+    find_location_index = find_location_index,
 }

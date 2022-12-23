@@ -232,6 +232,14 @@ local colliders = {}
 local collider_types = {}
 local collision_objects = {}
 
+local room_grids = {}
+
+for i = 1,room_export.room_count do
+    if room_export.room_bb[i] then
+        room_grids[i] = build_collision_grid(room_export.room_bb[i])
+    end
+end
+
 for _, node in pairs(collider_nodes) do
     local is_transparent = sk_scene.find_flag_argument(node.arguments, "transparent")
 
@@ -239,6 +247,10 @@ for _, node in pairs(collider_nodes) do
         local global_mesh = mesh:transform(node.node.full_transformation)
 
         local collider = create_collision_quad(global_mesh, parse_quad_thickness(node))
+
+        if room_grids[i] then
+            add_to_collision_grid(room_grids[i], collision_quad_bb(collider), #colliders)
+        end
 
         local named_entry = sk_scene.find_named_argument(node.arguments, "name")
 
@@ -278,4 +290,6 @@ return {
     colliders = colliders,
     collision_quad_bb = collision_quad_bb,
     collision_objects = collision_objects,
+    create_collision_quad = create_collision_quad,
+    room_grids = room_grids,
 }

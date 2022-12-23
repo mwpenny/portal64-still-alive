@@ -11,7 +11,7 @@ local Quaternion = {}
 --- @tparam number z the x value for the vector
 --- @treturn Vector3
 local function vector3(x, y, z) 
-    return setmetatable({ x = x, y = y, z = z }, Vector3)
+    return setmetatable({ x = x or 0, y = y or 0, z = z or 0 }, Vector3)
 end
 
 --- determines if the input is a Vector3
@@ -28,7 +28,7 @@ end
 --- @tparam Vector3 max
 --- @treturn Box3
 local function box3(min, max)
-    return setmetatable({ min = min, max = max }, Box3)
+    return setmetatable({ min = min or vector3(), max = max or vector3() }, Box3)
 end
 
 --- creates a new quaternion
@@ -304,6 +304,19 @@ end
 --- @treturn Vector3
 function Box3.lerp(box, lerp)
     return Vector3.lerp(box.min, box.max, lerp)
+end
+
+
+--- Linearly interpolates between the min and max of the box
+--- @function union
+--- @tparam Vector3|Box3 box_or_point
+--- @treturn Box3
+function Box3.union(box, box_or_point)
+    if isVector3(box_or_point) then
+        return box3(box.min:min(box_or_point), box.max:max(box_or_point))
+    end
+
+    return box3(box.min:min(box_or_point.min), box.max:max(box_or_point.max))
 end
 
 function Box3.__tostring(b)
