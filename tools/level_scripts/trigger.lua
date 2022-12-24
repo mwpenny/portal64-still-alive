@@ -11,13 +11,13 @@ local function does_belong_to_cutscene(first_step, step)
     local offset = step.position - first_step.position
     local local_pos = first_step.rotation * offset
 
-    return local_pos.y >= 0 and local_pos.x * local_pos.x + local_pos.z * local_pos.z < 0.1
+    return local_pos.z >= 0 and local_pos.x * local_pos.x + local_pos.y * local_pos.y < 0.1
 end
 
 local function distance_from_start(first_step, step)
     local offset = step.position - first_step.position
     local local_pos = first_step.rotation * offset
-    return local_pos.y
+    return local_pos.z
 end
 
 local function cutscene_index(cutscenes, name)
@@ -103,16 +103,16 @@ local function generate_cutscene_step(step, step_index, label_locations, cutscen
             sk_definition_writer.raw('CutsceneStepTypePlaySound') or 
             sk_definition_writer.raw('CutsceneStepTypeStartSound')
         result.playSound = {
-            string_starts_with(step.args[1], "SOUNDS_") and step.args[1] or ("SOUNDS_" .. step.args[1]),
+            sk_definition_writer.raw(string_starts_with(step.args[1], "SOUNDS_") and step.args[1] or ("SOUNDS_" .. step.args[1])),
             tonumber(step.args[2] or "1") * 255,
             math.floor(tonumber(step.args[3] or "1") * 64 + 0.5),
         }
     elseif step.command == "q_sound" and #step.args >= 2 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeQueueSound')
         result.queueSound = {
-            string_starts_with(step.args[1], "SOUNDS_") and step.args[1] or ("SOUNDS_" .. step.args[1]),
+            sk_definition_writer.raw(string_starts_with(step.args[1], "SOUNDS_") and step.args[1] or ("SOUNDS_" .. step.args[1])),
             sk_definition_writer.raw(step.args[2]),
-            tonumber(step.args[2] or "1") * 255,
+            tonumber(step.args[3] or "1") * 255,
         }
     elseif step.command == "wait_for_channel" and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeWaitForChannel')
@@ -121,9 +121,7 @@ local function generate_cutscene_step(step, step_index, label_locations, cutscen
         }
     elseif step.command == "delay" and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeDelay')
-        result.delay = {
-            tonumber(step.args[1])
-        }
+        result.delay = tonumber(step.args[1])
     elseif step.command == "open_portal" and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeOpenPortal')
         result.openPortal = {
@@ -209,7 +207,7 @@ local function generate_cutscenes()
                 rotation = rotation:conjugate(),
             }
 
-            if command == "start" and #args > 1 then
+            if command == "start" and #args >= 1 then
                 table.insert(cutscenes, {
                     name = args[1],
                     steps = {step},
@@ -255,8 +253,8 @@ local function generate_cutscenes()
         })
 
         table.insert(cutscene_data, {
-            sk_definition_writer.reference_to(cutscene.steps, 1),
-            #cutscene.steps,
+            sk_definition_writer.reference_to(steps, 1),
+            #cutscene.steps - 1,
         })
     end
 
@@ -268,7 +266,7 @@ local function generate_triggers(cutscenes)
     
     for _, trigger in pairs(sk_scene.nodes_for_type('@trigger')) do
         local first_mesh = trigger.node.meshes[1]
-        local cutscene_index = cutscene_index(cutscenes, trigger.arugments[1])
+        local cutscene_index = cutscene_index(cutscenes, trigger.arguments[1])
     
         if first_mesh and cutscene_index ~= -1 then
             local transformed = first_mesh:transform(trigger.node.full_transformation)

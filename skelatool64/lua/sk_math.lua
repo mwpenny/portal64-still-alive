@@ -342,7 +342,7 @@ end
 
 function Quaternion.__mul(a, b)
     if (isVector3(b)) then
-        local result = a * quaternion(b.x, b.y, b.z, 0) * quaternionConjugate(a)
+        local result = a * quaternion(b.x, b.y, b.z, 0) * a:conjugate()
         return vector3(result.x, result.y, result.z)
     elseif (isQuaternion(b)) then
         return quaternion(

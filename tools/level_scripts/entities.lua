@@ -11,9 +11,11 @@ local box_droppers = {}
 for _, dropper in pairs(sk_scene.nodes_for_type('@box_dropper')) do
     local position = dropper.node.full_transformation:decompose()
 
+    local room_index = room_export.node_nearest_room_index(dropper.node)
+
     table.insert(box_droppers, {
         position,
-        room_export.node_nearest_room_index(dropper.node),
+        room_index,
         signals.signal_index_for_name(dropper.arguments[1] or ''),
     })
 end
@@ -25,11 +27,13 @@ local buttons = {}
 for _, button in pairs(sk_scene.nodes_for_type('@button')) do
     local position = button.node.full_transformation:decompose()
 
+    local room_index = room_export.node_nearest_room_index(button.node)
+
     table.insert(buttons, {
         position,
-        room_export.node_nearest_room_index(dropper.node),
-        signals.signal_index_for_name(dropper.arguments[1] or ''),
-        signals.signal_index_for_name(dropper.arguments[2] or ''),
+        room_index,
+        signals.signal_index_for_name(button.arguments[1] or ''),
+        signals.signal_index_for_name(button.arguments[2] or ''),
     })
 end
 
@@ -40,10 +44,12 @@ local decor = {}
 for _, decor_entry in pairs(sk_scene.nodes_for_type('@decor')) do
     local position, rotation = decor_entry.node.full_transformation:decompose()
 
+    local room_index = room_export.node_nearest_room_index(decor_entry.node)
+
     table.insert(decor, {
         position,
         rotation,
-        room_export.node_nearest_room_index(decor_entry.node),
+        room_index,
         'DECOR_TYPE_' .. decor_entry.arguments[1],
     })
 end
@@ -86,10 +92,12 @@ for _, elevator in pairs(elevator_nodes) do
         end
     end
 
+    local room_index = room_export.node_nearest_room_index(elevator.node)
+
     table.insert(elevators, {
         position,
         rotation,
-        room_export.node_nearest_room_index(elevator.node),
+        room_index,
         target_elevator,
     })
 end
@@ -101,12 +109,14 @@ local fizzlers = {}
 for _, fizzler in pairs(sk_scene.nodes_for_type('@fizzler')) do
     local position, rotation = fizzler.node.full_transformation:decompose()
 
+    local room_index = room_export.node_nearest_room_index(fizzler.node)
+
     table.insert(fizzlers, {
         position,
         rotation,
         2,
         2,
-        room_export.node_nearest_room_index(fizzler.node),
+        room_index,
     })
 end
 
@@ -117,9 +127,11 @@ local pedestals = {}
 for _, pedestal in pairs(sk_scene.nodes_for_type('@pedestal')) do
     local position = pedestal.node.full_transformation:decompose()
 
+    local room_index = room_export.node_nearest_room_index(pedestal.node)
+
     table.insert(pedestals, {
         position,
-        room_export.node_nearest_room_index(fizzlers.node),
+        room_index,
     })
 end
 
@@ -130,10 +142,12 @@ local signage = {}
 for _, signage_element in pairs(sk_scene.nodes_for_type('@signage')) do
     local position, rotation = signage_element.node.full_transformation:decompose()
 
+    local room_index = room_export.node_nearest_room_index(signage_element.node)
+
     table.insert(signage, {
         position,
         rotation,
-        room_export.node_nearest_room_index(signage_element.node),
+        room_index,
         sk_definition_writer.raw(signage_element.arguments[1]),
     })
 end
