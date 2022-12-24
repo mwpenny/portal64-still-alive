@@ -36,10 +36,10 @@ local function build_collision_grid(boundaries)
 end
 
 local function add_to_collision_grid(grid, box, value)
-    local min_x = floor((box.min.x - grid.x) / COLLISION_GRID_CELL_SIZE)
-    local max_x = floor((box.max.x - grid.x) / COLLISION_GRID_CELL_SIZE)
-    local min_z = floor((box.min.z - grid.z) / COLLISION_GRID_CELL_SIZE)
-    local max_z = floor((box.max.z - grid.z) / COLLISION_GRID_CELL_SIZE)
+    local min_x = math.floor((box.min.x - grid.x) / COLLISION_GRID_CELL_SIZE)
+    local max_x = math.floor((box.max.x - grid.x) / COLLISION_GRID_CELL_SIZE)
+    local min_z = math.floor((box.min.z - grid.z) / COLLISION_GRID_CELL_SIZE)
+    local max_z = math.floor((box.max.z - grid.z) / COLLISION_GRID_CELL_SIZE)
 
     if (max_x < 0) then max_x = 0 end
     if (min_x >= grid.span_x) then min_x = grid.span_x - 1 end
@@ -215,6 +215,30 @@ end
 local INSIDE_NORMAL_TOLERANCE = 0.1
 
 local function is_coplanar(collision_quad, mesh, relative_scale)
+    if sk_math.isVector3(mesh) then
+        local offset = mesh - collision_quad.corner
+
+        local z = offset:dot(collision_quad.plane.normal)
+
+        if math.abs(z) >= INSIDE_NORMAL_TOLERANCE then
+            return false
+        end
+
+        local x = offset:dot(collision_quad.edgeA)
+
+        if x < -INSIDE_NORMAL_TOLERANCE or x > collision_quad.edgeALength + INSIDE_NORMAL_TOLERANCE then
+            return false
+        end
+
+        local y = offset:dot(collision_quad.edgeB)
+
+        if y < -INSIDE_NORMAL_TOLERANCE or y > collision_quad.edgeBLength + INSIDE_NORMAL_TOLERANCE then
+            return false
+        end
+
+        return true
+    end
+
     for _, vertex in pairs(mesh.vertices) do
         local offset = vertex * relative_scale - collision_quad.corner
 
@@ -243,13 +267,16 @@ end
 for _, node in pairs(collider_nodes) do
     local is_transparent = sk_scene.find_flag_argument(node.arguments, "transparent")
 
+    local room_index = room_export.node_nearest_room_index(node.node)
+
     for _, mesh in pairs(node.node.meshes) do
         local global_mesh = mesh:transform(node.node.full_transformation)
 
         local collider = create_collision_quad(global_mesh, parse_quad_thickness(node))
 
-        if room_grids[i] then
-            add_to_collision_grid(room_grids[i], collision_quad_bb(collider), #colliders)
+        local room_grid = room_grids[room_index + 1]
+        if room_grid then
+            add_to_collision_grid(room_grid, collision_quad_bb(collider), #colliders)
         end
 
         local named_entry = sk_scene.find_named_argument(node.arguments, "name")

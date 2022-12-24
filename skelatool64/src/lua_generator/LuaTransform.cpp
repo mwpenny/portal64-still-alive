@@ -28,9 +28,9 @@ void fromLua(lua_State* L, aiMatrix4x4& matrix) {
 
 /***
 @function decompose
-@treturn vector3.Vector3 scale
-@treturn quaternion.Quaternion rotation
 @treturn vector3.Vector3 position
+@treturn quaternion.Quaternion rotation
+@treturn vector3.Vector3 scale
  */
 int luaTransformDecomponse(lua_State* L) {
     aiMatrix4x4* mtx = (aiMatrix4x4*)luaL_checkudata(L, 1, "aiMatrix4x4");
@@ -40,9 +40,9 @@ int luaTransformDecomponse(lua_State* L) {
     aiVector3D position;
     mtx->Decompose(scaling, rotation, position);
 
-    toLua(L, scaling);
-    toLua(L, rotation);
     toLua(L, position);
+    toLua(L, rotation);
+    toLua(L, scaling);
 
     return 3;
 }

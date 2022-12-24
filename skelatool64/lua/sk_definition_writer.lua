@@ -86,7 +86,7 @@ local MacroType = {}
 ---@treturn MacroType result
 local function macro(name, ...)
     if (type(name) ~= "string") then
-        error("name should be of type string got " .. type(name))
+        error("name should be of type string got " .. type(name), 2)
     end
 
     return setmetatable({ name = name, args = {...}}, MacroType)
@@ -161,15 +161,15 @@ end
 ---@tparam any data The data of the file definition
 local function add_definition(nameHint, dataType, location, data)
     if (type(nameHint) ~= "string") then
-        error("nameHint should be a string")
+        error("nameHint should be a string", 2)
     end
 
     if (type(dataType) ~= "string") then
-        error("dataType should be a string")
+        error("dataType should be a string", 2)
     end
 
     if (type(location) ~= "string") then
-        error("location should be a string")
+        error("location should be a string", 2)
     end
 
     if (not validate_definition(data, {}, nameHint)) then

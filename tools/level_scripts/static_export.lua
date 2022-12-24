@@ -2,6 +2,7 @@
 local sk_definition_writer = require('sk_definition_writer')
 local sk_scene = require('sk_scene')
 local sk_mesh = require('sk_mesh')
+local sk_input = require('sk_input')
 local room_export = require('tools.level_scripts.room_export')
 
 sk_definition_writer.add_header('"../build/assets/materials/static.h"')
@@ -9,16 +10,28 @@ sk_definition_writer.add_header('"levels/level_definition.h"')
 
 local function proccessStaticNodes(nodes)
     local result = {}
+    local bb_scale = sk_input.settings.model_scale * sk_input.settings.fixed_point_scale
 
     for k, v in pairs(nodes) do
         local renderChunks = sk_mesh.generate_render_chunks(v.node)
         
         for _, chunkV in pairs(renderChunks) do
             local gfxName = sk_mesh.generate_mesh({chunkV}, "_geo", {defaultMaterial = chunkV.material})
+
+            local mesh_bb = chunkV.mesh.bb * bb_scale
+
+            mesh_bb.min.x = math.floor(mesh_bb.min.x + 0.5)
+            mesh_bb.min.y = math.floor(mesh_bb.min.y + 0.5)
+            mesh_bb.min.z = math.floor(mesh_bb.min.z + 0.5)
+
+            mesh_bb.max.x = math.floor(mesh_bb.max.x + 0.5)
+            mesh_bb.max.y = math.floor(mesh_bb.max.y + 0.5)
+            mesh_bb.max.z = math.floor(mesh_bb.max.z + 0.5)
     
             table.insert(result, {
                 node = v.node, 
                 mesh = chunkV.mesh,
+                mesh_bb = mesh_bb,
                 display_list = sk_definition_writer.raw(gfxName), 
                 material_index = sk_definition_writer.raw(chunkV.material.macro_name)
             })
@@ -41,12 +54,14 @@ table.sort(static_nodes, function(a, b)
 end)
 
 local room_ranges = {}
+local static_bounding_boxes = {}
 
 for index, static_node in pairs(static_nodes) do
     table.insert(static_content_elements, {
         displayList = static_node.display_list,
         materialIndex = static_node.material_index
     })
+    table.insert(static_bounding_boxes, static_node.mesh_bb)
 
     good_index = index - 1
 
@@ -64,9 +79,11 @@ end
 
 sk_definition_writer.add_definition("static", "struct StaticContentElement[]", "_geo", static_content_elements)
 sk_definition_writer.add_definition("room_mapping", "struct Rangeu16[]", "_geo", room_ranges)
+sk_definition_writer.add_definition('bounding_boxes', 'struct BoundingBoxs16[]', '_geo', static_bounding_boxes)
 
 return {
     static_nodes = static_nodes,
     static_content_elements = static_content_elements,
+    static_bounding_boxes = static_bounding_boxes,
     room_ranges = room_ranges,
 }

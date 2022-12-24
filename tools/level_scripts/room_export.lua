@@ -39,7 +39,11 @@ local function nearest_room_index(from_point, ignore_room)
         end
     end 
 
-    return block.room_index, block.bb
+    if result == nil then
+        return nil, nil
+    end
+
+    return result.room_index, result.bb
 end
 
 local function node_nearest_room_index(from_node, ignore_room)

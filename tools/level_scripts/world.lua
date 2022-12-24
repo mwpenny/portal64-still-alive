@@ -43,10 +43,6 @@ end
 
 sk_defintion_writer.add_definition('doorways', 'struct Doorway[]', '_geo', doorways)
 
-for i = 1,room_export.room_count do
-    sk_defintion_writer.add_definition('room_doorways', 'short[]', '_geo', room_doorways[i])
-end
-
 local function generate_room(room_index)
     local quad_indices = {}
     local cell_contents = {}
@@ -75,7 +71,7 @@ local function generate_room(room_index)
 
     sk_defintion_writer.add_definition('room_indices', 'short[]', '_geo', quad_indices)
     sk_defintion_writer.add_definition('room_cells', 'struct Rangeu16[]', '_geo', cell_contents)
-
+    
     sk_defintion_writer.add_definition('room_doorways', 'short[]', '_geo', room_doorways[room_index])
 
     return {
@@ -99,11 +95,22 @@ end
 
 sk_defintion_writer.add_definition('rooms', 'struct Room[]', '_geo', rooms)
 
+local function find_coplanar_doorway(point)
+    for index, doorway in pairs(doorways) do
+        if collision_export.is_coplanar(doorway[1], point) then
+            return index
+        end
+    end
+
+    return 0
+end
+
 return {
     world = {
         rooms = sk_defintion_writer.reference_to(rooms, 1),
         doorways = sk_defintion_writer.reference_to(doorways, 1),
         roomCount = #rooms,
         doorwayCount = #doorways,
-    }
+    },
+    find_coplanar_doorway = find_coplanar_doorway,
 }

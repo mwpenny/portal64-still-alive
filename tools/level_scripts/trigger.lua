@@ -2,26 +2,10 @@
 local sk_definition_writer = require('sk_definition_writer')
 local sk_scene = require('sk_scene')
 local room_export = require('tools.level_scripts.room_export')
+local signals = require('tools.level_scripts.signals')
 
 sk_definition_writer.add_header('"../build/src/audio/clips.h"')
 
-local signals = {
-    name_to_index = {},
-    signal_count = 0,
-}
-
-local function signal_index_for_name(name)
-    local result = signals.name_to_index[name]
-
-    if result then
-        return result
-    end
-
-    local result = signals.signal_count
-    signals.name_to_index[name] = result
-    signals.signal_count = signals.signal_count + 1
-    return result
-end
 
 local function does_belong_to_cutscene(first_step, step)
     local offset = step.position - first_step.position
@@ -51,7 +35,7 @@ local function generate_locations()
     local location_data = {}
 
     for _, location in pairs(sk_scene.nodes_for_type("@location")) do
-        local scale, rotation, position = location.node.full_transformation:decompose()
+        local position, rotation, scale = location.node.full_transformation:decompose()
 
         local room_index = room_export.node_nearest_room_index(location.node)
 
@@ -149,13 +133,13 @@ local function generate_cutscene_step(step, step_index, label_locations, cutscen
     elseif (step.command == "set_signal" or step.command == "clear_signal") and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeSetSignal')
         result.setSignal = {
-            signal_index_for_name(step.args[1]),
+            signals.signal_index_for_name(step.args[1]),
             step.command == 'set_signal' and 1 or 0,
         }
     elseif step.command == "wait_for_signal" and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeWaitForSignal')
         result.waitForSignal = {
-            signal_index_for_name(step.args[1]),
+            signals.signal_index_for_name(step.args[1]),
         }
     elseif step.command == "teleport_player" and #step.args >= 2 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeTeleportPlayer')
@@ -216,7 +200,7 @@ local function generate_cutscenes()
             local command = node_info.arguments[1]
             local args = {table.unpack(node_info.arguments, 2)}
 
-            local scale, rotation, position = node_info.node.transformation:decompose()
+            local position, rotation, scale = node_info.node.transformation:decompose()
 
             local step = {
                 command = command,
@@ -302,11 +286,11 @@ local cutscenes, cutscene_data = generate_cutscenes()
 local triggers = generate_triggers(cutscenes)
 
 sk_definition_writer.add_definition("triggers", "struct Trigger[]", "_geo", triggers)
+sk_definition_writer.add_definition("cutscenes", "struct Cutscene[]", "_geo", cutscene_data)
 
 return {
     triggers = triggers,
     cutscene_data = cutscene_data,
     location_data = location_data,
-    signal_index_for_name = signal_index_for_name,
     find_location_index = find_location_index,
 }
