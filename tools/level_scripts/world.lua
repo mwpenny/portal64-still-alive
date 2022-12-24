@@ -80,7 +80,7 @@ local function generate_room(room_index)
         room_grid and room_grid.span_x or 0,
         room_grid and room_grid.span_z or 0,
         room_grid and room_grid.x or 0,
-        room_grid and room_grid.y or 0,
+        room_grid and room_grid.z or 0,
         room_export.room_bb[room_index] or sk_math.box3(),
         sk_defintion_writer.reference_to(room_doorways[room_index], 1),
         #room_doorways[room_index],

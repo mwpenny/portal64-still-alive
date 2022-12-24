@@ -255,29 +255,19 @@ end
 local colliders = {}
 local collider_types = {}
 local collision_objects = {}
+local quad_rooms = {}
+
+local room_bb = {}
 
 local room_grids = {}
 
-for i = 1,room_export.room_count do
-    if room_export.room_bb[i] then
-        room_grids[i] = build_collision_grid(room_export.room_bb[i])
-    end
-end
-
 for _, node in pairs(collider_nodes) do
     local is_transparent = sk_scene.find_flag_argument(node.arguments, "transparent")
-
-    local room_index = room_export.node_nearest_room_index(node.node)
 
     for _, mesh in pairs(node.node.meshes) do
         local global_mesh = mesh:transform(node.node.full_transformation)
 
         local collider = create_collision_quad(global_mesh, parse_quad_thickness(node))
-
-        local room_grid = room_grids[room_index + 1]
-        if room_grid then
-            add_to_collision_grid(room_grid, collision_quad_bb(collider), #colliders)
-        end
 
         local named_entry = sk_scene.find_named_argument(node.arguments, "name")
 
@@ -285,7 +275,16 @@ for _, node in pairs(collider_nodes) do
             sk_definition_writer.add_macro(named_entry .. "_COLLISION_INDEX", #colliders)
         end
 
+        local bb = collision_quad_bb(collider)
+        
+        if room_bb[node.room_index + 1] then
+            room_bb[node.room_index + 1] = room_bb[node.room_index + 1]:union(bb)
+        else
+            room_bb[node.room_index + 1] = bb
+        end
+
         table.insert(colliders, collider)
+        table.insert(quad_rooms, node.room_index)
 
         local collider_type = {
             sk_definition_writer.raw("CollisionShapeTypeQuad"),
@@ -300,11 +299,25 @@ for _, node in pairs(collider_nodes) do
         table.insert(collision_objects, {
             sk_definition_writer.reference_to(collider_type),
             sk_definition_writer.null_value,
-            collision_quad_bb(collider),
+            bb,
             is_transparent and 
                 sk_definition_writer.raw('COLLISION_LAYERS_STATIC | COLLISION_LAYERS_TRANSPARENT | COLLISION_LAYERS_TANGIBLE') or
                 sk_definition_writer.raw('COLLISION_LAYERS_STATIC | COLLISION_LAYERS_TANGIBLE')
         })
+    end
+end
+
+for i = 1,room_export.room_count do
+    if room_bb[i] then
+        room_grids[i] = build_collision_grid(room_bb[i])
+    end
+end
+
+for index, quad in pairs(colliders) do
+    local room_grid = room_grids[quad_rooms[index] + 1]
+
+    if room_grid then
+        add_to_collision_grid(room_grid, collision_quad_bb(quad), index - 1)
     end
 end
 

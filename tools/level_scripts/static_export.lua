@@ -61,7 +61,15 @@ for index, static_node in pairs(static_nodes) do
         displayList = static_node.display_list,
         materialIndex = static_node.material_index
     })
-    table.insert(static_bounding_boxes, static_node.mesh_bb)
+    table.insert(static_bounding_boxes, {
+        static_node.mesh_bb.min.x,
+        static_node.mesh_bb.min.y,
+        static_node.mesh_bb.min.z,
+
+        static_node.mesh_bb.max.x,
+        static_node.mesh_bb.max.y,
+        static_node.mesh_bb.max.z,
+    })
 
     good_index = index - 1
 

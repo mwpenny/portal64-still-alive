@@ -48,7 +48,7 @@ for _, decor_entry in pairs(sk_scene.nodes_for_type('@decor')) do
     })
 end
 
-sk_definition_writer.add_definition('decor', 'struct DecorDefinition', '_geo', decor)
+sk_definition_writer.add_definition('decor', 'struct DecorDefinition[]', '_geo', decor)
 sk_definition_writer.add_header('"decor/decor_object_list.h"')
 
 local doors = {}
