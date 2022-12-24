@@ -50,7 +50,7 @@ for _, decor_entry in pairs(sk_scene.nodes_for_type('@decor')) do
         position,
         rotation,
         room_index,
-        'DECOR_TYPE_' .. decor_entry.arguments[1],
+        sk_definition_writer.raw('DECOR_TYPE_' .. decor_entry.arguments[1]),
     })
 end
 

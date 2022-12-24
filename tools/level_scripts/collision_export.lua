@@ -163,10 +163,16 @@ local function create_collision_quad(mesh, thickness)
         normal_sum = normal_sum + normal
     end
 
+    local final_normal = normal_sum:normalized()
+
+    -- make sure the basis is right handed
+    if edge_a_point:cross(edge_b_point):dot(final_normal) < 0 then
+        edge_a_point, edge_b_point = edge_b_point, edge_a_point
+    end
+
     local edge_a_normalized = edge_a_point:normalized()
     local edge_b_normalized = edge_b_point:normalized()
 
-    local final_normal = normal_sum:normalized()
 
     return {
         corner = corner_point,
