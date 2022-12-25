@@ -33,7 +33,7 @@ local function determine_signal_order(operators, result, used_signals, signal_pr
         end
     end
 
-    table.insert(input_signal)
+    table.insert(result, input_signal)
 end
 
 local function order_signals(operators)
@@ -87,15 +87,17 @@ local ordered_operators = order_signals(unordered_operators)
 
 local function generate_operator_data(operator)
     return {
-        operator.type,
+        sk_definition_writer.raw(operator.type),
         signal_index_for_name(operator.output),
         {
             signal_index_for_name(operator.input[1]),
             operator.input[2] and signal_index_for_name(operator.input[2]) or -1,
         },
-        additionalInputs = {
-            operator.input[3] and signal_index_for_name(operator.input[3]) or -1,
-            operator.input[4] and signal_index_for_name(operator.input[4]) or -1,
+        {
+            additionalInputs = {
+                operator.input[3] and signal_index_for_name(operator.input[3]) or -1,
+                operator.input[4] and signal_index_for_name(operator.input[4]) or -1,
+            }
         },
     }
 end

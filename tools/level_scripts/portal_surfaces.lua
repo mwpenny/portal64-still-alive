@@ -191,8 +191,8 @@ end
 
 for _, surface in pairs(static_export.static_nodes) do
     if (surface.mesh.material and portalable_surfaces[surface.mesh.material.name]) then
-        table.insert(portal_surfaces, calculate_portal_single_surface(surface.mesh, surface.display_list))
         table.insert(static_to_portable_surface_mapping, #portal_surfaces)
+        table.insert(portal_surfaces, calculate_portal_single_surface(surface.mesh, surface.display_list))
     else
         table.insert(static_to_portable_surface_mapping, -1)
     end
