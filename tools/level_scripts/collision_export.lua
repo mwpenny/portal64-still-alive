@@ -48,7 +48,7 @@ local function add_to_collision_grid(grid, box, value)
     if (min_z >= grid.span_z) then min_z = grid.span_z - 1 end
 
     for curr_x = min_x,max_x do
-        for curr_z = min_x,max_x do
+        for curr_z = min_z,max_z do
             if (curr_x >= 0 and curr_x < grid.span_x and curr_z >= 0 and curr_z < grid.span_z) then
                 table.insert(grid.cells[curr_x + 1][curr_z + 1], value)
             end
@@ -267,9 +267,9 @@ local room_bb = {}
 
 local room_grids = {}
 
-for _, node in pairs(collider_nodes) do
+for index, node in pairs(collider_nodes) do
     local is_transparent = sk_scene.find_flag_argument(node.arguments, "transparent")
-
+        
     for _, mesh in pairs(node.node.meshes) do
         local global_mesh = mesh:transform(node.node.full_transformation)
 

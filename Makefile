@@ -226,12 +226,14 @@ TEST_CHAMBERS = assets/test_chambers/test_chamber_00/test_chamber_00.blend \
 TEST_CHAMBER_HEADERS = $(TEST_CHAMBERS:%.blend=build/%.h)
 TEST_CHAMBER_OBJECTS = $(TEST_CHAMBERS:%.blend=build/%_geo.o)
 
+LUA_FILES = $(shell find tools/ -type f -name '*.lua')
+
 build/%.fbx: %.blend
 	@mkdir -p $(@D)
 	$(BLENDER_3_0) $< --background --python tools/export_fbx.py -- $@
 
-build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c: build/assets/test_chambers/%.fbx build/assets/materials/static.h $(SKELATOOL64) $(TEXTURE_IMAGES)
-	$(SKELATOOL64) --level --fixed-point-scale 256 --model-scale 0.01 --name $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
+build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c: build/assets/test_chambers/%.fbx build/assets/materials/static.h $(SKELATOOL64) $(TEXTURE_IMAGES) $(LUA_FILES)
+	$(SKELATOOL64) --script tools/export_level.lua --fixed-point-scale 256 --model-scale 0.01 --name $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
 
 build/assets/test_chambers/%.o: build/assets/test_chambers/%.c build/assets/materials/static.h
 	@mkdir -p $(@D)
