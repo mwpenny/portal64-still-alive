@@ -162,8 +162,8 @@ local function calculate_portal_single_surface(mesh, mesh_display_list)
     for _, key in pairs(edge_order) do
         local indices = edge_direction[key];
         table.insert(edges, {
-            indices.a,
-            indices.b,
+            indices.a - 1,
+            indices.b - 1,
             get_edge_index(edge_direction, indices.next_edge_key),
             get_edge_index(edge_direction, indices.prev_edge_key),
             get_edge_index(edge_direction, indices.next_edge_reverse_key),
@@ -182,7 +182,7 @@ local function calculate_portal_single_surface(mesh, mesh_display_list)
 
         right = right,
         up = up,
-        corner = corner,
+        corner = origin,
 
         gfxVertices = sk_mesh.generate_vertex_buffer(mesh, mesh.material, "_geo"),
         triangles = mesh_display_list,
