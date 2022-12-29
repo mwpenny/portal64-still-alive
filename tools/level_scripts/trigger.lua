@@ -21,9 +21,9 @@ local function distance_from_start(first_step, step)
 end
 
 local function cutscene_index(cutscenes, name)
-    for index, cutscene in pairs(cutscenes) do
+    for _, cutscene in pairs(cutscenes) do
         if cutscene.name == name then
-            return index - 1
+            return cutscene.macro
         end
     end
 
@@ -39,9 +39,12 @@ local function generate_locations()
 
         local room_index = room_export.node_nearest_room_index(location.node)
 
+        local name = location.arguments[1] or ''
+
         table.insert(result, {
-            name = location.arguments[1] or '',
+            name = name,
             room_index = room_index,
+            macro = sk_definition_writer.raw(sk_definition_writer.add_macro('LOCATION_' .. name, #result)),
         })
 
         table.insert(location_data, {
@@ -62,9 +65,9 @@ end
 local locations, location_data = generate_locations()
 
 local function find_location_index(name)
-    for index, location in pairs(locations) do
+    for _, location in pairs(locations) do
         if location.name == name then
-            return index - 1
+            return location.macro
         end
     end
 
@@ -211,6 +214,7 @@ local function generate_cutscenes()
                 table.insert(cutscenes, {
                     name = args[1],
                     steps = {step},
+                    macro = sk_definition_writer.raw(sk_definition_writer.add_macro("CUTSCENE_" .. args[1], #cutscenes)),
                 })
             else
                 table.insert(steps, step)

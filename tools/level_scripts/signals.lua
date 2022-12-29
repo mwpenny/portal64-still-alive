@@ -11,7 +11,7 @@ local function signal_index_for_name(name)
         return result
     end
 
-    local result = signal_count
+    local result = sk_definition_writer.raw(sk_definition_writer.add_macro('SIGNAL_' .. name, tostring(signal_count)))
     name_to_index[name] = result
     signal_count = signal_count + 1
     return result
