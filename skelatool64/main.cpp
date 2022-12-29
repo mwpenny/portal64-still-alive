@@ -19,9 +19,6 @@
 #include "src/definition_generator/MeshDefinitionGenerator.h"
 #include "src/definition_generator/CollisionGenerator.h"
 #include "src/definition_generator/MaterialGenerator.h"
-#include "src/definition_generator/StaticGenerator.h"
-#include "src/definition_generator/LevelGenerator.h"
-#include "src/definition_generator/TriggerGenerator.h"
 #include "src/materials/MaterialState.h"
 #include "src/materials/MaterialTranslator.h"
 #include "src/StringUtils.h"
@@ -178,41 +175,6 @@ int main(int argc, char *argv[]) {
             meshGenerator.GenerateDefinitions(scene, fileDef);
             break;
         }
-        case FileOutputType::Level:
-        {
-            NodeGroups nodesByGroup(scene);
-            Signals signals;
-
-            std::cout << "Grouping objects by room" << std::endl;
-            auto roomOutput = generateRooms(scene, fileDef, settings, signals, nodesByGroup);
-
-            std::cout << "Generating collider definitions" << std::endl;
-            auto collisionOutput = generateCollision(scene, fileDef, settings, roomOutput.get(), nodesByGroup);
-
-            std::cout << "Generating static definitions" << std::endl;
-            auto staticOutput = generateStatic(scene, fileDef, settings, *roomOutput, nodesByGroup);
-
-            auto triggerOutput = generateTriggers(scene, fileDef, settings, *roomOutput, signals, nodesByGroup);
-
-            auto signalsOutput = generateSignals(nodesByGroup);
-
-            std::cout << "Generating level definitions" << std::endl;
-            generateLevel(
-                scene,
-                fileDef,
-                settings, 
-                *staticOutput, 
-                *collisionOutput,
-                *triggerOutput,
-                *roomOutput,
-                *signalsOutput,
-                signals,
-                nodesByGroup
-            );
-
-            nodesByGroup.PrintUnusedTypes();
-            break;
-        }
         case FileOutputType::Materials:
         {
             std::cout << "Saving materials to "  << args.mOutputFile << std::endl;
@@ -227,7 +189,7 @@ int main(int argc, char *argv[]) {
         {
             NodeGroups nodesByGroup(scene);
             std::cout << "Generating collider definitions" << std::endl;
-            auto collisionOutput = generateCollision(scene, fileDef, settings, NULL, nodesByGroup);
+            auto collisionOutput = generateCollision(scene, fileDef, settings, nodesByGroup);
             generateMeshCollider(fileDef, *collisionOutput);
             break;
         }

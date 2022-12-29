@@ -9,7 +9,6 @@
 
 enum class FileOutputType {
     Mesh,
-    Level,
     Materials,
     CollisionMesh,
     Script,
