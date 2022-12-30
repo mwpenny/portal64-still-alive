@@ -356,6 +356,48 @@ function Quaternion.__mul(a, b)
     end
 end
 
+--- @function slerp
+--- @tparam Quaternion b
+--- @tparam number t
+--- @treturn Quaternion
+function Quaternion.slerp(a, b, t)
+    -- calc cosine theta
+    local cosom = a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+
+    -- adjust signs (if necessary)
+    local endQ = quaternion(b.x, b.y, b.z, b.w);
+
+    if cosom < 0 then
+        cosom = -cosom
+        -- Reverse all signs
+        endQ.x = -endQ.x   
+        endQ.y = -endQ.y
+        endQ.z = -endQ.z
+        endQ.w = -endQ.w
+    end
+
+    -- Calculate coefficients
+    local sclp, sclq;
+    if (1 - cosom) > 0.0001 then
+        -- Standard case (slerp)
+        local omega = math.acos(cosom); -- extract theta from dot product's cos theta
+        local sinom = math.sin( omega);
+        sclp  = math.sin( (1 - t) * omega) / sinom;
+        sclq  = math.sin( t * omega) / sinom;
+    else
+        -- Very close, do linear interp (because it's faster)
+        sclp = 1 - t;
+        sclq = t;
+    end
+
+    return quaternion(
+        sclp * a.x + sclq * endQ.x,
+        sclp * a.y + sclq * endQ.y,
+        sclp * a.z + sclq * endQ.z,
+        sclp * a.w + sclq * endQ.w
+    )
+end
+
 return {
     vector3 = vector3,
     Vector3 = Vector3,

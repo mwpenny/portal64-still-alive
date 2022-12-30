@@ -2,7 +2,7 @@
 
 local node_name_cache = nil
 
-local exports = {}
+local exports
 
 -- Defintions from LuaScene.cpp
 
@@ -19,7 +19,7 @@ local exports = {}
 ---@function export_default_mesh
 ---@treturn sk_definition_writer.RawType model
 ---@treturn sk_definition_writer.RawType material
-exports.export_default_mesh = function ()
+local function export_default_mesh()
     -- implmentation overridden by LuaScene.cpp
 end
 
@@ -34,7 +34,7 @@ end
 ---@function nodes_for_type
 ---@tparam string prefix the string prefix to search
 ---@treturn NodeWithArguments
-exports.nodes_for_type = function(prefix)
+local function nodes_for_type(prefix)
     
 end
 
@@ -53,9 +53,6 @@ local function find_named_argument(arg_list, name)
     return nil
 end
 
-exports.find_named_argument = find_named_argument
-
-
 ---Finds a named value in a list of arguments
 ---@function find_flag_argument
 ---@tfield {string,...} arg_list
@@ -71,8 +68,6 @@ local function find_flag_argument(arg_list, name)
     return false
 end
 
-exports.find_flag_argument = find_flag_argument
-
 local function build_node_with_name_cache(node)
     node_name_cache[node.name] = node
 
@@ -85,13 +80,50 @@ end
 ---@function node_with_name
 ---@tparam string name
 ---@treturn Node result
-exports.node_with_name = function (name)
+local function node_with_name(name)
     if (not node_name_cache) then
         node_name_cache = {}
-        build_node_with_name_cache(scene.root)
+        build_node_with_name_cache(exports.scene.root)
     end
 
     return node_name_cache[name]
 end
+
+local function for_each_node(node, callback)
+    callback(node)
+
+    for _, child in pairs(node.children) do
+        for_each_node(child, callback)
+    end
+end
+
+---@table Vector3Key
+---@tfield number time
+---@tfield sk_math.Vector3 value
+
+---@table QuaternionKey
+---@tfield number time
+---@tfield sk_math.Quaternion value
+
+---@table Channel
+---@tfield string node_name
+---@tfield {Vector3Key,...} position_keys
+---@tfield {QuaternionKey,...} rotation_keys
+---@tfield {Vector3Key,...} scaling_keys
+
+---@table Animation
+---@tfield string name
+---@tfield number duration
+---@tfield number ticks_per_second
+---@tfield {Channel,...} channels
+
+exports =  {
+    export_default_mesh = export_default_mesh,
+    nodes_for_type = nodes_for_type,
+    find_named_argument = find_named_argument,
+    find_flag_argument = find_flag_argument,
+    node_with_name = node_with_name,
+    for_each_node = for_each_node,
+}
 
 return exports

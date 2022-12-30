@@ -8,6 +8,7 @@ local trigger = require('tools.level_scripts.trigger')
 local world = require('tools.level_scripts.world')
 local entities = require('tools.level_scripts.entities')
 local signals = require('tools.level_scripts.signals')
+local animation = require('tools.level_scripts.animation')
 
 sk_definition_writer.add_definition("level", "struct LevelDefinition", "_geo", {
     collisionQuads = sk_definition_writer.reference_to(collision_export.collision_objects, 1),

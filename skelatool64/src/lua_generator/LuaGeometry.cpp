@@ -39,3 +39,19 @@ void fromLua(lua_State* L, aiVector3D& vector) {
 
     lua_pop(L, 1);
 }
+
+void fromLua(lua_State* L, aiQuaternion& quaternion) {
+    lua_getfield(L, -1, "x");
+    fromLua(L, quaternion.x);
+
+    lua_getfield(L, -1, "y");
+    fromLua(L, quaternion.y);
+
+    lua_getfield(L, -1, "z");
+    fromLua(L, quaternion.z);
+
+    lua_getfield(L, -1, "w");
+    fromLua(L, quaternion.w);
+
+    lua_pop(L, 1);
+}

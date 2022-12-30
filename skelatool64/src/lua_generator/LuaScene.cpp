@@ -44,6 +44,72 @@ int luaNodeToString(lua_State* L) {
     return 1;
 }
 
+void toLua(lua_State* L, const aiVectorKey& positionKey) {
+    lua_newtable(L);
+    int tableIndex = lua_gettop(L);
+
+    toLua(L, positionKey.mTime);
+    lua_setfield(L, tableIndex, "time");
+
+    toLua(L, positionKey.mValue);
+    lua_setfield(L, tableIndex, "value");
+}
+
+void toLua(lua_State* L, const aiQuatKey& quatKey) {
+    lua_newtable(L);
+    int tableIndex = lua_gettop(L);
+
+    toLua(L, quatKey.mTime);
+    lua_setfield(L, tableIndex, "time");
+
+    toLua(L, quatKey.mValue);
+    lua_setfield(L, tableIndex, "value");
+}
+
+void toLua(lua_State* L, const aiNodeAnim* channel) {
+    if (!channel) {
+        lua_pushnil(L);
+        return;
+    }
+
+    lua_newtable(L);
+    int tableIndex = lua_gettop(L);
+
+    toLua(L, channel->mNodeName.C_Str());
+    lua_setfield(L, tableIndex, "node_name");
+
+    toLua(L, channel->mPositionKeys, channel->mNumPositionKeys);
+    lua_setfield(L, tableIndex, "position_keys");
+
+    toLua(L, channel->mRotationKeys, channel->mNumRotationKeys);
+    lua_setfield(L, tableIndex, "rotation_keys");
+
+    toLua(L, channel->mScalingKeys, channel->mNumScalingKeys);
+    lua_setfield(L, tableIndex, "scaling_keys");
+}
+
+void toLua(lua_State* L, const aiAnimation* animation) {
+    if (!animation) {
+        lua_pushnil(L);
+        return;
+    }
+
+    lua_newtable(L);
+    int tableIndex = lua_gettop(L);
+
+    toLua(L, animation->mName.C_Str());
+    lua_setfield(L, tableIndex, "name");
+
+    toLua(L, animation->mDuration);
+    lua_setfield(L, tableIndex, "duration");
+
+    toLua(L, animation->mTicksPerSecond);
+    lua_setfield(L, tableIndex, "ticks_per_second");
+
+    toLua(L, animation->mChannels, animation->mNumChannels);
+    lua_setfield(L, tableIndex, "channels");
+}
+
 void toLua(lua_State* L, const aiNode* node) {
     if (!node) {
         lua_pushnil(L);
@@ -178,6 +244,9 @@ void toLua(lua_State* L, const aiScene* scene, CFileDefinition& fileDefinition) 
         lua_seti(L, -2, i + 1);
     }
     lua_setfield(L, tableIndex, "meshes");
+
+    toLua(L, scene->mAnimations, scene->mNumAnimations);
+    lua_setfield(L, tableIndex, "animations");
 }
 
 int luaExportDefaultMesh(lua_State* L) {

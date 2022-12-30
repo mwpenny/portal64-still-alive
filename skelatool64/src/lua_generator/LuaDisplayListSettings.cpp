@@ -90,6 +90,9 @@ int luaInputModuleLoader(lua_State* L) {
     toLua(L, defaults->mFixedPointScale);
     lua_setfield(L, -2, "fixed_point_scale");
 
+    toLua(L, defaults->mTicksPerSecond);
+    lua_setfield(L, -2, "ticks_per_second");
+
     lua_setfield(L, -2, "settings");
 
     lua_pushstring(L, levelFilename);

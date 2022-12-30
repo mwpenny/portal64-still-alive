@@ -9,5 +9,6 @@ void toLua(lua_State* L, const aiVector3D& vector);
 void toLua(lua_State* L, const aiAABB& box);
 
 void fromLua(lua_State* L, aiVector3D& vector);
+void fromLua(lua_State* L, aiQuaternion& quaternion);
 
 #endif

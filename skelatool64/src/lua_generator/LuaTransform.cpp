@@ -3,6 +3,42 @@
 #include "LuaTransform.h"
 
 #include "LuaBasicTypes.h"
+#include "LuaUtils.h"
+
+/***
+ @function from_pos_rot_scale
+ @tparam sk_math.Vector3 pos
+ @tparam[opt] sk_math.Quaternion rot
+ @tparam[opt] sk_math.Scale scale
+ @treturn Transform
+ */
+int luaTransformFromPosRotationScale(lua_State* L) {
+    if (lua_gettop(L) > 3) {
+        lua_settop(L, 3);
+    }
+
+    aiVector3D scale;
+
+    if (lua_gettop(L) == 3) {
+        fromLua(L, scale);
+    } else {
+        scale = aiVector3D(1, 1, 1);
+    }
+
+    aiQuaternion rot;
+
+    if (lua_gettop(L) == 2) {
+        fromLua(L, rot);
+    }
+
+    aiVector3D pos;
+
+    fromLua(L, pos);
+
+    aiMatrix4x4 fullTransform(scale, rot, pos);
+    toLua(L, fullTransform);
+    return 1;
+}
 
 /***
 A 4x4 matrix transform
@@ -100,6 +136,11 @@ bool luaIsTransform(lua_State* L, int idx) {
     return result;
 }
 
+/**
+ @function __mul
+ @tparam Transform|sk_math.Vector3 other
+ @treturn Transform
+ */
 int luaTransformMul(lua_State* L) {
     aiMatrix4x4* a = (aiMatrix4x4*)luaL_checkudata(L, 1, "aiMatrix4x4");
 
@@ -126,6 +167,15 @@ int luaTransformMul(lua_State* L) {
     return 1;
 }
 
+int buildTransformModule(lua_State* L) {
+    lua_newtable(L);
+
+    lua_pushcfunction(L, luaTransformFromPosRotationScale);
+    lua_setfield(L, -2, "from_pos_rot_scale");
+
+    return 1;
+}
+
 void generateLuaTransform(lua_State* L) {
     luaL_newmetatable(L, "aiMatrix4x4");
 
@@ -136,4 +186,7 @@ void generateLuaTransform(lua_State* L) {
     lua_setfield(L, -2, "__mul");
 
     lua_pop(L, 1);
+
+    lua_pushcfunction(L, buildTransformModule);
+    luaSetModuleLoader(L, "sk_transform");
 }
