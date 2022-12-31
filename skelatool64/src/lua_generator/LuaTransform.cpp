@@ -5,6 +5,9 @@
 #include "LuaBasicTypes.h"
 #include "LuaUtils.h"
 
+#include <sstream>
+#include <iomanip>
+
 /***
  @function from_pos_rot_scale
  @tparam sk_math.Vector3 pos
@@ -68,7 +71,7 @@ void fromLua(lua_State* L, aiMatrix4x4& matrix) {
 @treturn quaternion.Quaternion rotation
 @treturn vector3.Vector3 scale
  */
-int luaTransformDecomponse(lua_State* L) {
+int luaTransformDecompose(lua_State* L) {
     aiMatrix4x4* mtx = (aiMatrix4x4*)luaL_checkudata(L, 1, "aiMatrix4x4");
 
     aiVector3D scaling;
@@ -83,6 +86,17 @@ int luaTransformDecomponse(lua_State* L) {
     return 3;
 }
 
+/***
+@function inverse
+@treturn Transform
+ */
+int luaTransformInverse(lua_State* L) {
+    aiMatrix4x4 mtx = *(aiMatrix4x4*)luaL_checkudata(L, 1, "aiMatrix4x4");
+    mtx.Inverse();
+    toLua(L, mtx);
+    return 1;
+}
+
 int luaTransformIndex(lua_State* L) {
     aiMatrix4x4* mtx = (aiMatrix4x4*)luaL_checkudata(L, 1, "aiMatrix4x4");
 
@@ -92,7 +106,9 @@ int luaTransformIndex(lua_State* L) {
         const char* key = lua_tostring(L, 2);
 
         if (strcmp(key, "decompose") == 0) {
-            lua_pushcfunction(L, luaTransformDecomponse);
+            lua_pushcfunction(L, luaTransformDecompose);
+        } else if (strcmp(key, "inverse") == 0) {
+            lua_pushcfunction(L, luaTransformInverse);
         } else {
             lua_pushnil(L);
         }
@@ -167,6 +183,35 @@ int luaTransformMul(lua_State* L) {
     return 1;
 }
 
+int luaTransformToString(lua_State* L) {
+    aiMatrix4x4* a = (aiMatrix4x4*)luaL_checkudata(L, 1, "aiMatrix4x4");
+
+    std::ostringstream result;
+
+    result << "| " << std::setprecision(5) << std::fixed << std::setw(5) << a->a1 << " ";
+    result << std::setprecision(5) << std::fixed << std::setw(5) << a->b1 << " ";
+    result << std::setprecision(5) << std::fixed << std::setw(5) << a->c1 << " ";
+    result << std::setprecision(5) << std::fixed << std::setw(5) << a->d1 << " |" << std::endl;
+
+    result << "| " << std::setprecision(5) << std::fixed << std::setw(5) << a->a2 << " ";
+    result << std::setprecision(5) << std::fixed << std::setw(5) << a->b2 << " ";
+    result << std::setprecision(5) << std::fixed << std::setw(5) << a->c2 << " ";
+    result << std::setprecision(5) << std::fixed << std::setw(5) << a->d2 << " |" << std::endl;
+
+    result << "| " << std::setprecision(5) << std::fixed << std::setw(5) << a->a3 << " ";
+    result << std::setprecision(5) << std::fixed << std::setw(5) << a->b3 << " ";
+    result << std::setprecision(5) << std::fixed << std::setw(5) << a->c3 << " ";
+    result << std::setprecision(5) << std::fixed << std::setw(5) << a->d3 << " |" << std::endl;
+
+    result << "| " << std::setprecision(5) << std::fixed << std::setw(5) << a->a4 << " ";
+    result << std::setprecision(5) << std::fixed << std::setw(5) << a->b4 << " ";
+    result << std::setprecision(5) << std::fixed << std::setw(5) << a->c4 << " ";
+    result << std::setprecision(5) << std::fixed << std::setw(5) << a->d4 << " |" << std::endl;
+
+    toLua(L, result.str());
+    return 1;
+}
+
 int buildTransformModule(lua_State* L) {
     lua_newtable(L);
 
@@ -184,6 +229,9 @@ void generateLuaTransform(lua_State* L) {
 
     lua_pushcfunction(L, luaTransformMul);
     lua_setfield(L, -2, "__mul");
+
+    lua_pushcfunction(L, luaTransformToString);
+    lua_setfield(L, -2, "__tostring");
 
     lua_pop(L, 1);
 

@@ -2,6 +2,7 @@
 
 #include "../util/memory.h"
 #include "../util/time.h"
+#include "../math/mathf.h"
 
 void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo* animationInfo, int animatorCount) {
     sceneAnimator->armatures = malloc(sizeof(struct SKArmature) * animatorCount);

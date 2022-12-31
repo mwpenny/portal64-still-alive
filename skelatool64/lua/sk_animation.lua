@@ -258,7 +258,7 @@ local function build_armature_data(armature, gfx_reference_or_nil, name_hint, fi
 
         local pos, rot, scale = relative_transform:decompose()
 
-        table.insert(transforms, {pos, rot, scale})
+        table.insert(transforms, {pos * sk_input.settings.fixed_point_scale, rot, scale})
 
         -- calculate parent mapping
         local _, parent_index = armature:get_parent_bone(node)

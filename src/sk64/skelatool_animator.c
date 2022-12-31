@@ -168,6 +168,7 @@ void skAnimatorStep(struct SKAnimator* animator, float deltaTime) {
     while (currentFrame >= currentClip->nFrames) {
         if (!(animator->flags & SKAnimatorFlagsLoop)) {
             animator->blendLerp = 1.0f;
+            animator->currentClip = NULL;
             return;
         }
         
@@ -230,6 +231,10 @@ void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip
     animator->flags = flags;
 
     skAnimatorRequestNext(animator);
+}
+
+int skAnimatorIsRunning(struct SKAnimator* animator) {
+    return animator->currentClip != NULL;
 }
 
 static unsigned gSegmentLocations[SK_SEGMENT_COUNT];

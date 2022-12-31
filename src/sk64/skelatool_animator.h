@@ -25,6 +25,8 @@ void skAnimatorUpdate(struct SKAnimator* animator, struct Transform* transforms,
 
 void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip, float startTime, int flags);
 
+int skAnimatorIsRunning(struct SKAnimator* animator);
+
 #define SK_SEGMENT_COUNT 16
 
 void skSetSegmentLocation(unsigned segmentNumber, unsigned segmentLocatoin);

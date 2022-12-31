@@ -17,6 +17,13 @@ local function proccessStaticNodes(nodes)
         local renderChunks = sk_mesh.generate_render_chunks(v.node)
         
         for _, chunkV in pairs(renderChunks) do
+            local transform_index = animation.get_bone_index_for_node(v.node)
+
+            if transform_index then
+                local bone = animation.get_bone_for_index(transform_index)
+                chunkV.mesh = chunkV.mesh:transform(bone.full_transformation:inverse())
+            end
+
             local gfxName = sk_mesh.generate_mesh({chunkV}, "_geo", {defaultMaterial = chunkV.material})
 
             local mesh_bb = chunkV.mesh.bb * bb_scale
@@ -39,7 +46,7 @@ local function proccessStaticNodes(nodes)
                 mesh_bb = mesh_bb,
                 display_list = sk_definition_writer.raw(gfxName), 
                 material_index = sk_definition_writer.raw(chunkV.material.macro_name),
-                transform_index = animation.get_bone_index_for_node(v.node),
+                transform_index = transform_index,
                 room_index = room_export.node_nearest_room_index(v.node) or 0
             })
         end
