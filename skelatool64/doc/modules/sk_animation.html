@@ -33,6 +33,7 @@
 <h2>Contents</h2>
 <ul>
 <li><a href="#Functions">Functions</a></li>
+<li><a href="#Tables">Tables</a></li>
 <li><a href="#Class_Armature">Class Armature </a></li>
 </ul>
 
@@ -64,14 +65,33 @@
 	<td class="summary"></td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#export_animations">export_animations (name_hint, armature, animations, file_suffix, animation_file_suffix)</a></td>
+	<td class="name" nowrap><a href="#export_animation">export_animation (animation, armature, name_hint, file_suffix, animation_file_suffix)</a></td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#filter_animations_for_armature">filter_animations_for_armature (armature, animations)</a></td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#export_armature">export_armature (armature, gfx_reference_or_nil, name_hint, file_suffix)</a></td>
+	<td class="summary"></td>
+	</tr>
+</table>
+<h2><a href="#Tables">Tables</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#Clip">Clip</a></td>
 	<td class="summary"></td>
 	</tr>
 </table>
 <h2><a href="#Class_Armature">Class Armature </a></h2>
 <table class="function_list">
 	<tr>
-	<td class="name" nowrap><a href="#Armature:has_node">Armature:has_node ()</a></td>
+	<td class="name" nowrap><a href="#Armature:has_node">Armature:has_node (Node)</a></td>
+	<td class="summary"></td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Armature:get_parent_bone">Armature:get_parent_bone (Node)</a></td>
 	<td class="summary"></td>
 	</tr>
 </table>
@@ -111,8 +131,8 @@
 
 </dd>
     <dt>
-    <a name = "export_animations"></a>
-    <strong>export_animations (name_hint, armature, animations, file_suffix, animation_file_suffix)</strong>
+    <a name = "export_animation"></a>
+    <strong>export_animation (animation, armature, name_hint, file_suffix, animation_file_suffix)</strong>
     </dt>
     <dd>
 
@@ -120,16 +140,16 @@
 
     <h3>Parameters:</h3>
     <ul>
-        <li><span class="parameter">name_hint</span>
-            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        <li><span class="parameter">animation</span>
+            <span class="types"><span class="type">sk_scene.Animation</span></span>
 
         </li>
         <li><span class="parameter">armature</span>
             <span class="types"><a class="type" href="../modules/sk_animation.html#Armature">Armature</a></span>
 
         </li>
-        <li><span class="parameter">animations</span>
-            <span class="types"><span class="type">{sk_scene.Animation,...}</span></span>
+        <li><span class="parameter">name_hint</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
 
         </li>
         <li><span class="parameter">file_suffix</span>
@@ -138,6 +158,119 @@
         </li>
         <li><span class="parameter">animation_file_suffix</span>
             <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/sk_animation.html#Clip">Clip</a></span>
+        the exported clip object use sk_definition_writer.reference_to(clip) to reference in other data
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "filter_animations_for_armature"></a>
+    <strong>filter_animations_for_armature (armature, animations)</strong>
+    </dt>
+    <dd>
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">armature</span>
+            <span class="types"><a class="type" href="../modules/sk_animation.html#Armature">Armature</a></span>
+
+        </li>
+        <li><span class="parameter">animations</span>
+            <span class="types"><span class="type">{sk_scene.Animation,...}</span></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">{sk_scene.Animation,...}</span></span>
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "export_armature"></a>
+    <strong>export_armature (armature, gfx_reference_or_nil, name_hint, file_suffix)</strong>
+    </dt>
+    <dd>
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">armature</span>
+            <span class="types"><a class="type" href="../modules/sk_animation.html#Armature">Armature</a></span>
+
+        </li>
+        <li><span class="parameter">gfx_reference_or_nil</span>
+            <span class="types"><span class="type">sk_definition_writer.RefType</span> or <span class="type">nil</span></span>
+
+        </li>
+        <li><span class="parameter">name_hint</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+        </li>
+        <li><span class="parameter">file_suffix</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="Tables"></a>Tables</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "Clip"></a>
+    <strong>Clip</strong>
+    </dt>
+    <dd>
+
+
+
+    <h3>Fields:</h3>
+    <ul>
+        <li><span class="parameter">nFrames</span>
+            <span class="types"><span class="type">number</span></span>
+
+        </li>
+        <li><span class="parameter">nBones</span>
+            <span class="types"><span class="type">number</span></span>
+
+        </li>
+        <li><span class="parameter">frames</span>
+            <span class="types"><span class="type">sk_definition_writer.RefType</span></span>
+
+        </li>
+        <li><span class="parameter">fps</span>
+            <span class="types"><span class="type">number</span></span>
 
         </li>
     </ul>
@@ -153,13 +286,56 @@
     <dl class="function">
     <dt>
     <a name = "Armature:has_node"></a>
-    <strong>Armature:has_node ()</strong>
+    <strong>Armature:has_node (Node)</strong>
     </dt>
     <dd>
 
 
 
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">Node</span>
+            <span class="types"><span class="type">sk_scene.Node</span></span>
 
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span></span>
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Armature:get_parent_bone"></a>
+    <strong>Armature:get_parent_bone (Node)</strong>
+    </dt>
+    <dd>
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">Node</span>
+            <span class="types"><span class="type">sk_scene.Node</span></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+           <span class="types"><span class="type">sk_scene.Node</span> or <span class="type">nil</span></span>
+        </li>
+        <li>
+           <span class="types"><span class="type">number</span></span>
+        bone_index|nil</li>
+    </ol>
 
 
 
@@ -172,7 +348,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
-<i style="float:right;">Last updated 2022-12-29 21:32:18 </i>
+<i style="float:right;">Last updated 2022-12-30 12:30:52 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

@@ -7,10 +7,15 @@
 #include "../math/boxs16.h"
 #include "../math/box3d.h"
 #include "../math/range.h"
+#include "../sk64/skelatool_clip.h"
+#include "../sk64/skelatool_armature.h"
+
+#define NO_TRANSFORM_INDEX  0xFF
 
 struct StaticContentElement {
     Gfx* displayList;
     u8 materialIndex;
+    u8 transformIndex;
 };
 
 struct BoundingSphere {
@@ -167,6 +172,12 @@ struct BoxDropperDefinition {
     short signalIndex;
 };
 
+struct AnimationInfo {
+    struct SKArmature armature;
+    struct SKAnimationClip* clips;
+    short clipCount;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
@@ -189,6 +200,7 @@ struct LevelDefinition {
     struct PedestalDefinition* pedestals;
     struct SignageDefinition* signage;
     struct BoxDropperDefinition* boxDroppers;
+    struct AnimationInfo* animations;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
@@ -204,6 +216,7 @@ struct LevelDefinition {
     short pedestalCount;
     short signageCount;
     short boxDropperCount;
+    short animationInfoCount;
     short startLocation;
 };
 

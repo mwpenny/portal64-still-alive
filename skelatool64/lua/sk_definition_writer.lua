@@ -300,12 +300,10 @@ local function process_definitions(definitions)
     local name_mapping = {}
     
     for k, v in pairs(definitions) do
-        print("populating name mapping for " .. v.name)
         populate_name_mapping(v.name, v.data, name_mapping)
     end
 
     for k, v in pairs(definitions) do
-        print("replacing references for " .. v.name)
         v.data = replace_references(v.data, name_mapping, v.name)
     end
 end

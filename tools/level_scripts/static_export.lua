@@ -4,6 +4,7 @@ local sk_scene = require('sk_scene')
 local sk_mesh = require('sk_mesh')
 local sk_input = require('sk_input')
 local room_export = require('tools.level_scripts.room_export')
+local animation = require('tools.level_scripts.animation')
 
 sk_definition_writer.add_header('"../build/assets/materials/static.h"')
 sk_definition_writer.add_header('"levels/level_definition.h"')
@@ -33,25 +34,23 @@ local function proccessStaticNodes(nodes)
                 mesh = chunkV.mesh,
                 mesh_bb = mesh_bb,
                 display_list = sk_definition_writer.raw(gfxName), 
-                material_index = sk_definition_writer.raw(chunkV.material.macro_name)
+                material_index = sk_definition_writer.raw(chunkV.material.macro_name),
+                transform_index = animation.get_bone_index_for_node(v.node),
+                room_index = room_export.node_nearest_room_index(v.node) or 0
             })
         end
     end
+
+    table.sort(result, function(a, b)
+        return a.room_index < b.room_index
+    end)
 
     return result;
 end
 
 local static_nodes = proccessStaticNodes(sk_scene.nodes_for_type('@static'))
 
-for _, static_node in pairs(static_nodes) do
-    static_node.room_index = room_export.node_nearest_room_index(static_node.node) or 0
-end
-
 local static_content_elements = {}
-
-table.sort(static_nodes, function(a, b)
-    return a.room_index < b.room_index
-end)
 
 local room_ranges = {}
 local static_bounding_boxes = {}
@@ -59,7 +58,8 @@ local static_bounding_boxes = {}
 for index, static_node in pairs(static_nodes) do
     table.insert(static_content_elements, {
         displayList = static_node.display_list,
-        materialIndex = static_node.material_index
+        materialIndex = static_node.material_index,
+        transformIndex = static_node.transform_index and (static_node.transform_index - 1) or sk_definition_writer.raw('NO_TRANSFORM_INDEX'),
     })
     table.insert(static_bounding_boxes, {
         static_node.mesh_bb.min.x,

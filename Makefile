@@ -210,9 +210,9 @@ build/src/player/player.o: build/assets/models/player/chell.h build/assets/mater
 
 build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
 
-build/anims.ld: $(ANIM_LIST) tools/generate_animation_ld.js
+build/anims.ld: $(ANIM_LIST) $(ANIM_TEST_CHAMBERS) tools/generate_animation_ld.js
 	@mkdir -p $(@D)
-	node tools/generate_animation_ld.js $@ $(ANIM_LIST)
+	node tools/generate_animation_ld.js $@ $(ANIM_LIST) $(ANIM_TEST_CHAMBERS)
 
 ####################
 ## Test Chambers
@@ -223,6 +223,8 @@ TEST_CHAMBERS = assets/test_chambers/test_chamber_00/test_chamber_00.blend \
 	assets/test_chambers/test_chamber_02/test_chamber_02.blend \
 	assets/test_chambers/test_chamber_03/test_chamber_03.blend
 
+ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_03/test_chamber_03_anim.o
+
 TEST_CHAMBER_HEADERS = $(TEST_CHAMBERS:%.blend=build/%.h)
 TEST_CHAMBER_OBJECTS = $(TEST_CHAMBERS:%.blend=build/%_geo.o)
 
@@ -232,7 +234,7 @@ build/%.fbx: %.blend
 	@mkdir -p $(@D)
 	$(BLENDER_3_0) $< --background --python tools/export_fbx.py -- $@
 
-build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c: build/assets/test_chambers/%.fbx build/assets/materials/static.h $(SKELATOOL64) $(TEXTURE_IMAGES) $(LUA_FILES)
+build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c build/assets/test_chambers/%_anim.c: build/assets/test_chambers/%.fbx build/assets/materials/static.h $(SKELATOOL64) $(TEXTURE_IMAGES) $(LUA_FILES)
 	$(SKELATOOL64) --script tools/export_level.lua --fixed-point-scale 256 --model-scale 0.01 --name $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
 
 build/assets/test_chambers/%.o: build/assets/test_chambers/%.c build/assets/materials/static.h
