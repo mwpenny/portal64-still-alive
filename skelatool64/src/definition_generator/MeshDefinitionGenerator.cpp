@@ -62,8 +62,7 @@ double extractStaticUVScale(const std::string& nodeName) {
 aiMatrix4x4 buildTransformForRenderChunk(aiNode* node) {
     aiMatrix4x4 result;
 
-    // this is setup to intentionally skip the root node
-    while (node->mParent) {
+    while (node) {
         result = node->mTransformation * result;
         node = node->mParent;
     }
@@ -75,7 +74,7 @@ void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* n
     for (unsigned meshIndex = 0; meshIndex < node->mNumMeshes; ++meshIndex) {
         std::shared_ptr<ExtendedMesh> mesh = fileDefinition.GetExtendedMesh(scene->mMeshes[node->mMeshes[meshIndex]]);
 
-        mesh = mesh->Transform(buildTransformForRenderChunk(node));
+        mesh = mesh->Transform(settings.CreateCollisionTransform() * buildTransformForRenderChunk(node));
 
         std::string materialName = ExtendedMesh::GetMaterialName(scene->mMaterials[mesh->mMesh->mMaterialIndex], settings.mForceMaterialName);
 
@@ -95,8 +94,8 @@ void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* n
         if (extractMaterialAutoTileParameters(materialPtr, sTile, tTile)) {
             double uvScale = extractStaticUVScale(node->mName.C_Str());
             mesh->CubeProjectTex(
-                uvScale * settings.mModelScale / (double)sTile,
-                uvScale * settings.mModelScale / (double)tTile
+                uvScale / (double)sTile,
+                uvScale / (double)tTile
             );
         }
 

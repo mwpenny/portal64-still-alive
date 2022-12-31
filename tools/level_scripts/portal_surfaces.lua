@@ -64,16 +64,14 @@ local function get_edge_index(edges, edge_key)
 end
 
 local function calculate_portal_single_surface(mesh, mesh_display_list)
-    local scale = sk_input.settings.model_scale
-
-    local origin = mesh.bb:lerp(0.5) * scale
+    local origin = mesh.bb:lerp(0.5)
 
     local right, up, normal = calculate_surface_basis(mesh)
 
     local vertices = {}
 
     for _, vertex in pairs(mesh.vertices) do
-        local x, y = to_local_coords(origin, right, up, vertex * scale)
+        local x, y = to_local_coords(origin, right, up, vertex)
         table.insert(vertices, {{{x = x, y = y}}})
     end
 
@@ -205,13 +203,11 @@ local function is_coplanar_portal_surface(quad, mesh, collision_bb)
         return false
     end
 
-    if not collision_export.is_coplanar(quad, mesh, sk_input.settings.model_scale) then
+    if not collision_export.is_coplanar(quad, mesh) then
         return false
     end
 
-    local mesh_bb = mesh.bb * sk_input.settings.model_scale
-
-    if not mesh_bb:overlaps(collision_bb) then
+    if not mesh.bb:overlaps(collision_bb) then
         return false
     end
 

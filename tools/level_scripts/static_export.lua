@@ -11,7 +11,7 @@ sk_definition_writer.add_header('"levels/level_definition.h"')
 
 local function proccessStaticNodes(nodes)
     local result = {}
-    local bb_scale = sk_input.settings.model_scale * sk_input.settings.fixed_point_scale
+    local bb_scale = sk_input.settings.fixed_point_scale
 
     for k, v in pairs(nodes) do
         local renderChunks = sk_mesh.generate_render_chunks(v.node)

@@ -220,7 +220,7 @@ end
 
 local INSIDE_NORMAL_TOLERANCE = 0.1
 
-local function is_coplanar(collision_quad, mesh, relative_scale)
+local function is_coplanar(collision_quad, mesh)
     if sk_math.isVector3(mesh) then
         local offset = mesh - collision_quad.corner
 
@@ -246,7 +246,7 @@ local function is_coplanar(collision_quad, mesh, relative_scale)
     end
 
     for _, vertex in pairs(mesh.vertices) do
-        local offset = vertex * relative_scale - collision_quad.corner
+        local offset = vertex - collision_quad.corner
 
         local z = offset:dot(collision_quad.plane.normal)
 

@@ -66,8 +66,6 @@ unsigned convertByteRange(float value) {
 
         if (mTargetMesh->mPointInverseTransform.size()) {
             pos = mTargetMesh->mPointInverseTransform[i] * pos;
-        } else {
-            pos = rotate.Rotate(pos) * modelScale;
         }
 
         pos = pos * fixedPointScale;

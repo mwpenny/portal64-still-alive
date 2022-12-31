@@ -69,7 +69,7 @@ function Vector3.__eq(a, b)
     end
 
     if (not isVector3(b)) then
-        error('Vector3.__add expected another vector as second operand')
+        error('Vector3.__eq expected another vector as second operand', 2)
     end
 
     return a.x == b.x and a.y == b.y and a.z == b.z
@@ -88,7 +88,7 @@ function Vector3.__add(a, b)
     end
 
     if (not isVector3(b)) then
-        error('Vector3.__add expected another vector as second operand')
+        error('Vector3.__add expected another vector as second operand got ' .. type(b), 2)
     end
 
     return vector3(a.x + b.x, a.y + b.y, a.z + b.z)
@@ -107,7 +107,7 @@ function Vector3.__sub(a, b)
     end
 
     if (not isVector3(b)) then
-        error('Vector3.__add expected another vector as second operand')
+        error('Vector3.__sub expected another vector as second operand', 2)
     end
 
     if (a == nil) then
@@ -130,7 +130,7 @@ function Vector3.__mul(a, b)
     end
 
     if (not isVector3(b)) then
-        error('Vector3.__add expected another vector as second operand')
+        error('Vector3.__mul expected another vector or number as second operand got ' .. type(b), 2)
     end
 
     return vector3(a.x * b.x, a.y * b.y, a.z * b.z)
@@ -151,7 +151,7 @@ function Vector3.__div(a, b)
     end
 
     if (not isVector3(b)) then
-        error('Vector3.__add expected another vector as second operand')
+        error('Vector3.__div expected another vector as second operand', 2)
     end
 
     return vector3(a.x / b.x, a.y / b.y, a.z / b.z)
@@ -352,7 +352,7 @@ function Quaternion.__mul(a, b)
             a.w*b.w - a.x*b.x - a.y*b.y - a.z*b.z
         )
     else
-        error("Expected vector3 or quaternion got " .. tostring(b))
+        error("Expected vector3 or quaternion got " .. tostring(b), 2)
     end
 end
 
