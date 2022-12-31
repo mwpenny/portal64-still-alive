@@ -275,7 +275,7 @@ local function build_armature_data(armature, gfx_reference_or_nil, name_hint, fi
 
     return {
         displayList = gfx_reference_or_nil or sk_definition_writer.null_value,
-        boneTransforms = sk_definition_writer.reference_to(transforms, 1),
+        pose = sk_definition_writer.reference_to(transforms, 1),
         numberOfBones = #armature.nodes,
         numberOfAttachments = 0,
         boneParentIndex = sk_definition_writer.reference_to(parent_mapping, 1),

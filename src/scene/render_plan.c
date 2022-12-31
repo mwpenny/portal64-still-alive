@@ -408,7 +408,7 @@ void renderPlanBuild(struct RenderPlan* renderPlan, struct Scene* scene, struct 
     renderPlanAdjustViewportDepth(renderPlan);
 }
 
-void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderState* renderState) {
+void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* staticTransforms, struct RenderState* renderState) {
     struct DynamicRenderDataList* dynamicList = dynamicRenderListNew(MAX_DYNAMIC_SCENE_OBJECTS);
 
     dynamicRenderListPopulate(dynamicList, renderPlan->stageProps, renderPlan->stageCount, renderState);
@@ -474,7 +474,7 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, struc
             portalIndex = 1 - portalIndex;
         }
 
-        staticRender(&current->camera.transform, &current->cameraMatrixInfo.cullingInformation, current->visiblerooms, dynamicList, stageIndex, renderState);
+        staticRender(&current->camera.transform, &current->cameraMatrixInfo.cullingInformation, current->visiblerooms, dynamicList, stageIndex, staticTransforms, renderState);
     }
 
     dynamicRenderListFree(dynamicList);

@@ -6,7 +6,7 @@
 #include "../graphics/render_scene.h"
 #include "../math/mathf.h"
 
-void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, struct RenderScene* renderScene) {
+void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, Mtx* staticTransforms, struct RenderScene* renderScene) {
     int currentRoom = 0;
 
     u64 visibleRooms = renderScene->visibleRooms;
@@ -27,7 +27,13 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, s
                 boxCenter.y = (float)(box->minY + box->maxY) * (0.5f / SCENE_SCALE);
                 boxCenter.z = (float)(box->minZ + box->maxZ) * (0.5f / SCENE_SCALE);
 
-                renderSceneAdd(renderScene, gCurrentLevel->staticContent[i].displayList, NULL, gCurrentLevel->staticContent[i].materialIndex, &boxCenter, NULL);
+                Mtx* matrix = NULL;
+
+                if (gCurrentLevel->staticContent[i].transformIndex != NO_TRANSFORM_INDEX) {
+                    matrix = &staticTransforms[gCurrentLevel->staticContent[i].transformIndex];
+                }
+
+                renderSceneAdd(renderScene, gCurrentLevel->staticContent[i].displayList, matrix, gCurrentLevel->staticContent[i].materialIndex, &boxCenter, NULL);
             }
         }
 
@@ -75,14 +81,14 @@ int staticRenderIsRoomVisible(u64 visibleRooms, u16 roomIndex) {
     return (visibleRooms & (1LL << roomIndex)) != 0;
 }
 
-void staticRender(struct Transform* cameraTransform, struct FrustrumCullingInformation* cullingInfo, u64 visibleRooms, struct DynamicRenderDataList* dynamicList, int stageIndex, struct RenderState* renderState) {
+void staticRender(struct Transform* cameraTransform, struct FrustrumCullingInformation* cullingInfo, u64 visibleRooms, struct DynamicRenderDataList* dynamicList, int stageIndex, Mtx* staticTransforms, struct RenderState* renderState) {
     if (!gCurrentLevel) {
         return;
     }
 
     struct RenderScene* renderScene = renderSceneNew(cameraTransform, renderState, MAX_RENDER_COUNT, visibleRooms);
 
-    staticRenderPopulateRooms(cullingInfo, renderScene);
+    staticRenderPopulateRooms(cullingInfo, staticTransforms, renderScene);
 
     dynamicRenderPopulateRenderScene(dynamicList, stageIndex, renderScene);
 

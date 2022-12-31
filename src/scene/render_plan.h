@@ -47,6 +47,6 @@ struct RenderPlan {
 
 void renderPlanBuild(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderState* renderState);
 
-void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderState* renderState);
+void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* staticTransforms, struct RenderState* renderState);
 
 #endif

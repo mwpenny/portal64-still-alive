@@ -83,6 +83,14 @@ struct LevelDefinition* levelFixPointers(struct LevelDefinition* from, int point
     result->signage = ADJUST_POINTER_POS(result->signage, pointerOffset);
     result->boxDroppers = ADJUST_POINTER_POS(result->boxDroppers, pointerOffset);
 
+    result->animations = ADJUST_POINTER_POS(result->animations, pointerOffset);
+
+    for (int i = 0; i < result->animationInfoCount; ++i) {
+        result->animations[i].clips = ADJUST_POINTER_POS(result->animations[i].clips, pointerOffset);
+        result->animations[i].armature.boneParentIndex = ADJUST_POINTER_POS(result->animations[i].armature.boneParentIndex, pointerOffset);
+        result->animations[i].armature.pose = ADJUST_POINTER_POS(result->animations[i].armature.pose, pointerOffset);
+    }
+
     return result;
 }
 

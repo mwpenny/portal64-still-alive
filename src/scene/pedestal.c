@@ -82,7 +82,7 @@ void pedestalDetermineHolderAngle(struct Pedestal* pedestal, struct Vector2* out
 }
 
 void pedestalUpdate(struct Pedestal* pedestal) {
-    skAnimatorUpdate(&pedestal->animator, pedestal->armature.boneTransforms, FIXED_DELTA_TIME);
+    skAnimatorUpdate(&pedestal->animator, pedestal->armature.pose, FIXED_DELTA_TIME);
 
     if (pedestal->flags & PedestalFlagsIsPointing) {
         struct Vector2 target;
@@ -93,7 +93,7 @@ void pedestalUpdate(struct Pedestal* pedestal) {
         }
     }
     
-    quatAxisComplex(&gUp, &pedestal->currentRotation, &pedestal->armature.boneTransforms[PEDESTAL_HOLDER_BONE].rotation);
+    quatAxisComplex(&gUp, &pedestal->currentRotation, &pedestal->armature.pose[PEDESTAL_HOLDER_BONE].rotation);
 }
 
 void pedestalHide(struct Pedestal* pedestal) {

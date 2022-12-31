@@ -59,11 +59,23 @@ double extractStaticUVScale(const std::string& nodeName) {
     return result;
 }
 
+aiMatrix4x4 buildTransformForRenderChunk(aiNode* node) {
+    aiMatrix4x4 result;
+
+    // this is setup to intentionally skip the root node
+    while (node->mParent) {
+        result = node->mTransformation * result;
+        node = node->mParent;
+    }
+
+    return result;
+}
+
 void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* node, CFileDefinition& fileDefinition, const DisplayListSettings& settings, std::vector<RenderChunk>& renderChunks) {
     for (unsigned meshIndex = 0; meshIndex < node->mNumMeshes; ++meshIndex) {
         std::shared_ptr<ExtendedMesh> mesh = fileDefinition.GetExtendedMesh(scene->mMeshes[node->mMeshes[meshIndex]]);
 
-        mesh = mesh->Transform(node->mTransformation);
+        mesh = mesh->Transform(buildTransformForRenderChunk(node));
 
         std::string materialName = ExtendedMesh::GetMaterialName(scene->mMaterials[mesh->mMesh->mMaterialIndex], settings.mForceMaterialName);
 

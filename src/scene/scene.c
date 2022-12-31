@@ -118,6 +118,8 @@ void sceneInit(struct Scene* scene) {
     }
 
     scene->freeCameraOffset = gZeroVec;
+
+    sceneAnimatorInit(&scene->animator, gCurrentLevel->animations, gCurrentLevel->animationInfoCount);
 }
 
 #define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
@@ -175,8 +177,10 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     struct RenderPlan renderPlan;
 
+    Mtx* staticMatrices = sceneAnimatorBuildTransforms(&scene->animator, renderState);
+
     renderPlanBuild(&renderPlan, scene, renderState);
-    renderPlanExecute(&renderPlan, scene, renderState);
+    renderPlanExecute(&renderPlan, scene, staticMatrices, renderState);
 
     sceneRenderPortalGun(scene, renderState);
 
@@ -334,6 +338,7 @@ void sceneUpdate(struct Scene* scene) {
     
     collisionSceneUpdateDynamics();
 
+    sceneAnimatorUpdate(&scene->animator);
     levelCheckTriggers(&scene->player.lookTransform.position);
     cutscenesUpdate();
 

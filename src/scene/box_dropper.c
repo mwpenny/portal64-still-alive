@@ -109,7 +109,7 @@ void boxDropperInit(struct BoxDropper* dropper, struct BoxDropperDefinition* def
 }
 
 void boxDropperUpdate(struct BoxDropper* dropper) {
-    skAnimatorUpdate(&dropper->animator, dropper->armature.boneTransforms, FIXED_DELTA_TIME);
+    skAnimatorUpdate(&dropper->animator, dropper->armature.pose, FIXED_DELTA_TIME);
 
     if (dropper->reloadTimer > 0.0f) {
         dropper->reloadTimer -= FIXED_DELTA_TIME;

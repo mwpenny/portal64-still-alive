@@ -23,10 +23,6 @@ struct BoundingSphere {
     short radius;
 };
 
-enum TriggerCutsceneIndex {
-    TRIGGER_START,
-};
-
 enum CutsceneStepType {
     CutsceneStepTypeNoop,
     CutsceneStepTypePlaySound,
@@ -173,7 +169,7 @@ struct BoxDropperDefinition {
 };
 
 struct AnimationInfo {
-    struct SKArmature armature;
+    struct SKArmatureDefinition armature;
     struct SKAnimationClip* clips;
     short clipCount;
 };

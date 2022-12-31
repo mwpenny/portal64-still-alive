@@ -210,6 +210,8 @@ build/src/player/player.o: build/assets/models/player/chell.h build/assets/mater
 
 build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
 
+ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_03/test_chamber_03_anim.o
+
 build/anims.ld: $(ANIM_LIST) $(ANIM_TEST_CHAMBERS) tools/generate_animation_ld.js
 	@mkdir -p $(@D)
 	node tools/generate_animation_ld.js $@ $(ANIM_LIST) $(ANIM_TEST_CHAMBERS)
@@ -222,8 +224,6 @@ TEST_CHAMBERS = assets/test_chambers/test_chamber_00/test_chamber_00.blend \
 	assets/test_chambers/test_chamber_01/test_chamber_01.blend \
 	assets/test_chambers/test_chamber_02/test_chamber_02.blend \
 	assets/test_chambers/test_chamber_03/test_chamber_03.blend
-
-ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_03/test_chamber_03_anim.o
 
 TEST_CHAMBER_HEADERS = $(TEST_CHAMBERS:%.blend=build/%.h)
 TEST_CHAMBER_OBJECTS = $(TEST_CHAMBERS:%.blend=build/%_geo.o)

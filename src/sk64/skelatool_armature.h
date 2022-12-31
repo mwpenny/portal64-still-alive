@@ -9,7 +9,7 @@
 
 struct SKArmatureDefinition {
     Gfx* displayList;
-    struct Transform* initialPose;
+    struct Transform* pose;
     unsigned short* boneParentIndex;
     u16 numberOfBones;
     u16 numberOfAttachments;
@@ -17,10 +17,10 @@ struct SKArmatureDefinition {
 
 struct SKArmature {
     Gfx* displayList;
-    struct Transform* boneTransforms;
+    struct Transform* pose;
+    unsigned short* boneParentIndex;
     u16 numberOfBones;
     u16 numberOfAttachments;
-    unsigned short* boneParentIndex;
 };
 
 void skArmatureInit(struct SKArmature* object, struct SKArmatureDefinition* definition);

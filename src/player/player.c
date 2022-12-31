@@ -341,7 +341,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Vector3 forward;
     struct Vector3 right;
 
-    skBlenderUpdate(&player->animator, player->armature.boneTransforms, FIXED_DELTA_TIME);
+    skBlenderUpdate(&player->animator, player->armature.pose, FIXED_DELTA_TIME);
 
     int doorwayMask = worldCheckDoorwaySides(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom);
     playerGetMoveBasis(&player->lookTransform, &forward, &right);

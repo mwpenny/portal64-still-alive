@@ -11,20 +11,20 @@ void skArmatureInit(struct SKArmature* object, struct SKArmatureDefinition* defi
 
     unsigned transformSize = sizeof(Mtx) * definition->numberOfBones;
 
-    object->boneTransforms = malloc(transformSize);
-    if (definition->initialPose) {
-        if (IS_KSEG0(definition->initialPose)) {
-            memCopy(object->boneTransforms, definition->initialPose, transformSize);
+    object->pose = malloc(transformSize);
+    if (definition->pose) {
+        if (IS_KSEG0(definition->pose)) {
+            memCopy(object->pose, definition->pose, transformSize);
         } else {
-            romCopy((void*)definition->initialPose, (void*)object->boneTransforms, transformSize);
+            romCopy((void*)definition->pose, (void*)object->pose, transformSize);
         }
     }
     object->boneParentIndex = definition->boneParentIndex;
 }
 
 void skCleanupObject(struct SKArmature* object) {
-    free(object->boneTransforms);
-    object->boneTransforms = 0;
+    free(object->pose);
+    object->pose = 0;
     object->numberOfBones = 0;
 }
 
@@ -79,7 +79,7 @@ void skRenderObject(struct SKArmature* object, Gfx** attachements, struct Render
 
 void skCalculateTransforms(struct SKArmature* object, Mtx* into) {
     for (int i = 0; i < object->numberOfBones; ++i) {
-        transformToMatrixL(&object->boneTransforms[i], &into[i], 1.0f);
+        transformToMatrixL(&object->pose[i], &into[i], 1.0f);
     }
 }
 
@@ -90,7 +90,7 @@ void skCalculateBonePosition(struct SKArmature* object, unsigned short boneIndex
     *out = *bonePosition;
 
     while (boneIndex < object->numberOfBones) {
-        transformPoint(&object->boneTransforms[boneIndex], out, out);
+        transformPoint(&object->pose[boneIndex], out, out);
         boneIndex = object->boneParentIndex[boneIndex];
     }
 }
