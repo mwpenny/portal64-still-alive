@@ -18,6 +18,9 @@ end
 
 local armatures = {}
 
+local armature_indices_by_name = {}
+local animation_indices_by_name = {}
+
 local node_to_bone_index = {}
 local node_to_armature_index = {}
 local bones_as_array = {}
@@ -48,10 +51,14 @@ for index, armature in pairs(armatures) do
     local armature_data = sk_animation.build_armature_data(armature.armature, nil, armature.name, '_geo')
     local animation_clips = {}
 
-    for _, animation in pairs(sk_animation.filter_animations_for_armature(armature.armature, sk_scene.scene.animations)) do
+    local animation_names = {}
+
+    for animation_index, animation in pairs(sk_animation.filter_animations_for_armature(armature.armature, sk_scene.scene.animations)) do
         local clip = sk_animation.build_animation_clip(animation, armature.armature, '_anim')
         sk_definition_writer.add_macro(armature.name .. '_' .. animation.name, tostring(#animation_clips))
         table.insert(animation_clips, clip)
+
+        animation_names[animation.name] = sk_definition_writer.raw(sk_definition_writer.add_macro(armature.name .. '_ANIMATION_' .. animation.name, animation_index - 1))
     end
 
     sk_definition_writer.add_definition(armature.name .. '_clips', 'struct SKAnimationClip[]', '_geo', animation_clips)
@@ -61,6 +68,9 @@ for index, armature in pairs(armatures) do
         clips = sk_definition_writer.reference_to(animation_clips, 1),
         clipCount = #animation_clips
     })
+
+    armature_indices_by_name[armature.name] = sk_definition_writer.raw(sk_definition_writer.add_macro('ARMATURE_' .. armature.name, tostring(index - 1)))
+    animation_indices_by_name[armature.name] = animation_names
 end
 
 local function get_bone_index_for_node(node)
@@ -71,10 +81,26 @@ local function get_bone_for_index(index)
     return bones_as_array[index]
 end
 
+local function get_armature_index_with_name(name)
+    return armature_indices_by_name[name]
+end
+
+local function get_animation_with_name(armature_name, animation_name)
+    local armature = animation_indices_by_name[armature_name]
+
+    if not armature then
+        return nil
+    end
+
+    return armature[animation_name]
+end
+
 sk_definition_writer.add_definition('anim', 'struct AnimationInfo[]', '_geo', animated_nodes)
 
 return {
     animated_nodes = animated_nodes,
     get_bone_index_for_node = get_bone_index_for_node,
     get_bone_for_index = get_bone_for_index,
+    get_armature_index_with_name = get_armature_index_with_name,
+    get_animation_with_name = get_animation_with_name,
 }

@@ -12,6 +12,7 @@ struct SceneAnimator {
     struct SKArmature* armatures;
     struct SKAnimator* animators;
     struct AnimationInfo* animationInfo;
+    float* playbackSpeeds;
     short animatorCount;
     short boneCount;
 };
@@ -21,5 +22,10 @@ void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo
 void sceneAnimatorUpdate(struct SceneAnimator* sceneAnimator);
 
 Mtx* sceneAnimatorBuildTransforms(struct SceneAnimator* sceneAnimator, struct RenderState* renderState);
+
+void sceneAnimatorPlay(struct SceneAnimator* sceneAnimator, int animatorIndex, int animationIndex, float speed);
+void sceneAnimatorSetSpeed(struct SceneAnimator* sceneAnimator, int animatorIndex, float speed);
+
+int sceneAnimatorIsRunning(struct SceneAnimator* sceneAnimator, int animatorIndex);
 
 #endif

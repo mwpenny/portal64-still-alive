@@ -41,6 +41,9 @@ enum CutsceneStepType {
     CutsceneStepTypeWaitForCutscene,
     CutsceneStepTypeHidePedestal,
     CutsceneStepTypePointPedestal,
+    CutsceneStepPlayAnimation,
+    CutsceneStepSetAnimationSpeed,
+    CutsceneStepWaitForAnimation,
 };
 
 #define CH_NONE    0xFF
@@ -95,6 +98,18 @@ struct CutsceneStep {
         struct {
             u16 atLocation;
         } pointPedestal;
+        struct {
+            u8 armatureIndex;
+            u8 animationIndex;
+            s8 playbackSpeed;
+        } playAnimation;
+        struct {
+            u8 armatureIndex;
+            s8 playbackSpeed;
+        } setAnimationSpeed;
+        struct {
+            u8 armatureIndex;
+        } waitForAnimation;
         int noop;
     };
 };

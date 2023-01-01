@@ -124,6 +124,10 @@ void cutsceneQueueSound(int soundId, float volume, int channel) {
     }
 }
 
+float cutsceneRunnerConvertPlaybackSpeed(s8 asInt) {
+    return asInt * (1.0f / 127.0f);
+}
+
 void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
     struct CutsceneStep* step = &runner->currentCutscene->steps[runner->currentStep];
     switch (step->type) {
@@ -192,6 +196,21 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 pedestalPointAt(&gScene.pedestals[i], &gCurrentLevel->locations[step->pointPedestal.atLocation].transform.position);
             }
             break;
+        case CutsceneStepPlayAnimation:
+            sceneAnimatorPlay(
+                &gScene.animator, 
+                step->playAnimation.armatureIndex, 
+                step->playAnimation.animationIndex,
+                cutsceneRunnerConvertPlaybackSpeed(step->playAnimation.playbackSpeed)
+            );
+            break;
+        case CutsceneStepSetAnimationSpeed:
+            sceneAnimatorSetSpeed(
+                &gScene.animator,
+                step->playAnimation.armatureIndex, 
+                cutsceneRunnerConvertPlaybackSpeed(step->playAnimation.playbackSpeed)
+            );
+            break;
         default:
     }
 }
@@ -213,6 +232,8 @@ int cutsceneRunnerUpdateCurrentStep(struct CutsceneRunner* runner) {
             return signalsRead(step->waitForSignal.signalIndex);
         case CutsceneStepTypeWaitForCutscene:
             return !cutsceneIsRunning(&gCurrentLevel->cutscenes[step->cutscene.cutsceneIndex]);
+        case CutsceneStepWaitForAnimation:
+            return !sceneAnimatorIsRunning(&gScene.animator, step->waitForAnimation.armatureIndex);
         default:
             return 1;
     }

@@ -39,7 +39,7 @@ void skAnimatorInit(struct SKAnimator* animator, int nBones) {
     animator->boneState[1] = malloc(sizeof(struct SKAnimationBoneFrame) * nBones);
     animator->boneStateFrames[0] = -1;
     animator->boneStateFrames[1] = -1;
-    animator->latestBoneState = -1;
+    animator->nextFrameStateIndex = -1;
     animator->nBones = nBones;
 }
 
@@ -51,30 +51,28 @@ void skAnimatorCleanup(struct SKAnimator* animator) {
     animator->boneState[1] = NULL;
 }
 
-void skAnimatorRequestNext(struct SKAnimator* animator) {
+void skAnimatorRequestFrame(struct SKAnimator* animator, int nextFrame) {
     struct SKAnimationClip* currentClip = animator->currentClip;
 
     if (!currentClip) {
         return;
     }
 
-    int nextFrame = (int)ceilf(animator->currentTime * currentClip->fps);
-
-    if (animator->latestBoneState == -1) {
-        animator->latestBoneState = 0;
+    if (animator->nextFrameStateIndex == -1) {
+        animator->nextFrameStateIndex = 0;
     }
 
-    if (animator->boneStateFrames[animator->latestBoneState] == nextFrame) {
+    if (animator->boneStateFrames[animator->nextFrameStateIndex] == nextFrame) {
         return;
     }
 
-    animator->boneStateFrames[animator->latestBoneState] = nextFrame;
+    animator->boneStateFrames[animator->nextFrameStateIndex] = nextFrame;
 
     int boneCount = MIN(animator->nBones, currentClip->nBones);
 
     int frameSize = currentClip->nBones * sizeof(struct SKAnimationBoneFrame);
 
-    skAnimatorCopy((u32)currentClip->frames + frameSize * nextFrame, (void*)animator->boneState[animator->latestBoneState], sizeof(struct SKAnimationBoneFrame) * boneCount);
+    skAnimatorCopy((u32)currentClip->frames + frameSize * nextFrame, (void*)animator->boneState[animator->nextFrameStateIndex], sizeof(struct SKAnimationBoneFrame) * boneCount);
 }
 
 void skAnimatorExtractBone(struct SKAnimationBoneFrame* bone, struct Transform* result) {
@@ -94,7 +92,7 @@ void skAnimatorExtractBone(struct SKAnimationBoneFrame* bone, struct Transform* 
 }
 
 void skAnimatorInitZeroTransform(struct SKAnimator* animator, struct Transform* transforms) {
-    if (animator->latestBoneState == -1) {
+    if (animator->nextFrameStateIndex == -1) {
         return;
     }
 
@@ -135,22 +133,34 @@ void skAnimatorBlendTransform(struct SKAnimationBoneFrame* frame, struct Transfo
 
 void skAnimatorReadTransformWithWeight(struct SKAnimator* animator, struct Transform* transforms, float weight) {
     if (animator->blendLerp >= 1.0f) {
-        skAnimatorBlendTransform(animator->boneState[animator->latestBoneState], transforms, animator->nBones, weight);
+        skAnimatorBlendTransform(animator->boneState[animator->nextFrameStateIndex], transforms, animator->nBones, weight);
         return;
     }
 
-    skAnimatorBlendTransform(animator->boneState[animator->latestBoneState], transforms, animator->nBones, animator->blendLerp * weight);
-    skAnimatorBlendTransform(animator->boneState[animator->latestBoneState ^ 1], transforms, animator->nBones, (1.0f - animator->blendLerp) * weight);
+    skAnimatorBlendTransform(animator->boneState[animator->nextFrameStateIndex], transforms, animator->nBones, animator->blendLerp * weight);
+    skAnimatorBlendTransform(animator->boneState[animator->nextFrameStateIndex ^ 1], transforms, animator->nBones, (1.0f - animator->blendLerp) * weight);
 }
 
 void skAnimatorReadTransform(struct SKAnimator* animator, struct Transform* transforms) {
-    if (animator->latestBoneState == -1) {
+    if (animator->nextFrameStateIndex == -1) {
         return;
     }
 
     skAnimatorInitZeroTransform(animator, transforms);
     skAnimatorReadTransformWithWeight(animator, transforms, 1.0f);
     skAnimatorNormalize(animator, transforms);
+}
+
+int skAnimatorBoneStateIndexOfFrame(struct SKAnimator* animator, int frame) {
+    if (animator->boneStateFrames[0] == frame) {
+        return 0;
+    }
+
+    if (animator->boneStateFrames[1] == frame) {
+        return 1;
+    }
+
+    return 0;
 }
 
 void skAnimatorStep(struct SKAnimator* animator, float deltaTime) {
@@ -162,41 +172,59 @@ void skAnimatorStep(struct SKAnimator* animator, float deltaTime) {
 
     animator->currentTime += deltaTime;
 
-    float currentFrameFractional = animator->currentTime * currentClip->fps;
-    int currentFrame = (int)ceilf(currentFrameFractional);
+    float duration = currentClip->nFrames / currentClip->fps;
 
-    while (currentFrame >= currentClip->nFrames) {
-        if (!(animator->flags & SKAnimatorFlagsLoop)) {
-            animator->blendLerp = 1.0f;
-            animator->currentClip = NULL;
-            return;
-        }
-        
-        animator->currentTime -= currentClip->nFrames / currentClip->fps;
-
-        if (animator->currentTime < 0.0f) {
-            animator->currentTime = 0.0f;
-        }
-        
-        currentFrameFractional = animator->currentTime * currentClip->fps;
-        currentFrame = (int)ceilf(currentFrameFractional);
+    if (animator->currentTime >= duration || animator->currentTime < 0.0f) {
+        animator->currentTime = mathfMod(animator->currentTime, duration);
     }
 
-    int existingFrame = animator->boneStateFrames[animator->latestBoneState];
-    animator->blendLerp = 1.0f - (currentFrame - currentFrameFractional);
+    float currentFrameFractional = animator->currentTime * currentClip->fps;
+    int prevFrame = (int)floorf(currentFrameFractional);
+    int nextFrame = (int)ceilf(currentFrameFractional);
+    float lerpValue = currentFrameFractional - prevFrame;
 
-    // no need to request the next frame
-    if (existingFrame == (int)currentFrame) {
+    int existingPrevFrame = skAnimatorBoneStateIndexOfFrame(animator, prevFrame);
+    int existingNextFrame = skAnimatorBoneStateIndexOfFrame(animator, nextFrame);
+
+    if (existingPrevFrame == -1 && existingNextFrame == -1) {
+        // both frames need to be requested
+        animator->blendLerp = lerpValue;
+        if (prevFrame != nextFrame) {
+            animator->nextFrameStateIndex = 0;
+            skAnimatorRequestFrame(animator, prevFrame);
+        }
+        animator->nextFrameStateIndex = 1;
+        skAnimatorRequestFrame(animator, nextFrame);
         return;
     }
 
-    animator->latestBoneState ^= 1;
-
-    if ((int)currentFrame > existingFrame + 1) {
-        animator->blendLerp = 1.0f;
+    if (existingNextFrame == -1) {
+        // only the next frame needs to be requested
+        animator->blendLerp = lerpValue;
+        animator->nextFrameStateIndex = existingPrevFrame ^ 1;
+        skAnimatorRequestFrame(animator, nextFrame);
+        return;
     }
 
-    skAnimatorRequestNext(animator);
+    if (existingPrevFrame == -1) {
+        // only the previous frame needs to be requested
+        animator->blendLerp = 1.0f - lerpValue;
+        animator->nextFrameStateIndex = existingNextFrame ^ 1;
+        skAnimatorRequestFrame(animator, prevFrame);
+        return;
+    }
+
+    if (existingNextFrame == existingPrevFrame) {
+        // only one frame is needed and is already present
+        animator->blendLerp = 1.0f;
+        animator->nextFrameStateIndex = existingNextFrame;
+    }
+
+    if (existingNextFrame == 1) {
+        animator->blendLerp = lerpValue;
+    } else {
+        animator->blendLerp = 1.0f - lerpValue;
+    }
 }
 
 void skAnimatorUpdate(struct SKAnimator* animator, struct Transform* transforms, float deltaTime) {
@@ -218,8 +246,8 @@ void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip
         return;
     }
 
-    if (animator->latestBoneState != -1) {
-        animator->latestBoneState ^= 1;
+    if (animator->nextFrameStateIndex != -1) {
+        animator->nextFrameStateIndex ^= 1;
     }
     
     animator->boneStateFrames[0] = -1;
@@ -230,7 +258,7 @@ void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip
     animator->currentTime = startTime;
     animator->flags = flags;
 
-    skAnimatorRequestNext(animator);
+    skAnimatorStep(animator, 0.0f);
 }
 
 int skAnimatorIsRunning(struct SKAnimator* animator) {
@@ -257,15 +285,15 @@ void skBlenderInit(struct SKAnimatorBlender* blender, int nBones) {
 void skBlenderApply(struct SKAnimatorBlender* blender, struct Transform* transforms) {
     float lerp = blender->blendLerp;
 
-    if (blender->from.latestBoneState == -1) {
-        if (blender->to.latestBoneState == -1) {
+    if (blender->from.nextFrameStateIndex == -1) {
+        if (blender->to.nextFrameStateIndex == -1) {
             return;
         }
 
         lerp = 1.0f;
     }
 
-    if (blender->to.latestBoneState == -1) {
+    if (blender->to.nextFrameStateIndex == -1) {
         lerp = 0.0f;
     }
 

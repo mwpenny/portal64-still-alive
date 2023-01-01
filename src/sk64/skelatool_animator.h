@@ -14,7 +14,7 @@ struct SKAnimator {
     float blendLerp;
     struct SKAnimationBoneFrame* boneState[2];
     short boneStateFrames[2];
-    short latestBoneState;
+    short nextFrameStateIndex;
     short flags;
     short nBones;
 };

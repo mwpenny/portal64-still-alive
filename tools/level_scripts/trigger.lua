@@ -3,6 +3,7 @@ local sk_definition_writer = require('sk_definition_writer')
 local sk_scene = require('sk_scene')
 local room_export = require('tools.level_scripts.room_export')
 local signals = require('tools.level_scripts.signals')
+local animation = require('tools.level_scripts.animation')
 
 sk_definition_writer.add_header('"../build/src/audio/clips.h"')
 
@@ -181,6 +182,30 @@ local function generate_cutscene_step(step, step_index, label_locations, cutscen
         result.type = sk_definition_writer.raw('CutsceneStepTypePointPedestal')
         result.pointPedestal = {
             find_location_index(step.args[1]),
+        }
+    elseif step.command == "play_animation" then
+        result.type = sk_definition_writer.raw('CutsceneStepPlayAnimation')
+        result.playAnimation = {
+            animation.get_armature_index_with_name(step.args[1]) or 0,
+            animation.get_animation_with_name(step.args[1], step.args[2]) or 0,
+            step.args[3] and (tonumber(step.args[3]) * 127) or 127,
+        }
+    elseif step.command == "pause_animation" then
+        result.type = sk_definition_writer.raw('CutsceneStepSetAnimationSpeed')
+        result.setAnimationSpeed = {
+            animation.get_armature_index_with_name(step.args[1]) or 0,
+            0,
+        }
+    elseif step.command == "resume_animation" then
+        result.type = sk_definition_writer.raw('CutsceneStepSetAnimationSpeed')
+        result.setAnimationSpeed = {
+            animation.get_armature_index_with_name(step.args[1]) or 0,
+            step.args[2] and (tonumber(step.args[2]) * 127) or 127,
+        }
+    elseif step.command == "wait_for_animation" then
+        result.type = sk_definition_writer.raw('CutsceneStepWaitForAnimation')
+        result.waitForAnimation = {
+            animation.get_armature_index_with_name(step.args[1]) or 0,
         }
     else
         result.type = sk_definition_writer.raw('CutsceneStepTypeNoop')

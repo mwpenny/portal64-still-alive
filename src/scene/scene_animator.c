@@ -7,6 +7,7 @@
 void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo* animationInfo, int animatorCount) {
     sceneAnimator->armatures = malloc(sizeof(struct SKArmature) * animatorCount);
     sceneAnimator->animators = malloc(sizeof(struct SKAnimator) * animatorCount);
+    sceneAnimator->playbackSpeeds = malloc(sizeof(float) * animatorCount);
 
     sceneAnimator->animationInfo = animationInfo;
     sceneAnimator->animatorCount = animatorCount;
@@ -16,6 +17,7 @@ void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo
     for (int i = 0; i < animatorCount; ++i) {
         skArmatureInit(&sceneAnimator->armatures[i], &animationInfo[i].armature);
         skAnimatorInit(&sceneAnimator->animators[i], animationInfo[i].armature.numberOfBones);
+        sceneAnimator->playbackSpeeds[i] = 1.0f;
 
         sceneAnimator->boneCount += animationInfo[i].armature.numberOfBones;
     }
@@ -23,7 +25,7 @@ void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo
 
 void sceneAnimatorUpdate(struct SceneAnimator* sceneAnimator) {
     for (int i = 0; i < sceneAnimator->animatorCount; ++i) {
-        skAnimatorUpdate(&sceneAnimator->animators[i], sceneAnimator->armatures[i].pose, FIXED_DELTA_TIME);
+        skAnimatorUpdate(&sceneAnimator->animators[i], sceneAnimator->armatures[i].pose, FIXED_DELTA_TIME * sceneAnimator->playbackSpeeds[i]);
     }
 }
 
@@ -39,4 +41,42 @@ Mtx* sceneAnimatorBuildTransforms(struct SceneAnimator* sceneAnimator, struct Re
     }
     
     return result;
+}
+
+void sceneAnimatorPlay(struct SceneAnimator* sceneAnimator, int animatorIndex, int animationIndex, float speed) {
+    if (animatorIndex < 0 || animatorIndex >= sceneAnimator->animatorCount) {
+        return;
+    }
+
+    struct AnimationInfo* info = &sceneAnimator->animationInfo[animatorIndex];
+
+    if (animationIndex < 0 || animationIndex >= info->clipCount) {
+        return;
+    }
+
+    struct SKAnimationClip* clip = &info->clips[animationIndex];
+
+    sceneAnimator->playbackSpeeds[animatorIndex] = speed;
+
+    if (sceneAnimator->animators[animatorIndex].currentClip == clip) {
+        return;
+    }
+    
+    skAnimatorRunClip(&sceneAnimator->animators[animatorIndex], clip, speed >= 0.0f ? 0.0f : clip->nFrames / clip->fps, 0);
+}
+
+void sceneAnimatorSetSpeed(struct SceneAnimator* sceneAnimator, int animatorIndex, float speed) {
+    if (animatorIndex < 0 || animatorIndex >= sceneAnimator->animatorCount) {
+        return;
+    }
+
+    sceneAnimator->playbackSpeeds[animatorIndex] = speed;
+}
+
+int sceneAnimatorIsRunning(struct SceneAnimator* sceneAnimator, int animatorIndex) {
+    if (animatorIndex < 0 || animatorIndex >= sceneAnimator->animatorCount) {
+        return 0;
+    }
+
+    return skAnimatorIsRunning(&sceneAnimator->animators[animatorIndex]);
 }
