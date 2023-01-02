@@ -35,10 +35,6 @@ local function proccessStaticNodes(nodes)
             mesh_bb.max.x = math.floor(mesh_bb.max.x + 0.5)
             mesh_bb.max.y = math.floor(mesh_bb.max.y + 0.5)
             mesh_bb.max.z = math.floor(mesh_bb.max.z + 0.5)
-
-            if v.node.name == '@static floor.005' then
-                print(mesh_bb)
-            end
     
             table.insert(result, {
                 node = v.node, 

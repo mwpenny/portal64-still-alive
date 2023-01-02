@@ -279,6 +279,7 @@ local function generate_cutscenes()
         table.insert(cutscenes_result, {
             name = cutscene.name,
             steps = steps,
+            macro = cutscene.macro,
         })
 
         table.insert(cutscene_data, {

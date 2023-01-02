@@ -160,7 +160,7 @@ int skAnimatorBoneStateIndexOfFrame(struct SKAnimator* animator, int frame) {
         return 1;
     }
 
-    return 0;
+    return -1;
 }
 
 void skAnimatorStep(struct SKAnimator* animator, float deltaTime) {
@@ -182,6 +182,14 @@ void skAnimatorStep(struct SKAnimator* animator, float deltaTime) {
     int prevFrame = (int)floorf(currentFrameFractional);
     int nextFrame = (int)ceilf(currentFrameFractional);
     float lerpValue = currentFrameFractional - prevFrame;
+
+    if (nextFrame >= currentClip->nFrames) {
+        nextFrame -= currentClip->nFrames;
+    }
+
+    if (nextFrame == prevFrame) {
+        lerpValue = 1.0f;
+    }
 
     int existingPrevFrame = skAnimatorBoneStateIndexOfFrame(animator, prevFrame);
     int existingNextFrame = skAnimatorBoneStateIndexOfFrame(animator, nextFrame);
