@@ -117,6 +117,12 @@ void sceneInit(struct Scene* scene) {
         boxDropperInit(&scene->boxDroppers[i], &gCurrentLevel->boxDroppers[i]);
     }
 
+    scene->switchCount = gCurrentLevel->switchCount;
+    scene->switches = malloc(sizeof(struct Switch) * scene->switchCount);
+    for (int i = 0; i < scene->switchCount; ++i) {
+        switchInit(&scene->switches[i], &gCurrentLevel->switches[i]);
+    }
+
     scene->freeCameraOffset = gZeroVec;
 
     sceneAnimatorInit(&scene->animator, gCurrentLevel->animations, gCurrentLevel->animationInfoCount);
@@ -271,6 +277,10 @@ void sceneUpdate(struct Scene* scene) {
     
     for (int i = 0; i < scene->buttonCount; ++i) {
         buttonUpdate(&scene->buttons[i]);
+    }
+
+    for (int i = 0; i < scene->switchCount; ++i) {
+        switchUpdate(&scene->switches[i]);
     }
 
     signalsEvaluateSignals(gCurrentLevel->signalOperators, gCurrentLevel->signalOperatorCount);

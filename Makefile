@@ -172,6 +172,7 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/round_elevator_interior.blend \
 	assets/models/props/round_elevator_collision.blend \
 	assets/models/props/signage.blend \
+	assets/models/props/switch001.blend \
 	assets/models/props/box_dropper.blend \
 	assets/models/props/box_dropper_glass.blend \
 	assets/models/portal/portal_blue.blend \
@@ -182,7 +183,10 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/portal/portal_orange_face.blend \
 	assets/models/pedestal.blend
 
-ANIM_LIST = build/assets/models/pedestal_anim.o build/assets/models/props/box_dropper_anim.o build/assets/models/player/chell_anim.o
+ANIM_LIST = build/assets/models/pedestal_anim.o \
+	build/assets/models/props/box_dropper_anim.o \
+	build/assets/models/player/chell_anim.o \
+	build/assets/models/props/switch001_anim.o
 
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
 MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)
@@ -205,6 +209,8 @@ build/src/scene/pedestal.o: $(MODEL_HEADERS)
 build/src/scene/render_plan.o: $(MODEL_HEADERS)
 
 build/src/scene/portal_render.o: $(MODEL_HEADERS)
+
+build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/materials/static.h
 
 build/src/player/player.o: build/assets/models/player/chell.h build/assets/materials/static.h
 

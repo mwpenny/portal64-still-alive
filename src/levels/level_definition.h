@@ -143,6 +143,14 @@ struct ButtonDefinition {
     short cubeSignalIndex;
 };
 
+struct SwitchDefinition {
+    struct Vector3 location;
+    struct Quaternion rotation;
+    short roomIndex;
+    short signalIndex;
+    float duration;
+};
+
 struct DecorDefinition {
     struct Vector3 position;
     struct Quaternion rotation;
@@ -212,6 +220,7 @@ struct LevelDefinition {
     struct SignageDefinition* signage;
     struct BoxDropperDefinition* boxDroppers;
     struct AnimationInfo* animations;
+    struct SwitchDefinition* switches;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
@@ -228,6 +237,7 @@ struct LevelDefinition {
     short signageCount;
     short boxDropperCount;
     short animationInfoCount;
+    short switchCount;
     short startLocation;
 };
 

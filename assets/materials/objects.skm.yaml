@@ -29,7 +29,7 @@ materials:
         siz: G_IM_SIZ_16b
         tmem: 256
         s:
-          wrap: false
+          wrap: true
         t:
           wrap: false
     gSPTexture:

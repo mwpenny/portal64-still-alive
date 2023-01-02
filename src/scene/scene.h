@@ -17,6 +17,7 @@
 #include "signage.h"
 #include "box_dropper.h"
 #include "scene_animator.h"
+#include "switch.h"
 
 struct Scene {
     struct Camera camera;
@@ -30,6 +31,7 @@ struct Scene {
     struct Pedestal* pedestals;
     struct Signage* signage;
     struct BoxDropper* boxDroppers;
+    struct Switch* switches;
     struct Vector3 freeCameraOffset;
     struct SceneAnimator animator;
     OSTime cpuTime;
@@ -43,6 +45,7 @@ struct Scene {
     u8 pedestalCount;
     u8 signageCount;
     u8 boxDropperCount;
+    u8 switchCount;
 };
 
 extern struct Scene gScene;
