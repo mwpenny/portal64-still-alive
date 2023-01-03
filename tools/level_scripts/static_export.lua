@@ -19,14 +19,20 @@ local function proccessStaticNodes(nodes)
         for _, chunkV in pairs(renderChunks) do
             local transform_index = animation.get_bone_index_for_node(v.node)
 
+            local original_bb = chunkV.mesh.bb
+
             if transform_index then
                 local bone = animation.get_bone_for_index(transform_index)
+                local parent_pos = bone.full_transformation:decompose()
                 chunkV.mesh = chunkV.mesh:transform(bone.full_transformation:inverse())
+            
+                original_bb.min = original_bb.min - parent_pos
+                original_bb.max = original_bb.max - parent_pos
             end
 
             local gfxName = sk_mesh.generate_mesh({chunkV}, "_geo", {defaultMaterial = chunkV.material})
 
-            local mesh_bb = chunkV.mesh.bb * bb_scale
+            local mesh_bb = original_bb * bb_scale
 
             mesh_bb.min.x = math.floor(mesh_bb.min.x + 0.5)
             mesh_bb.min.y = math.floor(mesh_bb.min.y + 0.5)

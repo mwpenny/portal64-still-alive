@@ -2,6 +2,10 @@
 #ifndef _VECTOR3_H
 #define _VECTOR3_H
 
+struct Vector3i32 {
+    int x, y, z;
+};
+
 struct Vector3 {
     float x, y, z;
 };
