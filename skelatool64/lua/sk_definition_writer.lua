@@ -53,6 +53,12 @@ local function raw(value)
     return setmetatable({ value = value}, RawType)
 end
 
+RawType.__index = RawType;
+
+function RawType.__tostring(raw)
+    return 'raw(' .. raw.value .. ')'
+end
+
 --- renders a string directly in the ouptut instead of wrapping the output in quotes
 ---@function raw
 ---@tparam string value

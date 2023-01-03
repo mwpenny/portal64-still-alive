@@ -14,6 +14,7 @@
 
 #define COLLISION_OBJECT_HAS_CONTACTS       (1 << 0)
 #define COLLISION_OBJECT_PLAYER_STANDING    (1 << 1)
+#define COLLISION_OBJECT_INTERACTED         (1 << 2)
 
 typedef void (*TriggerCallback)(void* data, struct CollisionObject* objectEnteringTrigger);
 

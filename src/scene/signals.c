@@ -55,7 +55,7 @@ void signalsSend(unsigned signalIndex) {
         return;
     }
 
-    gSignals[bin] = (gSignals[bin] & ~mask) | (gDefaultSignals[bin] ^ mask);
+    gSignals[bin] = (gSignals[bin] & ~mask) | ((gDefaultSignals[bin] ^ mask) & mask);
 }
 
 void signalsSetDefault(unsigned signalIndex, int value) {

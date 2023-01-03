@@ -21,7 +21,7 @@ struct Vector2 gButtonCylinderEdgeVectors[] = {
 struct CollisionQuad gButtonCylinderFaces[8];
 
 struct CollisionCylinder gButtonCylinder = {
-    0.1f,
+    0.5f,
     0.3f,
     gButtonCylinderEdgeVectors,
     sizeof(gButtonCylinderEdgeVectors) / sizeof(*gButtonCylinderEdgeVectors),

@@ -33,6 +33,16 @@ table.sort(armatures, function(a, b)
     return a.name < b.name
 end)
 
+local function parse_animation_name(name)
+    local _, str_end = string.find(name, '|')
+
+    if str_end then
+        return string.sub(name, str_end + 1)
+    end
+
+    return name
+end
+
 local animated_nodes = {}
 
 for index, armature in pairs(armatures) do
@@ -58,7 +68,7 @@ for index, armature in pairs(armatures) do
         sk_definition_writer.add_macro(armature.name .. '_' .. animation.name, tostring(#animation_clips))
         table.insert(animation_clips, clip)
 
-        animation_names[animation.name] = sk_definition_writer.raw(sk_definition_writer.add_macro(armature.name .. '_ANIMATION_' .. animation.name, animation_index - 1))
+        animation_names[parse_animation_name(animation.name)] = sk_definition_writer.raw(sk_definition_writer.add_macro(armature.name .. '_ANIMATION_' .. animation.name, animation_index - 1))
     end
 
     sk_definition_writer.add_definition(armature.name .. '_clips', 'struct SKAnimationClip[]', '_geo', animation_clips)
@@ -87,7 +97,7 @@ end
 
 local function get_animation_with_name(armature_name, animation_name)
     local armature = animation_indices_by_name[armature_name]
-
+    
     if not armature then
         return nil
     end

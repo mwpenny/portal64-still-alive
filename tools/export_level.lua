@@ -49,4 +49,6 @@ sk_definition_writer.add_definition("level", "struct LevelDefinition", "_geo", {
     signalOperatorCount = #signals.operators,
     animations = sk_definition_writer.reference_to(animation.animated_nodes, 1),
     animationInfoCount = #animation.animated_nodes,
+    switches = sk_definition_writer.reference_to(entities.switches, 1),
+    switchCount = #entities.switches,
 })

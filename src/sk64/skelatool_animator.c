@@ -58,6 +58,10 @@ void skAnimatorRequestFrame(struct SKAnimator* animator, int nextFrame) {
         return;
     }
 
+    if (nextFrame < 0 || nextFrame >= currentClip->nFrames) {
+        return;
+    }
+
     if (animator->nextFrameStateIndex == -1) {
         animator->nextFrameStateIndex = 0;
     }
@@ -163,6 +167,18 @@ int skAnimatorBoneStateIndexOfFrame(struct SKAnimator* animator, int frame) {
     return -1;
 }
 
+int skAnimatorClampFrame(struct SKAnimator* animator, int frame) {
+    if (frame < animator->currentClip->nFrames) {
+        return frame;
+    }
+
+    if (animator->flags & SKAnimatorFlagsLoop) {
+        return frame - animator->currentClip->nFrames;
+    }
+
+    return animator->currentClip->nFrames - 1;
+}
+
 void skAnimatorStep(struct SKAnimator* animator, float deltaTime) {
     struct SKAnimationClip* currentClip = animator->currentClip;
 
@@ -175,7 +191,12 @@ void skAnimatorStep(struct SKAnimator* animator, float deltaTime) {
     float duration = currentClip->nFrames / currentClip->fps;
 
     if (animator->currentTime >= duration || animator->currentTime < 0.0f) {
-        animator->currentTime = mathfMod(animator->currentTime, duration);
+        if (animator->flags & SKAnimatorFlagsLoop) {
+            animator->currentTime = mathfMod(animator->currentTime, duration);
+        } else {
+            animator->currentTime = minf(duration, maxf(0.0f, animator->currentTime));
+            animator->flags |= SKAnimatorFlagsDone;
+        }
     }
 
     float currentFrameFractional = animator->currentTime * currentClip->fps;
@@ -183,9 +204,8 @@ void skAnimatorStep(struct SKAnimator* animator, float deltaTime) {
     int nextFrame = (int)ceilf(currentFrameFractional);
     float lerpValue = currentFrameFractional - prevFrame;
 
-    if (nextFrame >= currentClip->nFrames) {
-        nextFrame -= currentClip->nFrames;
-    }
+    prevFrame = skAnimatorClampFrame(animator, prevFrame);
+    nextFrame = skAnimatorClampFrame(animator, nextFrame);
 
     if (nextFrame == prevFrame) {
         lerpValue = 1.0f;
@@ -243,6 +263,11 @@ void skAnimatorUpdate(struct SKAnimator* animator, struct Transform* transforms,
     }
 
     skAnimatorReadTransform(animator, transforms);
+
+    if (animator->flags & SKAnimatorFlagsDone) {
+        animator->currentClip = NULL;
+        return;
+    }
 
     skAnimatorStep(animator, deltaTime);
 }

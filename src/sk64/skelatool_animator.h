@@ -6,6 +6,7 @@
 
 enum SKAnimatorFlags {
     SKAnimatorFlagsLoop = (1 << 0),
+    SKAnimatorFlagsDone = (1 << 1),
 };
 
 struct SKAnimator {

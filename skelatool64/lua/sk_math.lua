@@ -42,6 +42,24 @@ local function quaternion(x, y, z, w)
     return setmetatable({ x = x, y = y, z = z, w = w }, Quaternion)
 end
 
+--- creates a new quaternion with an axis and an angle in radians
+--- @function quaternion
+--- @tparam Vector3 axis
+--- @tparam number angle
+--- @treturn Quaternion
+local function axis_angle(axis, angle)
+    local normalized_axis = axis:normalized()
+    local cos_angle = math.cos(angle * 0.5)
+    local sin_angle = math.sin(angle * 0.5)
+
+    return quaternion(
+        normalized_axis.x * sin_angle, 
+        normalized_axis.y * sin_angle,
+        normalized_axis.z * sin_angle,
+        cos_angle
+    )
+end
+
 --- determines if the input is a Quaternion
 --- @function isQuaternion
 --- @tparam any obj
@@ -406,5 +424,6 @@ return {
     Box3 = Box3,
     Quaternion = Quaternion,
     quaternion = quaternion,
+    axis_angle = axis_angle,
     isQuaternion = isQuaternion,
 }

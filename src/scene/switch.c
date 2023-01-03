@@ -10,7 +10,7 @@
 
 #include "../util/time.h"
 
-#define COLLIDER_HEIGHT   7.0f
+#define COLLIDER_HEIGHT   0.7f
 
 struct Vector2 gSwitchCylinderEdgeVectors[] = {
     {0.0f, 1.0f},
@@ -22,7 +22,7 @@ struct Vector2 gSwitchCylinderEdgeVectors[] = {
 struct CollisionQuad gSwitchCylinderFaces[8];
 
 struct CollisionCylinder gSwitchCylinder = {
-    0.5f,
+    0.1f,
     COLLIDER_HEIGHT * 0.5f,
     gSwitchCylinderEdgeVectors,
     sizeof(gSwitchCylinderEdgeVectors) / sizeof(*gSwitchCylinderEdgeVectors),
@@ -94,7 +94,25 @@ void switchInit(struct Switch* switchObj, struct SwitchDefinition* definition) {
     switchObj->timeLeft = 0.0f;
 }
 
+void switchActivate(struct Switch* switchObj) {
+    if (switchObj->timeLeft > 0.0f) {
+        return;
+    }
+
+    switchObj->flags |= SwitchFlagsDepressed;
+    switchObj->timeLeft = switchObj->duration;
+    signalsSend(switchObj->signalIndex);
+    skAnimatorRunClip(&switchObj->animator, &props_switch001_Armature_down_clip, 0.0f, 0);
+}
+
 void switchUpdate(struct Switch* switchObj) {
+    skAnimatorUpdate(&switchObj->animator, switchObj->armature.pose, FIXED_DELTA_TIME);
+
+    if (switchObj->collisionObject.flags & COLLISION_OBJECT_INTERACTED) {
+        switchActivate(switchObj);
+        switchObj->collisionObject.flags &= ~COLLISION_OBJECT_INTERACTED;
+    }   
+
     if (switchObj->timeLeft <= 0.0f) {
         if ((switchObj->flags & SwitchFlagsDepressed) != 0 && 
             !skAnimatorIsRunning(&switchObj->animator)) {
@@ -112,15 +130,4 @@ void switchUpdate(struct Switch* switchObj) {
     } else {
         signalsSend(switchObj->signalIndex);
     }
-}
-
-void switchActivate(struct Switch* switchObj) {
-    if (switchObj->timeLeft > 0.0f) {
-        return;
-    }
-
-    switchObj->flags |= SwitchFlagsDepressed;
-    switchObj->timeLeft = switchObj->duration;
-    signalsSend(switchObj->signalIndex);
-    skAnimatorRunClip(&switchObj->animator, &props_switch001_Armature_down_clip, 0.0f, 0);
 }

@@ -197,13 +197,17 @@ void playerUpdateGrabbedObject(struct Player* player) {
 
             player->collisionObject.collisionLayers = 0;
 
-            if (collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, &hit) && hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable)) {
-                player->grabbing = hit.object;
+            if (collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, &hit)) {
+                hit.object->flags |= COLLISION_OBJECT_INTERACTED;
 
-                if (hit.throughPortal) {
-                    player->grabbingThroughPortal = hit.throughPortal == gCollisionScene.portalTransforms[0] ? 0 : 1;
-                } else {
-                    player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
+                if (hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable)) {
+                    player->grabbing = hit.object;
+
+                    if (hit.throughPortal) {
+                        player->grabbingThroughPortal = hit.throughPortal == gCollisionScene.portalTransforms[0] ? 0 : 1;
+                    } else {
+                        player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
+                    }
                 }
             }
 

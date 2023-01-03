@@ -159,7 +159,7 @@ local function generate_cutscene_step(step, step_index, label_locations, cutscen
     elseif step.command == "goto" and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeGoto')
         result.gotoStep = {
-            label_locations[step.args[1]] - step_index - 1,
+            label_locations[step.args[1]] - step_index,
         }
     elseif step.command == "start_cutscene" and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeStartCutscene')

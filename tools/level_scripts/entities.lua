@@ -1,6 +1,7 @@
 
 local sk_definition_writer = require('sk_definition_writer')
 local sk_scene = require('sk_scene')
+local sk_math = require('sk_math')
 local room_export = require('tools.level_scripts.room_export')
 local trigger = require('tools.level_scripts.trigger')
 local world = require('tools.level_scripts.world')
@@ -154,6 +155,25 @@ end
 
 sk_definition_writer.add_definition('signage', 'struct SignageDefinition[]', '_geo', signage)
 
+
+local switches = {}
+
+for _, switch_element in pairs(sk_scene.nodes_for_type('@switch')) do
+    local position, rotation = switch_element.node.full_transformation:decompose()
+
+    local room_index = room_export.node_nearest_room_index(switch_element.node)
+
+    table.insert(switches, {
+        position,
+        rotation * sk_math.axis_angle(sk_math.vector3(1, 0, 0), math.pi * 0.5),
+        room_index,
+        signals.signal_index_for_name(switch_element.arguments[1]),
+        switch_element.arguments[2] and tonumber(switch_element.arguments[2]) or 0,
+    })
+end
+
+sk_definition_writer.add_definition('switches', 'struct SwitchDefinition[]', '_geo', switches)
+
 return {
     box_droppers = box_droppers,
     buttons = buttons,
@@ -163,4 +183,5 @@ return {
     fizzlers = fizzlers,
     pedestals = pedestals,
     signage = signage,
+    switches = switches,
 }
