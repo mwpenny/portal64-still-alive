@@ -29,6 +29,21 @@ void sceneAnimatorUpdate(struct SceneAnimator* sceneAnimator) {
     }
 }
 
+struct Transform* sceneAnimatorTransformForIndex(struct SceneAnimator* sceneAnimator, int index) {
+    if (index < 0) {
+        return NULL;
+    }
+
+    for (int i = 0; i < sceneAnimator->animatorCount; ++i) {
+        if (index < sceneAnimator->armatures[i].numberOfBones) {
+            return &sceneAnimator->armatures[i].pose[index];
+        }
+
+        index -= sceneAnimator->armatures[i].numberOfBones;
+    }
+
+    return NULL;
+}
 
 Mtx* sceneAnimatorBuildTransforms(struct SceneAnimator* sceneAnimator, struct RenderState* renderState) {
     Mtx* result = renderStateRequestMatrices(renderState, sceneAnimator->boneCount);

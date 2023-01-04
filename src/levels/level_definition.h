@@ -9,6 +9,7 @@
 #include "../math/range.h"
 #include "../sk64/skelatool_clip.h"
 #include "../sk64/skelatool_armature.h"
+#include "../physics/collision_box.h"
 
 #define NO_TRANSFORM_INDEX  0xFF
 
@@ -197,6 +198,14 @@ struct AnimationInfo {
     short clipCount;
 };
 
+struct DynamicBoxDefinition {
+    struct CollisionBox box;
+    struct Vector3 position;
+    struct Quaternion rotation;
+    short roomIndex;
+    short transformIndex;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
@@ -221,6 +230,7 @@ struct LevelDefinition {
     struct BoxDropperDefinition* boxDroppers;
     struct AnimationInfo* animations;
     struct SwitchDefinition* switches;
+    struct DynamicBoxDefinition* dynamicBoxes;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
@@ -238,6 +248,7 @@ struct LevelDefinition {
     short boxDropperCount;
     short animationInfoCount;
     short switchCount;
+    short dynamicBoxCount;
     short startLocation;
 };
 

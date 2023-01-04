@@ -34,6 +34,7 @@ struct Scene {
     struct Switch* switches;
     struct Vector3 freeCameraOffset;
     struct SceneAnimator animator;
+    struct CollisionObject* dynamicColliders;
     OSTime cpuTime;
     OSTime lastFrameStart;
     OSTime lastFrameTime;

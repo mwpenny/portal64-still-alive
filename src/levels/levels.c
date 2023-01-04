@@ -83,6 +83,7 @@ struct LevelDefinition* levelFixPointers(struct LevelDefinition* from, int point
     result->signage = ADJUST_POINTER_POS(result->signage, pointerOffset);
     result->boxDroppers = ADJUST_POINTER_POS(result->boxDroppers, pointerOffset);
     result->switches = ADJUST_POINTER_POS(result->switches, pointerOffset);
+    result->dynamicBoxes = ADJUST_POINTER_POS(result->dynamicBoxes, pointerOffset);
 
     result->animations = ADJUST_POINTER_POS(result->animations, pointerOffset);
 

@@ -38,6 +38,30 @@ Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 
 void sceneUpdateListeners(struct Scene* scene);
 
+void sceneInitDynamicColliders(struct Scene* scene) {
+    int boxCount = gCurrentLevel->dynamicBoxCount;
+
+    struct CollisionObject* colliders = malloc(sizeof(struct CollisionObject) * boxCount);
+    struct ColliderTypeData* colliderType = malloc(sizeof(struct ColliderTypeData) * boxCount);
+    struct RigidBody* body = malloc(sizeof(struct RigidBody) * boxCount);
+
+    for (int i = 0; i < boxCount; ++i) {
+        colliderType[i].type = CollisionShapeTypeBox;
+        colliderType[i].data = &gCurrentLevel->dynamicBoxes[i].box;
+        colliderType[i].bounce = 0.5f;
+        colliderType[i].friction = 0.5f;
+        colliderType[i].callbacks = &gCollisionBoxCallbacks;
+        collisionObjectInit(&colliders[i], &colliderType[i], &body[i], 1.0f, COLLISION_LAYERS_TANGIBLE);
+        rigidBodyMarkKinematic(&body[i]);
+
+        body[i].currentRoom = gCurrentLevel->dynamicBoxes[i].roomIndex;
+
+        collisionSceneAddDynamicObject(&colliders[i]);
+    }
+
+    scene->dynamicColliders = colliders;
+}
+
 void sceneInit(struct Scene* scene) {
     signalsInit(1);
 
@@ -124,6 +148,8 @@ void sceneInit(struct Scene* scene) {
     }
 
     scene->freeCameraOffset = gZeroVec;
+
+    sceneInitDynamicColliders(scene);
 
     sceneAnimatorInit(&scene->animator, gCurrentLevel->animations, gCurrentLevel->animationInfoCount);
 }
@@ -345,10 +371,31 @@ void sceneUpdate(struct Scene* scene) {
     for (int i = 0; i < scene->boxDropperCount; ++i) {
         boxDropperUpdate(&scene->boxDroppers[i]);
     }
+
+    sceneAnimatorUpdate(&scene->animator);
+
+    for (int i = 0; i < gCurrentLevel->dynamicBoxCount; ++i) {
+        struct DynamicBoxDefinition* boxDef = &gCurrentLevel->dynamicBoxes[i];
+        struct Transform* baseTransform = sceneAnimatorTransformForIndex(&scene->animator, boxDef->transformIndex);  
+
+        if (!baseTransform) {
+            continue;
+        }
+
+        struct Transform baseTransformUnscaled = *baseTransform;
+        vector3Scale(&baseTransformUnscaled.position, &baseTransformUnscaled.position, 1.0f / SCENE_SCALE);
+        struct Transform relativeTransform;
+        relativeTransform.position = boxDef->position;
+        relativeTransform.rotation = boxDef->rotation;   
+        relativeTransform.scale = gOneVec;
+
+        transformConcat(&baseTransformUnscaled, &relativeTransform, &scene->dynamicColliders[i].body->transform);
+
+        collisionObjectUpdateBB(&scene->dynamicColliders[i]);
+    }
     
     collisionSceneUpdateDynamics();
 
-    sceneAnimatorUpdate(&scene->animator);
     levelCheckTriggers(&scene->player.lookTransform.position);
     cutscenesUpdate();
 
@@ -399,8 +446,7 @@ void sceneUpdate(struct Scene* scene) {
     }
 }
 
-int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, int quadIndex, int roomIndex) {
-    struct PortalSurfaceMappingRange surfaceMapping = gCurrentLevel->portalSurfaceMappingRange[quadIndex];
+int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, struct PortalSurfaceMappingRange surfaceMapping, struct CollisionObject* collisionObject, int roomIndex) {
 
     for (int indexIndex = surfaceMapping.minPortalIndex; indexIndex < surfaceMapping.maxPortalIndex; ++indexIndex) {
         int surfaceIndex = gCurrentLevel->portalSurfaceMappingIndices[indexIndex];
@@ -423,7 +469,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
                 portal->opacity = 0.0f;
             }
 
-            contactSolverCheckPortalContacts(&gContactSolver, &gCurrentLevel->collisionQuads[quadIndex]);
+            contactSolverCheckPortalContacts(&gContactSolver, collisionObject);
             return 1;
         }
     }
@@ -468,7 +514,7 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
         quatLook(&hitDirection, &upDir, &portalLocation.rotation);
     }
 
-    return sceneOpenPortal(scene, &portalLocation, portalIndex, quadIndex, hit.roomIndex);
+    return sceneOpenPortal(scene, &portalLocation, portalIndex, gCurrentLevel->portalSurfaceMappingRange[quadIndex], &gCurrentLevel->collisionQuads[quadIndex], hit.roomIndex);
 }
 
 void sceneClosePortal(struct Scene* scene, int portalIndex) {

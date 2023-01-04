@@ -9,6 +9,7 @@ local world = require('tools.level_scripts.world')
 local entities = require('tools.level_scripts.entities')
 local signals = require('tools.level_scripts.signals')
 local animation = require('tools.level_scripts.animation')
+local dynamic_collision = require('tools.level_scripts.dynamic_collision_export')
 
 sk_definition_writer.add_definition("level", "struct LevelDefinition", "_geo", {
     collisionQuads = sk_definition_writer.reference_to(collision_export.collision_objects, 1),
@@ -51,4 +52,6 @@ sk_definition_writer.add_definition("level", "struct LevelDefinition", "_geo", {
     animationInfoCount = #animation.animated_nodes,
     switches = sk_definition_writer.reference_to(entities.switches, 1),
     switchCount = #entities.switches,
+    dynamicBoxes = sk_definition_writer.reference_to(dynamic_collision.dynamic_boxes, 1),
+    dynamicBoxCount = #dynamic_collision.dynamic_boxes,
 })

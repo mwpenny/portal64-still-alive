@@ -21,6 +21,8 @@ void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo
 
 void sceneAnimatorUpdate(struct SceneAnimator* sceneAnimator);
 
+struct Transform* sceneAnimatorTransformForIndex(struct SceneAnimator* sceneAnimator, int index);
+
 Mtx* sceneAnimatorBuildTransforms(struct SceneAnimator* sceneAnimator, struct RenderState* renderState);
 
 void sceneAnimatorPlay(struct SceneAnimator* sceneAnimator, int animatorIndex, int animationIndex, float speed);
