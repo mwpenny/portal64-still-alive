@@ -4,6 +4,7 @@ local sk_input = require('sk_input')
 local sk_math = require('sk_math')
 local sk_mesh = require('sk_mesh')
 local sk_definition_writer = require('sk_definition_writer')
+local dynamic_collision_export = require('tools.level_scripts.dynamic_collision_export')
 
 local portal_surfaces = {}
 
@@ -216,6 +217,7 @@ end
 
 local portal_mapping_data = {}
 local portal_mapping_range = {}
+local dynamic_mapping_range = {}
 
 local mapping_index = 0
 
@@ -227,9 +229,13 @@ for _, quad in pairs(collision_export.colliders) do
     collision_with_padding.max = collision_with_padding.max + 0.1
 
     for static_index, surface in pairs(static_export.static_nodes) do
-        if is_coplanar_portal_surface(quad, surface.mesh, collision_with_padding) then
-            table.insert(portal_mapping_data, static_to_portable_surface_mapping[static_index])
-            mapping_index = mapping_index + 1
+        if not surface.transform_index and is_coplanar_portal_surface(quad, surface.mesh, collision_with_padding) then
+            local portal_surface_index = static_to_portable_surface_mapping[static_index]
+
+            if portal_surface_index ~= -1 then
+                table.insert(portal_mapping_data, static_to_portable_surface_mapping[static_index])
+                mapping_index = mapping_index + 1
+            end
         end
     end
 
@@ -240,11 +246,37 @@ for _, quad in pairs(collision_export.colliders) do
     table.insert(portal_mapping_range, {start_mapping_index, mapping_index})
 end
 
+for _, box in pairs(dynamic_collision_export.dynamic_boxes_original) do
+    local start_mapping_index = mapping_index
+
+    for static_index, surface in pairs(static_export.static_nodes) do
+        -- simple hack for now. If collider and a portal surface share
+        -- the same transform then the portal surface is assumed to be
+        -- attached to the collider
+        if surface.transform_index == box.parent_node_index then
+            local portal_surface_index = static_to_portable_surface_mapping[static_index]
+
+            if portal_surface_index ~= -1 then
+                table.insert(portal_mapping_data, static_to_portable_surface_mapping[static_index])
+                mapping_index = mapping_index + 1
+            end
+        end
+    end
+
+    if mapping_index > 255 then
+        error("mapping_index was greater than 255")
+    end
+
+    table.insert(dynamic_mapping_range, {start_mapping_index, mapping_index})
+end
+
 sk_definition_writer.add_definition("mapping_indices", "u8[]", "_geo", portal_mapping_data)
 sk_definition_writer.add_definition("collider_to_surface", "struct PortalSurfaceMappingRange[]", "_geo", portal_mapping_range)
+sk_definition_writer.add_definition("dynamic_collider_to_surface", "struct PortalSurfaceMappingRange[]", "_geo", dynamic_mapping_range)
 
 return {
     portal_surfaces = portal_surfaces,
     portal_mapping_data = portal_mapping_data,
     portal_mapping_range = portal_mapping_range,
+    dynamic_mapping_range = dynamic_mapping_range,
 }

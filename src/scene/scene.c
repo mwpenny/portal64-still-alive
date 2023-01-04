@@ -51,7 +51,7 @@ void sceneInitDynamicColliders(struct Scene* scene) {
         colliderType[i].bounce = 0.5f;
         colliderType[i].friction = 0.5f;
         colliderType[i].callbacks = &gCollisionBoxCallbacks;
-        collisionObjectInit(&colliders[i], &colliderType[i], &body[i], 1.0f, COLLISION_LAYERS_TANGIBLE);
+        collisionObjectInit(&colliders[i], &colliderType[i], &body[i], 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_STATIC);
         rigidBodyMarkKinematic(&body[i]);
 
         body[i].currentRoom = gCurrentLevel->dynamicBoxes[i].roomIndex;
@@ -446,7 +446,18 @@ void sceneUpdate(struct Scene* scene) {
     }
 }
 
-int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, struct PortalSurfaceMappingRange surfaceMapping, struct CollisionObject* collisionObject, int roomIndex) {
+int sceneOpenPortal(struct Scene* scene, struct Transform* at, struct Transform* relativeTo, int portalIndex, struct PortalSurfaceMappingRange surfaceMapping, struct CollisionObject* collisionObject, int roomIndex) {
+    struct Transform finalAt;
+    
+    if (relativeTo) {
+        struct Transform relativeInverse;
+        struct Transform relativePreScale = *relativeTo;
+        vector3Scale(&relativePreScale.position, &relativePreScale.position, 1.0f / SCENE_SCALE);
+        transformInvert(&relativePreScale, &relativeInverse);
+        transformConcat(&relativeInverse, at, &finalAt);
+    } else {
+        finalAt = *at;
+    }
 
     for (int indexIndex = surfaceMapping.minPortalIndex; indexIndex < surfaceMapping.maxPortalIndex; ++indexIndex) {
         int surfaceIndex = gCurrentLevel->portalSurfaceMappingIndices[indexIndex];
@@ -455,10 +466,18 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
 
         struct Portal* portal = &scene->portals[portalIndex];
 
-        if (portalAttachToSurface(portal, existingSurface, surfaceIndex, at)) {
+        if (portalAttachToSurface(portal, existingSurface, surfaceIndex, &finalAt)) {
             soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &at->position);
+
+            // the portal position may have been adjusted
+            if (relativeTo) {
+                struct Transform relativePreScale = *relativeTo;
+                vector3Scale(&relativePreScale.position, &relativePreScale.position, 1.0f / SCENE_SCALE);
+                transformConcat(&relativePreScale, &finalAt, &portal->transform);
+            } else {
+                portal->transform = finalAt;
+            }
             
-            portal->transform = *at;
             portal->roomIndex = roomIndex;
             portal->scale = 0.0f;
             gCollisionScene.portalTransforms[portalIndex] = &portal->transform;
@@ -477,6 +496,34 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int portalIndex, 
     return 0;
 }
 
+int sceneDynamicBoxIndex(struct Scene* scene, struct CollisionObject* hitObject) {
+    if (hitObject < scene->dynamicColliders || hitObject >= scene->dynamicColliders + gCurrentLevel->dynamicBoxCount) {
+        return -1;
+    }
+
+    return hitObject - scene->dynamicColliders;
+}
+
+int sceneDetermineSurfaceMapping(struct Scene* scene, struct CollisionObject* hitObject, struct PortalSurfaceMappingRange* mappingRangeOut, struct Transform** relativeToOut) {
+    int quadIndex = levelQuadIndex(hitObject);
+
+    if (quadIndex != -1) {
+        *mappingRangeOut = gCurrentLevel->portalSurfaceMappingRange[quadIndex];
+        *relativeToOut = NULL;
+        return 1;
+    } 
+
+    int dynamicBoxIndex = sceneDynamicBoxIndex(scene, hitObject);
+
+    if (dynamicBoxIndex != -1) {
+        *mappingRangeOut = gCurrentLevel->portalSurfaceDynamicMappingRange[dynamicBoxIndex];
+        *relativeToOut = sceneAnimatorTransformForIndex(&scene->animator, gCurrentLevel->dynamicBoxes[dynamicBoxIndex].transformIndex);
+        return 1;
+    }
+
+    return 0;
+}
+
 int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex) {
     struct RaycastHit hit;
 
@@ -484,9 +531,10 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
         return 0;
     }
 
-    int quadIndex = levelQuadIndex(hit.object);
+    struct PortalSurfaceMappingRange mappingRange;
+    struct Transform* relativeTo = NULL;
 
-    if (quadIndex == -1) {
+    if (!sceneDetermineSurfaceMapping(scene, hit.object, &mappingRange, &relativeTo)) {
         return 0;
     }
 
@@ -514,7 +562,7 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
         quatLook(&hitDirection, &upDir, &portalLocation.rotation);
     }
 
-    return sceneOpenPortal(scene, &portalLocation, portalIndex, gCurrentLevel->portalSurfaceMappingRange[quadIndex], &gCurrentLevel->collisionQuads[quadIndex], hit.roomIndex);
+    return sceneOpenPortal(scene, &portalLocation, relativeTo, portalIndex, mappingRange, hit.object, hit.roomIndex);
 }
 
 void sceneClosePortal(struct Scene* scene, int portalIndex) {

@@ -21,6 +21,7 @@ sk_definition_writer.add_definition("level", "struct LevelDefinition", "_geo", {
     portalSurfaces = sk_definition_writer.reference_to(portal_surfaces.portal_surfaces, 1),
     portalSurfaceCount = #portal_surfaces.portal_surfaces,
     portalSurfaceMappingRange = sk_definition_writer.reference_to(portal_surfaces.portal_mapping_range, 1),
+    portalSurfaceDynamicMappingRange = sk_definition_writer.reference_to(portal_surfaces.dynamic_mapping_range, 1),
     portalSurfaceMappingIndices = sk_definition_writer.reference_to(portal_surfaces.portal_mapping_data, 1),
     triggers = sk_definition_writer.reference_to(trigger.triggers, 1),
     triggerCount = #trigger.triggers,

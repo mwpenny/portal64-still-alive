@@ -55,6 +55,7 @@ struct LevelDefinition* levelFixPointers(struct LevelDefinition* from, int point
     }
 
     result->portalSurfaceMappingRange = ADJUST_POINTER_POS(result->portalSurfaceMappingRange, pointerOffset);
+    result->portalSurfaceDynamicMappingRange = ADJUST_POINTER_POS(result->portalSurfaceDynamicMappingRange, pointerOffset);
     result->portalSurfaceMappingIndices = ADJUST_POINTER_POS(result->portalSurfaceMappingIndices, pointerOffset);
     result->triggers = ADJUST_POINTER_POS(result->triggers, pointerOffset);
     result->cutscenes = ADJUST_POINTER_POS(result->cutscenes, pointerOffset);

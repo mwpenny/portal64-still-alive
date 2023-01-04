@@ -214,6 +214,8 @@ struct LevelDefinition {
     struct PortalSurface* portalSurfaces;
     // maps index of a collisionQuads to indices in portalSurfaces
     struct PortalSurfaceMappingRange* portalSurfaceMappingRange;
+    struct DynamicBoxDefinition* dynamicBoxes;
+    struct PortalSurfaceMappingRange* portalSurfaceDynamicMappingRange;
     u8* portalSurfaceMappingIndices;
     struct Trigger* triggers;
     struct Cutscene* cutscenes;
@@ -230,10 +232,10 @@ struct LevelDefinition {
     struct BoxDropperDefinition* boxDroppers;
     struct AnimationInfo* animations;
     struct SwitchDefinition* switches;
-    struct DynamicBoxDefinition* dynamicBoxes;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
+    short dynamicBoxCount;
     short triggerCount;
     short cutsceneCount;
     short locationCount;
@@ -248,7 +250,6 @@ struct LevelDefinition {
     short boxDropperCount;
     short animationInfoCount;
     short switchCount;
-    short dynamicBoxCount;
     short startLocation;
 };
 
