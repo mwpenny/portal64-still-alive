@@ -302,12 +302,12 @@ void sceneUpdatePortalVelocity(struct Scene* scene) {
 
         sceneAnimatorTransformForIndex(&scene->animator, portal->transformIndex, &baseTransform);
 
-        transformPointInverseNoScale(&baseTransform, &portal->relativePos, &newPos);
+        transformPoint(&baseTransform, &portal->relativePos, &newPos);
 
         // calculate new portal velocity
         struct Vector3 offset;
-        vector3Sub(&newPos, &gCollisionScene.portalTransforms[i], &offset);
-        vector3Scale(&offset, &portal->velocity, 1.0 / FIXED_DELTA_TIME);
+        vector3Sub(&newPos, &gCollisionScene.portalTransforms[i]->position, &offset);
+        vector3Scale(&offset, &gCollisionScene.portalVelocity[i], 1.0 / FIXED_DELTA_TIME);
 
         // update portal position
         gCollisionScene.portalTransforms[i]->position = newPos;
@@ -315,6 +315,25 @@ void sceneUpdatePortalVelocity(struct Scene* scene) {
 }
 
 #define FREE_CAM_VELOCITY   2.0f
+
+void sceneUpdateAnimatedObjects(struct Scene* scene) {
+    for (int i = 0; i < gCurrentLevel->dynamicBoxCount; ++i) {
+        struct DynamicBoxDefinition* boxDef = &gCurrentLevel->dynamicBoxes[i];
+
+        struct Transform baseTransform;
+
+        sceneAnimatorTransformForIndex(&scene->animator, boxDef->transformIndex, &baseTransform);  
+
+        struct Transform relativeTransform;
+        relativeTransform.position = boxDef->position;
+        relativeTransform.rotation = boxDef->rotation;   
+        relativeTransform.scale = gOneVec;
+
+        transformConcat(&baseTransform, &relativeTransform, &scene->dynamicColliders[i].body->transform);
+
+        collisionObjectUpdateBB(&scene->dynamicColliders[i]);
+    }
+}
 
 void sceneUpdate(struct Scene* scene) {
     OSTime frameStart = osGetTime();
@@ -383,6 +402,8 @@ void sceneUpdate(struct Scene* scene) {
                     &scene->player.body,
                     &scene->elevators[i].rigidBody.transform,
                     &scene->elevators[teleportTo].rigidBody.transform,
+                    &gZeroVec,
+                    &gZeroVec,
                     scene->elevators[teleportTo].roomIndex
                 );
             }
@@ -398,26 +419,8 @@ void sceneUpdate(struct Scene* scene) {
     }
 
     sceneAnimatorUpdate(&scene->animator);
-
-    for (int i = 0; i < gCurrentLevel->dynamicBoxCount; ++i) {
-        struct DynamicBoxDefinition* boxDef = &gCurrentLevel->dynamicBoxes[i];
-        struct Transform* baseTransform = sceneAnimatorTransformForIndex(&scene->animator, boxDef->transformIndex);  
-
-        if (!baseTransform) {
-            continue;
-        }
-
-        struct Transform baseTransformUnscaled = *baseTransform;
-        vector3Scale(&baseTransformUnscaled.position, &baseTransformUnscaled.position, 1.0f / SCENE_SCALE);
-        struct Transform relativeTransform;
-        relativeTransform.position = boxDef->position;
-        relativeTransform.rotation = boxDef->rotation;   
-        relativeTransform.scale = gOneVec;
-
-        transformConcat(&baseTransformUnscaled, &relativeTransform, &scene->dynamicColliders[i].body->transform);
-
-        collisionObjectUpdateBB(&scene->dynamicColliders[i]);
-    }
+    sceneUpdatePortalVelocity(scene);
+    sceneUpdateAnimatedObjects(scene);
     
     collisionSceneUpdateDynamics();
 
@@ -503,7 +506,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                 portal->transform = finalAt;
             }
             
-            portal->velocity = gZeroVec;
+            gCollisionScene.portalVelocity[portalIndex] = gZeroVec;
             portal->transformIndex = transformIndex;
             portal->roomIndex = roomIndex;
             portal->scale = 0.0f;

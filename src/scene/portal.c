@@ -48,6 +48,7 @@ void portalInit(struct Portal* portal, enum PortalFlags flags) {
     portal->opacity = 1.0f;
     portal->scale = 0.0f;
     portal->portalSurfaceIndex = -1;
+    portal->transformIndex = NO_TRANSFORM_INDEX;
 }
 
 void portalUpdate(struct Portal* portal, int isOpen) {

@@ -28,7 +28,6 @@ struct Portal {
     short roomIndex;
     short transformIndex;
     struct Vector3 relativePos;
-    struct Vector3 velocity;
 };
 
 #define NO_PORTAL 0xFF

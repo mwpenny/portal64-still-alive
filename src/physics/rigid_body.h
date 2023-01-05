@@ -57,7 +57,7 @@ void rigidBodyAppyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoin
 void rigidBodyUpdate(struct RigidBody* rigidBody);
 void rigidBodyVelocityAtLocalPoint(struct RigidBody* rigidBody, struct Vector3* localPoint, struct Vector3* worldVelocity);
 void rigidBodyVelocityAtWorldPoint(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* worldVelocity);
-void rigidBodyTeleport(struct RigidBody* rigidBody, struct Transform* from, struct Transform* to, int toRoom);
+void rigidBodyTeleport(struct RigidBody* rigidBody, struct Transform* from, struct Transform* to, struct Vector3* fromVelocity, struct Vector3* toVelocity, int toRoom);
 
 int rigidBodyCheckPortals(struct RigidBody* rigidBody);
 

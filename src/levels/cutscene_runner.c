@@ -162,6 +162,8 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 &gScene.player.body, 
                 &gCurrentLevel->locations[step->teleportPlayer.fromLocation].transform, 
                 &gCurrentLevel->locations[step->teleportPlayer.toLocation].transform,
+                &gZeroVec,
+                &gZeroVec,
                 gCurrentLevel->locations[step->teleportPlayer.toLocation].roomIndex
             );
             break;

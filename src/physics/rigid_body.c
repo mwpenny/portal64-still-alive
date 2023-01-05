@@ -144,7 +144,7 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
         }
 
         struct Transform* otherPortal = gCollisionScene.portalTransforms[1 - i];
-        rigidBodyTeleport(rigidBody, gCollisionScene.portalTransforms[i], otherPortal, gCollisionScene.portalRooms[1 - i]);
+        rigidBodyTeleport(rigidBody, gCollisionScene.portalTransforms[i], otherPortal, &gCollisionScene.portalVelocity[i], &gCollisionScene.portalVelocity[1 - 1], gCollisionScene.portalRooms[1 - i]);
 
         float speedSqrd = vector3MagSqrd(&rigidBody->velocity);
 
@@ -174,7 +174,7 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
     return result;
 }
 
-void rigidBodyTeleport(struct RigidBody* rigidBody, struct Transform* from, struct Transform* to, int toRoom) {
+void rigidBodyTeleport(struct RigidBody* rigidBody, struct Transform* from, struct Transform* to, struct Vector3* fromVelocity, struct Vector3* toVelocity, int toRoom) {
     struct Vector3 localPoint;
 
     transformPointInverseNoScale(from, &rigidBody->transform.position, &localPoint);
@@ -187,7 +187,13 @@ void rigidBodyTeleport(struct RigidBody* rigidBody, struct Transform* from, stru
     struct Quaternion rotationTransfer;
     quatMultiply(&to->rotation, &inverseARotation, &rotationTransfer);
 
-    quatMultVector(&rotationTransfer, &rigidBody->velocity, &rigidBody->velocity);
+    struct Vector3 relativeVelocity;
+    vector3Sub(&rigidBody->velocity, fromVelocity, &relativeVelocity);
+
+    quatMultVector(&rotationTransfer, &relativeVelocity, &relativeVelocity);
+
+    vector3Add(&relativeVelocity, toVelocity, &rigidBody->velocity);
+
     quatMultVector(&rotationTransfer, &rigidBody->angularVelocity, &rigidBody->angularVelocity);
 
     struct Quaternion newRotation;

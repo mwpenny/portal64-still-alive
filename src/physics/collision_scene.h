@@ -15,6 +15,7 @@ struct CollisionScene {
     struct World* world;
     short portalRooms[2];
     struct Transform* portalTransforms[2];
+    struct Vector3 portalVelocity[2];
     struct CollisionObject* dynamicObjects[MAX_DYNAMIC_OBJECTS];
     u16 dynamicObjectCount;
     u16 quadCount;
