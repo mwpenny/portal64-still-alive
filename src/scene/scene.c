@@ -289,6 +289,31 @@ struct Transform gRelativeElevatorTransform = {
     {1.0f, 1.0f, 1.0f},
 };
 
+void sceneUpdatePortalVelocity(struct Scene* scene) {
+    for (int i = 0; i < 2; ++i) {
+        struct Portal* portal = &scene->portals[i];
+
+        if (portal->transformIndex == NO_TRANSFORM_INDEX) {
+            continue;
+        }
+
+        struct Vector3 newPos;
+        struct Transform baseTransform;
+
+        sceneAnimatorTransformForIndex(&scene->animator, portal->transformIndex, &baseTransform);
+
+        transformPointInverseNoScale(&baseTransform, &portal->relativePos, &newPos);
+
+        // calculate new portal velocity
+        struct Vector3 offset;
+        vector3Sub(&newPos, &gCollisionScene.portalTransforms[i], &offset);
+        vector3Scale(&offset, &portal->velocity, 1.0 / FIXED_DELTA_TIME);
+
+        // update portal position
+        gCollisionScene.portalTransforms[i]->position = newPos;
+    }
+}
+
 #define FREE_CAM_VELOCITY   2.0f
 
 void sceneUpdate(struct Scene* scene) {
@@ -446,14 +471,15 @@ void sceneUpdate(struct Scene* scene) {
     }
 }
 
-int sceneOpenPortal(struct Scene* scene, struct Transform* at, struct Transform* relativeTo, int portalIndex, struct PortalSurfaceMappingRange surfaceMapping, struct CollisionObject* collisionObject, int roomIndex) {
+int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformIndex, int portalIndex, struct PortalSurfaceMappingRange surfaceMapping, struct CollisionObject* collisionObject, int roomIndex) {
     struct Transform finalAt;
+
+    struct Transform relativeToTransform;
     
-    if (relativeTo) {
+    if (transformIndex != NO_TRANSFORM_INDEX) {
+        sceneAnimatorTransformForIndex(&scene->animator, transformIndex, &relativeToTransform);
         struct Transform relativeInverse;
-        struct Transform relativePreScale = *relativeTo;
-        vector3Scale(&relativePreScale.position, &relativePreScale.position, 1.0f / SCENE_SCALE);
-        transformInvert(&relativePreScale, &relativeInverse);
+        transformInvert(&relativeToTransform, &relativeInverse);
         transformConcat(&relativeInverse, at, &finalAt);
     } else {
         finalAt = *at;
@@ -470,14 +496,15 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, struct Transform*
             soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &at->position);
 
             // the portal position may have been adjusted
-            if (relativeTo) {
-                struct Transform relativePreScale = *relativeTo;
-                vector3Scale(&relativePreScale.position, &relativePreScale.position, 1.0f / SCENE_SCALE);
-                transformConcat(&relativePreScale, &finalAt, &portal->transform);
+            if (transformIndex != NO_TRANSFORM_INDEX) {
+                portal->relativePos = finalAt.position;
+                transformConcat(&relativeToTransform, &finalAt, &portal->transform);
             } else {
                 portal->transform = finalAt;
             }
             
+            portal->velocity = gZeroVec;
+            portal->transformIndex = transformIndex;
             portal->roomIndex = roomIndex;
             portal->scale = 0.0f;
             gCollisionScene.portalTransforms[portalIndex] = &portal->transform;
@@ -504,12 +531,12 @@ int sceneDynamicBoxIndex(struct Scene* scene, struct CollisionObject* hitObject)
     return hitObject - scene->dynamicColliders;
 }
 
-int sceneDetermineSurfaceMapping(struct Scene* scene, struct CollisionObject* hitObject, struct PortalSurfaceMappingRange* mappingRangeOut, struct Transform** relativeToOut) {
+int sceneDetermineSurfaceMapping(struct Scene* scene, struct CollisionObject* hitObject, struct PortalSurfaceMappingRange* mappingRangeOut, int* relativeToOut) {
     int quadIndex = levelQuadIndex(hitObject);
 
     if (quadIndex != -1) {
         *mappingRangeOut = gCurrentLevel->portalSurfaceMappingRange[quadIndex];
-        *relativeToOut = NULL;
+        *relativeToOut = NO_TRANSFORM_INDEX;
         return 1;
     } 
 
@@ -517,7 +544,7 @@ int sceneDetermineSurfaceMapping(struct Scene* scene, struct CollisionObject* hi
 
     if (dynamicBoxIndex != -1) {
         *mappingRangeOut = gCurrentLevel->portalSurfaceDynamicMappingRange[dynamicBoxIndex];
-        *relativeToOut = sceneAnimatorTransformForIndex(&scene->animator, gCurrentLevel->dynamicBoxes[dynamicBoxIndex].transformIndex);
+        *relativeToOut = gCurrentLevel->dynamicBoxes[dynamicBoxIndex].transformIndex;
         return 1;
     }
 
@@ -532,9 +559,9 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
     }
 
     struct PortalSurfaceMappingRange mappingRange;
-    struct Transform* relativeTo = NULL;
+    int relativeIndex = NO_TRANSFORM_INDEX;
 
-    if (!sceneDetermineSurfaceMapping(scene, hit.object, &mappingRange, &relativeTo)) {
+    if (!sceneDetermineSurfaceMapping(scene, hit.object, &mappingRange, &relativeIndex)) {
         return 0;
     }
 
@@ -562,7 +589,7 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
         quatLook(&hitDirection, &upDir, &portalLocation.rotation);
     }
 
-    return sceneOpenPortal(scene, &portalLocation, relativeTo, portalIndex, mappingRange, hit.object, hit.roomIndex);
+    return sceneOpenPortal(scene, &portalLocation, relativeIndex, portalIndex, mappingRange, hit.object, hit.roomIndex);
 }
 
 void sceneClosePortal(struct Scene* scene, int portalIndex) {
@@ -571,5 +598,6 @@ void sceneClosePortal(struct Scene* scene, int portalIndex) {
         gCollisionScene.portalTransforms[portalIndex] = NULL;
         scene->portals[portalIndex].flags |= PortalFlagsNeedsNewHole;
         scene->portals[portalIndex].portalSurfaceIndex = -1;
+        scene->portals[portalIndex].transformIndex = NO_TRANSFORM_INDEX;
     }
 }

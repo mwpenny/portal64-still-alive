@@ -26,6 +26,9 @@ struct Portal {
     struct Vector2s16 fullSizeLoopCenter;
     short portalSurfaceIndex;
     short roomIndex;
+    short transformIndex;
+    struct Vector3 relativePos;
+    struct Vector3 velocity;
 };
 
 #define NO_PORTAL 0xFF

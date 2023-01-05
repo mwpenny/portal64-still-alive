@@ -3,6 +3,7 @@
 #include "../util/memory.h"
 #include "../util/time.h"
 #include "../math/mathf.h"
+#include "../defs.h"
 
 void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo* animationInfo, int animatorCount) {
     sceneAnimator->armatures = malloc(sizeof(struct SKArmature) * animatorCount);
@@ -29,20 +30,16 @@ void sceneAnimatorUpdate(struct SceneAnimator* sceneAnimator) {
     }
 }
 
-struct Transform* sceneAnimatorTransformForIndex(struct SceneAnimator* sceneAnimator, int index) {
-    if (index < 0) {
-        return NULL;
-    }
-
+void sceneAnimatorTransformForIndex(struct SceneAnimator* sceneAnimator, int index, struct Transform* result) {
     for (int i = 0; i < sceneAnimator->animatorCount; ++i) {
         if (index < sceneAnimator->armatures[i].numberOfBones) {
-            return &sceneAnimator->armatures[i].pose[index];
+            *result = sceneAnimator->armatures[i].pose[index];
+            vector3Scale(&result->position, &result->position, 1.0f / SCENE_SCALE);
+            return;
         }
 
         index -= sceneAnimator->armatures[i].numberOfBones;
     }
-
-    return NULL;
 }
 
 Mtx* sceneAnimatorBuildTransforms(struct SceneAnimator* sceneAnimator, struct RenderState* renderState) {

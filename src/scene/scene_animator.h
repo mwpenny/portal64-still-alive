@@ -21,7 +21,7 @@ void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo
 
 void sceneAnimatorUpdate(struct SceneAnimator* sceneAnimator);
 
-struct Transform* sceneAnimatorTransformForIndex(struct SceneAnimator* sceneAnimator, int index);
+void sceneAnimatorTransformForIndex(struct SceneAnimator* sceneAnimator, int index, struct Transform* result);
 
 Mtx* sceneAnimatorBuildTransforms(struct SceneAnimator* sceneAnimator, struct RenderState* renderState);
 
