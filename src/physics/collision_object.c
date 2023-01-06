@@ -214,6 +214,16 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
         &result
     );
 
+    // TMP
+    int touchingPortals = collisionSceneIsTouchingPortal(&result.contactA, &result.normal);
+
+    if (touchingPortals) {
+        a->body->flags |= touchingPortals;
+        b->body->flags |= touchingPortals;
+        return;
+    }
+    /// TMP
+
     struct ContactManifold* contact = contactSolverGetContactManifold(contactSolver, a, b);
 
     if (!contact) {
