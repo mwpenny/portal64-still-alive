@@ -144,7 +144,7 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
         }
 
         struct Transform* otherPortal = gCollisionScene.portalTransforms[1 - i];
-        rigidBodyTeleport(rigidBody, gCollisionScene.portalTransforms[i], otherPortal, &gCollisionScene.portalVelocity[i], &gCollisionScene.portalVelocity[1 - 1], gCollisionScene.portalRooms[1 - i]);
+        rigidBodyTeleport(rigidBody, gCollisionScene.portalTransforms[i], otherPortal, &gCollisionScene.portalVelocity[i], &gCollisionScene.portalVelocity[1 - i], gCollisionScene.portalRooms[1 - i]);
 
         float speedSqrd = vector3MagSqrd(&rigidBody->velocity);
 
