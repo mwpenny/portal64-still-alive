@@ -603,7 +603,6 @@ void collisionSceneUpdateDynamics() {
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
         // added back in by contactSolverRemoveUnusedContacts if there are actually contacts
         gCollisionScene.dynamicObjects[i]->flags &= ~COLLISION_OBJECT_HAS_CONTACTS;
-        // gCollisionScene.dynamicObjects[i]->flags |= COLLISION_OBJECT_HAS_CONTACTS;
     }
 
 	contactSolverRemoveUnusedContacts(&gContactSolver);
@@ -613,6 +612,10 @@ void collisionSceneUpdateDynamics() {
 
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
         struct CollisionObject* object = gCollisionScene.dynamicObjects[i];
+
+        prevPosList[i] = object->body->transform.position;
+        sweptBB[i] = object->boundingBox;
+
         if (!collisionObjectShouldGenerateConctacts(object)) {
             continue;
         }
@@ -633,44 +636,11 @@ void collisionSceneUpdateDynamics() {
             continue;
         }
 
-        prevPosList[i] = object->body->transform.position;
+        rigidBodyUpdate(object->body);
+        collisionObjectUpdateBB(object);
+        box3DUnion(&sweptBB[i], &object->boundingBox, &sweptBB[i]);
 
-        if (object->flags & COLLISION_OBJECT_HAS_CONTACTS || !collisionObjectIsActive(object)) {
-            collisionObjectCollideWithScene(object, &gCollisionScene, &gContactSolver);
-        } else {
-            sweptBB[i] = object->boundingBox;
-
-            rigidBodyUpdate(object->body);
-            collisionObjectUpdateBB(object);
-            box3DUnion(&sweptBB[i], &object->boundingBox, &sweptBB[i]);
-
-            collisionObjectCollideWithSceneSwept(object, &prevPosList[i], &sweptBB[i], &gCollisionScene, &gContactSolver);
-
-            struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, object, NULL);
-
-            struct ContactManifold* contact = NULL;
-
-            while (manifold) {
-		        contactSolverCleanupManifold(manifold);
-
-                if (manifold->contactCount) {
-                    contact = manifold;
-                }
-
-                manifold = contactSolverNextManifold(&gContactSolver, object, manifold);
-            }
-
-            if (contact) {
-                float velocityDot = vector3Dot(&contact->normal, &object->body->velocity);
-
-                if (velocityDot < 0.0f) {
-                    vector3AddScaled(&object->body->velocity, &contact->normal, (1 + contact->restitution) * -velocityDot, &object->body->velocity);
-                    vector3AddScaled(&object->body->transform.position, &contact->normal, -0.01f, &object->body->transform.position);
-                }
-            }
-
-            collisionObjectUpdateBB(object);
-        }
+        collisionObjectCollideMixed(object, &prevPosList[i], &sweptBB[i], &gCollisionScene, &gContactSolver);
     }
 
     collisionSceneCollideDynamicPairs(&gCollisionScene, prevPosList, sweptBB);
@@ -694,11 +664,6 @@ void collisionSceneUpdateDynamics() {
             continue;
         }
 
-        // if the object has no contacts then the rigidBodyUpdate
-        // was already done before before doing a swept collision
-        if (collisionObject->flags & COLLISION_OBJECT_HAS_CONTACTS) {
-            rigidBodyUpdate(collisionObject->body);
-        }
         rigidBodyCheckPortals(collisionObject->body);
         collisionObjectUpdateBB(collisionObject);
     }

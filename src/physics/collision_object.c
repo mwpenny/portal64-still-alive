@@ -87,6 +87,15 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
     contactInsert(contact, &result);
 }
 
+void collisionObjectHandleSweptCollision(struct CollisionObject* object, struct Vector3* normal, float restitution) {
+    float velocityDot = vector3Dot(normal, &object->body->velocity);
+
+    if (velocityDot < 0.0f) {
+        vector3AddScaled(&object->body->velocity, normal, (1 + restitution) * -velocityDot, &object->body->velocity);
+        vector3AddScaled(&object->body->transform.position, normal, -0.01f, &object->body->transform.position);
+    }
+}
+
 void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionObject* quadObject, struct ContactSolver* contactSolver) {
     if ((object->collisionLayers & quadObject->collisionLayers) == 0) {
         return;
@@ -160,6 +169,8 @@ void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct 
 
     transformPointInverseNoScale(&object->body->transform, &result.contactB, &result.contactB);
     contactInsert(contact, &result);
+
+    collisionObjectHandleSweptCollision(object, &contact->normal, contact->restitution);
 }
 
 
