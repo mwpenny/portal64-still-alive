@@ -42,6 +42,15 @@ void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData
 void collisionObjectCollideWithQuad(struct CollisionObject* object, struct CollisionObject* quad, struct ContactSolver* contactSolver);
 void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionObject* quadObject, struct ContactSolver* contactSolver);
 void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct CollisionObject* b, struct ContactSolver* contactSolver);
+void collisionObjectCollideTwoObjectsSwept(
+    struct CollisionObject* a, 
+    struct Vector3* prevAPos, 
+    struct Box3D* sweptA,
+    struct CollisionObject* b, 
+    struct Vector3* prevBPos, 
+    struct Box3D* sweptB,
+    struct ContactSolver* contactSolver
+);
 
 void collisionObjectUpdateBB(struct CollisionObject* object);
 

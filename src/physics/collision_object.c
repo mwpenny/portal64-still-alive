@@ -214,15 +214,162 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
         &result
     );
 
-    // TMP
     int touchingPortals = collisionSceneIsTouchingPortal(&result.contactA, &result.normal);
 
     if (touchingPortals) {
-        a->body->flags |= touchingPortals;
         b->body->flags |= touchingPortals;
         return;
     }
-    /// TMP
+
+    struct Vector3 minusNormal;
+    vector3Negate(&result.normal, &minusNormal);
+    
+    touchingPortals = collisionSceneIsTouchingPortal(&result.contactB, &minusNormal);
+
+    if (touchingPortals) {
+        a->body->flags |= touchingPortals;
+        return;
+    }
+
+
+    struct ContactManifold* contact = contactSolverGetContactManifold(contactSolver, a, b);
+
+    if (!contact) {
+        return;
+    }
+
+    transformPointInverseNoScale(&a->body->transform, &result.contactA, &result.contactA);
+    transformPointInverseNoScale(&b->body->transform, &result.contactB, &result.contactB);
+
+    if (contact->shapeA == b) {
+        epaSwapResult(&result);
+    }
+
+    contact->friction = MAX(a->collider->friction, b->collider->friction);
+    contact->restitution = MIN(a->collider->bounce, b->collider->bounce);
+
+    contactInsert(contact, &result);
+}
+
+
+void collisionObjectCollideTwoObjectsSwept(
+    struct CollisionObject* a, 
+    struct Vector3* prevAPos, 
+    struct Box3D* sweptA,
+    struct CollisionObject* b, 
+    struct Vector3* prevBPos, 
+    struct Box3D* sweptB,
+    struct ContactSolver* contactSolver
+) {
+    if (!box3DHasOverlap(sweptA, sweptB)) {
+        return;
+    }
+
+    if (a->trigger && b->trigger) {
+        return;
+    }
+
+    if (a->collider->type == CollisionShapeTypeMesh) {
+        if (b->collider->type != CollisionShapeTypeMesh) {
+            meshColliderCollideObject(a, b, contactSolver);
+        }
+
+        return;
+    } else if (b->collider->type == CollisionShapeTypeMesh) {
+        meshColliderCollideObject(b, a, contactSolver);
+        return;
+    }
+
+    struct Simplex simplex;
+
+    struct Vector3 relativePrevPos;
+    vector3Sub(prevBPos, prevAPos, &relativePrevPos);
+    vector3Add(&relativePrevPos, &a->body->transform.position, &relativePrevPos);
+
+    struct SweptCollisionObject sweptObject;
+    sweptObject.object = b;
+    sweptObject.prevPos = prevBPos;
+
+    if (!gjkCheckForOverlap(&simplex, 
+                a, minkowsiSumAgainstObject, 
+                &sweptObject, minkowsiSumAgainstSweptObject, 
+                &relativePrevPos)) {
+        return;
+    }
+
+    if (a->trigger) {
+        a->trigger(a->data, b);
+        return;
+    }
+
+    if (b->trigger) {
+        b->trigger(b->data, a);
+        return;
+    }
+
+    struct EpaResult result;
+
+    struct Vector3 objectEnd = b->body->transform.position;
+    
+    if (!epaSolveSwept(
+        &simplex, 
+        a, minkowsiSumAgainstObject, 
+        &sweptObject, minkowsiSumAgainstSweptObject,
+        &relativePrevPos,
+        &objectEnd,
+        &result
+    )) {
+        collisionObjectCollideTwoObjects(a, b, contactSolver);
+        return;
+    }
+
+    // determine how long each object travelled before colliding
+    struct Vector3 moveAmount;
+    struct Vector3 relativeOffset;
+
+    vector3Sub(&objectEnd, &relativePrevPos, &moveAmount);
+    vector3Sub(&b->body->transform.position, &relativePrevPos, &relativeOffset);
+    float lerpAmount;
+
+    float relativeMovementSqrd = vector3MagSqrd(&relativeOffset);
+
+    if (relativeMovementSqrd < 0.0000001f) {
+        lerpAmount = 0.0f;
+    } else {
+        lerpAmount = vector3Dot(&moveAmount, &relativeOffset) / relativeMovementSqrd;
+    }
+
+    // update the points of contact
+    struct Vector3 contactOffset;
+    vector3Sub(&result.contactA, &objectEnd, &contactOffset);
+    vector3Add(&objectEnd, &contactOffset, &result.contactA);
+    result.contactB = result.contactA;
+
+    // determine if a portal was hit
+    int touchingPortals = collisionSceneIsTouchingPortal(&result.contactA, &result.normal);
+
+    if (touchingPortals) {
+        b->body->flags |= touchingPortals;
+        return;
+    }
+
+    struct Vector3 minusNormal;
+    vector3Negate(&result.normal, &minusNormal);
+    
+    touchingPortals = collisionSceneIsTouchingPortal(&result.contactB, &minusNormal);
+
+    if (touchingPortals) {
+        a->body->flags |= touchingPortals;
+        return;
+    }
+
+    // update both objects to where they collided
+    if (!(a->body->flags & RigidBodyIsKinematic)) {
+        vector3Lerp(prevAPos, &a->body->transform.position, lerpAmount, &a->body->transform.position);
+    }
+    if (!(b->body->flags & RigidBodyIsKinematic)) {
+        vector3Lerp(prevBPos, &b->body->transform.position, lerpAmount, &b->body->transform.position);
+    }
 
     struct ContactManifold* contact = contactSolverGetContactManifold(contactSolver, a, b);
 

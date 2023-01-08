@@ -496,7 +496,15 @@ void dynamicBroadphaseSort(union DynamicBroadphaseEdge* edges, union DynamicBroa
     }
 }
 
-void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct DynamicBroadphase* broadphase) {
+void collisionObjectCollidePairMixed(struct CollisionObject* a, struct Vector3* aPrevPos, struct Box3D* sweptA, struct CollisionObject* b, struct Vector3* bPrevPos, struct Box3D* sweptB, struct ContactSolver* contactSolver) {
+    if (a->manifoldIds & b->manifoldIds) {
+        collisionObjectCollideTwoObjects(a, b, contactSolver);
+    } else {
+        collisionObjectCollideTwoObjectsSwept(a, aPrevPos, sweptA, b, bPrevPos, sweptB, contactSolver);
+    }
+}
+
+void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct DynamicBroadphase* broadphase, struct Vector3* prevPos, struct Box3D* sweptB) {
     int broadphaseEdgeCount = collisionScene->dynamicObjectCount * 2;
     for (int i = 0; i < broadphaseEdgeCount; ++i) {
         union DynamicBroadphaseEdge edge;
@@ -518,9 +526,25 @@ void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct 
 
                 // collide pair lowest in memory first
                 if (existing < subject) {
-                    collisionObjectCollideTwoObjects(existing, subject, &gContactSolver);
+                    collisionObjectCollidePairMixed(
+                        existing, 
+                        &prevPos[objectIndex], 
+                        &sweptB[objectIndex], 
+                        subject, 
+                        &prevPos[edge.objectId], 
+                        &sweptB[edge.objectId], 
+                        &gContactSolver
+                    );
                 } else {
-                    collisionObjectCollideTwoObjects(subject, existing, &gContactSolver);
+                    collisionObjectCollidePairMixed(
+                        subject, 
+                        &prevPos[edge.objectId],
+                        &sweptB[edge.objectId], 
+                        existing, 
+                        &prevPos[objectIndex], 
+                        &sweptB[objectIndex],
+                        &gContactSolver
+                    );
                 }
             }
 
@@ -545,7 +569,7 @@ void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct 
     }
 }
 
-void collisionSceneCollideDynamicPairs(struct CollisionScene* collisionScene) {
+void collisionSceneCollideDynamicPairs(struct CollisionScene* collisionScene, struct Vector3* prevPos, struct Box3D* sweptB) {
     struct DynamicBroadphase dynamicBroadphase;
 
     dynamicBroadphase.edges = stackMalloc(sizeof(union DynamicBroadphaseEdge) * collisionScene->dynamicObjectCount * 2);
@@ -558,7 +582,7 @@ void collisionSceneCollideDynamicPairs(struct CollisionScene* collisionScene) {
     dynamicBroadphase.objectsInCurrentRange = stackMalloc(sizeof(struct CollisionObject*) * collisionScene->dynamicObjectCount);
     dynamicBroadphase.objectInRangeCount = 0;
 
-    collisionSceneWalkBroadphase(collisionScene, &dynamicBroadphase);
+    collisionSceneWalkBroadphase(collisionScene, &dynamicBroadphase, prevPos, sweptB);
 
     stackMallocFree(dynamicBroadphase.objectsInCurrentRange);
     stackMallocFree(dynamicBroadphase.edges);
@@ -584,6 +608,9 @@ void collisionSceneUpdateDynamics() {
 
 	contactSolverRemoveUnusedContacts(&gContactSolver);
 
+    struct Vector3* prevPosList = stackMalloc(sizeof(struct Vector3) * gCollisionScene.dynamicObjectCount);
+    struct Box3D* sweptBB = stackMalloc(sizeof(struct Box3D) * gCollisionScene.dynamicObjectCount);
+
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
         struct CollisionObject* object = gCollisionScene.dynamicObjects[i];
         if (!collisionObjectShouldGenerateConctacts(object)) {
@@ -606,17 +633,18 @@ void collisionSceneUpdateDynamics() {
             continue;
         }
 
+        prevPosList[i] = object->body->transform.position;
+
         if (object->flags & COLLISION_OBJECT_HAS_CONTACTS || !collisionObjectIsActive(object)) {
             collisionObjectCollideWithScene(object, &gCollisionScene, &gContactSolver);
         } else {
-            struct Vector3 prevPos = object->body->transform.position;
-            struct Box3D sweptBB = object->boundingBox;
+            sweptBB[i] = object->boundingBox;
 
             rigidBodyUpdate(object->body);
             collisionObjectUpdateBB(object);
-            box3DUnion(&sweptBB, &object->boundingBox, &sweptBB);
+            box3DUnion(&sweptBB[i], &object->boundingBox, &sweptBB[i]);
 
-            collisionObjectCollideWithSceneSwept(object, &prevPos, &sweptBB, &gCollisionScene, &gContactSolver);
+            collisionObjectCollideWithSceneSwept(object, &prevPosList[i], &sweptBB[i], &gCollisionScene, &gContactSolver);
 
             struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, object, NULL);
 
@@ -645,7 +673,10 @@ void collisionSceneUpdateDynamics() {
         }
     }
 
-    collisionSceneCollideDynamicPairs(&gCollisionScene);
+    collisionSceneCollideDynamicPairs(&gCollisionScene, prevPosList, sweptBB);
+
+    stackMallocFree(sweptBB);
+    stackMallocFree(prevPosList);
 
     contactSolverSolve(&gContactSolver);
 
