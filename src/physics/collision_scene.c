@@ -430,7 +430,7 @@ union DynamicBroadphaseEdge {
 
 struct DynamicBroadphase {
     union DynamicBroadphaseEdge* edges;
-    struct CollisionObject** objectsInCurrentRange;
+    short* objectsInCurrentRange;
     int objectInRangeCount;
 };
 
@@ -504,7 +504,7 @@ void collisionObjectCollidePairMixed(struct CollisionObject* a, struct Vector3* 
     }
 }
 
-void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct DynamicBroadphase* broadphase, struct Vector3* prevPos, struct Box3D* sweptB) {
+void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct DynamicBroadphase* broadphase, struct Vector3* prevPos, struct Box3D* sweptBB) {
     int broadphaseEdgeCount = collisionScene->dynamicObjectCount * 2;
     for (int i = 0; i < broadphaseEdgeCount; ++i) {
         union DynamicBroadphaseEdge edge;
@@ -514,7 +514,8 @@ void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct 
 
         if (edge.isLeadingEdge) {
             for (int objectIndex = 0; objectIndex < broadphase->objectInRangeCount; ++objectIndex) {
-                struct CollisionObject* existing = broadphase->objectsInCurrentRange[objectIndex];
+                short existingIndex = broadphase->objectsInCurrentRange[objectIndex];
+                struct CollisionObject* existing = collisionScene->dynamicObjects[existingIndex];
 
                 if ((existing->collisionLayers & subject->collisionLayers) == 0) {
                     continue;
@@ -528,34 +529,34 @@ void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct 
                 if (existing < subject) {
                     collisionObjectCollidePairMixed(
                         existing, 
-                        &prevPos[objectIndex], 
-                        &sweptB[objectIndex], 
+                        &prevPos[existingIndex], 
+                        &sweptBB[existingIndex], 
                         subject, 
                         &prevPos[edge.objectId], 
-                        &sweptB[edge.objectId], 
+                        &sweptBB[edge.objectId], 
                         &gContactSolver
                     );
                 } else {
                     collisionObjectCollidePairMixed(
                         subject, 
                         &prevPos[edge.objectId],
-                        &sweptB[edge.objectId], 
+                        &sweptBB[edge.objectId], 
                         existing, 
-                        &prevPos[objectIndex], 
-                        &sweptB[objectIndex],
+                        &prevPos[existingIndex], 
+                        &sweptBB[existingIndex],
                         &gContactSolver
                     );
                 }
             }
 
             // add object
-            broadphase->objectsInCurrentRange[broadphase->objectInRangeCount] = subject;
+            broadphase->objectsInCurrentRange[broadphase->objectInRangeCount] = edge.objectId;
             ++broadphase->objectInRangeCount;
         } else {
             // remove object
             int hasFound = 0;
             for (int i = 0; i < broadphase->objectInRangeCount - 1; ++i) {
-                if (broadphase->objectsInCurrentRange[i] == subject) {
+                if (broadphase->objectsInCurrentRange[i] == edge.objectId) {
                     hasFound = 1;
                 }
 
@@ -569,7 +570,7 @@ void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct 
     }
 }
 
-void collisionSceneCollideDynamicPairs(struct CollisionScene* collisionScene, struct Vector3* prevPos, struct Box3D* sweptB) {
+void collisionSceneCollideDynamicPairs(struct CollisionScene* collisionScene, struct Vector3* prevPos, struct Box3D* sweptBB) {
     struct DynamicBroadphase dynamicBroadphase;
 
     dynamicBroadphase.edges = stackMalloc(sizeof(union DynamicBroadphaseEdge) * collisionScene->dynamicObjectCount * 2);
@@ -579,10 +580,10 @@ void collisionSceneCollideDynamicPairs(struct CollisionScene* collisionScene, st
     dynamicBroadphaseSort(dynamicBroadphase.edges, tmpEdges, 0, collisionScene->dynamicObjectCount * 2);
     stackMallocFree(tmpEdges);
 
-    dynamicBroadphase.objectsInCurrentRange = stackMalloc(sizeof(struct CollisionObject*) * collisionScene->dynamicObjectCount);
+    dynamicBroadphase.objectsInCurrentRange = stackMalloc(sizeof(short) * collisionScene->dynamicObjectCount);
     dynamicBroadphase.objectInRangeCount = 0;
 
-    collisionSceneWalkBroadphase(collisionScene, &dynamicBroadphase, prevPos, sweptB);
+    collisionSceneWalkBroadphase(collisionScene, &dynamicBroadphase, prevPos, sweptBB);
 
     stackMallocFree(dynamicBroadphase.objectsInCurrentRange);
     stackMallocFree(dynamicBroadphase.edges);
