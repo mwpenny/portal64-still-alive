@@ -84,6 +84,7 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 
 ## Current TODO list
 
+- [ ] Skips audio sometimes
 - [ ] Portal not rending recursively sometimes
 - [ ] Passing into a ceiling portal can sometimes mess with the player rotation
 - [ ] Stop looping sounds betwen levels
@@ -93,3 +94,8 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [ ] Presort portal gun polygon order
 - [ ] Signage should not always be on
 - [ ] Camera shake
+- [x] Finish up animation pieces (collider/portable surface/culling logic)
+- [x] Implement pedestal button
+- [x] Create piston animaiton test
+- [x] Refactor physics to allow swept collision between two dynamic objects
+- [x] Move constaints to be applied right before contact solving

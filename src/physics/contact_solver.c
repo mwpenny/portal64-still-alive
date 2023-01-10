@@ -173,6 +173,8 @@ void contactSolverInit(struct ContactSolver* contactSolver) {
 	for (int i = 1; i < MAX_CONTACT_COUNT; ++i) {
 		contactSolver->contacts[i-1].next = &contactSolver->contacts[i];
 	}
+
+	contactSolver->firstPointConstraint = NULL;
 }
 
 void contactSolverPreSolve(struct ContactSolver* contactSolver) {
@@ -310,6 +312,17 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 
 		cs = cs->next;
 	}
+}
+
+void contactSolverIterateConstraints(struct ContactSolver* contactSolver) {
+	struct PointConstraint* curr = contactSolver->firstPointConstraint;
+
+	while (curr) {
+		pointConstraintMoveToPoint(curr->object, &curr->targetPos, curr->maxPosImpulse);
+		pointConstraintRotateTo(curr->object->body, &curr->targetRot, curr->maxRotImpulse);		
+
+		curr = curr->nextConstraint;
+	} 
 }
 
 void contactSolverIterate(struct ContactSolver* contactSolver) {
@@ -452,6 +465,7 @@ void contactSolverIterate(struct ContactSolver* contactSolver) {
 
 
 void contactSolverSolve(struct ContactSolver* solver) {
+	contactSolverIterateConstraints(solver);
 	contactSolverPreSolve(solver);
 	for (int i = 0; i < SOLVER_ITERATIONS; ++i) {
 		contactSolverIterate(solver);
@@ -500,4 +514,29 @@ struct ContactManifold* contactSolverNextManifold(struct ContactSolver* solver, 
 	}
 
 	return NULL;
+}
+
+void contactSolverAddPointConstraint(struct ContactSolver* solver, struct PointConstraint* constraint) {
+    constraint->nextConstraint = solver->firstPointConstraint;
+    solver->firstPointConstraint = constraint;
+}
+
+void contactSolverRemovePointConstraint(struct ContactSolver* solver, struct PointConstraint* constraint) {
+    struct PointConstraint* prev = NULL;
+    struct PointConstraint* current = solver->firstPointConstraint;
+
+    while (current) {
+        if (current == constraint) {
+            if (prev) {
+                prev->nextConstraint = current->nextConstraint;
+            } else {
+                solver->firstPointConstraint = current->nextConstraint;
+            }
+
+            return;
+        }
+        
+        prev = current;
+        current = current->nextConstraint;
+    }
 }

@@ -9,6 +9,7 @@
 #include "../scene/dynamic_scene.h"
 #include "../sk64/skelatool_animator.h"
 #include "../sk64/skelatool_armature.h"
+#include "../physics/point_constraint.h"
 
 #define PLAYER_GRABBING_THROUGH_NOTHING -1
 
@@ -26,7 +27,7 @@ struct Player {
     struct SKAnimatorBlender animator;
     short grabbingThroughPortal;
     short dynamicId;
-    struct CollisionObject* grabbing;
+    struct PointConstraint grabConstraint;
     float pitchVelocity;
     float yawVelocity;
     enum PlayerFlags flags;

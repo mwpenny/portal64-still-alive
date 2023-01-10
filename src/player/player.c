@@ -105,7 +105,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
 
     player->body.velocity = *velocity;
     player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
-    player->grabbing = NULL;
+    player->grabConstraint.object = NULL;
     player->pitchVelocity = 0.0f;
     player->yawVelocity = 0.0f;
     player->flags = 0;
@@ -176,16 +176,28 @@ void playerApplyPortalGrab(struct Player* player, int portalIndex) {
     }
 }
 
+void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) {
+    if (grabbing && !player->grabConstraint.object) {
+        pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f);
+        contactSolverAddPointConstraint(&gContactSolver, &player->grabConstraint);
+    } else if (!grabbing && player->grabConstraint.object) {
+        player->grabConstraint.object = NULL;
+        contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
+    } else if (grabbing != player->grabConstraint.object) {
+        pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f);
+    }
+}
+
 void playerUpdateGrabbedObject(struct Player* player) {
     if (controllerGetButtonDown(0, B_BUTTON) || controllerGetButtonDown(1, U_JPAD)) {
-        if (player->grabbing) {
+        if (player->grabConstraint.object) {
             if (controllerGetButtonDown(1, U_JPAD)) {
                 struct Vector3 forward;
                 quatMultVector(&player->lookTransform.rotation, &gForward, &forward);
-                vector3AddScaled(&player->grabbing->body->velocity, &forward, -50.0f, &player->grabbing->body->velocity);
+                vector3AddScaled(&player->grabConstraint.object->body->velocity, &forward, -50.0f, &player->grabConstraint.object->body->velocity);
             }
 
-            player->grabbing = NULL;
+            playerSetGrabbing(player, NULL);
         } else {
             struct Ray ray;
 
@@ -201,7 +213,7 @@ void playerUpdateGrabbedObject(struct Player* player) {
                 hit.object->flags |= COLLISION_OBJECT_INTERACTED;
 
                 if (hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable)) {
-                    player->grabbing = hit.object;
+                    playerSetGrabbing(player, hit.object);
 
                     if (hit.throughPortal) {
                         player->grabbingThroughPortal = hit.throughPortal == gCollisionScene.portalTransforms[0] ? 0 : 1;
@@ -215,11 +227,11 @@ void playerUpdateGrabbedObject(struct Player* player) {
         }
     }
 
-    if (player->grabbing && (player->grabbing->body->flags & RigidBodyFlagsGrabbable) == 0) {
-        player->grabbing = NULL;
+    if (player->grabConstraint.object && (player->grabConstraint.object->body->flags & RigidBodyFlagsGrabbable) == 0) {
+        playerSetGrabbing(player, NULL);
     }
 
-    if (player->grabbing) {
+    if (player->grabConstraint.object) {
         if (player->body.flags & RigidBodyFlagsCrossedPortal0) {
             playerApplyPortalGrab(player, 1);
         }
@@ -228,11 +240,11 @@ void playerUpdateGrabbedObject(struct Player* player) {
             playerApplyPortalGrab(player, 0);
         }
 
-        if (player->grabbing->body->flags & RigidBodyFlagsCrossedPortal0) {
+        if (player->grabConstraint.object->body->flags & RigidBodyFlagsCrossedPortal0) {
             playerApplyPortalGrab(player, 0);
         }
 
-        if (player->grabbing->body->flags & RigidBodyFlagsCrossedPortal1) {
+        if (player->grabConstraint.object->body->flags & RigidBodyFlagsCrossedPortal1) {
             playerApplyPortalGrab(player, 1);
         }
 
@@ -244,7 +256,7 @@ void playerUpdateGrabbedObject(struct Player* player) {
         if (player->grabbingThroughPortal != PLAYER_GRABBING_THROUGH_NOTHING) {
             if (!collisionSceneIsPortalOpen()) {
                 // portal was closed while holding object through it
-                player->grabbing = NULL;
+                playerSetGrabbing(player, NULL);
                 return;
             }
 
@@ -257,8 +269,7 @@ void playerUpdateGrabbedObject(struct Player* player) {
             grabRotation = finalRotation;
         }
 
-        pointConstraintMoveToPoint(player->grabbing, &grabPoint, 8.0f);
-        pointConstraintRotateTo(player->grabbing->body, &grabRotation, 5.0f);
+        pointConstraintUpdateTarget(&player->grabConstraint, &grabPoint, &grabRotation);
     }
 }
 

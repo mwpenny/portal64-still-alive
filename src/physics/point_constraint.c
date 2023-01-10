@@ -54,3 +54,17 @@ void pointConstraintRotateTo(struct RigidBody* rigidBody, struct Quaternion* wor
         vector3AddScaled(&rigidBody->angularVelocity, &delta, maxImpulse / sqrtf(deltaSqrd), &rigidBody->angularVelocity);
     }
 }
+
+void pointConstraintInit(struct PointConstraint* constraint, struct CollisionObject* object, float maxPosImpulse, float maxRotImpulse) {
+    constraint->nextConstraint = NULL;
+    constraint->object = object;
+    constraint->targetPos = object->body->transform.position;
+    constraint->targetRot = object->body->transform.rotation;
+    constraint->maxPosImpulse = maxPosImpulse;
+    constraint->maxRotImpulse = maxRotImpulse;
+}
+
+void pointConstraintUpdateTarget(struct PointConstraint* constraint, struct Vector3* worldPoint, struct Quaternion* worldRotation) {
+    constraint->targetPos = *worldPoint;
+    constraint->targetRot = *worldRotation;
+}

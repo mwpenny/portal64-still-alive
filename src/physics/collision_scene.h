@@ -6,6 +6,7 @@
 #include "../math/ray.h"
 #include "world.h"
 #include "defs.h"
+#include "point_constraint.h"
 
 #define PORTAL_THICKNESS        0.11f
 #define PORTAL_X_RADIUS         0.5f

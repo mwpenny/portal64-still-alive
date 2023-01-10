@@ -48,6 +48,7 @@ struct ContactSolver {
     struct ContactManifold contacts[MAX_CONTACT_COUNT];
 	struct ContactManifold* unusedContacts;
 	struct ContactManifold* activeContacts;
+    struct PointConstraint* firstPointConstraint;
 	int contactCapacity;
 	short currentContactFrame;
 };
@@ -65,6 +66,9 @@ struct ContactManifold* contactSolverNextManifold(struct ContactSolver* solver, 
 void contactSolverRemoveUnusedContacts(struct ContactSolver* contactSolver);
 void contactSolverCheckPortalContacts(struct ContactSolver* contactSolver, struct CollisionObject* objectWithNewPortal);
 void contactSolverCleanupManifold(struct ContactManifold* manifold);
+
+void contactSolverAddPointConstraint(struct ContactSolver* solver, struct PointConstraint* constraint);
+void contactSolverRemovePointConstraint(struct ContactSolver* solver, struct PointConstraint* constraint);
 
 #endif
 
