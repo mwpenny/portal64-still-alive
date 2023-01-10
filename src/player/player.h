@@ -17,6 +17,8 @@
 
 enum PlayerFlags {
     PlayerFlagsGrounded = (1 << 0),
+    PlayerHasFirstPortalGun = (1 << 1),
+    PlayerHasSecondPortalGun = (1 << 2),
 };
 
 struct Player {
@@ -37,5 +39,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
 void playerUpdate(struct Player* player, struct Transform* cameraTransform);
 
 void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, struct Vector3* right);
+
+void playerGivePortalGun(struct Player* player, int flags);
 
 #endif

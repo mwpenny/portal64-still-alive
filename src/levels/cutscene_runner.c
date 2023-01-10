@@ -192,6 +192,13 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             for (unsigned i = 0; i < gScene.pedestalCount; ++i) {
                 pedestalHide(&gScene.pedestals[i]);
             }
+
+            if (!(gScene.player.flags & PlayerHasFirstPortalGun)) {
+                playerGivePortalGun(&gScene.player, PlayerHasFirstPortalGun);
+            } else if (!(gScene.player.flags & PlayerHasSecondPortalGun)) {
+                playerGivePortalGun(&gScene.player, PlayerHasSecondPortalGun);
+            }
+
             break;
         case CutsceneStepTypePointPedestal:
             for (unsigned i = 0; i < gScene.pedestalCount; ++i) {

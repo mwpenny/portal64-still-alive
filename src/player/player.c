@@ -310,6 +310,10 @@ void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, st
     vector3Normalize(right, right);
 }
 
+void playerGivePortalGun(struct Player* player, int flags) {
+    player->flags |= flags;
+}
+
 struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* blendLerp, float* startTime, struct Vector3* forwardDir, struct Vector3* rightDir) {
     float horzSpeed = player->body.velocity.x * player->body.velocity.x + player->body.velocity.z * player->body.velocity.z;
 

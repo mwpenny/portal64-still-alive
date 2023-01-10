@@ -214,13 +214,15 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     renderPlanBuild(&renderPlan, scene, renderState);
     renderPlanExecute(&renderPlan, scene, staticMatrices, renderState);
 
-    sceneRenderPortalGun(scene, renderState);
+    if (scene->player.flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
+        sceneRenderPortalGun(scene, renderState);
+    }
 
     gDPPipeSync(renderState->dl++);
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
 
-    hudRender(renderState);
+    hudRender(renderState, scene->player.flags);
 
     // sceneRenderPerformanceMetrics(scene, renderState, task);
 
@@ -235,12 +237,12 @@ void sceneCheckPortals(struct Scene* scene) {
     quatMultVector(&scene->player.lookTransform.rotation, &raycastRay.dir, &raycastRay.dir);
     quatMultVector(&scene->player.lookTransform.rotation, &gUp, &playerUp);
 
-    if (controllerGetButtonDown(0, Z_TRIG)) {
+    if (controllerGetButtonDown(0, Z_TRIG) && (scene->player.flags & PlayerHasSecondPortalGun)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom);
         soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL);
     }
 
-    if (controllerGetButtonDown(0, R_TRIG | L_TRIG)) {
+    if (controllerGetButtonDown(0, R_TRIG | L_TRIG) && (scene->player.flags & PlayerHasFirstPortalGun)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom);
         soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL);
     }
