@@ -166,6 +166,8 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/portal_gun/w_portalgun.blend \
 	assets/models/props/button.blend \
 	assets/models/props/door_01.blend \
+	assets/models/props/combine_ball_catcher.blend \
+	assets/models/props/combine_ball_launcher.blend \
 	assets/models/props/cylinder_test.blend \
 	assets/models/props/radio.blend \
 	assets/models/props/round_elevator.blend \
@@ -185,6 +187,8 @@ MODEL_LIST = assets/models/cube/cube.blend \
 
 ANIM_LIST = build/assets/models/pedestal_anim.o \
 	build/assets/models/props/box_dropper_anim.o \
+	build/assets/models/props/combine_ball_catcher_anim.o \
+	build/assets/models/props/combine_ball_launcher_anim.o \
 	build/assets/models/player/chell_anim.o \
 	build/assets/models/props/switch001_anim.o
 
@@ -216,7 +220,7 @@ build/src/player/player.o: build/assets/models/player/chell.h build/assets/mater
 
 build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
 
-ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_03/test_chamber_03_anim.o
+# ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_03/test_chamber_03_anim.o
 
 build/anims.ld: $(ANIM_LIST) $(ANIM_TEST_CHAMBERS) tools/generate_animation_ld.js
 	@mkdir -p $(@D)

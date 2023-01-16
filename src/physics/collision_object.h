@@ -11,6 +11,7 @@
 #define COLLISION_LAYERS_GRABBABLE          (1 << 3)
 #define COLLISION_LAYERS_FIZZLER            (1 << 4)
 #define COLLISION_LAYERS_BLOCK_PORTAL       (1 << 5)
+#define COLLISION_LAYERS_BLOCK_BALL         (1 << 6)
 
 #define COLLISION_OBJECT_HAS_CONTACTS       (1 << 0)
 #define COLLISION_OBJECT_PLAYER_STANDING    (1 << 1)

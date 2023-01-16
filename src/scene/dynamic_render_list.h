@@ -34,6 +34,13 @@ void dynamicRenderListAddData(
 );
 
 void dynamicRenderListPopulate(struct DynamicRenderDataList* list, struct RenderProps* stages, int stageCount, struct RenderState* renderState);
-void dynamicRenderPopulateRenderScene(struct DynamicRenderDataList* list, int stageIndex, struct RenderScene* renderScene);
+void dynamicRenderPopulateRenderScene(
+    struct DynamicRenderDataList* list, 
+    int stageIndex, 
+    struct RenderScene* renderScene, 
+    struct Transform* cameraTransform, 
+    struct FrustrumCullingInformation* cullingInfo, 
+    u64 visibleRooms
+);
 
 #endif

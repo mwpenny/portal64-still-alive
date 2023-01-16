@@ -118,7 +118,7 @@ void staticRender(struct Transform* cameraTransform, struct FrustrumCullingInfor
 
     staticRenderPopulateRooms(cullingInfo, staticTransforms, renderScene);
 
-    dynamicRenderPopulateRenderScene(dynamicList, stageIndex, renderScene);
+    dynamicRenderPopulateRenderScene(dynamicList, stageIndex, renderScene, cameraTransform, cullingInfo, visibleRooms);
 
     renderSceneGenerate(renderScene, renderState);
 

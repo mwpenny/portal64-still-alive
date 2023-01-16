@@ -55,4 +55,8 @@ sk_definition_writer.add_definition("level", "struct LevelDefinition", "_geo", {
     switchCount = #entities.switches,
     dynamicBoxes = sk_definition_writer.reference_to(dynamic_collision.dynamic_boxes, 1),
     dynamicBoxCount = #dynamic_collision.dynamic_boxes,
+    ballLaunchers = sk_definition_writer.reference_to(entities.ball_launchers, 1),
+    ballLauncherCount = #entities.ball_launchers,
+    ballCatchers = sk_definition_writer.reference_to(entities.ball_catchers, 1),
+    ballCatcherCount = #entities.ball_catchers,
 })

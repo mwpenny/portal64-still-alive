@@ -51,7 +51,7 @@ void sceneInitDynamicColliders(struct Scene* scene) {
         colliderType[i].bounce = 0.5f;
         colliderType[i].friction = 0.5f;
         colliderType[i].callbacks = &gCollisionBoxCallbacks;
-        collisionObjectInit(&colliders[i], &colliderType[i], &body[i], 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_STATIC);
+        collisionObjectInit(&colliders[i], &colliderType[i], &body[i], 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_BLOCK_BALL | COLLISION_LAYERS_STATIC);
         rigidBodyMarkKinematic(&body[i]);
 
         body[i].currentRoom = gCurrentLevel->dynamicBoxes[i].roomIndex;
@@ -145,6 +145,12 @@ void sceneInit(struct Scene* scene) {
     scene->switches = malloc(sizeof(struct Switch) * scene->switchCount);
     for (int i = 0; i < scene->switchCount; ++i) {
         switchInit(&scene->switches[i], &gCurrentLevel->switches[i]);
+    }
+
+    scene->ballLancherCount = gCurrentLevel->ballLauncherCount;
+    scene->ballLaunchers = malloc(sizeof(struct Switch) * scene->ballCatcherCount);
+    for (int i = 0; i < scene->ballLancherCount; ++i) {
+        ballLauncherInit(&scene->ballLaunchers[i], &gCurrentLevel->ballLaunchers[i]);
     }
 
     scene->freeCameraOffset = gZeroVec;
@@ -418,6 +424,10 @@ void sceneUpdate(struct Scene* scene) {
 
     for (int i = 0; i < scene->boxDropperCount; ++i) {
         boxDropperUpdate(&scene->boxDroppers[i]);
+    }
+
+    for (int i = 0; i < scene->ballLancherCount; ++i) {
+        ballLauncherUpdate(&scene->ballLaunchers[i]);
     }
 
     sceneAnimatorUpdate(&scene->animator);

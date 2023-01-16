@@ -307,8 +307,8 @@ for index, node in pairs(collider_nodes) do
             sk_definition_writer.null_value,
             bb,
             is_transparent and 
-                sk_definition_writer.raw('COLLISION_LAYERS_STATIC | COLLISION_LAYERS_TRANSPARENT | COLLISION_LAYERS_TANGIBLE') or
-                sk_definition_writer.raw('COLLISION_LAYERS_STATIC | COLLISION_LAYERS_TANGIBLE')
+                sk_definition_writer.raw('COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_BALL | COLLISION_LAYERS_TRANSPARENT | COLLISION_LAYERS_TANGIBLE') or
+                sk_definition_writer.raw('COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_BALL | COLLISION_LAYERS_TANGIBLE')
         })
     end
 end

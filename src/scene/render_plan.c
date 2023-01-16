@@ -474,7 +474,15 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* 
             portalIndex = 1 - portalIndex;
         }
 
-        staticRender(&current->camera.transform, &current->cameraMatrixInfo.cullingInformation, current->visiblerooms, dynamicList, stageIndex, staticTransforms, renderState);
+        staticRender(
+            &current->camera.transform, 
+            &current->cameraMatrixInfo.cullingInformation, 
+            current->visiblerooms, 
+            dynamicList, 
+            stageIndex, 
+            staticTransforms, 
+            renderState
+        );
     }
 
     dynamicRenderListFree(dynamicList);

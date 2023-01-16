@@ -21,6 +21,7 @@ void signalsInit(unsigned signalCount) {
 
     for (int i = 0; i < binCount; ++i) {
         gDefaultSignals[i] = 0;
+        gSignals[i] = 0;
     }
 }
 

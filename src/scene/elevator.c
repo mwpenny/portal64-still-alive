@@ -29,7 +29,7 @@ struct ColliderTypeData gElevatorColliderType = {
     &gMeshColliderCallbacks
 };
 
-int gElevatorCollisionLayers = COLLISION_LAYERS_STATIC | COLLISION_LAYERS_TANGIBLE;
+int gElevatorCollisionLayers = COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_BALL | COLLISION_LAYERS_TANGIBLE;
 
 struct Vector3 gClosedPosition[] = {
     [PROPS_ROUND_ELEVATOR_ELEVATOR_BONE] = {0, 0, 0},

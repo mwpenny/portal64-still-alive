@@ -206,6 +206,20 @@ struct DynamicBoxDefinition {
     short transformIndex;
 };
 
+struct BallLauncherDefinition {
+    struct Vector3 position;
+    struct Quaternion rotation;
+    short roomIndex;
+    short signalIndex;
+};
+
+struct BallCatcherDefinition {
+    struct Vector3 position;
+    struct Quaternion rotation;
+    short roomIndex;
+    short signalIndex;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
@@ -232,6 +246,8 @@ struct LevelDefinition {
     struct BoxDropperDefinition* boxDroppers;
     struct AnimationInfo* animations;
     struct SwitchDefinition* switches;
+    struct BallLauncherDefinition* ballLaunchers;
+    struct BallCatcherDefinition* ballCatchers;
     short collisionQuadCount;
     short staticContentCount;
     short portalSurfaceCount;
@@ -250,6 +266,8 @@ struct LevelDefinition {
     short boxDropperCount;
     short animationInfoCount;
     short switchCount;
+    short ballLauncherCount;
+    short ballCatcherCount;
     short startLocation;
 };
 

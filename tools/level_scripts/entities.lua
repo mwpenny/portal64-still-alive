@@ -174,6 +174,40 @@ end
 
 sk_definition_writer.add_definition('switches', 'struct SwitchDefinition[]', '_geo', switches)
 
+local ball_launchers = {}
+
+for _, switch_element in pairs(sk_scene.nodes_for_type('@ball_launcher')) do
+    local position, rotation = switch_element.node.full_transformation:decompose()
+
+    local room_index = room_export.node_nearest_room_index(switch_element.node)
+
+    table.insert(ball_launchers, {
+        position,
+        rotation * sk_math.axis_angle(sk_math.vector3(1, 0, 0), math.pi * 0.5),
+        room_index,
+        signals.signal_index_for_name(switch_element.arguments[1]),
+    })
+end
+
+sk_definition_writer.add_definition('ball_launchers', 'struct BallLauncherDefinition[]', '_geo', ball_launchers)
+
+local ball_catchers = {}
+
+for _, switch_element in pairs(sk_scene.nodes_for_type('@ball_catcher')) do
+    local position, rotation = switch_element.node.full_transformation:decompose()
+
+    local room_index = room_export.node_nearest_room_index(switch_element.node)
+
+    table.insert(ball_catchers, {
+        position,
+        rotation * sk_math.axis_angle(sk_math.vector3(1, 0, 0), math.pi * 0.5),
+        room_index,
+        signals.signal_index_for_name(switch_element.arguments[1]),
+    })
+end
+
+sk_definition_writer.add_definition('ball_catchers', 'struct BallCatcherDefinition[]', '_geo', ball_catchers)
+
 return {
     box_droppers = box_droppers,
     buttons = buttons,
@@ -184,4 +218,6 @@ return {
     pedestals = pedestals,
     signage = signage,
     switches = switches,
+    ball_catchers = ball_catchers,
+    ball_launchers =  ball_launchers,
 }

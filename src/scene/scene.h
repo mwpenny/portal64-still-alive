@@ -18,6 +18,8 @@
 #include "box_dropper.h"
 #include "scene_animator.h"
 #include "switch.h"
+#include "ball_launcher.h"
+#include "ball_catcher.h"
 
 struct Scene {
     struct Camera camera;
@@ -35,6 +37,8 @@ struct Scene {
     struct Vector3 freeCameraOffset;
     struct SceneAnimator animator;
     struct CollisionObject* dynamicColliders;
+    struct BallLauncher* ballLaunchers;
+    struct BallCatcher* ballCatchers;
     OSTime cpuTime;
     OSTime lastFrameStart;
     OSTime lastFrameTime;
@@ -47,6 +51,8 @@ struct Scene {
     u8 signageCount;
     u8 boxDropperCount;
     u8 switchCount;
+    u8 ballLancherCount;
+    u8 ballCatcherCount;
 };
 
 extern struct Scene gScene;

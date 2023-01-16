@@ -86,7 +86,14 @@ void dynamicRenderListPopulate(struct DynamicRenderDataList* list, struct Render
     }
 }
 
-void dynamicRenderPopulateRenderScene(struct DynamicRenderDataList* list, int stageIndex, struct RenderScene* renderScene) {
+void dynamicRenderPopulateRenderScene(
+    struct DynamicRenderDataList* list, 
+    int stageIndex, 
+    struct RenderScene* renderScene, 
+    struct Transform* cameraTransform, 
+    struct FrustrumCullingInformation* cullingInfo, 
+    u64 visiblerooms
+) {
     int stageMask = (1 << stageIndex);
     for (int i = 0; i < list->currentLength; ++i) {
         struct DynamicRenderData* current = &list->renderData[i];
@@ -96,5 +103,26 @@ void dynamicRenderPopulateRenderScene(struct DynamicRenderDataList* list, int st
         }
 
         renderSceneAdd(renderScene, current->model, current->transform, current->materialIndex, &current->position, current->armature);
+    }
+
+    for (int i = 0; i < MAX_VIEW_DEPENDANT_OBJECTS; ++i) {
+        struct DynamicSceneViewDependantObject* object = &gDynamicScene.viewDependantObjects[i];
+
+        if ((object->flags & FLAG_MASK) != FLAG_MASK) {
+            continue;
+        }
+
+        if ((visiblerooms & object->roomFlags) == 0) {
+            continue;
+        }
+
+        struct Vector3 scaledPos;
+        vector3Scale(&object->transform->position, &scaledPos, SCENE_SCALE);
+
+        if (isSphereOutsideFrustrum(cullingInfo, &scaledPos, object->scaledRadius)) {
+            continue;
+        }
+
+        object->renderCallback(object->data, renderScene, cameraTransform);
     }
 }
