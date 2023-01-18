@@ -148,7 +148,7 @@ void sceneInit(struct Scene* scene) {
     }
 
     scene->ballLancherCount = gCurrentLevel->ballLauncherCount;
-    scene->ballLaunchers = malloc(sizeof(struct Switch) * scene->ballCatcherCount);
+    scene->ballLaunchers = malloc(sizeof(struct BallLauncher) * scene->ballLancherCount);
     for (int i = 0; i < scene->ballLancherCount; ++i) {
         ballLauncherInit(&scene->ballLaunchers[i], &gCurrentLevel->ballLaunchers[i]);
     }
