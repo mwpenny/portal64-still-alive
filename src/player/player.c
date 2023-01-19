@@ -108,7 +108,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->grabConstraint.object = NULL;
     player->pitchVelocity = 0.0f;
     player->yawVelocity = 0.0f;
-    player->flags = 0;
+    player->flags = PlayerHasFirstPortalGun | PlayerHasSecondPortalGun;
 
     player->dynamicId = dynamicSceneAdd(player, playerRender, &player->body.transform, 1.5f);
     dynamicSceneSetFlags(player->dynamicId, DYNAMIC_SCENE_OBJECT_SKIP_ROOT);

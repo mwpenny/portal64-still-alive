@@ -164,8 +164,8 @@ void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct 
 
     object->body->transform.position = objectEnd;
 
-    contact->friction = MAX(object->collider->friction, quadObject->collider->friction);
-    contact->restitution = MIN(object->collider->bounce, quadObject->collider->bounce);
+    contact->friction = MIN(object->collider->friction, quadObject->collider->friction);
+    contact->restitution = MAX(object->collider->bounce, quadObject->collider->bounce);
 
     transformPointInverseNoScale(&object->body->transform, &result.contactB, &result.contactB);
     contactInsert(contact, &result);
@@ -395,10 +395,15 @@ void collisionObjectCollideTwoObjectsSwept(
         epaSwapResult(&result);
     }
 
-    contact->friction = MAX(a->collider->friction, b->collider->friction);
-    contact->restitution = MIN(a->collider->bounce, b->collider->bounce);
+    contact->friction = MIN(a->collider->friction, b->collider->friction);
+    contact->restitution = MAX(a->collider->bounce, b->collider->bounce);
 
     contactInsert(contact, &result);
+
+    struct Vector3 normalReverse;
+    vector3Negate(&contact->normal, &normalReverse);
+    collisionObjectHandleSweptCollision(a, &normalReverse, contact->restitution);
+    collisionObjectHandleSweptCollision(b, &contact->normal, contact->restitution);
 }
 
 void collisionObjectUpdateBB(struct CollisionObject* object) {

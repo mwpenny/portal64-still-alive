@@ -84,8 +84,8 @@ void ballLauncherUpdate(struct BallLauncher* launcher) {
 
     if (!ballIsActive(&launcher->currentBall) && signalsRead(launcher->signalIndex)) {
         struct Vector3 initialVelocity;
-        quatMultVector(&launcher->rigidBody.transform.rotation, &gUp, &initialVelocity);
-        vector3Scale(&initialVelocity, &initialVelocity, -BALL_VELOCITY);
+        quatMultVector(&launcher->rigidBody.transform.rotation, &gForward, &initialVelocity);
+        vector3Scale(&initialVelocity, &initialVelocity, BALL_VELOCITY);
 
         ballInit(&launcher->currentBall, &launcher->rigidBody.transform.position, &initialVelocity, launcher->rigidBody.currentRoom);
     }
