@@ -85,8 +85,21 @@ void ballLauncherUpdate(struct BallLauncher* launcher) {
     if (!ballIsActive(&launcher->currentBall) && signalsRead(launcher->signalIndex)) {
         struct Vector3 initialVelocity;
         quatMultVector(&launcher->rigidBody.transform.rotation, &gUp, &initialVelocity);
-        vector3Scale(&initialVelocity, &initialVelocity, BALL_VELOCITY);
+        vector3Scale(&initialVelocity, &initialVelocity, -BALL_VELOCITY);
 
         ballInit(&launcher->currentBall, &launcher->rigidBody.transform.position, &initialVelocity, launcher->rigidBody.currentRoom);
+    }
+
+    if (ballIsActive(&launcher->currentBall) && !ballIsCollisionOn(&launcher->currentBall)) {
+        struct Simplex simplex;
+        if (!gjkCheckForOverlap(
+            &simplex, 
+            &launcher->collisionObject, 
+            minkowsiSumAgainstObject,
+            &launcher->currentBall.collisionObject,
+            minkowsiSumAgainstObject,
+            &launcher->currentBall.rigidBody.velocity)) {
+            ballTurnOnCollision(&launcher->currentBall);
+        }
     }
 }

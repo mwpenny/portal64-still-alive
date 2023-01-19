@@ -7,6 +7,7 @@
 #include "../physics/collision_box.h"
 
 #include "../build/assets/models/grav_flare.h"
+#include "../build/assets/models/cube/cube.h"
 #include "../build/assets/materials/static.h"
 
 #define BALL_RADIUS 0.1f
@@ -42,9 +43,11 @@ void ballInitInactive(struct Ball* ball) {
 }
 
 void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* velocity, short startingRoom) {
-    // collisionObjectInit(&ball->collisionObject, &gBallCollider, &ball->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_BLOCK_BALL);
+    collisionObjectInit(&ball->collisionObject, &gBallCollider, &ball->rigidBody, 1.0f, 0);
 
-    // collisionSceneAddDynamicObject(&ball->collisionObject);
+    collisionSceneAddDynamicObject(&ball->collisionObject);
+
+    ball->rigidBody.flags |= RigidBodyDisableGravity;
 
     ball->rigidBody.velocity = *velocity;
     ball->rigidBody.transform.position = *position;
@@ -57,6 +60,10 @@ void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* veloc
     ball->dynamicId = dynamicSceneAddViewDependant(ball, ballRender, &ball->rigidBody.transform, BALL_RADIUS);
 
     dynamicSceneSetRoomFlags(ball->dynamicId, ROOM_FLAG_FROM_INDEX(startingRoom));
+}
+
+void ballTurnOnCollision(struct Ball* ball) {
+    ball->collisionObject.collisionLayers |= COLLISION_LAYERS_BLOCK_BALL;
 }
 
 void ballUpdate(struct Ball* ball) {
@@ -79,4 +86,8 @@ void ballUpdate(struct Ball* ball) {
 
 int ballIsActive(struct Ball* ball) {
     return ball->targetSpeed != 0.0f;
+}
+
+int ballIsCollisionOn(struct Ball* ball) {
+    return ball->collisionObject.collisionLayers != 0;
 }

@@ -12,8 +12,10 @@ struct Ball {
 
 void ballInitInactive(struct Ball* ball);
 void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* velocity, short startingRoom);
+void ballTurnOnCollision(struct Ball* ball);
 
 void ballUpdate(struct Ball* ball);
 int ballIsActive(struct Ball* ball);
+int ballIsCollisionOn(struct Ball* ball);
 
 #endif
