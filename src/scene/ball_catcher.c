@@ -63,6 +63,8 @@ void ballCatcherInit(struct BallCatcher* catcher, struct BallCatcherDefinition* 
 
     catcher->signalIndex = definition->signalIndex;
 
+    catcher->flags = 0;
+
     collisionObjectUpdateBB(&catcher->collisionObject);
 
     catcher->dynamicId = dynamicSceneAdd(catcher, ballCatcherRender, &catcher->rigidBody.transform, 1.0f);
@@ -73,6 +75,40 @@ void ballCatcherInit(struct BallCatcher* catcher, struct BallCatcherDefinition* 
     skArmatureInit(&catcher->armature, &props_combine_ball_catcher_armature);
 }
 
-void ballCatcherUpdate(struct BallCatcher* catcher) {
+void ballCatcherCheckBalls(struct BallCatcher* catcher, struct BallLauncher* ballLaunchers, int ballLauncherCount) {
+    if (catcher->flags & BallCatcherFlagsCaught) {
+        return;
+    }
+
+    for (int i = 0; i < ballLauncherCount; ++i) {
+        struct BallLauncher* launcher = &ballLaunchers[i];
+
+        if (!ballIsActive(&launcher->currentBall)) {
+            continue;
+        }
+
+        struct Simplex simplex;
+        if (!gjkCheckForOverlap(
+            &simplex, 
+            &catcher->collisionObject, 
+            minkowsiSumAgainstObject, 
+            &launcher->currentBall.collisionObject, 
+            minkowsiSumAgainstObject, 
+            &launcher->currentBall.rigidBody.velocity)) {
+            continue;
+        }
+
+        catcher->flags |= BallCatcherFlagsCaught;
+        skAnimatorRunClip(&catcher->animator, &props_combine_ball_catcher_Armature_catch_clip, 0.0f, 0);
+    }
+}
+
+void ballCatcherUpdate(struct BallCatcher* catcher, struct BallLauncher* ballLaunchers, int ballLauncherCount) {
     skAnimatorUpdate(&catcher->animator, catcher->armature.pose, FIXED_DELTA_TIME);
+    
+    if (catcher->flags & BallCatcherFlagsCaught) {
+        signalsSend(catcher->signalIndex);
+    } else {
+        ballCatcherCheckBalls(catcher, ballLaunchers, ballLauncherCount);
+    }
 }

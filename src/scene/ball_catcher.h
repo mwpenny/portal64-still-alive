@@ -8,6 +8,12 @@
 
 #include "../levels/level_definition.h"
 
+#include "./ball_launcher.h"
+
+enum BallCatcherFlags {
+    BallCatcherFlagsCaught = (1 << 0),
+};
+
 struct BallCatcher {
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
@@ -15,9 +21,10 @@ struct BallCatcher {
     struct SKAnimator animator;
     short dynamicId;
     short signalIndex;
+    short flags;
 };
 
 void ballCatcherInit(struct BallCatcher* catcher, struct BallCatcherDefinition* definition);
-void ballCatcherUpdate(struct BallCatcher* catcher);
+void ballCatcherUpdate(struct BallCatcher* catcher, struct BallLauncher* ballLaunchers, int ballLauncherCount);
 
 #endif

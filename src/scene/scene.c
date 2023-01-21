@@ -153,6 +153,12 @@ void sceneInit(struct Scene* scene) {
         ballLauncherInit(&scene->ballLaunchers[i], &gCurrentLevel->ballLaunchers[i]);
     }
 
+    scene->ballCatcherCount = gCurrentLevel->ballCatcherCount;
+    scene->ballCatchers = malloc(sizeof(struct BallCatcher) * scene->ballCatcherCount);
+    for (int i = 0; i < scene->ballCatcherCount; ++i) {
+        ballCatcherInit(&scene->ballCatchers[i], &gCurrentLevel->ballCatchers[i]);
+    }
+
     scene->freeCameraOffset = gZeroVec;
 
     sceneInitDynamicColliders(scene);
@@ -428,6 +434,10 @@ void sceneUpdate(struct Scene* scene) {
 
     for (int i = 0; i < scene->ballLancherCount; ++i) {
         ballLauncherUpdate(&scene->ballLaunchers[i]);
+    }
+
+    for (int i = 0; i < scene->ballCatcherCount; ++i) {
+        ballCatcherUpdate(&scene->ballCatchers[i], scene->ballLaunchers, scene->ballLancherCount);
     }
 
     sceneAnimatorUpdate(&scene->animator);
