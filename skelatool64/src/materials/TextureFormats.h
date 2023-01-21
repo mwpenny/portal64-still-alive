@@ -23,5 +23,6 @@ const char* nameForImageSize(G_IM_SIZ size);
 bool isImageFormatSupported(G_IM_FMT format, G_IM_SIZ size);
 
 int bitSizeforSiz(G_IM_SIZ input);
+int lineSizeForSize(G_IM_SIZ input);
 
 #endif

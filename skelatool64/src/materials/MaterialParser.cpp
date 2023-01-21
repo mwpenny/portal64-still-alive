@@ -663,7 +663,7 @@ bool parseSingleTile(const YAML::Node& node, TileState& state, ParseResult& outp
     if (state.texture) {
         state.format = state.texture->Format();
         state.size = state.texture->Size();
-        if (!state.texture->GetLine(state.line)) {
+        if (!state.texture->GetLineForTile(state.line)) {
             output.mErrors.push_back(ParseError(formatError("Texture line width should be a multiple of 64 bits", node.Mark())));
         }
 

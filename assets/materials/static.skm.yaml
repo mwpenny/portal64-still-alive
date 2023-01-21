@@ -312,8 +312,12 @@ materials:
       filename: ../../portal_pak_modified/materials/sprites/grav_flare.png
       fmt: G_IM_FMT_RGBA
       siz: G_IM_SIZ_32b
+      s:
+        mirror: true
+      t:
+        mirror: true
 
-    # gDPSetRenderMode: G_RM_ZB_XLU_SURF
+    gDPSetRenderMode: G_RM_ZB_XLU_SURF
 
     gDPSetCombineMode:
       color: ["0", "0", "0", "TEXEL0"]

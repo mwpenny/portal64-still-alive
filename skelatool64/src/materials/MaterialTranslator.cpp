@@ -20,10 +20,10 @@ void loadTextureFromAiMaterial(TextureCache& cache, Material& material, aiString
     state.isOn = true;
     state.texture = useTexture;
 
-    if (!state.texture->GetLine(state.line)) {
+    if (!state.texture->GetLineForTile(state.line)) {
         std::cerr << "Texture line width should be a multiple of 64 bits" << std::endl;
     }
-    useTexture->GetLine(state.line);
+    
     state.format = useTexture->Format();
     state.size = useTexture->Size();
     state.tmem = 0;

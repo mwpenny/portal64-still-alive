@@ -662,6 +662,12 @@ bool TextureDefinition::GetLine(int& line) const {
     return bitLine % 64 == 0;
 }
 
+bool TextureDefinition::GetLineForTile(int& line) const {
+    int bitLine = lineSizeForSize(mSiz) * mWidth;
+    line = bitLine / 64;
+    return bitLine % 64 == 0;
+}
+
 const std::string& TextureDefinition::Name() const {
     return mName;
 }

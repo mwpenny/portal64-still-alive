@@ -45,3 +45,14 @@ const int G_IM_SIZ_SIZES[] = {
 int bitSizeforSiz(G_IM_SIZ input) {
     return G_IM_SIZ_SIZES[(int)input];
 }
+
+const int G_IM_SIZ_LINE_BYTES[] = {
+    4,
+    8,
+    16,
+    16,
+};
+
+int lineSizeForSize(G_IM_SIZ input) {
+    return G_IM_SIZ_LINE_BYTES[(int)input];
+}

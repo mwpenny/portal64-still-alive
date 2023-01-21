@@ -97,6 +97,7 @@ public:
     G_IM_SIZ Size() const;
 
     bool GetLine(int& line) const;
+    bool GetLineForTile(int& line) const;
     int LoadBlockSize() const;
     int DTX() const;
     int NBytes() const;

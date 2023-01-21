@@ -1,4 +1,4 @@
--crop 32x32+0+0 -resize 16x16
+-crop 16x16+16+16 -resize 16x16
     \(
         +clone
         -colorspace gray
