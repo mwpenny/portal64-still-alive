@@ -528,3 +528,13 @@ materials:
       g: 0
       b: 0
       a: 0
+
+  solid_black_cap:
+    gDPSetPrimColor:
+      r: 32
+      g: 32
+      b: 32
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["PRIMITIVE", "0", "SHADE", "0"]

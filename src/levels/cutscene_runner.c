@@ -181,6 +181,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         }
         case CutsceneStepTypeGoto:
             runner->currentStep += step->gotoStep.relativeInstructionIndex;
+            cutsceneRunnerStartStep(runner);
             break;
         case CutsceneStepTypeStartCutscene:
             cutsceneStart(&gCurrentLevel->cutscenes[step->cutscene.cutsceneIndex]);
