@@ -40,6 +40,7 @@ void ballRender(void* data, struct RenderScene* renderScene, struct Transform* f
 
 void ballInitInactive(struct Ball* ball) {
     ball->targetSpeed = 0.0f;
+    ball->flags = 0;
 }
 
 void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* velocity, short startingRoom) {
@@ -54,6 +55,7 @@ void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* veloc
     quatIdent(&ball->rigidBody.transform.rotation);
     ball->rigidBody.transform.scale = gOneVec;
     ball->rigidBody.currentRoom = startingRoom;
+    ball->flags = 0;
 
     ball->targetSpeed = sqrtf(vector3MagSqrd(&ball->rigidBody.velocity));
 
@@ -90,4 +92,13 @@ int ballIsActive(struct Ball* ball) {
 
 int ballIsCollisionOn(struct Ball* ball) {
     return ball->collisionObject.collisionLayers != 0;
+}
+
+int ballIsCaught(struct Ball* ball) {
+    return (ball->flags & BallFlagsCaught) != 0;
+}
+
+void ballMarkCaught(struct Ball* ball) {
+    ball->flags |= BallFlagsCaught;
+    rigidBodyMarkKinematic(&ball->rigidBody);
 }

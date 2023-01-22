@@ -10,10 +10,6 @@
 
 #include "./ball_launcher.h"
 
-enum BallCatcherFlags {
-    BallCatcherFlagsCaught = (1 << 0),
-};
-
 struct BallCatcher {
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
@@ -21,7 +17,7 @@ struct BallCatcher {
     struct SKAnimator animator;
     short dynamicId;
     short signalIndex;
-    short flags;
+    struct Ball* caughtBall;
 };
 
 void ballCatcherInit(struct BallCatcher* catcher, struct BallCatcherDefinition* definition);

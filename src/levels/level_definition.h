@@ -123,6 +123,7 @@ struct Cutscene {
 struct Trigger {
     struct Box3D box;
     short cutsceneIndex;
+    short signalIndex;
 };
 
 struct Location {

@@ -367,6 +367,11 @@ void sceneUpdate(struct Scene* scene) {
         switchUpdate(&scene->switches[i]);
     }
 
+    for (int i = 0; i < scene->ballCatcherCount; ++i) {
+        ballCatcherUpdate(&scene->ballCatchers[i], scene->ballLaunchers, scene->ballLancherCount);
+    }
+
+    levelCheckTriggers(&scene->player.lookTransform.position);
     signalsEvaluateSignals(gCurrentLevel->signalOperators, gCurrentLevel->signalOperatorCount);
 
     for (int i = 0; i < scene->doorCount; ++i) {
@@ -436,17 +441,12 @@ void sceneUpdate(struct Scene* scene) {
         ballLauncherUpdate(&scene->ballLaunchers[i]);
     }
 
-    for (int i = 0; i < scene->ballCatcherCount; ++i) {
-        ballCatcherUpdate(&scene->ballCatchers[i], scene->ballLaunchers, scene->ballLancherCount);
-    }
-
     sceneAnimatorUpdate(&scene->animator);
     sceneUpdatePortalVelocity(scene);
     sceneUpdateAnimatedObjects(scene);
     
     collisionSceneUpdateDynamics();
 
-    levelCheckTriggers(&scene->player.lookTransform.position);
     cutscenesUpdate();
 
     scene->cpuTime = osGetTime() - frameStart;

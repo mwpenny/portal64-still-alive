@@ -14,6 +14,10 @@ struct CollisionBox gBallCatcherBox = {
     {0.5f, 0.5f, 0.5f},
 };
 
+struct Vector3 gLocalCatcherLocation = {
+    0.0f, 0.0f, -0.125f
+};
+
 struct ColliderTypeData gBallCatcherCollider = {
     CollisionShapeTypeBox,
     &gBallCatcherBox,
@@ -63,7 +67,7 @@ void ballCatcherInit(struct BallCatcher* catcher, struct BallCatcherDefinition* 
 
     catcher->signalIndex = definition->signalIndex;
 
-    catcher->flags = 0;
+    catcher->caughtBall = NULL;
 
     collisionObjectUpdateBB(&catcher->collisionObject);
 
@@ -76,7 +80,7 @@ void ballCatcherInit(struct BallCatcher* catcher, struct BallCatcherDefinition* 
 }
 
 void ballCatcherCheckBalls(struct BallCatcher* catcher, struct BallLauncher* ballLaunchers, int ballLauncherCount) {
-    if (catcher->flags & BallCatcherFlagsCaught) {
+    if (catcher->caughtBall) {
         return;
     }
 
@@ -98,7 +102,8 @@ void ballCatcherCheckBalls(struct BallCatcher* catcher, struct BallLauncher* bal
             continue;
         }
 
-        catcher->flags |= BallCatcherFlagsCaught;
+        catcher->caughtBall = &launcher->currentBall;
+        ballMarkCaught(catcher->caughtBall);
         skAnimatorRunClip(&catcher->animator, &props_combine_ball_catcher_Armature_catch_clip, 0.0f, 0);
     }
 }
@@ -106,8 +111,18 @@ void ballCatcherCheckBalls(struct BallCatcher* catcher, struct BallLauncher* bal
 void ballCatcherUpdate(struct BallCatcher* catcher, struct BallLauncher* ballLaunchers, int ballLauncherCount) {
     skAnimatorUpdate(&catcher->animator, catcher->armature.pose, FIXED_DELTA_TIME);
     
-    if (catcher->flags & BallCatcherFlagsCaught) {
+    if (catcher->caughtBall) {
         signalsSend(catcher->signalIndex);
+
+        struct Vector3 targetPosition;
+        transformPoint(&catcher->rigidBody.transform, &gLocalCatcherLocation, &targetPosition);
+
+        vector3MoveTowards(
+            &catcher->caughtBall->rigidBody.transform.position, 
+            &targetPosition, 
+            FIXED_DELTA_TIME * BALL_VELOCITY, 
+            &catcher->caughtBall->rigidBody.transform.position
+        );
     } else {
         ballCatcherCheckBalls(catcher, ballLaunchers, ballLauncherCount);
     }

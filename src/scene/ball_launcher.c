@@ -10,8 +10,6 @@
 #include "../build/assets/models/props/combine_ball_launcher.h"
 #include "../build/assets/materials/static.h"
 
-#define BALL_VELOCITY   2.0f
-
 struct CollisionBox gBallLauncherBox = {
     {0.5f, 0.5f, 0.5f},
 };
@@ -79,6 +77,10 @@ void ballLauncherInit(struct BallLauncher* launcher, struct BallLauncherDefiniti
 
 void ballLauncherUpdate(struct BallLauncher* launcher) {
     skAnimatorUpdate(&launcher->animator, launcher->armature.pose, FIXED_DELTA_TIME);
+
+    if (ballIsCaught(&launcher->currentBall)) {
+        return;
+    }
 
     ballUpdate(&launcher->currentBall);
 

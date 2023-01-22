@@ -298,12 +298,13 @@ local function generate_triggers(cutscenes)
         local first_mesh = trigger.node.meshes[1]
         local cutscene_index = cutscene_index(cutscenes, trigger.arguments[1])
     
-        if first_mesh and cutscene_index ~= -1 then
+        if first_mesh then
             local transformed = first_mesh:transform(trigger.node.full_transformation)
     
             table.insert(result, {
                 transformed.bb,
                 cutscene_index,
+                trigger.arguments[2] and signals.signal_index_for_name(trigger.arguments[2]) or -1,
             })
         end
     end
