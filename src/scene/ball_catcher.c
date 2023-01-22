@@ -112,17 +112,25 @@ void ballCatcherUpdate(struct BallCatcher* catcher, struct BallLauncher* ballLau
     skAnimatorUpdate(&catcher->animator, catcher->armature.pose, FIXED_DELTA_TIME);
     
     if (catcher->caughtBall) {
-        signalsSend(catcher->signalIndex);
+        if (catcher->caughtBall->flags & BallFlagsPowering) {
+            signalsSend(catcher->signalIndex);
+        } else {
+            struct Vector3 targetPosition;
+            transformPoint(&catcher->rigidBody.transform, &gLocalCatcherLocation, &targetPosition);
 
-        struct Vector3 targetPosition;
-        transformPoint(&catcher->rigidBody.transform, &gLocalCatcherLocation, &targetPosition);
+            vector3MoveTowards(
+                &catcher->caughtBall->rigidBody.transform.position, 
+                &targetPosition, 
+                FIXED_DELTA_TIME * BALL_VELOCITY, 
+                &catcher->caughtBall->rigidBody.transform.position
+            );
 
-        vector3MoveTowards(
-            &catcher->caughtBall->rigidBody.transform.position, 
-            &targetPosition, 
-            FIXED_DELTA_TIME * BALL_VELOCITY, 
-            &catcher->caughtBall->rigidBody.transform.position
-        );
+            if (targetPosition.x == catcher->caughtBall->rigidBody.transform.position.x && 
+                targetPosition.y == catcher->caughtBall->rigidBody.transform.position.y && 
+                targetPosition.z == catcher->caughtBall->rigidBody.transform.position.z) {
+                catcher->caughtBall->flags |= BallFlagsPowering;
+            }
+        }
     } else {
         ballCatcherCheckBalls(catcher, ballLaunchers, ballLauncherCount);
     }

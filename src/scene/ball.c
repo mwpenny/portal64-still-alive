@@ -6,6 +6,8 @@
 #include "../physics/collision_scene.h"
 #include "../physics/collision_box.h"
 
+#include "../util/time.h"
+
 #include "../build/assets/models/grav_flare.h"
 #include "../build/assets/models/cube/cube.h"
 #include "../build/assets/materials/static.h"
@@ -56,6 +58,7 @@ void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* veloc
     ball->rigidBody.transform.scale = gOneVec;
     ball->rigidBody.currentRoom = startingRoom;
     ball->flags = 0;
+    ball->lifetime = BALL_LIFETIME;
 
     ball->targetSpeed = sqrtf(vector3MagSqrd(&ball->rigidBody.velocity));
 
@@ -69,7 +72,7 @@ void ballTurnOnCollision(struct Ball* ball) {
 }
 
 void ballUpdate(struct Ball* ball) {
-    if (ball->targetSpeed == 0.0f) {
+    if (ball->targetSpeed == 0.0f || ballIsCaught(ball)) {
         return;
     }
 
@@ -84,6 +87,16 @@ void ballUpdate(struct Ball* ball) {
     ball->rigidBody.angularVelocity = gOneVec;
     
     dynamicSceneSetRoomFlags(ball->dynamicId, ROOM_FLAG_FROM_INDEX(ball->rigidBody.currentRoom));
+
+    if (ball->lifetime > 0.0f) {
+        ball->lifetime -= FIXED_DELTA_TIME;
+
+        if (ball->lifetime <= 0.0f) {
+            ball->targetSpeed = 0.0f;
+            collisionSceneRemoveDynamicObject(&ball->collisionObject);
+            dynamicSceneRemove(ball->dynamicId);
+        }
+    }
 }
 
 int ballIsActive(struct Ball* ball) {
@@ -100,5 +113,6 @@ int ballIsCaught(struct Ball* ball) {
 
 void ballMarkCaught(struct Ball* ball) {
     ball->flags |= BallFlagsCaught;
+    collisionSceneRemoveDynamicObject(&ball->collisionObject);
     rigidBodyMarkKinematic(&ball->rigidBody);
 }

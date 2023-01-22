@@ -90,6 +90,7 @@ void ballLauncherUpdate(struct BallLauncher* launcher) {
         vector3Scale(&initialVelocity, &initialVelocity, BALL_VELOCITY);
 
         ballInit(&launcher->currentBall, &launcher->rigidBody.transform.position, &initialVelocity, launcher->rigidBody.currentRoom);
+        skAnimatorRunClip(&launcher->animator, &props_combine_ball_launcher_Armature_launch_clip, 0.0f, 0);
     }
 
     if (ballIsActive(&launcher->currentBall) && !ballIsCollisionOn(&launcher->currentBall)) {

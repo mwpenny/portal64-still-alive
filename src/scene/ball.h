@@ -4,15 +4,19 @@
 #include "../physics/collision_object.h"
 
 #define BALL_VELOCITY   2.0f
+#define BALL_LIFETIME   10.0f
+#define BALL_FADE_TIME  3.0f
 
 enum BallFlags {
     BallFlagsCaught = (1 << 0),
+    BallFlagsPowering = (1 << 1),
 };
 
 struct Ball {
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
     float targetSpeed;
+    float lifetime;
     short dynamicId;
     short flags;
 };
