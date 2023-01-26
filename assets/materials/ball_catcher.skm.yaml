@@ -1,0 +1,251 @@
+materials:
+  catcher_solid_white:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_back.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 0
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_sheet.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 256
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ./models/props/combine_ball_catcher.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 384
+        s:
+          wrap: false
+        t:
+          wrap: false
+
+    gDPSetPrimColor:
+      r: 255
+      g: 255
+      b: 255
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+    gDPSetCombineMode: 
+      color: ["PRIMITIVE", "0", "SHADE", "0"]
+
+  catcher_solid_black:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_back.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 0
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_sheet.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 256
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ./models/props/combine_ball_catcher.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 384
+        s:
+          wrap: false
+        t:
+          wrap: false
+          
+    gDPSetPrimColor:
+      r: 32
+      g: 32
+      b: 32
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+    gDPSetCombineMode: 
+      color: ["PRIMITIVE", "0", "SHADE", "0"]
+
+  catcher_solid_white_double:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_back.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 0
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_sheet.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 256
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ./models/props/combine_ball_catcher.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 384
+        s:
+          wrap: false
+        t:
+          wrap: false
+
+    gDPSetPrimColor:
+      r: 255
+      g: 255
+      b: 255
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+      clear: [G_CULL_BACK]
+    gDPSetCombineMode: 
+      color: ["PRIMITIVE", "0", "SHADE", "0"]
+
+  catcher_solid_black_double:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_back.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 0
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_sheet.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 256
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ./models/props/combine_ball_catcher.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 384
+        s:
+          wrap: false
+        t:
+          wrap: false
+          
+    gDPSetPrimColor:
+      r: 32
+      g: 32
+      b: 32
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+      clear: [G_CULL_BACK]
+    gDPSetCombineMode: 
+      color: ["PRIMITIVE", "0", "SHADE", "0"]
+
+  catcher_center:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_back.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 0
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_sheet.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 256
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ./models/props/combine_ball_catcher.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 384
+        s:
+          wrap: false
+        t:
+          wrap: false
+
+    gSPTexture:
+      tile: 0
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+    gDPSetCombineMode: 
+      color: ["TEXEL0", "0", "SHADE", "0"]
+
+  catcher_ring:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_back.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 0
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_sheet.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 256
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ./models/props/combine_ball_catcher.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 384
+        s:
+          wrap: false
+        t:
+          wrap: false
+
+    gSPTexture:
+      tile: 1
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+    gDPSetCombineMode: 
+      color: ["TEXEL0", "0", "SHADE", "0"]
+
+  catcher_blue:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_back.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 0
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_sheet.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 256
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ./models/props/combine_ball_catcher.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 384
+        s:
+          wrap: false
+        t:
+          wrap: false
+
+    gSPTexture:
+      tile: 2
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+    gDPSetCombineMode: 
+      color: ["TEXEL0", "0", "SHADE", "0"]

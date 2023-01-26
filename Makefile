@@ -227,6 +227,10 @@ build/src/scene/ball_catcher.o: build/assets/models/props/combine_ball_catcher.h
 
 build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
 
+build/assets/models/props/combine_ball_catcher.h: assets/materials/ball_catcher.skm.yaml
+
+build/assets/models/props/combine_ball_launcher.h: assets/materials/ball_catcher.skm.yaml
+
 ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_03/test_chamber_03_anim.o
 
 build/anims.ld: $(ANIM_LIST) $(ANIM_TEST_CHAMBERS) tools/generate_animation_ld.js

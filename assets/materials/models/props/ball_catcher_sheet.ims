@@ -1,0 +1,16 @@
+\( 
+    +clone 
+    -alpha off 
+    -crop 117x117+367+28
+    -resize 32x32 
+    -fill "#020202" 
+    -draw 'rectangle 0,-1 32,0' 
+    -draw 'rectangle 0,31 32,32' 
+    -draw 'rectangle -1,0 0,32' 
+    -draw 'rectangle 31,0 32,32' 
+    -write portal_pak_modified/materials/models/props/ball_catcher_back.png 
+\) 
+-composite 
+-alpha off 
+-crop 98x49+267+315 
+-resize 32x16 

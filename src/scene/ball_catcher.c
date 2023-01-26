@@ -49,7 +49,7 @@ void ballCatcherRender(void* data, struct DynamicRenderDataList* renderList, str
         renderList,
         props_combine_ball_catcher_model_gfx,
         matrix,
-        DEFAULT_INDEX,
+        BALL_CATCHER_INDEX,
         &catcher->rigidBody.transform.position,
         armature
     );

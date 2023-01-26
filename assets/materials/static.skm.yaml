@@ -538,3 +538,30 @@ materials:
       set: [G_LIGHTING, G_SHADE]
     gDPSetCombineMode: 
       color: ["PRIMITIVE", "0", "SHADE", "0"]
+
+  ball_catcher:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_back.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 0
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ../../portal_pak_modified/materials/models/props/ball_catcher_sheet.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 256
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ./models/props/combine_ball_catcher.png
+        fmt: G_IM_FMT_RGBA
+        siz: G_IM_SIZ_16b
+        tmem: 384
+        s:
+          wrap: false
+        t:
+          wrap: false

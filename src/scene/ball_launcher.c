@@ -45,7 +45,7 @@ void ballLauncherRender(void* data, struct DynamicRenderDataList* renderList, st
         renderList,
         props_combine_ball_launcher_model_gfx,
         matrix,
-        DEFAULT_INDEX,
+        BALL_CATCHER_INDEX,
         &launcher->rigidBody.transform.position,
         armature
     );
