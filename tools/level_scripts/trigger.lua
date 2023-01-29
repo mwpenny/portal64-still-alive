@@ -208,6 +208,7 @@ local function generate_cutscene_step(step, step_index, label_locations, cutscen
             animation.get_armature_index_with_name(step.args[1]) or 0,
         }
     else
+        error("Unrecognized cutscene step " .. step.command)
         result.type = sk_definition_writer.raw('CutsceneStepTypeNoop')
         table.noop = 0;
     end
