@@ -441,8 +441,9 @@ void epaSweptFindFace(struct ExpandingSimplex* simplex, struct Vector3* directio
     int currentFace = NEXT_FACE(*startFaceEdge);
 
     int i = 0;
+    int loopCheck = 3;
 
-    while (currentFace != *startFaceEdge && i < MAX_ITERATIONS) {
+    while (loopCheck > 0 && i < MAX_ITERATIONS) {
         int nextFace = NEXT_FACE(currentFace);
 
         struct SimplexTriangle* triangle = &simplex->triangles[*startTriangleIndex];
@@ -456,13 +457,14 @@ void epaSweptFindFace(struct ExpandingSimplex* simplex, struct Vector3* directio
 
         if (vector3Dot(&normal, direction) < 0) {
             *startTriangleIndex = triangle->indexData.adjacentFaces[currentFace];
-            nextFace = triangle->indexData.oppositePoints[currentFace];
             *startFaceEdge = NEXT_FACE(triangle->indexData.oppositePoints[currentFace]);
             nextFace = NEXT_FACE(*startFaceEdge);
+            loopCheck = 3;
         }
 
         currentFace = nextFace;
         ++i;
+        --loopCheck;
     }
 }
 
