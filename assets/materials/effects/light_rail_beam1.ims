@@ -1,0 +1,9 @@
+-crop 32x32+32+20 
+    \(
+        +clone
+        -colorspace gray
+        -alpha off
+        -brightness-contrast 60x80
+    \)
+    -compose copy-opacity
+    -composite

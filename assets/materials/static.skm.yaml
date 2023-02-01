@@ -565,3 +565,23 @@ materials:
           wrap: false
         t:
           wrap: false
+
+  light_rail_beam:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/effects/light_rail_beam1.png
+      siz: G_IM_SIZ_32b
+      fmt: G_IM_FMT_RGBA
+      s:
+        mirror: true
+      t:
+        mirror: true
+    
+    gDPSetRenderMode: G_RM_ZB_XLU_SURF
+
+    gDPSetCombineMode:
+      color: ["0", "0", "0", "TEXEL0"]
+      alpha: ["0", "0", "0", "TEXEL0"]
+
+    properties:
+      tileSizeS: 0.25
+      tileSizeT: 0.25
