@@ -33,6 +33,9 @@ struct Player {
     float pitchVelocity;
     float yawVelocity;
     enum PlayerFlags flags;
+    struct RigidBody* anchoredTo;
+    struct Vector3 relativeAnchor;
+    struct Vector3 lastAnchorPoint;
 };
 
 void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity);

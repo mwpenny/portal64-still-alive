@@ -122,6 +122,8 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     }
     player->body.transform = player->lookTransform;
 
+    player->anchoredTo = NULL;
+
     collisionObjectUpdateBB(&player->collisionObject);
 
     dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
@@ -399,11 +401,20 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
     vector3AddScaled(&player->body.transform.position, &player->body.velocity, FIXED_DELTA_TIME, &player->body.transform.position);
 
+    if (player->anchoredTo) {
+        struct Vector3 newAnchor;
+        transformPoint(&player->anchoredTo->transform, &player->relativeAnchor, &newAnchor);
+        vector3Add(&player->body.transform.position, &newAnchor, &player->body.transform.position);
+        vector3Sub(&player->body.transform.position, &player->lastAnchorPoint, &player->body.transform.position);
+    }
+
     struct Box3D sweptBB = player->collisionObject.boundingBox;
     collisionObjectUpdateBB(&player->collisionObject);
     box3DUnion(&sweptBB, &player->collisionObject.boundingBox, &sweptBB);
 
     collisionObjectCollideMixed(&player->collisionObject, &prevPos, &sweptBB, &gCollisionScene, &gContactSolver);
+
+    player->anchoredTo = NULL;
 
     struct RaycastHit hit;
     struct Ray ray;
@@ -421,6 +432,12 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
         hit.object->flags |= COLLISION_OBJECT_PLAYER_STANDING;
         player->flags |= PlayerFlagsGrounded;
+
+        if (hit.object->body) {
+            player->anchoredTo = hit.object->body;
+            player->lastAnchorPoint = hit.at;
+            transformPointInverseNoScale(&player->anchoredTo->transform, &hit.at, &player->relativeAnchor);
+        }
     }
     
     struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);
