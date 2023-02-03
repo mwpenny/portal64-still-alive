@@ -585,3 +585,25 @@ materials:
     properties:
       tileSizeS: 0.25
       tileSizeT: 0.25
+
+  hazard_liquid:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/nature/hazard_liquid.png
+      siz: G_IM_SIZ_16b
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+    
+    gDPSetCombineMode:
+      color: ["TEXEL0", "PRIMITIVE", "SHADE", "PRIMITIVE"]
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gDPSetPrimColor:
+      r: 217
+      g: 71
+      b: 24
+
+    properties:
+      tileSizeS: 4
+      tileSizeT: 4
