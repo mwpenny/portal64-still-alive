@@ -59,7 +59,7 @@ enum LevelWarnings {
     LevelWarningsCake = (1 << 9),
 };
 
-char gLevelWarnings[] = {
+short gLevelWarnings[] = {
     LevelWarningsCubeDispense | LevelWarningsCubeHit,
     0,
     0,
@@ -68,6 +68,7 @@ char gLevelWarnings[] = {
     LevelWarningsCubeHit,
     LevelWarningsBallHit | LevelWarningsBallCollect,
     LevelWarningsBallHit | LevelWarningsBallCollect,
+    LevelWarningsBallHit | LevelWarningsBallCollect | LevelWarningsLiquid | LevelWarningsDrinking,
 };
 
 static struct Coloru8 gSignageOnColor = {0, 0, 0, 255};

@@ -158,7 +158,7 @@ static void gameProc(void* arg) {
     dynamicSceneInit();
     contactSolverInit(&gContactSolver);
     portalSurfaceCleanupQueueInit();
-    levelLoad(3);
+    levelLoad(4);
     cutsceneRunnerReset();
     controllersInit();
     initAudio(fps);
