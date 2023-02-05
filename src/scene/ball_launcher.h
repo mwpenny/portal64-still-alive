@@ -16,6 +16,7 @@ struct BallLauncher {
     struct SKAnimator animator;
     short dynamicId;
     short signalIndex;
+    float ballLifetime;
     struct Ball currentBall;
 };
 

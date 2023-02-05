@@ -45,7 +45,7 @@ void ballInitInactive(struct Ball* ball) {
     ball->flags = 0;
 }
 
-void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* velocity, short startingRoom) {
+void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* velocity, short startingRoom, float ballLifetime) {
     collisionObjectInit(&ball->collisionObject, &gBallCollider, &ball->rigidBody, 1.0f, 0);
 
     collisionSceneAddDynamicObject(&ball->collisionObject);
@@ -58,7 +58,6 @@ void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* veloc
     ball->rigidBody.transform.scale = gOneVec;
     ball->rigidBody.currentRoom = startingRoom;
     ball->flags = 0;
-    ball->lifetime = BALL_LIFETIME;
 
     ball->targetSpeed = sqrtf(vector3MagSqrd(&ball->rigidBody.velocity));
 

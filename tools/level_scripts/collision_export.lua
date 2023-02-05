@@ -269,6 +269,24 @@ local room_grids = {}
 
 for index, node in pairs(collider_nodes) do
     local is_transparent = sk_scene.find_flag_argument(node.arguments, "transparent")
+
+    local collision_layers = {}
+
+    for _, arg in pairs(node.arguments) do
+        if string.sub(arg, 1, #"CL_") == "CL_" then
+            table.insert(collision_layers, 'COLLISION_LAYERS_' .. string.sub(arg, #"CL_" + 1))
+        end
+    end
+
+    if #collision_layers == 0 then
+        table.insert(collision_layers, 'COLLISION_LAYERS_STATIC')
+        table.insert(collision_layers, 'COLLISION_LAYERS_BLOCK_BALL')
+        table.insert(collision_layers, 'COLLISION_LAYERS_TANGIBLE')
+
+        if is_transparent then 
+            table.insert(collision_layers, 'COLLISION_LAYERS_TRANSPARENT')
+        end
+    end
         
     for _, mesh in pairs(node.node.meshes) do
         local global_mesh = mesh:transform(node.node.full_transformation)
@@ -306,9 +324,7 @@ for index, node in pairs(collider_nodes) do
             sk_definition_writer.reference_to(collider_type),
             sk_definition_writer.null_value,
             bb,
-            is_transparent and 
-                sk_definition_writer.raw('COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_BALL | COLLISION_LAYERS_TRANSPARENT | COLLISION_LAYERS_TANGIBLE') or
-                sk_definition_writer.raw('COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_BALL | COLLISION_LAYERS_TANGIBLE')
+            sk_definition_writer.raw(table.concat(collision_layers, ' | '))
         })
     end
 end

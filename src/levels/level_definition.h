@@ -212,6 +212,7 @@ struct BallLauncherDefinition {
     struct Quaternion rotation;
     short roomIndex;
     short signalIndex;
+    float ballLifetime;
 };
 
 struct BallCatcherDefinition {

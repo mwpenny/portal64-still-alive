@@ -62,6 +62,7 @@ void ballLauncherInit(struct BallLauncher* launcher, struct BallLauncherDefiniti
     launcher->rigidBody.currentRoom = definition->roomIndex;
 
     launcher->signalIndex = definition->signalIndex;
+    launcher->ballLifetime = definition->ballLifetime;
 
     collisionObjectUpdateBB(&launcher->collisionObject);
 
@@ -89,7 +90,7 @@ void ballLauncherUpdate(struct BallLauncher* launcher) {
         quatMultVector(&launcher->rigidBody.transform.rotation, &gForward, &initialVelocity);
         vector3Scale(&initialVelocity, &initialVelocity, BALL_VELOCITY);
 
-        ballInit(&launcher->currentBall, &launcher->rigidBody.transform.position, &initialVelocity, launcher->rigidBody.currentRoom);
+        ballInit(&launcher->currentBall, &launcher->rigidBody.transform.position, &initialVelocity, launcher->rigidBody.currentRoom, launcher->ballLifetime);
         skAnimatorRunClip(&launcher->animator, &props_combine_ball_launcher_Armature_launch_clip, 0.0f, 0);
     }
 

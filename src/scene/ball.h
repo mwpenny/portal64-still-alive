@@ -4,7 +4,6 @@
 #include "../physics/collision_object.h"
 
 #define BALL_VELOCITY   2.0f
-#define BALL_LIFETIME   10.0f
 #define BALL_FADE_TIME  3.0f
 
 enum BallFlags {
@@ -22,7 +21,7 @@ struct Ball {
 };
 
 void ballInitInactive(struct Ball* ball);
-void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* velocity, short startingRoom);
+void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* velocity, short startingRoom, float ballLifetime);
 void ballTurnOnCollision(struct Ball* ball);
 
 void ballUpdate(struct Ball* ball);
