@@ -24,6 +24,12 @@
 #define HUD_LOWER_Y ((SCREEN_HT - HUD_OUTER_HEIGHT + (HUD_OUTER_OFFSET_Y << 1)) << 1)
 
 void hudRender(struct RenderState* renderState, int playerFlags) {
+    if (playerFlags & PlayerIsDead) {
+        gSPDisplayList(renderState->dl++, hud_death_overlay);
+        gDPFillRectangle(renderState->dl++, 0, 0, SCREEN_WD, SCREEN_HT);
+        gSPDisplayList(renderState->dl++, hud_death_overlay_revert);
+    // }
+
     gSPDisplayList(renderState->dl++, hud_material_list[PORTAL_CROSSHAIRS_INDEX]);
 
     // gSPTextureRectangle(renderState->dl++, 

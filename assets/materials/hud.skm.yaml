@@ -18,3 +18,16 @@ materials:
       g: 255
       b: 255
       a: 255
+
+  death_overlay:
+    gDPSetRenderMode: G_RM_XLU_SURF
+    gSPGeometryMode:
+      clear: [G_ZBUFFER]
+    gDPSetCombineMode:
+      color: ["0", "0", "0", "PRIMITIVE"]
+      alpha: ["0", "0", "0", "PRIMITIVE"]
+    gDPSetPrimColor:
+      r: 255 
+      g: 0
+      b: 0
+      a: 128
