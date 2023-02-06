@@ -13,13 +13,16 @@
 #include "../physics/point_constraint.h"
 #include "../util/time.h"
 #include "../physics/contact_insertion.h"
+#include "../scene/ball.h"
 
 #include "../build/assets/models/player/chell.h"
 #include "../build/assets/materials/static.h"
 
 #define GRAB_RAYCAST_DISTANCE   2.5f
 
-#define PLAYER_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER)
+#define DEAD_OFFSET -0.4f
+
+#define PLAYER_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_BALL)
 
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
@@ -164,6 +167,10 @@ void playerHandleCollision(struct Player* player) {
 
         if ((contact->shapeA == &player->collisionObject) == (relativeVelocity > 0.0f)) {
             vector3ProjectPlane(&player->body.velocity, &contact->normal, &player->body.velocity);
+        }
+
+        if (isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB)) {
+            playerKill(player);
         }
 
         contact = contactSolverNextManifold(&gContactSolver, &player->collisionObject, contact);
@@ -314,6 +321,17 @@ void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, st
 
 void playerGivePortalGun(struct Player* player, int flags) {
     player->flags |= flags;
+}
+
+void playerKill(struct Player* player) {
+    // TODO 
+    // close all portals
+    // red overlay
+    // remove controls
+    player->flags |= PlayerIsDead;
+    // drop the portal gun
+    player->flags &= ~(PlayerHasFirstPortalGun | PlayerHasSecondPortalGun);
+    playerSetGrabbing(player, NULL);
 }
 
 struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* blendLerp, float* startTime, struct Vector3* forwardDir, struct Vector3* rightDir) {
@@ -523,6 +541,10 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     playerUpdateGrabbedObject(player);
 
     collisionObjectUpdateBB(&player->collisionObject);
+
+    if (player->flags & PlayerIsDead) {
+        cameraTransform->position.y += DEAD_OFFSET;
+    }
 
     player->body.currentRoom = worldCheckDoorwayCrossings(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom, doorwayMask);
 

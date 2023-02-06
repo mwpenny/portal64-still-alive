@@ -265,6 +265,11 @@ void sceneCheckPortals(struct Scene* scene) {
         scene->player.body.flags &= ~RigidBodyFizzled;
     }
 
+    if (scene->player.flags & PlayerIsDead) {
+        sceneClosePortal(scene, 0);
+        sceneClosePortal(scene, 1);
+    }
+
     int isOpen = collisionSceneIsPortalOpen();
 
     portalUpdate(&scene->portals[0], isOpen);

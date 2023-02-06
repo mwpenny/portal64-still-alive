@@ -115,3 +115,7 @@ void ballMarkCaught(struct Ball* ball) {
     collisionSceneRemoveDynamicObject(&ball->collisionObject);
     rigidBodyMarkKinematic(&ball->rigidBody);
 }
+
+int isColliderForBall(struct CollisionObject* collisionObject) {
+    return collisionObject->collider->data == &gBallCollisionBox;
+}

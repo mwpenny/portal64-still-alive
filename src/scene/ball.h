@@ -30,4 +30,6 @@ int ballIsCollisionOn(struct Ball* ball);
 int ballIsCaught(struct Ball* ball);
 void ballMarkCaught(struct Ball* ball);
 
+int isColliderForBall(struct CollisionObject* collisionObject);
+
 #endif
