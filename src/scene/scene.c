@@ -242,6 +242,13 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 }
 
 void sceneCheckPortals(struct Scene* scene) {
+    if (playerIsDead(&scene->player)) {
+        sceneClosePortal(scene, 0);
+        sceneClosePortal(scene, 1);
+        portalCheckForHoles(scene->portals);
+        return;
+    }
+
     struct Ray raycastRay;
     struct Vector3 playerUp;
     raycastRay.origin = scene->player.lookTransform.position;
@@ -263,11 +270,6 @@ void sceneCheckPortals(struct Scene* scene) {
         sceneClosePortal(scene, 0);
         sceneClosePortal(scene, 1);
         scene->player.body.flags &= ~RigidBodyFizzled;
-    }
-
-    if (scene->player.flags & PlayerIsDead) {
-        sceneClosePortal(scene, 0);
-        sceneClosePortal(scene, 1);
     }
 
     int isOpen = collisionSceneIsPortalOpen();

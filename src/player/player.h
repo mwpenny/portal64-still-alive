@@ -48,4 +48,6 @@ void playerGivePortalGun(struct Player* player, int flags);
 
 void playerKill(struct Player* player);
 
+int playerIsDead(struct Player* player);
+
 #endif

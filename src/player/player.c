@@ -198,6 +198,10 @@ void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) 
 }
 
 void playerUpdateGrabbedObject(struct Player* player) {
+    if (playerIsDead(player)) {
+        return;
+    }
+
     if (controllerGetButtonDown(0, B_BUTTON) || controllerGetButtonDown(1, U_JPAD)) {
         if (player->grabConstraint.object) {
             if (controllerGetButtonDown(1, U_JPAD)) {
@@ -324,14 +328,14 @@ void playerGivePortalGun(struct Player* player, int flags) {
 }
 
 void playerKill(struct Player* player) {
-    // TODO 
-    // close all portals
-    // red overlay
-    // remove controls
     player->flags |= PlayerIsDead;
     // drop the portal gun
     player->flags &= ~(PlayerHasFirstPortalGun | PlayerHasSecondPortalGun);
     playerSetGrabbing(player, NULL);
+}
+
+int playerIsDead(struct Player* player) {
+    return (player->flags & PlayerIsDead) != 0;
 }
 
 struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* blendLerp, float* startTime, struct Vector3* forwardDir, struct Vector3* rightDir) {
@@ -385,22 +389,26 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     int doorwayMask = worldCheckDoorwaySides(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom);
     playerGetMoveBasis(&player->lookTransform, &forward, &right);
 
-    if ((player->flags & PlayerFlagsGrounded) && controllerGetButtonDown(0, A_BUTTON)) {
+    int isDead = playerIsDead(player);
+
+    if (!isDead && (player->flags & PlayerFlagsGrounded) && controllerGetButtonDown(0, A_BUTTON)) {
         player->body.velocity.y = JUMP_IMPULSE;
     }
 
     struct Vector3 targetVelocity = gZeroVec;
 
-    if (controllerGetButton(0, L_CBUTTONS | L_JPAD)) {
-        vector3AddScaled(&targetVelocity, &right, -PLAYER_SPEED, &targetVelocity);
-    } else if (controllerGetButton(0, R_CBUTTONS | R_JPAD)) {
-        vector3AddScaled(&targetVelocity, &right, PLAYER_SPEED, &targetVelocity);
-    }
+    if (!isDead) {
+        if (controllerGetButton(0, L_CBUTTONS | L_JPAD)) {
+            vector3AddScaled(&targetVelocity, &right, -PLAYER_SPEED, &targetVelocity);
+        } else if (controllerGetButton(0, R_CBUTTONS | R_JPAD)) {
+            vector3AddScaled(&targetVelocity, &right, PLAYER_SPEED, &targetVelocity);
+        }
 
-    if (controllerGetButton(0, U_CBUTTONS | U_JPAD)) {
-        vector3AddScaled(&targetVelocity, &forward, -PLAYER_SPEED, &targetVelocity);
-    } else if (controllerGetButton(0, D_CBUTTONS | D_JPAD)) {
-        vector3AddScaled(&targetVelocity, &forward, PLAYER_SPEED, &targetVelocity);
+        if (controllerGetButton(0, U_CBUTTONS | U_JPAD)) {
+            vector3AddScaled(&targetVelocity, &forward, -PLAYER_SPEED, &targetVelocity);
+        } else if (controllerGetButton(0, D_CBUTTONS | D_JPAD)) {
+            vector3AddScaled(&targetVelocity, &forward, PLAYER_SPEED, &targetVelocity);
+        }
     }
     
     targetVelocity.y = player->body.velocity.y;

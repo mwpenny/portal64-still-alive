@@ -28,7 +28,7 @@ void hudRender(struct RenderState* renderState, int playerFlags) {
         gSPDisplayList(renderState->dl++, hud_death_overlay);
         gDPFillRectangle(renderState->dl++, 0, 0, SCREEN_WD, SCREEN_HT);
         gSPDisplayList(renderState->dl++, hud_death_overlay_revert);
-    // }
+    }
 
     gSPDisplayList(renderState->dl++, hud_material_list[PORTAL_CROSSHAIRS_INDEX]);
 
