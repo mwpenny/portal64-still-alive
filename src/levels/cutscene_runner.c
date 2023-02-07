@@ -362,3 +362,20 @@ void cutscenesUpdate() {
         } 
     }
 }
+
+void cutsceneSerialize(struct CutsceneRunner* runner, struct CutsceneSerialized* result) {
+    result->cutsceneIndex = runner->currentCutscene - gCurrentLevel->cutscenes;
+    result->currentStep = runner->currentStep;
+
+    struct CutsceneStep* step = &runner->currentCutscene->steps[runner->currentStep];
+
+    switch (step->type) {
+        case CutsceneStepTypePlaySound:
+        case CutsceneStepTypeStartSound:
+            result->state.playSound.soundId = SOUND_ID_NONE;
+            break;
+        default:
+            result->state = runner->state;
+            break;
+    }
+}

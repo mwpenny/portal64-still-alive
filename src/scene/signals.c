@@ -14,7 +14,7 @@ void signalsInit(unsigned signalCount) {
         return;
     }
 
-    int binCount = (signalCount + 63) >> 6;
+    int binCount = SIGNAL_BIN_COUNT(signalCount);
     gSignals = malloc(sizeof(unsigned long long) * binCount);
     gDefaultSignals = malloc(sizeof(unsigned long long) * binCount);
     gSignalCount = signalCount;

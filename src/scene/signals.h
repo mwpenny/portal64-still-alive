@@ -1,6 +1,8 @@
 #ifndef __SCENE_SIGNALS_H__
 #define __SCENE_SIGNALS_H__
 
+#define SIGNAL_BIN_COUNT(signalCount) (((signalCount) + 63) >> 6)
+
 enum SignalOperatorType {
     SignalOperatorTypeAnd,
     SignalOperatorTypeOr,
