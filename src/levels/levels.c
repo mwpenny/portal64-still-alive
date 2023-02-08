@@ -129,6 +129,13 @@ void levelQueueLoad(int index, struct Transform* relativeExitTransform, struct V
     gRelativeVelocity = *relativeVelocity;
 }
 
+void levelLoadLastCheckpoint() {
+    cutsceneRunnerReset();
+    gQueuedLevel = gCurrentLevelIndex;
+    transformInitIdentity(&gRelativeTransform);
+    gRelativeVelocity = gZeroVec;
+}
+
 int levelGetQueued() {
     return gQueuedLevel;
 }

@@ -5,6 +5,7 @@
 #include "../scene/signals.h"
 #include "../levels/levels.h"
 #include "../util/memory.h"
+#include "checkpoint.h"
 
 struct CutsceneRunner* gRunningCutscenes;
 struct CutsceneRunner* gUnusedRunners;
@@ -221,6 +222,9 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 cutsceneRunnerConvertPlaybackSpeed(step->playAnimation.playbackSpeed)
             );
             break;
+        case CutsceneStepSaveCheckpoint:
+            checkpointSave(&gScene);
+            break;
         default:
     }
 }
@@ -271,9 +275,9 @@ void cutsceneRunnerUpdate(struct CutsceneRunner* runner) {
 
 void cutsceneStart(struct Cutscene* cutscene) {
     struct CutsceneRunner* runner = cutsceneRunnerNew();
-    cutsceneRunnerRun(runner, cutscene);
     runner->nextRunner = gRunningCutscenes;
     gRunningCutscenes = runner;
+    cutsceneRunnerRun(runner, cutscene);
 }
 
 void cutsceneStop(struct Cutscene* cutscene) {
@@ -378,4 +382,14 @@ void cutsceneSerialize(struct CutsceneRunner* runner, struct CutsceneSerialized*
             result->state = runner->state;
             break;
     }
+}
+
+void cutsceneStartSerialized(struct CutsceneSerialized* serialized) {
+    struct CutsceneRunner* runner = cutsceneRunnerNew();
+    runner->nextRunner = gRunningCutscenes;
+    gRunningCutscenes = runner;
+
+    runner->currentCutscene = &gCurrentLevel->cutscenes[serialized->cutsceneIndex];
+    runner->currentStep = serialized->currentStep;
+    runner->state = serialized->state;
 }

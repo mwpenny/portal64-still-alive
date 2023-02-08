@@ -3,9 +3,19 @@
 #include "../util/memory.h"
 #include "../levels/cutscene_runner.h"
 
+#define MAX_CHECKPOINT_SIZE 256
+
+char gHasCheckpoint = 0;
+char gCheckpoint[MAX_CHECKPOINT_SIZE];
+
 void* checkpointWrite(void* dst, int size, void* src) {
     memCopy(dst, src, size);
     return (char*)dst + size;
+}
+
+void* checkpointRead(void* src, int size, void* dst) {
+    memCopy(dst, src, size);
+    return (char*)src + size;
 }
 
 extern unsigned long long* gSignals;
@@ -34,19 +44,29 @@ int checkpointEstimateSize(struct Scene* scene) {
     int binCount = SIGNAL_BIN_COUNT(gSignalCount);
     result += sizeof(unsigned long long) * binCount * 2;
 
+    result += sizeof(short);
     result += sizeof(struct CutsceneSerialized) * checkpointCutsceneCount();
+
+    result += sizeof(struct PartialTransform);
 
     result += sizeof(gTriggeredCutscenes);
 
     return result;
 }
 
-Checkpoint checkpointNew(struct Scene* scene) {
+void checkpointClear() {
+    gHasCheckpoint = 0;
+}
+
+void checkpointSave(struct Scene* scene) {
     int size = checkpointEstimateSize(scene);
 
-    void* result = malloc(size);
+    if (size > MAX_CHECKPOINT_SIZE) {
+        gHasCheckpoint = 0;
+        return;
+    }
 
-    void* curr = result;
+    void* curr = gCheckpoint;
 
     int binCount = SIGNAL_BIN_COUNT(gSignalCount);
     curr = checkpointWrite(curr, sizeof(unsigned long long) * binCount, gSignals);
@@ -61,19 +81,41 @@ Checkpoint checkpointNew(struct Scene* scene) {
         struct CutsceneSerialized cutscene;
         cutsceneSerialize(currCutscene, &cutscene);
         curr = checkpointWrite(curr, sizeof(struct CutsceneSerialized), &cutscene);
+
+        currCutscene = currCutscene->nextRunner;
     }
 
     curr = checkpointWrite(curr, sizeof(struct PartialTransform), &scene->player.body.transform);
 
     curr = checkpointWrite(curr, sizeof (gTriggeredCutscenes), &gTriggeredCutscenes);
 
-    return result;
+    gHasCheckpoint = 1;
 }
 
-void checkpointLoad(struct Scene* scene, Checkpoint checkpoint) {
+void checkpointLoadLast(struct Scene* scene) {
+    if (!gHasCheckpoint) {
+        return;
+    }
 
-}
+    void* curr = gCheckpoint;
 
-void checkpointDelete(Checkpoint checkpoint) {
-    free(checkpoint);
+    int binCount = SIGNAL_BIN_COUNT(gSignalCount);
+    curr = checkpointRead(curr, sizeof(unsigned long long) * binCount, gSignals);
+    curr = checkpointRead(curr, sizeof(unsigned long long) * binCount, gDefaultSignals);
+
+    short cutsceneCount;
+    curr = checkpointRead(curr, sizeof(short), &cutsceneCount);
+
+    cutsceneRunnerReset();
+
+    for (int i = 0; i < cutsceneCount; ++i) {
+        struct CutsceneSerialized cutscene;
+        curr = checkpointRead(curr, sizeof(struct CutsceneSerialized), &cutscene);
+        cutsceneStartSerialized(&cutscene);
+    }
+
+    curr = checkpointRead(curr, sizeof(struct PartialTransform), &scene->player.body.transform);
+    scene->player.body.velocity = gZeroVec;
+
+    curr = checkpointRead(curr, sizeof (gTriggeredCutscenes), &gTriggeredCutscenes);
 }

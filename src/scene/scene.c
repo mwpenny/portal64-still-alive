@@ -365,6 +365,10 @@ void sceneUpdate(struct Scene* scene) {
     playerUpdate(&scene->player, &scene->camera.transform);
     sceneUpdateListeners(scene);
     sceneCheckPortals(scene);
+
+    if (playerIsDead(&scene->player) && controllerGetButtonDown(0, START_BUTTON | A_BUTTON)) {
+        levelLoadLastCheckpoint();
+    }
     
     for (int i = 0; i < scene->buttonCount; ++i) {
         buttonUpdate(&scene->buttons[i]);

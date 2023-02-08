@@ -45,6 +45,7 @@ enum CutsceneStepType {
     CutsceneStepPlayAnimation,
     CutsceneStepSetAnimationSpeed,
     CutsceneStepWaitForAnimation,
+    CutsceneStepSaveCheckpoint,
 };
 
 #define CH_NONE    0xFF

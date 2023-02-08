@@ -11,6 +11,7 @@ int levelCount();
 void levelLoad(int index);
 
 void levelQueueLoad(int index, struct Transform* relativeExitTransform, struct Vector3* relativeVelocity);
+void levelLoadLastCheckpoint();
 int levelGetQueued();
 struct Transform* levelRelativeTransform();
 struct Vector3* levelRelativeVelocity();

@@ -19,6 +19,7 @@
 #include "sk64/skelatool_animator.h"
 
 #include "levels/levels.h"
+#include "levels/checkpoint.h"
 
 #ifdef WITH_DEBUGGER
 #include "../debugger/debugger.h"
@@ -180,6 +181,7 @@ static void gameProc(void* arg) {
 
                 if (levelGetQueued() != NO_QUEUED_LEVEL) {
                     if (pendingGFX == 0) {
+                        soundPlayerStopAll();
                         dynamicSceneInit();
                         contactSolverInit(&gContactSolver);
                         portalSurfaceRevert(1);
@@ -189,6 +191,7 @@ static void gameProc(void* arg) {
                         levelLoad(levelGetQueued());
                         cutsceneRunnerReset();
                         sceneInit(&gScene);
+                        checkpointLoadLast(&gScene);
                     }
 
                     break;

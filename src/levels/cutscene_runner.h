@@ -32,5 +32,6 @@ int cutsceneIsRunning(struct Cutscene* cutscene);
 void cutscenesUpdate();
 
 void cutsceneSerialize(struct CutsceneRunner* runner, struct CutsceneSerialized* result);
+void cutsceneStartSerialized(struct CutsceneSerialized* serialized);
 
 #endif
