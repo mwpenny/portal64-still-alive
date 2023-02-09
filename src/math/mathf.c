@@ -30,6 +30,10 @@ float mathfLerp(float from, float to, float t) {
     return from * (1.0f - t) + to * t;
 }
 
+float mathfInvLerp(float from, float to, float value) {
+    return (value - from) / (to - from);
+}
+
 float mathfMoveTowards(float from, float to, float maxMove) {
     float offset = to - from;
     if (fabsf(offset) <= maxMove) {

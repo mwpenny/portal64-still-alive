@@ -7,6 +7,7 @@ int randomInRange(int min, int maxPlusOne);
 float randomInRangef(float min, float maxPlusOne);
 
 float mathfLerp(float from, float to, float t);
+float mathfInvLerp(float from, float to, float value);
 float mathfMoveTowards(float from, float to, float maxMove);
 float mathfBounceBackLerp(float t);
 float mathfRandomFloat();

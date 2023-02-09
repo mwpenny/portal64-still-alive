@@ -19,6 +19,7 @@
 #include "../build/assets/materials/static.h"
 
 #define GRAB_RAYCAST_DISTANCE   2.5f
+#define DROWN_TIME              2.0f
 
 #define DEAD_OFFSET -0.4f
 
@@ -170,7 +171,7 @@ void playerHandleCollision(struct Player* player) {
         }
 
         if (isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB)) {
-            playerKill(player);
+            playerKill(player, 0);
         }
 
         contact = contactSolverNextManifold(&gContactSolver, &player->collisionObject, contact);
@@ -327,7 +328,13 @@ void playerGivePortalGun(struct Player* player, int flags) {
     player->flags |= flags;
 }
 
-void playerKill(struct Player* player) {
+void playerKill(struct Player* player, int isUnderwater) {
+    if (isUnderwater) {
+        player->flags |= PlayerIsUnderwater;
+        player->drownTimer = DROWN_TIME;
+        return;
+    }
+
     player->flags |= PlayerIsDead;
     // drop the portal gun
     player->flags &= ~(PlayerHasFirstPortalGun | PlayerHasSecondPortalGun);
@@ -563,5 +570,14 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
     if (clip != player->animator.from.currentClip) {
         skAnimatorRunClip(&player->animator.from, clip, startTime, SKAnimatorFlagsLoop);
+    }
+
+    if (player->flags & PlayerIsUnderwater) {
+        player->drownTimer -= FIXED_DELTA_TIME;
+
+        if (player->drownTimer < 0.0f) {
+            player->flags &= ~PlayerIsUnderwater;
+            playerKill(player, 0);
+        }
     }
 }

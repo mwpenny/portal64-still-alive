@@ -46,6 +46,7 @@ enum CutsceneStepType {
     CutsceneStepSetAnimationSpeed,
     CutsceneStepWaitForAnimation,
     CutsceneStepSaveCheckpoint,
+    CutsceneStepKillPlayer,
 };
 
 #define CH_NONE    0xFF
@@ -112,6 +113,9 @@ struct CutsceneStep {
         struct {
             u8 armatureIndex;
         } waitForAnimation;
+        struct {
+            u8 isWater;
+        } killPlayer;
         int noop;
     };
 };

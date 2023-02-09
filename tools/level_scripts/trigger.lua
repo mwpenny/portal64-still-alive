@@ -209,6 +209,11 @@ local function generate_cutscene_step(step, step_index, label_locations, cutscen
         }
     elseif step.command == "save_checkpoint" then
         result.type = sk_definition_writer.raw('CutsceneStepSaveCheckpoint')
+    elseif step.command == "kill_player" then
+        result.type = sk_definition_writer.raw('CutsceneStepKillPlayer')
+        result.killPlayer = {
+            step.args[1] == 'water' and 1 or 0,
+        }
     else
         error("Unrecognized cutscene step " .. step.command)
         result.type = sk_definition_writer.raw('CutsceneStepTypeNoop')

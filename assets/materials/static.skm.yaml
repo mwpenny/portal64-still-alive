@@ -7,7 +7,7 @@ materials:
     gDPSetAlphaCompare: G_AC_NONE
     gSPGeometryMode:
       set: [G_CULL_BACK, G_ZBUFFER]
-      clear: [G_CULL_FRONT, G_TEXTURE_GEN, G_TEXTURE_GEN_LINEAR]
+      clear: [G_CULL_FRONT, G_TEXTURE_GEN, G_TEXTURE_GEN_LINEAR, G_FOG]
 
   concrete_modular_wall001d:
     gDPSetTile: 
@@ -44,6 +44,30 @@ materials:
     
     gDPSetCombineMode: G_CC_DECALRGB
     gDPSetCycleType: G_CYC_1CYCLE
+
+    properties:
+      tileSizeS: 0.5
+      tileSizeT: 0.5
+
+  metalwall048c:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalwall048b.png
+      siz: G_IM_SIZ_16b
+    
+    gDPSetCombineMode: 
+      - G_CC_DECALRGB
+      - G_CC_PASS2
+    gDPSetRenderMode: 
+      - G_RM_FOG_SHADE_A
+      - G_RM_ZB_OPA_SURF
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetFogColor:
+      r: 238
+      g: 52
+      b: 13
+
+    gSPGeometryMode:
+      set: [G_FOG]
 
     properties:
       tileSizeS: 0.5

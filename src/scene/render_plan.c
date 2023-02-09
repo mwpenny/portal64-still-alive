@@ -408,6 +408,21 @@ void renderPlanBuild(struct RenderPlan* renderPlan, struct Scene* scene, struct 
     renderPlanAdjustViewportDepth(renderPlan);
 }
 
+#define MIN_FOG_DISTANCE 1.0f
+#define MAX_FOG_DISTANCE 2.5f
+
+int fogIntValue(float floatValue) {
+    if (floatValue < 0.0) {
+        return 0;
+    }
+
+    if (floatValue > 1.0) {
+        return 1000;
+    }
+
+    return (int)(floatValue * 1000.0f);
+}
+
 void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* staticTransforms, struct RenderState* renderState) {
     struct DynamicRenderDataList* dynamicList = dynamicRenderListNew(MAX_DYNAMIC_SCENE_OBJECTS);
 
@@ -422,6 +437,12 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* 
 
         gSPViewport(renderState->dl++, current->viewport);
         gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, current->minX, current->minY, current->maxX, current->maxY);
+
+        float lerpMin = mathfInvLerp(current->camera.nearPlane, current->camera.farPlane, MIN_FOG_DISTANCE * SCENE_SCALE);
+        float lerpMax = mathfInvLerp(current->camera.nearPlane, current->camera.farPlane, MAX_FOG_DISTANCE * SCENE_SCALE);
+        
+        gSPFogPosition(renderState->dl++, fogIntValue(lerpMin), fogIntValue(lerpMax));
+        // gSPFogPosition(renderState->dl++, 0, 1000);
 
         int portalIndex = (current->portalRenderType & PORTAL_RENDER_TYPE_SECOND_CLOSER) ? 1 : 0;
         

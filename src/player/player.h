@@ -20,6 +20,7 @@ enum PlayerFlags {
     PlayerHasFirstPortalGun = (1 << 1),
     PlayerHasSecondPortalGun = (1 << 2),
     PlayerIsDead = (1 << 3),
+    PlayerIsUnderwater = (1 << 4),
 };
 
 struct Player {
@@ -37,6 +38,7 @@ struct Player {
     struct RigidBody* anchoredTo;
     struct Vector3 relativeAnchor;
     struct Vector3 lastAnchorPoint;
+    float drownTimer;
 };
 
 void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity);
@@ -46,7 +48,7 @@ void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, st
 
 void playerGivePortalGun(struct Player* player, int flags);
 
-void playerKill(struct Player* player);
+void playerKill(struct Player* player, int isUnderwater);
 
 int playerIsDead(struct Player* player);
 

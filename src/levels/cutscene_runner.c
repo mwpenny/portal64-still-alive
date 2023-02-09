@@ -225,6 +225,9 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         case CutsceneStepSaveCheckpoint:
             checkpointSave(&gScene);
             break;
+        case CutsceneStepKillPlayer:
+            playerKill(&gScene.player, step->killPlayer.isWater);
+            break;
         default:
     }
 }
