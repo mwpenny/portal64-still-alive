@@ -9,18 +9,28 @@ void pointConstraintMoveToPoint(struct CollisionObject* object, struct Vector3* 
     struct Vector3 targetVelocity;
     vector3Scale(&rigidBody->velocity, &targetVelocity, 1.0f / FIXED_DELTA_TIME);
 
+    struct ContactManifold* contact = contactSolverNextManifold(&gContactSolver, object, NULL);
+
+    while (contact) {
+        struct Vector3 contactNormal;
+
+        if (contact->shapeB == object) {
+            contactNormal = contact->normal;
+        } else {
+            vector3Negate(&contact->normal, &contactNormal);
+        }
+
+        float overlap = vector3Dot(&contactNormal, &targetVelocity);
+
+        if (overlap < 0.0f) {
+            vector3AddScaled(&targetVelocity, &contact->normal, -overlap * 0.7f, &targetVelocity);
+        }
+
+        contact = contactSolverNextManifold(&gContactSolver, object, contact);
+    }
+
     struct Vector3 delta;
     vector3Sub(&targetVelocity, &rigidBody->velocity, &delta);
-
-    // struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, object, NULL);
-
-    // while (manifold) {
-    //     int isFirst = manifold->shapeA == object;
-
-
-
-    //     manifold = contactSolverNextManifold(&gContactSolver, object, manifold);
-    // }
 
     float deltaSqrd = vector3MagSqrd(&delta);
     if (deltaSqrd < maxImpulse * maxImpulse) {

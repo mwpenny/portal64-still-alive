@@ -366,7 +366,8 @@ void sceneUpdate(struct Scene* scene) {
     sceneUpdateListeners(scene);
     sceneCheckPortals(scene);
 
-    if (playerIsDead(&scene->player) && controllerGetButtonDown(0, START_BUTTON | A_BUTTON)) {
+    if ((playerIsDead(&scene->player) && controllerGetButtonDown(0, START_BUTTON | A_BUTTON)) ||
+        scene->player.lookTransform.position.y < KILL_PLANE_Y) {
         levelLoadLastCheckpoint();
     }
     

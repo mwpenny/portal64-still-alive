@@ -6,8 +6,6 @@
 #include "defs.h"
 #include <math.h>
 
-#define KILL_PLANE_Y    -10.0f
-
 void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniteria) {
     transformInitIdentity(&rigidBody->transform);
     rigidBody->velocity = gZeroVec;

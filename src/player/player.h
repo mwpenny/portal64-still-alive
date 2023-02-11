@@ -51,5 +51,6 @@ void playerGivePortalGun(struct Player* player, int flags);
 void playerKill(struct Player* player, int isUnderwater);
 
 int playerIsDead(struct Player* player);
+void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing);
 
 #endif

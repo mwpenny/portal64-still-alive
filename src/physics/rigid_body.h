@@ -5,6 +5,8 @@
 #include "../math/transform.h"
 #include "./collision.h"
 
+#define KILL_PLANE_Y    -10.0f
+
 #define RIGID_BODY_NO_ROOM  0xFFFF
 
 #define MAX_PORTAL_SPEED (1000.0f / 64.0f)

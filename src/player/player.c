@@ -185,6 +185,10 @@ void playerHandleCollision(struct Player* player) {
             playerKill(player, 0);
         }
 
+        if (contact->shapeA == player->grabConstraint.object || contact->shapeB == player->grabConstraint.object) {
+            playerSetGrabbing(player, NULL);
+        }
+
         contact = contactSolverNextManifold(&gContactSolver, &player->collisionObject, contact);
     }
 }
@@ -209,6 +213,22 @@ void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) 
     }
 }
 
+int playerRaycastGrab(struct Player* player, struct RaycastHit* hit) {
+    struct Ray ray;
+
+    ray.origin = player->lookTransform.position;
+    quatMultVector(&player->lookTransform.rotation, &gForward, &ray.dir);
+    vector3Negate(&ray.dir, &ray.dir);
+
+    player->collisionObject.collisionLayers = 0;
+
+    int result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit);
+
+    player->collisionObject.collisionLayers = PLAYER_COLLISION_LAYERS;
+
+    return result;
+}
+
 void playerUpdateGrabbedObject(struct Player* player) {
     if (playerIsDead(player)) {
         return;
@@ -224,17 +244,9 @@ void playerUpdateGrabbedObject(struct Player* player) {
 
             playerSetGrabbing(player, NULL);
         } else {
-            struct Ray ray;
-
-            ray.origin = player->lookTransform.position;
-            quatMultVector(&player->lookTransform.rotation, &gForward, &ray.dir);
-            vector3Negate(&ray.dir, &ray.dir);
-            
             struct RaycastHit hit;
 
-            player->collisionObject.collisionLayers = 0;
-
-            if (collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, &hit)) {
+            if (playerRaycastGrab(player, &hit)) {
                 hit.object->flags |= COLLISION_OBJECT_INTERACTED;
 
                 if (hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable)) {
@@ -247,8 +259,6 @@ void playerUpdateGrabbedObject(struct Player* player) {
                     }
                 }
             }
-
-            player->collisionObject.collisionLayers = PLAYER_COLLISION_LAYERS;
         }
     }
 
@@ -295,6 +305,11 @@ void playerUpdateGrabbedObject(struct Player* player) {
         }
 
         pointConstraintUpdateTarget(&player->grabConstraint, &grabPoint, &grabRotation);
+    }
+
+    struct RaycastHit hit;
+    if (player->grabConstraint.object && !(playerRaycastGrab(player, &hit) || hit.object != player->grabConstraint.object)) {
+        playerSetGrabbing(player, NULL);
     }
 }
 
@@ -542,7 +557,6 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         quatLook(&lookingForward, &gUp, &upRotation);
         quatLerp(&upRotation, &player->lookTransform.rotation, 0.9f, &player->lookTransform.rotation);
     }
-    
 
     // yaw
     struct Quaternion deltaRotate;
