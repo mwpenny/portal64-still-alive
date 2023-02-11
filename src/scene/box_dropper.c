@@ -142,7 +142,7 @@ void boxDropperUpdate(struct BoxDropper* dropper) {
         struct Transform pendingCubePos;
         boxDropperFakePos(dropper, &pendingCubePos);
 
-        decorObjectInit(&dropper->activeCube, decorObjectDefinitionForId(DECOR_TYPE_CUBE), &pendingCubePos, dropper->roomIndex);
+        decorObjectInit(&dropper->activeCube, decorObjectDefinitionForId(DECOR_TYPE_CUBE_UNIMPORTANT), &pendingCubePos, dropper->roomIndex);
         skAnimatorRunClip(&dropper->animator, &props_box_dropper_Armature_DropCube_clip, 0.0f, 0);
 
         dropper->flags &= ~BoxDropperFlagsCubeRequested;

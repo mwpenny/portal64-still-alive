@@ -56,6 +56,17 @@ struct DecorObject* decorObjectNew(struct DecorObjectDefinition* definition, str
     return result;
 }
 
+void decorObjectReset(struct DecorObject* object) {
+    object->rigidBody.transform.position = object->originalPosition;
+    object->rigidBody.transform.rotation = object->originalRotation;
+    object->rigidBody.velocity = gZeroVec;
+    object->rigidBody.angularVelocity = gZeroVec;
+    object->fizzleTime = 0.0f;
+    object->rigidBody.flags &= ~(RigidBodyFizzled | RigidBodyDisableGravity);
+    object->rigidBody.flags |= RigidBodyFlagsGrabbable;
+    object->rigidBody.currentRoom = object->originalRoom;
+}
+
 void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* definition, struct Transform* at, int room) {
     if (definition->colliderType.type != CollisionShapeTypeNone) {
         collisionObjectInit(&object->collisionObject, &definition->colliderType, &object->rigidBody, definition->mass, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_FIZZLER);
@@ -64,11 +75,16 @@ void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* d
         rigidBodyInit(&object->rigidBody, 1.0f, 1.0f);
     }
 
+    object->definition = definition;
+
     object->rigidBody.transform = *at;
     object->rigidBody.flags |= RigidBodyFlagsGrabbable;
     object->rigidBody.currentRoom = room;
-    object->definition = definition;
     object->fizzleTime = 0.0f;
+
+    object->originalPosition = at->position;
+    object->originalRotation = at->rotation;
+    object->originalRoom = room;
 
     if (definition->colliderType.type != CollisionShapeTypeNone) {
         collisionObjectUpdateBB(&object->collisionObject);
@@ -101,6 +117,12 @@ int decorObjectUpdate(struct DecorObject* decorObject) {
     }
 
     if (decorObject->rigidBody.flags & RigidBodyFizzled) {
+        if (decorObject->definition->flags & DecorObjectFlagsImportant) {
+            decorObjectReset(decorObject);
+            dynamicSceneSetRoomFlags(decorObject->dynamicId, ROOM_FLAG_FROM_INDEX(decorObject->rigidBody.currentRoom));
+            return 1;
+        }
+
         if (decorObject->fizzleTime == 0.0f) {
             vector3Scale(&decorObject->rigidBody.velocity, &decorObject->rigidBody.velocity, 0.25f);
 

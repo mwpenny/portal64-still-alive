@@ -78,6 +78,22 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         .materialIndex = CUBE_INDEX,
         .materialIndexFizzled = CUBE_FIZZLED_INDEX,
         .soundClipId = -1,
+        .flags = DecorObjectFlagsImportant,
+    },
+    [DECOR_TYPE_CUBE_UNIMPORTANT] = {
+        {
+            CollisionShapeTypeBox,
+            &gCubeCollisionBox,
+            0.0f,
+            0.5f,
+            &gCollisionBoxCallbacks,  
+        },
+        2.0f, 
+        0.55f,
+        &cube_cube_model_gfx[0],
+        .materialIndex = CUBE_INDEX,
+        .materialIndexFizzled = CUBE_FIZZLED_INDEX,
+        .soundClipId = -1,
     },
     [DECOR_TYPE_AUTOPORTAL_FRAME] = {
         {
