@@ -16,6 +16,7 @@
 #include "scene/portal_surface.h"
 #include "sk64/skelatool_defs.h"
 #include "levels/cutscene_runner.h"
+#include "levels/savefile.h"
 #include "sk64/skelatool_animator.h"
 
 #include "levels/levels.h"
@@ -159,6 +160,7 @@ static void gameProc(void* arg) {
     dynamicSceneInit();
     contactSolverInit(&gContactSolver);
     portalSurfaceCleanupQueueInit();
+    savefileNew();
     levelLoad(0);
     cutsceneRunnerReset();
     controllersInit();

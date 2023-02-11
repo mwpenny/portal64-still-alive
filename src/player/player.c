@@ -14,6 +14,7 @@
 #include "../util/time.h"
 #include "../physics/contact_insertion.h"
 #include "../scene/ball.h"
+#include "../levels/savefile.h"
 
 #include "../build/assets/models/player/chell.h"
 #include "../build/assets/materials/static.h"
@@ -113,6 +114,16 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->pitchVelocity = 0.0f;
     player->yawVelocity = 0.0f;
     player->flags = 0;
+
+    int saveFlags = savefileReadFlags(SavefileFlagsFirstPortalGun | SavefileFlagsSecondPortalGun);
+
+    if (saveFlags & SavefileFlagsFirstPortalGun) {
+        player->flags |= PlayerHasFirstPortalGun;
+    }
+
+    if (saveFlags & SavefileFlagsSecondPortalGun) {
+        player->flags |= PlayerHasSecondPortalGun;
+    }
 
     player->dynamicId = dynamicSceneAdd(player, playerRender, &player->body.transform, 1.5f);
     dynamicSceneSetFlags(player->dynamicId, DYNAMIC_SCENE_OBJECT_SKIP_ROOT);
@@ -326,6 +337,14 @@ void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, st
 
 void playerGivePortalGun(struct Player* player, int flags) {
     player->flags |= flags;
+
+    if (flags & PlayerHasFirstPortalGun) {
+        savefileSetFlags(SavefileFlagsFirstPortalGun);
+    }
+
+    if (flags & PlayerHasSecondPortalGun) {
+        savefileSetFlags(SavefileFlagsSecondPortalGun);
+    }
 }
 
 void playerKill(struct Player* player, int isUnderwater) {
@@ -471,6 +490,8 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
             player->lastAnchorPoint = hit.at;
             transformPointInverseNoScale(&player->anchoredTo->transform, &hit.at, &player->relativeAnchor);
         }
+    } else {
+        player->flags &= ~PlayerFlagsGrounded;
     }
     
     struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);

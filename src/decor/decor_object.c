@@ -60,6 +60,8 @@ void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* d
     if (definition->colliderType.type != CollisionShapeTypeNone) {
         collisionObjectInit(&object->collisionObject, &definition->colliderType, &object->rigidBody, definition->mass, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_FIZZLER);
         collisionSceneAddDynamicObject(&object->collisionObject);
+    } else {
+        rigidBodyInit(&object->rigidBody, 1.0f, 1.0f);
     }
 
     object->rigidBody.transform = *at;
