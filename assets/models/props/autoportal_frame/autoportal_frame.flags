@@ -1,0 +1,1 @@
+-r 90,0,0 -m assets/materials/static.skm.yaml -m assets/materials/objects.skm.yaml --default-material autoportal_frame

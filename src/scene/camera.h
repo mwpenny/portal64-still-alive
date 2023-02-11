@@ -44,4 +44,6 @@ int cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, 
 
 int cameraApplyMatrices(struct RenderState* renderState, struct CameraMatrixInfo* matrixInfo);
 
+float cameraClipDistance(struct Camera* camera, float distance);
+
 #endif

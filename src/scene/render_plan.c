@@ -412,7 +412,7 @@ void renderPlanBuild(struct RenderPlan* renderPlan, struct Scene* scene, struct 
 #define MAX_FOG_DISTANCE 2.5f
 
 int fogIntValue(float floatValue) {
-    if (floatValue < 0.0) {
+    if (floatValue < -1.0) {
         return 0;
     }
 
@@ -420,7 +420,7 @@ int fogIntValue(float floatValue) {
         return 1000;
     }
 
-    return (int)(floatValue * 1000.0f);
+    return (int)((floatValue + 1.0f) * 500.0f);
 }
 
 void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* staticTransforms, struct RenderState* renderState) {
@@ -438,11 +438,21 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* 
         gSPViewport(renderState->dl++, current->viewport);
         gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, current->minX, current->minY, current->maxX, current->maxY);
 
-        float lerpMin = mathfInvLerp(current->camera.nearPlane, current->camera.farPlane, MIN_FOG_DISTANCE * SCENE_SCALE);
-        float lerpMax = mathfInvLerp(current->camera.nearPlane, current->camera.farPlane, MAX_FOG_DISTANCE * SCENE_SCALE);
+        float lerpMin = cameraClipDistance(&current->camera, MIN_FOG_DISTANCE);
+        float lerpMax = cameraClipDistance(&current->camera, MAX_FOG_DISTANCE);
+
+        int fogMin = fogIntValue(lerpMin);
+        int fogMax = fogIntValue(lerpMax);
+
+        if (fogMax <= 0) {
+            fogMax = 1;
+        }
+
+        if (fogMin >= 1000) {
+            fogMin = 999;
+        }
         
-        gSPFogPosition(renderState->dl++, fogIntValue(lerpMin), fogIntValue(lerpMax));
-        // gSPFogPosition(renderState->dl++, 0, 1000);
+        gSPFogPosition(renderState->dl++, fogMin, fogMax);
 
         int portalIndex = (current->portalRenderType & PORTAL_RENDER_TYPE_SECOND_CLOSER) ? 1 : 0;
         

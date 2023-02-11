@@ -155,3 +155,24 @@ int cameraApplyMatrices(struct RenderState* renderState, struct CameraMatrixInfo
 
     return 1;
 }
+
+// assuming projection matrix works as follows
+// a 0 0                    0
+// 0 b 0                    0
+// 0 0 (n + f) / (n - f)    2 * n * f / (n - f)
+// 0 0 -1                   0
+
+// distance should be a positive value not scaled by scene scale
+// returns -1 for the near plane
+// returns 1 for the far plane
+float cameraClipDistance(struct Camera* camera, float distance) {
+    float modifiedDistance = distance * -SCENE_SCALE;
+    
+    float denom = modifiedDistance * (camera->nearPlane - camera->farPlane);
+
+    if (fabsf(denom) < 0.00000001f) {
+        return 0.0f;
+    }
+
+    return -((camera->nearPlane + camera->farPlane) * modifiedDistance + 2.0f * camera->nearPlane * camera->farPlane) / denom;
+}

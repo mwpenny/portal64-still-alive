@@ -164,6 +164,7 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/player/chell.blend \
 	assets/models/portal_gun/v_portalgun.blend \
 	assets/models/portal_gun/w_portalgun.blend \
+	assets/models/props/autoportal_frame/autoportal_frame.blend \
 	assets/models/props/button.blend \
 	assets/models/props/door_01.blend \
 	assets/models/props/combine_ball_catcher.blend \

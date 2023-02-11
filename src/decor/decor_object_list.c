@@ -1,5 +1,6 @@
 #include "decor_object_list.h"
 
+#include "../../build/assets/models/props/autoportal_frame/autoportal_frame.h"
 #include "../../build/assets/models/props/cylinder_test.h"
 #include "../../build/assets/models/cube/cube.h"
 #include "../../build/assets/models/props/radio.h"
@@ -78,6 +79,20 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         .materialIndexFizzled = CUBE_FIZZLED_INDEX,
         .soundClipId = -1,
     },
+    [DECOR_TYPE_AUTOPORTAL_FRAME] = {
+        {
+            CollisionShapeTypeNone,
+            NULL,
+            0.0f,
+            0.0f,
+            NULL,  
+        },
+        0.0f, 
+        1.0f,
+        &props_autoportal_frame_autoportal_frame_model_gfx[0],
+        .materialIndex = AUTOPORTAL_FRAME_INDEX,
+        .soundClipId = -1,
+    }
 };
 
 struct DecorObjectDefinition* decorObjectDefinitionForId(int id) {

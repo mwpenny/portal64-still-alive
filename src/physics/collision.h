@@ -12,6 +12,7 @@
 #include "gjk.h"
 
 enum CollisionShapeType {
+    CollisionShapeTypeNone,
     CollisionShapeTypeBox,
     CollisionShapeTypeQuad,
     CollisionShapeTypeSphere,
