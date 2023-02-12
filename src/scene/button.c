@@ -80,7 +80,7 @@ void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
 
     collisionObjectUpdateBB(&button->collisionObject);
 
-    button->dynamicId = dynamicSceneAdd(button, buttonRender, &button->rigidBody.transform, 0.84f);
+    button->dynamicId = dynamicSceneAdd(button, buttonRender, &button->rigidBody.transform.position, 0.84f);
     button->signalIndex = definition->signalIndex;
 
     button->originalPos = definition->location;

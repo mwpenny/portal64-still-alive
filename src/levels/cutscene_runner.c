@@ -152,7 +152,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             quatMultVector(&location->transform.rotation, &gRight, &transformUp);
             vector3Negate(&transformUp, &transformUp);
             vector3AddScaled(&location->transform.position, &firingRay.dir, -0.1f, &firingRay.origin);
-            sceneFirePortal(&gScene, &firingRay, &transformUp, step->openPortal.portalIndex, location->roomIndex);
+            sceneFirePortal(&gScene, &firingRay, &transformUp, step->openPortal.portalIndex, location->roomIndex, 0);
             break;
         }
         case CutsceneStepTypeSetSignal:

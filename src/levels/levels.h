@@ -17,6 +17,7 @@ struct Transform* levelRelativeTransform();
 struct Vector3* levelRelativeVelocity();
 
 extern struct LevelDefinition* gCurrentLevel;
+extern int gCurrentLevelIndex;
 
 int levelMaterialCount();
 int levelMaterialTransparentStart();

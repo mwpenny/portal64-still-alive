@@ -54,7 +54,7 @@ void dynamicRenderListPopulate(struct DynamicRenderDataList* list, struct Render
         int visibleStages = 0;
 
         struct Vector3 scaledPos;
-        vector3Scale(&object->transform->position, &scaledPos, SCENE_SCALE);
+        vector3Scale(object->position, &scaledPos, SCENE_SCALE);
 
         for (int stageIndex = 0; stageIndex < stageCount; ++stageIndex) {
             if ((stages[stageIndex].visiblerooms & object->roomFlags) == 0) {
@@ -117,7 +117,7 @@ void dynamicRenderPopulateRenderScene(
         }
 
         struct Vector3 scaledPos;
-        vector3Scale(&object->transform->position, &scaledPos, SCENE_SCALE);
+        vector3Scale(object->position, &scaledPos, SCENE_SCALE);
 
         if (isSphereOutsideFrustrum(cullingInfo, &scaledPos, object->scaledRadius)) {
             continue;

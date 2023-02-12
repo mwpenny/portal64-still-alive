@@ -84,10 +84,6 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 
 ## Current TODO list
 
-- [ ] close portal in elevator
-- [ ] checkpoint in elevator
-- [ ] keep stationary portal with fizzle grids
-- [ ] add more fizzle grids
 - [ ] red light district
 - [ ] burn marks
 - [ ] Skips audio sometimes
@@ -100,6 +96,10 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [ ] Presort portal gun polygon order
 - [ ] Signage should not always be on
 - [ ] Camera shake
+- [x] close portal in elevator
+- [x] keep stationary portal with fizzle grids
+- [x] add more fizzle grids
+- [x] checkpoint in elevator
 - [x] preserve gun between test chambers
 - [x] Finish up animation pieces (collider/portable surface/culling logic)
 - [x] Implement pedestal button

@@ -185,7 +185,8 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/portal/portal_orange_filled.blend \
 	assets/models/portal/portal_orange_face.blend \
 	assets/models/pedestal.blend \
-	assets/models/grav_flare.blend
+	assets/models/grav_flare.blend \
+	assets/models/fleck_ash2.blend
 
 ANIM_LIST = build/assets/models/pedestal_anim.o \
 	build/assets/models/props/box_dropper_anim.o \
@@ -220,7 +221,7 @@ build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/mat
 
 build/src/player/player.o: build/assets/models/player/chell.h build/assets/materials/static.h
 
-build/src/scene/ball.o: build/assets/models/grav_flare.h build/assets/materials/static.h
+build/src/scene/ball.o: build/assets/models/grav_flare.h build/assets/models/fleck_ash2.h build/assets/materials/static.h
 
 build/src/scene/ball_launcher.o: build/assets/models/props/combine_ball_launcher.h build/assets/materials/static.h
 

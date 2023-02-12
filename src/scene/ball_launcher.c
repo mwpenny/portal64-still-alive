@@ -66,7 +66,7 @@ void ballLauncherInit(struct BallLauncher* launcher, struct BallLauncherDefiniti
 
     collisionObjectUpdateBB(&launcher->collisionObject);
 
-    launcher->dynamicId = dynamicSceneAdd(launcher, ballLauncherRender, &launcher->rigidBody.transform, 1.0f);
+    launcher->dynamicId = dynamicSceneAdd(launcher, ballLauncherRender, &launcher->rigidBody.transform.position, 1.0f);
 
     dynamicSceneSetRoomFlags(launcher->dynamicId, ROOM_FLAG_FROM_INDEX(launcher->rigidBody.currentRoom));
 

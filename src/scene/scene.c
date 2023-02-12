@@ -18,6 +18,7 @@
 #include "../physics/collision_scene.h"
 #include "../levels/static_render.h"
 #include "../levels/levels.h"
+#include "../levels/checkpoint.h"
 #include "../scene/portal_surface.h"
 #include "../math/mathf.h"
 #include "./hud.h"
@@ -35,6 +36,9 @@ struct Vector3 gPortalGunForward = {0.1f, -0.1f, 1.0f};
 struct Vector3 gPortalGunUp = {0.0f, 1.0f, 0.0f};
 
 Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
+
+#define LEVEL_INDEX_WITH_GUN_0  2
+#define LEVEL_INDEX_WITH_GUN_1  8
 
 void sceneUpdateListeners(struct Scene* scene);
 
@@ -76,6 +80,14 @@ void sceneInit(struct Scene* scene) {
 
     playerInit(&scene->player, &combinedLocation, &startVelocity);
     sceneUpdateListeners(scene);
+
+    if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_0) {
+        playerGivePortalGun(&scene->player, PlayerHasFirstPortalGun);
+    }
+
+    if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_1) {
+        playerGivePortalGun(&scene->player, PlayerHasSecondPortalGun);
+    }
 
     portalInit(&scene->portals[0], 0);
     portalInit(&scene->portals[1], PortalFlagsOddParity);
@@ -146,6 +158,8 @@ void sceneInit(struct Scene* scene) {
     for (int i = 0; i < scene->switchCount; ++i) {
         switchInit(&scene->switches[i], &gCurrentLevel->switches[i]);
     }
+
+    ballBurnMarkInit();
 
     scene->ballLancherCount = gCurrentLevel->ballLauncherCount;
     scene->ballLaunchers = malloc(sizeof(struct BallLauncher) * scene->ballLancherCount);
@@ -257,18 +271,22 @@ void sceneCheckPortals(struct Scene* scene) {
     quatMultVector(&scene->player.lookTransform.rotation, &gUp, &playerUp);
 
     if (controllerGetButtonDown(0, Z_TRIG) && (scene->player.flags & PlayerHasSecondPortalGun)) {
-        sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom);
+        sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom, 1);
         soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL);
     }
 
     if (controllerGetButtonDown(0, R_TRIG | L_TRIG) && (scene->player.flags & PlayerHasFirstPortalGun)) {
-        sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom);
+        sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom, 1);
         soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL);
     }
 
     if (scene->player.body.flags & RigidBodyFizzled) {
-        sceneClosePortal(scene, 0);
-        sceneClosePortal(scene, 1);
+        if (scene->portals[0].flags & PortalFlagsPlayerPortal) {
+            sceneClosePortal(scene, 0);
+        }
+        if (scene->portals[1].flags & PortalFlagsPlayerPortal) {
+            sceneClosePortal(scene, 1);
+        }
         scene->player.body.flags &= ~RigidBodyFizzled;
     }
 
@@ -437,6 +455,9 @@ void sceneUpdate(struct Scene* scene) {
                     &gZeroVec,
                     scene->elevators[teleportTo].roomIndex
                 );
+                checkpointSave(&gScene);
+                sceneClosePortal(&gScene, 0);
+                sceneClosePortal(&gScene, 1);
             }
         }
     }
@@ -508,7 +529,7 @@ void sceneUpdate(struct Scene* scene) {
     }
 }
 
-int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformIndex, int portalIndex, struct PortalSurfaceMappingRange surfaceMapping, struct CollisionObject* collisionObject, int roomIndex) {
+int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformIndex, int portalIndex, struct PortalSurfaceMappingRange surfaceMapping, struct CollisionObject* collisionObject, int roomIndex, int fromPlayer) {
     struct Transform finalAt;
 
     struct Transform relativeToTransform;
@@ -547,12 +568,19 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
             gCollisionScene.portalTransforms[portalIndex] = &portal->transform;
             gCollisionScene.portalRooms[portalIndex] = roomIndex;
 
+            if (fromPlayer) {
+                portal->flags |= PortalFlagsPlayerPortal;
+            } else {
+                portal->flags &= ~PortalFlagsPlayerPortal;
+            }
+
             if (collisionSceneIsPortalOpen()) {
                 // the second portal is fully transparent right away
                 portal->opacity = 0.0f;
             }
 
             contactSolverCheckPortalContacts(&gContactSolver, collisionObject);
+            ballBurnFilterOnPortal(&portal->transform, portalIndex);
             return 1;
         }
     }
@@ -588,7 +616,7 @@ int sceneDetermineSurfaceMapping(struct Scene* scene, struct CollisionObject* hi
     return 0;
 }
 
-int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex) {
+int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex, int fromPlayer) {
     struct RaycastHit hit;
 
     if (!collisionSceneRaycast(&gCollisionScene, roomIndex, ray, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, 1000000.0f, 0, &hit)) {
@@ -626,7 +654,7 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
         quatLook(&hitDirection, &upDir, &portalLocation.rotation);
     }
 
-    return sceneOpenPortal(scene, &portalLocation, relativeIndex, portalIndex, mappingRange, hit.object, hit.roomIndex);
+    return sceneOpenPortal(scene, &portalLocation, relativeIndex, portalIndex, mappingRange, hit.object, hit.roomIndex, fromPlayer);
 }
 
 void sceneClosePortal(struct Scene* scene, int portalIndex) {

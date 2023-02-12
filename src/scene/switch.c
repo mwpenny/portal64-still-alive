@@ -81,7 +81,7 @@ void switchInit(struct Switch* switchObj, struct SwitchDefinition* definition) {
 
     collisionObjectUpdateBB(&switchObj->collisionObject);
 
-    switchObj->dynamicId = dynamicSceneAdd(switchObj, switchRender, &switchObj->rigidBody.transform, COLLIDER_HEIGHT * 0.5f);
+    switchObj->dynamicId = dynamicSceneAdd(switchObj, switchRender, &switchObj->rigidBody.transform.position, COLLIDER_HEIGHT * 0.5f);
     switchObj->signalIndex = definition->signalIndex;
 
     dynamicSceneSetRoomFlags(switchObj->dynamicId, ROOM_FLAG_FROM_INDEX(switchObj->rigidBody.currentRoom));

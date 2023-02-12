@@ -89,7 +89,7 @@ void boxDropperRender(void* data, struct DynamicRenderDataList* renderList, stru
 }
 
 void boxDropperInit(struct BoxDropper* dropper, struct BoxDropperDefinition* definition) {
-    dropper->dynamicId = dynamicSceneAdd(dropper, boxDropperRender, &dropper->transform, 1.5f);
+    dropper->dynamicId = dynamicSceneAdd(dropper, boxDropperRender, &dropper->transform.position, 1.5f);
 
     dropper->transform.position = definition->position;
     quatIdent(&dropper->transform.rotation);

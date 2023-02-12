@@ -143,7 +143,7 @@ void signageInit(struct Signage* signage, struct SignageDefinition* definition) 
     signage->roomIndex = definition->roomIndex;
     signage->testChamberNumber = definition->testChamberNumber;
 
-    int dynamicId = dynamicSceneAdd(signage, signageRender, &signage->transform, 1.7f);
+    int dynamicId = dynamicSceneAdd(signage, signageRender, &signage->transform.position, 1.7f);
 
     dynamicSceneSetRoomFlags(dynamicId, ROOM_FLAG_FROM_INDEX(definition->roomIndex));
 }

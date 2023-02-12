@@ -62,7 +62,7 @@ void pedestalInit(struct Pedestal* pedestal, struct PedestalDefinition* definiti
 
     skAnimatorInit(&pedestal->animator, PEDESTAL_DEFAULT_BONES_COUNT);
 
-    pedestal->dynamicId = dynamicSceneAdd(pedestal, pedestalRender, &pedestal->transform, 0.8f);
+    pedestal->dynamicId = dynamicSceneAdd(pedestal, pedestalRender, &pedestal->transform.position, 0.8f);
 
     dynamicSceneSetRoomFlags(pedestal->dynamicId, ROOM_FLAG_FROM_INDEX(definition->roomIndex));
 

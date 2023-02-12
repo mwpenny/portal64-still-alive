@@ -15,7 +15,7 @@
 #include "../../build/assets/materials/static.h"
 
 #define AUTO_OPEN_DISTANCE      4.0f
-#define INSIDE_DISTANCE         1.0f
+#define INSIDE_DISTANCE         1.2f
 #define SAME_LEVEL_HEIGHT       3.0f
 #define OPEN_SPEED              2.0f
 
@@ -95,7 +95,7 @@ void elevatorInit(struct Elevator* elevator, struct ElevatorDefinition* elevator
 
     collisionObjectUpdateBB(&elevator->collisionObject);
 
-    elevator->dynamicId = dynamicSceneAdd(elevator, elevatorRender, &elevator->rigidBody.transform, 3.9f);
+    elevator->dynamicId = dynamicSceneAdd(elevator, elevatorRender, &elevator->rigidBody.transform.position, 3.9f);
     elevator->flags = elevatorDefinition->targetElevator == -1 ? ElevatorFlagsIsExit : 0;
     elevator->openAmount = 0.0f;
     elevator->roomIndex = elevatorDefinition->roomIndex;

@@ -71,7 +71,7 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct W
 
     collisionObjectUpdateBB(&door->collisionObject);
 
-    door->dynamicId = dynamicSceneAdd(door, doorRender, &door->rigidBody.transform, 1.7f);
+    door->dynamicId = dynamicSceneAdd(door, doorRender, &door->rigidBody.transform.position, 1.7f);
     door->signalIndex = doorDefinition->signalIndex;
     door->openAmount = 0.0f;
 

@@ -71,7 +71,7 @@ void ballCatcherInit(struct BallCatcher* catcher, struct BallCatcherDefinition* 
 
     collisionObjectUpdateBB(&catcher->collisionObject);
 
-    catcher->dynamicId = dynamicSceneAdd(catcher, ballCatcherRender, &catcher->rigidBody.transform, 1.0f);
+    catcher->dynamicId = dynamicSceneAdd(catcher, ballCatcherRender, &catcher->rigidBody.transform.position, 1.0f);
 
     dynamicSceneSetRoomFlags(catcher->dynamicId, ROOM_FLAG_FROM_INDEX(catcher->rigidBody.currentRoom));
 

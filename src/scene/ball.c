@@ -9,6 +9,7 @@
 #include "../util/time.h"
 
 #include "../build/assets/models/grav_flare.h"
+#include "../build/assets/models/fleck_ash2.h"
 #include "../build/assets/models/cube/cube.h"
 #include "../build/assets/materials/static.h"
 
@@ -26,6 +27,32 @@ struct ColliderTypeData gBallCollider = {
     &gCollisionBoxCallbacks,
 };
 
+struct BallBurnMark gBurnMarks[MAX_BURN_MARKS];
+short gCurrentBurnIndex;
+
+void ballBurnMarkInit() {
+    gCurrentBurnIndex = 0;
+
+    for (int i = 0; i < 3; ++i) {
+        gBurnMarks[i].dynamicId = -1;
+    }
+}
+
+void ballBurnFilterOnPortal(struct Transform* portalTransform, int portalIndex) {
+    for (int i = 0; i < MAX_BURN_MARKS; ++i) {
+        struct BallBurnMark* burnMark = &gBurnMarks[i];
+        
+        if (burnMark->dynamicId == -1) {
+            continue;
+        }
+
+        if (collisionSceneIsTouchingSinglePortal(&burnMark->at, &burnMark->normal, portalTransform, portalIndex)) {
+            dynamicSceneRemove(burnMark->dynamicId);
+            burnMark->dynamicId = -1;
+        }
+    }
+}
+
 void ballRender(void* data, struct RenderScene* renderScene, struct Transform* fromView) {
     struct Ball* ball = (struct Ball*)data;
     struct Transform transform;
@@ -38,6 +65,19 @@ void ballRender(void* data, struct RenderScene* renderScene, struct Transform* f
     transformToMatrixL(&transform, mtx, SCENE_SCALE);
 
     renderSceneAdd(renderScene, grav_flare_model_gfx, mtx, GRAV_FLARE_INDEX, &ball->rigidBody.transform.position, NULL);
+}
+
+void ballBurnRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
+    struct BallBurnMark* burn = (struct BallBurnMark*)data;
+
+    dynamicRenderListAddData(
+        renderList,
+        fleck_ash2_model_gfx,
+        &burn->matrix,
+        FLECK_ASH2_INDEX,
+        &burn->at,
+        NULL
+    );
 }
 
 void ballInitInactive(struct Ball* ball) {
@@ -61,13 +101,53 @@ void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* veloc
 
     ball->targetSpeed = sqrtf(vector3MagSqrd(&ball->rigidBody.velocity));
 
-    ball->dynamicId = dynamicSceneAddViewDependant(ball, ballRender, &ball->rigidBody.transform, BALL_RADIUS);
+    ball->dynamicId = dynamicSceneAddViewDependant(ball, ballRender, &ball->rigidBody.transform.position, BALL_RADIUS);
 
     dynamicSceneSetRoomFlags(ball->dynamicId, ROOM_FLAG_FROM_INDEX(startingRoom));
 }
 
 void ballTurnOnCollision(struct Ball* ball) {
     ball->collisionObject.collisionLayers |= COLLISION_LAYERS_BLOCK_BALL;
+}
+
+void ballInitBurn(struct Ball* ball, struct ContactManifold* manifold) {
+    if (!manifold || manifold->contactCount == 0) {
+        return;
+    }
+
+    // only add burn marks to static objects
+    if (manifold->shapeA->body != NULL) {
+        return;
+    }
+
+    struct BallBurnMark* burn = &gBurnMarks[gCurrentBurnIndex];
+
+    struct BallBurnMark* lastBurn = &gBurnMarks[(gCurrentBurnIndex == 0 ? MAX_BURN_MARKS : gCurrentBurnIndex) - 1];
+
+    struct Transform burnTransform;
+    burnTransform.position = manifold->contacts[0].contactAWorld;
+
+    // don't double up burns
+    if (vector3DistSqrd(&burnTransform.position, &lastBurn->at) < 0.1f) {
+        return;
+    }
+
+    ++gCurrentBurnIndex;
+
+    if (gCurrentBurnIndex == MAX_BURN_MARKS) {
+        gCurrentBurnIndex = 0;
+    }
+
+    if (burn->dynamicId == -1) {
+        burn->dynamicId = dynamicSceneAdd(burn, ballBurnRender, &burn->at, 0.2f);
+    }
+
+    quatLook(&manifold->normal, &gUp, &burnTransform.rotation);
+    burnTransform.scale = gOneVec;
+
+    transformToMatrixL(&burnTransform, &burn->matrix, SCENE_SCALE);
+    burn->at = burnTransform.position;
+    burn->normal = manifold->normal;
 }
 
 void ballUpdate(struct Ball* ball) {
@@ -96,6 +176,9 @@ void ballUpdate(struct Ball* ball) {
             dynamicSceneRemove(ball->dynamicId);
         }
     }
+
+    struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &ball->collisionObject, NULL);
+    ballInitBurn(ball, manifold);
 }
 
 int ballIsActive(struct Ball* ball) {

@@ -90,7 +90,7 @@ void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* d
         collisionObjectUpdateBB(&object->collisionObject);
     }
 
-    object->dynamicId = dynamicSceneAdd(object, decorObjectRender, &object->rigidBody.transform, definition->radius);
+    object->dynamicId = dynamicSceneAdd(object, decorObjectRender, &object->rigidBody.transform.position, definition->radius);
 
     dynamicSceneSetRoomFlags(object->dynamicId, ROOM_FLAG_FROM_INDEX(room));
 

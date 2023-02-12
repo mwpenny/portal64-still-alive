@@ -11,7 +11,7 @@ struct DynamicRenderDataList;
 typedef void (*DynamicRender)(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState);
 typedef void (*DynamicViewRender)(void* data, struct RenderScene* renderScene, struct Transform* fromView);
 
-#define MAX_DYNAMIC_SCENE_OBJECTS 32
+#define MAX_DYNAMIC_SCENE_OBJECTS 64
 #define MAX_VIEW_DEPENDANT_OBJECTS 8
 
 #define DYNAMIC_SCENE_OBJECT_FLAGS_USED                 (1 << 0)
@@ -25,7 +25,7 @@ typedef void (*DynamicViewRender)(void* data, struct RenderScene* renderScene, s
 struct DynamicSceneObject {
     void* data;
     DynamicRender renderCallback;
-    struct Transform* transform;
+    struct Vector3* position;
     float scaledRadius;
     u16 flags;
     u64 roomFlags;
@@ -34,7 +34,7 @@ struct DynamicSceneObject {
 struct DynamicSceneViewDependantObject {
     void* data;
     DynamicViewRender renderCallback;
-    struct Transform* transform;
+    struct Vector3* position;
     float scaledRadius;
     u16 flags;
     u64 roomFlags;
@@ -47,8 +47,8 @@ struct DynamicScene {
 
 void dynamicSceneInit();
 
-int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Transform* transform, float radius);
-int dynamicSceneAddViewDependant(void* data, DynamicViewRender renderCallback, struct Transform* transform, float radius);
+int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Vector3* position, float radius);
+int dynamicSceneAddViewDependant(void* data, DynamicViewRender renderCallback, struct Vector3* position, float radius);
 void dynamicSceneRemove(int id);
 void dynamicSceneSetFlags(int id, int flags);
 void dynamicSceneClearFlags(int id, int flags);

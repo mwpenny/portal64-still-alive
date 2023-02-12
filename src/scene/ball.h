@@ -6,19 +6,32 @@
 #define BALL_VELOCITY   2.0f
 #define BALL_FADE_TIME  3.0f
 
+#define MAX_BURN_MARKS  3
+
 enum BallFlags {
     BallFlagsCaught = (1 << 0),
     BallFlagsPowering = (1 << 1),
 };
 
+struct BallBurnMark {
+    Mtx matrix;
+    struct Vector3 at;
+    struct Vector3 normal;
+    short dynamicId;
+};
+
 struct Ball {
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
+
     float targetSpeed;
     float lifetime;
     short dynamicId;
     short flags;
 };
+
+void ballBurnMarkInit();
+void ballBurnFilterOnPortal(struct Transform* portalTransform, int portalIndex);
 
 void ballInitInactive(struct Ball* ball);
 void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* velocity, short startingRoom, float ballLifetime);

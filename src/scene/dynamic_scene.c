@@ -15,7 +15,7 @@ void dynamicSceneInit() {
     }
 }
 
-int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Transform* transform, float radius) {
+int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Vector3* position, float radius) {
     for (int i = 0; i < MAX_DYNAMIC_SCENE_OBJECTS; ++i) {
         struct DynamicSceneObject* object = &gDynamicScene.objects[i];
         if (!(object->flags & DYNAMIC_SCENE_OBJECT_FLAGS_USED)) {
@@ -23,7 +23,7 @@ int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Transform* 
             object->flags = DYNAMIC_SCENE_OBJECT_FLAGS_USED | DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE;
             object->data = data;
             object->renderCallback = renderCallback;
-            object->transform = transform;
+            object->position = position;
             object->scaledRadius = radius * SCENE_SCALE;
             object->roomFlags = ~0;
             return i;
@@ -33,7 +33,7 @@ int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Transform* 
     return INVALID_DYNAMIC_OBJECT;
 }
 
-int dynamicSceneAddViewDependant(void* data, DynamicViewRender renderCallback, struct Transform* transform, float radius) {
+int dynamicSceneAddViewDependant(void* data, DynamicViewRender renderCallback, struct Vector3* position, float radius) {
     for (int i = 0; i < MAX_VIEW_DEPENDANT_OBJECTS; ++i) {
         struct DynamicSceneViewDependantObject* object = &gDynamicScene.viewDependantObjects[i];
         if (!(object->flags & DYNAMIC_SCENE_OBJECT_FLAGS_USED)) {
@@ -41,7 +41,7 @@ int dynamicSceneAddViewDependant(void* data, DynamicViewRender renderCallback, s
             object->flags = DYNAMIC_SCENE_OBJECT_FLAGS_USED | DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE;
             object->data = data;
             object->renderCallback = renderCallback;
-            object->transform = transform;
+            object->position = position;
             object->scaledRadius = radius * SCENE_SCALE;
             object->roomFlags = ~0;
             return i + MAX_DYNAMIC_SCENE_OBJECTS;
