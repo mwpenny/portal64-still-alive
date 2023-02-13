@@ -84,8 +84,7 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 
 ## Current TODO list
 
-- [ ] fix chell animation problem
-- [ ] first portal wall
+- [ ] fix chell animation problem (fixed itself, investigate)
 - [ ] sound effects for ball
 --------------------------------------------------------
 - [ ] Skips audio sometimes
@@ -96,6 +95,7 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [ ] Presort portal gun polygon order
 - [ ] Signage should not always be on
 - [ ] Camera shake
+- [x] first portal wall
 - [x] the cube bounces the player
 - [x] break constraint after large distance
 - [x] prevent objects from pushing the player around

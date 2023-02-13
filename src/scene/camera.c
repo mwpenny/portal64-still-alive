@@ -15,7 +15,7 @@ int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Boundi
         closestPoint.y = normal->y < 0.0f ? boundingBox->minY : boundingBox->maxY;
         closestPoint.z = normal->z < 0.0f ? boundingBox->minZ : boundingBox->maxZ;
 
-        if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.0f) {
+        if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.00001f) {
             return 1;
         }
     }
