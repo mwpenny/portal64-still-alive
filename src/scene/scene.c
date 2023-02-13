@@ -581,6 +581,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
 
             contactSolverCheckPortalContacts(&gContactSolver, collisionObject);
             ballBurnFilterOnPortal(&portal->transform, portalIndex);
+            playerSignalPortalChanged(&scene->player);
             return 1;
         }
     }

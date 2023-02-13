@@ -155,14 +155,20 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
 #define JUMP_IMPULSE   2.7f
 
 void playerHandleCollision(struct Player* player) {
-    struct ContactManifold* contact = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);
-
-    while (contact) {
+    for (struct ContactManifold* contact = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);
+        contact;
+        contact = contactSolverNextManifold(&gContactSolver, &player->collisionObject, contact)
+    ) {
         float offset = 0.0f;
 
         for (int i = 0; i < contact->contactCount; ++i) {
             struct ContactPoint* contactPoint = &contact->contacts[i];
             offset = MIN(offset, contactPoint->penetration);
+        }
+
+        if (contact->shapeA == player->grabConstraint.object || contact->shapeB == player->grabConstraint.object) {
+            // objects being grabbed by the player shouldn't push the player
+            continue;
         }
         
         if (offset != 0.0f) {
@@ -184,12 +190,6 @@ void playerHandleCollision(struct Player* player) {
         if (isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB)) {
             playerKill(player, 0);
         }
-
-        if (contact->shapeA == player->grabConstraint.object || contact->shapeB == player->grabConstraint.object) {
-            playerSetGrabbing(player, NULL);
-        }
-
-        contact = contactSolverNextManifold(&gContactSolver, &player->collisionObject, contact);
     }
 }
 
@@ -210,6 +210,12 @@ void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) 
         contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
     } else if (grabbing != player->grabConstraint.object) {
         pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f);
+    }
+}
+
+void playerSignalPortalChanged(struct Player* player) {
+    if (player->grabbingThroughPortal != PLAYER_GRABBING_THROUGH_NOTHING) {
+        playerSetGrabbing(player, NULL);
     }
 }
 
@@ -305,11 +311,6 @@ void playerUpdateGrabbedObject(struct Player* player) {
         }
 
         pointConstraintUpdateTarget(&player->grabConstraint, &grabPoint, &grabRotation);
-    }
-
-    struct RaycastHit hit;
-    if (player->grabConstraint.object && !(playerRaycastGrab(player, &hit) || hit.object != player->grabConstraint.object)) {
-        playerSetGrabbing(player, NULL);
     }
 }
 
@@ -500,7 +501,11 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         hit.object->flags |= COLLISION_OBJECT_PLAYER_STANDING;
         player->flags |= PlayerFlagsGrounded;
 
-        if (hit.object->body) {
+        if (hit.object == player->grabConstraint.object) {
+            playerSetGrabbing(player, NULL);
+        }
+
+        if (hit.object->body && (hit.object->body->flags & RigidBodyIsKinematic)) {
             player->anchoredTo = hit.object->body;
             player->lastAnchorPoint = hit.at;
             transformPointInverseNoScale(&player->anchoredTo->transform, &hit.at, &player->relativeAnchor);

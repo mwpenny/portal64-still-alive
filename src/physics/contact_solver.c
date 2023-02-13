@@ -195,7 +195,7 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 		struct RigidBody* bodyA = cs->shapeA->body;
 		struct RigidBody* bodyB = cs->shapeB->body;
 
-		if (bodyA) {
+		if (bodyA && !(bodyA->flags & RigidBodyIsKinematic)) {
 			vA = &bodyA->velocity;
 			wA = &bodyA->angularVelocity;
 		} else {
@@ -203,7 +203,7 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 			wA = NULL;
 		}
 
-		if (bodyB) {
+		if (bodyB && !(bodyB->flags & RigidBodyIsKinematic)) {
 			vB = &bodyB->velocity;
 			wB = &bodyB->angularVelocity;
 		} else {
@@ -222,11 +222,11 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
             vector3Cross(&c->contactBWorld, &cs->normal, &rbCn);
 			float nm = 0;
 			
-			if (bodyA) {
+			if (vA) {
 				nm += bodyA->massInv;
 			}
 
-			if (bodyB) {
+			if (vB) {
 				nm += bodyB->massInv;
 			}
 
@@ -234,11 +234,11 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 			tm[ 0 ] = nm;
 			tm[ 1 ] = nm;
 
-			if (bodyA) {
+			if (vA) {
 				nm += bodyA->momentOfInertiaInv * vector3MagSqrd(&raCn);
 			}
 
-			if (bodyB) {
+			if (vB) {
 				nm += bodyB->momentOfInertiaInv * vector3MagSqrd(&rbCn);
 			}
 
@@ -251,10 +251,10 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 				struct Vector3 rbCt;
                 vector3Cross(&cs->tangentVectors[ i ], &c->contactBWorld, &rbCt);
 
-				if (bodyA) {
+				if (vA) {
 					tm[ i ] += bodyA->momentOfInertiaInv * vector3MagSqrd(&raCt);
 				}
-				if (bodyB) {
+				if (vB) {
 					tm[ i ] += bodyB->momentOfInertiaInv * vector3MagSqrd(&rbCt);
 				}
 
@@ -276,13 +276,13 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 
             struct Vector3 w;
 
-			if (bodyA) {
+			if (vA) {
 				vector3AddScaled(vA, &P, -bodyA->massInv, vA);
 				vector3Cross(&c->contactAWorld, &P, &w);
 				vector3AddScaled(wA, &w, -bodyA->momentOfInertiaInv, wA);
 			}
 
-			if (bodyB) {
+			if (vB) {
 				vector3AddScaled(vB, &P, bodyB->massInv, vB);
 				vector3Cross(&c->contactBWorld, &P, &w);
 				vector3AddScaled(wB, &w, bodyB->momentOfInertiaInv, wB);
@@ -314,11 +314,31 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 	}
 }
 
+#define BREAK_DISTANCE	0.5f
+
 void contactSolverIterateConstraints(struct ContactSolver* contactSolver) {
 	struct PointConstraint* curr = contactSolver->firstPointConstraint;
 
+	struct PointConstraint* prev = NULL;
+
 	while (curr) {
-		pointConstraintMoveToPoint(curr->object, &curr->targetPos, curr->maxPosImpulse);
+		if (!pointConstraintMoveToPoint(curr->object, &curr->targetPos, curr->maxPosImpulse)) {
+			struct PointConstraint* next = curr->nextConstraint;
+
+			if (prev) {
+				prev->nextConstraint = next;
+			} else {
+				contactSolver->firstPointConstraint = next;
+			}
+
+
+			curr->nextConstraint = NULL;
+			curr->object = NULL;
+
+			curr = next;
+			continue;
+		}
+
 		pointConstraintRotateTo(curr->object->body, &curr->targetRot, curr->maxRotImpulse);		
 
 		curr = curr->nextConstraint;
@@ -343,7 +363,7 @@ void contactSolverIterate(struct ContactSolver* contactSolver) {
 		struct RigidBody* bodyA = cs->shapeA->body;
 		struct RigidBody* bodyB = cs->shapeB->body;
 
-		if (bodyA) {
+		if (bodyA && !(bodyA->flags & RigidBodyIsKinematic)) {
 			vA = &bodyA->velocity;
 			wA = &bodyA->angularVelocity;
 		} else {
@@ -351,7 +371,7 @@ void contactSolverIterate(struct ContactSolver* contactSolver) {
 			wA = NULL;
 		}
 
-		if (bodyB) {
+		if (bodyB && !(bodyB->flags & RigidBodyIsKinematic)) {
 			vB = &bodyB->velocity;
 			wB = &bodyB->angularVelocity;
 		} else {

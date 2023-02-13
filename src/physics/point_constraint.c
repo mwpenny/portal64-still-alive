@@ -2,12 +2,19 @@
 
 #include "../util/time.h"
 
-void pointConstraintMoveToPoint(struct CollisionObject* object, struct Vector3* worldPoint, float maxImpulse) {
+#define BREAK_CONSTRAINT_DISTANCE 2.0f
+
+int pointConstraintMoveToPoint(struct CollisionObject* object, struct Vector3* worldPoint, float maxImpulse) {
     struct RigidBody* rigidBody = object->body;
 
-    vector3Sub(worldPoint, &rigidBody->transform.position, &rigidBody->velocity);
     struct Vector3 targetVelocity;
-    vector3Scale(&rigidBody->velocity, &targetVelocity, 1.0f / FIXED_DELTA_TIME);
+    vector3Sub(worldPoint, &rigidBody->transform.position, &targetVelocity);
+
+    if (vector3MagSqrd(&targetVelocity) > BREAK_CONSTRAINT_DISTANCE * BREAK_CONSTRAINT_DISTANCE) {
+        return 0;
+    }
+
+    vector3Scale(&targetVelocity, &targetVelocity, 1.0f / FIXED_DELTA_TIME);
 
     struct ContactManifold* contact = contactSolverNextManifold(&gContactSolver, object, NULL);
 
@@ -38,6 +45,8 @@ void pointConstraintMoveToPoint(struct CollisionObject* object, struct Vector3* 
     } else {
         vector3AddScaled(&rigidBody->velocity, &delta, maxImpulse / sqrtf(deltaSqrd), &rigidBody->velocity);
     }
+
+    return 1;
 }
 
 void pointConstraintRotateTo(struct RigidBody* rigidBody, struct Quaternion* worldRotation, float maxImpulse) {
