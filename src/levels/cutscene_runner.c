@@ -95,6 +95,7 @@ ALSndId cutsceneRunnerPlaySound(struct CutsceneStep* step) {
         step->playSound.soundId,
         step->playSound.volume * (1.0f / 255.0f),
         step->playSound.pitch * (1.0f / 64.0f),
+        NULL,
         NULL
     );
 }
@@ -331,7 +332,7 @@ void cutscenesUpdateSounds() {
             if (gCutsceneSoundQueues[i]) {
                 struct QueuedSound* curr = gCutsceneSoundQueues[i];
 
-                gCutsceneCurrentSound[i] = soundPlayerPlay(curr->soundId, curr->volume, gCutsceneChannelPitch[i], NULL);
+                gCutsceneCurrentSound[i] = soundPlayerPlay(curr->soundId, curr->volume, gCutsceneChannelPitch[i], NULL, NULL);
                 gCutsceneSoundQueues[i] = curr->next;
 
                 curr->next = gCutsceneNextFreeSound;

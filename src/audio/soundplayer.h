@@ -20,15 +20,15 @@ extern char _soundsTblSegmentRomEnd[];
 
 void soundPlayerInit();
 void soundPlayerUpdate();
-ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at);
+ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity);
 void soundPlayerStop(ALSndId soundId);
 void soundPlayerStopAll();
 
-void soundPlayerUpdatePosition(ALSndId soundId, struct Vector3* at);
+void soundPlayerUpdatePosition(ALSndId soundId, struct Vector3* at, struct Vector3* velocity);
 
 int soundPlayerIsPlaying(ALSndId soundId);
 
-void soundListenerUpdate(struct Vector3* position, struct Quaternion* rotation, int listenerIndex);
+void soundListenerUpdate(struct Vector3* position, struct Quaternion* rotation, struct Vector3* velocity, int listenerIndex);
 void soundListenerSetCount(int count);
 
 #endif

@@ -272,12 +272,12 @@ void sceneCheckPortals(struct Scene* scene) {
 
     if (controllerGetButtonDown(0, Z_TRIG) && (scene->player.flags & PlayerHasSecondPortalGun)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom, 1);
-        soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL);
+        soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL);
     }
 
     if (controllerGetButtonDown(0, R_TRIG | L_TRIG) && (scene->player.flags & PlayerHasFirstPortalGun)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom, 1);
-        soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL);
+        soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL, NULL);
     }
 
     if (scene->player.body.flags & RigidBodyFizzled) {
@@ -298,7 +298,13 @@ void sceneCheckPortals(struct Scene* scene) {
     portalCheckForHoles(scene->portals);
 }
 
-void sceneUpdatePortalListener(struct Scene* scene, int portalIndex, int listenerIndex) {
+#define MAX_LISTEN_THROUGH_PORTAL_DISTANCE 3.0f
+
+int sceneUpdatePortalListener(struct Scene* scene, int portalIndex, int listenerIndex) {
+    if (vector3DistSqrd(&scene->player.lookTransform.position, &scene->portals[portalIndex].transform.position) > MAX_LISTEN_THROUGH_PORTAL_DISTANCE * MAX_LISTEN_THROUGH_PORTAL_DISTANCE) {
+        return 0;
+    }
+
     struct Transform otherInverse;
     transformInvert(&scene->portals[1 - portalIndex].transform, &otherInverse);
     struct Transform portalCombined;
@@ -307,19 +313,30 @@ void sceneUpdatePortalListener(struct Scene* scene, int portalIndex, int listene
     struct Transform relativeTransform;
     transformConcat(&portalCombined, &scene->player.lookTransform, &relativeTransform);
 
-    soundListenerUpdate(&relativeTransform.position, &relativeTransform.rotation, listenerIndex);
+    struct Vector3 velocity;
+    quatMultVector(&relativeTransform.rotation, &scene->player.body.velocity, &velocity);
+
+    soundListenerUpdate(&relativeTransform.position, &relativeTransform.rotation, &velocity, listenerIndex);
+
+    return 1;
 }
 
 void sceneUpdateListeners(struct Scene* scene) {
-    soundListenerUpdate(&scene->player.lookTransform.position, &scene->player.lookTransform.rotation, 0);
+    soundListenerUpdate(&scene->player.lookTransform.position, &scene->player.lookTransform.rotation, &scene->player.body.velocity, 0);
+
+    int listenerCount = 1;
 
     if (collisionSceneIsPortalOpen()) {
-        soundListenerSetCount(3);
-        sceneUpdatePortalListener(scene, 0, 1);
-        sceneUpdatePortalListener(scene, 1, 2);
-    } else {
-        soundListenerSetCount(1);
+        if (sceneUpdatePortalListener(scene, 0, listenerCount)) {
+            ++listenerCount;
+        }
+
+        if (sceneUpdatePortalListener(scene, 1, listenerCount)) {
+            ++listenerCount;
+        }
     }
+
+    soundListenerSetCount(listenerCount);
 }
 
 struct Transform gRelativeElevatorTransform = {
@@ -551,7 +568,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
         struct Portal* portal = &scene->portals[portalIndex];
 
         if (portalAttachToSurface(portal, existingSurface, surfaceIndex, &finalAt)) {
-            soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &at->position);
+            soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &at->position, &gZeroVec);
 
             // the portal position may have been adjusted
             if (transformIndex != NO_TRANSFORM_INDEX) {
@@ -660,7 +677,7 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
 
 void sceneClosePortal(struct Scene* scene, int portalIndex) {
     if (gCollisionScene.portalTransforms[portalIndex]) {
-        soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position);
+        soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position, &gZeroVec);
         gCollisionScene.portalTransforms[portalIndex] = NULL;
         scene->portals[portalIndex].flags |= PortalFlagsNeedsNewHole;
         scene->portals[portalIndex].portalSurfaceIndex = -1;

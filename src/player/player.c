@@ -533,8 +533,8 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     quatIdent(&player->body.transform.rotation);
 
     if (didPassThroughPortal) {
-        soundPlayerPlay(soundsPortalEnter[didPassThroughPortal - 1], 0.75f, 1.0f, NULL);
-        soundPlayerPlay(soundsPortalExit[2 - didPassThroughPortal], 0.75f, 1.0f, NULL);
+        soundPlayerPlay(soundsPortalEnter[didPassThroughPortal - 1], 0.75f, 1.0f, NULL, NULL);
+        soundPlayerPlay(soundsPortalExit[2 - didPassThroughPortal], 0.75f, 1.0f, NULL, NULL);
     }
 
     OSContPad* controllerInput = controllersGetControllerData(0);

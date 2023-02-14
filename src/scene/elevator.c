@@ -169,7 +169,7 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
     }
 
     if ((elevator->openAmount == 0.0f && shouldBeOpen) || (elevator->openAmount && !shouldBeOpen)) {
-        soundPlayerPlay(soundsElevatorDoor, 1.0f, 0.5f, &elevator->rigidBody.transform.position);
+        soundPlayerPlay(soundsElevatorDoor, 1.0f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec);
     }
 
     elevator->openAmount = mathfMoveTowards(elevator->openAmount, shouldBeOpen ? 1.0f : 0.0f, OPEN_SPEED * FIXED_DELTA_TIME);
