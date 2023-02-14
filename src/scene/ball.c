@@ -13,6 +13,9 @@
 #include "../build/assets/models/cube/cube.h"
 #include "../build/assets/materials/static.h"
 
+#include "../audio/soundplayer.h"
+#include "../audio/clips.h"
+
 #define BALL_RADIUS 0.1f
 
 struct CollisionBox gBallCollisionBox = {
@@ -83,6 +86,7 @@ void ballBurnRender(void* data, struct DynamicRenderDataList* renderList, struct
 void ballInitInactive(struct Ball* ball) {
     ball->targetSpeed = 0.0f;
     ball->flags = 0;
+    ball->soundLoopId = SOUND_ID_NONE;
 }
 
 void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* velocity, short startingRoom, float ballLifetime) {
@@ -104,6 +108,8 @@ void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* veloc
     ball->dynamicId = dynamicSceneAddViewDependant(ball, ballRender, &ball->rigidBody.transform.position, BALL_RADIUS);
 
     dynamicSceneSetRoomFlags(ball->dynamicId, ROOM_FLAG_FROM_INDEX(startingRoom));
+
+    ball->soundLoopId = soundPlayerPlay(soundsBallLoop, 4.0f, 1.0f, &ball->rigidBody.transform.position, &ball->rigidBody.velocity);
 }
 
 void ballTurnOnCollision(struct Ball* ball) {
@@ -163,6 +169,8 @@ void ballUpdate(struct Ball* ball) {
         vector3Scale(&ball->rigidBody.velocity, &ball->rigidBody.velocity, ball->targetSpeed / currentSpeed);
     }
 
+    soundPlayerUpdatePosition(ball->soundLoopId, &ball->rigidBody.transform.position, &ball->rigidBody.velocity);
+
     ball->rigidBody.angularVelocity = gOneVec;
     
     dynamicSceneSetRoomFlags(ball->dynamicId, ROOM_FLAG_FROM_INDEX(ball->rigidBody.currentRoom));
@@ -174,6 +182,8 @@ void ballUpdate(struct Ball* ball) {
             ball->targetSpeed = 0.0f;
             collisionSceneRemoveDynamicObject(&ball->collisionObject);
             dynamicSceneRemove(ball->dynamicId);
+            soundPlayerStop(ball->soundLoopId);
+            ball->soundLoopId = SOUND_ID_NONE;
         }
     }
 
@@ -197,6 +207,8 @@ void ballMarkCaught(struct Ball* ball) {
     ball->flags |= BallFlagsCaught;
     collisionSceneRemoveDynamicObject(&ball->collisionObject);
     rigidBodyMarkKinematic(&ball->rigidBody);
+    soundPlayerStop(ball->soundLoopId);
+    ball->soundLoopId = SOUND_ID_NONE;
 }
 
 int isColliderForBall(struct CollisionObject* collisionObject) {

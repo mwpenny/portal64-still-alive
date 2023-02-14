@@ -12,4 +12,6 @@ extern unsigned short soundsPortalFizzle;
 
 extern unsigned short soundsElevatorDoor;
 
+extern unsigned short soundsBallLoop;
+
 #endif

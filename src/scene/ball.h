@@ -28,6 +28,7 @@ struct Ball {
     float lifetime;
     short dynamicId;
     short flags;
+    short soundLoopId;
 };
 
 void ballBurnMarkInit();

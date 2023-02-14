@@ -24,3 +24,5 @@ unsigned short soundsPortalOpen2 = SOUNDS_PORTAL_OPEN2;
 unsigned short soundsPortalFizzle = SOUNDS_PORTAL_FIZZLE2;
 
 unsigned short soundsElevatorDoor = SOUNDS_DOORMOVE1;
+
+unsigned short soundsBallLoop = SOUNDS_ENERGY_SING_LOOP4;

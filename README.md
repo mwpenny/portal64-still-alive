@@ -85,7 +85,7 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 ## Current TODO list
 
 - [ ] fix chell animation problem (fixed itself, investigate)
-- [ ] sound effects for ball
+- [ ] sound effects for ball (portal_pak_dir/scripts/npc_sounds_energy_ball.txt)
 --------------------------------------------------------
 - [ ] Skips audio sometimes
 - [ ] Portal not rending recursively sometimes
