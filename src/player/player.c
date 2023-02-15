@@ -187,8 +187,9 @@ void playerHandleCollision(struct Player* player) {
             vector3ProjectPlane(&player->body.velocity, &contact->normal, &player->body.velocity);
         }
 
-        if (isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB)) {
+        if (((isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB)) && !playerIsDead(player))) {
             playerKill(player, 0);
+            soundPlayerPlay(soundsBallKill, 1.0f, 1.0f, NULL, NULL);
         }
     }
 }

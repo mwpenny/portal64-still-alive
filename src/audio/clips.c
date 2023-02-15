@@ -26,3 +26,7 @@ unsigned short soundsPortalFizzle = SOUNDS_PORTAL_FIZZLE2;
 unsigned short soundsElevatorDoor = SOUNDS_DOORMOVE1;
 
 unsigned short soundsBallLoop = SOUNDS_ENERGY_SING_LOOP4;
+unsigned short soundsBallLaunch = SOUNDS_ENERGY_SING_FLYBY1;
+unsigned short soundsBallBounce = SOUNDS_ENERGY_BOUNCE1;
+unsigned short soundsBallKill = SOUNDS_ENERGY_DISINTEGRATE4;
+unsigned short soundsBallExplode = SOUNDS_ENERGY_SING_EXPLOSION2;

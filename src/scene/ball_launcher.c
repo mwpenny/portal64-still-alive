@@ -6,9 +6,12 @@
 #include "../physics/collision_scene.h"
 #include "dynamic_scene.h"
 #include "signals.h"
+#include "../audio/clips.h"
+#include "../audio/soundplayer.h"
 
 #include "../build/assets/models/props/combine_ball_launcher.h"
 #include "../build/assets/materials/static.h"
+
 
 struct CollisionBox gBallLauncherBox = {
     {0.5f, 0.5f, 0.5f},
@@ -92,6 +95,7 @@ void ballLauncherUpdate(struct BallLauncher* launcher) {
 
         ballInit(&launcher->currentBall, &launcher->rigidBody.transform.position, &initialVelocity, launcher->rigidBody.currentRoom, launcher->ballLifetime);
         skAnimatorRunClip(&launcher->animator, &props_combine_ball_launcher_Armature_launch_clip, 0.0f, 0);
+        soundPlayerPlay(soundsBallLaunch, 1.0f, 1.0f, &launcher->rigidBody.transform.position, &gZeroVec);
     }
 
     if (ballIsActive(&launcher->currentBall) && !ballIsCollisionOn(&launcher->currentBall)) {

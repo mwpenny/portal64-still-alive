@@ -152,6 +152,9 @@ void ballInitBurn(struct Ball* ball, struct ContactManifold* manifold) {
     burnTransform.scale = gOneVec;
 
     transformToMatrixL(&burnTransform, &burn->matrix, SCENE_SCALE);
+
+    soundPlayerPlay(soundsBallBounce, 1.0f, 1.0f, &burnTransform.position, &gZeroVec);
+
     burn->at = burnTransform.position;
     burn->normal = manifold->normal;
 }
@@ -183,6 +186,7 @@ void ballUpdate(struct Ball* ball) {
             collisionSceneRemoveDynamicObject(&ball->collisionObject);
             dynamicSceneRemove(ball->dynamicId);
             soundPlayerStop(ball->soundLoopId);
+            soundPlayerPlay(soundsBallExplode, 1.0f, 1.0f, &ball->rigidBody.transform.position, &gZeroVec);
             ball->soundLoopId = SOUND_ID_NONE;
         }
     }

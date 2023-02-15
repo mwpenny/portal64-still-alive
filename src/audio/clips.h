@@ -13,5 +13,9 @@ extern unsigned short soundsPortalFizzle;
 extern unsigned short soundsElevatorDoor;
 
 extern unsigned short soundsBallLoop;
+extern unsigned short soundsBallLaunch;
+extern unsigned short soundsBallBounce;
+extern unsigned short soundsBallKill;
+extern unsigned short soundsBallExplode;
 
 #endif
