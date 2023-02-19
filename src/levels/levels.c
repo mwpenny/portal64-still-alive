@@ -8,6 +8,7 @@
 #include "cutscene_runner.h"
 #include "../graphics/graphics.h"
 #include "../player/player.h"
+#include "checkpoint.h"
 
 #include "../util/rom.h"
 #include "../util/memory.h"
@@ -122,11 +123,16 @@ void levelLoad(int index) {
 void levelQueueLoad(int index, struct Transform* relativeExitTransform, struct Vector3* relativeVelocity) {
     if (index == NEXT_LEVEL) {
         gQueuedLevel = gCurrentLevelIndex + 1;
+
+        if (gQueuedLevel == LEVEL_COUNT) {
+            gQueuedLevel = 0;
+        }
     } else {
         gQueuedLevel = index;
     }
     gRelativeTransform = *relativeExitTransform;
     gRelativeVelocity = *relativeVelocity;
+    checkpointClear();
 }
 
 void levelLoadLastCheckpoint() {

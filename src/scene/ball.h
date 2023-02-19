@@ -3,7 +3,7 @@
 
 #include "../physics/collision_object.h"
 
-#define BALL_VELOCITY   2.0f
+#define BALL_VELOCITY   3.0f
 #define BALL_FADE_TIME  3.0f
 
 #define MAX_BURN_MARKS  3

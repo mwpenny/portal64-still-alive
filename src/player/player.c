@@ -125,6 +125,9 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
         player->flags |= PlayerHasSecondPortalGun;
     }
 
+
+    // player->flags |= PlayerHasFirstPortalGun | PlayerHasSecondPortalGun;
+
     player->dynamicId = dynamicSceneAdd(player, playerRender, &player->body.transform.position, 1.5f);
     dynamicSceneSetFlags(player->dynamicId, DYNAMIC_SCENE_OBJECT_SKIP_ROOT);
 

@@ -87,6 +87,7 @@ void ballInitInactive(struct Ball* ball) {
     ball->targetSpeed = 0.0f;
     ball->flags = 0;
     ball->soundLoopId = SOUND_ID_NONE;
+    ball->lifetime = 0.0f;
 }
 
 void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* velocity, short startingRoom, float ballLifetime) {
@@ -102,6 +103,7 @@ void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* veloc
     ball->rigidBody.transform.scale = gOneVec;
     ball->rigidBody.currentRoom = startingRoom;
     ball->flags = 0;
+    ball->lifetime = ballLifetime;
 
     ball->targetSpeed = sqrtf(vector3MagSqrd(&ball->rigidBody.velocity));
 
@@ -109,7 +111,7 @@ void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* veloc
 
     dynamicSceneSetRoomFlags(ball->dynamicId, ROOM_FLAG_FROM_INDEX(startingRoom));
 
-    ball->soundLoopId = soundPlayerPlay(soundsBallLoop, 4.0f, 1.0f, &ball->rigidBody.transform.position, &ball->rigidBody.velocity);
+    ball->soundLoopId = soundPlayerPlay(soundsBallLoop, 1.0f, 1.0f, &ball->rigidBody.transform.position, &ball->rigidBody.velocity);
 }
 
 void ballTurnOnCollision(struct Ball* ball) {
