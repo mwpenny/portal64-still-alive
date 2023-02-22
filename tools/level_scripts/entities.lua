@@ -115,8 +115,8 @@ for _, fizzler in pairs(sk_scene.nodes_for_type('@fizzler')) do
     table.insert(fizzlers, {
         position,
         rotation,
-        2,
-        2,
+        1,
+        1,
         room_index,
     })
 end

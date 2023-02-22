@@ -9,7 +9,7 @@
 #include "../physics/collision_box.h"
 #include "../physics/collision_object.h"
 
-#define FIZZLER_PARTICLES_PER_1x1   2.5f
+#define FIZZLER_PARTICLES_PER_1x1   10.0f
 #define FIZZLER_PARTICLE_VELOCITY   1.0f
 #define FIZZLER_UNITS_PER_UPDATE    (int)(SCENE_SCALE * FIZZLER_PARTICLE_VELOCITY * FIXED_DELTA_TIME)
 #define FIZZLER_PARTICLE_LENGTH     0.4f
