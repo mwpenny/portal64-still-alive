@@ -249,7 +249,8 @@ TEST_CHAMBERS = assets/test_chambers/test_chamber_00/test_chamber_00.blend \
 	assets/test_chambers/test_chamber_02/test_chamber_02.blend \
 	assets/test_chambers/test_chamber_03/test_chamber_03.blend \
 	assets/test_chambers/test_chamber_04/test_chamber_04.blend \
-	assets/test_chambers/test_chamber_05/test_chamber_05.blend
+	assets/test_chambers/test_chamber_05/test_chamber_05.blend \
+	assets/test_chambers/test_chamber_06/test_chamber_06.blend
 
 TEST_CHAMBER_HEADERS = $(TEST_CHAMBERS:%.blend=build/%.h)
 TEST_CHAMBER_OBJECTS = $(TEST_CHAMBERS:%.blend=build/%_geo.o)
