@@ -47,6 +47,7 @@ enum CutsceneStepType {
     CutsceneStepWaitForAnimation,
     CutsceneStepSaveCheckpoint,
     CutsceneStepKillPlayer,
+    CutsceneStepTypeClosePortal,
 };
 
 #define CH_NONE    0xFF
@@ -75,6 +76,9 @@ struct CutsceneStep {
             u16 locationIndex;
             u16 portalIndex;
         } openPortal;
+        struct {
+            u16 portalIndex;
+        } closePortal;
         float delay;
         struct {
             u16 signalIndex;

@@ -168,7 +168,7 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
         }
     }
 
-    if ((elevator->openAmount == 0.0f && shouldBeOpen) || (elevator->openAmount && !shouldBeOpen)) {
+    if ((elevator->openAmount == 0.0f && shouldBeOpen) || (elevator->openAmount == 1.0f && !shouldBeOpen)) {
         soundPlayerPlay(soundsElevatorDoor, 1.0f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec);
     }
 

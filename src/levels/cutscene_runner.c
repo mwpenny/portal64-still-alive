@@ -90,16 +90,6 @@ void cutsceneRunnerCancel(struct CutsceneRunner* runner) {
     runner->currentCutscene = NULL;
 }
 
-ALSndId cutsceneRunnerPlaySound(struct CutsceneStep* step) {
-    return soundPlayerPlay(
-        step->playSound.soundId,
-        step->playSound.volume * (1.0f / 255.0f),
-        step->playSound.pitch * (1.0f / 64.0f),
-        NULL,
-        NULL
-    );
-}
-
 void cutsceneQueueSound(int soundId, float volume, int channel) {
     struct QueuedSound* next = gCutsceneNextFreeSound;
 
@@ -135,7 +125,13 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
     switch (step->type) {
         case CutsceneStepTypePlaySound:
         case CutsceneStepTypeStartSound:
-            runner->state.playSound.soundId = cutsceneRunnerPlaySound(step);
+            runner->state.playSound.soundId = soundPlayerPlay(
+                step->playSound.soundId,
+                step->playSound.volume * (1.0f / 255.0f),
+                step->playSound.pitch * (1.0f / 64.0f),
+                NULL,
+                NULL
+            );
             break;
         case CutsceneStepTypeQueueSound:
             cutsceneQueueSound(step->queueSound.soundId, step->queueSound.volume * (1.0f / 255.0f), step->queueSound.channel);
@@ -154,6 +150,11 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             vector3Negate(&transformUp, &transformUp);
             vector3AddScaled(&location->transform.position, &firingRay.dir, -0.1f, &firingRay.origin);
             sceneFirePortal(&gScene, &firingRay, &transformUp, step->openPortal.portalIndex, location->roomIndex, 0);
+            break;
+        }
+        case CutsceneStepTypeClosePortal:
+        {
+            sceneClosePortal(&gScene, step->closePortal.portalIndex);
             break;
         }
         case CutsceneStepTypeSetSignal:

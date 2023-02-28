@@ -22,6 +22,8 @@
 #define GRAB_RAYCAST_DISTANCE   2.5f
 #define DROWN_TIME              2.0f
 
+#define STAND_SPEED             1.5f
+
 #define DEAD_OFFSET -0.4f
 
 #define PLAYER_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_BALL)
@@ -149,6 +151,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
 
 #define PLAYER_SPEED    (150.0f / 64.0f)
 #define PLAYER_ACCEL    (5.875f)
+#define PLAYER_AIR_ACCEL    (5.875f)
 #define PLAYER_STOP_ACCEL    (5.875f)
 
 #define ROTATE_RATE     (M_PI * 2.0f)
@@ -423,7 +426,6 @@ struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* bl
             return &player_chell_Armature_runw_clip;
         }
     }
-
 }
 
 void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
@@ -456,13 +458,33 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
             vector3AddScaled(&targetVelocity, &forward, PLAYER_SPEED, &targetVelocity);
         }
     }
-    
+
     targetVelocity.y = player->body.velocity.y;
+
+    float velocityDot = vector3Dot(&player->body.velocity, &targetVelocity);
+    int isAccelerating = velocityDot > 0.0f;
+    float acceleration = 0.0f;
+
+    if (!(player->flags & PlayerFlagsGrounded)) {
+        float velocitySqrd = vector3MagSqrd(&player->body.velocity);
+        if (velocitySqrd >= PLAYER_SPEED * PLAYER_SPEED) {
+            struct Vector3 movementCenter;
+            vector3Scale(&player->body.velocity, &movementCenter, -PLAYER_SPEED / sqrtf(velocitySqrd));
+            targetVelocity.x += player->body.velocity.x + movementCenter.x;
+            targetVelocity.z += player->body.velocity.z + movementCenter.z;
+        }
+
+        acceleration = PLAYER_AIR_ACCEL * FIXED_DELTA_TIME;
+    } else if (isAccelerating) {
+        acceleration = PLAYER_ACCEL * FIXED_DELTA_TIME;
+    } else {
+        acceleration = PLAYER_STOP_ACCEL * FIXED_DELTA_TIME;
+    }
 
     vector3MoveTowards(
         &player->body.velocity, 
         &targetVelocity, 
-        vector3Dot(&player->body.velocity, &targetVelocity) > 0.0f ? PLAYER_ACCEL * FIXED_DELTA_TIME : PLAYER_STOP_ACCEL * FIXED_DELTA_TIME, 
+        acceleration, 
         &player->body.velocity
     );
     player->body.angularVelocity = gZeroVec;
@@ -496,7 +518,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         float penetration = hit.distance - PLAYER_HEAD_HEIGHT;
 
         if (penetration < 0.0f) {
-            vector3AddScaled(&player->body.transform.position, &gUp, -penetration, &player->body.transform.position);
+            vector3AddScaled(&player->body.transform.position, &gUp, MIN(-penetration, STAND_SPEED * FIXED_DELTA_TIME), &player->body.transform.position);
             if (player->body.velocity.y < 0.0f) {
                 player->body.velocity.y = 0.0f;
             }
