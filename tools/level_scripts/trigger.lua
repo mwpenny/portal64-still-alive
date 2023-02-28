@@ -135,7 +135,7 @@ local function generate_cutscene_step(step, step_index, label_locations, cutscen
     elseif step.command == "close_portal" and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeClosePortal')
         result.closePortal = {
-            step.args[2] == "1" and 1 or 0,
+            step.args[1] == "1" and 1 or 0,
         }
     elseif (step.command == "set_signal" or step.command == "clear_signal") and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeSetSignal')

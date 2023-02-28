@@ -153,6 +153,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
 #define PLAYER_ACCEL    (5.875f)
 #define PLAYER_AIR_ACCEL    (5.875f)
 #define PLAYER_STOP_ACCEL    (5.875f)
+#define PLAYER_SLIDE_ACCEL    (40.0f)
 
 #define ROTATE_RATE     (M_PI * 2.0f)
 #define ROTATE_RATE_DELTA     (M_PI * 0.125f)
@@ -464,10 +465,11 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     float velocityDot = vector3Dot(&player->body.velocity, &targetVelocity);
     int isAccelerating = velocityDot > 0.0f;
     float acceleration = 0.0f;
+    float velocitySqrd = vector3MagSqrd(&player->body.velocity);
+    int isFast = velocitySqrd >= PLAYER_SPEED * PLAYER_SPEED;
 
     if (!(player->flags & PlayerFlagsGrounded)) {
-        float velocitySqrd = vector3MagSqrd(&player->body.velocity);
-        if (velocitySqrd >= PLAYER_SPEED * PLAYER_SPEED) {
+        if (isFast) {
             struct Vector3 movementCenter;
             vector3Scale(&player->body.velocity, &movementCenter, -PLAYER_SPEED / sqrtf(velocitySqrd));
             targetVelocity.x += player->body.velocity.x + movementCenter.x;
@@ -475,6 +477,8 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         }
 
         acceleration = PLAYER_AIR_ACCEL * FIXED_DELTA_TIME;
+    } else if (isFast) {
+        acceleration = PLAYER_SLIDE_ACCEL * FIXED_DELTA_TIME;
     } else if (isAccelerating) {
         acceleration = PLAYER_ACCEL * FIXED_DELTA_TIME;
     } else {
