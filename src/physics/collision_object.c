@@ -17,6 +17,12 @@ void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData
     object->manifoldIds = 0;
 }
 
+void collisionObjectReInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers) {
+    object->collider = collider;
+    object->body = body;
+    collisionObjectUpdateBB(object);
+}
+
 int collisionObjectIsActive(struct CollisionObject* object) {
     return object->body && ((object->body->flags & (RigidBodyIsKinematic | RigidBodyIsSleeping)) == 0);
 }
