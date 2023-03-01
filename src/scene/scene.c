@@ -173,6 +173,9 @@ void sceneInit(struct Scene* scene) {
         ballCatcherInit(&scene->ballCatchers[i], &gCurrentLevel->ballCatchers[i]);
     }
 
+    scene->portal_0_present=0;
+    scene->portal_1_present=0;
+
     scene->freeCameraOffset = gZeroVec;
 
     sceneInitDynamicColliders(scene);
@@ -248,7 +251,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
 
-    hudRender(renderState, scene->player.flags);
+    hudRender(renderState, scene->player.flags, scene->portal_0_present, scene->portal_1_present);
 
     // sceneRenderPerformanceMetrics(scene, renderState, task);
 
@@ -596,6 +599,13 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                 portal->opacity = 0.0f;
             }
 
+            if (portalIndex == 0){
+                scene->portal_0_present = 1;
+            }
+            if (portalIndex == 1){
+                scene->portal_1_present = 1;
+            }
+
             contactSolverCheckPortalContacts(&gContactSolver, collisionObject);
             ballBurnFilterOnPortal(&portal->transform, portalIndex);
             playerSignalPortalChanged(&scene->player);
@@ -682,5 +692,11 @@ void sceneClosePortal(struct Scene* scene, int portalIndex) {
         scene->portals[portalIndex].flags |= PortalFlagsNeedsNewHole;
         scene->portals[portalIndex].portalSurfaceIndex = -1;
         scene->portals[portalIndex].transformIndex = NO_TRANSFORM_INDEX;
+        if (portalIndex == 0){
+            scene->portal_0_present = 0;
+        }
+        if (portalIndex == 1){
+            scene->portal_1_present = 0;
+        }
     }
 }

@@ -3,6 +3,6 @@
 
 #include "../graphics/renderstate.h"
 
-void hudRender(struct RenderState* renderState, int playerFlags);
+void hudRender(struct RenderState* renderState, int playerFlags, int portal_0_present, int portal_1_present);
 
 #endif
