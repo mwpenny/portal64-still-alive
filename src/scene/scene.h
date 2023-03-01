@@ -53,6 +53,8 @@ struct Scene {
     u8 switchCount;
     u8 ballLancherCount;
     u8 ballCatcherCount;
+    int portal_0_present;
+    int portal_1_present;
 };
 
 extern struct Scene gScene;

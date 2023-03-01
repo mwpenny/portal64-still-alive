@@ -23,7 +23,7 @@
 #define HUD_LOWER_X ((SCREEN_WD - HUD_OUTER_WIDTH + (HUD_OUTER_OFFSET_X << 1)) << 1)
 #define HUD_LOWER_Y ((SCREEN_HT - HUD_OUTER_HEIGHT + (HUD_OUTER_OFFSET_Y << 1)) << 1)
 
-void hudRender(struct RenderState* renderState, int playerFlags) {
+void hudRender(struct RenderState* renderState, int playerFlags, int portal_0_present, int portal_1_present) {
     if (playerFlags & PlayerIsDead) {
         gSPDisplayList(renderState->dl++, hud_death_overlay);
         gDPFillRectangle(renderState->dl++, 0, 0, SCREEN_WD, SCREEN_HT);
@@ -39,19 +39,34 @@ void hudRender(struct RenderState* renderState, int playerFlags) {
 
     if (playerFlags & PlayerHasFirstPortalGun) {
         gDPSetPrimColor(renderState->dl++, 255, 255, 0, 128, 255, 255);
-
-        gSPTextureRectangle(renderState->dl++, 
-            HUD_UPPER_X, HUD_UPPER_Y,
-            HUD_UPPER_X + (HUD_OUTER_WIDTH << 2), HUD_UPPER_Y + (HUD_OUTER_HEIGHT << 2), 
-            G_TX_RENDERTILE, 0 << 5, 0 << 5, 1 << 10, 1 << 10);
+        if (portal_1_present){
+            gSPTextureRectangle(renderState->dl++, 
+                HUD_UPPER_X, HUD_UPPER_Y,
+                HUD_UPPER_X + (HUD_OUTER_WIDTH << 2), HUD_UPPER_Y + (HUD_OUTER_HEIGHT << 2), 
+                G_TX_RENDERTILE, (HUD_OUTER_WIDTH*2) << 5, 0 << 5, 1 << 10, 1 << 10);
+        }
+        else{
+            gSPTextureRectangle(renderState->dl++, 
+                HUD_UPPER_X, HUD_UPPER_Y,
+                HUD_UPPER_X + (HUD_OUTER_WIDTH << 2), HUD_UPPER_Y + (HUD_OUTER_HEIGHT << 2), 
+                G_TX_RENDERTILE, 0 << 5, 0 << 5, 1 << 10, 1 << 10);
+        }
     }
 
     if (playerFlags & PlayerHasSecondPortalGun) {
         gDPSetPrimColor(renderState->dl++, 255, 255, 255, 128, 0, 255);
 
-        gSPTextureRectangle(renderState->dl++, 
-            HUD_LOWER_X, HUD_LOWER_Y,
-            HUD_LOWER_X + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2), 
-            G_TX_RENDERTILE, HUD_OUTER_WIDTH << 5, 0 << 5, 1 << 10, 1 << 10);
+        if (portal_0_present){
+            gSPTextureRectangle(renderState->dl++, 
+                HUD_LOWER_X, HUD_LOWER_Y,
+                HUD_LOWER_X + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2), 
+                G_TX_RENDERTILE, (HUD_OUTER_WIDTH*3) << 5, 0 << 5, 1 << 10, 1 << 10);
+        }
+        else{
+            gSPTextureRectangle(renderState->dl++, 
+                HUD_LOWER_X, HUD_LOWER_Y,
+                HUD_LOWER_X + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2), 
+                G_TX_RENDERTILE, HUD_OUTER_WIDTH << 5, 0 << 5, 1 << 10, 1 << 10);
+        }
     }
 }
