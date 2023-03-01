@@ -84,6 +84,7 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 
 ## Current TODO list
 
+- [ ] force placing auto portals when there is a conflict
 - [ ] fix chell animation problem (fixed itself, investigate)
 - [ ] rotate auto uv
 - [ ] disable portal surfaces manually on some surfaces

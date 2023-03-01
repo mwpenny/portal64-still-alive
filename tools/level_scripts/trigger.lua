@@ -190,9 +190,20 @@ local function generate_cutscene_step(step, step_index, label_locations, cutscen
         }
     elseif step.command == "play_animation" then
         result.type = sk_definition_writer.raw('CutsceneStepPlayAnimation')
+        local armature = animation.get_armature_index_with_name(step.args[1])
+        local animation = animation.get_animation_with_name(step.args[1], step.args[2])
+
+        if not armature then
+            error("Unrecognized animator " .. step.args[1])
+        end
+
+        if not animation then
+            error("Unrecognized animation " .. step.args[2])
+        end
+
         result.playAnimation = {
-            animation.get_armature_index_with_name(step.args[1]) or 0,
-            animation.get_animation_with_name(step.args[1], step.args[2]) or 0,
+            armature,
+            animation,
             step.args[3] and (tonumber(step.args[3]) * 127) or 127,
         }
     elseif step.command == "pause_animation" then
