@@ -1,7 +1,7 @@
 #ifndef __LUA_BASIC_TYPES_H__
 #define __LUA_BASIC_TYPES_H__
 
-#include <lua.hpp>
+#include <lua5.4/lua.hpp>
 #include <string>
 #include <vector>
 #include <map>

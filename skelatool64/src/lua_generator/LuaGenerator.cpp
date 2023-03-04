@@ -9,7 +9,7 @@
 #include "LuaDisplayListSettings.h"
 #include "LuaBasicTypes.h"
 
-#include <lua.hpp>
+#include <lua5.4/lua.hpp>
 #include <iostream>
 
 #define EMIT(name) extern const char _binary_build_lua_##name##_out_start[]; extern const char _binary_build_lua_##name##_out_end[];

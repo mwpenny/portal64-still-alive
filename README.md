@@ -6,6 +6,12 @@ A demake of Portal for the Nintendo 64.
 
 First, you will need to setup [Modern SDK](https://crashoveride95.github.io/n64hbrew/modernsdk/startoff.html).
 
+After installing modern sdk you will want to also install
+
+```
+sudo apt install libnustd
+```
+
 Next, you will need to download Blender 3.0 or higher. Then set the environment variable `BLENDER_3_0` to be the absolute path where the Blender executable is located on your system.
 
 <br />
@@ -17,19 +23,30 @@ pip install vpk
 
 <br />
 
-Install `vtf2png`, `sfz2n64`, and `skeletool64`.
+Install `vtf2png`, `sfz2n64`, and setup `skeletool64`.
 ```sh
 echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" \
-    | tee /etc/apt/sources.list.d/lambertjamesd.list
-
-sudo apt install vtf2png sfz2n64 skeletool64 mpg123
+    | sudo tee /etc/apt/sources.list.d/lambertjamesd.list
+sudo apt update
+sudo apt install vtf2png sfz2n64 mpg123 sox imagemagick
 ```
 
 <br />
 
-Install ImageMagick.
+Setup and build skelatool64
+
 ```
-sudo apt install imagemagick
+cd skelatool64
+./setup_dependencies.sh
+make
+```
+
+<br />
+
+You will need to install nodejs. You can use apt for this
+
+```
+sudo apt install nodejs
 ```
 
 <br />

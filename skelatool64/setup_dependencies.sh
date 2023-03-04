@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-sudo apt install -y libpng-dev libtiff-dev libassimp-dev
+sudo apt install -y libpng-dev libtiff-dev libassimp-dev g++ liblua5.4-dev cmake
 
 pushd $(dirname "$0")
 

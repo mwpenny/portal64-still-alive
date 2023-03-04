@@ -2,7 +2,7 @@
 #define __LUA_SCENE_H__
 
 #include <assimp/scene.h>
-#include <lua.hpp>
+#include <lua5.4/lua.hpp>
 
 #include "../DisplayListSettings.h"
 #include "../CFileDefinition.h"
