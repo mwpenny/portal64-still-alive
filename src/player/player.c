@@ -56,6 +56,22 @@ struct ColliderTypeData gPlayerColliderData = {
     &gCollisionCylinderCallbacks,
 };
 
+struct CollisionCylinder gCrouchingPlayerCollider = {
+    0.25f,
+    0.40f,
+    gPlayerColliderEdgeVectors,
+    sizeof(gPlayerColliderEdgeVectors) / sizeof(*gPlayerColliderEdgeVectors),
+    gPlayerColliderFaces,
+};
+
+struct ColliderTypeData gCrouchingPlayerColliderData = {
+    CollisionShapeTypeCylinder,
+    &gCrouchingPlayerCollider,
+    0.0f,
+    0.6f,
+    &gCollisionCylinderCallbacks,
+};
+
 void playerRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Player* player = (struct Player*)data;
 
@@ -446,17 +462,44 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
     struct Vector3 targetVelocity = gZeroVec;
 
+    float camera_y_modifier = 0.0;
+    if (player->flags & PlayerCrouched){
+        camera_y_modifier = -0.25;
+    }
+    else{
+        camera_y_modifier = 0.0;
+    }
+
     if (!isDead) {
-        if (controllerGetButton(0, L_CBUTTONS | L_JPAD)) {
+        if (controllerGetButton(0, L_JPAD)) {
             vector3AddScaled(&targetVelocity, &right, -PLAYER_SPEED, &targetVelocity);
-        } else if (controllerGetButton(0, R_CBUTTONS | R_JPAD)) {
+        } else if (controllerGetButton(0, R_JPAD)) {
             vector3AddScaled(&targetVelocity, &right, PLAYER_SPEED, &targetVelocity);
         }
 
-        if (controllerGetButton(0, U_CBUTTONS | U_JPAD)) {
+        if (controllerGetButton(0, U_JPAD)) {
             vector3AddScaled(&targetVelocity, &forward, -PLAYER_SPEED, &targetVelocity);
-        } else if (controllerGetButton(0, D_CBUTTONS | D_JPAD)) {
+        } else if (controllerGetButton(0, D_JPAD)) {
             vector3AddScaled(&targetVelocity, &forward, PLAYER_SPEED, &targetVelocity);
+        }
+
+        // if player isnt crouched, crouch
+        if (!(player->flags & PlayerCrouched) && (controllerGetButtonDown(0, R_CBUTTONS))){
+            player->flags |= PlayerCrouched;
+            camera_y_modifier = -0.25;
+            collisionSceneRemoveDynamicObject(&player->collisionObject);
+            collisionObjectReInit(&player->collisionObject, &gCrouchingPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
+            collisionSceneAddDynamicObject(&player->collisionObject);
+            collisionObjectUpdateBB(&player->collisionObject);
+        }
+        //if player crouched, uncrouch
+        else if ((player->flags & PlayerCrouched) && (controllerGetButtonDown(0, R_CBUTTONS))){
+            player->flags &= ~PlayerCrouched;
+            camera_y_modifier = 0.0;
+            collisionSceneRemoveDynamicObject(&player->collisionObject);
+            collisionObjectReInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
+            collisionSceneAddDynamicObject(&player->collisionObject);
+            collisionObjectUpdateBB(&player->collisionObject);
         }
     }
 
@@ -559,6 +602,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     int didPassThroughPortal = rigidBodyCheckPortals(&player->body);
 
     player->lookTransform.position = player->body.transform.position;
+    player->lookTransform.position.y += camera_y_modifier;
     player->lookTransform.rotation = player->body.transform.rotation;
     quatIdent(&player->body.transform.rotation);
 
