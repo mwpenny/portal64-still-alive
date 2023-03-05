@@ -77,10 +77,13 @@ void portalUpdate(struct Portal* portal, int isOpen) {
     }
 }
 
-int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt) {
+int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt, int just_checking) {
     // determine if portal is on surface
     if (!portalSurfaceIsInside(surface, portalAt)) {
         return 0;
+    }
+    if (just_checking){
+        return 1;
     }
     // find all portal edge intersections
     struct Vector2s16 correctPosition;
@@ -88,6 +91,7 @@ int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, 
     if (!portalSurfaceAdjustPosition(surface, portalAt, &correctPosition, portalOutline)) {
         return 0;
     }
+    
 
     for (int i = 0; i < PORTAL_LOOP_SIZE; ++i) {
         vector2s16Sub(&portalOutline[i], &correctPosition, &portal->originCentertedLoop[i]);

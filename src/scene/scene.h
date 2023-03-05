@@ -53,8 +53,8 @@ struct Scene {
     u8 switchCount;
     u8 ballLancherCount;
     u8 ballCatcherCount;
-    int portal_0_present;
-    int portal_1_present;
+    int last_portal_indx_shot;
+    int looked_wall_portalable;
 };
 
 extern struct Scene gScene;
@@ -65,7 +65,7 @@ void sceneInit(struct Scene* scene);
 void sceneRender(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task);
 void sceneUpdate(struct Scene* scene);
 
-int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex, int fromPlayer);
+int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex, int fromPlayer, int just_checking);
 void sceneClosePortal(struct Scene* scene, int portalIndex);
 
 #endif

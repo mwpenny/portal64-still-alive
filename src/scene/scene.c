@@ -173,8 +173,9 @@ void sceneInit(struct Scene* scene) {
         ballCatcherInit(&scene->ballCatchers[i], &gCurrentLevel->ballCatchers[i]);
     }
 
-    scene->portal_0_present=0;
-    scene->portal_1_present=0;
+
+    scene->last_portal_indx_shot=-1;
+    scene->looked_wall_portalable=0;
 
     scene->freeCameraOffset = gZeroVec;
 
@@ -251,7 +252,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
 
-    hudRender(renderState, scene->player.flags, scene->portal_0_present, scene->portal_1_present);
+    hudRender(renderState, scene->player.flags, scene->last_portal_indx_shot, scene->looked_wall_portalable);
 
     // sceneRenderPerformanceMetrics(scene, renderState, task);
 
@@ -274,13 +275,22 @@ void sceneCheckPortals(struct Scene* scene) {
     quatMultVector(&scene->player.lookTransform.rotation, &gUp, &playerUp);
 
     if (controllerGetButtonDown(0, Z_TRIG) && (scene->player.flags & PlayerHasSecondPortalGun)) {
-        sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom, 1);
+        sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom, 1, 0);
+        scene->last_portal_indx_shot=0;
         soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL);
     }
 
     if (controllerGetButtonDown(0, R_TRIG | L_TRIG) && (scene->player.flags & PlayerHasFirstPortalGun)) {
-        sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom, 1);
+        sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom, 1, 0);
+        scene->last_portal_indx_shot=1;
         soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL, NULL);
+    }
+
+    scene->looked_wall_portalable = 0;
+    if (scene->player.flags & PlayerHasFirstPortalGun){
+        if (sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom, 1, 1)){
+            scene->looked_wall_portalable = 1;
+        }
     }
 
     if (scene->player.body.flags & RigidBodyFizzled) {
@@ -549,7 +559,7 @@ void sceneUpdate(struct Scene* scene) {
     }
 }
 
-int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformIndex, int portalIndex, struct PortalSurfaceMappingRange surfaceMapping, struct CollisionObject* collisionObject, int roomIndex, int fromPlayer) {
+int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformIndex, int portalIndex, struct PortalSurfaceMappingRange surfaceMapping, struct CollisionObject* collisionObject, int roomIndex, int fromPlayer, int just_checking) {
     struct Transform finalAt;
 
     struct Transform relativeToTransform;
@@ -570,7 +580,10 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
 
         struct Portal* portal = &scene->portals[portalIndex];
 
-        if (portalAttachToSurface(portal, existingSurface, surfaceIndex, &finalAt)) {
+        if (portalAttachToSurface(portal, existingSurface, surfaceIndex, &finalAt, just_checking)) {
+            if (just_checking){
+                return 1;
+            }
             soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &at->position, &gZeroVec);
 
             // the portal position may have been adjusted
@@ -598,14 +611,6 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                 // the second portal is fully transparent right away
                 portal->opacity = 0.0f;
             }
-
-            if (portalIndex == 0){
-                scene->portal_0_present = 1;
-            }
-            if (portalIndex == 1){
-                scene->portal_1_present = 1;
-            }
-
             contactSolverCheckPortalContacts(&gContactSolver, collisionObject);
             ballBurnFilterOnPortal(&portal->transform, portalIndex);
             playerSignalPortalChanged(&scene->player);
@@ -644,7 +649,7 @@ int sceneDetermineSurfaceMapping(struct Scene* scene, struct CollisionObject* hi
     return 0;
 }
 
-int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex, int fromPlayer) {
+int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex, int fromPlayer, int just_checking) {
     struct RaycastHit hit;
 
     if (!collisionSceneRaycast(&gCollisionScene, roomIndex, ray, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, 1000000.0f, 0, &hit)) {
@@ -682,7 +687,7 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
         quatLook(&hitDirection, &upDir, &portalLocation.rotation);
     }
 
-    return sceneOpenPortal(scene, &portalLocation, relativeIndex, portalIndex, mappingRange, hit.object, hit.roomIndex, fromPlayer);
+    return sceneOpenPortal(scene, &portalLocation, relativeIndex, portalIndex, mappingRange, hit.object, hit.roomIndex, fromPlayer, just_checking);
 }
 
 void sceneClosePortal(struct Scene* scene, int portalIndex) {
@@ -692,11 +697,5 @@ void sceneClosePortal(struct Scene* scene, int portalIndex) {
         scene->portals[portalIndex].flags |= PortalFlagsNeedsNewHole;
         scene->portals[portalIndex].portalSurfaceIndex = -1;
         scene->portals[portalIndex].transformIndex = NO_TRANSFORM_INDEX;
-        if (portalIndex == 0){
-            scene->portal_0_present = 0;
-        }
-        if (portalIndex == 1){
-            scene->portal_1_present = 0;
-        }
     }
 }
