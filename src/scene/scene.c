@@ -175,7 +175,8 @@ void sceneInit(struct Scene* scene) {
 
 
     scene->last_portal_indx_shot=-1;
-    scene->looked_wall_portalable=0;
+    scene->looked_wall_portalable_0=0;
+    scene->looked_wall_portalable_1=0;
 
     scene->freeCameraOffset = gZeroVec;
 
@@ -252,7 +253,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
 
-    hudRender(renderState, scene->player.flags, scene->last_portal_indx_shot, scene->looked_wall_portalable);
+    hudRender(renderState, scene->player.flags, scene->last_portal_indx_shot, scene->looked_wall_portalable_0, scene->looked_wall_portalable_1);
 
     // sceneRenderPerformanceMetrics(scene, renderState, task);
 
@@ -286,10 +287,14 @@ void sceneCheckPortals(struct Scene* scene) {
         soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL, NULL);
     }
 
-    scene->looked_wall_portalable = 0;
+    scene->looked_wall_portalable_0 = 0;
+    scene->looked_wall_portalable_1 = 0;
     if (scene->player.flags & PlayerHasFirstPortalGun){
+        if (sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom, 1, 1)){
+            scene->looked_wall_portalable_0 = 1;
+        }
         if (sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom, 1, 1)){
-            scene->looked_wall_portalable = 1;
+            scene->looked_wall_portalable_1 = 1;
         }
     }
 

@@ -22,6 +22,7 @@ enum PlayerFlags {
     PlayerIsDead = (1 << 3),
     PlayerIsUnderwater = (1 << 4),
     PlayerCrouched = (1 << 5),
+    PlayerIsGrabbing = (1 << 6),
 };
 
 struct Player {
