@@ -175,6 +175,7 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/round_elevator_interior.blend \
 	assets/models/props/round_elevator_collision.blend \
 	assets/models/props/signage.blend \
+	assets/models/props/signage_off.blend \
 	assets/models/props/switch001.blend \
 	assets/models/props/box_dropper.blend \
 	assets/models/props/box_dropper_glass.blend \
