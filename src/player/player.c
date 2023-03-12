@@ -143,6 +143,12 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
         player->flags |= PlayerHasSecondPortalGun;
     }
 
+    if (gCurrentLevelIndex == 0){
+        player->flags &= ~PlayerHasFirstPortalGun;
+        player->flags &= ~PlayerHasSecondPortalGun;
+        savefileUnsetFlags(SavefileFlagsFirstPortalGun);
+        savefileUnsetFlags(SavefileFlagsFirstPortalGun);
+    }
 
     // player->flags |= PlayerHasFirstPortalGun | PlayerHasSecondPortalGun;
 
