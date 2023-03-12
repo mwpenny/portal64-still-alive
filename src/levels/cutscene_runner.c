@@ -199,7 +199,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
 
             if (!(gScene.player.flags & PlayerHasFirstPortalGun)) {
                 playerGivePortalGun(&gScene.player, PlayerHasFirstPortalGun);
-            } else if (!(gScene.player.flags & PlayerHasSecondPortalGun)) {
+            } else if (!(gScene.player.flags & PlayerHasSecondPortalGun) && (gCurrentLevelIndex > 1)) {
                 playerGivePortalGun(&gScene.player, PlayerHasSecondPortalGun);
             }
 
