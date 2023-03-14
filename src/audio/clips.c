@@ -19,6 +19,19 @@ unsigned short soundsPortalgunShoot[2] = {
     SOUNDS_PORTALGUN_SHOOT_BLUE1,
 };
 
+unsigned short soundsConcreteFootstep[4] = {
+    SOUNDS_CONCRETE1, //left foot
+    SOUNDS_CONCRETE2, //right foot
+    SOUNDS_CONCRETE3, //land
+    SOUNDS_CONCRETE4, //jump
+};
+
+unsigned short soundsSelecting[3] = {
+    SOUNDS_WPN_DENYSELECT,
+    SOUNDS_WPN_SELECT,
+    SOUNDS_SUIT_DENYDEVICE,
+};
+
 unsigned short soundsPortalOpen2 = SOUNDS_PORTAL_OPEN2;
 
 unsigned short soundsPortalFizzle = SOUNDS_PORTAL_FIZZLE2;

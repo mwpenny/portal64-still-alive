@@ -17,6 +17,10 @@ void savefileSetFlags(enum SavefileFlags flags) {
     gCurrentSave.flags |= flags;
 }
 
+void savefileUnsetFlags(enum SavefileFlags flags) {
+    gCurrentSave.flags &= ~flags;
+}
+
 int savefileReadFlags(enum SavefileFlags flags) {
     return gCurrentSave.flags & flags;
 }
