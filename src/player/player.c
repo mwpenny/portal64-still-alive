@@ -21,6 +21,7 @@
 
 #define GRAB_RAYCAST_DISTANCE   2.5f
 #define DROWN_TIME              2.0f
+#define STEP_TIME               0.35f
 
 #define STAND_SPEED             1.5f
 
@@ -132,6 +133,8 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->pitchVelocity = 0.0f;
     player->yawVelocity = 0.0f;
     player->flags = 0;
+    player->stepTimer = STEP_TIME;
+    player->currentFoot = 0;
 
     int saveFlags = savefileReadFlags(SavefileFlagsFirstPortalGun | SavefileFlagsSecondPortalGun);
 
@@ -142,9 +145,8 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     if (saveFlags & SavefileFlagsSecondPortalGun) {
         player->flags |= PlayerHasSecondPortalGun;
     }
-
-
-    // player->flags |= PlayerHasFirstPortalGun | PlayerHasSecondPortalGun;
+    
+    //player->flags |= PlayerHasFirstPortalGun | PlayerHasSecondPortalGun;
 
     player->dynamicId = dynamicSceneAdd(player, playerRender, &player->body.transform.position, 1.5f);
     dynamicSceneSetFlags(player->dynamicId, DYNAMIC_SCENE_OBJECT_SKIP_ROOT);
@@ -281,6 +283,7 @@ void playerUpdateGrabbedObject(struct Player* player) {
 
                 if (hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable)) {
                     playerSetGrabbing(player, hit.object);
+                    player->flags |= PlayerJustSelect;
 
                     if (hit.throughPortal) {
                         player->grabbingThroughPortal = hit.throughPortal == gCollisionScene.portalTransforms[0] ? 0 : 1;
@@ -288,6 +291,12 @@ void playerUpdateGrabbedObject(struct Player* player) {
                         player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
                     }
                 }
+                else{
+                    player->flags |= PlayerJustDeniedSelect;
+                }
+            }
+            else{
+                player->flags |= PlayerJustDeniedSelect;
             }
         }
     }
@@ -458,6 +467,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
     if (!isDead && (player->flags & PlayerFlagsGrounded) && controllerGetButtonDown(0, A_BUTTON)) {
         player->body.velocity.y = JUMP_IMPULSE;
+        player->flags |= PlayerJustJumped;
     }
 
     struct Vector3 targetVelocity = gZeroVec;
@@ -572,6 +582,9 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         }
 
         hit.object->flags |= COLLISION_OBJECT_PLAYER_STANDING;
+        if (!(player->flags & PlayerFlagsGrounded)){
+            player->flags |= PlayerJustLanded;
+        }
         player->flags |= PlayerFlagsGrounded;
 
         if (hit.object == player->grabConstraint.object) {
@@ -694,4 +707,21 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
             playerKill(player, 0);
         }
     }
+
+    // player not moving on ground
+    if ((player->flags & PlayerFlagsGrounded) && (player->body.velocity.x == 0) && (player->body.velocity.z == 0)){
+        player->stepTimer = STEP_TIME;
+        player->flags &= ~PlayerIsStepping;
+    }
+    // player moving on ground
+    else{
+        player->stepTimer -= FIXED_DELTA_TIME;
+
+        if (player->stepTimer < 0.0f) {
+            player->flags |= PlayerIsStepping;
+            player->stepTimer = STEP_TIME;
+            player->currentFoot = !player->currentFoot;
+        }
+    }
+
 }

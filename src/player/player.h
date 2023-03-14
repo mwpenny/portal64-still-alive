@@ -22,6 +22,11 @@ enum PlayerFlags {
     PlayerIsDead = (1 << 3),
     PlayerIsUnderwater = (1 << 4),
     PlayerCrouched = (1 << 5),
+    PlayerIsStepping = (1 << 6),
+    PlayerJustJumped = (1 << 7),
+    PlayerJustLanded = (1 << 8),
+    PlayerJustSelect = (1 << 9),
+    PlayerJustDeniedSelect = (1 << 10),
 };
 
 struct Player {
@@ -40,6 +45,8 @@ struct Player {
     struct Vector3 relativeAnchor;
     struct Vector3 lastAnchorPoint;
     float drownTimer;
+    float stepTimer;
+    int currentFoot; //left=0, right=1
 };
 
 void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity);
