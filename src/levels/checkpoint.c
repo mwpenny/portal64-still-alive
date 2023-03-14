@@ -58,6 +58,13 @@ void checkpointClear() {
     gHasCheckpoint = 0;
 }
 
+int checkpointExists() {
+    if (gHasCheckpoint != 0){
+        return 1;
+    }
+    return 0;
+}
+
 void checkpointSave(struct Scene* scene) {
     int size = checkpointEstimateSize(scene);
 

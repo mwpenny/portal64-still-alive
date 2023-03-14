@@ -133,17 +133,6 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->yawVelocity = 0.0f;
     player->flags = 0;
 
-    int saveFlags = savefileReadFlags(SavefileFlagsFirstPortalGun | SavefileFlagsSecondPortalGun);
-
-    if (saveFlags & SavefileFlagsFirstPortalGun) {
-        player->flags |= PlayerHasFirstPortalGun;
-    }
-
-    if (saveFlags & SavefileFlagsSecondPortalGun) {
-        player->flags |= PlayerHasSecondPortalGun;
-    }
-
-
     // player->flags |= PlayerHasFirstPortalGun | PlayerHasSecondPortalGun;
 
     player->dynamicId = dynamicSceneAdd(player, playerRender, &player->body.transform.position, 1.5f);
@@ -377,14 +366,6 @@ void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, st
 
 void playerGivePortalGun(struct Player* player, int flags) {
     player->flags |= flags;
-
-    if (flags & PlayerHasFirstPortalGun) {
-        savefileSetFlags(SavefileFlagsFirstPortalGun);
-    }
-
-    if (flags & PlayerHasSecondPortalGun) {
-        savefileSetFlags(SavefileFlagsSecondPortalGun);
-    }
 }
 
 void playerKill(struct Player* player, int isUnderwater) {
