@@ -145,8 +145,15 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     if (saveFlags & SavefileFlagsSecondPortalGun) {
         player->flags |= PlayerHasSecondPortalGun;
     }
-    
-    //player->flags |= PlayerHasFirstPortalGun | PlayerHasSecondPortalGun;
+
+    if (gCurrentLevelIndex == 0){
+        player->flags &= ~PlayerHasFirstPortalGun;
+        player->flags &= ~PlayerHasSecondPortalGun;
+        savefileUnsetFlags(SavefileFlagsFirstPortalGun);
+        savefileUnsetFlags(SavefileFlagsFirstPortalGun);
+    }
+
+    // player->flags |= PlayerHasFirstPortalGun | PlayerHasSecondPortalGun;
 
     player->dynamicId = dynamicSceneAdd(player, playerRender, &player->body.transform.position, 1.5f);
     dynamicSceneSetFlags(player->dynamicId, DYNAMIC_SCENE_OBJECT_SKIP_ROOT);
@@ -510,6 +517,35 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
             collisionObjectReInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
             collisionSceneAddDynamicObject(&player->collisionObject);
             collisionObjectUpdateBB(&player->collisionObject);
+        }
+
+        //look straight forward
+        if (controllerGetButtonDown(0, U_CBUTTONS)){
+            struct Vector3 lookingForward;
+            vector3Negate(&gForward, &lookingForward);
+            quatMultVector(&player->lookTransform.rotation, &lookingForward, &lookingForward);
+            if (fabsf(lookingForward.y) < 0.999f) {
+                lookingForward.y = 0;
+                quatLook(&lookingForward, &gUp, &player->lookTransform.rotation);
+            }
+        }
+        //look behind
+        if (controllerGetButtonDown(0, D_CBUTTONS)){
+            struct Vector3 lookingForward;
+            vector3Negate(&gForward, &lookingForward);
+            quatMultVector(&player->lookTransform.rotation, &lookingForward, &lookingForward);
+            if (fabsf(lookingForward.y) < 0.999f) {
+                lookingForward.y = 0;
+                quatLook(&lookingForward, &gUp, &player->lookTransform.rotation);
+                //look directly behind
+                struct Quaternion behindRotation;
+                behindRotation.x=(player->lookTransform.rotation.z);
+                behindRotation.y=player->lookTransform.rotation.w;
+                behindRotation.z=(-1.0f*player->lookTransform.rotation.x);
+                behindRotation.w=(-1.0f*player->lookTransform.rotation.y);
+
+                player->lookTransform.rotation = behindRotation;
+            }
         }
     }
 
