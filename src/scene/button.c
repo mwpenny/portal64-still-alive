@@ -36,6 +36,8 @@ struct ColliderTypeData gButtonCollider = {
     &gCollisionCylinderCallbacks
 };
 
+int gPrevButtonState = 0; //0 == unpressed, 1 == pressed
+
 #define MASS_BUTTON_PRESS_THRESHOLD     1.9f
 #define BUTTON_MOVEMENT_AMOUNT          0.1f
 #define BUTTON_MOVE_VELOCTY             0.3f
@@ -93,11 +95,11 @@ void buttonUpdate(struct Button* button) {
     struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, NULL);
 
     int shouldPress = 0;
-
     while (manifold) {
         struct CollisionObject* other = manifold->shapeA == &button->collisionObject ? manifold->shapeB : manifold->shapeA;
 
         if (other->body && other->body->mass > MASS_BUTTON_PRESS_THRESHOLD) {
+            
             shouldPress = 1;
 
             if (other->body->flags & RigidBodyFlagsGrabbable) {
@@ -109,6 +111,7 @@ void buttonUpdate(struct Button* button) {
 
         manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, manifold);
     }
+    
 
     if (button->collisionObject.flags & COLLISION_OBJECT_PLAYER_STANDING) {
         button->collisionObject.flags &= ~COLLISION_OBJECT_PLAYER_STANDING;
@@ -118,6 +121,8 @@ void buttonUpdate(struct Button* button) {
     struct Vector3 targetPos = button->originalPos;
     
     if (shouldPress) {
+        
+        
         targetPos.y -= BUTTON_MOVEMENT_AMOUNT;
         signalsSend(button->signalIndex);
 
@@ -126,8 +131,22 @@ void buttonUpdate(struct Button* button) {
         }
     }
 
+    //if its actively moving up or down
     if (targetPos.y != button->rigidBody.transform.position.y) {
+        //actively going down
+        if (shouldPress){
+            if (gPrevButtonState == 0){
+                soundPlayerPlay(soundsButton, 2.5f, 0.5f, &button->rigidBody.transform.position, &gZeroVec);
+            }
+            gPrevButtonState = 1;
+        }
+        // actively going up
+        else{
+            gPrevButtonState = 0;
+        }
+
         vector3MoveTowards(&button->rigidBody.transform.position, &targetPos, BUTTON_MOVE_VELOCTY * FIXED_DELTA_TIME, &button->rigidBody.transform.position);
         collisionObjectUpdateBB(&button->collisionObject);
     }
+    
 }

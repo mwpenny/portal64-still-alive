@@ -7,6 +7,11 @@ extern unsigned short soundsPortalExit[2];
 extern unsigned short soundsPortalgunShoot[2];
 extern unsigned short soundsConcreteFootstep[4];
 extern unsigned short soundsSelecting[3];
+extern unsigned short soundsIntercom[2];
+extern unsigned short soundsButton;
+extern unsigned short soundsReleaseCube;
+extern unsigned short soundsPedestalShooting;
+
 
 
 extern unsigned short soundsPortalOpen2;

@@ -89,6 +89,9 @@ void pedestalUpdate(struct Pedestal* pedestal) {
         pedestalDetermineHolderAngle(pedestal, &target);
 
         if (vector2RotateTowards(&pedestal->currentRotation, &target, &gMaxPedistalRotation, &pedestal->currentRotation)) {
+            if (!(pedestal->flags & PedestalFlagsDown)){
+                soundPlayerPlay(soundsPedestalShooting, 5.0f, 0.5f, &pedestal->transform.position, &gZeroVec);
+            }
             pedestal->flags &= ~PedestalFlagsIsPointing;
         }
     }

@@ -4,6 +4,8 @@
 #include "../physics/collision_object.h"
 #include "signals.h"
 #include "../levels/level_definition.h"
+#include "../audio/clips.h"
+#include "../audio/soundplayer.h"
 
 struct Button {
     struct CollisionObject collisionObject;

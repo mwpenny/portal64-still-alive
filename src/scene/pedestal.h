@@ -4,6 +4,8 @@
 #include "../sk64/skelatool_armature.h"
 #include "../sk64/skelatool_animator.h"
 #include "../levels/level_definition.h"
+#include "../audio/soundplayer.h"
+#include "../audio/clips.h"
 
 enum PedestalFlags {
     PedestalFlagsDown = (1 << 0),
