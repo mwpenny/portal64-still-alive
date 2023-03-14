@@ -10,6 +10,8 @@ void savefileNew();
 
 void savefileSetFlags(enum SavefileFlags flags);
 
+void savefileUnsetFlags(enum SavefileFlags flags);
+
 int savefileReadFlags(enum SavefileFlags flags);
 
 #endif

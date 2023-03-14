@@ -22,7 +22,7 @@
 #include "levels/levels.h"
 #include "levels/checkpoint.h"
 
-#ifdef WITH_DEBUGGER
+#ifdef PORTAL64_WITH_DEBUGGER
 #include "../debugger/debugger.h"
 #endif
 
@@ -151,7 +151,7 @@ static void gameProc(void* arg) {
     heapInit(_heapStart, memoryEnd);
     romInit();
 
-#ifdef WITH_DEBUGGER
+#ifdef PORTAL64_WITH_DEBUGGER
     OSThread* debugThreads[2];
     debugThreads[0] = &gameThread;
     gdbInitDebugger(gPiHandle, &dmaMessageQ, debugThreads, 1);

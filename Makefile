@@ -21,8 +21,8 @@ OPTIMIZER		:= -O0
 LCDEFS			:= -DDEBUG -g -Isrc/ -I/usr/include/n64/nustd -Werror -Wall
 N64LIB			:= -lultra_rom -lnustd
 
-ifeq ($(WITH_DEBUGGER),1)
-LCDEFS += -DWITH_DEBUGGER
+ifeq ($(PORTAL64_WITH_DEBUGGER),1)
+LCDEFS += -DPORTAL64_WITH_DEBUGGER
 endif
 
 BASE_TARGET_NAME = build/portal
@@ -36,8 +36,8 @@ ASMOBJECTS  =	$(patsubst %.s, build/%.o, $(ASMFILES))
 
 CODEFILES = $(shell find src/ -type f -name '*.c')
 
-ifeq ($(WITH_GFX_VALIDATOR),1)
-LCDEFS += -DWITH_GFX_VALIDATOR
+ifeq ($(PORTAL64_WITH_GFX_VALIDATOR),1)
+LCDEFS += -DPORTAL64_WITH_GFX_VALIDATOR
 CODEFILES += gfxvalidator/validator.c gfxvalidator/error_printer.c gfxvalidator/command_printer.c
 endif
 
@@ -175,6 +175,7 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/round_elevator_interior.blend \
 	assets/models/props/round_elevator_collision.blend \
 	assets/models/props/signage.blend \
+	assets/models/props/signage_off.blend \
 	assets/models/props/switch001.blend \
 	assets/models/props/box_dropper.blend \
 	assets/models/props/box_dropper_glass.blend \
@@ -251,7 +252,8 @@ TEST_CHAMBERS = assets/test_chambers/test_chamber_00/test_chamber_00.blend \
 	assets/test_chambers/test_chamber_03/test_chamber_03.blend \
 	assets/test_chambers/test_chamber_04/test_chamber_04.blend \
 	assets/test_chambers/test_chamber_05/test_chamber_05.blend \
-	assets/test_chambers/test_chamber_06/test_chamber_06.blend
+	assets/test_chambers/test_chamber_06/test_chamber_06.blend \
+	assets/test_chambers/test_chamber_07/test_chamber_07.blend
 
 TEST_CHAMBER_HEADERS = $(TEST_CHAMBERS:%.blend=build/%.h)
 TEST_CHAMBER_OBJECTS = $(TEST_CHAMBERS:%.blend=build/%_geo.o)
@@ -350,7 +352,7 @@ CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) $(MODEL_OBJECTS) build/as
 
 CODEOBJECTS_NO_DEBUG = $(CODEOBJECTS)
 
-ifeq ($(WITH_DEBUGGER),1)
+ifeq ($(PORTAL64_WITH_DEBUGGER),1)
 CODEOBJECTS_NO_DEBUG += build/debugger/debugger_stub.o build/debugger/serial.o 
 endif
 
@@ -369,7 +371,7 @@ $(BASE_TARGET_NAME).z64: $(CODESEGMENT)_no_debug.o $(OBJECTS) $(CP_LD_SCRIPT)_no
 # with debugger
 CODEOBJECTS_DEBUG = $(CODEOBJECTS) 
 
-ifeq ($(WITH_DEBUGGER),1)
+ifeq ($(PORTAL64_WITH_DEBUGGER),1)
 CODEOBJECTS_DEBUG += build/debugger/debugger.o build/debugger/serial.o 
 endif
 
