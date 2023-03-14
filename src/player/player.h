@@ -22,7 +22,6 @@ enum PlayerFlags {
     PlayerIsDead = (1 << 3),
     PlayerIsUnderwater = (1 << 4),
     PlayerCrouched = (1 << 5),
-    PlayerIsGrabbing = (1 << 6),
 };
 
 struct Player {
@@ -55,5 +54,6 @@ void playerKill(struct Player* player, int isUnderwater);
 int playerIsDead(struct Player* player);
 void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing);
 void playerSignalPortalChanged(struct Player* player);
+int playerIsGrabbing(struct Player* player);
 
 #endif

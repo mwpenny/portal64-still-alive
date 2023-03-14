@@ -227,15 +227,12 @@ void playerApplyPortalGrab(struct Player* player, int portalIndex) {
 
 void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) {
     if (grabbing && !player->grabConstraint.object) {
-        player->flags |= PlayerIsGrabbing;
         pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f);
         contactSolverAddPointConstraint(&gContactSolver, &player->grabConstraint);
     } else if (!grabbing && player->grabConstraint.object) {
-        player->flags &= ~PlayerIsGrabbing;
         player->grabConstraint.object = NULL;
         contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
     } else if (grabbing != player->grabConstraint.object) {
-        player->flags |= PlayerIsGrabbing;
         pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f);
     }
 }
@@ -244,6 +241,10 @@ void playerSignalPortalChanged(struct Player* player) {
     if (player->grabbingThroughPortal != PLAYER_GRABBING_THROUGH_NOTHING) {
         playerSetGrabbing(player, NULL);
     }
+}
+
+int playerIsGrabbing(struct Player* player) {
+    return player->grabConstraint.object != NULL;
 }
 
 int playerRaycastGrab(struct Player* player, struct RaycastHit* hit) {
