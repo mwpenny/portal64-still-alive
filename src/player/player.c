@@ -252,6 +252,10 @@ void playerSignalPortalChanged(struct Player* player) {
     }
 }
 
+int playerIsGrabbing(struct Player* player) {
+    return player->grabConstraint.object != NULL;
+}
+
 int playerRaycastGrab(struct Player* player, struct RaycastHit* hit) {
     struct Ray ray;
 

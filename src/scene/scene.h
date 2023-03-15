@@ -53,8 +53,9 @@ struct Scene {
     u8 switchCount;
     u8 ballLancherCount;
     u8 ballCatcherCount;
-    int last_portal_indx_shot;
-    int looked_wall_portalable;
+    u8 last_portal_indx_shot;
+    u8 looked_wall_portalable_0;
+    u8 looked_wall_portalable_1;
 };
 
 extern struct Scene gScene;
