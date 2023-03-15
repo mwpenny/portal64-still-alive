@@ -36,8 +36,6 @@ struct ColliderTypeData gButtonCollider = {
     &gCollisionCylinderCallbacks
 };
 
-int gPrevButtonState = 0; //0 == unpressed, 1 == pressed
-
 #define MASS_BUTTON_PRESS_THRESHOLD     1.9f
 #define BUTTON_MOVEMENT_AMOUNT          0.1f
 #define BUTTON_MOVE_VELOCTY             0.3f
@@ -87,6 +85,7 @@ void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
 
     button->originalPos = definition->location;
     button->cubeSignalIndex = definition->cubeSignalIndex;
+    button->flags = 0;
 
     dynamicSceneSetRoomFlags(button->dynamicId, ROOM_FLAG_FROM_INDEX(button->rigidBody.currentRoom));
 }
@@ -135,14 +134,14 @@ void buttonUpdate(struct Button* button) {
     if (targetPos.y != button->rigidBody.transform.position.y) {
         //actively going down
         if (shouldPress){
-            if (gPrevButtonState == 0){
+            if (!(button->flags & ButtonFlagsBeingPressed)){
                 soundPlayerPlay(soundsButton, 2.5f, 0.5f, &button->rigidBody.transform.position, &gZeroVec);
             }
-            gPrevButtonState = 1;
+            button->flags |= ButtonFlagsBeingPressed;
         }
         // actively going up
         else{
-            gPrevButtonState = 0;
+            button->flags &= ~ButtonFlagsBeingPressed;
         }
 
         vector3MoveTowards(&button->rigidBody.transform.position, &targetPos, BUTTON_MOVE_VELOCTY * FIXED_DELTA_TIME, &button->rigidBody.transform.position);

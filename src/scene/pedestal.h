@@ -10,6 +10,7 @@
 enum PedestalFlags {
     PedestalFlagsDown = (1 << 0),
     PedestalFlagsIsPointing = (1 << 1),
+    PedestalFlagsAlreadyMoving  = (1 << 2),
 };
 
 struct Pedestal {

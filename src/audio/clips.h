@@ -11,6 +11,10 @@ extern unsigned short soundsIntercom[2];
 extern unsigned short soundsButton;
 extern unsigned short soundsReleaseCube;
 extern unsigned short soundsPedestalShooting;
+extern unsigned short soundsPedestalMoving;
+extern unsigned short soundsDoor;
+extern unsigned short soundsElevatorMoving;
+
 
 
 

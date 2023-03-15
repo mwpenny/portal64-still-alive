@@ -7,6 +7,10 @@
 #include "../audio/clips.h"
 #include "../audio/soundplayer.h"
 
+enum ButtonFlags {
+    ButtonFlagsBeingPressed = (1 << 0),
+};
+
 struct Button {
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
@@ -14,6 +18,7 @@ struct Button {
     short signalIndex;
     short cubeSignalIndex;
     struct Vector3 originalPos;
+    short flags;
 };
 
 void buttonInit(struct Button* button, struct ButtonDefinition* definition);

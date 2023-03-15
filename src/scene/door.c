@@ -82,6 +82,7 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct W
     } else {
         door->forDoorway = NULL;
     }
+    door->flags = 0;
 
     door->doorDefinition = doorDefinition;
 
@@ -90,6 +91,7 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct W
 void doorUpdate(struct Door* door) {
     float targetOpenAmount = signalsRead(door->signalIndex) ? 1.0f : 0.0f;
     door->openAmount = mathfMoveTowards(door->openAmount, targetOpenAmount, OPEN_VELOCITY * FIXED_DELTA_TIME);
+    
 
     if (door->forDoorway) {
         if (door->openAmount == 0.0f) {
@@ -101,7 +103,17 @@ void doorUpdate(struct Door* door) {
 
     if (door->openAmount == 0.0f) {
         door->collisionObject.collisionLayers = COLLISION_LAYERS_TANGIBLE;
+        door->flags &= ~DoorFlagsJustOpened;
+        if (!(door->flags & DoorFlagsJustClosed)){
+            soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec);
+            door->flags |= DoorFlagsJustClosed;
+        }
     } else {
+        door->flags &= ~DoorFlagsJustClosed;
+        if (!(door->flags & DoorFlagsJustOpened)){
+            soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec);
+            door->flags |= DoorFlagsJustOpened;
+        }
         door->collisionObject.collisionLayers = 0;
     }
 }

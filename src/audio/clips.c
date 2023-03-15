@@ -39,6 +39,9 @@ unsigned short soundsIntercom[2] = {
 unsigned short soundsButton = SOUNDS_BUTTON3;
 unsigned short soundsReleaseCube = SOUNDS_DOORMOVE2;
 unsigned short soundsPedestalShooting = SOUNDS_CHARGING;
+unsigned short soundsDoor= SOUNDS_DOOR_METAL_THIN_CLOSE2;
+unsigned short soundsElevatorMoving = SOUNDS_WALL_MOVE5;
+unsigned short soundsPedestalMoving = SOUNDS_PORTALGUN_ROTATE1;
 
 unsigned short soundsPortalOpen2 = SOUNDS_PORTAL_OPEN2;
 

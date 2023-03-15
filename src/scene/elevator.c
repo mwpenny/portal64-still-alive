@@ -21,6 +21,7 @@
 
 #define OPEN_DELAY              1.0f
 #define CLOSE_DELAY             13.0f
+#define MOVING_SOUND_DELAY      3.5f      
 
 struct ColliderTypeData gElevatorColliderType = {
     CollisionShapeTypeMesh,
@@ -102,6 +103,7 @@ void elevatorInit(struct Elevator* elevator, struct ElevatorDefinition* elevator
     elevator->targetElevator = elevatorDefinition->targetElevator;
 
     elevator->timer = elevatorDefinition->targetElevator == -1 ? OPEN_DELAY : CLOSE_DELAY;
+    elevator->movingTimer = MOVING_SOUND_DELAY;
     
     dynamicSceneSetRoomFlags(elevator->dynamicId, ROOM_FLAG_FROM_INDEX(elevatorDefinition->roomIndex));
 }
@@ -150,7 +152,8 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
     }
 
     if (shouldLock) {
-        elevator->flags |= ElevatorFlagsIsLocked;
+        
+        elevator->flags |= ElevatorFlagsIsLocked;   
     }
 
     if ((elevator->flags & ElevatorFlagsIsLocked) != 0) {
@@ -170,6 +173,15 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
 
     if ((elevator->openAmount == 0.0f && shouldBeOpen) || (elevator->openAmount == 1.0f && !shouldBeOpen)) {
         soundPlayerPlay(soundsElevatorDoor, 1.0f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec);
+    }
+
+    if ((elevator->flags & ElevatorFlagsIsLocked) && (elevator->openAmount == 0.0f) && (elevator->movingTimer > 0.0f)){
+        elevator->movingTimer -= FIXED_DELTA_TIME;
+    }
+
+    if ((elevator->flags & ElevatorFlagsIsLocked) && (elevator->openAmount == 0.0f) && !(elevator->flags & ElevatorFlagsMovingSoundPlayed) && (elevator->movingTimer <= 0.0f)){
+            soundPlayerPlay(soundsElevatorMoving, 1.5f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec);
+            elevator->flags |= ElevatorFlagsMovingSoundPlayed;
     }
 
     elevator->openAmount = mathfMoveTowards(elevator->openAmount, shouldBeOpen ? 1.0f : 0.0f, OPEN_SPEED * FIXED_DELTA_TIME);
