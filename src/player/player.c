@@ -336,7 +336,32 @@ void playerUpdateGrabbedObject(struct Player* player) {
         struct Vector3 grabPoint;
         struct Quaternion grabRotation = player->lookTransform.rotation;
 
-        transformPoint(&player->lookTransform, &gGrabDistance, &grabPoint);
+        // try to determine how far away to set the grab dist
+        struct Ray ray;
+        struct RaycastHit hit;
+        struct Vector3 temp_grab_dist = gGrabDistance;
+        ray.origin = player->lookTransform.position;
+        quatMultVector(&player->lookTransform.rotation, &gForward, &ray.dir);
+        vector3Negate(&ray.dir, &ray.dir);
+
+        //hide player/the object player is holding to determine if there is a wall closer
+        player->grabConstraint.object->collisionLayers = 0;
+        player->collisionObject.collisionLayers = 0;
+        if (collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, 1, GRAB_RAYCAST_DISTANCE, 1, &hit)){
+            float dist = hit.distance;
+            // bound distance to between -0.1 and the gGrabDistance.z
+            temp_grab_dist.z = maxf(((-1.0f*fabsf(dist))+0.2f), gGrabDistance.z);
+            temp_grab_dist.z = minf(temp_grab_dist.z, -0.2f);
+        }
+        player->grabConstraint.object->collisionLayers = COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE;
+        player->collisionObject.collisionLayers = PLAYER_COLLISION_LAYERS;
+
+        if (fabsf(temp_grab_dist.z) < 0.3){
+            playerSetGrabbing(player, NULL);
+            return;
+        }
+
+        transformPoint(&player->lookTransform, &temp_grab_dist, &grabPoint);
 
         if (player->grabbingThroughPortal != PLAYER_GRABBING_THROUGH_NOTHING) {
             if (!collisionSceneIsPortalOpen()) {
@@ -602,7 +627,6 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Box3D sweptBB = player->collisionObject.boundingBox;
     collisionObjectUpdateBB(&player->collisionObject);
     box3DUnion(&sweptBB, &player->collisionObject.boundingBox, &sweptBB);
-
     collisionObjectCollideMixed(&player->collisionObject, &prevPos, &sweptBB, &gCollisionScene, &gContactSolver);
 
     player->anchoredTo = NULL;
