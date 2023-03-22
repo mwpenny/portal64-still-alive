@@ -3,7 +3,7 @@
 
 #include <ultra64.h>
 #include "level_definition.h"
-
+#include "../audio/clips.h"
 union CutsceneStepState {
     struct {
         ALSndId soundId;

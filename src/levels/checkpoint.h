@@ -11,3 +11,4 @@ struct PartialTransform {
 void checkpointClear();
 void checkpointSave(struct Scene* scene);
 void checkpointLoadLast(struct Scene* scene);
+int checkpointExists();

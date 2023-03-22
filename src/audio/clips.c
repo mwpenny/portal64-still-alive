@@ -32,6 +32,17 @@ unsigned short soundsSelecting[3] = {
     SOUNDS_SUIT_DENYDEVICE,
 };
 
+unsigned short soundsIntercom[2] = {
+    SOUNDS_DING_ON,
+    SOUNDS_DING_OFF,
+};
+unsigned short soundsButton = SOUNDS_BUTTON3;
+unsigned short soundsReleaseCube = SOUNDS_DOORMOVE2;
+unsigned short soundsPedestalShooting = SOUNDS_CHARGING;
+unsigned short soundsDoor= SOUNDS_DOOR_METAL_THIN_CLOSE2;
+unsigned short soundsElevatorMoving = SOUNDS_WALL_MOVE5;
+unsigned short soundsPedestalMoving = SOUNDS_PORTALGUN_ROTATE1;
+
 unsigned short soundsPortalOpen2 = SOUNDS_PORTAL_OPEN2;
 
 unsigned short soundsPortalFizzle = SOUNDS_PORTAL_FIZZLE2;

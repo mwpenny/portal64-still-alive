@@ -89,16 +89,29 @@ void pedestalUpdate(struct Pedestal* pedestal) {
         pedestalDetermineHolderAngle(pedestal, &target);
 
         if (vector2RotateTowards(&pedestal->currentRotation, &target, &gMaxPedistalRotation, &pedestal->currentRotation)) {
+            if (!(pedestal->flags & PedestalFlagsDown)){
+                soundPlayerPlay(soundsPedestalShooting, 5.0f, 0.5f, &pedestal->transform.position, &gZeroVec);
+            }
             pedestal->flags &= ~PedestalFlagsIsPointing;
         }
+        else{
+            if (!(pedestal->flags & PedestalFlagsAlreadyMoving) && !(pedestal->flags & PedestalFlagsDown)){
+                soundPlayerPlay(soundsPedestalMoving, 5.0f, 0.5f, &pedestal->transform.position, &gZeroVec);
+                pedestal->flags |= PedestalFlagsAlreadyMoving;
+            }
+        }
+        
+    }
+    else{
+        pedestal->flags &= ~PedestalFlagsAlreadyMoving;
     }
     
     quatAxisComplex(&gUp, &pedestal->currentRotation, &pedestal->armature.pose[PEDESTAL_HOLDER_BONE].rotation);
 }
 
 void pedestalHide(struct Pedestal* pedestal) {
+    soundPlayerPlay(soundsReleaseCube, 3.0f, 0.5f, &pedestal->transform.position, &gZeroVec);
     pedestal->flags |= PedestalFlagsDown;
-
     skAnimatorRunClip(&pedestal->animator, &pedestal_Armature_Hide_clip, 0.0f, 0);
 }
 
