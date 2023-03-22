@@ -136,16 +136,6 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->stepTimer = STEP_TIME;
     player->currentFoot = 0;
 
-    int saveFlags = savefileReadFlags(SavefileFlagsFirstPortalGun | SavefileFlagsSecondPortalGun);
-
-    if (saveFlags & SavefileFlagsFirstPortalGun) {
-        player->flags |= PlayerHasFirstPortalGun;
-    }
-
-    if (saveFlags & SavefileFlagsSecondPortalGun) {
-        player->flags |= PlayerHasSecondPortalGun;
-    }
-
     if (gCurrentLevelIndex == 0){
         player->flags &= ~PlayerHasFirstPortalGun;
         player->flags &= ~PlayerHasSecondPortalGun;
@@ -397,14 +387,6 @@ void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, st
 
 void playerGivePortalGun(struct Player* player, int flags) {
     player->flags |= flags;
-
-    if (flags & PlayerHasFirstPortalGun) {
-        savefileSetFlags(SavefileFlagsFirstPortalGun);
-    }
-
-    if (flags & PlayerHasSecondPortalGun) {
-        savefileSetFlags(SavefileFlagsSecondPortalGun);
-    }
 }
 
 void playerKill(struct Player* player, int isUnderwater) {

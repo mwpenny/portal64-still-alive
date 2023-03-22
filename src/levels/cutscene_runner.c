@@ -169,6 +169,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 &gZeroVec,
                 gCurrentLevel->locations[step->teleportPlayer.toLocation].roomIndex
             );
+            checkpointSave(&gScene);
             break;
         case CutsceneStepTypeLoadLevel:
         {
@@ -180,6 +181,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             transformConcat(&exitInverse, &gScene.player.lookTransform, &relativeExit);
             quatMultVector(&exitInverse.rotation, &gScene.player.body.velocity, &relativeVelocity);
             levelQueueLoad(step->loadLevel.levelIndex, &relativeExit, &relativeVelocity);
+            checkpointSave(&gScene);
             break;
         }
         case CutsceneStepTypeGoto:
