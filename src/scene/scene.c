@@ -331,13 +331,15 @@ void sceneCheckPortals(struct Scene* scene) {
     }
 
     if (scene->player.body.flags & RigidBodyFizzled) {
-        if (scene->portals[0].flags & PortalFlagsPlayerPortal) {
-            sceneClosePortal(scene, 0);
+        if (!(scene->player.body.flags & (RigidBodyIsTouchingPortalA|RigidBodyIsTouchingPortalB|RigidBodyWasTouchingPortalA|RigidBodyWasTouchingPortalB))){
+            if (scene->portals[0].flags & PortalFlagsPlayerPortal) {
+                sceneClosePortal(scene, 0);
+            }
+            if (scene->portals[1].flags & PortalFlagsPlayerPortal) {
+                sceneClosePortal(scene, 1);
+            }
+            scene->player.body.flags &= ~RigidBodyFizzled;
         }
-        if (scene->portals[1].flags & PortalFlagsPlayerPortal) {
-            sceneClosePortal(scene, 1);
-        }
-        scene->player.body.flags &= ~RigidBodyFizzled;
     }
 
     int isOpen = collisionSceneIsPortalOpen();
