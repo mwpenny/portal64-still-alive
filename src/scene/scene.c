@@ -329,7 +329,7 @@ void sceneCheckPortals(struct Scene* scene) {
     }
 
     if (scene->player.body.flags & RigidBodyFizzled) {
-        if (!rigidBodyCheckPortals(&scene->player.body)){
+        if (!(scene->player.body.flags & (RigidBodyIsTouchingPortalA|RigidBodyIsTouchingPortalB|RigidBodyWasTouchingPortalA|RigidBodyWasTouchingPortalB))){
             if (scene->portals[0].flags & PortalFlagsPlayerPortal) {
                 sceneClosePortal(scene, 0);
             }
