@@ -711,7 +711,6 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     }
 
     player->body.currentRoom = worldCheckDoorwayCrossings(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom, doorwayMask);
-
     dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
 
     float startTime = 0.0f;
