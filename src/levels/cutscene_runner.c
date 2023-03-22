@@ -10,7 +10,7 @@
 struct CutsceneRunner* gRunningCutscenes;
 struct CutsceneRunner* gUnusedRunners;
 
-#define MAX_QUEUE_LENGTH    16
+#define MAX_QUEUE_LENGTH    25
 
 struct QueuedSound {
     struct QueuedSound* next;
@@ -122,6 +122,19 @@ float cutsceneRunnerConvertPlaybackSpeed(s8 asInt) {
 
 void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
     struct CutsceneStep* step = &runner->currentCutscene->steps[runner->currentStep];
+    struct CutsceneStep* prev_step;
+    struct CutsceneStep* next_step;
+    enum CutsceneStepType prev_type = -1;
+    enum CutsceneStepType next_type = -1;
+    if (runner->currentStep != 0){
+        prev_step = &runner->currentCutscene->steps[(runner->currentStep)-1];
+        prev_type = prev_step->type;
+    }
+    if (runner->currentStep < runner->currentCutscene->stepCount){
+        next_step = &runner->currentCutscene->steps[(runner->currentStep)+1];
+        next_type = next_step->type;
+    }
+    
     switch (step->type) {
         case CutsceneStepTypePlaySound:
         case CutsceneStepTypeStartSound:
@@ -134,8 +147,16 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             );
             break;
         case CutsceneStepTypeQueueSound:
+        {
+            if ((prev_type == -1) || !(prev_type == CutsceneStepTypeQueueSound)){
+                cutsceneQueueSound(soundsIntercom[0], step->queueSound.volume * (1.0f / 255.0f), step->queueSound.channel);
+            } 
             cutsceneQueueSound(step->queueSound.soundId, step->queueSound.volume * (1.0f / 255.0f), step->queueSound.channel);
+            if ((next_type == -1) || !(next_type == CutsceneStepTypeQueueSound)){
+                cutsceneQueueSound(soundsIntercom[1], step->queueSound.volume * (1.0f / 255.0f), step->queueSound.channel);
+            } 
             break;
+        }
         case CutsceneStepTypeDelay:
             runner->state.delay = step->delay;
             break;

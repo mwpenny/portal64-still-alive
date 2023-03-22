@@ -4,6 +4,12 @@
 #include "../physics/collision_object.h"
 #include "signals.h"
 #include "../levels/level_definition.h"
+#include "../audio/clips.h"
+#include "../audio/soundplayer.h"
+
+enum ButtonFlags {
+    ButtonFlagsBeingPressed = (1 << 0),
+};
 
 struct Button {
     struct CollisionObject collisionObject;
@@ -12,6 +18,7 @@ struct Button {
     short signalIndex;
     short cubeSignalIndex;
     struct Vector3 originalPos;
+    short flags;
 };
 
 void buttonInit(struct Button* button, struct ButtonDefinition* definition);

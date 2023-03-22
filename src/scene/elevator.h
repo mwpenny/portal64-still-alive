@@ -10,6 +10,7 @@ enum ElevatorFlags {
     ElevatorFlagsIsLocked = (1 << 0),
     ElevatorFlagsIsExit = (1 << 1),
     ElevatorFlagsHasHadPlayer = (1 << 2),
+    ElevatorFlagsMovingSoundPlayed = (1 << 3),
 };
 
 struct Elevator {
@@ -21,6 +22,7 @@ struct Elevator {
     short roomIndex;
     float openAmount;
     float timer;
+    float movingTimer;
 };
 
 void elevatorInit(struct Elevator* elevator, struct ElevatorDefinition* elevatorDefinition);
