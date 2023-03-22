@@ -246,16 +246,25 @@ int playerIsGrabbing(struct Player* player) {
     return player->grabConstraint.object != NULL;
 }
 
-int playerRaycastGrab(struct Player* player, struct RaycastHit* hit) {
+int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPastObject) {
     struct Ray ray;
 
     ray.origin = player->lookTransform.position;
     quatMultVector(&player->lookTransform.rotation, &gForward, &ray.dir);
     vector3Negate(&ray.dir, &ray.dir);
+    int result;
 
     player->collisionObject.collisionLayers = 0;
 
-    int result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit);
+    if (checkPastObject){
+        short prevCollisionLayers = player->grabConstraint.object->collisionLayers;
+        player->grabConstraint.object->collisionLayers = 0;
+        result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit);
+        player->grabConstraint.object->collisionLayers = prevCollisionLayers;
+    }
+    else{
+        result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit);
+    }
 
     player->collisionObject.collisionLayers = PLAYER_COLLISION_LAYERS;
 
@@ -279,7 +288,7 @@ void playerUpdateGrabbedObject(struct Player* player) {
         } else {
             struct RaycastHit hit;
 
-            if (playerRaycastGrab(player, &hit)) {
+            if (playerRaycastGrab(player, &hit, 0)) {
                 hit.object->flags |= COLLISION_OBJECT_INTERACTED;
 
                 if (hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable)) {
@@ -326,7 +335,21 @@ void playerUpdateGrabbedObject(struct Player* player) {
         struct Vector3 grabPoint;
         struct Quaternion grabRotation = player->lookTransform.rotation;
 
-        transformPoint(&player->lookTransform, &gGrabDistance, &grabPoint);
+        // try to determine how far away to set the grab dist
+        struct RaycastHit hit;
+        struct Vector3 temp_grab_dist = gGrabDistance;
+        if (playerRaycastGrab(player, &hit, 1)){
+            float dist = hit.distance;
+            temp_grab_dist.z = maxf(((-1.0f*fabsf(dist))+0.2f), gGrabDistance.z);
+            temp_grab_dist.z = minf(temp_grab_dist.z, -0.2f);
+        }
+        //drop the object if grab distance becomes too close to player
+        if (fabsf(temp_grab_dist.z) < 0.3){
+            playerSetGrabbing(player, NULL);
+            return;
+        }
+
+        transformPoint(&player->lookTransform, &temp_grab_dist, &grabPoint);
 
         if (player->grabbingThroughPortal != PLAYER_GRABBING_THROUGH_NOTHING) {
             if (!collisionSceneIsPortalOpen()) {
@@ -584,7 +607,6 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     struct Box3D sweptBB = player->collisionObject.boundingBox;
     collisionObjectUpdateBB(&player->collisionObject);
     box3DUnion(&sweptBB, &player->collisionObject.boundingBox, &sweptBB);
-
     collisionObjectCollideMixed(&player->collisionObject, &prevPos, &sweptBB, &gCollisionScene, &gContactSolver);
 
     player->anchoredTo = NULL;
