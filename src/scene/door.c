@@ -60,7 +60,7 @@ void doorRender(void* data, struct DynamicRenderDataList* renderList, struct Ren
 }
 
 void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct World* world) {
-    collisionObjectInit(&door->collisionObject, &gDoorCollider, &door->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
+    collisionObjectInit(&door->collisionObject, &gDoorCollider, &door->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE|COLLISION_LAYERS_STATIC);
     rigidBodyMarkKinematic(&door->rigidBody);
     collisionSceneAddDynamicObject(&door->collisionObject);
 
@@ -102,7 +102,7 @@ void doorUpdate(struct Door* door) {
     }
 
     if (door->openAmount == 0.0f) {
-        door->collisionObject.collisionLayers = COLLISION_LAYERS_TANGIBLE;
+        door->collisionObject.collisionLayers = COLLISION_LAYERS_TANGIBLE|COLLISION_LAYERS_STATIC;
         door->flags &= ~DoorFlagsJustOpened;
         if (!(door->flags & DoorFlagsJustClosed)){
             soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec);
