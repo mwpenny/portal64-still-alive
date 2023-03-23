@@ -99,35 +99,44 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 
 <br />
 
-## Current TODO list
-
+## Current New Feature TODO List
 - [ ] force placing auto portals when there is a conflict
-- [ ] fix chell animation problem (fixed itself, investigate)
 - [ ] rotate auto uv
 - [ ] disable portal surfaces manually on some surfaces
-- [ ] Portal not rending recursively sometimes
-- [ ] Passing into a ceiling portal can sometimes mess with the player rotation
+- [ ] Portal not rendering recursively sometimes
 - [ ] Correct elevator timing
 - [ ] Presort portal gun polygon order
+- [ ] Portal gun movement with player movement/shooting #19
 - [ ] Camera shake
-- [x] Elevator and door sounds
-- [?] Skips audio sometimes
-- [x] Signage should not always be on
-- [x] sound effects for ball (portal_pak_dir/scripts/npc_sounds_energy_ball.txt)
-- [x] first portal wall
-- [x] the cube bounces the player
-- [x] break constraint after large distance
-- [x] prevent objects from pushing the player around
-- [x] Stop looping sounds betwen levels
-- [x] red light district
-- [x] burn marks
-- [x] close portal in elevator
-- [x] keep stationary portal with fizzle grids
-- [x] add more fizzle grids
-- [x] checkpoint in elevator
-- [x] preserve gun between test chambers
-- [x] Finish up animation pieces (collider/portable surface/culling logic)
-- [x] Implement pedestal button
-- [x] Create piston animaiton test
-- [x] Refactor physics to allow swept collision between two dynamic objects
-- [x] Move constaints to be applied right before contact solving
+- [ ] Adding a menu to game #47
+- [ ] Adding y-axis/x-axis inverting options #55
+- [ ] Adding loading notice between levels #45
+- [ ] Vertex lighting #39
+- [ ] Multi controller support #23
+
+## Current New Sounds TODO List
+- [ ] Fast flying air whoosh sound
+- [ ] Button release beep-beep sound
+- [ ] Box collision sounds
+- [ ] Elevator arrived chime sound
+- [ ] Ball catcher activated sound
+- [ ] Unstationary scaffolding moving sound
+- [ ] Ambient background loop
+
+## Current Bug TODO List (Hardware Verified) (High->Low priority)
+- [ ] Player can clip through any level by placing one portal on wall and another portal right next to it on ground. #13
+- [ ] Player can clip through chamber 7 by walking back up the stairs (near the top).
+- [ ] player can clip through back of elevator by jumping and strafeing at the back corners while inside.
+- [ ] Player can strap themselves in chamber 5 by following instructions issue #75
+- [ ] Any grabbable object can be clipped through level by wall/floor portals method.
+- [ ] Two wall portals next to eachother can be used to clip any object out of any level by pushing it into corner, then dropping. 
+- [ ] Glass can be walked through from one side on multiple levels (0,1,4,...)
+- [ ] Passing into a ceiling portal can sometimes mess with the player rotation
+- [ ] Can shoot portals through decor objects
+- [ ] Can shoot portals while holding an object
+- [ ] Can shoot portals, and walk through signage
+- [ ] Chell animation problem (fixed itself, investigate)
+- [ ] Can place portals on ground after final fizzler on all levels
+- [ ] Door at end of room 2, chamber 10 isnt rendered properly
+- [ ] various visual glitches when running NTSC on PAL console #65
+- [ ] various visual glitches when running PAL on NTSC console #65
