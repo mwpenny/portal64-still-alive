@@ -32,6 +32,12 @@
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
 
+struct Vector3 gPortalGunOffset = {0.150957, -0.153587, -0.355};
+struct Vector3 gPortalGunShootOffset = {0.150957, -0.153587, 0.1};
+struct Vector3 gPortalGunForward = {0.1f, -0.1f, 1.0f};
+struct Vector3 gPortalGunShootForward = {0.1f, -0.25f, 1.0f};
+struct Vector3 gPortalGunUp = {0.0f, 1.0f, 0.0f};
+
 struct Vector2 gPlayerColliderEdgeVectors[] = {
     {0.0f, 1.0f},
     {0.707f, 0.707f},
@@ -115,8 +121,11 @@ void playerRender(void* data, struct DynamicRenderDataList* renderList, struct R
     );
 }
 
-void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity) {
+void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity, struct CollisionObject* portalGunObject) {
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
+
+    
+
     // rigidBodyMarkKinematic(&player->body);
     player->body.flags |= RigidBodyIsKinematic | RigidBodyIsPlayer;
     collisionSceneAddDynamicObject(&player->collisionObject);
@@ -130,6 +139,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->body.velocity = *velocity;
     player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
     player->grabConstraint.object = NULL;
+    player->gunConstraint.object = NULL;
     player->pitchVelocity = 0.0f;
     player->yawVelocity = 0.0f;
     player->flags = 0;
@@ -162,6 +172,9 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     collisionObjectUpdateBB(&player->collisionObject);
 
     dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
+
+    pointConstraintInit(&player->gunConstraint, portalGunObject, 20.0f, 2.5f, 1, 0.9f);
+    contactSolverAddPointConstraint(&gContactSolver, &player->gunConstraint);
 }
 
 #define PLAYER_SPEED    (150.0f / 64.0f)
@@ -226,13 +239,13 @@ void playerApplyPortalGrab(struct Player* player, int portalIndex) {
 
 void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) {
     if (grabbing && !player->grabConstraint.object) {
-        pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f);
+        pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 0, 1.0f);
         contactSolverAddPointConstraint(&gContactSolver, &player->grabConstraint);
     } else if (!grabbing && player->grabConstraint.object) {
         player->grabConstraint.object = NULL;
         contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
     } else if (grabbing != player->grabConstraint.object) {
-        pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f);
+        pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 0, 1.0f);
     }
 }
 
@@ -369,6 +382,33 @@ void playerUpdateGrabbedObject(struct Player* player) {
 
         pointConstraintUpdateTarget(&player->grabConstraint, &grabPoint, &grabRotation);
     }
+}
+
+void playerUpdateGunObject(struct Player* player) {
+    struct Vector3 forward;
+    struct Vector3 offset;
+
+    if (player->flags & PlayerJustShotPortalGun){
+        player->flags &= ~PlayerJustShotPortalGun;
+        forward = gPortalGunShootForward;
+        offset = gPortalGunShootOffset;
+    }
+    else{
+        forward = gPortalGunForward;
+        offset = gPortalGunOffset;
+    }
+
+    struct Quaternion relativeRotation;
+    quatLook(&forward, &gPortalGunUp, &relativeRotation);
+    quatMultiply(&player->lookTransform.rotation, &relativeRotation, &player->gunConstraint.object->body->transform.rotation);
+
+
+    struct Vector3 gunPoint;
+    struct Vector3 temp_gun_dist = offset;
+    transformPoint(&player->lookTransform, &temp_gun_dist, &gunPoint);
+
+    pointConstraintUpdateTarget(&player->gunConstraint, &gunPoint, &player->gunConstraint.object->body->transform.rotation);
+    
 }
 
 #define DEADZONE_SIZE       5
@@ -725,6 +765,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     cameraTransform->rotation = player->lookTransform.rotation;
     cameraTransform->position = player->lookTransform.position;
     playerUpdateGrabbedObject(player);
+    playerUpdateGunObject(player);
 
     collisionObjectUpdateBB(&player->collisionObject);
 

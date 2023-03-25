@@ -31,10 +31,6 @@
 #include "signals.h"
 #include "render_plan.h"
 
-struct Vector3 gPortalGunOffset = {0.120957, -0.113587, -0.20916};
-struct Vector3 gPortalGunForward = {0.1f, -0.1f, 1.0f};
-struct Vector3 gPortalGunUp = {0.0f, 1.0f, 0.0f};
-
 Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 
 #define LEVEL_INDEX_WITH_GUN_0  2
@@ -78,7 +74,9 @@ void sceneInit(struct Scene* scene) {
     transformConcat(&startLocation->transform, levelRelativeTransform(), &combinedLocation.transform);
     quatMultVector(&startLocation->transform.rotation, levelRelativeVelocity(), &startVelocity);
 
-    playerInit(&scene->player, &combinedLocation, &startVelocity);
+    portalGunInit(&scene->portalGun, &combinedLocation.transform);
+
+    playerInit(&scene->player, &combinedLocation, &startVelocity, &scene->portalGun.collisionObject);
     sceneUpdateListeners(scene);
 
     if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_0) {
@@ -205,26 +203,6 @@ void sceneRenderPerformanceMetrics(struct Scene* scene, struct RenderState* rend
     gDPPipeSync(renderState->dl++);
 }
 
-void sceneRenderPortalGun(struct Scene* scene, struct RenderState* renderState) {
-    struct Transform gunTransform;
-    transformPoint(&scene->player.lookTransform, &gPortalGunOffset, &gunTransform.position);
-    struct Quaternion relativeRotation;
-    quatLook(&gPortalGunForward, &gPortalGunUp, &relativeRotation);
-    quatMultiply(&scene->player.lookTransform.rotation, &relativeRotation, &gunTransform.rotation);
-    gunTransform.scale = gOneVec;
-    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
-
-    if (!matrix) {
-        return;
-    }
-
-    transformToMatrixL(&gunTransform, matrix, SCENE_SCALE);
-
-    gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
-    gSPDisplayList(renderState->dl++, v_portal_gun_gfx);
-    gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
-}
-
 LookAt gLookAt = gdSPDefLookAt(127, 0, 0, 0, 127, 0);
 
 void sceneRender(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
@@ -247,9 +225,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     renderPlanBuild(&renderPlan, scene, renderState);
     renderPlanExecute(&renderPlan, scene, staticMatrices, renderState);
 
-    if (scene->player.flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
-        sceneRenderPortalGun(scene, renderState);
-    }
+    portalGunRenderReal(&scene->portalGun, renderState);
 
     gDPPipeSync(renderState->dl++);
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
@@ -281,12 +257,14 @@ void sceneCheckPortals(struct Scene* scene) {
 
     if (controllerGetButtonDown(0, Z_TRIG) && (scene->player.flags & PlayerHasSecondPortalGun)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom, 1, 0);
+        scene->player.flags |= PlayerJustShotPortalGun;
         scene->last_portal_indx_shot=0;
         soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL);
     }
 
     if (controllerGetButtonDown(0, R_TRIG | L_TRIG) && (scene->player.flags & PlayerHasFirstPortalGun)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom, 1, 0);
+        scene->player.flags |= PlayerJustShotPortalGun;
         scene->last_portal_indx_shot=1;
         soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL, NULL);
     }
@@ -323,6 +301,7 @@ void sceneCheckPortals(struct Scene* scene) {
 
     if (scene->player.flags & PlayerHasFirstPortalGun){
         if (sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom, 1, 1)){
+            
             scene->looked_wall_portalable_0 = 1;
         }
         if (sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom, 1, 1)){
@@ -449,6 +428,7 @@ void sceneUpdate(struct Scene* scene) {
 
     signalsReset();
 
+    portalGunUpdate(&scene->portalGun, &scene->player);
     playerUpdate(&scene->player, &scene->camera.transform);
     sceneUpdateListeners(scene);
     sceneCheckPortals(scene);
@@ -518,6 +498,14 @@ void sceneUpdate(struct Scene* scene) {
             } else {
                 rigidBodyTeleport(
                     &scene->player.body,
+                    &scene->elevators[i].rigidBody.transform,
+                    &scene->elevators[teleportTo].rigidBody.transform,
+                    &gZeroVec,
+                    &gZeroVec,
+                    scene->elevators[teleportTo].roomIndex
+                );
+                rigidBodyTeleport(
+                    &scene->portalGun.rigidBody,
                     &scene->elevators[i].rigidBody.transform,
                     &scene->elevators[teleportTo].rigidBody.transform,
                     &gZeroVec,
