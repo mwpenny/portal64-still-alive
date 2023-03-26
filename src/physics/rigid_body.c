@@ -177,6 +177,9 @@ void rigidBodyTeleport(struct RigidBody* rigidBody, struct Transform* from, stru
 
     transformPointInverseNoScale(from, &rigidBody->transform.position, &localPoint);
 
+    localPoint.x = clampf(localPoint.x, -0.1, 0.1);
+    localPoint.y = clampf(localPoint.y, -0.2, 0.2);
+
     transformPoint(to, &localPoint, &rigidBody->transform.position);
 
     struct Quaternion inverseARotation;

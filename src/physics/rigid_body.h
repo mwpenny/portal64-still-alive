@@ -3,6 +3,7 @@
 
 #include "../math/basis.h"
 #include "../math/transform.h"
+#include "../math/mathf.h"
 #include "./collision.h"
 
 #define KILL_PLANE_Y    -10.0f
