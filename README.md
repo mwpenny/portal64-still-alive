@@ -1,4 +1,5 @@
 # Portal64
+![](./assets/images/portal64_readme_logo.gif)
 
 A demake of Portal for the Nintendo 64.
 
