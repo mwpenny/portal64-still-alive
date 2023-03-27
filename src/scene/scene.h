@@ -20,10 +20,12 @@
 #include "switch.h"
 #include "ball_launcher.h"
 #include "ball_catcher.h"
+#include "portal_gun.h"
 
 struct Scene {
     struct Camera camera;
     struct Player player;
+    struct PortalGun portalGun;
     struct Portal portals[2];
     struct Button* buttons;
     struct DecorObject** decor;

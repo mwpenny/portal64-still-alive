@@ -140,11 +140,17 @@ struct Location {
     short roomIndex;
 };
 
+enum DoorType {
+    DoorType01,
+    DoorType02,
+};
+
 struct DoorDefinition {
     struct Vector3 location;
     struct Quaternion rotation;
     short doorwayIndex;
     short signalIndex;
+    short doorType;
 };
 
 struct ButtonDefinition {

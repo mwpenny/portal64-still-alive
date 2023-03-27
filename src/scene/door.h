@@ -5,20 +5,32 @@
 #include "../levels/level_definition.h"
 #include "../audio/soundplayer.h"
 #include "../audio/clips.h"
+#include "../sk64/skelatool_animator.h"
+#include "../sk64/skelatool_armature.h"
 
 enum DoorFlags {
-    DoorFlagsJustClosed = (1 << 0),
-    DoorFlagsJustOpened = (1 << 1),
+    DoorFlagsIsOpen = (1 << 0),
+};
+
+struct DoorTypeDefinition {
+    struct SKArmatureDefinition* armature;
+    Gfx* model;
+    struct SKAnimationClip* openClip;
+    struct SKAnimationClip* closeClip;
+    short colliderBoneIndex;
+    float closeSpeed;
 };
 
 struct Door {
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
+    struct SKAnimator animator;
+    struct SKArmature armature;
+
     struct Doorway* forDoorway;
     struct DoorDefinition* doorDefinition;
     short dynamicId;
     short signalIndex;
-    float openAmount;
     short flags;
 };
 
