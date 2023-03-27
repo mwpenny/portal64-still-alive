@@ -203,9 +203,9 @@ void rigidBodyTeleport(struct RigidBody* rigidBody, struct Transform* from, stru
     //the to portal will teleport the player slightly in front of it. (altering the z)
     if (rigidBody->flags & RigidBodyIsPlayer){
         if (localPoint.z >= 0){
-            localPoint.z = minf(localPoint.z, -PLAYER_PORTAL_EXIT_Z_DISTANCE);
+            localPoint.z = minf(localPoint.z, PLAYER_PORTAL_EXIT_Z_DISTANCE);
         }else{
-            localPoint.z = maxf(localPoint.z, PLAYER_PORTAL_EXIT_Z_DISTANCE);
+            localPoint.z = maxf(localPoint.z, -PLAYER_PORTAL_EXIT_Z_DISTANCE);
         }
     }
 
