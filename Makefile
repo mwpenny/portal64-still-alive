@@ -167,6 +167,7 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/autoportal_frame/autoportal_frame.blend \
 	assets/models/props/button.blend \
 	assets/models/props/door_01.blend \
+	assets/models/props/door_02.blend \
 	assets/models/props/combine_ball_catcher.blend \
 	assets/models/props/combine_ball_launcher.blend \
 	assets/models/props/cylinder_test.blend \
@@ -193,6 +194,8 @@ ANIM_LIST = build/assets/models/pedestal_anim.o \
 	build/assets/models/props/box_dropper_anim.o \
 	build/assets/models/props/combine_ball_catcher_anim.o \
 	build/assets/models/props/combine_ball_launcher_anim.o \
+	build/assets/models/props/door_01_anim.o \
+	build/assets/models/props/door_02_anim.o \
 	build/assets/models/player/chell_anim.o \
 	build/assets/models/props/switch001_anim.o
 
@@ -228,11 +231,14 @@ build/src/scene/ball_launcher.o: build/assets/models/props/combine_ball_launcher
 
 build/src/scene/ball_catcher.o: build/assets/models/props/combine_ball_catcher.h build/assets/materials/static.h
 
+build/src/scene/door.o: build/assets/models/props/door_01.h build/assets/models/props/door_02.h
+
 build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
 
 build/assets/models/props/combine_ball_catcher.h: assets/materials/ball_catcher.skm.yaml
 
 build/assets/models/props/combine_ball_launcher.h: assets/materials/ball_catcher.skm.yaml
+
 
 ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_03/test_chamber_03_anim.o \
 	build/assets/test_chambers/test_chamber_04/test_chamber_04_anim.o \

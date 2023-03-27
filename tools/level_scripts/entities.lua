@@ -60,6 +60,14 @@ sk_definition_writer.add_header('"decor/decor_object_list.h"')
 
 local doors = {}
 
+local function parse_door_type(name)
+    if name == '02' then
+        return sk_definition_writer.raw('DoorType02')
+    end
+
+    return sk_definition_writer.raw('DoorType01')
+end
+
 for _, door in pairs(sk_scene.nodes_for_type('@door')) do
     local position, rotation = door.node.full_transformation:decompose()
 
@@ -68,6 +76,7 @@ for _, door in pairs(sk_scene.nodes_for_type('@door')) do
         rotation,
         world.find_coplanar_doorway(position) - 1,
         signals.signal_index_for_name(door.arguments[1] or ''),
+        parse_door_type(door.arguments[2])
     })
 end
 
