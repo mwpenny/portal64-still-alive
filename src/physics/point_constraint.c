@@ -4,13 +4,18 @@
 
 #define BREAK_CONSTRAINT_DISTANCE 2.0f
 
-int pointConstraintMoveToPoint(struct CollisionObject* object, struct Vector3* worldPoint, float maxImpulse) {
+int pointConstraintMoveToPoint(struct CollisionObject* object, struct Vector3* worldPoint, float maxImpulse, int teleportOnBreak, float movementScaleFactor) {
     struct RigidBody* rigidBody = object->body;
+
 
     struct Vector3 targetVelocity;
     vector3Sub(worldPoint, &rigidBody->transform.position, &targetVelocity);
 
     if (vector3MagSqrd(&targetVelocity) > BREAK_CONSTRAINT_DISTANCE * BREAK_CONSTRAINT_DISTANCE) {
+        if (teleportOnBreak){
+            object->body->transform.position = *worldPoint;
+            return 1;
+        }
         return 0;
     }
 
@@ -38,9 +43,11 @@ int pointConstraintMoveToPoint(struct CollisionObject* object, struct Vector3* w
 
     struct Vector3 delta;
     vector3Sub(&targetVelocity, &rigidBody->velocity, &delta);
+    
 
     float deltaSqrd = vector3MagSqrd(&delta);
     if (deltaSqrd < maxImpulse * maxImpulse) {
+        vector3Scale(&targetVelocity, &targetVelocity, movementScaleFactor);
         rigidBody->velocity = targetVelocity;
     } else {
         vector3AddScaled(&rigidBody->velocity, &delta, maxImpulse / sqrtf(deltaSqrd), &rigidBody->velocity);
@@ -74,13 +81,15 @@ void pointConstraintRotateTo(struct RigidBody* rigidBody, struct Quaternion* wor
     }
 }
 
-void pointConstraintInit(struct PointConstraint* constraint, struct CollisionObject* object, float maxPosImpulse, float maxRotImpulse) {
+void pointConstraintInit(struct PointConstraint* constraint, struct CollisionObject* object, float maxPosImpulse, float maxRotImpulse, int teleportOnBreak, float movementScaleFactor) {
     constraint->nextConstraint = NULL;
     constraint->object = object;
     constraint->targetPos = object->body->transform.position;
     constraint->targetRot = object->body->transform.rotation;
     constraint->maxPosImpulse = maxPosImpulse;
     constraint->maxRotImpulse = maxRotImpulse;
+    constraint->teleportOnBreak = teleportOnBreak;
+    constraint->movementScaleFactor = movementScaleFactor;
 }
 
 void pointConstraintUpdateTarget(struct PointConstraint* constraint, struct Vector3* worldPoint, struct Quaternion* worldRotation) {
