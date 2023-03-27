@@ -109,9 +109,20 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
 
         int mask = (RigidBodyFlagsInFrontPortal0 << i);
 
-        if (localPoint.z < 0.0f) {
-            newFlags |= mask;
+        if (rigidBody->flags & RigidBodyIsPlayer){
+            if (localPoint.z < -PLAYER_PORTAL_ENTRY_Z_DISTANCE && i==0) {
+                newFlags |= mask;
+            }
+            else if (localPoint.z < PLAYER_PORTAL_ENTRY_Z_DISTANCE && i==1) {
+                newFlags |= mask;
+            }
         }
+        else{
+            if (localPoint.z < 0.0f) {
+                newFlags |= mask;
+            }
+        }
+
 
         if (!((RigidBodyIsTouchingPortalA << i) & rigidBody->flags) && !((RigidBodyWasTouchingPortalA << i) & rigidBody->flags)) {
             continue;
@@ -177,8 +188,26 @@ void rigidBodyTeleport(struct RigidBody* rigidBody, struct Transform* from, stru
 
     transformPointInverseNoScale(from, &rigidBody->transform.position, &localPoint);
 
-    localPoint.x = clampf(localPoint.x, -0.1, 0.1);
-    localPoint.y = clampf(localPoint.y, -0.2, 0.2);
+    //clamping the x and y of local point to a slightly smaller oval on the output portal
+    struct Vector3 clampedLocalPoint;
+    clampedLocalPoint = localPoint;
+    clampedLocalPoint.y /= 2.0f;
+    clampedLocalPoint.z = 0.0f;
+    while(sqrtf(vector3MagSqrd(&clampedLocalPoint))>PORTAL_EXIT_XY_CLAMP_DISTANCE){
+        vector3Scale(&clampedLocalPoint, &clampedLocalPoint, 0.90f);
+    }
+    clampedLocalPoint.y *= 2.0f;
+    localPoint.y = clampedLocalPoint.y;
+    localPoint.x = clampedLocalPoint.x;
+
+    //the to portal will teleport the player slightly in front of it. (altering the z)
+    if (rigidBody->flags & RigidBodyIsPlayer){
+        if (localPoint.z >= 0){
+            localPoint.z = minf(localPoint.z, -PLAYER_PORTAL_EXIT_Z_DISTANCE);
+        }else{
+            localPoint.z = maxf(localPoint.z, PLAYER_PORTAL_EXIT_Z_DISTANCE);
+        }
+    }
 
     transformPoint(to, &localPoint, &rigidBody->transform.position);
 

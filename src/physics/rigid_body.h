@@ -10,7 +10,10 @@
 
 #define RIGID_BODY_NO_ROOM  0xFFFF
 
-#define MAX_PORTAL_SPEED (1000.0f / 64.0f)
+#define MAX_PORTAL_SPEED (500.0f / 64.0f)
+#define PLAYER_PORTAL_ENTRY_Z_DISTANCE (0.05f)
+#define PLAYER_PORTAL_EXIT_Z_DISTANCE (0.07f)
+#define PORTAL_EXIT_XY_CLAMP_DISTANCE (0.07f)
 
 enum RigidBodyFlags {
     RigidBodyFlagsInFrontPortal0 = (1 << 0),
