@@ -1,4 +1,5 @@
 # Portal64
+![](./assets/images/portal64_readme_logo.gif)
 
 A demake of Portal for the Nintendo 64.
 
@@ -106,13 +107,13 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [ ] Portal not rendering recursively sometimes
 - [ ] Correct elevator timing
 - [ ] Presort portal gun polygon order
-- [ ] Portal gun movement with player movement/shooting #19
 - [ ] Camera shake
 - [ ] Adding a menu to game #47
 - [ ] Adding y-axis/x-axis inverting options #55
 - [ ] Adding loading notice between levels #45
 - [ ] Vertex lighting #39
 - [ ] Multi controller support #23
+- [x] Portal gun movement with player movement/shooting #19
 
 ## Current New Sounds TODO List
 - [ ] Fast flying air whoosh sound
@@ -130,8 +131,6 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [ ] Two wall portals next to eachother can be used to clip any object out of any level by pushing it into corner, then dropping. 
 - [ ] Glass can be walked through from one side on multiple levels (0,1,4,...)
 - [ ] Passing into a ceiling portal can sometimes mess with the player rotation
-- [ ] Can shoot portals through decor objects
-- [ ] Can shoot portals while holding an object
 - [ ] Can shoot portals, and walk through signage
 - [ ] Chell animation problem (fixed itself, investigate)
 - [ ] Can place portals on ground after final fizzler on all levels
@@ -140,3 +139,4 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [ ] various visual glitches when running PAL on NTSC console #65
 - [x] Any grabbable object can be clipped through level by wall/floor portals method.
 - [x] Player can clip through any level by placing one portal on wall and another portal right next to it on ground. #13
+- [x] Can shoot portals while holding an object

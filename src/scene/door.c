@@ -11,6 +11,7 @@
 #include "../physics/collision_scene.h"
 
 #include "../build/assets/models/props/door_01.h"
+#include "../build/assets/models/props/door_02.h"
 
 #define OPEN_VELOCITY   8.0f
 
@@ -28,6 +29,25 @@ struct ColliderTypeData gDoorCollider = {
     &gCollisionBoxCallbacks,  
 };
 
+struct DoorTypeDefinition gDoorTypeDefinitions[] = {
+    [DoorType01] = {
+        &props_door_01_armature,
+        &props_door_01_model_gfx[0],
+        &props_door_01_Armature_open_clip,
+        &props_door_01_Armature_close_clip,
+        -1,
+        1.0f,
+    },
+    [DoorType02] = {
+        &props_door_02_armature,
+        &props_door_02_model_gfx[0],
+        &props_door_02_Armature_open_clip,
+        &props_door_02_Armature_close_clip,
+        PROPS_DOOR_02_DOOR_BONE,
+        3.0f,
+    },
+};
+
 void doorRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Door* door = (struct Door*)data;
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
@@ -43,18 +63,13 @@ void doorRender(void* data, struct DynamicRenderDataList* renderList, struct Ren
 
     transformToMatrixL(&originalTransform, matrix, SCENE_SCALE);
 
-    props_door_01_default_bones[PROPS_DOOR_01_DOORL_BONE].position.x = door->openAmount * -0.625f * SCENE_SCALE;
-    props_door_01_default_bones[PROPS_DOOR_01_DOORR_BONE].position.x = door->openAmount * 0.625f * SCENE_SCALE;
-
-    Mtx* armature = renderStateRequestMatrices(renderState, PROPS_DOOR_01_DEFAULT_BONES_COUNT);
+    Mtx* armature = renderStateRequestMatrices(renderState, door->armature.numberOfBones);
 
     if (!armature) {
         return;
     }
 
-    transformToMatrixL(&props_door_01_default_bones[PROPS_DOOR_01_FRAME_BONE], &armature[PROPS_DOOR_01_FRAME_BONE], 1.0f);
-    transformToMatrixL(&props_door_01_default_bones[PROPS_DOOR_01_DOORL_BONE], &armature[PROPS_DOOR_01_DOORL_BONE], 1.0f);
-    transformToMatrixL(&props_door_01_default_bones[PROPS_DOOR_01_DOORR_BONE], &armature[PROPS_DOOR_01_DOORR_BONE], 1.0f);
+    skCalculateTransforms(&door->armature, armature);
 
     dynamicRenderListAddData(renderList, door_01_gfx, matrix, door_01_material_index, &door->rigidBody.transform.position, armature);
 }
@@ -63,6 +78,11 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct W
     collisionObjectInit(&door->collisionObject, &gDoorCollider, &door->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE|COLLISION_LAYERS_STATIC);
     rigidBodyMarkKinematic(&door->rigidBody);
     collisionSceneAddDynamicObject(&door->collisionObject);
+
+    struct DoorTypeDefinition* typeDefinition = &gDoorTypeDefinitions[doorDefinition->doorType];
+
+    skArmatureInit(&door->armature, typeDefinition->armature);
+    skAnimatorInit(&door->animator, typeDefinition->armature->numberOfBones);
 
     door->rigidBody.transform.position = doorDefinition->location;
     door->rigidBody.transform.position.y += 1.0f;
@@ -73,7 +93,6 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct W
 
     door->dynamicId = dynamicSceneAdd(door, doorRender, &door->rigidBody.transform.position, 1.7f);
     door->signalIndex = doorDefinition->signalIndex;
-    door->openAmount = 0.0f;
 
     if (doorDefinition->doorwayIndex >= 0 && doorDefinition->doorwayIndex < world->doorwayCount) {
         door->forDoorway = &world->doorways[doorDefinition->doorwayIndex];
@@ -89,31 +108,46 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct W
 }
 
 void doorUpdate(struct Door* door) {
-    float targetOpenAmount = signalsRead(door->signalIndex) ? 1.0f : 0.0f;
-    door->openAmount = mathfMoveTowards(door->openAmount, targetOpenAmount, OPEN_VELOCITY * FIXED_DELTA_TIME);
-    
+    struct DoorTypeDefinition* typeDefinition = &gDoorTypeDefinitions[door->doorDefinition->doorType];
 
-    if (door->forDoorway) {
-        if (door->openAmount == 0.0f) {
-            door->forDoorway->flags &= ~DoorwayFlagsOpen;
+    int signal = signalsRead(door->signalIndex);
+    skAnimatorUpdate(&door->animator, door->armature.pose, FIXED_DELTA_TIME);
+
+    int isOpen = (door->flags & DoorFlagsIsOpen) != 0;
+
+    if (isOpen != signal) {
+        if (!skAnimatorIsRunning(&door->animator)) {
+            if (signal) {
+                skAnimatorRunClip(&door->animator, typeDefinition->openClip, 0.0f, 0);
+            } else {
+                skAnimatorRunClip(&door->animator, typeDefinition->closeClip, 0.0f, 0);
+            }
+
+            soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec);
+        }
+
+        if (signal) {
+            door->flags |= DoorFlagsIsOpen;
         } else {
-            door->forDoorway->flags |= DoorwayFlagsOpen;
+            door->flags &= ~DoorFlagsIsOpen;
         }
     }
 
-    if (door->openAmount == 0.0f) {
-        door->collisionObject.collisionLayers = COLLISION_LAYERS_TANGIBLE|COLLISION_LAYERS_STATIC;
-        door->flags &= ~DoorFlagsJustOpened;
-        if (!(door->flags & DoorFlagsJustClosed)){
-            soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec);
-            door->flags |= DoorFlagsJustClosed;
+    int isDoorwayOpen = skAnimatorIsRunning(&door->animator) || isOpen;
+
+    if (door->forDoorway) {
+        if (isDoorwayOpen) {
+            door->forDoorway->flags |= DoorwayFlagsOpen;
+        } else {
+            door->forDoorway->flags &= ~DoorwayFlagsOpen;
         }
+    }
+
+    if (typeDefinition->colliderBoneIndex == -1) {
+        door->collisionObject.collisionLayers = isDoorwayOpen ? 0 : (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_STATIC);
     } else {
-        door->flags &= ~DoorFlagsJustClosed;
-        if (!(door->flags & DoorFlagsJustOpened)){
-            soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec);
-            door->flags |= DoorFlagsJustOpened;
-        }
-        door->collisionObject.collisionLayers = 0;
+        door->rigidBody.transform.position.y = 
+            door->doorDefinition->location.y + 
+            door->armature.pose[typeDefinition->colliderBoneIndex].position.y * (1.0f / SCENE_SCALE);
     }
 }

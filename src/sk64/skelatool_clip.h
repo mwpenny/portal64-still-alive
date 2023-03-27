@@ -4,6 +4,8 @@
 #define SK_ANIMATION_EVENT_END      0xFFFF
 #define SK_ANIMATION_EVENT_START    0xFFFE
 
+#define SK_ANIMATION_CLIP_DURATION(clip) ((clip)->nFrames / (clip)->fps)
+
 struct SKU16Vector3 {
     short x;
     short y;

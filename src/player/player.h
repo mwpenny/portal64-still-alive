@@ -27,6 +27,7 @@ enum PlayerFlags {
     PlayerJustLanded = (1 << 8),
     PlayerJustSelect = (1 << 9),
     PlayerJustDeniedSelect = (1 << 10),
+    PlayerJustShotPortalGun = (1 << 11),
 };
 
 struct Player {
@@ -38,6 +39,7 @@ struct Player {
     short grabbingThroughPortal;
     short dynamicId;
     struct PointConstraint grabConstraint;
+    struct PointConstraint gunConstraint;
     float pitchVelocity;
     float yawVelocity;
     enum PlayerFlags flags;
@@ -49,7 +51,7 @@ struct Player {
     int currentFoot; //left=0, right=1
 };
 
-void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity);
+void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity, struct CollisionObject* portalGunObject);
 void playerUpdate(struct Player* player, struct Transform* cameraTransform);
 
 void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, struct Vector3* right);

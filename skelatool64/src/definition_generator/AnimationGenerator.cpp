@@ -79,15 +79,20 @@ struct FrameData {
 
 template <typename T>
 void findStartValue(const T* keys, unsigned keyCount, double at, unsigned& startValue, double& lerp) {
+    lerp = 0.0f;
+
     for (startValue = 0; startValue < keyCount; ++startValue) {
-        if (keys[startValue].mTime >= at) {
+        if (keys[startValue].mTime == at) {
+            lerp = 0.0f;
+            break;
+        } else if (keys[startValue].mTime > at) {
             if (startValue == 0) {
                 lerp = 0.0f;
             } else {
                 --startValue;
                 double deltaTime = keys[startValue + 1].mTime - keys[startValue].mTime;
 
-                if (deltaTime == 1.0) {
+                if (deltaTime == 0.0) {
                     lerp = 0.0f;
                 } else {
                     lerp = (at - keys[startValue].mTime) / deltaTime;
@@ -151,7 +156,7 @@ aiQuaternion evaluateQuaternionAt(const aiQuatKey* keys, unsigned keyCount, doub
 }
 
 void generateanimationV2(const aiAnimation& animation, BoneHierarchy& bones, CFileDefinition& fileDef, const DisplayListSettings& settings) {
-    int nFrames = ceil(animation.mDuration * settings.mTicksPerSecond / animation.mTicksPerSecond);
+    int nFrames = ceil(animation.mDuration * settings.mTicksPerSecond / animation.mTicksPerSecond) + 1;
 
     std::vector<std::vector<FrameData>> allFrameData(nFrames);
 
