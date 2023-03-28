@@ -10,6 +10,8 @@
 #include "../physics/collision_box.h"
 #include "../physics/collision_scene.h"
 
+#include "../build/assets/materials/static.h"
+
 #include "../build/assets/models/props/door_01.h"
 #include "../build/assets/models/props/door_02.h"
 
@@ -35,6 +37,7 @@ struct DoorTypeDefinition gDoorTypeDefinitions[] = {
         &props_door_01_model_gfx[0],
         &props_door_01_Armature_open_clip,
         &props_door_01_Armature_close_clip,
+        DOOR_01_INDEX,
         -1,
         1.0f,
     },
@@ -43,6 +46,7 @@ struct DoorTypeDefinition gDoorTypeDefinitions[] = {
         &props_door_02_model_gfx[0],
         &props_door_02_Armature_open_clip,
         &props_door_02_Armature_close_clip,
+        DOOR_02_INDEX,
         PROPS_DOOR_02_DOOR_BONE,
         3.0f,
     },
@@ -51,6 +55,7 @@ struct DoorTypeDefinition gDoorTypeDefinitions[] = {
 void doorRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Door* door = (struct Door*)data;
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
+    struct DoorTypeDefinition* typeDefinition = &gDoorTypeDefinitions[door->doorDefinition->doorType];
 
     if (!matrix) {
         return;
@@ -71,7 +76,7 @@ void doorRender(void* data, struct DynamicRenderDataList* renderList, struct Ren
 
     skCalculateTransforms(&door->armature, armature);
 
-    dynamicRenderListAddData(renderList, door_01_gfx, matrix, door_01_material_index, &door->rigidBody.transform.position, armature);
+    dynamicRenderListAddData(renderList, typeDefinition->model, matrix, typeDefinition->materialIndex, &door->rigidBody.transform.position, armature);
 }
 
 void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct World* world) {

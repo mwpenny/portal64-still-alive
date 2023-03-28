@@ -17,6 +17,7 @@ struct DoorTypeDefinition {
     Gfx* model;
     struct SKAnimationClip* openClip;
     struct SKAnimationClip* closeClip;
+    short materialIndex;
     short colliderBoneIndex;
     float closeSpeed;
 };

@@ -18,9 +18,6 @@ Gfx* w_portal_gun_gfx = &portal_gun_w_portalgun_model_gfx[0];
 Gfx* button_gfx = &props_button_model_gfx[0];
 short button_material_index = BUTTON_INDEX;
 
-Gfx* door_01_gfx = &props_door_01_model_gfx[0];
-short door_01_material_index = DOOR_01_INDEX;
-
 Gfx* cylinder_gfx = &props_cylinder_test_model_gfx[0];
 short cylinder_material_index = PLASTIC_PLASTICWALL001A_INDEX;
 

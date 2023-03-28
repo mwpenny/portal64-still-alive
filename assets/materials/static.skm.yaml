@@ -348,7 +348,7 @@ materials:
         ../../portal_pak_modified/materials/models/props/door_02.png
       siz: G_IM_SIZ_16b
       fmt: G_IM_FMT_RGBA
-      t:
+      s:
         mirror: true
     gSPGeometryMode:
       set: [G_LIGHTING, G_SHADE]
