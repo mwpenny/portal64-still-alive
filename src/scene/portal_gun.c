@@ -4,6 +4,8 @@
 #include "../physics/collision_cylinder.h"
 #include "models/models.h"
 
+#define PORTAL_GUN_RECOIL_TIME (0.18f)
+
 struct Vector2 gGunColliderEdgeVectors[] = {
     {0.0f, 1.0f},
     {0.707f, 0.707f},
@@ -37,16 +39,9 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at){
     portalGun->rigidBody.currentRoom = 0;
     portalGun->rigidBody.velocity = gZeroVec;
     portalGun->rigidBody.angularVelocity = gZeroVec;
-    portalGun->dynamicId = dynamicSceneAdd(portalGun, portalGunDummyRender, &portalGun->rigidBody.transform.position, 0.05f);
     portalGun->portalGunVisible = 0;
+    portalGun->shootAnimationTimer = 0.0;
 
-    collisionObjectUpdateBB(&portalGun->collisionObject);
-    dynamicSceneSetRoomFlags(portalGun->dynamicId, ROOM_FLAG_FROM_INDEX(portalGun->rigidBody.currentRoom));
-
-}
-
-void portalGunDummyRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState){
-    return;
 }
 
 void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState){
@@ -65,14 +60,22 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
     }
 }
 
-
-
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player){
     if (player->flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)){
         portalGun->portalGunVisible = 1;
-    }
-    else{
+    }else{
         portalGun->portalGunVisible = 0;
     }
-    dynamicSceneSetRoomFlags(portalGun->dynamicId, ROOM_FLAG_FROM_INDEX(portalGun->rigidBody.currentRoom));
+
+    if (player->flags & PlayerJustShotPortalGun && portalGun->shootAnimationTimer <= 0.0f){
+        portalGun->shootAnimationTimer = PORTAL_GUN_RECOIL_TIME;
+    }
+
+    if (portalGun->shootAnimationTimer >= 0.0f){
+        portalGun->shootAnimationTimer -= FIXED_DELTA_TIME;
+        if (portalGun->shootAnimationTimer <= 0.0f){
+            portalGun->shootAnimationTimer = 0.0f;
+            player->flags &= ~PlayerJustShotPortalGun;
+        }
+    }
 }
