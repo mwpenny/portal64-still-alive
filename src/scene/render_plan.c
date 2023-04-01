@@ -197,16 +197,6 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
     next->minY = MAX(next->minY, current->minY);
     next->maxY = MIN(next->maxY, current->maxY);
 
-    struct RenderProps* prevSibling = prevSiblingPtr ? *prevSiblingPtr : NULL;
-
-    if (prevSibling) {
-        if (next->minX < prevSibling->minX) {
-            next->maxX = MIN(next->maxX, prevSibling->minX);
-        } else {
-            next->minX = MAX(next->minX, prevSibling->maxX);
-        }
-    }
-
     if (next->minX >= next->maxX || next->minY >= next->maxY) {
         return 0;
     }
