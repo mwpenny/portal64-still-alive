@@ -24,7 +24,7 @@
 
 #define MAX_DYNAMIC_OBJECTS     16
 
-#define MAX_RENDER_COUNT        128
+#define MAX_RENDER_COUNT        256
 
 #define SIMPLE_CONTROLLER_MSG	    (5)
 
