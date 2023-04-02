@@ -3,6 +3,7 @@
 
 #include "../math/basis.h"
 #include "../math/transform.h"
+#include "../math/mathf.h"
 #include "./collision.h"
 
 #define KILL_PLANE_Y    -10.0f
@@ -10,6 +11,7 @@
 #define RIGID_BODY_NO_ROOM  0xFFFF
 
 #define MAX_PORTAL_SPEED (1000.0f / 64.0f)
+#define PORTAL_EXIT_XY_CLAMP_DISTANCE (0.15f)
 
 enum RigidBodyFlags {
     RigidBodyFlagsInFrontPortal0 = (1 << 0),

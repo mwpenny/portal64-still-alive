@@ -82,6 +82,24 @@ float rigidBodyMassInverseAtLocalPoint(struct RigidBody* rigidBody, struct Vecto
     return rigidBody->massInv + rigidBody->momentOfInertiaInv * vector3MagSqrd(&crossPoint);
 }
 
+void rigidBodyClampToPortal(struct RigidBody* rigidBody, struct Transform* portal) {
+    struct Vector3 localPoint;
+
+    transformPointInverseNoScale(portal, &rigidBody->transform.position, &localPoint);
+
+    //clamping the x and y of local point to a slightly smaller oval on the output portal
+    struct Vector3 clampedLocalPoint;
+    clampedLocalPoint = localPoint;
+    clampedLocalPoint.y /= 2.0f;
+    clampedLocalPoint.z = 0.0f;
+    while(sqrtf(vector3MagSqrd(&clampedLocalPoint))>PORTAL_EXIT_XY_CLAMP_DISTANCE){
+        vector3Scale(&clampedLocalPoint, &clampedLocalPoint, 0.90f);
+    }
+    clampedLocalPoint.y *= 2.0f;
+    localPoint.x = clampedLocalPoint.x;
+    localPoint.y = clampedLocalPoint.y;
+    transformPoint(portal, &localPoint, &rigidBody->transform.position);
+}
 
 int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
     if (!gCollisionScene.portalTransforms[0] || !gCollisionScene.portalTransforms[1]) {
@@ -93,6 +111,14 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
     struct Vector3 localPoint;
 
     enum RigidBodyFlags newFlags = 0;
+
+    //if only touching one portal, clamp object to edges of that portal
+    if ((rigidBody->flags & RigidBodyIsTouchingPortalA) && !(rigidBody->flags & RigidBodyIsTouchingPortalB)){
+        rigidBodyClampToPortal(rigidBody, gCollisionScene.portalTransforms[0]);
+    }
+    else if ((rigidBody->flags & RigidBodyIsTouchingPortalB) && !(rigidBody->flags & RigidBodyIsTouchingPortalA)){
+        rigidBodyClampToPortal(rigidBody, gCollisionScene.portalTransforms[1]);
+    }
 
     if (rigidBody->flags & RigidBodyIsTouchingPortalA) {
         newFlags |= RigidBodyWasTouchingPortalA;
