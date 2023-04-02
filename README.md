@@ -125,12 +125,9 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [ ] Ambient background loop
 
 ## Current Bug TODO List (Hardware Verified) (High->Low priority)
-- [ ] Player can clip through any level by placing one portal on wall and another portal right next to it on ground. #13
 - [ ] Player can clip through chamber 7 by walking back up the stairs (near the top).
 - [ ] player can clip through back of elevator by jumping and strafeing at the back corners while inside.
-- [ ] Player can strap themselves in chamber 5 by following instructions issue #75
-- [ ] Any grabbable object can be clipped through level by wall/floor portals method.
-- [ ] Two wall portals can be placed on top of eachother in certain instances if on the same surface
+- [ ] Player can trap themselves in chamber 5 by following instructions issue #75
 - [ ] Two wall portals next to eachother can be used to clip any object out of any level by pushing it into corner, then dropping. 
 - [ ] Glass can be walked through from one side on multiple levels (0,1,4,...)
 - [ ] Passing into a ceiling portal can sometimes mess with the player rotation
@@ -140,5 +137,6 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [ ] Door at end of room 2, chamber 10 isnt rendered properly
 - [ ] various visual glitches when running NTSC on PAL console #65
 - [ ] various visual glitches when running PAL on NTSC console #65
+- [x] Any grabbable object can be clipped through level by wall/floor portals method.
+- [x] Player can clip through any level by placing one portal on wall and another portal right next to it on ground. #13
 - [x] Can shoot portals while holding an object
-

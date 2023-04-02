@@ -8,16 +8,17 @@
 #include "../physics/collision_object.h"
 #include "../scene/dynamic_scene.h"
 #include "../player/player.h"
+#include "../util/time.h"
 
 struct PortalGun {
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
     int portalGunVisible;
-    short dynamicId;
+    float shootAnimationTimer;
 };
 
 void portalGunInit(struct PortalGun* portalGun, struct Transform* at);
-void portalGunDummyRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState);
+// void portalGunDummyRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState);
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player);
 void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState);
 

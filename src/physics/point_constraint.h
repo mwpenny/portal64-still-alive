@@ -3,6 +3,7 @@
 
 #include "rigid_body.h"
 #include "collision_object.h"
+#include "../math/mathf.h"
 
 struct PointConstraint {
     struct PointConstraint* nextConstraint;

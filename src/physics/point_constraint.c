@@ -3,10 +3,10 @@
 #include "../util/time.h"
 
 #define BREAK_CONSTRAINT_DISTANCE 2.0f
+#define CLAMP_CONSTRAINT_DISTANCE 0.07f
 
 int pointConstraintMoveToPoint(struct CollisionObject* object, struct Vector3* worldPoint, float maxImpulse, int teleportOnBreak, float movementScaleFactor) {
     struct RigidBody* rigidBody = object->body;
-
 
     struct Vector3 targetVelocity;
     vector3Sub(worldPoint, &rigidBody->transform.position, &targetVelocity);
@@ -18,8 +18,20 @@ int pointConstraintMoveToPoint(struct CollisionObject* object, struct Vector3* w
         }
         return 0;
     }
-
-    vector3Scale(&targetVelocity, &targetVelocity, 1.0f / FIXED_DELTA_TIME);
+    if (teleportOnBreak){
+        if (fabsf(sqrtf(vector3DistSqrd(worldPoint, &rigidBody->transform.position))) > CLAMP_CONSTRAINT_DISTANCE){
+            while(sqrtf(vector3DistSqrd(worldPoint, &rigidBody->transform.position)) > CLAMP_CONSTRAINT_DISTANCE){
+                vector3Lerp(&rigidBody->transform.position, worldPoint, 0.01, &rigidBody->transform.position);
+            }       
+            vector3Sub(worldPoint, &rigidBody->transform.position, &targetVelocity);
+            vector3Scale(&targetVelocity, &targetVelocity, (1.0f / FIXED_DELTA_TIME));
+            vector3Scale(&targetVelocity, &targetVelocity, 0.5);
+            rigidBody->velocity = targetVelocity;
+            return 1;
+        }
+    }
+    
+    vector3Scale(&targetVelocity, &targetVelocity, (1.0f / FIXED_DELTA_TIME));
 
     struct ContactManifold* contact = contactSolverNextManifold(&gContactSolver, object, NULL);
 

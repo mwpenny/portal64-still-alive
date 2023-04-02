@@ -32,10 +32,10 @@
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
 
-struct Vector3 gPortalGunOffset = {0.150957, -0.153587, -0.355};
-struct Vector3 gPortalGunShootOffset = {0.150957, -0.153587, 0.1};
+struct Vector3 gPortalGunOffset = {0.120957, -0.113587, -0.20916};
+struct Vector3 gPortalGunShootOffset = {0.120957, -0.113587, -0.08};
 struct Vector3 gPortalGunForward = {0.1f, -0.1f, 1.0f};
-struct Vector3 gPortalGunShootForward = {0.1f, -0.25f, 1.0f};
+struct Vector3 gPortalGunShootForward = {0.3f, -0.25f, 1.0f};
 struct Vector3 gPortalGunUp = {0.0f, 1.0f, 0.0f};
 
 struct Vector2 gPlayerColliderEdgeVectors[] = {
@@ -173,7 +173,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
 
     dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
 
-    pointConstraintInit(&player->gunConstraint, portalGunObject, 20.0f, 2.5f, 1, 0.9f);
+    pointConstraintInit(&player->gunConstraint, portalGunObject, 20.0f, 2.5f, 1, 0.5f);
     contactSolverAddPointConstraint(&gContactSolver, &player->gunConstraint);
 }
 
@@ -389,11 +389,9 @@ void playerUpdateGunObject(struct Player* player) {
     struct Vector3 offset;
 
     if (player->flags & PlayerJustShotPortalGun){
-        player->flags &= ~PlayerJustShotPortalGun;
         forward = gPortalGunShootForward;
         offset = gPortalGunShootOffset;
-    }
-    else{
+    }else{
         forward = gPortalGunForward;
         offset = gPortalGunOffset;
     }
