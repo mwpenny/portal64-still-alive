@@ -255,14 +255,21 @@ void sceneCheckPortals(struct Scene* scene) {
     quatMultVector(&scene->player.lookTransform.rotation, &raycastRay.dir, &raycastRay.dir);
     quatMultVector(&scene->player.lookTransform.rotation, &gUp, &playerUp);
 
-    if (controllerGetButtonDown(0, Z_TRIG) && (scene->player.flags & PlayerHasSecondPortalGun) && !playerIsGrabbing(&scene->player)) {
+    int bluePortalFlags;
+    if (scene->player.flags & PlayerHasSecondPortalGun){
+        bluePortalFlags = (L_TRIG);
+    }else{
+        bluePortalFlags = (L_TRIG | Z_TRIG | R_TRIG);
+    }
+
+    if (controllerGetButtonDown(0, Z_TRIG | R_TRIG) && (scene->player.flags & PlayerHasSecondPortalGun) && !playerIsGrabbing(&scene->player)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom, 1, 0);
         scene->player.flags |= PlayerJustShotPortalGun;
         scene->last_portal_indx_shot=0;
         soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL);
     }
 
-    if (controllerGetButtonDown(0, R_TRIG | L_TRIG) && (scene->player.flags & PlayerHasFirstPortalGun) && !playerIsGrabbing(&scene->player)) {
+    if (controllerGetButtonDown(0, bluePortalFlags) && (scene->player.flags & PlayerHasFirstPortalGun) && !playerIsGrabbing(&scene->player)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom, 1, 0);
         scene->player.flags |= PlayerJustShotPortalGun;
         scene->last_portal_indx_shot=1;
