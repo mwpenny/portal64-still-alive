@@ -99,7 +99,7 @@ local function string_starts_with(str, prefix)
     return string.sub(str, 1, #prefix) == prefix
 end
 
-local function generate_cutscene_step(step, step_index, label_locations, cutscenes)
+local function generate_cutscene_step(cutscene_name, step, step_index, label_locations, cutscenes)
     local result = {}
 
     if step.command == "play_sound" or step.command == "start_sound" and #step.args >= 1 then
@@ -163,8 +163,15 @@ local function generate_cutscene_step(step, step_index, label_locations, cutscen
         }
     elseif step.command == "goto" and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeGoto')
+
+        local label_location = label_locations[step.args[1]]
+
+        if not label_location then
+            error("Unrecognized label '" .. step.args[1] .. "' in cutscene " .. cutscene_name)
+        end
+
         result.gotoStep = {
-            label_locations[step.args[1]] - step_index,
+            label_location - step_index,
         }
     elseif step.command == "start_cutscene" and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeStartCutscene')
@@ -295,7 +302,7 @@ local function generate_cutscenes()
         local steps = {}
 
         for step_index, step in pairs(other_steps) do
-            table.insert(steps, generate_cutscene_step(step, step_index, label_locations, cutscenes))
+            table.insert(steps, generate_cutscene_step(cutscene.name, step, step_index, label_locations, cutscenes))
         end
 
         sk_definition_writer.add_definition(cutscene.name .. '_steps', 'struct CutsceneStep[]', '_geo', steps)
