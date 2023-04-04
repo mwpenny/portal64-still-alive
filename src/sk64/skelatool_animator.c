@@ -190,7 +190,7 @@ void skAnimatorStep(struct SKAnimator* animator, float deltaTime) {
 
     float duration = currentClip->nFrames / currentClip->fps;
 
-    if (animator->currentTime >= duration || animator->currentTime < 0.0f) {
+    if ((animator->currentTime >= duration && deltaTime) > 0.0f || (animator->currentTime < 0.0f && deltaTime < 0.0f)) {
         if (animator->flags & SKAnimatorFlagsLoop) {
             animator->currentTime = mathfMod(animator->currentTime, duration);
         } else {
