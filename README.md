@@ -116,13 +116,13 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [x] Portal gun movement with player movement/shooting #19
 
 ## Current New Sounds TODO List
-- [ ] Fast flying air whoosh sound
 - [ ] Button release beep-beep sound
 - [ ] Box collision sounds
 - [ ] Elevator arrived chime sound
 - [ ] Ball catcher activated sound
 - [ ] Unstationary scaffolding moving sound
 - [ ] Ambient background loop
+- [x] Fast flying air whoosh sound
 
 ## Current Bug TODO List (Hardware Verified) (High->Low priority)
 - [ ] Player can clip through chamber 7 by walking back up the stairs (near the top).
