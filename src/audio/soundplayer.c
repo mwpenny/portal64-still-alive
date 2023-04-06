@@ -226,6 +226,7 @@ void soundPlayerUpdate() {
                 alSndpSetPitch(&gSoundPlayer, sound->basePitch * pitch);
             }
 
+
             ++writeIndex;
         }
         
@@ -282,6 +283,19 @@ void soundPlayerUpdatePosition(ALSndId soundId, struct Vector3* at, struct Vecto
         activeSound->flags |= SOUND_FLAGS_3D;
         activeSound->pos3D = *at;
         activeSound->velocity3D = *velocity;
+    }
+}
+
+void soundPlayerAdjustVolume(ALSndId soundId, float newVolume) {
+    struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
+
+    if (activeSound) {
+        if (activeSound->flags & SOUND_FLAGS_3D){
+            activeSound->volume = newVolume;
+        }else{
+            alSndpSetSound(&gSoundPlayer, activeSound->soundId);
+            alSndpSetVol(&gSoundPlayer, (short)(32767 * newVolume));
+        }
     }
 }
 
