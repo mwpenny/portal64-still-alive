@@ -46,6 +46,7 @@ struct Player {
     struct RigidBody* anchoredTo;
     struct Vector3 relativeAnchor;
     struct Vector3 lastAnchorPoint;
+    short flyingSoundLoopId;
     float drownTimer;
     float stepTimer;
     int currentFoot; //left=0, right=1

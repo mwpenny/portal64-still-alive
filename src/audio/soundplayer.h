@@ -25,6 +25,7 @@ void soundPlayerStop(ALSndId soundId);
 void soundPlayerStopAll();
 
 void soundPlayerUpdatePosition(ALSndId soundId, struct Vector3* at, struct Vector3* velocity);
+void soundPlayerAdjustVolume(ALSndId soundId, float newVolume);
 
 int soundPlayerIsPlaying(ALSndId soundId);
 

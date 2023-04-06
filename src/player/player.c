@@ -122,6 +122,8 @@ void playerRender(void* data, struct DynamicRenderDataList* renderList, struct R
 }
 
 void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity, struct CollisionObject* portalGunObject) {
+    player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, 0.0f, 0.5f, NULL, NULL);
+
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
 
     
@@ -450,6 +452,15 @@ void playerGivePortalGun(struct Player* player, int flags) {
     player->flags |= flags;
 }
 
+void playerUpdateSpeedSound(struct Player* player) {
+    float soundPlayerVolume;
+    soundPlayerVolume = PLAYER_SPEED*8 - sqrtf(vector3MagSqrd(&player->body.velocity))*0.70;
+    soundPlayerVolume = clampf(soundPlayerVolume, 0.0, PLAYER_SPEED*8);
+    soundPlayerVolume /= PLAYER_SPEED*8;
+    soundPlayerVolume = 1.0 - soundPlayerVolume;
+    soundPlayerAdjustVolume(player->flyingSoundLoopId, soundPlayerVolume);
+}
+
 void playerKill(struct Player* player, int isUnderwater) {
     if (isUnderwater) {
         player->flags |= PlayerIsUnderwater;
@@ -603,6 +614,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     float acceleration = 0.0f;
     float velocitySqrd = vector3MagSqrd(&player->body.velocity);
     int isFast = velocitySqrd >= PLAYER_SPEED * PLAYER_SPEED;
+    playerUpdateSpeedSound(player);
 
     if (!(player->flags & PlayerFlagsGrounded)) {
         if (isFast) {

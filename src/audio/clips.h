@@ -14,6 +14,7 @@ extern unsigned short soundsPedestalShooting;
 extern unsigned short soundsPedestalMoving;
 extern unsigned short soundsDoor;
 extern unsigned short soundsElevatorMoving;
+extern unsigned short soundsFastFalling;
 
 
 

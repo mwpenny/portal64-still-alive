@@ -1,0 +1,15 @@
+envelope Envelope {
+    attackTime = 0
+    attackVolume = 127
+    decayTime = -1
+    decayVolume = 127
+    releaseTime = 0
+}
+
+sound Sound {
+    use("../../../portal_pak_dir/sound/vehicles/fast_windloop1.wav")
+    loopCount = -1
+    loopEnd = -1
+    pan=64
+    envelope = Envelope
+}
