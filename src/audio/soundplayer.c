@@ -13,7 +13,6 @@ ALSndPlayer gSoundPlayer;
 #define SOUND_FLAGS_3D          (1 << 0)
 #define SOUND_FLAGS_LOOPING     (1 << 1)
 #define SOUND_HAS_STARTED       (1 << 2)
-#define SOUND_IS_ADJUSTABLE     (1 << 3)
 
 #define SPEED_OF_SOUND          343.2f
 
@@ -227,13 +226,6 @@ void soundPlayerUpdate() {
                 alSndpSetPitch(&gSoundPlayer, sound->basePitch * pitch);
             }
 
-            if (sound->flags & SOUND_IS_ADJUSTABLE) {
-                float volume;
-                volume = sound->volume;
-
-                alSndpSetVol(&gSoundPlayer, (short)(32767 * volume));
-            }
-
 
             ++writeIndex;
         }
@@ -298,8 +290,12 @@ void soundPlayerAdjustVolume(ALSndId soundId, float newVolume) {
     struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
 
     if (activeSound) {
-        activeSound->volume = newVolume;
-        activeSound->flags |= SOUND_IS_ADJUSTABLE;
+        if (activeSound->flags & SOUND_FLAGS_3D){
+            activeSound->volume = newVolume;
+        }else{
+            alSndpSetSound(&gSoundPlayer, activeSound->soundId);
+            alSndpSetVol(&gSoundPlayer, (short)(32767 * newVolume));
+        }
     }
 }
 
