@@ -173,14 +173,18 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
 
     if ((elevator->openAmount == 0.0f && shouldBeOpen) || (elevator->openAmount == 1.0f && !shouldBeOpen)) {
         soundPlayerPlay(soundsElevatorDoor, 1.0f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec);
+        if ((elevator->openAmount == 0.0f && shouldBeOpen) && (elevator->flags & ElevatorFlagsHasHadPlayer)){
+            soundPlayerPlay(soundsElevatorChime, 1.5f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec);
+        }
     }
+    
 
     if ((elevator->flags & ElevatorFlagsIsLocked) && (elevator->openAmount == 0.0f) && (elevator->movingTimer > 0.0f)){
         elevator->movingTimer -= FIXED_DELTA_TIME;
     }
 
     if ((elevator->flags & ElevatorFlagsIsLocked) && (elevator->openAmount == 0.0f) && !(elevator->flags & ElevatorFlagsMovingSoundPlayed) && (elevator->movingTimer <= 0.0f)){
-            soundPlayerPlay(soundsElevatorMoving, 1.5f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec);
+            soundPlayerPlay(soundsElevatorMoving, 1.25f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec);
             elevator->flags |= ElevatorFlagsMovingSoundPlayed;
     }
 

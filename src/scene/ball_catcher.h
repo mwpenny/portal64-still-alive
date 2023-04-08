@@ -9,6 +9,8 @@
 #include "../levels/level_definition.h"
 
 #include "./ball_launcher.h"
+#include "../audio/clips.h"
+#include "../audio/soundplayer.h"
 
 struct BallCatcher {
     struct CollisionObject collisionObject;

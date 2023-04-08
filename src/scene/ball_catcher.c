@@ -103,6 +103,7 @@ void ballCatcherCheckBalls(struct BallCatcher* catcher, struct BallLauncher* bal
         }
 
         catcher->caughtBall = &launcher->currentBall;
+        soundPlayerPlay(soundsBallCatcher, 5.0f, 1.0f, &catcher->rigidBody.transform.position, &catcher->rigidBody.velocity);
         ballMarkCaught(catcher->caughtBall);
         skAnimatorRunClip(&catcher->animator, &props_combine_ball_catcher_Armature_catch_clip, 0.0f, 0);
     }
