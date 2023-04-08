@@ -316,6 +316,9 @@ void playerUpdateGrabbedObject(struct Player* player) {
                         player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
                     }
                 }
+                else if ((hit.object->body)){
+                    player->flags |= PlayerJustSelect;
+                }
                 else{
                     player->flags |= PlayerJustDeniedSelect;
                 }

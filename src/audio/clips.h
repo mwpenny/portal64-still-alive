@@ -17,6 +17,7 @@ extern unsigned short soundsDoor;
 extern unsigned short soundsFastFalling;
 extern unsigned short soundsBallCatcher;
 extern unsigned short soundsPortalOpen2;
+extern unsigned short soundsTickTock;
 
 extern unsigned short soundsPortalFizzle;
 

@@ -4,6 +4,8 @@
 #include "../sk64/skelatool_armature.h"
 #include "../sk64/skelatool_animator.h"
 #include "../physics/collision_object.h"
+#include "../audio/soundplayer.h"
+#include "../audio/clips.h"
 
 #include "../levels/level_definition.h"
 
@@ -21,6 +23,8 @@ struct Switch {
     short flags;
     float duration;
     float timeLeft;
+    short ticktockSoundLoopId;
+    float ticktockPauseTimer;
 };
 
 void switchInit(struct Switch* switchObj, struct SwitchDefinition* definition);
