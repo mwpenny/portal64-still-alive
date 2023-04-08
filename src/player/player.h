@@ -49,6 +49,7 @@ struct Player {
     short flyingSoundLoopId;
     float drownTimer;
     float stepTimer;
+    float shakeTimer;
     int currentFoot; //left=0, right=1
 };
 

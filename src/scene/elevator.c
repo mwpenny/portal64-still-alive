@@ -21,7 +21,8 @@
 
 #define OPEN_DELAY              1.0f
 #define CLOSE_DELAY             13.0f
-#define MOVING_SOUND_DELAY      3.5f      
+#define MOVING_SOUND_DELAY      3.5f  
+#define SHAKE_DURATION          0.5f    
 
 struct ColliderTypeData gElevatorColliderType = {
     CollisionShapeTypeMesh,
@@ -183,8 +184,9 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
         elevator->movingTimer -= FIXED_DELTA_TIME;
     }
 
-    if ((elevator->flags & ElevatorFlagsIsLocked) && (elevator->openAmount == 0.0f) && !(elevator->flags & ElevatorFlagsMovingSoundPlayed) && (elevator->movingTimer <= 0.0f)){
+    if ((elevator->flags & ElevatorFlagsIsLocked) && (elevator->openAmount == 0.0f) && !(elevator->flags & ElevatorFlagsMovingSoundPlayed) && (elevator->movingTimer <= 0.0f) && inside){
             soundPlayerPlay(soundsElevatorMoving, 1.25f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec);
+            player->shakeTimer = SHAKE_DURATION;
             elevator->flags |= ElevatorFlagsMovingSoundPlayed;
     }
 
