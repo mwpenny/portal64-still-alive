@@ -200,10 +200,69 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
     struct RenderProps* prevSibling = prevSiblingPtr ? *prevSiblingPtr : NULL;
 
     if (prevSibling) {
-        if (next->minX < prevSibling->minX) {
-            next->maxX = MIN(next->maxX, prevSibling->minX);
-        } else {
-            next->minX = MAX(next->minX, prevSibling->maxX);
+        int topDiff = 0;
+        int bottomDiff = 0;
+        int leftDiff = 0;
+        int rightDiff = 0;
+
+        // if top left overlapping
+        if ((next->minX > prevSibling->minX) && (next->minX < prevSibling->maxX) && (next->minY > prevSibling->minY) && (next->minY < prevSibling->maxY)){
+            topDiff = MAX(abs(prevSibling->maxY-next->minY), topDiff);
+            leftDiff = MAX(abs(prevSibling->maxX-next->minX), leftDiff);
+        }
+
+        // if top right overlapping
+        if ((next->maxX > prevSibling->minX) && (next->maxX < prevSibling->maxX) && (next->minY > prevSibling->minY) && (next->minY < prevSibling->maxY)){
+            topDiff = MAX(abs(prevSibling->maxY-next->minY), topDiff);
+            rightDiff = MAX(abs(next->maxX -prevSibling->minX), rightDiff);
+        }
+
+        // if bottom left overlapping
+        if ((next->minX > prevSibling->minX) && (next->minX < prevSibling->maxX) && (next->maxY > prevSibling->minY) && (next->maxY < prevSibling->maxY)){
+            bottomDiff = MAX(abs(next->maxY-prevSibling->minY), bottomDiff);
+            leftDiff = MAX(abs(prevSibling->maxX-next->minX), leftDiff);
+        }
+
+        // if bottom right overlapping
+        if ((next->maxX > prevSibling->minX) && (next->maxX < prevSibling->maxX) && (next->maxY > prevSibling->minY) && (next->maxY < prevSibling->maxY)){
+            bottomDiff = MAX(abs(next->maxY-prevSibling->minY), bottomDiff);
+            rightDiff = MAX(abs(next->maxX -prevSibling->minX), rightDiff);
+        }
+
+        //shouldnt draw at all if fully overlapped
+        if (rightDiff && leftDiff && topDiff && bottomDiff){
+            return 0;
+        }
+        //cut nothing if no overlap
+        else if (!rightDiff && !leftDiff && !topDiff && !bottomDiff){
+            //do nothing
+        }
+        //should only cut out top portion
+        else if (rightDiff && leftDiff && topDiff && !bottomDiff){
+            next->minY += topDiff;
+        }
+        //should only cut out bottom portion
+        else if (rightDiff && leftDiff && !topDiff && bottomDiff){
+            next->maxY -= bottomDiff;
+        }
+        //should only cut out right portion
+        else if (rightDiff && !leftDiff && topDiff && bottomDiff){
+            next->maxX -= rightDiff;
+        }
+        //should only cut out left portion
+        else if (!rightDiff && leftDiff && topDiff && bottomDiff){
+            next->minX += leftDiff;
+        }
+        // only one corner is overlapping so cut the larger side
+        else{
+            if (MAX(rightDiff, leftDiff) > MAX(topDiff, bottomDiff)){
+                next->minY += topDiff;
+                next->maxY -= bottomDiff;
+            }
+            else{
+                next->minX += leftDiff;
+                next->maxX -= rightDiff;
+            }
         }
     }
 

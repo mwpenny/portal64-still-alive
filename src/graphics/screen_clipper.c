@@ -137,7 +137,7 @@ void screenClipperBoundingPoints(struct ScreenClipper* clipper, struct Vector3* 
                 next->x += PIXEL_EXPAND_COUNT;
             } else {
                 curr->x += PIXEL_EXPAND_COUNT;
-                next->y -= PIXEL_EXPAND_COUNT;
+                next->x -= PIXEL_EXPAND_COUNT;
             }
         } else {
             if (curr->y < next->y) {

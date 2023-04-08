@@ -72,8 +72,8 @@ void portalUpdate(struct Portal* portal, int isOpen) {
         if (portal->scale > 1.0f) {
             portal->scale = 1.0f;
         }
-
         portal->flags |= PortalFlagsNeedsNewHole;
+        
     }
 }
 
@@ -129,43 +129,43 @@ int portalSurfaceCutNewHole(struct Portal* portal, int portalIndex) {
     if (!portalSurfacePokeHole(currentSurface, scaledLoop, &newSurface)) {
         return 0;
     }
-
+    
     portalSurfaceReplace(portal->portalSurfaceIndex, portal->roomIndex, portalIndex, &newSurface);
 
     return 1;
 }
 
 void portalCheckForHoles(struct Portal* portals) {
-    if (controllerGetButtonUp(0, R_JPAD)) {
-        portals[0].flags |= PortalFlagsNeedsNewHole;
-        portals[1].flags |= PortalFlagsNeedsNewHole;
-    }
 
-    if ((portals[1].flags & PortalFlagsNeedsNewHole) != 0 || (
-        portalSurfaceAreBothOnSameSurface() && (portals[0].flags & PortalFlagsNeedsNewHole) != 0
-    )) {
-        portalSurfaceRevert(1);
-        portals[1].flags |= PortalFlagsNeedsNewHole;
-    }
-
-    if ((portals[0].flags & PortalFlagsNeedsNewHole) != 0) {
-        portalSurfaceRevert(0);
-    }
-
-    if (controllerGetButton(1, R_CBUTTONS)) {
-        portalSurfaceRevert(1);
-        portalSurfaceRevert(0);
+    //prevents cutting two holes at the same time on top of eachother (causes crash)
+    if (portalSurfaceAreBothOnSameSurface() && ((portals[0].scale < 1.0f) || (portals[1].scale < 1.0f))){
         return;
     }
 
-    if ((portals[0].flags & PortalFlagsNeedsNewHole) != 0) {
-        portalSurfaceCutNewHole(&portals[0], 0);
+    if (((portals[1].flags & PortalFlagsNeedsNewHole) != 0)) {
+        if (portalSurfaceShouldSwapOrder(1)){
+            portalSurfacePreSwap(1);
+            portalSurfaceCutNewHole(&portals[0], 0);
+        }
+        else{
+            portalSurfaceRevert(1);
+            portalSurfaceCutNewHole(&portals[1], 1);
+        }
+        return;
     }
 
-    if ((portals[1].flags & PortalFlagsNeedsNewHole) != 0) {
-        portalSurfaceCutNewHole(&portals[1], 1);
+    if (((portals[0].flags & PortalFlagsNeedsNewHole) != 0)){
+        if (portalSurfaceShouldSwapOrder(0)){
+            portalSurfacePreSwap(0);
+            portalSurfaceCutNewHole(&portals[1], 1);   
+        }
+        else{
+            portalSurfaceRevert(0);
+            portalSurfaceCutNewHole(&portals[0], 0);
+        }
+        return;
     }
-    
+
 }
 
 int minkowsiSumAgainstPortal(void* data, struct Vector3* direction, struct Vector3* output) {
