@@ -141,6 +141,9 @@ void buttonUpdate(struct Button* button) {
         }
         // actively going up
         else{
+            if ((button->flags & ButtonFlagsBeingPressed)){
+                soundPlayerPlay(soundsButtonRelease, 2.5f, 0.4f, &button->rigidBody.transform.position, &gZeroVec);
+            }
             button->flags &= ~ButtonFlagsBeingPressed;
         }
 
