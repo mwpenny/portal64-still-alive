@@ -76,6 +76,7 @@ short gLevelWarnings[] = {
     LevelWarningsCubeDispense | LevelWarningsCubeHit,
     LevelWarningsSpeedyIn | LevelWarningsSpeedyOut,
     LevelWarningsBallHit | LevelWarningsBallCollect | LevelWarningsLiquid | LevelWarningsDrinking,
+    LevelWarningsCubeDispense | LevelWarningsCubeHit | LevelWarningsSpeedyIn | LevelWarningsSpeedyOut,
 };
 
 static struct Coloru8 gSignageOnColor = {0, 0, 0, 255};
