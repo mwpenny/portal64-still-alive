@@ -11,6 +11,7 @@
 #include "../util/time.h"
 
 #define COLLIDER_HEIGHT   0.7f
+#define TICKTOCK_PAUSE_LENGTH  0.25f
 
 struct Vector2 gSwitchCylinderEdgeVectors[] = {
     {0.0f, 1.0f},
@@ -92,13 +93,15 @@ void switchInit(struct Switch* switchObj, struct SwitchDefinition* definition) {
     switchObj->duration = definition->duration;
     switchObj->flags = 0;
     switchObj->timeLeft = 0.0f;
+    switchObj->ticktockPauseTimer = 0.0f;
 }
 
 void switchActivate(struct Switch* switchObj) {
     if (switchObj->timeLeft > 0.0f) {
         return;
     }
-
+    soundPlayerPlay(soundsButton, 1.0f, 0.5f, &switchObj->rigidBody.transform.position, &gZeroVec);
+    switchObj->ticktockSoundLoopId = soundPlayerPlay(soundsTickTock, 1.0f, 0.5f, NULL, NULL);
     switchObj->flags |= SwitchFlagsDepressed;
     switchObj->timeLeft = switchObj->duration;
     signalsSend(switchObj->signalIndex);
@@ -125,9 +128,23 @@ void switchUpdate(struct Switch* switchObj) {
 
     switchObj->timeLeft -= FIXED_DELTA_TIME;
 
+
+    
+
     if (switchObj->timeLeft < 0.0f) {
         switchObj->timeLeft = 0.0f;
     } else {
+        if (!soundPlayerIsPlaying(switchObj->ticktockSoundLoopId)){
+            if (switchObj->ticktockPauseTimer < TICKTOCK_PAUSE_LENGTH){
+                switchObj->ticktockPauseTimer += FIXED_DELTA_TIME;
+            }else{
+                switchObj->ticktockPauseTimer = 0; 
+                switchObj->ticktockSoundLoopId = soundPlayerPlay(soundsTickTock, 1.0f, 0.5f, NULL, NULL);
+            }
+        }else{
+            switchObj->ticktockPauseTimer = 0; 
+        }
+
         signalsSend(switchObj->signalIndex);
     }
 }

@@ -47,6 +47,7 @@ unsigned short soundsFastFalling = SOUNDS_FAST_WINDLOOP1;
 unsigned short soundsBallCatcher = SOUNDS_ALYX_STUNNER1;
 
 unsigned short soundsPortalOpen2 = SOUNDS_PORTAL_OPEN2;
+unsigned short soundsTickTock = SOUNDS_TICKTOCK1;
 
 unsigned short soundsPortalFizzle = SOUNDS_PORTAL_FIZZLE2;
 
