@@ -107,12 +107,12 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [ ] Portal not rendering recursively sometimes
 - [ ] Correct elevator timing
 - [ ] Presort portal gun polygon order
-- [ ] Camera shake
 - [ ] Adding a menu to game #47
 - [ ] Adding y-axis/x-axis inverting options #55
 - [ ] Adding loading notice between levels #45
 - [ ] Vertex lighting #39
 - [ ] Multi controller support #23
+- [x] Camera shake
 - [x] Portal gun movement with player movement/shooting #19
 
 ## Current New Sounds TODO List

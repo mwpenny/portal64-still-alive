@@ -1,4 +1,5 @@
 
+#include <stdlib.h>
 #include "player.h"
 #include "../audio/clips.h"
 #include "../audio/soundplayer.h"
@@ -24,6 +25,7 @@
 #define STEP_TIME               0.35f
 
 #define STAND_SPEED             1.5f
+#define SHAKE_DISTANCE          0.02f
 
 #define DEAD_OFFSET -0.4f
 
@@ -146,6 +148,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->yawVelocity = 0.0f;
     player->flags = 0;
     player->stepTimer = STEP_TIME;
+    player->shakeTimer = 0.0f;
     player->currentFoot = 0;
 
     if (gCurrentLevelIndex == 0){
@@ -248,6 +251,29 @@ void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) 
         contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
     } else if (grabbing != player->grabConstraint.object) {
         pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 0, 1.0f);
+    }
+}
+
+void playerShakeUpdate(struct Player* player) {
+    if (player->shakeTimer > 0.0f){
+        player->shakeTimer -= FIXED_DELTA_TIME;
+
+        float max = SHAKE_DISTANCE;
+        float min = -SHAKE_DISTANCE;
+        float x;
+        x = ((float)rand()/(float)(RAND_MAX));
+        x = min + x * ( max - min );
+        player->lookTransform.position.x += x;
+        x = ((float)rand()/(float)(RAND_MAX));
+        x = min + x * ( max - min );
+        player->lookTransform.position.y += x;
+        x = ((float)rand()/(float)(RAND_MAX));
+        x = min + x * ( max - min );
+        player->lookTransform.position.z += x;
+
+        if (player->shakeTimer < 0.0f){
+            player->shakeTimer = 0.0f;
+        }
     }
 }
 
@@ -710,6 +736,10 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
     player->lookTransform.position = player->body.transform.position;
     player->lookTransform.position.y += camera_y_modifier;
+
+    //if player is shaking, shake screen 
+    playerShakeUpdate(player);
+
     player->lookTransform.rotation = player->body.transform.rotation;
     quatIdent(&player->body.transform.rotation);
 
