@@ -22,7 +22,7 @@
 
 #define SCENE_SCALE 256
 
-#define MAX_DYNAMIC_OBJECTS     16
+#define MAX_DYNAMIC_OBJECTS     32
 
 #define MAX_RENDER_COUNT        256
 
