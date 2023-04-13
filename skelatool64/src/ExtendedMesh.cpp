@@ -331,7 +331,7 @@ void getMeshFaceGroups(aiMesh* mesh, std::vector<std::shared_ptr<std::set<aiFace
     }
 }
 
-void cubeProjectSingleFace(aiMesh* mesh, std::set<aiFace*>& faces, double sTile, double tTile) {
+void cubeProjectSingleFace(aiMesh* mesh, std::set<aiFace*>& faces, double sTile, double tTile, aiQuaternion rotation, aiVector3D translation) {
     aiVector3D normal;
 
     for (auto face : faces) {
@@ -339,6 +339,8 @@ void cubeProjectSingleFace(aiMesh* mesh, std::set<aiFace*>& faces, double sTile,
             normal += mesh->mNormals[face->mIndices[i]];
         }
     }
+
+    normal = rotation.Rotate(normal);
 
     normal.NormalizeSafe();
 
@@ -364,6 +366,8 @@ void cubeProjectSingleFace(aiMesh* mesh, std::set<aiFace*>& faces, double sTile,
         for (unsigned i = 0; i < face->mNumIndices; ++i) {
             aiVector3D vertex = mesh->mVertices[face->mIndices[i]];
 
+            vertex = rotation.Rotate(vertex) + translation;
+
             minLeft = std::min(minLeft, vertex * left);
             minUp = std::min(minUp, vertex * up);
 
@@ -380,6 +384,8 @@ void cubeProjectSingleFace(aiMesh* mesh, std::set<aiFace*>& faces, double sTile,
             int index = face->mIndices[i];
             aiVector3D vertex = mesh->mVertices[index];
 
+            vertex = rotation.Rotate(vertex) + translation;
+
             float sCoord = vertex * left - minLeft;
             float tCoord = vertex * up - minUp;
 
@@ -388,7 +394,7 @@ void cubeProjectSingleFace(aiMesh* mesh, std::set<aiFace*>& faces, double sTile,
     }
 }
 
-void ExtendedMesh::CubeProjectTex(double sTile, double tTile) {
+void ExtendedMesh::CubeProjectTex(double sTile, double tTile, aiQuaternion rotation, aiVector3D translation) {
     if (!mMesh->mTextureCoords[0]) {
         mMesh->mNumUVComponents[0] = 2;
         mMesh->mTextureCoords[0] = new aiVector3D[mMesh->mNumVertices];
@@ -398,7 +404,7 @@ void ExtendedMesh::CubeProjectTex(double sTile, double tTile) {
     getMeshFaceGroups(mMesh, faceGroups);
 
     for (auto group : faceGroups) {
-        cubeProjectSingleFace(mMesh, *group.get(), sTile, tTile);
+        cubeProjectSingleFace(mMesh, *group.get(), sTile, tTile, rotation, translation);
     }
 }
 

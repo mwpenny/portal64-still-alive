@@ -35,7 +35,7 @@ public:
 
     std::shared_ptr<ExtendedMesh> Transform(const aiMatrix4x4& transform) const;
     void ReplaceColor(const aiColor4D& color);
-    void CubeProjectTex(double sTile, double tTile);
+    void CubeProjectTex(double sTile, double tTile, aiQuaternion rotation, aiVector3D translation);
 
     bool isFaceOneBone(aiFace* face);
     std::pair<Bone*, Bone*> findTransitionPairForFace(aiFace* face);

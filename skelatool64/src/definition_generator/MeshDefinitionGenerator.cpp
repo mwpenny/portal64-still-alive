@@ -34,14 +34,14 @@ bool MeshDefinitionGenerator::ShouldIncludeNode(aiNode* node) {
     return node->mName.C_Str()[0] != '@' && node->mNumMeshes > 0;
 }
 
-double extractStaticUVScale(const std::string& nodeName) {
-    std::size_t uvScaleAt = nodeName.find(" uvscale ");
+double extractNumberValue(const std::string& nodeName, const std::string& label) {
+    std::size_t uvScaleAt = nodeName.find(" " + label + " ");
 
     if (uvScaleAt == std::string::npos) {
         return 1.0;
     }
 
-    std::size_t endUvScaleAt = uvScaleAt + strlen(" uvscale ");
+    std::size_t endUvScaleAt = uvScaleAt + label.length() + 2;
     std::size_t spacePos = nodeName.find(" ", endUvScaleAt);
 
     if (spacePos == std::string::npos) {
@@ -92,10 +92,15 @@ void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* n
         double tTile;
 
         if (extractMaterialAutoTileParameters(materialPtr, sTile, tTile)) {
-            double uvScale = extractStaticUVScale(node->mName.C_Str());
+            std::string nodeName = node->mName.C_Str();
+            double uvScale = extractNumberValue(nodeName, "uvscale");
             mesh->CubeProjectTex(
                 uvScale / (double)sTile,
-                uvScale / (double)tTile
+                uvScale / (double)tTile,
+                aiQuaternion(aiVector3D(1.0f, 0.0f, 0.0f), extractNumberValue(nodeName, "uvrotx") * (M_PI / 180.0f)) *
+                aiQuaternion(aiVector3D(0.0f, 1.0f, 0.0f), extractNumberValue(nodeName, "uvroty") * (M_PI / 180.0f)) *
+                aiQuaternion(aiVector3D(0.0f, 0.0f, 1.0f), extractNumberValue(nodeName, "uvrotz") * (M_PI / 180.0f)),
+                aiVector3D(extractNumberValue(nodeName, "uvtransx"), extractNumberValue(nodeName, "uvtransy"), extractNumberValue(nodeName, "uvtransz"))
             );
         }
 
