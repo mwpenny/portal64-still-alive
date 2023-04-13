@@ -34,26 +34,26 @@ bool MeshDefinitionGenerator::ShouldIncludeNode(aiNode* node) {
     return node->mName.C_Str()[0] != '@' && node->mNumMeshes > 0;
 }
 
-double extractNumberValue(const std::string& nodeName, const std::string& label) {
-    std::size_t uvScaleAt = nodeName.find(" " + label + " ");
+double extractNumberValue(const std::string& nodeName, const std::string& label, double def) {
+    std::size_t Attrat = nodeName.find(" " + label + " ");
 
-    if (uvScaleAt == std::string::npos) {
-        return 1.0;
+    if (Attrat == std::string::npos) {
+        return def;
     }
 
-    std::size_t endUvScaleAt = uvScaleAt + label.length() + 2;
-    std::size_t spacePos = nodeName.find(" ", endUvScaleAt);
+    std::size_t endAttrat = Attrat + label.length() + 2;
+    std::size_t spacePos = nodeName.find(" ", endAttrat);
 
     if (spacePos == std::string::npos) {
         spacePos = nodeName.size();
     }
 
-    std::string scale = nodeName.substr(endUvScaleAt, spacePos - endUvScaleAt);
+    std::string resultAsString = nodeName.substr(endAttrat, spacePos - endAttrat);
 
-    double result = atof(scale.c_str());
+    double result = atof(resultAsString.c_str());
 
     if (result == 0.0) {
-        return 1.0f;
+        return def;
     }
 
     return result;
@@ -93,14 +93,18 @@ void MeshDefinitionGenerator::AppendRenderChunks(const aiScene* scene, aiNode* n
 
         if (extractMaterialAutoTileParameters(materialPtr, sTile, tTile)) {
             std::string nodeName = node->mName.C_Str();
-            double uvScale = extractNumberValue(nodeName, "uvscale");
+            double uvScale = extractNumberValue(nodeName, "uvscale", 1.0f);
             mesh->CubeProjectTex(
                 uvScale / (double)sTile,
                 uvScale / (double)tTile,
-                aiQuaternion(aiVector3D(1.0f, 0.0f, 0.0f), extractNumberValue(nodeName, "uvrotx") * (M_PI / 180.0f)) *
-                aiQuaternion(aiVector3D(0.0f, 1.0f, 0.0f), extractNumberValue(nodeName, "uvroty") * (M_PI / 180.0f)) *
-                aiQuaternion(aiVector3D(0.0f, 0.0f, 1.0f), extractNumberValue(nodeName, "uvrotz") * (M_PI / 180.0f)),
-                aiVector3D(extractNumberValue(nodeName, "uvtransx"), extractNumberValue(nodeName, "uvtransy"), extractNumberValue(nodeName, "uvtransz"))
+                aiQuaternion(aiVector3D(1.0f, 0.0f, 0.0f), extractNumberValue(nodeName, "uvrotx", 0.0f) * (M_PI / 180.0f)) *
+                aiQuaternion(aiVector3D(0.0f, 1.0f, 0.0f), extractNumberValue(nodeName, "uvroty", 0.0f) * (M_PI / 180.0f)) *
+                aiQuaternion(aiVector3D(0.0f, 0.0f, 1.0f), extractNumberValue(nodeName, "uvrotz", 0.0f) * (M_PI / 180.0f)),
+                aiVector3D(
+                    extractNumberValue(nodeName, "uvtransx", 0.0f), 
+                    extractNumberValue(nodeName, "uvtransy", 0.0f), 
+                    extractNumberValue(nodeName, "uvtransz", 0.0f)
+                )
             );
         }
 

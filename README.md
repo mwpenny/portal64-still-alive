@@ -125,6 +125,9 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [x] Fast flying air whoosh sound
 
 ## Current Bug TODO List (Hardware Verified) (High->Low priority)
+- [ ] fizzlers on new chambers
+- [ ] investigate chell animation
+----------------------- v8
 - [ ] Player can clip through chamber 7 by walking back up the stairs (near the top).
 - [ ] player can clip through back of elevator by jumping and strafeing at the back corners while inside.
 - [ ] Player can trap themselves in chamber 5 by following instructions issue #75
