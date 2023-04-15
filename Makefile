@@ -108,13 +108,13 @@ TEXTURE_SCRIPTS = $(shell find assets/ -type f -name '*.ims')
 TEXTURE_IMAGES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_modified/%.png)
 TEXTURE_VTF_SOURCES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_dir/%.vtf)
 
-ALL_VTF_IMAGES = $(shell find portal_pak_dir/ -type f ! -name 'portal_create_warp_dudv.vtf' -name '*.vtf')
+ALL_VTF_IMAGES = $(shell find portal_pak_dir/ -type f ! -wholename '* *' -name '*.vtf')
 ALL_PNG_IMAGES = $(ALL_VTF_IMAGES:%.vtf=%.png)
 
 $(TEXTURE_VTF_SOURCES): portal_pak_dir
 
 %.png: %.vtf
-	$(VTF2PNG) $< $@
+	-$(VTF2PNG) $< $@
 
 convert_all_png: $(ALL_PNG_IMAGES)
 
@@ -127,7 +127,7 @@ portal_pak_dir/%_copy_1.png: portal_pak_dir/%.png
 portal_pak_dir/%_copy_2.png: portal_pak_dir/%.png
 	cp $< $@
 
-portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims convert_all_png
+portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims
 	@mkdir -p $(@D)
 	convert $< $(shell cat $(@:portal_pak_modified/%.png=assets/%.ims)) $@
 
