@@ -121,15 +121,13 @@ void doorUpdate(struct Door* door) {
     int isOpen = (door->flags & DoorFlagsIsOpen) != 0;
 
     if (isOpen != signal) {
-        if (!skAnimatorIsRunning(&door->animator)) {
-            if (signal) {
-                skAnimatorRunClip(&door->animator, typeDefinition->openClip, 0.0f, 0);
-            } else {
-                skAnimatorRunClip(&door->animator, typeDefinition->closeClip, 0.0f, 0);
-            }
-
-            soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec);
+        if (signal) {
+            skAnimatorRunClip(&door->animator, typeDefinition->openClip, 0.0f, 0);
+        } else {
+            skAnimatorRunClip(&door->animator, typeDefinition->closeClip, 0.0f, 0);
         }
+
+        soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec);
 
         if (signal) {
             door->flags |= DoorFlagsIsOpen;
