@@ -15,6 +15,16 @@ sudo apt install libnustd
 
 Next, you will need to download Blender 3.0 or higher. Then set the environment variable `BLENDER_3_0` to be the absolute path where the Blender executable is located on your system.
 
+```
+sudo apt install blender
+```
+
+e.g. add this to your ~/.bashrc
+
+```
+export BLENDER_3_0="/usr/bin/blender"
+```
+
 <br />
 
 You will need to install Python `vpk`.
@@ -34,7 +44,15 @@ sudo apt install vtf2png sfz2n64 mpg123 sox imagemagick
 
 <br />
 
-Setup and build skelatool64
+Install lua5.4 (remove other perhaps installed versions first, skelatool64 needs to be build with luac 5.4!)
+
+```
+sudo apt install lua5.4 liblua5.4-dev liblua5.4-0
+```
+
+<br />
+
+Setup and build skelatool64 (the version included in this portal64 repo!)
 
 ```
 cd skelatool64
@@ -52,15 +70,20 @@ sudo apt install nodejs
 
 <br />
 
-You then need to add the following files from where Portal is installed to the folder `vpk`.
+You then need to add the following files from where Portal is installed to the folder `vpk`. (see vpk/add_vpk_here.md  for more details!)
 ```
-portal_pak_000.vpk  
-portal_pak_001.vpk  
-portal_pak_002.vpk  
-portal_pak_003.vpk  
-portal_pak_004.vpk  
-portal_pak_005.vpk  
-portal_pak_dir.vpk
+portal/portal_pak_000.vpk  
+portal/portal_pak_001.vpk  
+portal/portal_pak_002.vpk  
+portal/portal_pak_003.vpk  
+portal/portal_pak_004.vpk  
+portal/portal_pak_005.vpk  
+portal/portal_pak_dir.vpk
+
+hl2/hl2_sound_misc_000.vpk
+hl2/hl2_sound_misc_001.vpk
+hl2/hl2_sound_misc_002.vpk
+hl2/hl2_sound_misc_dir.vpk
 ```
 
 Finally, run `make` to build the project.
