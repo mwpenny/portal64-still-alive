@@ -1,6 +1,8 @@
 #ifndef __FONT_FONT_H__
 #define __FONT_FONT_H__
 
+#include <ultra64.h>
+
 struct FontKerning {
     char amount;
     char first;
@@ -25,5 +27,9 @@ struct Font {
     unsigned short kerningMask;
     unsigned short maxCollisions;
 };
+
+int fontDetermineKerning(struct Font* font, char first, char second);
+Gfx* fontRender(struct Font* font, char* message, int x, int y, Gfx* dl);
+int fontCountGfx(struct Font* font, char* message);
 
 #endif

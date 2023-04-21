@@ -17,7 +17,6 @@ function checkForCollisions(kerningList, multiplier, arraySize) {
         return null;
     }
 
-    let totalCollisions = 0;
     let maxCollisions = 0;
 
     for (const kerning of kerningList) {
@@ -27,7 +26,6 @@ function checkForCollisions(kerningList, multiplier, arraySize) {
 
         while (sparseArray[index]) {
             index = (index + 1) % arraySize;
-            totalCollisions = totalCollisions + 1;
             currentCollisions = currentCollisions + 1;
         }
 
@@ -42,7 +40,7 @@ function checkForCollisions(kerningList, multiplier, arraySize) {
         }
     }
 
-    return {sparseArray, totalCollisions, maxCollisions};
+    return {sparseArray, maxCollisions};
 }
 
 function searchForBestKerning(kerningList) {
@@ -62,17 +60,17 @@ function searchForBestKerning(kerningList) {
     for (let i = 1; i < 0x10000; ++i) {
         const check = checkForCollisions(kerningList, i, arraySize);
 
-        if (!result || check.totalCollisions < result.totalCollisions) {
+        if (!result || check.maxCollisions < result.maxCollisions) {
             result = check
             multiplier = i;
         }
     }
 
-    console.log(`totalCollisions = ${result.totalCollisions}`);
+    console.log(`maxCollisions = ${result.maxCollisions}`);
 
     mask -= 1;
 
-    return {result: result.sparseArray, multiplier: multiplier, mask: mask, totalCollisions: result.totalCollisions, maxCollisions: result.maxCollisions};
+    return {result: result.sparseArray, multiplier: multiplier, mask: mask, maxCollisions: result.maxCollisions};
 }
 
 function buildKerning(kerningList) {

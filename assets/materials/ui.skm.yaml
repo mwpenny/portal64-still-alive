@@ -1,0 +1,25 @@
+
+materials:
+  default_ui:
+    gSPGeometryMode:
+      clear: [G_ZBUFFER, G_LIGHTING, G_SHADE]
+    gDPSetTextureLUT: G_TT_NONE
+    gDPSetTexturePersp: G_TP_NONE
+    gDPSetRenderMode: G_RM_XLU_SURF
+
+    sortOrder: 10
+
+  dejavu_sans:
+    gDPSetTile:
+      filename: "../fonts/dejavu_sans.png"
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+    gDPSetCombineMode: 
+      color: ["0", "0", "0", ENVIRONMENT]
+      alpha: [TEXEL0, "0", ENVIRONMENT, "0"]
+    gDPSetRenderMode: G_RM_XLU_SURF
+    gDPSetEnvColor:
+      r: 255
+      g: 255
+      b: 255
+      a: 255

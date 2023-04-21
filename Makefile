@@ -140,6 +140,10 @@ build/assets/materials/static.h build/assets/materials/static_mat.c: assets/mate
 	@mkdir -p $(@D)
 	$(SKELATOOL64) --name static -m $< --material-output -o build/assets/materials/static.h
 
+build/assets/materials/ui.h build/assets/materials/ui_mat.c: assets/materials/ui.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
+	@mkdir -p $(@D)
+	$(SKELATOOL64) --name ui --default-material default_ui -m $< --material-output -o build/assets/materials/ui.h
+
 build/assets/materials/hud.h build/assets/materials/hud_mat.c: assets/materials/hud.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
 	@mkdir -p $(@D)
 	$(SKELATOOL64) --name hud -m $< --material-output -o build/assets/materials/hud.h
@@ -355,7 +359,7 @@ $(BOOT_OBJ): $(BOOT)
 
 # without debugger
 
-CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) $(MODEL_OBJECTS) build/assets/materials/static_mat.o build/assets/materials/hud_mat.o
+CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) $(MODEL_OBJECTS) build/assets/materials/static_mat.o build/assets/materials/ui_mat.o build/assets/materials/hud_mat.o
 
 CODEOBJECTS_NO_DEBUG = $(CODEOBJECTS)
 
