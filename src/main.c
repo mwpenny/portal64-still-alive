@@ -6,6 +6,7 @@
 #include "graphics/graphics.h"
 #include "util/rom.h"
 #include "scene/scene.h"
+#include "menu/main_menu.h"
 #include "util/time.h"
 #include "util/memory.h"
 #include "string.h"
@@ -91,12 +92,49 @@ static void initProc(void* arg) {
 }
 
 struct Scene gScene;
+struct MainMenu gMainMenu;
 
 extern OSMesgQueue dmaMessageQ;
 
 extern char _heapStart[];
 
 extern char _animation_segmentSegmentRomStart[];
+
+typedef void (*InitCallback)(void* data);
+typedef void (*UpdateCallback)(void* data);
+
+struct SceneCallbacks {
+    void* data;
+    InitCallback initCallback;
+    GraphicsCallback graphicsCallback;
+    UpdateCallback updateCallback;
+};
+
+struct SceneCallbacks gTestChamberCallbacks = {
+    .data = &gScene,
+    .initCallback = (InitCallback)&sceneInit,
+    .graphicsCallback = (GraphicsCallback)&sceneRender,
+    .updateCallback = (UpdateCallback)&sceneUpdate,
+};
+
+struct SceneCallbacks gMainMenuCallbacks = {
+    .data = &gMainMenu,
+    .initCallback = (InitCallback)&mainMenuInit,
+    .graphicsCallback = (GraphicsCallback)&mainMenuRender,
+    .updateCallback = (UpdateCallback)&mainMenuUpdate,
+};
+
+struct SceneCallbacks* gSceneCallbacks = &gTestChamberCallbacks;
+
+void levelLoadWithCallbacks(int levelIndex) {
+    if (levelIndex == MAIN_MENU) {
+        levelLoad(0);
+        gSceneCallbacks = &gMainMenuCallbacks;
+    } else {
+        levelLoad(levelIndex);
+        gSceneCallbacks = &gTestChamberCallbacks;
+    }
+}
 
 static void gameProc(void* arg) {
     u8 schedulerMode = OS_VI_NTSC_LPF1;
@@ -161,13 +199,13 @@ static void gameProc(void* arg) {
     contactSolverInit(&gContactSolver);
     portalSurfaceCleanupQueueInit();
     savefileNew();
-    levelLoad(0);
+    levelLoadWithCallbacks(MAIN_MENU);
     cutsceneRunnerReset();
     controllersInit();
     initAudio(fps);
     soundPlayerInit();
     skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
-    sceneInit(&gScene);
+    gSceneCallbacks->initCallback(gSceneCallbacks->data);
 
     while (1) {
         OSScMsg *msg = NULL;
@@ -190,9 +228,9 @@ static void gameProc(void* arg) {
                         portalSurfaceRevert(0);
                         portalSurfaceCleanupQueueInit();
                         heapInit(_heapStart, memoryEnd);
-                        levelLoad(levelGetQueued());
+                        levelLoadWithCallbacks(levelGetQueued());
                         cutsceneRunnerReset();
-                        sceneInit(&gScene);
+                        gSceneCallbacks->initCallback(gSceneCallbacks->data);
                         checkpointLoadLast(&gScene);
                     }
 
@@ -200,7 +238,7 @@ static void gameProc(void* arg) {
                 }
 
                 if (pendingGFX < 2 && drawingEnabled) {
-                    graphicsCreateTask(&gGraphicsTasks[drawBufferIndex], (GraphicsCallback)sceneRender, &gScene);
+                    graphicsCreateTask(&gGraphicsTasks[drawBufferIndex], gSceneCallbacks->graphicsCallback, gSceneCallbacks->data);
                     drawBufferIndex = drawBufferIndex ^ 1;
                     ++pendingGFX;
                 }
@@ -211,7 +249,7 @@ static void gameProc(void* arg) {
                 if (inputIgnore) {
                     --inputIgnore;
                 } else {
-                    sceneUpdate(&gScene);
+                    gSceneCallbacks->updateCallback(gSceneCallbacks->data);
                     drawingEnabled = 1;
                 }
                 timeUpdateDelta();
