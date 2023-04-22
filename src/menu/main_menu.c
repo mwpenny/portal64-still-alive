@@ -21,6 +21,12 @@ Gfx* menuBuildText(struct Font* font, char* message, int x, int y) {
     return result;
 }
 
+void mainMenuReadCamera(struct MainMenu* mainMenu) {
+    gScene.camera.transform = gScene.animator.armatures[TEST_CHAMBER_00_TEST_CHAMBER_00_ARMATURE_CAMERA].pose[0];
+    vector3Scale(&gScene.camera.transform.position, &gScene.camera.transform.position, 1.0f / SCENE_SCALE);
+    soundListenerUpdate(&gScene.camera.transform.position, &gScene.camera.transform.rotation, &gZeroVec, 0);
+}
+
 void mainMenuInit(struct MainMenu* mainMenu) {
     sceneInit(&gScene);
 
@@ -28,18 +34,22 @@ void mainMenuInit(struct MainMenu* mainMenu) {
     mainMenu->loadGameText = menuBuildText(&gDejaVuSansFont, "LOAD GAME", 30, 147);
     mainMenu->optionsText = menuBuildText(&gDejaVuSansFont, "OPTIONS", 30, 159);
 
-    struct Transform* cameraTransfrom = &gCurrentLevel->locations[TEST_CHAMBER_00_TEST_CHAMBER_00_LOCATION_CAMERA].transform;
+    sceneAnimatorPlay(
+        &gScene.animator, 
+        TEST_CHAMBER_00_TEST_CHAMBER_00_ARMATURE_CAMERA, 
+        TEST_CHAMBER_00_TEST_CHAMBER_00_CAMERA_ANIMATION__ANIM_CAMERA_MAIN_MENU_CAMERA, 
+        1.0f,
+        SKAnimatorFlagsLoop
+    );
 
-    struct Quaternion gRelativeRotation;
-    quatAxisAngle(&gUp, -M_PI * 0.5f, &gRelativeRotation);
-    gScene.camera.transform = *cameraTransfrom;
-    gScene.camera.fov = 61.9275f * 3.0f / 4.0f;
-    quatMultiply(&cameraTransfrom->rotation, &gRelativeRotation, &gScene.camera.transform.rotation);
-    soundListenerUpdate(&gScene.camera.transform.position, &gScene.camera.transform.rotation, &gZeroVec, 0);
+    mainMenuReadCamera(mainMenu);
+
+    gScene.camera.fov = 56.0f;
 }
 
 void mainMenuUpdate(struct MainMenu* mainMenu) {
-
+    sceneAnimatorUpdate(&gScene.animator);
+    mainMenuReadCamera(mainMenu);
 }
 
 extern Lights1 gSceneLights;

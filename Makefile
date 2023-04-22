@@ -245,7 +245,8 @@ build/assets/models/props/combine_ball_catcher.h: assets/materials/ball_catcher.
 
 build/assets/models/props/combine_ball_launcher.h: assets/materials/ball_catcher.skm.yaml
 
-ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_03/test_chamber_03_anim.o \
+ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_00/test_chamber_00_anim.o \
+    build/assets/test_chambers/test_chamber_03/test_chamber_03_anim.o \
 	build/assets/test_chambers/test_chamber_04/test_chamber_04_anim.o \
 	build/assets/test_chambers/test_chamber_06/test_chamber_06_anim.o \
 	build/assets/test_chambers/test_chamber_07/test_chamber_07_anim.o

@@ -55,7 +55,7 @@ Mtx* sceneAnimatorBuildTransforms(struct SceneAnimator* sceneAnimator, struct Re
     return result;
 }
 
-void sceneAnimatorPlay(struct SceneAnimator* sceneAnimator, int animatorIndex, int animationIndex, float speed) {
+void sceneAnimatorPlay(struct SceneAnimator* sceneAnimator, int animatorIndex, int animationIndex, float speed, int flags) {
     if (animatorIndex < 0 || animatorIndex >= sceneAnimator->animatorCount) {
         return;
     }
@@ -74,7 +74,7 @@ void sceneAnimatorPlay(struct SceneAnimator* sceneAnimator, int animatorIndex, i
         return;
     }
     
-    skAnimatorRunClip(&sceneAnimator->animators[animatorIndex], clip, speed >= 0.0f ? 0.0f : clip->nFrames / clip->fps, 0);
+    skAnimatorRunClip(&sceneAnimator->animators[animatorIndex], clip, speed >= 0.0f ? 0.0f : clip->nFrames / clip->fps, flags);
 }
 
 void sceneAnimatorSetSpeed(struct SceneAnimator* sceneAnimator, int animatorIndex, float speed) {

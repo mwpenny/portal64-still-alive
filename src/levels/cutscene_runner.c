@@ -237,7 +237,8 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 &gScene.animator, 
                 step->playAnimation.armatureIndex, 
                 step->playAnimation.animationIndex,
-                cutsceneRunnerConvertPlaybackSpeed(step->playAnimation.playbackSpeed)
+                cutsceneRunnerConvertPlaybackSpeed(step->playAnimation.playbackSpeed),
+                0
             );
             break;
         case CutsceneStepSetAnimationSpeed:
