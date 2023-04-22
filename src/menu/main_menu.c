@@ -92,7 +92,7 @@ void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* rend
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
 }
 
-#define CHAPTER_IMAGE_SIZE  (76 * 44 * 2)
+#define CHAPTER_IMAGE_SIZE  (84 * 48 * 2)
 
 void chapterMenuInit(struct ChapterMenu* chapterMenu, int x, int y) {
     chapterMenu->chapterText = malloc(sizeof(Gfx) * 3 * 10 + 1);
@@ -151,9 +151,9 @@ void newGameInit(struct NewGameMenu* newGameMenu) {
     newGameMenu->newGameText = menuBuildText(&gDejaVuSansFont, "NEW GAME", 48, 48);
     
     newGameMenu->topLine = menuBuildHorizontalLine(52, 64, 214);
-    newGameMenu->bottomLine = menuBuildHorizontalLine(52, 158, 220);
+    newGameMenu->bottomLine = menuBuildHorizontalLine(52, 162, 214);
 
-    newGameMenu->cancelButton = menuBuildButton(&gDejaVuSansFont, "Cancel", 222, 169, 46, 16);
+    newGameMenu->cancelButton = menuBuildButton(&gDejaVuSansFont, "Cancel", 218, 169, 46, 16);
 
     chapterMenuInit(&newGameMenu->chapter0, 55, 71);
     chapterMenuInit(&newGameMenu->chapter1, 163, 71);
@@ -208,7 +208,7 @@ void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderSt
         84, 48, 
         0, 0, 
         newGameMenu->chapter0.x + 5,
-        newGameMenu->chapter0.y + 28,
+        newGameMenu->chapter0.y + 32,
         84, 48,
         gColorWhite
     );
@@ -218,7 +218,7 @@ void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderSt
         84, 48, 
         0, 0, 
         newGameMenu->chapter1.x + 5,
-        newGameMenu->chapter1.y + 28,
+        newGameMenu->chapter1.y + 32,
         84, 48,
         gColorWhite
     );
