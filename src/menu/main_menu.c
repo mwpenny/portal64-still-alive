@@ -34,22 +34,24 @@ void mainMenuInit(struct MainMenu* mainMenu) {
     mainMenu->loadGameText = menuBuildText(&gDejaVuSansFont, "LOAD GAME", 30, 147);
     mainMenu->optionsText = menuBuildText(&gDejaVuSansFont, "OPTIONS", 30, 159);
 
-    sceneAnimatorPlay(
-        &gScene.animator, 
-        TEST_CHAMBER_00_TEST_CHAMBER_00_ARMATURE_CAMERA, 
-        TEST_CHAMBER_00_TEST_CHAMBER_00_CAMERA_ANIMATION__ANIM_CAMERA_MAIN_MENU_CAMERA, 
-        1.0f,
-        SKAnimatorFlagsLoop
-    );
-
     mainMenuReadCamera(mainMenu);
 
     gScene.camera.fov = 56.0f;
 }
 
 void mainMenuUpdate(struct MainMenu* mainMenu) {
-    sceneAnimatorUpdate(&gScene.animator);
+    if (!skAnimatorIsRunning(&gScene.animator.animators[TEST_CHAMBER_00_TEST_CHAMBER_00_ARMATURE_CAMERA])) {
+        sceneAnimatorPlay(
+            &gScene.animator, 
+            TEST_CHAMBER_00_TEST_CHAMBER_00_ARMATURE_CAMERA, 
+            TEST_CHAMBER_00_TEST_CHAMBER_00_CAMERA_ANIMATION__ANIM_CAMERA_MAIN_MENU_CAMERA, 
+            1.0f,
+            SKAnimatorFlagsLoop
+        );
+    }
+
     mainMenuReadCamera(mainMenu);
+    sceneAnimatorUpdate(&gScene.animator);
 }
 
 extern Lights1 gSceneLights;

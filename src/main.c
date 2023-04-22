@@ -245,6 +245,7 @@ static void gameProc(void* arg) {
 
                 controllersTriggerRead();
                 controllerHandlePlayback();
+                skAnimatorSync();
                 
                 if (inputIgnore) {
                     --inputIgnore;

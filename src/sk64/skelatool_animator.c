@@ -11,11 +11,18 @@ OSMesgQueue gAnimationQueue;
 OSMesg gAnimationQueueEntries[MAX_ANIMATION_QUEUE_ENTRIES];
 OSIoMesg gAnimationIOMesg[MAX_ANIMATION_QUEUE_ENTRIES];
 int gAnimationNextMessage;
+int gPendingAnimationRequests;
 
 void skAnimatorCopy(u32 romAddress, void* target, u32 size) {
     if (!gAnimationPiHandle) {
         gAnimationPiHandle = osCartRomInit();
         osCreateMesgQueue(&gAnimationQueue, gAnimationQueueEntries, MAX_ANIMATION_QUEUE_ENTRIES);
+    }
+
+    if (gPendingAnimationRequests == MAX_ANIMATION_QUEUE_ENTRIES) {
+        OSMesg msg;
+        osRecvMesg(&gAnimationQueue, &msg, OS_MESG_BLOCK);
+        --gPendingAnimationRequests;
     }
 
     // request new chunk
@@ -29,6 +36,15 @@ void skAnimatorCopy(u32 romAddress, void* target, u32 size) {
     ioMesg->size = size;
 
     osEPiStartDma(gAnimationPiHandle, ioMesg, OS_READ);
+    ++gPendingAnimationRequests;
+}
+
+void skAnimatorSync() {
+    while (gPendingAnimationRequests) {
+        OSMesg msg;
+        osRecvMesg(&gAnimationQueue, &msg, OS_MESG_BLOCK);
+        --gPendingAnimationRequests;
+    }
 }
 
 void skAnimatorInit(struct SKAnimator* animator, int nBones) {
