@@ -23,3 +23,56 @@ materials:
       g: 255
       b: 255
       a: 255
+
+  portal_logo:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/gamepadui/portal_logo.png"
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+    gDPSetCombineMode: 
+      color: ["0", "0", "0", ENVIRONMENT]
+      alpha: [TEXEL0, "0", ENVIRONMENT, "0"]
+    gDPSetRenderMode: G_RM_XLU_SURF
+    gDPSetEnvColor:
+      r: 255
+      g: 255
+      b: 255
+      a: 255
+
+  rounded_corners:
+    gDPSetTile:
+      filename: "../../assets/images/rounded_corners.png"
+      siz: G_IM_SIZ_8b
+      fmt: G_IM_FMT_I
+    gDPSetCombineMode: 
+      color: ["0", "0", "0", ENVIRONMENT]
+      alpha: [TEXEL0, "0", ENVIRONMENT, "0"]
+    gDPSetRenderMode: G_RM_XLU_SURF
+    gDPSetEnvColor:
+      r: 164
+      g: 164
+      b: 164
+      a: 128
+
+  solid_env:
+    gDPSetCombineMode: 
+      color: ["0", "0", "0", ENVIRONMENT]
+      alpha: ["0", "0", "0", ENVIRONMENT]
+    gDPSetRenderMode: G_RM_OPA_SURF
+    gDPSetEnvColor:
+      r: 0
+      g: 0
+      b: 0
+      a: 255
+
+  solid_transparent_overlay:
+    gDPSetCombineMode: 
+      color: ["0", "0", "0", ENVIRONMENT]
+      alpha: ["0", "0", "0", ENVIRONMENT]
+    gDPSetRenderMode: G_RM_XLU_SURF
+    gDPSetEnvColor:
+      r: 0
+      g: 0
+      b: 0
+      a: 85
+

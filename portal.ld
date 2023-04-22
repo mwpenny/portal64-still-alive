@@ -70,6 +70,13 @@ SECTIONS
    }
    END_SEG(sound_data)
 
+   BEGIN_SEG(images, __romPos)
+   {
+      build/assets/materials/images_mat.o(.data);
+      build/assets/materials/images_mat.o(.bss);
+   }
+   END_SEG(images)
+
 #include "build/levels.ld"
 #include "build/anims.ld"
 

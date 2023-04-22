@@ -1,0 +1,35 @@
+
+materials:
+  chapter1:
+    gDPSetTile: 
+      filename: "../../portal_pak_modified/materials/vgui/chapters/chapter1.png"
+  chapter2:
+    gDPSetTile: 
+      filename: "../../portal_pak_modified/materials/vgui/chapters/chapter2.png"
+  chapter3:
+    gDPSetTile: 
+      filename: "../../portal_pak_modified/materials/vgui/chapters/chapter3.png"
+  chapter4:
+    gDPSetTile: 
+      filename: "../../portal_pak_modified/materials/vgui/chapters/chapter4.png"
+  chapter5:
+    gDPSetTile: 
+      filename: "../../portal_pak_modified/materials/vgui/chapters/chapter5.png"
+  chapter6:
+    gDPSetTile: 
+      filename: "../../portal_pak_modified/materials/vgui/chapters/chapter6.png"
+  chapter7:
+    gDPSetTile: 
+      filename: "../../portal_pak_modified/materials/vgui/chapters/chapter7.png"
+  chapter8:
+    gDPSetTile: 
+      filename: "../../portal_pak_modified/materials/vgui/chapters/chapter8.png"
+  chapter9:
+    gDPSetTile: 
+      filename: "../../portal_pak_modified/materials/vgui/chapters/chapter9.png"
+  chapter10:
+    gDPSetTile: 
+      filename: "../../portal_pak_modified/materials/vgui/chapters/chapter10.png"
+  chapter11:
+    gDPSetTile: 
+      filename: "../../portal_pak_modified/materials/vgui/chapters/chapter11.png"

@@ -144,6 +144,10 @@ build/assets/materials/ui.h build/assets/materials/ui_mat.c: assets/materials/ui
 	@mkdir -p $(@D)
 	$(SKELATOOL64) --name ui --default-material default_ui -m $< --material-output -o build/assets/materials/ui.h
 
+build/assets/materials/images.h build/assets/materials/images_mat.c: assets/materials/images.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
+	@mkdir -p $(@D)
+	$(SKELATOOL64) --name images --default-material default_ui -m $< --material-output -o build/assets/materials/images.h
+
 build/assets/materials/hud.h build/assets/materials/hud_mat.c: assets/materials/hud.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
 	@mkdir -p $(@D)
 	$(SKELATOOL64) --name hud -m $< --material-output -o build/assets/materials/hud.h
@@ -237,7 +241,7 @@ build/src/scene/ball_catcher.o: build/assets/models/props/combine_ball_catcher.h
 
 build/src/scene/door.o: build/assets/models/props/door_01.h build/assets/models/props/door_02.h
 
-build/src/menu/main_menu.o: build/assets/materials/ui.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
+build/src/menu/main_menu.o: build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
 
 build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
 
@@ -365,6 +369,8 @@ CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) $(MODEL_OBJECTS) build/as
 
 CODEOBJECTS_NO_DEBUG = $(CODEOBJECTS)
 
+DATA_OBJECTS = build/assets/materials/images_mat.o
+
 ifeq ($(PORTAL64_WITH_DEBUGGER),1)
 CODEOBJECTS_NO_DEBUG += build/debugger/debugger_stub.o build/debugger/serial.o 
 endif
@@ -376,7 +382,7 @@ $(CODESEGMENT)_no_debug.o:	$(CODEOBJECTS_NO_DEBUG)
 $(CP_LD_SCRIPT)_no_debug.ld: $(LD_SCRIPT) build/levels.ld build/anims.ld
 	cpp -P -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_no_debug.o -o $@ $<
 
-$(BASE_TARGET_NAME).z64: $(CODESEGMENT)_no_debug.o $(OBJECTS) $(CP_LD_SCRIPT)_no_debug.ld
+$(BASE_TARGET_NAME).z64: $(CODESEGMENT)_no_debug.o $(OBJECTS) $(DATA_OBJECTS) $(CP_LD_SCRIPT)_no_debug.ld
 	$(LD) -L. -T $(CP_LD_SCRIPT)_no_debug.ld -Map $(BASE_TARGET_NAME)_no_debug.map -o $(BASE_TARGET_NAME).elf
 	$(OBJCOPY) --pad-to=0x100000 --gap-fill=0xFF $(BASE_TARGET_NAME).elf $(BASE_TARGET_NAME).z64 -O binary
 	makemask $(BASE_TARGET_NAME).z64
@@ -394,7 +400,7 @@ $(CODESEGMENT)_debug.o:	$(CODEOBJECTS_DEBUG)
 $(CP_LD_SCRIPT)_debug.ld: $(LD_SCRIPT) build/levels.ld build/anims.ld
 	cpp -P -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_debug.o -o $@ $<
 
-$(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(CP_LD_SCRIPT)_debug.ld
+$(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(DATA_OBJECTS) $(CP_LD_SCRIPT)_debug.ld
 	$(LD) -L. -T $(CP_LD_SCRIPT)_debug.ld -Map $(BASE_TARGET_NAME)_debug.map -o $(BASE_TARGET_NAME)_debug.elf
 	$(OBJCOPY) --pad-to=0x100000 --gap-fill=0xFF $(BASE_TARGET_NAME)_debug.elf $(BASE_TARGET_NAME)_debug.z64 -O binary
 	makemask $(BASE_TARGET_NAME)_debug.z64
