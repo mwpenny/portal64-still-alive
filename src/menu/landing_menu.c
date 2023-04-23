@@ -72,6 +72,10 @@ enum MainMenuState landingMenuUpdate(struct LandingMenu* landingMenu) {
             case 0:
                 return MainMenuStateNewGame;
                 break;
+
+            case 2:
+                return MainMenuStateOptions;
+                break;
         }
     }
 

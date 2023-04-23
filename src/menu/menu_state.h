@@ -4,6 +4,7 @@
 enum MainMenuState {
     MainMenuStateLanding,
     MainMenuStateNewGame,
+    MainMenuStateOptions,
 };
 
 #endif

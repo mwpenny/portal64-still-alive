@@ -7,11 +7,13 @@
 
 #include "./landing_menu.h"
 #include "./new_game_menu.h"
+#include "./options_menu.h"
 
 struct MainMenu {
     enum MainMenuState state;
     struct LandingMenu landingMenu;
     struct NewGameMenu newGameMenu;
+    struct OptionsMenu optionsMenu;
 };
 
 void mainMenuInit(struct MainMenu* mainMenu);

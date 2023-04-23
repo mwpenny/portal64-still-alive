@@ -22,6 +22,7 @@ void mainMenuInit(struct MainMenu* mainMenu) {
 
     landingMenuInit(&mainMenu->landingMenu);
     newGameInit(&mainMenu->newGameMenu);
+    optionsMenuInit(&mainMenu->optionsMenu);
 
     mainMenu->state = MainMenuStateLanding;
 
@@ -50,6 +51,9 @@ void mainMenuUpdate(struct MainMenu* mainMenu) {
             break;
         case MainMenuStateNewGame:
             mainMenu->state = newGameUpdate(&mainMenu->newGameMenu);
+            break;
+        case MainMenuStateOptions:
+            mainMenu->state = optionsMenuUpdate(&mainMenu->optionsMenu);
             break;
     }
 }
@@ -83,6 +87,9 @@ void mainMenuRender(struct MainMenu* mainMenu, struct RenderState* renderState, 
             break;
         case MainMenuStateNewGame:
             newGameRender(&mainMenu->newGameMenu, renderState, task);
+            break;
+        case MainMenuStateOptions:
+            optionsMenuRender(&mainMenu->optionsMenu, renderState, task);
             break;
     }
 }
