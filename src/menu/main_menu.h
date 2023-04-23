@@ -4,10 +4,16 @@
 #include "../graphics/graphics.h"
 #include "./menu.h"
 
+enum MainMenuState {
+    MainMenuStateLanding,
+    MainMenuStateNewGame,
+};
+
 struct LandingMenu {
     Gfx* newGameText;
     Gfx* loadGameText;
     Gfx* optionsText;
+    short selectedItem;
 };
 
 void landingMenuInit(struct LandingMenu* landingMenu);
@@ -17,6 +23,7 @@ struct Chapter {
     char* chapter;
     char* testChamber;
     void* imageData;
+    int testChamberNumber;
 };
 
 struct ChapterMenu {
@@ -42,12 +49,17 @@ struct NewGameMenu {
 
     struct ChapterMenu chapter0;
     struct ChapterMenu chapter1;
+
+    short selectedChapter;
+    short chapterOffset;
 };
 
 void newGameInit(struct NewGameMenu* newGameMenu);
+enum MainMenuState newGameUpdate(struct NewGameMenu* newGameMenu);
 void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderState, struct GraphicsTask* task);
 
 struct MainMenu {
+    enum MainMenuState state;
     struct LandingMenu landingMenu;
     struct NewGameMenu newGameMenu;
 };
