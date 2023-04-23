@@ -132,3 +132,14 @@ struct MenuButton menuBuildButton(struct Font* font, char* message, int x, int y
 
     return result;
 }
+
+struct Coloru8 gSelectionOrange = {255, 156, 0, 255};
+struct Coloru8 gSelectionGray = {201, 201, 201, 255};
+
+void menuSetRenderColor(struct RenderState* renderState, int isSelected, struct Coloru8* selected, struct Coloru8* defaultColor) {
+    if (isSelected) {
+        gDPSetEnvColor(renderState->dl++, selected->r, selected->g, selected->b, selected->a);
+    } else {
+        gDPSetEnvColor(renderState->dl++, defaultColor->r, defaultColor->g, defaultColor->b, defaultColor->a);
+    }
+}

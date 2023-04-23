@@ -243,6 +243,12 @@ build/src/scene/door.o: build/assets/models/props/door_01.h build/assets/models/
 
 build/src/menu/main_menu.o: build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
 
+build/src/menu/new_game_menu.o: build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
+
+build/src/menu/landing_menu.o: build/assets/materials/ui.h
+
+build/src/menu/options_menu.o: build/assets/materials/ui.h
+
 build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
 
 build/assets/models/props/combine_ball_catcher.h: assets/materials/ball_catcher.skm.yaml
