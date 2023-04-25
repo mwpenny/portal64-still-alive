@@ -10,11 +10,11 @@
 #include "materials/point_light_rendered.h"
 #include "util/time.h"
 #include "sk64/skelatool_defs.h"
-#include "controls/controller.h"
 #include "shadow_map.h"
 #include "../physics/point_constraint.h"
 #include "../physics/debug_renderer.h"
 #include "../controls/controller.h"
+#include "../controls/controller_actions.h"
 #include "../physics/collision_scene.h"
 #include "../levels/static_render.h"
 #include "../levels/levels.h"
@@ -255,31 +255,29 @@ void sceneCheckPortals(struct Scene* scene) {
     quatMultVector(&scene->player.lookTransform.rotation, &raycastRay.dir, &raycastRay.dir);
     quatMultVector(&scene->player.lookTransform.rotation, &gUp, &playerUp);
 
-    int bluePortalFlags;
-    if (scene->player.flags & PlayerHasSecondPortalGun){
-        bluePortalFlags = (L_TRIG);
-    }else{
-        bluePortalFlags = (L_TRIG | Z_TRIG | R_TRIG);
-    }
+    int fireBlue = controllerActionGet(ControllerActionOpenPortal0);
+    int fireOrange = controllerActionGet(ControllerActionOpenPortal1);
 
-    if (controllerGetButtonDown(0, Z_TRIG | R_TRIG) && (scene->player.flags & PlayerHasSecondPortalGun) && !playerIsGrabbing(&scene->player)) {
+    int hasBlue = (scene->player.flags & PlayerHasFirstPortalGun) != 0;
+    int hasOrange = (scene->player.flags & PlayerHasSecondPortalGun) != 0;
+
+    if (fireOrange && hasOrange && !playerIsGrabbing(&scene->player)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom, 1, 0);
         scene->player.flags |= PlayerJustShotPortalGun;
         scene->last_portal_indx_shot=0;
         soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL);
     }
 
-    if (controllerGetButtonDown(0, bluePortalFlags) && (scene->player.flags & PlayerHasFirstPortalGun) && !playerIsGrabbing(&scene->player)) {
+    if ((fireBlue || (!hasOrange && fireOrange)) && hasBlue && !playerIsGrabbing(&scene->player)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom, 1, 0);
         scene->player.flags |= PlayerJustShotPortalGun;
         scene->last_portal_indx_shot=1;
         soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL, NULL);
     }
 
-    if (controllerGetButtonDown(0, R_TRIG | L_TRIG | Z_TRIG) && playerIsGrabbing(&scene->player)){
+    if ((fireOrange || fireBlue) && playerIsGrabbing(&scene->player)){
         playerSetGrabbing(&scene->player, NULL);
     }
-
 
     scene->looked_wall_portalable_0 = 0;
     scene->looked_wall_portalable_1 = 0;
@@ -444,7 +442,7 @@ void sceneUpdate(struct Scene* scene) {
     sceneUpdateListeners(scene);
     sceneCheckPortals(scene);
 
-    if ((playerIsDead(&scene->player) && controllerGetButtonDown(0, START_BUTTON | A_BUTTON)) ||
+    if ((playerIsDead(&scene->player) && (controllerActionGet(ControllerActionPause) || controllerActionGet(ControllerActionJump))) ||
         scene->player.lookTransform.position.y < KILL_PLANE_Y) {
         levelLoadLastCheckpoint();
     }
@@ -553,7 +551,7 @@ void sceneUpdate(struct Scene* scene) {
     scene->cpuTime = osGetTime() - frameStart;
     scene->lastFrameStart = frameStart;
 
-    OSContPad* freecam = controllersGetControllerData(1);
+    OSContPad* freecam = controllersGetControllerData(2);
 
 
     struct Vector3 lookDir;
@@ -562,7 +560,7 @@ void sceneUpdate(struct Scene* scene) {
     playerGetMoveBasis(&scene->camera.transform, &lookDir, &rightDir);
 
     if (freecam->stick_y) {
-        if (controllerGetButton(1, Z_TRIG)) {
+        if (controllerGetButton(2, Z_TRIG)) {
             vector3AddScaled(
                 &scene->freeCameraOffset, 
                 &lookDir, 
@@ -583,13 +581,13 @@ void sceneUpdate(struct Scene* scene) {
         );
     }
 
-    if (controllerGetButtonDown(1, START_BUTTON)) {
+    if (controllerGetButtonDown(2, START_BUTTON)) {
         scene->freeCameraOffset = gZeroVec;
     }
 
     vector3Add(&scene->camera.transform.position, &scene->freeCameraOffset, &scene->camera.transform.position);
 
-    if (controllerGetButtonDown(1, L_TRIG)) {
+    if (controllerGetButtonDown(2, L_TRIG)) {
         struct Transform identityTransform;
         transformInitIdentity(&identityTransform);
         identityTransform.position.y = 1.0f;

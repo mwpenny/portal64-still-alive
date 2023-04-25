@@ -2,6 +2,11 @@
 
 #include "../util/memory.h"
 
+struct Coloru8 gSelectionOrange = {255, 156, 0, 255};
+struct Coloru8 gSelectionGray = {201, 201, 201, 255};
+struct Coloru8 gBorderHighlight = {193, 193, 193, 255};
+struct Coloru8 gBorderDark = {86, 86, 86, 255};
+
 Gfx* menuBuildText(struct Font* font, char* message, int x, int y) {
     Gfx* result = malloc(sizeof(Gfx) * (fontCountGfx(font, message) + 1));
     Gfx* dl = result;
@@ -121,20 +126,17 @@ struct MenuButton menuBuildButton(struct Font* font, char* message, int x, int y
     Gfx* dl = result.outline;
 
     gDPPipeSync(dl++);
-    gDPSetEnvColor(dl++, 188, 188, 188, 255);
+    gDPSetEnvColor(dl++, gBorderHighlight.r, gBorderHighlight.g, gBorderHighlight.b, gBorderHighlight.a);
     gDPFillRectangle(dl++, x, y, x + width - 1, y + 1);
     gDPFillRectangle(dl++, x, y, x + 1, y + height);
     gDPPipeSync(dl++);
-    gDPSetEnvColor(dl++, 76, 76, 76, 255);
+    gDPSetEnvColor(dl++, gBorderDark.r, gBorderDark.g, gBorderDark.b, gBorderDark.a);
     gDPFillRectangle(dl++, x, y + height - 1, x + width, y + height);
     gDPFillRectangle(dl++, x + width - 1, y, x + width, y + height - 1);
     gSPEndDisplayList(dl++);
 
     return result;
 }
-
-struct Coloru8 gSelectionOrange = {255, 156, 0, 255};
-struct Coloru8 gSelectionGray = {201, 201, 201, 255};
 
 void menuSetRenderColor(struct RenderState* renderState, int isSelected, struct Coloru8* selected, struct Coloru8* defaultColor) {
     if (isSelected) {

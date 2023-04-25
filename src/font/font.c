@@ -81,3 +81,39 @@ int fontCountGfx(struct Font* font, char* message) {
 
     return result;
 }
+
+struct Vector2s16 fontMeasure(struct Font* font, char* message) {
+    int startX = 0;
+    char prev = 0;
+    int x = 0;
+    int y = 0;
+
+    struct Vector2s16 result;
+
+    result.x = 0;
+
+    for (; *message; prev = *message, ++message) {
+        char curr = *message;
+
+        if (curr == '\n') {
+            y += font->charHeight;
+            x = startX;
+            continue;
+        }
+
+        if ((unsigned char)curr >= font->symbolCount) {
+            continue;
+        }
+
+        struct FontSymbol* symbol = &font->symbols[(int)curr];
+
+        x += fontDetermineKerning(font, prev, curr);
+        x += symbol->xadvance;
+
+        result.x = MAX(result.x, x);
+    }
+
+    result.y = y + font->charHeight;
+
+    return result;
+}

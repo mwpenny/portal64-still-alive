@@ -4,10 +4,13 @@
 #include "../graphics/graphics.h"
 #include "./menu.h"
 #include "./menu_state.h"
+#include "./tabs.h"
 
 struct OptionsMenu {
     Gfx* menuOutline;
     Gfx* optionsText;
+
+    struct Tabs tabs;
 };
 
 void optionsMenuInit(struct OptionsMenu* options);

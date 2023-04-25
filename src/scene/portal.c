@@ -11,7 +11,6 @@
 #include "../util/time.h"
 #include "../levels/levels.h"
 #include "./portal_surface_generator.h"
-#include "../controls/controller.h"
 
 #include "../build/assets/models/portal/portal_blue.h"
 #include "../build/assets/models/portal/portal_blue_filled.h"
@@ -60,10 +59,6 @@ void portalUpdate(struct Portal* portal, int isOpen) {
         }
     } else if (!isOpen) {
         portal->opacity = 1.0f;
-    }
-
-    if (controllerGetButton(1, B_BUTTON)) {
-        portal->opacity = 0.5f;
     }
 
     if (portal->scale < 1.0f) {

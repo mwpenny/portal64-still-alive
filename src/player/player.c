@@ -3,7 +3,7 @@
 #include "player.h"
 #include "../audio/clips.h"
 #include "../audio/soundplayer.h"
-#include "../controls/controller.h"
+#include "../controls/controller_actions.h"
 #include "../defs.h"
 #include "../levels/levels.h"
 #include "../math/mathf.h"
@@ -317,14 +317,8 @@ void playerUpdateGrabbedObject(struct Player* player) {
         return;
     }
 
-    if (controllerGetButtonDown(0, B_BUTTON) || controllerGetButtonDown(1, U_JPAD)) {
+    if (controllerActionGet(ControllerActionUseItem)) {
         if (player->grabConstraint.object) {
-            if (controllerGetButtonDown(1, U_JPAD)) {
-                struct Vector3 forward;
-                quatMultVector(&player->lookTransform.rotation, &gForward, &forward);
-                vector3AddScaled(&player->grabConstraint.object->body->velocity, &forward, -50.0f, &player->grabConstraint.object->body->velocity);
-            }
-
             playerSetGrabbing(player, NULL);
         } else {
             struct RaycastHit hit;
@@ -440,25 +434,6 @@ void playerUpdateGunObject(struct Player* player) {
     
 }
 
-#define DEADZONE_SIZE       5
-#define MAX_JOYSTICK_RANGE  80
-
-float playerCleanupStickInput(s8 input) {
-    if (input > -DEADZONE_SIZE && input < DEADZONE_SIZE) {
-        return 0.0f;
-    }
-
-    if (input >= MAX_JOYSTICK_RANGE) {
-        return 1.0f;
-    }
-
-    if (input <= -MAX_JOYSTICK_RANGE) {
-        return -1.0f;
-    }
-
-    return ((float)input + (input > 0 ? -DEADZONE_SIZE : DEADZONE_SIZE)) * (1.0f / (MAX_JOYSTICK_RANGE - DEADZONE_SIZE));
-}
-
 void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, struct Vector3* right) {
     quatMultVector(&transform->rotation, &gForward, forward);
     quatMultVector(&transform->rotation, &gRight, right);
@@ -559,7 +534,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
 
     int isDead = playerIsDead(player);
 
-    if (!isDead && (player->flags & PlayerFlagsGrounded) && controllerGetButtonDown(0, A_BUTTON)) {
+    if (!isDead && (player->flags & PlayerFlagsGrounded) && controllerActionGet(ControllerActionJump)) {
         player->body.velocity.y = JUMP_IMPULSE;
         player->flags |= PlayerJustJumped;
     }
@@ -575,20 +550,13 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     }
 
     if (!isDead) {
-        if (controllerGetButton(0, L_JPAD)) {
-            vector3AddScaled(&targetVelocity, &right, -PLAYER_SPEED, &targetVelocity);
-        } else if (controllerGetButton(0, R_JPAD)) {
-            vector3AddScaled(&targetVelocity, &right, PLAYER_SPEED, &targetVelocity);
-        }
+        struct Vector2 moveInput = controllerDirectionGet(ControllerActionMove);
 
-        if (controllerGetButton(0, U_JPAD)) {
-            vector3AddScaled(&targetVelocity, &forward, -PLAYER_SPEED, &targetVelocity);
-        } else if (controllerGetButton(0, D_JPAD)) {
-            vector3AddScaled(&targetVelocity, &forward, PLAYER_SPEED, &targetVelocity);
-        }
+        vector3AddScaled(&targetVelocity, &right, PLAYER_SPEED * moveInput.x, &targetVelocity);
+        vector3AddScaled(&targetVelocity, &forward, -PLAYER_SPEED * moveInput.y, &targetVelocity);
 
         // if player isnt crouched, crouch
-        if (!(player->flags & PlayerCrouched) && (controllerGetButtonDown(0, R_CBUTTONS))){
+        if (!(player->flags & PlayerCrouched) && (controllerActionGet(ControllerActionDuck))){
             player->flags |= PlayerCrouched;
             camera_y_modifier = -0.25;
             collisionSceneRemoveDynamicObject(&player->collisionObject);
@@ -597,7 +565,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
             collisionObjectUpdateBB(&player->collisionObject);
         }
         //if player crouched, uncrouch
-        else if ((player->flags & PlayerCrouched) && (controllerGetButtonDown(0, R_CBUTTONS))){
+        else if ((player->flags & PlayerCrouched) && (controllerActionGet(ControllerActionDuck))){
             player->flags &= ~PlayerCrouched;
             camera_y_modifier = 0.0;
             collisionSceneRemoveDynamicObject(&player->collisionObject);
@@ -607,7 +575,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         }
 
         //look straight forward
-        if (controllerGetButtonDown(0, U_CBUTTONS)){
+        if (controllerActionGet(ControllerActionLookForward)){
             struct Vector3 lookingForward;
             vector3Negate(&gForward, &lookingForward);
             quatMultVector(&player->lookTransform.rotation, &lookingForward, &lookingForward);
@@ -617,7 +585,7 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
             }
         }
         //look behind
-        if (controllerGetButtonDown(0, D_CBUTTONS)){
+        if (controllerActionGet(ControllerActionLookBackward)){
             struct Vector3 lookingForward;
             vector3Negate(&gForward, &lookingForward);
             quatMultVector(&player->lookTransform.rotation, &lookingForward, &lookingForward);
@@ -751,9 +719,9 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         soundPlayerPlay(soundsPortalExit[2 - didPassThroughPortal], 0.75f, 1.0f, NULL, NULL);
     }
 
-    OSContPad* controllerInput = controllersGetControllerData(0);
-    float targetYaw = -playerCleanupStickInput(controllerInput->stick_x) * ROTATE_RATE;
-    float targetPitch = playerCleanupStickInput(controllerInput->stick_y) * ROTATE_RATE;
+    struct Vector2 lookInput = controllerDirectionGet(ControllerActionRotate);
+    float targetYaw = -lookInput.x * ROTATE_RATE;
+    float targetPitch = lookInput.y * ROTATE_RATE;
 
     player->yawVelocity = mathfMoveTowards(
         player->yawVelocity, 

@@ -11,6 +11,7 @@
 #include "util/memory.h"
 #include "string.h"
 #include "controls/controller.h"
+#include "controls/controller_actions.h"
 #include "scene/dynamic_scene.h"
 #include "audio/soundplayer.h"
 #include "audio/audio.h"
@@ -199,9 +200,10 @@ static void gameProc(void* arg) {
     contactSolverInit(&gContactSolver);
     portalSurfaceCleanupQueueInit();
     savefileNew();
-    levelLoadWithCallbacks(MAIN_MENU);
+    levelLoadWithCallbacks(0);
     cutsceneRunnerReset();
     controllersInit();
+    controllerActionInit();
     initAudio(fps);
     soundPlayerInit();
     skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
@@ -245,6 +247,7 @@ static void gameProc(void* arg) {
 
                 controllersTriggerRead();
                 controllerHandlePlayback();
+                controllerActionRead();
                 skAnimatorSync();
                 
                 if (inputIgnore) {
