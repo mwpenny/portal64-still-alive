@@ -5,12 +5,15 @@
 #include "./menu.h"
 #include "./menu_state.h"
 #include "./tabs.h"
+#include "./controls.h"
 
 struct OptionsMenu {
     Gfx* menuOutline;
     Gfx* optionsText;
 
     struct Tabs tabs;
+
+    struct ControlsMenu controlsMenu;
 };
 
 void optionsMenuInit(struct OptionsMenu* options);

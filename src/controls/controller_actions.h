@@ -41,6 +41,13 @@ enum ControllerAction {
     // direction actions
     ControllerActionMove,
     ControllerActionRotate,
+
+    ControllerActionCount = ControllerActionRotate,
+};
+
+struct ControllerSourceWithController {
+    char button;
+    char controller;
 };
 
 void controllerActionInit();
@@ -49,5 +56,7 @@ void controllerActionRead();
 
 struct Vector2 controllerDirectionGet(enum ControllerAction direction);
 int controllerActionGet(enum ControllerAction action);
+
+int controllerSourcesForAction(enum ControllerAction action, struct ControllerSourceWithController* sources, int maxSources);
 
 #endif

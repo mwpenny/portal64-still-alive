@@ -38,6 +38,8 @@ void optionsMenuInit(struct OptionsMenu* options) {
         MENU_LEFT + OPTIONS_PADDING, MENU_TOP + OPTIONS_PADDING,
         MENU_WIDTH - OPTIONS_PADDING * 2, MENU_HEIGHT - OPTIONS_PADDING * 2
     );
+
+    controlsMenuInit(&options->controlsMenu);
 }
 
 enum MainMenuState optionsMenuUpdate(struct OptionsMenu* options) {
@@ -66,4 +68,10 @@ void optionsMenuRender(struct OptionsMenu* options, struct RenderState* renderSt
     gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
     renderState->dl = tabsRenderText(&options->tabs, renderState->dl);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
+
+    switch (options->tabs.selectedTab) {
+        case 0:
+            controlsMenuRender(&options->controlsMenu, renderState, task);
+            break;
+    }
 }

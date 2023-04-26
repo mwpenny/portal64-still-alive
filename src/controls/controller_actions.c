@@ -159,3 +159,23 @@ struct Vector2 controllerDirectionGet(enum ControllerAction direction) {
 int controllerActionGet(enum ControllerAction action) {
     return (gActionState & (1 << action)) != 0;
 }
+
+int controllerSourcesForAction(enum ControllerAction action, struct ControllerSourceWithController* sources, int maxSources) {
+    int index = 0;
+
+    for (int controllerIndex = 0; controllerIndex < 2; ++controllerIndex) {
+        for (int sourceIndex = 0; sourceIndex < ControllerActionSourceCount; ++sourceIndex) {
+            if (gControllerSettings[controllerIndex][sourceIndex] == action) {
+                sources[index].button = sourceIndex;
+                sources[index].controller = controllerIndex;
+                ++index;
+
+                if (index == maxSources) {
+                    return index;
+                }
+            } 
+        }
+    }
+
+    return index;
+}

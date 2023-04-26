@@ -117,23 +117,36 @@ Gfx* menuBuildSolidBorder(int x, int y, int w, int h, int nx, int ny, int nw, in
     return result;
 }
 
+Gfx* menuBuildOutline(int x, int y, int width, int height, int invert) {
+    Gfx* result = malloc(sizeof(Gfx) * 9);
+    Gfx* dl = result;
+
+    gDPPipeSync(dl++);
+    if (invert) {
+        gDPSetEnvColor(dl++, gBorderDark.r, gBorderDark.g, gBorderDark.b, gBorderDark.a);
+    } else {
+        gDPSetEnvColor(dl++, gBorderHighlight.r, gBorderHighlight.g, gBorderHighlight.b, gBorderHighlight.a);
+    }
+    gDPFillRectangle(dl++, x, y, x + width - 1, y + 1);
+    gDPFillRectangle(dl++, x, y, x + 1, y + height);
+    gDPPipeSync(dl++);
+    if (invert) {
+        gDPSetEnvColor(dl++, gBorderHighlight.r, gBorderHighlight.g, gBorderHighlight.b, gBorderHighlight.a);
+    } else {
+        gDPSetEnvColor(dl++, gBorderDark.r, gBorderDark.g, gBorderDark.b, gBorderDark.a);
+    }
+    gDPFillRectangle(dl++, x, y + height - 1, x + width, y + height);
+    gDPFillRectangle(dl++, x + width - 1, y, x + width, y + height - 1);
+    gSPEndDisplayList(dl++);
+
+    return result;
+}
+
 struct MenuButton menuBuildButton(struct Font* font, char* message, int x, int y, int width, int height) {
     struct MenuButton result;
 
     result.text = menuBuildText(font, message, x + 4, y + 2);
-    result.outline = malloc(sizeof(Gfx) * 9);
-
-    Gfx* dl = result.outline;
-
-    gDPPipeSync(dl++);
-    gDPSetEnvColor(dl++, gBorderHighlight.r, gBorderHighlight.g, gBorderHighlight.b, gBorderHighlight.a);
-    gDPFillRectangle(dl++, x, y, x + width - 1, y + 1);
-    gDPFillRectangle(dl++, x, y, x + 1, y + height);
-    gDPPipeSync(dl++);
-    gDPSetEnvColor(dl++, gBorderDark.r, gBorderDark.g, gBorderDark.b, gBorderDark.a);
-    gDPFillRectangle(dl++, x, y + height - 1, x + width, y + height);
-    gDPFillRectangle(dl++, x + width - 1, y, x + width, y + height - 1);
-    gSPEndDisplayList(dl++);
+    result.outline = menuBuildOutline(x, y, width, height, 0);
 
     return result;
 }

@@ -33,8 +33,8 @@ struct Chapter gChapters[] = {
 #define CHAPTER_IMAGE_SIZE  (84 * 48 * 2)
 
 void chapterMenuInit(struct ChapterMenu* chapterMenu, int x, int y) {
-    chapterMenu->chapterText = malloc(sizeof(Gfx) * 3 * 10 + 1);
-    chapterMenu->testChamberText = malloc(sizeof(Gfx) * 3 * 14 + 1);
+    chapterMenu->chapterText = malloc(sizeof(Gfx) * GFX_ENTRIES_PER_IMAGE * 10 + GFX_ENTRIES_PER_END_DL);
+    chapterMenu->testChamberText = malloc(sizeof(Gfx) * GFX_ENTRIES_PER_IMAGE * 14 + GFX_ENTRIES_PER_END_DL);
     chapterMenu->border = menuBuildSolidBorder(
         x, y + 27, 
         92, 58,

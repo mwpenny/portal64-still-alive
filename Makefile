@@ -249,6 +249,8 @@ build/src/menu/landing_menu.o: build/assets/materials/ui.h
 
 build/src/menu/options_menu.o: build/assets/materials/ui.h
 
+build/src/menu/controls.o: build/assets/materials/ui.h
+
 build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
 
 build/assets/models/props/combine_ball_catcher.h: assets/materials/ball_catcher.skm.yaml
