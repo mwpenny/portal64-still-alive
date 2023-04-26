@@ -47,6 +47,12 @@ enum MainMenuState optionsMenuUpdate(struct OptionsMenu* options) {
         return MainMenuStateLanding;
     }
 
+    switch (options->tabs.selectedTab) {
+        case 0:
+            controlsMenuUpdate(&options->controlsMenu);
+            break;
+    }
+
     return MainMenuStateOptions;
 }
 
