@@ -8,9 +8,11 @@
 #define MAX_SOURCES_PER_ACTION  4
 #define MAX_CONTROLS_SECTIONS   4
 
+#define SOURCE_ICON_COUNT MAX_SOURCES_PER_ACTION * GFX_ENTRIES_PER_IMAGE + GFX_ENTRIES_PER_END_DL
+
 struct ControlsMenuRow {
     Gfx* actionText;
-    Gfx sourceIcons[MAX_SOURCES_PER_ACTION * GFX_ENTRIES_PER_IMAGE + GFX_ENTRIES_PER_END_DL];
+    Gfx sourceIcons[SOURCE_ICON_COUNT];
     short y;
 };
 

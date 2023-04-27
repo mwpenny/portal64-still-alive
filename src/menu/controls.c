@@ -21,6 +21,85 @@
 
 #define SEPARATOR_SPACE     3
 
+struct ControllerIcon {
+    char x, y;
+    char w, h;
+};
+
+enum ControllerButtonIcons {
+    ControllerButtonIconsA,
+    ControllerButtonIconsB,
+    ControllerButtonIconsS,
+    ControllerButtonIconsCU,
+    ControllerButtonIconsCR,
+    ControllerButtonIconsCD,
+    ControllerButtonIconsCL,
+    ControllerButtonIconsDU,
+    ControllerButtonIconsDR,
+    ControllerButtonIconsDD,
+    ControllerButtonIconsDL,
+    ControllerButtonIconsZ,
+    ControllerButtonIconsR,
+    ControllerButtonIconsL,
+};
+
+struct ControllerIcon gControllerButtonIcons[] = {
+    [ControllerButtonIconsA] = {0, 0, 12, 12},
+    [ControllerButtonIconsB] = {12, 0, 12, 12},
+    [ControllerButtonIconsS] = {24, 0, 12, 12},
+
+    [ControllerButtonIconsCU] = {0, 24, 12, 12},
+    [ControllerButtonIconsCR] = {12, 24, 12, 12},
+    [ControllerButtonIconsCD] = {24, 24, 12, 12},
+    [ControllerButtonIconsCL] = {36, 24, 12, 12},
+
+    [ControllerButtonIconsDU] = {0, 36, 12, 12},
+    [ControllerButtonIconsDR] = {12, 36, 12, 12},
+    [ControllerButtonIconsDD] = {24, 36, 12, 12},
+    [ControllerButtonIconsDL] = {36, 36, 12, 12},
+
+    [ControllerButtonIconsZ] = {0, 48, 12, 12},
+    [ControllerButtonIconsR] = {12, 48, 12, 12},
+    [ControllerButtonIconsL] = {24, 48, 12, 12},
+};
+
+char gControllerActionToButtonIcon[] = {
+    [ControllerActionSourceAButton] = ControllerButtonIconsA,
+    [ControllerActionSourceBButton] = ControllerButtonIconsB,
+    [ControllerActionSourceStartButton] = ControllerButtonIconsS,
+
+    [ControllerActionSourceCUpButton] = ControllerButtonIconsCU,
+    [ControllerActionSourceCRightButton] = ControllerButtonIconsCR,
+    [ControllerActionSourceCDownButton] = ControllerButtonIconsCD,
+    [ControllerActionSourceCLeftButton] = ControllerButtonIconsCL,
+
+    [ControllerActionSourceDUpButton] = ControllerButtonIconsDU,
+    [ControllerActionSourceDRightButton] = ControllerButtonIconsDR,
+    [ControllerActionSourceDDownButton] = ControllerButtonIconsDD,
+    [ControllerActionSourceDLeftButton] = ControllerButtonIconsDL,
+
+    [ControllerActionSourceZTrig] = ControllerButtonIconsZ,
+    [ControllerActionSourceRTrig] = ControllerButtonIconsR,
+    [ControllerActionSourceLTrig] = ControllerButtonIconsL,
+};
+
+enum ControllerDirectionIcons {
+    ControllerDirectionIconsC,
+    ControllerDirectionIconsD,
+    ControllerDirectionIconsJ,
+};
+
+struct ControllerIcon gControllerDirectionIcons[] = {
+    [ControllerDirectionIconsC] = {0, 12, 14, 12},
+    [ControllerDirectionIconsD] = {14, 12, 12, 12},
+    [ControllerDirectionIconsJ] = {26, 12, 15, 12},
+};
+
+char gControllerActionToDirectionIcon[] = {
+    [ControllerActionSourceCUpButton] = ControllerDirectionIconsC,
+    [ControllerActionSourceDUpButton] = ControllerDirectionIconsD,
+    [ControllerActionSourceJoystick] = ControllerDirectionIconsJ,
+};
 
 struct ControlActionDataRow {
     char* name;
@@ -44,8 +123,44 @@ struct ControlActionDataRow gControllerDataRows[] = {
     {"Look backward", ControllerActionLookForward, NULL},
 };
 
+void controlsRenderIcons(Gfx* dl, enum ControllerAction action, int y) {
+    struct ControllerSourceWithController sources[MAX_SOURCES_PER_ACTION];
+
+    int sourceCount = controllerSourcesForAction(action, sources, MAX_SOURCES_PER_ACTION);
+
+    char* iconMapping;
+    struct ControllerIcon* icons;
+
+    int x = CONTROLS_X + CONTROLS_WIDTH - ROW_PADDING * 2;
+    
+    if (IS_DIRECTION_ACTION(action)) {
+        iconMapping = gControllerActionToDirectionIcon;
+        icons = gControllerDirectionIcons;
+    } else {
+        iconMapping = gControllerActionToButtonIcon;
+        icons = gControllerButtonIcons;
+    }
+
+    for (int i = 0; i < sourceCount; ++i) {
+        struct ControllerIcon icon = icons[(int)iconMapping[(int)sources[i].button]];
+
+        x -= icon.w;
+        gSPTextureRectangle(
+            dl++, 
+            x << 2, y << 2, 
+            (x + icon.w) << 2, (y + icon.h) << 2, 
+            G_TX_RENDERTILE, 
+            icon.x << 5, icon.y << 5, 
+            0x400, 0x400
+        );
+    }
+
+    gSPEndDisplayList(dl++);
+}
+
 void controlsRerenderRow(struct ControlsMenuRow* row, struct ControlActionDataRow* data, int x, int y) {
     fontRender(&gDejaVuSansFont, data->name, x + ROW_PADDING, y, row->actionText);
+    controlsRenderIcons(row->sourceIcons, data->action, y);
     row->y = y;
 }
 
@@ -53,7 +168,9 @@ void controlsInitRow(struct ControlsMenuRow* row, struct ControlActionDataRow* d
     row->actionText = menuBuildText(&gDejaVuSansFont, data->name, 0, 0);
 
     Gfx* dl = row->sourceIcons;
-    gSPEndDisplayList(dl++);
+    for (int i = 0; i < SOURCE_ICON_COUNT; ++i) {
+        gSPEndDisplayList(dl++);
+    }
 }
 
 void controlsRerenderHeader(struct ControlsMenuHeader* header, char* message, int x, int y) {
@@ -208,6 +325,22 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
         gSPDisplayList(renderState->dl++, controlsMenu->headers[i].headerText);
     }
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
+
+    gSPDisplayList(renderState->dl++, ui_material_list[BUTTON_ICONS_INDEX]);
+    for (int i = 0; i < ControllerActionCount; ++i) {
+        if (controlsMenu->selectedRow == i) {
+            gDPPipeSync(renderState->dl++);
+            gDPSetEnvColor(renderState->dl++, 0, 0, 0, 255);
+        }
+
+        gSPDisplayList(renderState->dl++, controlsMenu->actionRows[i].sourceIcons);
+
+        if (controlsMenu->selectedRow == i) {
+            gDPPipeSync(renderState->dl++);
+            gDPSetEnvColor(renderState->dl++, 255, 255, 255, 255);
+        }
+    }
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[BUTTON_ICONS_INDEX]);
 
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT);
 }

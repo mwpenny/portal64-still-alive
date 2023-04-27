@@ -19,9 +19,9 @@ enum ControllerActionSource {
     ControllerActionSourceDDownButton,
     ControllerActionSourceDLeftButton,
     // triggers
-    ControllerActionSourceLTrig,
-    ControllerActionSourceRTrig,
     ControllerActionSourceZTrig,
+    ControllerActionSourceRTrig,
+    ControllerActionSourceLTrig,
     // joystick
     ControllerActionSourceJoystick,
 
@@ -44,6 +44,8 @@ enum ControllerAction {
 
     ControllerActionCount = ControllerActionRotate,
 };
+
+#define IS_DIRECTION_ACTION(action)     ((action) >= ControllerActionMove && (action) <= ControllerActionRotate)
 
 struct ControllerSourceWithController {
     char button;

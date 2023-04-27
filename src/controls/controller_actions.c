@@ -40,8 +40,6 @@ unsigned short gActionSourceButtonMask[ControllerActionSourceCount] = {
     [ControllerActionSourceJoystick] = 0,
 };
 
-#define IS_DIRECTION_ACTION(action)     ((action) >= ControllerActionMove && (action) <= ControllerActionRotate)
-
 enum ControllerAction gControllerSettings[2][ControllerActionSourceCount];
 
 int gActionState = 0;
@@ -169,6 +167,11 @@ int controllerSourcesForAction(enum ControllerAction action, struct ControllerSo
                 sources[index].button = sourceIndex;
                 sources[index].controller = controllerIndex;
                 ++index;
+
+                if (IS_DIRECTION_ACTION(action) && 
+                    (sourceIndex == ControllerActionSourceCUpButton || sourceIndex == ControllerActionSourceDUpButton)) {
+                    sourceIndex += 3;
+                }
 
                 if (index == maxSources) {
                     return index;
