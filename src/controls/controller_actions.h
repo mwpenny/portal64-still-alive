@@ -29,7 +29,7 @@ enum ControllerActionSource {
 };
 
 enum ControllerAction {
-    ControllerActionOpenNone,
+    ControllerActionNone,
     ControllerActionOpenPortal0,
     ControllerActionOpenPortal1,
     ControllerActionJump,
@@ -46,10 +46,11 @@ enum ControllerAction {
 };
 
 #define IS_DIRECTION_ACTION(action)     ((action) >= ControllerActionMove && (action) <= ControllerActionRotate)
+#define IS_VALID_SOURCE(source) ((source) >= 0 && (source) < ControllerActionSourceCount)
 
 struct ControllerSourceWithController {
-    char button;
-    char controller;
+    unsigned char button;
+    unsigned char controller;
 };
 
 void controllerActionInit();
@@ -60,5 +61,13 @@ struct Vector2 controllerDirectionGet(enum ControllerAction direction);
 int controllerActionGet(enum ControllerAction action);
 
 int controllerSourcesForAction(enum ControllerAction action, struct ControllerSourceWithController* sources, int maxSources);
+
+void controllerSetSource(enum ControllerAction action, enum ControllerActionSource source, int controller);
+void controllerSetDefaultSource();
+
+struct ControllerSourceWithController controllerReadAnySource();
+
+enum ControllerActionSource controllerSourceMapToDirection(enum ControllerActionSource source);
+enum ControllerActionSource controllerSourceMapAction(enum ControllerActionSource source);
 
 #endif

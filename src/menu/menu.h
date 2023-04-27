@@ -11,6 +11,13 @@ struct MenuButton {
     Gfx* text;
 };
 
+enum MenuDirection {
+    MenuDirectionStay,
+    MenuDirectionUp,
+    MenuDirectionRight,
+    MenuDirectionLeft,
+};
+
 #define GFX_ENTRIES_PER_IMAGE   3
 #define GFX_ENTRIES_PER_END_DL  1
 

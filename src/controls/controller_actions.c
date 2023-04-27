@@ -8,13 +8,13 @@ enum ControllerAction gDefaultControllerSettings[ControllerActionSourceCount] = 
     [ControllerActionSourceAButton] = ControllerActionJump,
     [ControllerActionSourceBButton] = ControllerActionUseItem,
     [ControllerActionSourceCUpButton] = ControllerActionMove,
-    [ControllerActionSourceCRightButton] = ControllerActionMove,
-    [ControllerActionSourceCDownButton] = ControllerActionMove,
-    [ControllerActionSourceCLeftButton] = ControllerActionMove,
+    [ControllerActionSourceCRightButton] = ControllerActionNone,
+    [ControllerActionSourceCDownButton] = ControllerActionNone,
+    [ControllerActionSourceCLeftButton] = ControllerActionNone,
     [ControllerActionSourceDUpButton] = ControllerActionMove,
-    [ControllerActionSourceDRightButton] = ControllerActionMove,
-    [ControllerActionSourceDDownButton] = ControllerActionMove,
-    [ControllerActionSourceDLeftButton] = ControllerActionMove,
+    [ControllerActionSourceDRightButton] = ControllerActionNone,
+    [ControllerActionSourceDDownButton] = ControllerActionNone,
+    [ControllerActionSourceDLeftButton] = ControllerActionNone,
     [ControllerActionSourceStartButton] = ControllerActionPause,
     [ControllerActionSourceLTrig] = ControllerActionOpenPortal1,
     [ControllerActionSourceRTrig] = ControllerActionOpenPortal1,
@@ -46,8 +46,8 @@ int gActionState = 0;
 struct Vector2 gDirections[2];
 
 void controllerActionInit() {
-    memCopy(gControllerSettings[0], gDefaultControllerSettings, sizeof(gDefaultControllerSettings));
-    zeroMemory(gControllerSettings[1], sizeof(gDefaultControllerSettings));
+    // TODO load controller settings from SRAM
+    controllerSetDefaultSource();
 }
 
 void controllerActionApply(enum ControllerAction action) {
@@ -181,4 +181,89 @@ int controllerSourcesForAction(enum ControllerAction action, struct ControllerSo
     }
 
     return index;
+}
+
+void controllerSetSource(enum ControllerAction action, enum ControllerActionSource source, int controller) {
+    if (IS_DIRECTION_ACTION(action)) {
+        source = controllerSourceMapToDirection(source);
+        
+    } else {
+        source = controllerSourceMapAction(source);
+    }
+
+    if (source == ControllerActionSourceCount) {
+        return;
+    }
+
+    if (source >= ControllerActionSourceCUpButton && 
+        source <= ControllerActionSourceCLeftButton && 
+        IS_DIRECTION_ACTION(gControllerSettings[controller][ControllerActionSourceCUpButton])) {
+        gControllerSettings[controller][ControllerActionSourceCUpButton] = ControllerActionNone;
+    }
+
+    if (source >= ControllerActionSourceDUpButton && 
+        source <= ControllerActionSourceDLeftButton && 
+        IS_DIRECTION_ACTION(gControllerSettings[controller][ControllerActionSourceDUpButton])) {
+        gControllerSettings[controller][ControllerActionSourceDUpButton] = ControllerActionNone;
+    }
+
+    gControllerSettings[controller][source] = action;
+
+    if (IS_DIRECTION_ACTION(action) && (source == ControllerActionSourceCUpButton || source == ControllerActionSourceDUpButton)) {
+        gControllerSettings[controller][source + 1] = ControllerActionNone;
+        gControllerSettings[controller][source + 2] = ControllerActionNone;
+        gControllerSettings[controller][source + 3] = ControllerActionNone;
+    }
+}
+
+void controllerSetDefaultSource() {
+    memCopy(gControllerSettings[0], gDefaultControllerSettings, sizeof(gDefaultControllerSettings));
+    zeroMemory(gControllerSettings[1], sizeof(gDefaultControllerSettings));
+}
+
+struct ControllerSourceWithController controllerReadAnySource() {
+    struct ControllerSourceWithController result;
+
+
+    for (result.controller = 0; result.controller < 2; ++result.controller) {
+        for (result.button = 0; result.button < ControllerActionSourceCount; ++result.button) {
+            if (controllerGetButtonDown(result.controller, gActionSourceButtonMask[result.button])) {
+                return result;
+            }
+
+            if (result.button == ControllerActionSourceJoystick) {
+                OSContPad* pad = controllersGetControllerData(result.controller);
+
+                if (abs(pad->stick_x) > 40 || abs(pad->stick_y) > 40) {
+                    return result;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+enum ControllerActionSource controllerSourceMapToDirection(enum ControllerActionSource source) {
+    if (source >= ControllerActionSourceCUpButton && source <= ControllerActionSourceCLeftButton) {
+        return ControllerActionSourceCUpButton;
+    }
+
+    if (source >= ControllerActionSourceDUpButton && source <= ControllerActionSourceDLeftButton) {
+        return ControllerActionSourceDUpButton;
+    }
+
+    if (source == ControllerActionSourceJoystick) {
+        return ControllerActionSourceJoystick;
+    }
+
+    return ControllerActionSourceCount;
+}
+
+enum ControllerActionSource controllerSourceMapAction(enum ControllerActionSource source) {
+    if (source == ControllerActionSourceJoystick) {
+        return ControllerActionSourceCount;
+    }
+
+    return source;
 }

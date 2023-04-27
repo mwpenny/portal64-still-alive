@@ -43,17 +43,20 @@ void optionsMenuInit(struct OptionsMenu* options) {
 }
 
 enum MainMenuState optionsMenuUpdate(struct OptionsMenu* options) {
-    if (controllerGetButtonDown(0, B_BUTTON)) {
-        return MainMenuStateLanding;
-    }
+    enum MenuDirection menuDirection = MenuDirectionStay;
 
     switch (options->tabs.selectedTab) {
         case 0:
-            controlsMenuUpdate(&options->controlsMenu);
+            menuDirection = controlsMenuUpdate(&options->controlsMenu);
             break;
     }
 
-    return MainMenuStateOptions;
+    switch (menuDirection) {
+        case MenuDirectionUp:
+            return MainMenuStateLanding;
+        default:
+            return MainMenuStateOptions;
+    };
 }
 
 void optionsMenuRender(struct OptionsMenu* options, struct RenderState* renderState, struct GraphicsTask* task) {

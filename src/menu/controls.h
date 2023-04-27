@@ -29,10 +29,12 @@ struct ControlsMenu {
 
     short selectedRow;
     short scrollOffset;
+
+    enum ControllerAction waitingForAction;
 };
 
 void controlsMenuInit(struct ControlsMenu* controlsMenu);
-void controlsMenuUpdate(struct ControlsMenu* controlsMenu);
+enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu);
 void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* renderState, struct GraphicsTask* task);
 
 #endif

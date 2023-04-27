@@ -9,13 +9,11 @@
 #define MAX_DYNAMIC_LIGHTS      128
 
 struct RenderState {
-    Gfx glist[MAX_DL_LENGTH];
-    u64 renderStateMemory[MAX_RENDER_STATE_MEMORY_CHUNKS];
+    Gfx glist[MAX_DL_LENGTH + MAX_RENDER_STATE_MEMORY_CHUNKS];
     Gfx* dl;
     u16* framebuffer;
     u16* depthBuffer;
-    unsigned short currentMemoryChunk;
-    unsigned short currentChunkEnd;
+    Gfx* currentMemoryChunk;
 };
 
 void renderStateInit(struct RenderState* renderState, u16* framebuffer, u16* depthBuffer);
@@ -29,5 +27,9 @@ Gfx* renderStateAllocateDLChunk(struct RenderState* renderState, unsigned count)
 Gfx* renderStateReplaceDL(struct RenderState* renderState, Gfx* nextDL);
 Gfx* renderStateStartChunk(struct RenderState* renderState);
 Gfx* renderStateEndChunk(struct RenderState* renderState, Gfx* chunkStart);
+
+int renderStateMaxDLCount(struct RenderState* renderState);
+
+void renderStateInlineBranch(struct RenderState* renderState, Gfx* dl);
 
 #endif

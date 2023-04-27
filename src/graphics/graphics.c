@@ -122,7 +122,7 @@ void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callba
     struct GFXValidationResult validationResult;
     zeroMemory(&validationResult, sizeof(struct GFXValidationResult));
 
-    if (gfxValidate(&scTask->list, MAX_DL_LENGTH, &validationResult) != GFXValidatorErrorNone) {
+    if (gfxValidate(&scTask->list, renderStateMaxDLCount(renderState), &validationResult) != GFXValidatorErrorNone) {
         gfxGenerateReadableMessage(&validationResult, graphicsOutputMessageToDebugger);
         gdbBreak();
     }
