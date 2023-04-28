@@ -6,6 +6,14 @@
 #include "./menu_state.h"
 #include "./tabs.h"
 #include "./controls.h"
+#include "./audio_options.h"
+
+enum OptionsMenuTabs {
+    OptionsMenuTabsControls,
+    OptionsMenuTabsAudio,
+
+    OptionsMenuTabsCount,
+};
 
 struct OptionsMenu {
     Gfx* menuOutline;
@@ -14,6 +22,7 @@ struct OptionsMenu {
     struct Tabs tabs;
 
     struct ControlsMenu controlsMenu;
+    struct AudioOptions audioOptions;
 };
 
 void optionsMenuInit(struct OptionsMenu* options);

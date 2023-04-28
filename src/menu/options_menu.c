@@ -40,23 +40,45 @@ void optionsMenuInit(struct OptionsMenu* options) {
     );
 
     controlsMenuInit(&options->controlsMenu);
+    audioOptionsInit(&options->audioOptions);
 }
 
 enum MainMenuState optionsMenuUpdate(struct OptionsMenu* options) {
     enum MenuDirection menuDirection = MenuDirectionStay;
 
     switch (options->tabs.selectedTab) {
-        case 0:
+        case OptionsMenuTabsControls:
             menuDirection = controlsMenuUpdate(&options->controlsMenu);
+            break;
+        case OptionsMenuTabsAudio:
+            menuDirection = audioOptionsUpdate(&options->audioOptions);
             break;
     }
 
-    switch (menuDirection) {
-        case MenuDirectionUp:
-            return MainMenuStateLanding;
-        default:
-            return MainMenuStateOptions;
-    };
+    if (menuDirection == MenuDirectionUp) {
+        return MainMenuStateLanding;
+    }
+
+    if (menuDirection == MenuDirectionLeft) {
+        if (options->tabs.selectedTab == 0) {
+            tabsSetSelectedTab(&options->tabs, OptionsMenuTabsCount - 1);
+        } else {
+            tabsSetSelectedTab(&options->tabs, options->tabs.selectedTab - 1);
+        }
+
+        tabsSetSelectedTab(&options->tabs, options->tabs.selectedTab);
+    }
+
+    if (menuDirection == MenuDirectionRight) {
+        if (options->tabs.selectedTab == OptionsMenuTabsCount - 1) {
+            tabsSetSelectedTab(&options->tabs, 0);
+        } else {
+            tabsSetSelectedTab(&options->tabs, options->tabs.selectedTab + 1);
+        }
+
+    }
+
+    return MainMenuStateOptions;
 }
 
 void optionsMenuRender(struct OptionsMenu* options, struct RenderState* renderState, struct GraphicsTask* task) {
@@ -79,8 +101,11 @@ void optionsMenuRender(struct OptionsMenu* options, struct RenderState* renderSt
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
 
     switch (options->tabs.selectedTab) {
-        case 0:
+        case OptionsMenuTabsControls:
             controlsMenuRender(&options->controlsMenu, renderState, task);
+            break;
+        case OptionsMenuTabsAudio:
+            audioOptionsRender(&options->audioOptions, renderState, task);
             break;
     }
 }

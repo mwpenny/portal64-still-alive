@@ -24,7 +24,7 @@ void mainMenuInit(struct MainMenu* mainMenu) {
     newGameInit(&mainMenu->newGameMenu);
     optionsMenuInit(&mainMenu->optionsMenu);
 
-    mainMenu->state = MainMenuStateLanding;
+    mainMenu->state = MainMenuStateOptions;
 
     mainMenuReadCamera(mainMenu);
 

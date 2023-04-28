@@ -14,7 +14,7 @@ void tabsSetSelectedTab(struct Tabs* tabs, int index) {
         return;
     }
 
-    tabs->selectedTab = 0;
+    tabs->selectedTab = index;
 
     Gfx* dl = tabs->tabOutline;
 
@@ -48,7 +48,7 @@ void tabsSetSelectedTab(struct Tabs* tabs, int index) {
 
     if (selectedTab) {
         gDPFillRectangle(dl++, tabs->x, tabs->y + TAB_HEIGHT, selectedTab->x, tabs->y + TAB_HEIGHT + 1);
-        gDPFillRectangle(dl++, tabs->x + selectedTab->width, tabs->y + TAB_HEIGHT, tabs->x + tabs->width, tabs->y + TAB_HEIGHT + 1);
+        gDPFillRectangle(dl++, selectedTab->x + selectedTab->width, tabs->y + TAB_HEIGHT, tabs->x + tabs->width, tabs->y + TAB_HEIGHT + 1);
     }
 
     gSPEndDisplayList(dl++);

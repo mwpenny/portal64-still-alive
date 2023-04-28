@@ -9,6 +9,8 @@
 struct MenuButton {
     Gfx* outline;
     Gfx* text;
+    short x, y;
+    short w, h;
 };
 
 enum MenuDirection {

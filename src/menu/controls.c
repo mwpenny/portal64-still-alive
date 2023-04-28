@@ -21,6 +21,11 @@
 
 #define SEPARATOR_SPACE     3
 
+#define USE_DEFAULTS_X      190
+#define USE_DEFAULTS_Y      186
+#define USE_DEFAULTS_WIDTH  96
+#define USE_DEFAULTS_HEIGHT 16
+
 struct ControllerIcon {
     char x, y;
     char w, h;
@@ -230,6 +235,13 @@ void controlsMenuInit(struct ControlsMenu* controlsMenu) {
 
     controlsLayout(controlsMenu);
 
+    controlsMenu->useDefaults = menuBuildButton(
+        &gDejaVuSansFont, 
+        "Use Defaults", 
+        USE_DEFAULTS_X, USE_DEFAULTS_Y,
+        USE_DEFAULTS_WIDTH, USE_DEFAULTS_HEIGHT
+    );
+
     controlsMenu->scrollOutline = menuBuildOutline(CONTROLS_X, CONTROLS_Y, CONTROLS_WIDTH, CONTROLS_HEIGHT, 1);
 }
 
@@ -251,7 +263,7 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
     if (controllerDir & ControllerDirectionDown) {
         controlsMenu->selectedRow = controlsMenu->selectedRow + 1;
 
-        if (controlsMenu->selectedRow == ControllerActionCount) {
+        if (controlsMenu->selectedRow == ControllerActionCount + 1) {
             controlsMenu->selectedRow = 0;
         }
     }
@@ -260,7 +272,7 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
         controlsMenu->selectedRow = controlsMenu->selectedRow - 1;
 
         if (controlsMenu->selectedRow < 0) {
-            controlsMenu->selectedRow = ControllerActionCount - 1;
+            controlsMenu->selectedRow = ControllerActionCount;
         }
     }
 
@@ -286,9 +298,14 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
             controlsMenu->scrollOffset = newScroll;
             controlsLayout(controlsMenu);
         }
+    }
 
-        if (controllerGetButtonDown(0, A_BUTTON)) {
+    if (controllerGetButtonDown(0, A_BUTTON)) {
+        if (controlsMenu->selectedRow >= 0 && controlsMenu->selectedRow < ControllerActionCount) {
             controlsMenu->waitingForAction = gControllerDataRows[controlsMenu->selectedRow].action;
+        } else if (controlsMenu->selectedRow == ControllerActionCount) {
+            controllerSetDefaultSource();
+            controlsLayout(controlsMenu);
         }
     }
 
@@ -296,11 +313,18 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
         return MenuDirectionUp;
     }
 
+    if (controllerDir & ControllerDirectionLeft) {
+        return MenuDirectionLeft;
+    }
+
+    if (controllerDir & ControllerDirectionRight) {
+        return MenuDirectionRight;
+    }
+
     return MenuDirectionStay;
 }
 
 void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* renderState, struct GraphicsTask* task) {
-
     gSPDisplayList(renderState->dl++, ui_material_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
     gDPFillRectangle(renderState->dl++, CONTROLS_X, CONTROLS_Y, CONTROLS_X + CONTROLS_WIDTH, CONTROLS_Y + CONTROLS_HEIGHT);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
@@ -328,11 +352,34 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
         );
     }
 
+    if (controlsMenu->selectedRow == ControllerActionCount) {
+        gDPPipeSync(renderState->dl++);
+        gDPSetEnvColor(renderState->dl++, gSelectionOrange.r, gSelectionOrange.g, gSelectionOrange.b, gSelectionOrange.a);
+        gDPFillRectangle(
+            renderState->dl++, 
+            USE_DEFAULTS_X, 
+            USE_DEFAULTS_Y, 
+            USE_DEFAULTS_X + USE_DEFAULTS_WIDTH,
+            USE_DEFAULTS_Y + USE_DEFAULTS_HEIGHT
+        );
+    }
+
+    gSPDisplayList(renderState->dl++, controlsMenu->useDefaults.outline);
+
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
 
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, CONTROLS_X, CONTROLS_Y, CONTROLS_X + CONTROLS_WIDTH, CONTROLS_Y + CONTROLS_HEIGHT);
 
     gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
+
+    gDPPipeSync(renderState->dl++);
+    gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT);
+    menuSetRenderColor(renderState, controlsMenu->selectedRow == ControllerActionCount, &gColorBlack, &gColorWhite);
+    gSPDisplayList(renderState->dl++, controlsMenu->useDefaults.text);
+    gDPPipeSync(renderState->dl++);
+    gDPSetEnvColor(renderState->dl++, gColorWhite.r, gColorWhite.g, gColorWhite.b, gColorWhite.a);    
+    gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, CONTROLS_X, CONTROLS_Y, CONTROLS_X + CONTROLS_WIDTH, CONTROLS_Y + CONTROLS_HEIGHT);
+
     for (int i = 0; i < ControllerActionCount; ++i) {
         if (controlsMenu->selectedRow == i) {
             gDPPipeSync(renderState->dl++);
@@ -352,6 +399,7 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
         }
         renderStateInlineBranch(renderState, controlsMenu->headers[i].headerText);
     }
+
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
 
     gSPDisplayList(renderState->dl++, ui_material_list[BUTTON_ICONS_INDEX]);

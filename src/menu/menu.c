@@ -148,6 +148,12 @@ struct MenuButton menuBuildButton(struct Font* font, char* message, int x, int y
     result.text = menuBuildText(font, message, x + 4, y + 2);
     result.outline = menuBuildOutline(x, y, width, height, 0);
 
+    result.x = x;
+    result.y = y;
+
+    result.w = width;
+    result.h = height;
+
     return result;
 }
 
