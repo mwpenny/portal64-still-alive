@@ -241,9 +241,9 @@ build/src/scene/ball_catcher.o: build/assets/models/props/combine_ball_catcher.h
 
 build/src/scene/door.o: build/assets/models/props/door_01.h build/assets/models/props/door_02.h
 
-build/src/menu/main_menu.o: build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
+build/src/menu/main_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
 
-build/src/menu/new_game_menu.o: build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
+build/src/menu/new_game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
 
 build/src/menu/landing_menu.o: build/assets/materials/ui.h
 
