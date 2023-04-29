@@ -6,7 +6,6 @@
 #include "../controls/controller_actions.h"
 
 struct SaveData gSaveData;
-int gShouldSave = 0;
 
 #ifdef DEBUG
 #define UNLOCK_ALL  1
@@ -24,13 +23,9 @@ void savefileNew() {
     zeroMemory(&gSaveData, sizeof(gSaveData));
     gSaveData.header.header = SAVEFILE_HEADER;
 
+    gSaveData.header.nextSaveSlot = 1;
+
     controllerSetDefaultSource();
-    
-    for (int controller = 0; controller < 2; ++controller) {
-        for (int source = 0; source < ControllerActionSourceCount; ++source) {
-            gSaveData.controls.controllerSettings[controller][source] = controllerGetSource(source, controller);
-        }
-    }
 
     gSaveData.audio.soundVolume = 0xFF;
     gSaveData.audio.musicVolume = 0xFF;
@@ -45,119 +40,6 @@ void savefileNew() {
 #define SRAM_CHUNK_DELAY        OS_USEC_TO_CYCLES(10 * 1000)
 
 #define SRAM_ADDR   0x08000000
-
-// void saveFileLoad() {
-//     /* Fill basic information */
-
-//     gSramHandle.type = 3;
-//     gSramHandle.baseAddress = PHYS_TO_K1(SRAM_START_ADDR);
-
-//     /* Get Domain parameters */
-
-//     gSramHandle.latency = (u8)SRAM_latency;
-//     gSramHandle.pulse = (u8)SRAM_pulse;
-//     gSramHandle.pageSize = (u8)SRAM_pageSize;
-//     gSramHandle.relDuration = (u8)SRAM_relDuration;
-//     gSramHandle.domain = PI_DOMAIN2;
-//     gSramHandle.speed = 0;
-
-//     osCreateMesgQueue(&timerQueue, &timerQueueBuf, 1);
-
-//     /* TODO gSramHandle.speed = */
-
-//     zeroMemory(&(gSramHandle.transferInfo), sizeof(gSramHandle.transferInfo));
-
-//     /*
-//     * Put the gSramHandle onto PiTable
-//     */
-
-//     OSIntMask saveMask = osGetIntMask();
-//     osSetIntMask(OS_IM_NONE);
-//     gSramHandle.next = __osPiTable;
-//     __osPiTable = &gSramHandle;
-//     osSetIntMask(saveMask);
-
-
-//     OSTimer timer;
-
-//     OSIoMesg dmaIoMesgBuf;
-
-//     dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
-//     dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
-//     dmaIoMesgBuf.dramAddr = &gSaveData;
-//     dmaIoMesgBuf.devAddr = SRAM_ADDR;
-//     dmaIoMesgBuf.size = sizeof(gSaveData);
-
-//     osInvalDCache(&gSaveData, sizeof(gSaveData));
-//     if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_READ) == -1)
-//     {
-//         saveFileNew();
-//         return;
-//     }
-//     (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
-
-//     osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
-//     (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
-
-//     if (gSaveData.header != SAVEFILE_HEADER) {
-//         saveFileNew();
-//     }
-// }
-
-// void saveFileCheckSave() {
-//     if (gShouldSave) {
-//         OSTimer timer;
-
-//         OSIoMesg dmaIoMesgBuf;
-
-//         dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
-//         dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
-//         dmaIoMesgBuf.dramAddr = &gSaveData;
-//         dmaIoMesgBuf.devAddr = SRAM_ADDR;
-//         dmaIoMesgBuf.size = sizeof(gSaveData);
-
-//         osWritebackDCache(&gSaveData, sizeof(gSaveData));
-//         if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_WRITE) == -1)
-//         {
-//             gShouldSave = 0;
-//             return;
-//         }
-//         (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
-
-//         osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
-//         (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
-        
-//         gShouldSave = 0;
-//     } else {
-//         gShouldSave = 0;
-//     }
-// }
-
-// void saveFileSave() {
-//     gShouldSave = 1;
-// }
-
-// int saveFileIsLevelComplete(int level) {
-//     return UNLOCK_ALL || gSaveData.levels[level].completionTime != 0;
-// }
-
-// unsigned short saveFileLevelTime(int level) {
-//     return gSaveData.levels[level].completionTime;
-// }
-
-// void saveFileMarkLevelComplete(int level, float time) {
-//     unsigned short newTime = (unsigned short)(time * 10.0f);
-//     if (gSaveData.levels[level].completionTime == 0 || newTime < gSaveData.levels[level].completionTime) {
-//         gSaveData.levels[level].completionTime = newTime;
-//     }
-//     gShouldSave = 1;
-// }
-
-// void saveFileErase() {
-//     saveFileNew();
-//     gShouldSave = 1;
-// }
-
 
 void savefileLoad() {
     /* Fill basic information */
@@ -217,6 +99,28 @@ void savefileLoad() {
     }
 }
 
+void savefileSave() {
+    OSTimer timer;
+
+    OSIoMesg dmaIoMesgBuf;
+
+    dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
+    dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
+    dmaIoMesgBuf.dramAddr = &gSaveData;
+    dmaIoMesgBuf.devAddr = SRAM_ADDR;
+    dmaIoMesgBuf.size = sizeof(gSaveData);
+
+    osWritebackDCache(&gSaveData, sizeof(gSaveData));
+    if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_WRITE) == -1)
+    {
+        return;
+    }
+    (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
+
+    osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
+    (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
+}
+
 void savefileSetFlags(enum SavefileFlags flags) {
     gSaveData.header.flags |= flags;
 }
@@ -229,8 +133,109 @@ int savefileReadFlags(enum SavefileFlags flags) {
     return gSaveData.header.flags & flags;
 }
 
-void savefileSave();
+#define SAVE_SLOT_SRAM_ADDRESS(index) (SRAM_ADDR + (1 + (index)) * MAX_CHECKPOINT_SIZE)
 
-void savefileSaveGame(void* checkpoint);
-int savefileListSaves(struct SaveSlotInfo* slots);
-void saveFileLoadGame(int slot, void* checkpoint);
+void savefileSaveGame(Checkpoint checkpoint, int isAutosave) {
+    int slotIndex = 0;
+
+    if (!isAutosave) {
+        slotIndex = gSaveData.header.nextSaveSlot;
+    }
+
+    OSTimer timer;
+
+    OSIoMesg dmaIoMesgBuf;
+
+    dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
+    dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
+    dmaIoMesgBuf.dramAddr = checkpoint;
+    dmaIoMesgBuf.devAddr = SAVE_SLOT_SRAM_ADDRESS(slotIndex);
+    dmaIoMesgBuf.size = MAX_CHECKPOINT_SIZE;
+
+    osWritebackDCache(&gSaveData, sizeof(gSaveData));
+    if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_WRITE) == -1)
+    {
+        return;
+    }
+    (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
+
+    osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
+    (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
+
+    gSaveData.saveSlotTestChamber[slotIndex] = checkpointLevelIndex(checkpoint);
+
+    if (isAutosave) {
+        if (!(gSaveData.header.flags & SavefileFlagsHasAutosave)) {
+            gSaveData.header.flags |= SavefileFlagsHasAutosave;
+            savefileSave();
+        }
+
+        return;
+    }
+
+    gSaveData.header.nextSaveSlot = slotIndex + 1;
+
+    if (gSaveData.header.nextSaveSlot >= MAX_SAVE_SLOTS) {
+        gSaveData.header.nextSaveSlot = 1;
+    }
+
+    ++gSaveData.header.saveSlotCount;
+
+    if (gSaveData.header.saveSlotCount >= MAX_USER_SAVE_SLOTS) {
+        gSaveData.header.saveSlotCount = MAX_USER_SAVE_SLOTS;
+    }
+
+    savefileSave();
+}
+
+int savefileListSaves(struct SaveSlotInfo* slots) {
+    int result = 0;
+
+    if (gSaveData.header.flags & SavefileFlagsHasAutosave) {
+        slots[result].saveSlot = 0;
+        slots[result].testChamber = gSaveData.saveSlotTestChamber[0];
+        ++result;
+    }
+
+    int count = gSaveData.header.saveSlotCount;
+    int nextSaveSlot = gSaveData.header.nextSaveSlot;
+
+    while (count > 0) {
+        nextSaveSlot = nextSaveSlot - 1;
+
+        // 0 slot is reserved for autosave
+        if (nextSaveSlot == 0) {
+            nextSaveSlot = MAX_SAVE_SLOTS - 1;
+        }
+
+        slots[result].saveSlot = nextSaveSlot;
+        slots[result].testChamber = gSaveData.saveSlotTestChamber[nextSaveSlot];
+
+        --count;
+    }
+
+    return result;
+}
+
+void savefileLoadGame(int slot, Checkpoint checkpoint) {
+    OSTimer timer;
+
+    OSIoMesg dmaIoMesgBuf;
+
+    dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
+    dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
+    dmaIoMesgBuf.dramAddr = checkpoint;
+    dmaIoMesgBuf.devAddr = SAVE_SLOT_SRAM_ADDRESS(slot);
+    dmaIoMesgBuf.size = MAX_CHECKPOINT_SIZE;
+
+    osInvalDCache(checkpoint, MAX_CHECKPOINT_SIZE);
+    if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_READ) == -1)
+    {
+        savefileNew();
+        return;
+    }
+    (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
+
+    osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
+    (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
+}

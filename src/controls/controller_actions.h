@@ -61,7 +61,6 @@ int controllerActionGet(enum ControllerAction action);
 int controllerSourcesForAction(enum ControllerAction action, struct ControllerSourceWithController* sources, int maxSources);
 
 void controllerSetSource(enum ControllerAction action, enum ControllerActionSource source, int controller);
-enum ControllerAction controllerGetSource(enum ControllerActionSource source, int controller);
 void controllerSetDefaultSource();
 
 struct ControllerSourceWithController controllerReadAnySource();

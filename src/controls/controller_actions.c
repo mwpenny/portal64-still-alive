@@ -3,6 +3,7 @@
 #include "../util/memory.h"
 #include "./controller.h"
 #include "../math/mathf.h"
+#include "../savefile/savefile.h"
 
 enum ControllerAction gDefaultControllerSettings[ControllerActionSourceCount] = {
     [ControllerActionSourceAButton] = ControllerActionJump,
@@ -39,8 +40,6 @@ unsigned short gActionSourceButtonMask[ControllerActionSourceCount] = {
     [ControllerActionSourceZTrig] = Z_TRIG,
     [ControllerActionSourceJoystick] = 0,
 };
-
-enum ControllerAction gControllerSettings[2][ControllerActionSourceCount];
 
 int gActionState = 0;
 struct Vector2 gDirections[2];
@@ -121,7 +120,7 @@ void controllerActionRead() {
 
     for (int controllerIndex = 0; controllerIndex < 2; ++controllerIndex) {
         for (int sourceIndex = 0; sourceIndex < ControllerActionSourceCount; ++sourceIndex) {
-            enum ControllerAction action = gControllerSettings[controllerIndex][sourceIndex];
+            enum ControllerAction action = gSaveData.controls.controllerSettings[controllerIndex][sourceIndex];
 
             if (IS_DIRECTION_ACTION(action)) {
                 controllerActionReadDirection(sourceIndex, controllerIndex, action - ControllerActionMove);
@@ -158,7 +157,7 @@ int controllerSourcesForAction(enum ControllerAction action, struct ControllerSo
 
     for (int controllerIndex = 0; controllerIndex < 2; ++controllerIndex) {
         for (int sourceIndex = 0; sourceIndex < ControllerActionSourceCount; ++sourceIndex) {
-            if (gControllerSettings[controllerIndex][sourceIndex] == action) {
+            if (gSaveData.controls.controllerSettings[controllerIndex][sourceIndex] == action) {
                 sources[index].button = sourceIndex;
                 sources[index].controller = controllerIndex;
                 ++index;
@@ -192,33 +191,28 @@ void controllerSetSource(enum ControllerAction action, enum ControllerActionSour
 
     if (source >= ControllerActionSourceCUpButton && 
         source <= ControllerActionSourceCLeftButton && 
-        IS_DIRECTION_ACTION(gControllerSettings[controller][ControllerActionSourceCUpButton])) {
-        gControllerSettings[controller][ControllerActionSourceCUpButton] = ControllerActionNone;
+        IS_DIRECTION_ACTION(gSaveData.controls.controllerSettings[controller][ControllerActionSourceCUpButton])) {
+        gSaveData.controls.controllerSettings[controller][ControllerActionSourceCUpButton] = ControllerActionNone;
     }
 
     if (source >= ControllerActionSourceDUpButton && 
         source <= ControllerActionSourceDLeftButton && 
-        IS_DIRECTION_ACTION(gControllerSettings[controller][ControllerActionSourceDUpButton])) {
-        gControllerSettings[controller][ControllerActionSourceDUpButton] = ControllerActionNone;
+        IS_DIRECTION_ACTION(gSaveData.controls.controllerSettings[controller][ControllerActionSourceDUpButton])) {
+        gSaveData.controls.controllerSettings[controller][ControllerActionSourceDUpButton] = ControllerActionNone;
     }
 
-    gControllerSettings[controller][source] = action;
+    gSaveData.controls.controllerSettings[controller][source] = action;
 
     if (IS_DIRECTION_ACTION(action) && (source == ControllerActionSourceCUpButton || source == ControllerActionSourceDUpButton)) {
-        gControllerSettings[controller][source + 1] = ControllerActionNone;
-        gControllerSettings[controller][source + 2] = ControllerActionNone;
-        gControllerSettings[controller][source + 3] = ControllerActionNone;
+        gSaveData.controls.controllerSettings[controller][source + 1] = ControllerActionNone;
+        gSaveData.controls.controllerSettings[controller][source + 2] = ControllerActionNone;
+        gSaveData.controls.controllerSettings[controller][source + 3] = ControllerActionNone;
     }
-}
-
-
-enum ControllerAction controllerGetSource(enum ControllerActionSource source, int controller) {
-    return gControllerSettings[controller][source];
 }
 
 void controllerSetDefaultSource() {
-    memCopy(gControllerSettings[0], gDefaultControllerSettings, sizeof(gDefaultControllerSettings));
-    zeroMemory(gControllerSettings[1], sizeof(gDefaultControllerSettings));
+    memCopy(gSaveData.controls.controllerSettings[0], gDefaultControllerSettings, sizeof(gDefaultControllerSettings));
+    zeroMemory(gSaveData.controls.controllerSettings[1], sizeof(gDefaultControllerSettings));
 }
 
 struct ControllerSourceWithController controllerReadAnySource() {

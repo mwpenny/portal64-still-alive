@@ -67,6 +67,10 @@ int checkpointExists() {
     return 0;
 }
 
+int checkpointLevelIndex(Checkpoint checkpoint) {
+    return *((unsigned char*)checkpoint);
+}
+
 void checkpointSave(struct Scene* scene) {
     int size = checkpointEstimateSize(scene);
 
