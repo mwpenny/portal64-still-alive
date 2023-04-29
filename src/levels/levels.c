@@ -8,7 +8,7 @@
 #include "cutscene_runner.h"
 #include "../graphics/graphics.h"
 #include "../player/player.h"
-#include "checkpoint.h"
+#include "../savefile/checkpoint.h"
 
 #include "../util/rom.h"
 #include "../util/memory.h"

@@ -29,9 +29,6 @@ struct NewGameMenu {
     Gfx* menuOutline;
     Gfx* newGameText;
     Gfx* topLine;
-    Gfx* bottomLine;
-
-    struct MenuButton cancelButton;
 
     struct ChapterMenu chapter0;
     struct ChapterMenu chapter1;

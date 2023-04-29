@@ -45,11 +45,6 @@ enum ControllerAction gControllerSettings[2][ControllerActionSourceCount];
 int gActionState = 0;
 struct Vector2 gDirections[2];
 
-void controllerActionInit() {
-    // TODO load controller settings from SRAM
-    controllerSetDefaultSource();
-}
-
 void controllerActionApply(enum ControllerAction action) {
     gActionState |= (1 << action);
 }
@@ -214,6 +209,11 @@ void controllerSetSource(enum ControllerAction action, enum ControllerActionSour
         gControllerSettings[controller][source + 2] = ControllerActionNone;
         gControllerSettings[controller][source + 3] = ControllerActionNone;
     }
+}
+
+
+enum ControllerAction controllerGetSource(enum ControllerActionSource source, int controller) {
+    return gControllerSettings[controller][source];
 }
 
 void controllerSetDefaultSource() {

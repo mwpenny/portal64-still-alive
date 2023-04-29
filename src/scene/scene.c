@@ -18,7 +18,7 @@
 #include "../physics/collision_scene.h"
 #include "../levels/static_render.h"
 #include "../levels/levels.h"
-#include "../levels/checkpoint.h"
+#include "../savefile/checkpoint.h"
 #include "../scene/portal_surface.h"
 #include "../math/mathf.h"
 #include "./hud.h"

@@ -1,7 +1,11 @@
+#ifndef __SAVEFILE_CHECKPOINT_H__
+#define __SAVEFILE_CHECKPOINT_H__
 
 #include "../scene/scene.h"
 
 typedef void* Checkpoint;
+
+#define MAX_CHECKPOINT_SIZE 2048
 
 struct PartialTransform {
     struct Vector3 position;
@@ -12,3 +16,5 @@ void checkpointClear();
 void checkpointSave(struct Scene* scene);
 void checkpointLoadLast(struct Scene* scene);
 int checkpointExists();
+
+#endif

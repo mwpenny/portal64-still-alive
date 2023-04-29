@@ -5,7 +5,7 @@
 #include "../scene/signals.h"
 #include "../levels/levels.h"
 #include "../util/memory.h"
-#include "checkpoint.h"
+#include "../savefile/checkpoint.h"
 
 struct CutsceneRunner* gRunningCutscenes;
 struct CutsceneRunner* gUnusedRunners;

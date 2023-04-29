@@ -18,11 +18,11 @@
 #include "scene/portal_surface.h"
 #include "sk64/skelatool_defs.h"
 #include "levels/cutscene_runner.h"
-#include "levels/savefile.h"
+#include "savefile/savefile.h"
 #include "sk64/skelatool_animator.h"
 
 #include "levels/levels.h"
-#include "levels/checkpoint.h"
+#include "savefile/checkpoint.h"
 
 #ifdef PORTAL64_WITH_DEBUGGER
 #include "../debugger/debugger.h"
@@ -199,11 +199,10 @@ static void gameProc(void* arg) {
     dynamicSceneInit();
     contactSolverInit(&gContactSolver);
     portalSurfaceCleanupQueueInit();
-    savefileNew();
+    savefileLoad();
     levelLoadWithCallbacks(MAIN_MENU);
     cutsceneRunnerReset();
     controllersInit();
-    controllerActionInit();
     initAudio(fps);
     soundPlayerInit();
     skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);

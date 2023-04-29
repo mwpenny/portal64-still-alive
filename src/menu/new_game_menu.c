@@ -99,12 +99,9 @@ void newGameInit(struct NewGameMenu* newGameMenu) {
     newGameMenu->newGameText = menuBuildText(&gDejaVuSansFont, "NEW GAME", 48, 48);
     
     newGameMenu->topLine = menuBuildHorizontalLine(52, 64, 214);
-    newGameMenu->bottomLine = menuBuildHorizontalLine(52, 162, 214);
 
-    newGameMenu->cancelButton = menuBuildButton(&gDejaVuSansFont, "Cancel", 218, 169, 46, 16);
-
-    chapterMenuInit(&newGameMenu->chapter0, 55, 71);
-    chapterMenuInit(&newGameMenu->chapter1, 163, 71);
+    chapterMenuInit(&newGameMenu->chapter0, 55, 76);
+    chapterMenuInit(&newGameMenu->chapter1, 163, 76);
 
     chapterMenuSetChapter(&newGameMenu->chapter0, &gChapters[0]);
     chapterMenuSetChapter(&newGameMenu->chapter1, &gChapters[1]);
@@ -161,8 +158,6 @@ void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderSt
 
     gSPDisplayList(renderState->dl++, ui_material_list[SOLID_ENV_INDEX]);
     gSPDisplayList(renderState->dl++, newGameMenu->topLine);
-    gSPDisplayList(renderState->dl++, newGameMenu->bottomLine);
-    gSPDisplayList(renderState->dl++, newGameMenu->cancelButton.outline);
 
     gDPPipeSync(renderState->dl++);
     menuSetRenderColor(renderState, newGameMenu->selectedChapter == newGameMenu->chapterOffset, &gSelectionOrange, &gColorBlack);
@@ -178,7 +173,6 @@ void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderSt
 
     gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
     gSPDisplayList(renderState->dl++, newGameMenu->newGameText);
-    gSPDisplayList(renderState->dl++, newGameMenu->cancelButton.text);
 
     gDPPipeSync(renderState->dl++);
     menuSetRenderColor(renderState, newGameMenu->selectedChapter == newGameMenu->chapterOffset, &gSelectionOrange, &gColorWhite);

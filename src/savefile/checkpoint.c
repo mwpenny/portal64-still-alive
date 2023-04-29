@@ -2,8 +2,7 @@
 
 #include "../util/memory.h"
 #include "../levels/cutscene_runner.h"
-
-#define MAX_CHECKPOINT_SIZE 256
+#include "../levels/levels.h"
 
 char gHasCheckpoint = 0;
 char gCheckpoint[MAX_CHECKPOINT_SIZE];
@@ -41,6 +40,9 @@ int checkpointCutsceneCount() {
 int checkpointEstimateSize(struct Scene* scene) {
     int result = 0;
 
+    // test chamber index
+    result += sizeof(char);
+
     int binCount = SIGNAL_BIN_COUNT(gSignalCount);
     result += sizeof(unsigned long long) * binCount * 2;
 
@@ -75,6 +77,10 @@ void checkpointSave(struct Scene* scene) {
 
     void* curr = gCheckpoint;
 
+    char testChamberIndex = gCurrentLevelIndex;
+
+    curr = checkpointWrite(curr, 1, &testChamberIndex);
+
     int binCount = SIGNAL_BIN_COUNT(gSignalCount);
     curr = checkpointWrite(curr, sizeof(unsigned long long) * binCount, gSignals);
     curr = checkpointWrite(curr, sizeof(unsigned long long) * binCount, gDefaultSignals);
@@ -105,6 +111,10 @@ void checkpointLoadLast(struct Scene* scene) {
     }
 
     void* curr = gCheckpoint;
+
+    char testChamberIndex;
+
+    curr = checkpointRead(curr, sizeof(char), &testChamberIndex);
 
     int binCount = SIGNAL_BIN_COUNT(gSignalCount);
     curr = checkpointRead(curr, sizeof(unsigned long long) * binCount, gSignals);
