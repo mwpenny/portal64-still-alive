@@ -104,6 +104,9 @@ void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* d
 void decorObjectClenaup(struct DecorObject* decorObject) {
     dynamicSceneRemove(decorObject->dynamicId);
     collisionSceneRemoveDynamicObject(&decorObject->collisionObject);
+    if ((decorObject->playingSound != SOUND_ID_NONE) && (soundPlayerIsPlaying(decorObject->playingSound))) {
+        soundPlayerStop(decorObject->playingSound);
+    }
 }
 
 void decorObjectDelete(struct DecorObject* decorObject) {
