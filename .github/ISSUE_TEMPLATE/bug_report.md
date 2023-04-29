@@ -16,7 +16,7 @@ assignees: ''
   - [X] This box is checked
 -->
 - [ ] Original Hardware
-- [ ] Emulator
+- [ ] Emulator (please specify)
 
 #### What is the bug?
 A clear and concise description of what the bug is.
