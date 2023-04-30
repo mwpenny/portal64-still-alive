@@ -83,7 +83,7 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
 
     *pitchBend = (SPEED_OF_SOUND + directionalVelocity) * (1.0f / SPEED_OF_SOUND);
 
-    float pan = -vector3Dot(&offset, &nearestListener->rightVector) * invDist;
+    float pan = vector3Dot(&offset, &nearestListener->rightVector) * invDist;
 
     pan = pan * 64.0f + 64.0f;
 
