@@ -3,6 +3,8 @@
 #include "../font/font.h"
 #include "../font/dejavusans.h"
 
+#include "../savefile/savefile.h"
+
 #include "../build/assets/materials/ui.h"
 
 #include "../controls/controller.h"
@@ -43,7 +45,7 @@ void optionsMenuInit(struct OptionsMenu* options) {
     audioOptionsInit(&options->audioOptions);
 }
 
-enum MainMenuState optionsMenuUpdate(struct OptionsMenu* options) {
+enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options) {
     enum MenuDirection menuDirection = MenuDirectionStay;
 
     switch (options->tabs.selectedTab) {
@@ -56,7 +58,8 @@ enum MainMenuState optionsMenuUpdate(struct OptionsMenu* options) {
     }
 
     if (menuDirection == MenuDirectionUp) {
-        return MainMenuStateLanding;
+        savefileSave();
+        return MenuDirectionUp;
     }
 
     if (menuDirection == MenuDirectionLeft) {
@@ -78,7 +81,7 @@ enum MainMenuState optionsMenuUpdate(struct OptionsMenu* options) {
 
     }
 
-    return MainMenuStateOptions;
+    return MenuDirectionStay;
 }
 
 void optionsMenuRender(struct OptionsMenu* options, struct RenderState* renderState, struct GraphicsTask* task) {

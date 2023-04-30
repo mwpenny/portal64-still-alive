@@ -22,6 +22,7 @@ void mainMenuInit(struct MainMenu* mainMenu) {
 
     landingMenuInit(&mainMenu->landingMenu);
     newGameInit(&mainMenu->newGameMenu);
+    loadGameMenuInit(&mainMenu->loadGameMenu);
     optionsMenuInit(&mainMenu->optionsMenu);
 
     mainMenu->state = MainMenuStateLanding;
@@ -29,6 +30,14 @@ void mainMenuInit(struct MainMenu* mainMenu) {
     mainMenuReadCamera(mainMenu);
 
     gScene.camera.fov = 56.0f;
+}
+
+enum MainMenuState mainMenuDirectionToState(enum MenuDirection direction, enum MainMenuState currentState) {
+    if (direction == MenuDirectionUp) {
+        return MainMenuStateLanding;
+    }
+
+    return currentState;
 }
 
 void mainMenuUpdate(struct MainMenu* mainMenu) {
@@ -50,10 +59,13 @@ void mainMenuUpdate(struct MainMenu* mainMenu) {
             mainMenu->state = landingMenuUpdate(&mainMenu->landingMenu);
             break;
         case MainMenuStateNewGame:
-            mainMenu->state = newGameUpdate(&mainMenu->newGameMenu);
+            mainMenu->state = mainMenuDirectionToState(newGameUpdate(&mainMenu->newGameMenu), mainMenu->state);
+            break;
+        case MainMenuStateLoadGame:
+            mainMenu->state = mainMenuDirectionToState(loadGameUpdate(&mainMenu->loadGameMenu), mainMenu->state);
             break;
         case MainMenuStateOptions:
-            mainMenu->state = optionsMenuUpdate(&mainMenu->optionsMenu);
+            mainMenu->state = mainMenuDirectionToState(optionsMenuUpdate(&mainMenu->optionsMenu), mainMenu->state);
             break;
     }
 }
@@ -87,6 +99,9 @@ void mainMenuRender(struct MainMenu* mainMenu, struct RenderState* renderState, 
             break;
         case MainMenuStateNewGame:
             newGameRender(&mainMenu->newGameMenu, renderState, task);
+            break;
+        case MainMenuStateLoadGame:
+            loadGameRender(&mainMenu->loadGameMenu, renderState, task);
             break;
         case MainMenuStateOptions:
             optionsMenuRender(&mainMenu->optionsMenu, renderState, task);

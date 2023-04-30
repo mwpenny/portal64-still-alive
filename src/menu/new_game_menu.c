@@ -28,9 +28,17 @@ struct Chapter gChapters[] = {
     {NULL, NULL, NULL},
 };
 
-#define CHAPTER_COUNT   (sizeof(gChapters) / sizeof(*gChapters))
+#define CHAPTER_COUNT   ((sizeof(gChapters) / sizeof(*gChapters)) - 1)
 
-#define CHAPTER_IMAGE_SIZE  (84 * 48 * 2)
+struct Chapter* chapterFindForChamber(int chamberIndex) {
+    for (int i = 1; i < CHAPTER_COUNT; ++i) {
+        if (gChapters[i].testChamberNumber > chamberIndex) {
+            return &gChapters[i - 1];
+        }
+    }
+
+    return &gChapters[CHAPTER_COUNT - 1];
+}
 
 void chapterMenuInit(struct ChapterMenu* chapterMenu, int x, int y) {
     chapterMenu->chapterText = malloc(sizeof(Gfx) * GFX_ENTRIES_PER_IMAGE * 10 + GFX_ENTRIES_PER_END_DL);
@@ -39,7 +47,7 @@ void chapterMenuInit(struct ChapterMenu* chapterMenu, int x, int y) {
         x, y + 27, 
         92, 58,
         x + 5, y + 32,
-        84, 48
+        CHAPTER_IMAGE_WIDTH, CHAPTER_IMAGE_HEIGHT
     );
 
     chapterMenu->imageBuffer = malloc(CHAPTER_IMAGE_SIZE);
@@ -110,9 +118,9 @@ void newGameInit(struct NewGameMenu* newGameMenu) {
     newGameMenu->selectedChapter = 0;
 }
 
-enum MainMenuState newGameUpdate(struct NewGameMenu* newGameMenu) {
+enum MenuDirection newGameUpdate(struct NewGameMenu* newGameMenu) {
     if (controllerGetButtonDown(0, B_BUTTON)) {
-        return MainMenuStateLanding;
+        return MenuDirectionUp;
     }
 
     if (controllerGetButtonDown(0, A_BUTTON) && gChapters[newGameMenu->selectedChapter + 1].testChamberNumber >= 0) {
@@ -124,7 +132,7 @@ enum MainMenuState newGameUpdate(struct NewGameMenu* newGameMenu) {
     }
 
     if ((controllerGetDirectionDown(0) & ControllerDirectionRight) != 0 && 
-        newGameMenu->selectedChapter + 1 < CHAPTER_COUNT &&
+        newGameMenu->selectedChapter < CHAPTER_COUNT &&
         gChapters[newGameMenu->selectedChapter + 1].imageData) {
         newGameMenu->selectedChapter = newGameMenu->selectedChapter + 1;
     }
@@ -142,7 +150,7 @@ enum MainMenuState newGameUpdate(struct NewGameMenu* newGameMenu) {
         chapterMenuSetChapter(&newGameMenu->chapter1, &gChapters[newGameMenu->chapterOffset + 1]);
     }
 
-    return MainMenuStateNewGame;
+    return MenuDirectionStay;
 }
 
 void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderState, struct GraphicsTask* task) {

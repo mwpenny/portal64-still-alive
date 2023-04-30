@@ -56,7 +56,7 @@ void savefileSetFlags(enum SavefileFlags flags);
 void savefileUnsetFlags(enum SavefileFlags flags);
 int savefileReadFlags(enum SavefileFlags flags);
 
-void savefileSaveGame(Checkpoint checkpoint, int isAutosave);
+void savefileSaveGame(Checkpoint checkpoint, int testChamberIndex, int isAutosave);
 int savefileListSaves(struct SaveSlotInfo* slots);
 void savefileLoadGame(int slot, Checkpoint checkpoint);
 

@@ -5,6 +5,11 @@
 #include "./menu.h"
 #include "./menu_state.h"
 
+#define CHAPTER_IMAGE_WIDTH     84
+#define CHAPTER_IMAGE_HEIGHT    48
+
+#define CHAPTER_IMAGE_SIZE  (CHAPTER_IMAGE_WIDTH * CHAPTER_IMAGE_HEIGHT * 2)
+
 struct Chapter {
     char* chapter;
     char* testChamber;
@@ -22,6 +27,8 @@ struct ChapterMenu {
     int y;
 };
 
+struct Chapter* chapterFindForChamber(int chamberIndex);
+
 void chapterMenuInit(struct ChapterMenu* chapterMenu, int x, int y);
 void chapterMenuSetChapter(struct ChapterMenu* chapterMenu, struct Chapter* chapter);
 
@@ -38,7 +45,7 @@ struct NewGameMenu {
 };
 
 void newGameInit(struct NewGameMenu* newGameMenu);
-enum MainMenuState newGameUpdate(struct NewGameMenu* newGameMenu);
+enum MenuDirection newGameUpdate(struct NewGameMenu* newGameMenu);
 void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderState, struct GraphicsTask* task);
 
 #endif

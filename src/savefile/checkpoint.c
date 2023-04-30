@@ -40,9 +40,6 @@ int checkpointCutsceneCount() {
 int checkpointEstimateSize(struct Scene* scene) {
     int result = 0;
 
-    // test chamber index
-    result += sizeof(char);
-
     int binCount = SIGNAL_BIN_COUNT(gSignalCount);
     result += sizeof(unsigned long long) * binCount * 2;
 
@@ -67,10 +64,6 @@ int checkpointExists() {
     return 0;
 }
 
-int checkpointLevelIndex(Checkpoint checkpoint) {
-    return *((unsigned char*)checkpoint);
-}
-
 void checkpointSave(struct Scene* scene) {
     int size = checkpointEstimateSize(scene);
 
@@ -80,10 +73,6 @@ void checkpointSave(struct Scene* scene) {
     }
 
     void* curr = gCheckpoint;
-
-    char testChamberIndex = gCurrentLevelIndex;
-
-    curr = checkpointWrite(curr, 1, &testChamberIndex);
 
     int binCount = SIGNAL_BIN_COUNT(gSignalCount);
     curr = checkpointWrite(curr, sizeof(unsigned long long) * binCount, gSignals);
@@ -115,10 +104,6 @@ void checkpointLoadLast(struct Scene* scene) {
     }
 
     void* curr = gCheckpoint;
-
-    char testChamberIndex;
-
-    curr = checkpointRead(curr, sizeof(char), &testChamberIndex);
 
     int binCount = SIGNAL_BIN_COUNT(gSignalCount);
     curr = checkpointRead(curr, sizeof(unsigned long long) * binCount, gSignals);

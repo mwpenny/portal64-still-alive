@@ -8,11 +8,13 @@
 #include "./landing_menu.h"
 #include "./new_game_menu.h"
 #include "./options_menu.h"
+#include "./load_game.h"
 
 struct MainMenu {
     enum MainMenuState state;
     struct LandingMenu landingMenu;
     struct NewGameMenu newGameMenu;
+    struct LoadGameMenu loadGameMenu;
     struct OptionsMenu optionsMenu;
 };
 

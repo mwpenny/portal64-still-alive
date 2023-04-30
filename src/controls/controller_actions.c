@@ -5,7 +5,7 @@
 #include "../math/mathf.h"
 #include "../savefile/savefile.h"
 
-enum ControllerAction gDefaultControllerSettings[ControllerActionSourceCount] = {
+unsigned char gDefaultControllerSettings[ControllerActionSourceCount] = {
     [ControllerActionSourceAButton] = ControllerActionJump,
     [ControllerActionSourceBButton] = ControllerActionUseItem,
     [ControllerActionSourceCUpButton] = ControllerActionMove,

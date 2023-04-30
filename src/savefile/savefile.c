@@ -135,7 +135,7 @@ int savefileReadFlags(enum SavefileFlags flags) {
 
 #define SAVE_SLOT_SRAM_ADDRESS(index) (SRAM_ADDR + (1 + (index)) * MAX_CHECKPOINT_SIZE)
 
-void savefileSaveGame(Checkpoint checkpoint, int isAutosave) {
+void savefileSaveGame(Checkpoint checkpoint, int testChamberIndex, int isAutosave) {
     int slotIndex = 0;
 
     if (!isAutosave) {
@@ -162,27 +162,24 @@ void savefileSaveGame(Checkpoint checkpoint, int isAutosave) {
     osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
     (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
 
-    gSaveData.saveSlotTestChamber[slotIndex] = checkpointLevelIndex(checkpoint);
+    gSaveData.saveSlotTestChamber[slotIndex] = testChamberIndex;
 
     if (isAutosave) {
         if (!(gSaveData.header.flags & SavefileFlagsHasAutosave)) {
             gSaveData.header.flags |= SavefileFlagsHasAutosave;
-            savefileSave();
+        }
+    } else {
+        gSaveData.header.nextSaveSlot = slotIndex + 1;
+
+        if (gSaveData.header.nextSaveSlot >= MAX_SAVE_SLOTS) {
+            gSaveData.header.nextSaveSlot = 1;
         }
 
-        return;
-    }
+        ++gSaveData.header.saveSlotCount;
 
-    gSaveData.header.nextSaveSlot = slotIndex + 1;
-
-    if (gSaveData.header.nextSaveSlot >= MAX_SAVE_SLOTS) {
-        gSaveData.header.nextSaveSlot = 1;
-    }
-
-    ++gSaveData.header.saveSlotCount;
-
-    if (gSaveData.header.saveSlotCount >= MAX_USER_SAVE_SLOTS) {
-        gSaveData.header.saveSlotCount = MAX_USER_SAVE_SLOTS;
+        if (gSaveData.header.saveSlotCount >= MAX_USER_SAVE_SLOTS) {
+            gSaveData.header.saveSlotCount = MAX_USER_SAVE_SLOTS;
+        }
     }
 
     savefileSave();
