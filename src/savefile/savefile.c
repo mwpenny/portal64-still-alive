@@ -133,7 +133,7 @@ int savefileReadFlags(enum SavefileFlags flags) {
     return gSaveData.header.flags & flags;
 }
 
-#define SAVE_SLOT_SRAM_ADDRESS(index) (SRAM_ADDR + (1 + (index)) * MAX_CHECKPOINT_SIZE)
+#define SAVE_SLOT_SRAM_ADDRESS(index) (SRAM_ADDR + (1 + (index)) * SAVE_SLOT_SIZE)
 
 void savefileSaveGame(Checkpoint checkpoint, int testChamberIndex, int isAutosave) {
     int slotIndex = 0;
@@ -152,7 +152,7 @@ void savefileSaveGame(Checkpoint checkpoint, int testChamberIndex, int isAutosav
     dmaIoMesgBuf.devAddr = SAVE_SLOT_SRAM_ADDRESS(slotIndex);
     dmaIoMesgBuf.size = MAX_CHECKPOINT_SIZE;
 
-    osWritebackDCache(&gSaveData, sizeof(gSaveData));
+    osWritebackDCache(&gSaveData, MAX_CHECKPOINT_SIZE);
     if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_WRITE) == -1)
     {
         return;

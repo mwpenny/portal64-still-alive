@@ -104,14 +104,18 @@ Gfx* menuBuildHorizontalLine(int x, int y, int width) {
     return result;
 }
 
-Gfx* menuBuildSolidBorder(int x, int y, int w, int h, int nx, int ny, int nw, int nh) {
-    Gfx* result = malloc(sizeof(Gfx) * 5);
-    Gfx* dl = result;
-
+Gfx* menuRerenderSolidBorder(int x, int y, int w, int h, int nx, int ny, int nw, int nh, Gfx* dl) {
     gDPFillRectangle(dl++, x, y, x + w, ny);
     gDPFillRectangle(dl++, x, ny, nx, ny + nh);
     gDPFillRectangle(dl++, nx + nw, ny, x + w, ny + nh);
     gDPFillRectangle(dl++, x, ny + nh, x + w, y + h);
+    return dl;
+}
+
+Gfx* menuBuildSolidBorder(int x, int y, int w, int h, int nx, int ny, int nw, int nh) {
+    Gfx* result = malloc(sizeof(Gfx) * 5);
+    Gfx* dl = menuRerenderSolidBorder(x, y, w, h, nx, ny, nw, nh, result);
+
     gSPEndDisplayList(dl++);
 
     return result;

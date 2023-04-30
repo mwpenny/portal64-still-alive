@@ -21,8 +21,9 @@ void mainMenuInit(struct MainMenu* mainMenu) {
     sceneInit(&gScene);
 
     landingMenuInit(&mainMenu->landingMenu);
+    savefileListMenuInit(&mainMenu->savefileList);
     newGameInit(&mainMenu->newGameMenu);
-    loadGameMenuInit(&mainMenu->loadGameMenu);
+    loadGameMenuInit(&mainMenu->loadGameMenu, &mainMenu->savefileList);
     optionsMenuInit(&mainMenu->optionsMenu);
 
     mainMenu->state = MainMenuStateLanding;
@@ -54,6 +55,8 @@ void mainMenuUpdate(struct MainMenu* mainMenu) {
     mainMenuReadCamera(mainMenu);
     sceneAnimatorUpdate(&gScene.animator);
 
+    enum MainMenuState prevState = mainMenu->state;
+
     switch (mainMenu->state) {
         case MainMenuStateLanding:
             mainMenu->state = landingMenuUpdate(&mainMenu->landingMenu);
@@ -67,6 +70,16 @@ void mainMenuUpdate(struct MainMenu* mainMenu) {
         case MainMenuStateOptions:
             mainMenu->state = mainMenuDirectionToState(optionsMenuUpdate(&mainMenu->optionsMenu), mainMenu->state);
             break;
+    }
+
+    if (prevState != mainMenu->state) {
+        switch (mainMenu->state) {
+            case MainMenuStateLoadGame:
+                loadGamePopulate(&mainMenu->loadGameMenu);
+                break;
+            default:
+                break;
+        }
     }
 }
 

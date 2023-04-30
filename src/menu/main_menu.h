@@ -12,6 +12,7 @@
 
 struct MainMenu {
     enum MainMenuState state;
+    struct SavefileListMenu savefileList;
     struct LandingMenu landingMenu;
     struct NewGameMenu newGameMenu;
     struct LoadGameMenu loadGameMenu;

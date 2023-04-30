@@ -6,10 +6,14 @@
 
 #define SRAM_SIZE        0x8000 
 
+#define THUMBNAIL_IMAGE_SIZE    2048
+
+#define SAVE_SLOT_SIZE  (MAX_CHECKPOINT_SIZE + THUMBNAIL_IMAGE_SIZE)
+
 #define SAVEFILE_HEADER 0xDEAD
 
 // first save slot is always reserved for auto save
-#define MAX_SAVE_SLOTS  ((int)(SRAM_SIZE / MAX_CHECKPOINT_SIZE) - 1)
+#define MAX_SAVE_SLOTS  ((int)(SRAM_SIZE / SAVE_SLOT_SIZE) - 1)
 #define MAX_USER_SAVE_SLOTS (MAX_SAVE_SLOTS - 1)
 
 enum SavefileFlags {
