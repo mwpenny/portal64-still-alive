@@ -728,7 +728,7 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
 }
 
 void sceneClosePortal(struct Scene* scene, int portalIndex) {
-    if (scene->player.body.flags & (RigidBodyIsTouchingPortalA|RigidBodyIsTouchingPortalB|RigidBodyWasTouchingPortalA|RigidBodyWasTouchingPortalB)){
+    if (scene->player.body.flags & (RigidBodyIsTouchingPortalA|RigidBodyIsTouchingPortalB|RigidBodyWasTouchingPortalA|RigidBodyWasTouchingPortalB|RigidBodyFlagsCrossedPortal0|RigidBodyFlagsCrossedPortal1)){
         return;
     } 
     else if (gCollisionScene.portalTransforms[portalIndex]) {
