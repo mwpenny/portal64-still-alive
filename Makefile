@@ -247,6 +247,8 @@ build/src/menu/new_game_menu.o: build/src/audio/clips.h build/assets/materials/u
 
 build/src/menu/load_game.o: build/assets/materials/ui.h
 
+build/src/menu/savefile_list.o: build/assets/materials/ui.h
+
 build/src/menu/landing_menu.o: build/assets/materials/ui.h
 
 build/src/menu/options_menu.o: build/assets/materials/ui.h
