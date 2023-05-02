@@ -60,6 +60,7 @@ struct SaveSlotInfo {
 };
 
 extern struct SaveData gSaveData;
+extern int gCurrentTestSubject;
 
 void savefileLoad();
 void savefileSave();
@@ -69,7 +70,7 @@ void savefileUnsetFlags(enum SavefileFlags flags);
 int savefileReadFlags(enum SavefileFlags flags);
 
 void savefileSaveGame(Checkpoint checkpoint, int testChamberIndex, int subjectNumber, int slotIndex);
-int savefileListSaves(struct SaveSlotInfo* slots);
+int savefileListSaves(struct SaveSlotInfo* slots, int includeAuto);
 int savefileNextTestSubject();
 int savefileSuggestedSlot(int testSubject);
 int savefileOldestSlot();

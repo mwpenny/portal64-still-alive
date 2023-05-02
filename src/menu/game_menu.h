@@ -6,6 +6,7 @@
 
 #include "./landing_menu.h"
 #include "./new_game_menu.h"
+#include "./save_game_menu.h"
 #include "./options_menu.h"
 #include "./load_game.h"
 
@@ -25,6 +26,7 @@ struct GameMenu {
     struct LandingMenu landingMenu;
     struct NewGameMenu newGameMenu;
     struct LoadGameMenu loadGameMenu;
+    struct SaveGameMenu saveGameMenu;
     struct OptionsMenu optionsMenu;
 };
 

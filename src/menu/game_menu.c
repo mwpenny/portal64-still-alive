@@ -16,6 +16,7 @@ void gameMenuInit(struct GameMenu* gameMenu, struct LandingMenuOption* options, 
     savefileListMenuInit(&gameMenu->savefileList);
     newGameInit(&gameMenu->newGameMenu);
     loadGameMenuInit(&gameMenu->loadGameMenu, &gameMenu->savefileList);
+    saveGameMenuInit(&gameMenu->saveGameMenu, &gameMenu->savefileList);
     optionsMenuInit(&gameMenu->optionsMenu);
 
     gameMenu->state = GameMenuStateLanding;
@@ -48,6 +49,9 @@ void gameMenuUpdate(struct GameMenu* gameMenu) {
         case GameMenuStateLoadGame:
             gameMenu->state = gameMenuDirectionToState(loadGameUpdate(&gameMenu->loadGameMenu), gameMenu->state);
             break;
+        case GameMenuStateSaveGame:
+            gameMenu->state = gameMenuDirectionToState(saveGameUpdate(&gameMenu->saveGameMenu), gameMenu->state);
+            break;
         case GameMenuStateOptions:
             gameMenu->state = gameMenuDirectionToState(optionsMenuUpdate(&gameMenu->optionsMenu), gameMenu->state);
             break;
@@ -59,6 +63,9 @@ void gameMenuUpdate(struct GameMenu* gameMenu) {
         switch (gameMenu->state) {
             case GameMenuStateLoadGame:
                 loadGamePopulate(&gameMenu->loadGameMenu);
+                break;
+            case GameMenuStateSaveGame:
+                saveGamePopulate(&gameMenu->saveGameMenu);
                 break;
             default:
                 break;
@@ -79,6 +86,9 @@ void gameMenuRender(struct GameMenu* gameMenu, struct RenderState* renderState, 
             break;
         case GameMenuStateLoadGame:
             loadGameRender(&gameMenu->loadGameMenu, renderState, task);
+            break;
+        case GameMenuStateSaveGame:
+            saveGameRender(&gameMenu->saveGameMenu, renderState, task);
             break;
         case GameMenuStateOptions:
             optionsMenuRender(&gameMenu->optionsMenu, renderState, task);

@@ -10,7 +10,7 @@ void loadGamePopulate(struct LoadGameMenu* loadGame) {
     struct SavefileInfo savefileInfo[MAX_SAVE_SLOTS];
     struct SaveSlotInfo saveSlots[MAX_SAVE_SLOTS];
 
-    int numberOfSaves = savefileListSaves(saveSlots);
+    int numberOfSaves = savefileListSaves(saveSlots, 1);
 
     saveSlots[0].saveSlot = 0;
     saveSlots[0].testChamber = 0;

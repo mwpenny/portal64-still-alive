@@ -6,6 +6,7 @@
 #include "../controls/controller_actions.h"
 
 struct SaveData gSaveData;
+int gCurrentTestSubject = -1;
 
 #ifdef DEBUG
 #define UNLOCK_ALL  1
@@ -215,13 +216,17 @@ void savefileMetadataSort(struct SlotAndOrder* result, struct SlotAndOrder* tmp,
     }
 }
 
-int savefileListSaves(struct SaveSlotInfo* slots) {
+int savefileListSaves(struct SaveSlotInfo* slots, int includeAuto) {
     int result = 0;
 
     struct SlotAndOrder unsortedResult[MAX_SAVE_SLOTS];
 
     for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
         if (gSaveData.saveSlotMetadata[i].testChamber == NO_TEST_CHAMBER) {
+            continue;
+        }
+
+        if (gSaveData.saveSlotMetadata[i].testSubjectNumber == TEST_SUBJECT_AUTOSAVE && !includeAuto) {
             continue;
         }
 
