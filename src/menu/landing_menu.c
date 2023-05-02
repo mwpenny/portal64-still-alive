@@ -3,6 +3,7 @@
 #include "../font/font.h"
 #include "../font/dejavusans.h"
 #include "../controls/controller.h"
+#include "../util/memory.h"
 
 #include "../build/assets/materials/ui.h"
 
@@ -49,57 +50,58 @@ Gfx portal_logo_gfx[] = {
     gsSPEndDisplayList(),
 };
 
-void landingMenuInit(struct LandingMenu* landingMenu) {
-    landingMenu->newGameText = menuBuildText(&gDejaVuSansFont, "NEW GAME", 30, 132);
-    landingMenu->loadGameText = menuBuildText(&gDejaVuSansFont, "LOAD GAME", 30, 148);
-    landingMenu->optionsText = menuBuildText(&gDejaVuSansFont, "OPTIONS", 30, 164);
+void landingMenuInit(struct LandingMenu* landingMenu, struct LandingMenuOption* options, int optionCount, int darkenBackground) {    
+    landingMenu->optionText = malloc(sizeof(Gfx*) * optionCount);
 
+    int y = 132;
+
+    int stride = optionCount > 4 ? 12 : 16;
+
+    for (int i = 0; i < optionCount; ++i) {
+        landingMenu->optionText[i] = menuBuildText(&gDejaVuSansFont, options[i].message, 30, y);
+        y += stride;
+    }
+
+    landingMenu->options = options;
     landingMenu->selectedItem = 0;
+    landingMenu->optionCount = optionCount;
+    landingMenu->darkenBackground = darkenBackground;
 }
 
-enum MainMenuState landingMenuUpdate(struct LandingMenu* landingMenu) {
+struct LandingMenuOption* landingMenuUpdate(struct LandingMenu* landingMenu) {
     if ((controllerGetDirectionDown(0) & ControllerDirectionUp) != 0 && landingMenu->selectedItem > 0) {
         --landingMenu->selectedItem;
     }
 
-    if ((controllerGetDirectionDown(0) & ControllerDirectionDown) != 0 && landingMenu->selectedItem < 2) {
+    if ((controllerGetDirectionDown(0) & ControllerDirectionDown) != 0 && landingMenu->selectedItem + 1 < landingMenu->optionCount) {
         ++landingMenu->selectedItem;
     }
 
     if (controllerGetButtonDown(0, A_BUTTON)) {
-        switch (landingMenu->selectedItem)
-        {
-            case 0:
-                return MainMenuStateNewGame;
-                break;
-            case 1:
-                return MainMenuStateLoadGame;
-                break;
-            case 2:
-                return MainMenuStateOptions;
-                break;
-        }
+        return &landingMenu->options[landingMenu->selectedItem];
     }
 
-    return MainMenuStateLanding;
+    return NULL;
 }
 
 void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* renderState, struct GraphicsTask* task) {
     gSPDisplayList(renderState->dl++, ui_material_list[DEFAULT_UI_INDEX]);
+
+    if (landingMenu->darkenBackground) {
+        gSPDisplayList(renderState->dl++, ui_material_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
+        gDPFillRectangle(renderState->dl++, 0, 0, SCREEN_WD, SCREEN_HT);
+        gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
+    }
 
     gSPDisplayList(renderState->dl++, ui_material_list[PORTAL_LOGO_INDEX]);
     gSPDisplayList(renderState->dl++, portal_logo_gfx);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[PORTAL_LOGO_INDEX]);
 
     gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
-    gDPPipeSync(renderState->dl++);
-    menuSetRenderColor(renderState, landingMenu->selectedItem == 0, &gSelectionGray, &gColorWhite);
-    gSPDisplayList(renderState->dl++, landingMenu->newGameText);
-    gDPPipeSync(renderState->dl++);
-    menuSetRenderColor(renderState, landingMenu->selectedItem == 1, &gSelectionGray, &gColorWhite);
-    gSPDisplayList(renderState->dl++, landingMenu->loadGameText);
-    gDPPipeSync(renderState->dl++);
-    menuSetRenderColor(renderState, landingMenu->selectedItem == 2, &gSelectionGray, &gColorWhite);
-    gSPDisplayList(renderState->dl++, landingMenu->optionsText);
+    for (int i = 0; i < landingMenu->optionCount; ++i) {
+        gDPPipeSync(renderState->dl++);
+        menuSetRenderColor(renderState, landingMenu->selectedItem == i, &gSelectionGray, &gColorWhite);
+        gSPDisplayList(renderState->dl++, landingMenu->optionText[i]);
+    }
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
 }

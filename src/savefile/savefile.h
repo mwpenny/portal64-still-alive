@@ -10,7 +10,7 @@
 
 #define SAVE_SLOT_SIZE  (MAX_CHECKPOINT_SIZE + THUMBNAIL_IMAGE_SIZE)
 
-#define SAVEFILE_HEADER 0xDEAD
+#define SAVEFILE_HEADER 0xDEAE
 
 // first save slot is always reserved for auto save
 #define MAX_SAVE_SLOTS  ((int)(SRAM_SIZE / SAVE_SLOT_SIZE) - 1)
@@ -19,15 +19,13 @@
 enum SavefileFlags {
     SavefileFlagsFirstPortalGun = (1 << 0),
     SavefileFlagsSecondPortalGun = (1 << 1),
-    SavefileFlagsHasAutosave = (1 << 2),
 };
 
 struct SaveHeader {
     unsigned header;
     unsigned char chapterProgress;
     unsigned char flags;
-    unsigned char saveSlotCount;
-    unsigned char nextSaveSlot;
+    unsigned char nextTestSubject;
 };
 
 struct ControlSaveState {
@@ -39,11 +37,21 @@ struct AudioSettingsSaveState {
     unsigned char musicVolume;
 };
 
+#define NO_TEST_CHAMBER         0xFF
+#define TEST_SUBJECT_AUTOSAVE   0xFF
+#define TEST_SUBJECT_MAX        99
+
+struct SaveSlotMetadata {
+    unsigned char testChamber;
+    unsigned char testSubjectNumber;
+    unsigned char saveSlotOrder;
+};
+
 struct SaveData {
     struct SaveHeader header;
     struct ControlSaveState controls;
     struct AudioSettingsSaveState audio;
-    unsigned char saveSlotTestChamber[MAX_SAVE_SLOTS];
+    struct SaveSlotMetadata saveSlotMetadata[MAX_SAVE_SLOTS];
 };
 
 struct SaveSlotInfo {
@@ -60,8 +68,11 @@ void savefileSetFlags(enum SavefileFlags flags);
 void savefileUnsetFlags(enum SavefileFlags flags);
 int savefileReadFlags(enum SavefileFlags flags);
 
-void savefileSaveGame(Checkpoint checkpoint, int testChamberIndex, int isAutosave);
+void savefileSaveGame(Checkpoint checkpoint, int testChamberIndex, int subjectNumber, int slotIndex);
 int savefileListSaves(struct SaveSlotInfo* slots);
+int savefileNextTestSubject();
+int savefileSuggestedSlot(int testSubject);
+int savefileOldestSlot();
 void savefileLoadGame(int slot, Checkpoint checkpoint);
 
 #endif

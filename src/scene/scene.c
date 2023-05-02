@@ -30,6 +30,18 @@
 #include "../decor/decor_object_list.h"
 #include "signals.h"
 #include "render_plan.h"
+#include "../menu/game_menu.h"
+
+extern struct GameMenu gGameMenu;
+
+struct LandingMenuOption gPauseMenuOptions[] = {
+    {"RESUME", GameMenuStateResumeGame},
+    {"SAVE GAME", GameMenuStateSaveGame},
+    {"LOAD GAME", GameMenuStateLoadGame},
+    {"NEW GAME", GameMenuStateNewGame},
+    {"OPTIONS", GameMenuStateOptions},
+    {"QUIT", GameMenuStateQuit},
+};
 
 Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 
@@ -63,6 +75,13 @@ void sceneInitDynamicColliders(struct Scene* scene) {
 }
 
 void sceneInit(struct Scene* scene) {
+    sceneInitNoPauseMenu(scene);
+    gameMenuInit(&gGameMenu, gPauseMenuOptions, sizeof(gPauseMenuOptions) / sizeof(*gPauseMenuOptions), 1);
+
+    gGameMenu.state = GameMenuStateResumeGame;
+}
+
+void sceneInitNoPauseMenu(struct Scene* scene) {
     signalsInit(1);
 
     cameraInit(&scene->camera, 70.0f, DEFAULT_NEAR_PLANE * SCENE_SCALE, DEFAULT_FAR_PLANE * SCENE_SCALE);
@@ -232,6 +251,10 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
 
     hudRender(renderState, &scene->player, scene->last_portal_indx_shot, scene->looked_wall_portalable_0, scene->looked_wall_portalable_1);
+
+    if (gGameMenu.state != GameMenuStateResumeGame) {
+        gameMenuRender(&gGameMenu, renderState, task);
+    }
 
     // sceneRenderPerformanceMetrics(scene, renderState, task);
 
@@ -434,6 +457,26 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
 void sceneUpdate(struct Scene* scene) {
     OSTime frameStart = osGetTime();
     scene->lastFrameTime = frameStart - scene->lastFrameStart;
+
+    if (gGameMenu.state != GameMenuStateResumeGame) {
+        gameMenuUpdate(&gGameMenu);
+
+        if (controllerActionGet(ControllerActionPause)) {
+            gGameMenu.state = GameMenuStateResumeGame;
+        }
+
+        if (gGameMenu.state == GameMenuStateQuit) {
+            struct Transform identityTransform;
+            transformInitIdentity(&identityTransform);
+            levelQueueLoad(MAIN_MENU, &identityTransform, &gZeroVec);
+            return;
+        }
+
+        return;
+    } else if (controllerActionGet(ControllerActionPause)) {
+        gGameMenu.state = GameMenuStateLanding;
+        gGameMenu.landingMenu.selectedItem = 0;
+    }
 
     signalsReset();
 

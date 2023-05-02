@@ -3,7 +3,6 @@
 
 #include "../graphics/graphics.h"
 #include "./menu.h"
-#include "./menu_state.h"
 #include "./tabs.h"
 #include "./controls.h"
 #include "./audio_options.h"

@@ -3,17 +3,22 @@
 
 #include "../graphics/graphics.h"
 #include "./menu.h"
-#include "./menu_state.h"
 
-struct LandingMenu {
-    Gfx* newGameText;
-    Gfx* loadGameText;
-    Gfx* optionsText;
-    short selectedItem;
+struct LandingMenuOption {
+    char* message;
+    int id;
 };
 
-void landingMenuInit(struct LandingMenu* landingMenu);
-enum MainMenuState landingMenuUpdate(struct LandingMenu* landingMenu);
+struct LandingMenu {
+    struct LandingMenuOption* options;
+    Gfx** optionText;
+    short selectedItem;
+    short optionCount;
+    short darkenBackground;
+};
+
+void landingMenuInit(struct LandingMenu* landingMenu, struct LandingMenuOption* options, int optionCount, int darkenBackground);
+struct LandingMenuOption* landingMenuUpdate(struct LandingMenu* landingMenu);
 void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* renderState, struct GraphicsTask* task);
 
 

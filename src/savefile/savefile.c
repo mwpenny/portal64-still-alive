@@ -23,7 +23,14 @@ void savefileNew() {
     zeroMemory(&gSaveData, sizeof(gSaveData));
     gSaveData.header.header = SAVEFILE_HEADER;
 
-    gSaveData.header.nextSaveSlot = 1;
+    gSaveData.header.nextTestSubject = 0;
+    gSaveData.header.flags = 0;
+
+    for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
+        gSaveData.saveSlotMetadata[i].testChamber = NO_TEST_CHAMBER;
+        gSaveData.saveSlotMetadata[i].testSubjectNumber = 0xFF;
+        gSaveData.saveSlotMetadata[i].saveSlotOrder = 0xFF;
+    }
 
     controllerSetDefaultSource();
 
@@ -135,13 +142,7 @@ int savefileReadFlags(enum SavefileFlags flags) {
 
 #define SAVE_SLOT_SRAM_ADDRESS(index) (SRAM_ADDR + (1 + (index)) * SAVE_SLOT_SIZE)
 
-void savefileSaveGame(Checkpoint checkpoint, int testChamberIndex, int isAutosave) {
-    int slotIndex = 0;
-
-    if (!isAutosave) {
-        slotIndex = gSaveData.header.nextSaveSlot;
-    }
-
+void savefileSaveGame(Checkpoint checkpoint, int testChamberIndex, int subjectNumber, int slotIndex) {
     OSTimer timer;
 
     OSIoMesg dmaIoMesgBuf;
@@ -162,53 +163,130 @@ void savefileSaveGame(Checkpoint checkpoint, int testChamberIndex, int isAutosav
     osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
     (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
 
-    gSaveData.saveSlotTestChamber[slotIndex] = testChamberIndex;
+    unsigned char prevSortOrder = gSaveData.saveSlotMetadata[slotIndex].saveSlotOrder;
 
-    if (isAutosave) {
-        if (!(gSaveData.header.flags & SavefileFlagsHasAutosave)) {
-            gSaveData.header.flags |= SavefileFlagsHasAutosave;
-        }
-    } else {
-        gSaveData.header.nextSaveSlot = slotIndex + 1;
-
-        if (gSaveData.header.nextSaveSlot >= MAX_SAVE_SLOTS) {
-            gSaveData.header.nextSaveSlot = 1;
-        }
-
-        ++gSaveData.header.saveSlotCount;
-
-        if (gSaveData.header.saveSlotCount >= MAX_USER_SAVE_SLOTS) {
-            gSaveData.header.saveSlotCount = MAX_USER_SAVE_SLOTS;
+    // shift existing slot sort orders
+    for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
+        if (gSaveData.saveSlotMetadata[i].saveSlotOrder < prevSortOrder) {
+            ++gSaveData.saveSlotMetadata[i].saveSlotOrder;
         }
     }
 
+    gSaveData.saveSlotMetadata[slotIndex].testChamber = testChamberIndex;
+    gSaveData.saveSlotMetadata[slotIndex].testSubjectNumber = subjectNumber;
+    gSaveData.saveSlotMetadata[slotIndex].saveSlotOrder = 0;
+
     savefileSave();
+}
+
+struct SlotAndOrder {
+    unsigned char saveSlot;
+    unsigned char sortOrder;
+};
+
+void savefileMetadataSort(struct SlotAndOrder* result, struct SlotAndOrder* tmp, int start, int end) {
+    if (start + 1 >= end) {
+        return;
+    }
+
+    int mid = (start + end) >> 1;
+
+    savefileMetadataSort(result, tmp, start, mid);
+    savefileMetadataSort(result, tmp, mid, end);
+
+    int currentOut = start;
+    int aRead = start;
+    int bRead = mid;
+
+    while (aRead < mid || bRead < end) {
+        if (bRead == end || (aRead < mid && result[aRead].sortOrder < result[bRead].sortOrder)) {
+            tmp[currentOut] = result[aRead];
+            ++currentOut;
+            ++aRead;
+        } else {
+            tmp[currentOut] = result[bRead];
+            ++currentOut;
+            ++bRead;
+        }
+    }
+
+    for (int i = start; i < end; ++i) {
+        result[i] = tmp[i];
+    }
 }
 
 int savefileListSaves(struct SaveSlotInfo* slots) {
     int result = 0;
 
-    if (gSaveData.header.flags & SavefileFlagsHasAutosave) {
-        slots[result].saveSlot = 0;
-        slots[result].testChamber = gSaveData.saveSlotTestChamber[0];
+    struct SlotAndOrder unsortedResult[MAX_SAVE_SLOTS];
+
+    for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
+        if (gSaveData.saveSlotMetadata[i].testChamber == NO_TEST_CHAMBER) {
+            continue;
+        }
+
+        unsortedResult[result].sortOrder = gSaveData.saveSlotMetadata[i].saveSlotOrder;
+        unsortedResult[result].saveSlot = i;
         ++result;
     }
 
-    int count = gSaveData.header.saveSlotCount;
-    int nextSaveSlot = gSaveData.header.nextSaveSlot;
+    struct SlotAndOrder tmp[MAX_SAVE_SLOTS];
 
-    while (count > 0) {
-        nextSaveSlot = nextSaveSlot - 1;
+    savefileMetadataSort(unsortedResult, tmp, 0, result);
 
-        // 0 slot is reserved for autosave
-        if (nextSaveSlot == 0) {
-            nextSaveSlot = MAX_SAVE_SLOTS - 1;
+    for (int i = 0; i < result; ++i) {
+        slots[i].saveSlot = unsortedResult[i].saveSlot;
+        slots[i].testChamber = gSaveData.saveSlotMetadata[unsortedResult[i].saveSlot].testChamber;
+    }
+
+    return result;
+}
+
+int savefileNextTestSubject() {
+    int needsToCheck = 1;
+
+    while (needsToCheck) {
+        needsToCheck = 0;
+
+        for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
+            if (gSaveData.saveSlotMetadata[i].testSubjectNumber == gSaveData.header.nextTestSubject) {
+                needsToCheck = 1;
+                ++gSaveData.header.nextTestSubject;
+
+                if (gSaveData.header.nextTestSubject > TEST_SUBJECT_MAX) {
+                    gSaveData.header.nextTestSubject = 0;
+                }
+
+                break;
+            }
         }
+    }
 
-        slots[result].saveSlot = nextSaveSlot;
-        slots[result].testChamber = gSaveData.saveSlotTestChamber[nextSaveSlot];
+    return gSaveData.header.nextTestSubject;
+}
 
-        --count;
+int savefileSuggestedSlot(int testSubject) {
+    int result = 0;
+
+    // 0 indicates a new save
+    for (int i = 1; i < MAX_SAVE_SLOTS; ++i) {
+        if (gSaveData.saveSlotMetadata[i].testSubjectNumber == testSubject && 
+            (result == 0 || gSaveData.saveSlotMetadata[i].saveSlotOrder < gSaveData.saveSlotMetadata[result].saveSlotOrder)) {
+            result = i;
+        }
+    }
+
+    return result;
+}
+
+int savefileOldestSlot() {
+    int result = 1;
+
+    // 0 indicates a new save
+    for (int i = 1; i < MAX_SAVE_SLOTS; ++i) {
+        if (gSaveData.saveSlotMetadata[i].saveSlotOrder > gSaveData.saveSlotMetadata[result].saveSlotOrder) {
+            result = i;
+        }
     }
 
     return result;

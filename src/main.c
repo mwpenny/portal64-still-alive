@@ -93,7 +93,7 @@ static void initProc(void* arg) {
 }
 
 struct Scene gScene;
-struct MainMenu gMainMenu;
+struct GameMenu gGameMenu;
 
 extern OSMesgQueue dmaMessageQ;
 
@@ -119,7 +119,7 @@ struct SceneCallbacks gTestChamberCallbacks = {
 };
 
 struct SceneCallbacks gMainMenuCallbacks = {
-    .data = &gMainMenu,
+    .data = &gGameMenu,
     .initCallback = (InitCallback)&mainMenuInit,
     .graphicsCallback = (GraphicsCallback)&mainMenuRender,
     .updateCallback = (UpdateCallback)&mainMenuUpdate,

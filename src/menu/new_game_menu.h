@@ -3,8 +3,6 @@
 
 #include "../graphics/graphics.h"
 #include "./menu.h"
-#include "./menu_state.h"
-
 #define CHAPTER_IMAGE_WIDTH     84
 #define CHAPTER_IMAGE_HEIGHT    48
 
