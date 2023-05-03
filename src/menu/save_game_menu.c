@@ -2,12 +2,14 @@
 
 #include "../savefile/savefile.h"
 #include "../levels/levels.h"
+#include "../controls/controller.h"
+#include "../util/memory.h"
 
 void saveGameMenuInit(struct SaveGameMenu* saveGame, struct SavefileListMenu* savefileList) {
     saveGame->savefileList = savefileList;
 }
 
-void saveGamePopulate(struct SaveGameMenu* saveGame) {
+void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
     struct SavefileInfo savefileInfo[MAX_SAVE_SLOTS];
     struct SaveSlotInfo saveSlots[MAX_SAVE_SLOTS];
 
@@ -22,7 +24,7 @@ void saveGamePopulate(struct SaveGameMenu* saveGame) {
 
     int freeSlot = savefileFirstFreeSlot();
 
-    if (freeSlot != SAVEFILE_NO_SLOT) {
+    if (includeNew && freeSlot != SAVEFILE_NO_SLOT) {
         savefileInfo[numberOfSaves].slotIndex = freeSlot;
         savefileInfo[numberOfSaves].savefileName = "NEW SAVE";
         savefileInfo[numberOfSaves].testchamberIndex = gCurrentLevelIndex;
@@ -36,6 +38,14 @@ void saveGamePopulate(struct SaveGameMenu* saveGame) {
 }
 
 enum MenuDirection saveGameUpdate(struct SaveGameMenu* saveGame) {
+    if (controllerGetButton(0, A_BUTTON) && saveGame->savefileList->numberOfSaves) {
+        Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
+        if (checkpointSaveInto(&gScene, save)) {
+            savefileSaveGame(save, gScreenGrabBuffer, gCurrentLevelIndex, gCurrentTestSubject, savefileGetSlot(saveGame->savefileList));
+            saveGamePopulate(saveGame, 0);
+        }
+    }
+
     return savefileListUpdate(saveGame->savefileList);
 }
 

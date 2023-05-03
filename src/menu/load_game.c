@@ -16,6 +16,7 @@ void loadGamePopulate(struct LoadGameMenu* loadGame) {
         savefileInfo[i].slotIndex = saveSlots[i].saveSlot;
         savefileInfo[i].testchamberIndex = saveSlots[i].testChamber;
         savefileInfo[i].savefileName = NULL;
+        savefileInfo[i].screenshot = (u16*)SCREEN_SHOT_SRAM(saveSlots[i].saveSlot);
     }
 
     savefileUseList(loadGame->savefileList, "LOAD GAME", savefileInfo, numberOfSaves);

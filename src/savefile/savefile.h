@@ -79,7 +79,7 @@ void savefileSetFlags(enum SavefileFlags flags);
 void savefileUnsetFlags(enum SavefileFlags flags);
 int savefileReadFlags(enum SavefileFlags flags);
 
-void savefileSaveGame(Checkpoint checkpoint, int testChamberIndex, int subjectNumber, int slotIndex);
+void savefileSaveGame(Checkpoint checkpoint, u16* screenshot, int testChamberIndex, int subjectNumber, int slotIndex);
 int savefileListSaves(struct SaveSlotInfo* slots, int includeAuto);
 int savefileNextTestSubject();
 int savefileSuggestedSlot(int testSubject);

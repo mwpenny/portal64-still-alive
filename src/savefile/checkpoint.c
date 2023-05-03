@@ -65,14 +65,26 @@ int checkpointExists() {
 }
 
 void checkpointSave(struct Scene* scene) {
-    int size = checkpointEstimateSize(scene);
+    gHasCheckpoint = checkpointSaveInto(scene, gCheckpoint);
+    gHasCheckpoint = 1;
+}
 
-    if (size > MAX_CHECKPOINT_SIZE) {
-        gHasCheckpoint = 0;
+void checkpointLoadLast(struct Scene* scene) {
+    if (!gHasCheckpoint) {
         return;
     }
 
-    void* curr = gCheckpoint;
+    checkpointLoadLastFrom(scene, gCheckpoint);
+}
+
+int checkpointSaveInto(struct Scene* scene, Checkpoint into) {
+    int size = checkpointEstimateSize(scene);
+
+    if (size > MAX_CHECKPOINT_SIZE) {
+        return 0;
+    }
+
+    void* curr = into;
 
     int binCount = SIGNAL_BIN_COUNT(gSignalCount);
     curr = checkpointWrite(curr, sizeof(unsigned long long) * binCount, gSignals);
@@ -95,15 +107,11 @@ void checkpointSave(struct Scene* scene) {
 
     curr = checkpointWrite(curr, sizeof (gTriggeredCutscenes), &gTriggeredCutscenes);
 
-    gHasCheckpoint = 1;
+    return 1;
 }
 
-void checkpointLoadLast(struct Scene* scene) {
-    if (!gHasCheckpoint) {
-        return;
-    }
-
-    void* curr = gCheckpoint;
+void checkpointLoadLastFrom(struct Scene* scene, Checkpoint from) {
+    void* curr = from;
 
     int binCount = SIGNAL_BIN_COUNT(gSignalCount);
     curr = checkpointRead(curr, sizeof(unsigned long long) * binCount, gSignals);

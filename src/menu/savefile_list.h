@@ -41,6 +41,7 @@ void savefileListMenuInit(struct SavefileListMenu* savefileList);
 void savefileUseList(struct SavefileListMenu* savefileList, char* title, struct SavefileInfo* savefileInfo, int slotCount);
 enum MenuDirection savefileListUpdate(struct SavefileListMenu* savefileList);
 void savefileListRender(struct SavefileListMenu* savefileList, struct RenderState* renderState, struct GraphicsTask* task);
+int savefileGetSlot(struct SavefileListMenu* savefileList);
 
 void savefileGrabScreenshot();
 

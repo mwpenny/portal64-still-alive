@@ -290,3 +290,7 @@ void savefileGrabScreenshot() {
         }
     }
 }
+
+int savefileGetSlot(struct SavefileListMenu* savefileList) {
+    return savefileList->savefileInfo[savefileList->selectedSave].slotIndex;
+}

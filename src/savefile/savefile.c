@@ -20,6 +20,62 @@ OSMesg     timerQueueBuf;
 
 extern OSMesgQueue dmaMessageQ;
 
+#define SRAM_latency     0x5 
+#define SRAM_pulse       0x0c 
+#define SRAM_pageSize    0xd 
+#define SRAM_relDuration 0x2
+
+#define SRAM_CHUNK_DELAY        OS_USEC_TO_CYCLES(10 * 1000)
+
+#define SRAM_ADDR   0x08000000
+
+void savefileSramSave(void* dst, void* src, int size) {
+    OSTimer timer;
+
+    OSIoMesg dmaIoMesgBuf;
+
+    // save chechpoint
+    dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
+    dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
+    dmaIoMesgBuf.dramAddr = src;
+    dmaIoMesgBuf.devAddr = (u32)dst;
+    dmaIoMesgBuf.size = size;
+
+    osWritebackDCache(src, size);
+    if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_WRITE) == -1)
+    {
+        return;
+    }
+    (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
+
+    osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
+    (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
+}
+
+int savefileSramLoad(void* sramAddr, void* ramAddr, int size) {
+    OSTimer timer;
+
+    OSIoMesg dmaIoMesgBuf;
+
+    dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
+    dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
+    dmaIoMesgBuf.dramAddr = ramAddr;
+    dmaIoMesgBuf.devAddr = (u32)sramAddr;
+    dmaIoMesgBuf.size = size;
+
+    osInvalDCache(ramAddr, size);
+    if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_READ) == -1)
+    {
+        return 0;
+    }
+    (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
+
+    osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
+    (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
+
+    return 1;
+}
+
 void savefileNew() {
     zeroMemory(&gSaveData, sizeof(gSaveData));
     gSaveData.header.header = SAVEFILE_HEADER;
@@ -38,15 +94,6 @@ void savefileNew() {
     gSaveData.audio.soundVolume = 0xFF;
     gSaveData.audio.musicVolume = 0xFF;
 }
-
-#define SRAM_latency     0x5 
-#define SRAM_pulse       0x0c 
-#define SRAM_pageSize    0xd 
-#define SRAM_relDuration 0x2
-
-#define SRAM_CHUNK_DELAY        OS_USEC_TO_CYCLES(10 * 1000)
-
-#define SRAM_ADDR   0x08000000
 
 void savefileLoad() {
     /* Fill basic information */
@@ -79,53 +126,13 @@ void savefileLoad() {
     __osPiTable = &gSramHandle;
     osSetIntMask(saveMask);
 
-
-    OSTimer timer;
-
-    OSIoMesg dmaIoMesgBuf;
-
-    dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
-    dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
-    dmaIoMesgBuf.dramAddr = &gSaveData;
-    dmaIoMesgBuf.devAddr = SRAM_ADDR;
-    dmaIoMesgBuf.size = sizeof(gSaveData);
-
-    osInvalDCache(&gSaveData, sizeof(gSaveData));
-    if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_READ) == -1)
-    {
-        savefileNew();
-        return;
-    }
-    (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
-
-    osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
-    (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
-
-    if (gSaveData.header.header != SAVEFILE_HEADER) {
+    if (!savefileSramLoad((void*)SRAM_ADDR, &gSaveData, sizeof(gSaveData)) || gSaveData.header.header != SAVEFILE_HEADER) {
         savefileNew();
     }
 }
 
 void savefileSave() {
-    OSTimer timer;
-
-    OSIoMesg dmaIoMesgBuf;
-
-    dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
-    dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
-    dmaIoMesgBuf.dramAddr = &gSaveData;
-    dmaIoMesgBuf.devAddr = SRAM_ADDR;
-    dmaIoMesgBuf.size = sizeof(gSaveData);
-
-    osWritebackDCache(&gSaveData, sizeof(gSaveData));
-    if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_WRITE) == -1)
-    {
-        return;
-    }
-    (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
-
-    osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
-    (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
+    savefileSramSave((void*)SRAM_ADDR, &gSaveData, sizeof(gSaveData));
 }
 
 void savefileSetFlags(enum SavefileFlags flags) {
@@ -142,26 +149,9 @@ int savefileReadFlags(enum SavefileFlags flags) {
 
 #define SAVE_SLOT_SRAM_ADDRESS(index) (SRAM_ADDR + (1 + (index)) * SAVE_SLOT_SIZE)
 
-void savefileSaveGame(Checkpoint checkpoint, int testChamberIndex, int subjectNumber, int slotIndex) {
-    OSTimer timer;
-
-    OSIoMesg dmaIoMesgBuf;
-
-    dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
-    dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
-    dmaIoMesgBuf.dramAddr = checkpoint;
-    dmaIoMesgBuf.devAddr = SAVE_SLOT_SRAM_ADDRESS(slotIndex);
-    dmaIoMesgBuf.size = MAX_CHECKPOINT_SIZE;
-
-    osWritebackDCache(&gSaveData, MAX_CHECKPOINT_SIZE);
-    if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_WRITE) == -1)
-    {
-        return;
-    }
-    (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
-
-    osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
-    (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
+void savefileSaveGame(Checkpoint checkpoint, u16* screenshot, int testChamberIndex, int subjectNumber, int slotIndex) {
+    savefileSramSave((void*)SAVE_SLOT_SRAM_ADDRESS(slotIndex), checkpoint, MAX_CHECKPOINT_SIZE);
+    savefileSramSave((void*)SCREEN_SHOT_SRAM(slotIndex), screenshot, THUMBANIL_IMAGE_SIZE);
 
     unsigned char prevSortOrder = gSaveData.saveSlotMetadata[slotIndex].saveSlotOrder;
 
@@ -307,50 +297,12 @@ int savefileFirstFreeSlot() {
 }
 
 void savefileLoadGame(int slot, Checkpoint checkpoint) {
-    OSTimer timer;
-
-    OSIoMesg dmaIoMesgBuf;
-
-    dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
-    dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
-    dmaIoMesgBuf.dramAddr = checkpoint;
-    dmaIoMesgBuf.devAddr = SAVE_SLOT_SRAM_ADDRESS(slot);
-    dmaIoMesgBuf.size = MAX_CHECKPOINT_SIZE;
-
-    osInvalDCache(checkpoint, MAX_CHECKPOINT_SIZE);
-    if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_READ) == -1)
-    {
-        savefileNew();
-        return;
-    }
-    (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
-
-    osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
-    (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
+    savefileSramLoad((void*)SAVE_SLOT_SRAM_ADDRESS(slot), checkpoint, MAX_CHECKPOINT_SIZE);
 }
 
 void savefileLoadScreenshot(u16* target, u16* location) {
     if ((int)location >= SRAM_START_ADDR && (int)location <= (SRAM_START_ADDR + SRAM_SIZE)) {
-        OSTimer timer;
-
-        OSIoMesg dmaIoMesgBuf;
-
-        dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
-        dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
-        dmaIoMesgBuf.dramAddr = target;
-        dmaIoMesgBuf.devAddr = (u32)location;
-        dmaIoMesgBuf.size = THUMBANIL_IMAGE_SIZE;
-
-        osInvalDCache(target, THUMBANIL_IMAGE_SIZE);
-        if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_READ) == -1)
-        {
-            savefileNew();
-            return;
-        }
-        (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
-
-        osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
-        (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
+        savefileSramLoad(location, target, THUMBANIL_IMAGE_SIZE);
     } else {
         memCopy(target, location, THUMBANIL_IMAGE_SIZE);
     }

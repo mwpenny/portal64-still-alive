@@ -65,7 +65,7 @@ void gameMenuUpdate(struct GameMenu* gameMenu) {
                 loadGamePopulate(&gameMenu->loadGameMenu);
                 break;
             case GameMenuStateSaveGame:
-                saveGamePopulate(&gameMenu->saveGameMenu);
+                saveGamePopulate(&gameMenu->saveGameMenu, 1);
                 break;
             default:
                 break;
