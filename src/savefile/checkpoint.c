@@ -57,6 +57,11 @@ void checkpointClear() {
     gHasCheckpoint = 0;
 }
 
+void checkpointUse(Checkpoint checkpoint) {
+    memCopy(gCheckpoint, checkpoint, MAX_CHECKPOINT_SIZE);
+    gHasCheckpoint = 1;
+}
+
 int checkpointExists() {
     if (gHasCheckpoint != 0){
         return 1;

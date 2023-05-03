@@ -466,9 +466,7 @@ void sceneUpdate(struct Scene* scene) {
         }
 
         if (gGameMenu.state == GameMenuStateQuit) {
-            struct Transform identityTransform;
-            transformInitIdentity(&identityTransform);
-            levelQueueLoad(MAIN_MENU, &identityTransform, &gZeroVec);
+            levelQueueLoad(MAIN_MENU, NULL, NULL);
             return;
         }
 
@@ -632,10 +630,7 @@ void sceneUpdate(struct Scene* scene) {
     vector3Add(&scene->camera.transform.position, &scene->freeCameraOffset, &scene->camera.transform.position);
 
     if (controllerGetButtonDown(2, L_TRIG)) {
-        struct Transform identityTransform;
-        transformInitIdentity(&identityTransform);
-        identityTransform.position.y = 1.0f;
-        levelQueueLoad(NEXT_LEVEL, &identityTransform, &gZeroVec);
+        levelQueueLoad(NEXT_LEVEL, NULL, NULL);
     }
 }
 

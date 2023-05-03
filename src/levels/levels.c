@@ -130,8 +130,17 @@ void levelQueueLoad(int index, struct Transform* relativeExitTransform, struct V
     } else {
         gQueuedLevel = index;
     }
-    gRelativeTransform = *relativeExitTransform;
-    gRelativeVelocity = *relativeVelocity;
+    if (relativeExitTransform) {
+        gRelativeTransform = *relativeExitTransform;
+    } else {
+        transformInitIdentity(&gRelativeTransform);
+        gRelativeTransform.position.y = 1.0f;
+    }
+    if (relativeVelocity) {
+        gRelativeVelocity = *relativeVelocity;
+    } else {
+        gRelativeVelocity = gZeroVec;
+    }
     checkpointClear();
 }
 

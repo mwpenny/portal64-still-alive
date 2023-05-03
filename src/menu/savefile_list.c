@@ -44,6 +44,8 @@ void savefileListSlotUseInfo(struct SavefileListSlot* savefileListSlot, struct S
     savefileListSlot->slotIndex = savefileInfo->slotIndex;
 
     savefileLoadScreenshot(savefileListSlot->imageData, savefileInfo->screenshot);
+    savefileListSlot->x = x;
+    savefileListSlot->y = y;
 }
 
 void savefileListSlotInit(struct SavefileListSlot* savefileListSlot, int x, int y) {

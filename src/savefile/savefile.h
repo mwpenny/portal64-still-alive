@@ -18,9 +18,9 @@
 
 #define SAVE_SLOT_SIZE  (MAX_CHECKPOINT_SIZE + THUMBNAIL_IMAGE_SPACE)
 
-#define SCREEN_SHOT_SRAM(slotIndex)     (((slotIndex) + 1) * SAVE_SLOT_SIZE + MAX_CHECKPOINT_SIZE)
+#define SCREEN_SHOT_SRAM(slotIndex)     (((slotIndex) + 1) * SAVE_SLOT_SIZE + MAX_CHECKPOINT_SIZE + SRAM_START_ADDR)
 
-#define SAVEFILE_HEADER 0xDEAE
+#define SAVEFILE_HEADER 0xDEAD
 
 // first save slot is always reserved for auto save
 #define MAX_SAVE_SLOTS  ((int)(SRAM_SIZE / SAVE_SLOT_SIZE) - 1)
@@ -87,7 +87,7 @@ int savefileOldestSlot();
 
 int savefileFirstFreeSlot();
 
-void savefileLoadGame(int slot, Checkpoint checkpoint);
+void savefileLoadGame(int slot, Checkpoint checkpoint, int* testChamberIndex, int* subjectNumber);
 void savefileLoadScreenshot(u16* target, u16* location);
 
 #endif

@@ -1,6 +1,9 @@
 #include "load_game.h"
 
 #include "../savefile/savefile.h"
+#include "../controls/controller.h"
+#include "../levels/levels.h"
+#include "../util/memory.h"
 
 void loadGameMenuInit(struct LoadGameMenu* loadGame, struct SavefileListMenu* savefileList) {
     loadGame->savefileList = savefileList;
@@ -23,6 +26,19 @@ void loadGamePopulate(struct LoadGameMenu* loadGame) {
 }
 
 enum MenuDirection loadGameUpdate(struct LoadGameMenu* loadGame) {
+    if (controllerGetButtonDown(0, A_BUTTON) && loadGame->savefileList->numberOfSaves) {
+        Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
+        int level;
+        int testSubject;
+        savefileLoadGame(savefileGetSlot(loadGame->savefileList), save, &level, &testSubject);
+        gCurrentTestSubject = testSubject;
+        
+        levelQueueLoad(level, NULL, NULL);
+        checkpointUse(save);
+
+        stackMallocFree(save);
+    }
+
     return savefileListUpdate(loadGame->savefileList);
 }
 

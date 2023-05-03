@@ -11,6 +11,7 @@
 #include "../build/assets/materials/images.h"
 
 #include "../levels/levels.h"
+#include "../savefile/savefile.h"
 #include "../controls/controller.h"
 
 struct Chapter gChapters[] = {
@@ -124,11 +125,8 @@ enum MenuDirection newGameUpdate(struct NewGameMenu* newGameMenu) {
     }
 
     if (controllerGetButtonDown(0, A_BUTTON) && gChapters[newGameMenu->selectedChapter + 1].testChamberNumber >= 0) {
-        struct Transform identityTransform;
-        transformInitIdentity(&identityTransform);
-        identityTransform.position.y = 1.0f;
-
-        levelQueueLoad(gChapters[newGameMenu->selectedChapter].testChamberNumber, &identityTransform, &gZeroVec);
+        gCurrentTestSubject = savefileNextTestSubject();
+        levelQueueLoad(gChapters[newGameMenu->selectedChapter].testChamberNumber, NULL, NULL);
     }
 
     if ((controllerGetDirectionDown(0) & ControllerDirectionRight) != 0 && 

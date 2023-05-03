@@ -126,7 +126,11 @@ void savefileLoad() {
     __osPiTable = &gSramHandle;
     osSetIntMask(saveMask);
 
-    if (!savefileSramLoad((void*)SRAM_ADDR, &gSaveData, sizeof(gSaveData)) || gSaveData.header.header != SAVEFILE_HEADER) {
+    if (!savefileSramLoad((void*)SRAM_ADDR, &gSaveData, sizeof(gSaveData))) {
+        savefileNew();
+    }
+
+    if (gSaveData.header.header != SAVEFILE_HEADER) {
         savefileNew();
     }
 }
@@ -296,8 +300,10 @@ int savefileFirstFreeSlot() {
     return SAVEFILE_NO_SLOT;
 }
 
-void savefileLoadGame(int slot, Checkpoint checkpoint) {
+void savefileLoadGame(int slot, Checkpoint checkpoint, int* testChamberIndex, int* subjectNumber) {
     savefileSramLoad((void*)SAVE_SLOT_SRAM_ADDRESS(slot), checkpoint, MAX_CHECKPOINT_SIZE);
+    *testChamberIndex = gSaveData.saveSlotMetadata[slot].testChamber;
+    *subjectNumber = gSaveData.saveSlotMetadata[slot].testSubjectNumber;
 }
 
 void savefileLoadScreenshot(u16* target, u16* location) {
