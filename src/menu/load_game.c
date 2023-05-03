@@ -12,22 +12,6 @@ void loadGamePopulate(struct LoadGameMenu* loadGame) {
 
     int numberOfSaves = savefileListSaves(saveSlots, 1);
 
-    saveSlots[0].saveSlot = 0;
-    saveSlots[0].testChamber = 0;
-
-    saveSlots[1].saveSlot = 1;
-    saveSlots[1].testChamber = 4;
-
-    saveSlots[2].saveSlot = 2;
-    saveSlots[2].testChamber = 5;
-
-    saveSlots[3].saveSlot = 3;
-    saveSlots[3].testChamber = 3;
-
-    saveSlots[4].saveSlot = 4;
-    saveSlots[4].testChamber = 0;
-    numberOfSaves = 5;
-
     for (int i = 0; i < numberOfSaves; ++i) {
         savefileInfo[i].slotIndex = saveSlots[i].saveSlot;
         savefileInfo[i].testchamberIndex = saveSlots[i].testChamber;

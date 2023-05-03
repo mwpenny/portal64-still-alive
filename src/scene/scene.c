@@ -474,6 +474,7 @@ void sceneUpdate(struct Scene* scene) {
 
         return;
     } else if (controllerActionGet(ControllerActionPause)) {
+        savefileGrabScreenshot();
         gGameMenu.state = GameMenuStateLanding;
         gGameMenu.landingMenu.selectedItem = 0;
     }

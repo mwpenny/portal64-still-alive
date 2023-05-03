@@ -39,7 +39,6 @@ void savefileNew() {
     gSaveData.audio.musicVolume = 0xFF;
 }
 
-#define SRAM_START_ADDR  0x08000000 
 #define SRAM_latency     0x5 
 #define SRAM_pulse       0x0c 
 #define SRAM_pageSize    0xd 
@@ -297,6 +296,16 @@ int savefileOldestSlot() {
     return result;
 }
 
+int savefileFirstFreeSlot() {
+    for (int i = 1; i < MAX_SAVE_SLOTS; ++i) {
+        if (gSaveData.saveSlotMetadata[i].testChamber == NO_TEST_CHAMBER) {
+            return i;
+        }
+    }
+
+    return SAVEFILE_NO_SLOT;
+}
+
 void savefileLoadGame(int slot, Checkpoint checkpoint) {
     OSTimer timer;
 
@@ -318,4 +327,31 @@ void savefileLoadGame(int slot, Checkpoint checkpoint) {
 
     osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
     (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
+}
+
+void savefileLoadScreenshot(u16* target, u16* location) {
+    if ((int)location >= SRAM_START_ADDR && (int)location <= (SRAM_START_ADDR + SRAM_SIZE)) {
+        OSTimer timer;
+
+        OSIoMesg dmaIoMesgBuf;
+
+        dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
+        dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
+        dmaIoMesgBuf.dramAddr = target;
+        dmaIoMesgBuf.devAddr = (u32)location;
+        dmaIoMesgBuf.size = THUMBANIL_IMAGE_SIZE;
+
+        osInvalDCache(target, THUMBANIL_IMAGE_SIZE);
+        if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_READ) == -1)
+        {
+            savefileNew();
+            return;
+        }
+        (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
+
+        osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
+        (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
+    } else {
+        memCopy(target, location, THUMBANIL_IMAGE_SIZE);
+    }
 }

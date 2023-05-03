@@ -1,6 +1,7 @@
 
 materials:
   default_ui:
+    gDPSetCycleType: G_CYC_1CYCLE
     gSPGeometryMode:
       clear: [G_ZBUFFER, G_LIGHTING, G_SHADE]
     gDPSetTextureLUT: G_TT_NONE
@@ -91,3 +92,11 @@ materials:
       b: 0
       a: 85
 
+  image_copy:
+    gDPSetRenderMode: G_RM_OPA_SURF
+    gDPSetCombineMode: 
+      color: ["0", "0", "0", TEXEL0]
+      alpha: ["0", "0", "0", TEXEL0]
+    gDPSetTextureFilter: G_TF_BILERP
+    gDPSetTextureLUT: G_TT_NONE
+    gDPSetTexturePersp: G_TP_NONE

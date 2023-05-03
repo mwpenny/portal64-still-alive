@@ -6,10 +6,13 @@
 #include "../savefile/savefile.h"
 #include "./new_game_menu.h"
 
+extern u16 gScreenGrabBuffer[SAVE_SLOT_IMAGE_W * SAVE_SLOT_IMAGE_H];
+
 struct SavefileInfo {
     short slotIndex;
     short testchamberIndex;
     char* savefileName;
+    u16* screenshot;
 };
 
 struct SavefileListSlot {
@@ -39,5 +42,6 @@ void savefileUseList(struct SavefileListMenu* savefileList, char* title, struct 
 enum MenuDirection savefileListUpdate(struct SavefileListMenu* savefileList);
 void savefileListRender(struct SavefileListMenu* savefileList, struct RenderState* renderState, struct GraphicsTask* task);
 
+void savefileGrabScreenshot();
 
 #endif

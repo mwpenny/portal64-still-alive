@@ -13,33 +13,20 @@ void saveGamePopulate(struct SaveGameMenu* saveGame) {
 
     int numberOfSaves = savefileListSaves(saveSlots, 0);
 
-    saveSlots[0].saveSlot = 0;
-    saveSlots[0].testChamber = 0;
-
-    saveSlots[1].saveSlot = 1;
-    saveSlots[1].testChamber = 4;
-
-    saveSlots[2].saveSlot = 2;
-    saveSlots[2].testChamber = 5;
-
-    saveSlots[3].saveSlot = 3;
-    saveSlots[3].testChamber = 3;
-
-    saveSlots[4].saveSlot = 4;
-    saveSlots[4].testChamber = 0;
-    numberOfSaves = 5;
-
     for (int i = 0; i < numberOfSaves; ++i) {
         savefileInfo[i].slotIndex = saveSlots[i].saveSlot;
         savefileInfo[i].testchamberIndex = saveSlots[i].testChamber;
         savefileInfo[i].savefileName = NULL;
+        savefileInfo[i].screenshot = (u16*)SCREEN_SHOT_SRAM(saveSlots[i].saveSlot);
     }
 
-    if (numberOfSaves < MAX_USER_SAVE_SLOTS) {
-        // TODO
-        savefileInfo[numberOfSaves].slotIndex = 0;
+    int freeSlot = savefileFirstFreeSlot();
+
+    if (freeSlot != SAVEFILE_NO_SLOT) {
+        savefileInfo[numberOfSaves].slotIndex = freeSlot;
         savefileInfo[numberOfSaves].savefileName = "NEW SAVE";
         savefileInfo[numberOfSaves].testchamberIndex = gCurrentLevelIndex;
+        savefileInfo[numberOfSaves].screenshot = gScreenGrabBuffer;
         ++numberOfSaves;
     }
 

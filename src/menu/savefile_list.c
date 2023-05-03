@@ -8,8 +8,12 @@
 
 #include "../build/assets/materials/ui.h"
 
-#define BORDER_WIDTH    92
-#define BORDER_HEIGHT   58
+#define SAVE_SLOT_RENDER_W  (SAVE_SLOT_IMAGE_W * 2)
+#define SAVE_SLOT_RENDER_H  (SAVE_SLOT_IMAGE_H * 2)
+
+#define BORDER_THICKNESS    5
+#define BORDER_WIDTH        (SAVE_SLOT_RENDER_W + BORDER_THICKNESS * 2)
+#define BORDER_HEIGHT       (SAVE_SLOT_RENDER_H + BORDER_THICKNESS * 2)
 
 #define ROW_HEIGHT      (BORDER_HEIGHT + 8)
 
@@ -17,28 +21,42 @@ void savefileListSlotUseInfo(struct SavefileListSlot* savefileListSlot, struct S
     char message[16];
     sprintf(message, "Testchamber %02d", savefileInfo->testchamberIndex);
     fontRender(&gDejaVuSansFont, message, x + BORDER_WIDTH + 8, y, savefileListSlot->testChamberText);
+
+    if (savefileListSlot->gameId) {
+        free(savefileListSlot->gameId);
+    }
+
+    if (savefileInfo->savefileName) {
+        strcpy(message, savefileInfo->savefileName);
+    } else {
+        sprintf(message, "Subject %02d", gSaveData.saveSlotMetadata[savefileInfo->slotIndex].testSubjectNumber);
+    }
+
+    savefileListSlot->gameId = menuBuildText(&gDejaVuSansFont, message, x + BORDER_WIDTH + 8, y + 16);
+
     menuRerenderSolidBorder(
-        x, y, BORDER_WIDTH, BORDER_HEIGHT,
-        x + 5, y + 5, 82, 48,
+        x, y, 
+        BORDER_WIDTH, BORDER_HEIGHT,
+        x + BORDER_THICKNESS, y + BORDER_THICKNESS, 
+        SAVE_SLOT_IMAGE_W * 2, SAVE_SLOT_IMAGE_H * 2,
         savefileListSlot->border
     );
     savefileListSlot->slotIndex = savefileInfo->slotIndex;
-    struct Chapter* chapter = chapterFindForChamber(savefileInfo->testchamberIndex);
-    romCopy(chapter->imageData, savefileListSlot->imageData, CHAPTER_IMAGE_SIZE);
-    savefileListSlot->x = x;
-    savefileListSlot->y = y;
+
+    savefileLoadScreenshot(savefileListSlot->imageData, savefileInfo->screenshot);
 }
 
 void savefileListSlotInit(struct SavefileListSlot* savefileListSlot, int x, int y) {
     savefileListSlot->testChamberText = menuBuildText(&gDejaVuSansFont, "Testchamber 00", x + BORDER_WIDTH + 8, y);
+    savefileListSlot->gameId = NULL;
     savefileListSlot->border = menuBuildSolidBorder(
         x, y, BORDER_WIDTH, BORDER_HEIGHT,
-        x + 5, y + 5, 82, 48
+        x + BORDER_THICKNESS, y + BORDER_THICKNESS, 82, 48
     );
 
     savefileListSlot->x = x;
     savefileListSlot->y = y;
-    savefileListSlot->imageData = malloc(CHAPTER_IMAGE_SIZE);
+    savefileListSlot->imageData = malloc(THUMBANIL_IMAGE_SIZE);
     savefileListSlot->slotIndex = -1;
 }
 
@@ -208,9 +226,12 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
         menuSetRenderColor(renderState, savefileList->indexOffset + i == savefileList->selectedSave, &gSelectionOrange, &gColorWhite);
 
         renderStateInlineBranch(renderState, slot->testChamberText);
+        renderStateInlineBranch(renderState, slot->gameId);
     }
 
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
+
+    gSPDisplayList(renderState->dl++, ui_material_list[IMAGE_COPY_INDEX]);
 
     for (int i = 0; i < MAX_VISIBLE_SLOTS; ++i) {
         struct SavefileListSlot* slot = &savefileList->slots[i];
@@ -218,18 +239,54 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
         if (slot->slotIndex < 0) {
             continue;
         }
-        
-        graphicsCopyImage(
-            renderState,
-            slot->imageData,
-            CHAPTER_IMAGE_WIDTH, CHAPTER_IMAGE_HEIGHT,
+
+        gDPLoadTextureTile(
+            renderState->dl++,
+            K0_TO_PHYS(slot->imageData),
+            G_IM_FMT_RGBA, G_IM_SIZ_16b,
+            SAVE_SLOT_IMAGE_W, SAVE_SLOT_IMAGE_H,
             0, 0,
-            slot->x + 5, slot->y + 5,
-            CHAPTER_IMAGE_WIDTH, CHAPTER_IMAGE_HEIGHT,
-            gColorWhite
+            SAVE_SLOT_IMAGE_W-1, SAVE_SLOT_IMAGE_H-1,
+            0,
+            G_TX_CLAMP, G_TX_CLAMP,
+            G_TX_NOMASK, G_TX_NOMASK,
+            G_TX_NOLOD, G_TX_NOLOD
+        );
+        
+        gSPTextureRectangle(
+            renderState->dl++,
+            (slot->x + BORDER_THICKNESS) << 2, (slot->y + BORDER_THICKNESS) << 2,
+            (slot->x + BORDER_THICKNESS + SAVE_SLOT_RENDER_W) << 2, 
+            (slot->y + BORDER_THICKNESS + SAVE_SLOT_RENDER_H) << 2,
+            G_TX_RENDERTILE, 
+            0, 0, 
+            (SAVE_SLOT_IMAGE_W << 10) / SAVE_SLOT_RENDER_W, (SAVE_SLOT_IMAGE_H << 10) / SAVE_SLOT_RENDER_H
         );
     }
 
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[IMAGE_COPY_INDEX]);
+
     gDPPipeSync(renderState->dl++);
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT);
+}
+
+u16 gScreenGrabBuffer[SAVE_SLOT_IMAGE_W * SAVE_SLOT_IMAGE_H];
+
+#define IMAGE_SCALE_FACTOR      (int)((SCREEN_WD << 16) / SAVE_SLOT_IMAGE_W)
+#define SCALE_TO_SOURCE(value)  ((IMAGE_SCALE_FACTOR * (value)) >> 16)
+
+void savefileGrabScreenshot() {
+    u16* cfb = osViGetCurrentFramebuffer();
+    u16* dst = gScreenGrabBuffer;
+
+    for (int y = 0; y < SAVE_SLOT_IMAGE_H; ++y) {
+        for (int x = 0; x < SAVE_SLOT_IMAGE_W; ++x) {
+            int srcX = SCALE_TO_SOURCE(x);
+            int srcY = SCALE_TO_SOURCE(y);
+
+            *dst = cfb[srcX + srcY * SCREEN_WD];
+
+            ++dst;
+        }
+    }
 }
