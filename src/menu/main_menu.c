@@ -24,7 +24,7 @@ void mainMenuReadCamera(struct GameMenu* gameMenu) {
 }
 
 void mainMenuInit(struct GameMenu* gameMenu) {
-    sceneInit(&gScene);
+    sceneInitNoPauseMenu(&gScene);
 
     gameMenuInit(gameMenu, gMainMenuOptions, sizeof(gMainMenuOptions) / sizeof(*gMainMenuOptions), 0);
 

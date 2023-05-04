@@ -76,6 +76,9 @@ void sceneInitDynamicColliders(struct Scene* scene) {
 
 void sceneInit(struct Scene* scene) {
     sceneInitNoPauseMenu(scene);
+    if (!checkpointExists()) {
+        checkpointSave(scene);
+    }
     gameMenuInit(&gGameMenu, gPauseMenuOptions, sizeof(gPauseMenuOptions) / sizeof(*gPauseMenuOptions), 1);
 
     gGameMenu.state = GameMenuStateResumeGame;
@@ -200,8 +203,6 @@ void sceneInitNoPauseMenu(struct Scene* scene) {
     sceneInitDynamicColliders(scene);
 
     sceneAnimatorInit(&scene->animator, gCurrentLevel->animations, gCurrentLevel->animationInfoCount);
-
-    checkpointSave(scene);
 }
 
 #define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT

@@ -46,8 +46,8 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
 
     savefileUseList(saveGame->savefileList, "SAVE GAME", savefileInfo, numberOfSaves);
 
-    if (startSelection != -1) {
-        saveGame->savefileList->selectedSave = startSelection;
+    if (startSelection == -1) {
+        saveGame->savefileList->selectedSave = numberOfSaves - 1;
     }
 }
 

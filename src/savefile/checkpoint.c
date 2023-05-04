@@ -108,7 +108,7 @@ int checkpointSaveInto(struct Scene* scene, Checkpoint into) {
         currCutscene = currCutscene->nextRunner;
     }
 
-    curr = checkpointWrite(curr, sizeof(struct PartialTransform), &scene->player.body.transform);
+    curr = checkpointWrite(curr, sizeof(struct PartialTransform), &scene->player.lookTransform);
 
     curr = checkpointWrite(curr, sizeof (gTriggeredCutscenes), &gTriggeredCutscenes);
 
@@ -133,7 +133,8 @@ void checkpointLoadLastFrom(struct Scene* scene, Checkpoint from) {
         cutsceneStartSerialized(&cutscene);
     }
 
-    curr = checkpointRead(curr, sizeof(struct PartialTransform), &scene->player.body.transform);
+    curr = checkpointRead(curr, sizeof(struct PartialTransform), &scene->player.lookTransform);
+    scene->player.body.transform.position = scene->player.lookTransform.position;
     scene->player.body.velocity = gZeroVec;
 
     curr = checkpointRead(curr, sizeof (gTriggeredCutscenes), &gTriggeredCutscenes);
