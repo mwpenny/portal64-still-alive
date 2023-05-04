@@ -124,7 +124,6 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 <br />
 
 ## Current New Feature TODO List
-- [ ] force placing auto portals when there is a conflict
 - [ ] rotate auto uv
 - [ ] disable portal surfaces manually on some surfaces
 - [ ] Portal not rendering recursively sometimes
@@ -135,6 +134,7 @@ Where `/home/james/Blender/blender-2.93.1-linux-x64` is the folder where Blender
 - [ ] Adding loading notice between levels #45
 - [ ] Vertex lighting #39
 - [ ] Multi controller support #23
+- [x] force placing auto portals when there is a conflict
 - [x] Camera shake
 - [x] Portal gun movement with player movement/shooting #19
 

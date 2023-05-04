@@ -197,6 +197,7 @@ void sceneInitNoPauseMenu(struct Scene* scene) {
     scene->last_portal_indx_shot=-1;
     scene->looked_wall_portalable_0=0;
     scene->looked_wall_portalable_1=0;
+    scene->continuouslyAttemptingPortalOpen=0;
 
     scene->freeCameraOffset = gZeroVec;
 
@@ -284,6 +285,9 @@ void sceneCheckPortals(struct Scene* scene) {
 
     int hasBlue = (scene->player.flags & PlayerHasFirstPortalGun) != 0;
     int hasOrange = (scene->player.flags & PlayerHasSecondPortalGun) != 0;
+    if (scene->continuouslyAttemptingPortalOpen){
+        sceneFirePortal(scene, &scene->savedPortal.ray, &scene->savedPortal.transformUp, scene->savedPortal.portalIndex, scene->savedPortal.roomIndex, 0, 0);
+    }
 
     if (fireOrange && hasOrange && !playerIsGrabbing(&scene->player)) {
         sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom, 1, 0);
@@ -334,7 +338,6 @@ void sceneCheckPortals(struct Scene* scene) {
 
     if (scene->player.flags & PlayerHasFirstPortalGun){
         if (sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom, 1, 1)){
-            
             scene->looked_wall_portalable_0 = 1;
         }
         if (sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom, 1, 1)){
@@ -766,7 +769,19 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
         quatLook(&hitDirection, &upDir, &portalLocation.rotation);
     }
 
-    return sceneOpenPortal(scene, &portalLocation, relativeIndex, portalIndex, mappingRange, hit.object, hit.roomIndex, fromPlayer, just_checking);
+    if (!sceneOpenPortal(scene, &portalLocation, relativeIndex, portalIndex, mappingRange, hit.object, hit.roomIndex, fromPlayer, just_checking) && !fromPlayer){
+        sceneClosePortal(scene, 1-portalIndex);
+        scene->continuouslyAttemptingPortalOpen = 1;
+        scene->savedPortal.portalIndex = portalIndex;
+        scene->savedPortal.ray = *ray;
+        scene->savedPortal.roomIndex = roomIndex;
+        scene->savedPortal.transformUp = *playerUp;
+        return 0;
+    }
+    if (!fromPlayer){
+        scene->continuouslyAttemptingPortalOpen = 0;
+    }
+    return 1;
 }
 
 void sceneClosePortal(struct Scene* scene, int portalIndex) {
