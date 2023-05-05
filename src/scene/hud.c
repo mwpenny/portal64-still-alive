@@ -21,6 +21,11 @@
 #define HUD_LOWER_X ((SCREEN_WD - HUD_OUTER_WIDTH + (HUD_OUTER_OFFSET_X << 1)) << 1)
 #define HUD_LOWER_Y ((SCREEN_HT - HUD_OUTER_HEIGHT + (HUD_OUTER_OFFSET_Y << 1)) << 1)
 
+#define RETICLE_XMIN ((SCREEN_WD - (8 << 1)) << 1)
+#define RETICLE_YMIN ((SCREEN_HT - (8 << 1)) << 1)
+#define RETICLE_WIDTH 16
+#define RETICLE_HEIGHT 16
+
 void hudRender(struct RenderState* renderState, struct Player* player, int last_portal_idx_shot, int looked_wall_portalable_0, int looked_wall_portalable_1) {
     if (player->flags & PlayerIsDead) {
         gSPDisplayList(renderState->dl++, hud_death_overlay);
@@ -102,4 +107,13 @@ void hudRender(struct RenderState* renderState, struct Player* player, int last_
                 G_TX_RENDERTILE, position_of_portal_indicator << 5, 0 << 5, 1 << 10, 1 << 10);
         }
     }
+
+    // center reticle is drawn over top everything
+    gSPDisplayList(renderState->dl++, hud_material_list[CENTER_RETICLE_INDEX]);
+    gDPSetPrimColor(renderState->dl++, 255, 255, 210, 210, 210, 255);
+    gSPTextureRectangle(renderState->dl++, 
+            RETICLE_XMIN, RETICLE_YMIN,
+            RETICLE_XMIN + (RETICLE_WIDTH << 2), RETICLE_YMIN + (RETICLE_HEIGHT << 2), 
+            G_TX_RENDERTILE, 0 << 5, 0 << 5, 1 << 10, 1 << 10);
+
 }
