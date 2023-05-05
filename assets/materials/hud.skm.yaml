@@ -18,6 +18,26 @@ materials:
       g: 255
       b: 255
       a: 255
+  
+  center_reticle:
+    gDPSetTile:
+      filename: "../images/center_reticle.png"
+      siz: G_IM_SIZ_8b
+      fmt: G_IM_FMT_I
+    gDPSetRenderMode: G_RM_XLU_SURF
+    gDPSetCombineMode:
+      color: ["0", "0", "0", "PRIMITIVE"]
+      alpha: ["0", "0", "0", "TEXEL0"]
+    gSPGeometryMode:
+      clear: [G_ZBUFFER]
+    gDPSetTexturePersp: G_TP_NONE
+    gDPSetTextureLUT: G_TT_NONE
+    gDPSetTextureFilter: G_TF_POINT
+    gDPSetPrimColor:
+      r: 255 
+      g: 255
+      b: 255
+      a: 255
 
   death_overlay:
     gDPSetRenderMode: G_RM_XLU_SURF
