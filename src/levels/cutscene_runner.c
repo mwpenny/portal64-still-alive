@@ -470,6 +470,19 @@ void cutsceneSerializeWrite(struct Serializer* serializer, SerializeAction actio
     }
 
     action(serializer, &gTriggeredCutscenes, sizeof(gTriggeredCutscenes));
+
+    for (int i = 0; i < CH_COUNT; ++i) {
+        struct QueuedSound* curr = gCutsceneSoundQueues[i];
+
+        while (curr) {
+            action(serializer, &curr->soundId, sizeof(u16));
+            u8 volume = (u8)(clampf(curr->volume, 0.0f, 1.0f) * 255.0f);
+            action(serializer, &volume, sizeof(volume));
+        }
+
+        u16 noSound = SOUND_ID_NONE;
+        action(serializer, &noSound, sizeof(noSound));
+    }
 }
 
 void cutsceneSerializeRead(struct Serializer* serializer) {
@@ -485,4 +498,15 @@ void cutsceneSerializeRead(struct Serializer* serializer) {
     }
 
     serializeRead(serializer, &gTriggeredCutscenes, sizeof (gTriggeredCutscenes));
+
+    for (int i = 0; i < CH_COUNT; ++i) {
+        u16 nextId;
+        serializeRead(serializer, &nextId, sizeof(nextId));
+
+        while (nextId != SOUND_ID_NONE) {
+            u8 volume;
+            serializeRead(serializer, &volume, sizeof(volume));
+            cutsceneQueueSound(nextId, volume * (1.0f / 255.0f), i);
+        }
+    }
 }

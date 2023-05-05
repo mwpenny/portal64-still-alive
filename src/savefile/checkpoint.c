@@ -14,6 +14,7 @@ void ckeckpointSerialize(struct Serializer* serializer, SerializeAction action, 
     signalsSerializeRW(serializer, action);
     cutsceneSerializeWrite(serializer, action);
     playerSerialize(serializer, action, &scene->player);
+    sceneSerializePortals(serializer, action, scene);
 }
 
 void checkpointDeserialize(struct Serializer* serializer, void* data) {
@@ -22,6 +23,7 @@ void checkpointDeserialize(struct Serializer* serializer, void* data) {
     signalsSerializeRW(serializer, serializeRead);
     cutsceneSerializeRead(serializer);
     playerDeserialize(serializer, &scene->player);
+    sceneDeserializePortals(serializer, scene);
 }
 
 int checkpointEstimateSize(struct Scene* scene) {

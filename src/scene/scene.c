@@ -708,7 +708,6 @@ int sceneDynamicBoxIndex(struct Scene* scene, struct CollisionObject* hitObject)
 
 
 
-
 int sceneDetermineSurfaceMapping(struct Scene* scene, struct CollisionObject* hitObject, struct PortalSurfaceMappingRange* mappingRangeOut, int* relativeToOut) {
     int quadIndex = levelQuadIndex(hitObject);
 
@@ -795,3 +794,79 @@ void sceneClosePortal(struct Scene* scene, int portalIndex) {
     }
     return;
 }
+
+void sceneSerializePortals(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+    for (int portalIndex = 0; portalIndex < 2; ++portalIndex) {
+        if (!gCollisionScene.portalTransforms[portalIndex]) {
+            char flags = 0xFF;
+            action(serializer, &flags, sizeof(flags));
+            continue;
+        }
+
+        struct Portal* portal = &scene->portals[portalIndex];
+        char flags = portal->flags;
+        action(serializer, &flags, sizeof(flags));
+
+        action(serializer, &portal->transform, sizeof(struct PartialTransform));
+        action(serializer, &portal->portalSurfaceIndex, sizeof(portal->portalSurfaceIndex));
+        action(serializer, &portal->roomIndex, sizeof(portal->roomIndex));
+        action(serializer, &portal->transformIndex, sizeof(portal->transformIndex));
+
+        if (portal->transformIndex != NO_TRANSFORM_INDEX) {
+            action(serializer, &portal->relativePos, sizeof(portal->relativePos));
+        }
+    }
+}
+
+void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene) {
+    for (int portalIndex = 0; portalIndex < 2; ++portalIndex) {
+        char flags;
+        serializeRead(serializer, &flags, sizeof(flags));
+
+        if (flags == 0xFF) {
+            continue;
+        }
+
+        struct Portal* portal = &scene->portals[portalIndex];
+
+        struct Transform transform;
+        serializeRead(serializer, &transform, sizeof(struct PartialTransform));  
+        transform.scale = gOneVec;
+
+        short portalSurfaceIndex;
+        short roomIndex;
+        serializeRead(serializer, &portalSurfaceIndex, sizeof(portalSurfaceIndex));
+        serializeRead(serializer, &roomIndex, sizeof(roomIndex));
+
+        struct PortalSurface* existingSurface = portalSurfaceGetOriginalSurface(portalSurfaceIndex, portalIndex);
+
+        portalAttachToSurface(
+            portal, 
+            existingSurface, 
+            portalSurfaceIndex, 
+            &transform,
+            0
+        );
+
+        serializeRead(serializer, &portal->transformIndex, sizeof(portal->transformIndex));
+        if (portal->transformIndex != NO_TRANSFORM_INDEX) {
+            serializeRead(serializer, &portal->relativePos, sizeof(portal->relativePos));
+        }
+
+        portal->transform = transform;
+        gCollisionScene.portalVelocity[portalIndex] = gZeroVec;
+        portal->roomIndex = roomIndex;
+        portal->scale = 1.0f;
+        gCollisionScene.portalTransforms[portalIndex] = &portal->transform;
+        gCollisionScene.portalRooms[portalIndex] = roomIndex;
+
+        if (flags & PortalFlagsPlayerPortal) {
+            portal->flags |= PortalFlagsPlayerPortal;
+        } else {
+            portal->flags &= ~PortalFlagsPlayerPortal;
+        }
+
+        portal->opacity = 0.0f;
+    }
+
+}   
