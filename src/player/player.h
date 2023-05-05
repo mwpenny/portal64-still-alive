@@ -10,6 +10,7 @@
 #include "../sk64/skelatool_animator.h"
 #include "../sk64/skelatool_armature.h"
 #include "../physics/point_constraint.h"
+#include "../savefile/serializer.h"
 
 #define PLAYER_GRABBING_THROUGH_NOTHING -1
 
@@ -66,5 +67,8 @@ int playerIsDead(struct Player* player);
 void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing);
 void playerSignalPortalChanged(struct Player* player);
 int playerIsGrabbing(struct Player* player);
+
+void playerSerialize(struct Serializer* serializer, SerializeAction action, struct Player* player);
+void playerDeserialize(struct Serializer* serializer, struct Player* player);
 
 #endif

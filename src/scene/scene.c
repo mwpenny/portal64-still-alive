@@ -503,7 +503,7 @@ void sceneUpdate(struct Scene* scene) {
         ballCatcherUpdate(&scene->ballCatchers[i], scene->ballLaunchers, scene->ballLancherCount);
     }
 
-    levelCheckTriggers(&scene->player.lookTransform.position);
+    cutsceneCheckTriggers(&scene->player.lookTransform.position);
     signalsEvaluateSignals(gCurrentLevel->signalOperators, gCurrentLevel->signalOperatorCount);
 
     for (int i = 0; i < scene->doorCount; ++i) {

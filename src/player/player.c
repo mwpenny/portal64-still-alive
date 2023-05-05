@@ -820,3 +820,14 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     }
 
 }
+
+
+void playerSerialize(struct Serializer* serializer, SerializeAction action, struct Player* player) {
+    action(serializer, &player->lookTransform, sizeof(struct PartialTransform));
+}
+
+void playerDeserialize(struct Serializer* serializer, struct Player* player) {
+    serializeRead(serializer, &player->lookTransform, sizeof(struct PartialTransform));
+    player->body.transform.position = player->lookTransform.position;
+    player->body.velocity = gZeroVec;
+}

@@ -1,6 +1,8 @@
 #ifndef __SCENE_SIGNALS_H__
 #define __SCENE_SIGNALS_H__
 
+#include "../savefile/serializer.h"
+
 #define SIGNAL_BIN_COUNT(signalCount) (((signalCount) + 63) >> 6)
 
 enum SignalOperatorType {
@@ -26,5 +28,7 @@ int signalsRead(unsigned signalIndex);
 void signalsSend(unsigned signalIndex);
 void signalsSetDefault(unsigned signalIndex, int value);
 void signalsEvaluateSignals(struct SignalOperator* operator, unsigned count);
+
+void signalsSerializeRW(struct Serializer* serializer, SerializeAction action);
 
 #endif

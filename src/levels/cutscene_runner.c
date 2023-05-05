@@ -9,6 +9,7 @@
 
 struct CutsceneRunner* gRunningCutscenes;
 struct CutsceneRunner* gUnusedRunners;
+u64 gTriggeredCutscenes;
 
 #define MAX_QUEUE_LENGTH    25
 
@@ -396,6 +397,25 @@ void cutscenesUpdate() {
     }
 }
 
+
+void cutsceneCheckTriggers(struct Vector3* playerPos) {
+    for (int i = 0; i < gCurrentLevel->triggerCount; ++i) {
+        struct Trigger* trigger = &gCurrentLevel->triggers[i];
+        u64 cutsceneMask = 1LL << i;
+        if (box3DContainsPoint(&trigger->box, playerPos)) {
+            if (trigger->signalIndex != -1) {
+                signalsSend(trigger->signalIndex);
+            }
+
+            if (trigger->cutsceneIndex != -1 && !(gTriggeredCutscenes & cutsceneMask)) {
+                cutsceneStart(&gCurrentLevel->cutscenes[trigger->cutsceneIndex]);
+                // prevent the trigger from happening again
+                gTriggeredCutscenes |= cutsceneMask;
+            }
+        }
+    }
+}
+
 void cutsceneSerialize(struct CutsceneRunner* runner, struct CutsceneSerialized* result) {
     result->cutsceneIndex = runner->currentCutscene - gCurrentLevel->cutscenes;
     result->currentStep = runner->currentStep;
@@ -421,4 +441,48 @@ void cutsceneStartSerialized(struct CutsceneSerialized* serialized) {
     runner->currentCutscene = &gCurrentLevel->cutscenes[serialized->cutsceneIndex];
     runner->currentStep = serialized->currentStep;
     runner->state = serialized->state;
+}
+
+int cutsceneGetCount() {
+    struct CutsceneRunner* curr = gRunningCutscenes;
+    int result = 0;
+
+    while (curr) {
+        curr = curr->nextRunner;
+        ++result;
+    }
+
+    return result;
+}
+
+void cutsceneSerializeWrite(struct Serializer* serializer, SerializeAction action) {
+    short cutsceneCount = (short)cutsceneGetCount();
+    action(serializer, &cutsceneCount, sizeof(short));
+
+    struct CutsceneRunner* currCutscene = gRunningCutscenes;
+
+    while (currCutscene) {
+        struct CutsceneSerialized cutscene;
+        cutsceneSerialize(currCutscene, &cutscene);
+        action(serializer, &cutscene, sizeof(struct CutsceneSerialized));
+
+        currCutscene = currCutscene->nextRunner;
+    }
+
+    action(serializer, &gTriggeredCutscenes, sizeof(gTriggeredCutscenes));
+}
+
+void cutsceneSerializeRead(struct Serializer* serializer) {
+    short cutsceneCount;
+    serializeRead(serializer, &cutsceneCount, sizeof(short));
+
+    cutsceneRunnerReset();
+
+    for (int i = 0; i < cutsceneCount; ++i) {
+        struct CutsceneSerialized cutscene;
+        serializeRead(serializer, &cutscene, sizeof(struct CutsceneSerialized));
+        cutsceneStartSerialized(&cutscene);
+    }
+
+    serializeRead(serializer, &gTriggeredCutscenes, sizeof (gTriggeredCutscenes));
 }

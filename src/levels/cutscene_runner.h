@@ -4,6 +4,8 @@
 #include <ultra64.h>
 #include "level_definition.h"
 #include "../audio/clips.h"
+#include "../savefile/serializer.h"
+
 union CutsceneStepState {
     struct {
         ALSndId soundId;
@@ -31,7 +33,12 @@ void cutsceneStop(struct Cutscene* cutscene);
 int cutsceneIsRunning(struct Cutscene* cutscene);
 void cutscenesUpdate();
 
+void cutsceneCheckTriggers(struct Vector3* playerPos);
+
 void cutsceneSerialize(struct CutsceneRunner* runner, struct CutsceneSerialized* result);
 void cutsceneStartSerialized(struct CutsceneSerialized* serialized);
+
+void cutsceneSerializeWrite(struct Serializer* serializer, SerializeAction action);
+void cutsceneSerializeRead(struct Serializer* serializer);
 
 #endif
