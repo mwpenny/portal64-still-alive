@@ -10,5 +10,6 @@
 #define DECOR_TYPE_AUTOPORTAL_FRAME     4
 
 struct DecorObjectDefinition* decorObjectDefinitionForId(int id);
+int decorIdForObjectDefinition(struct DecorObjectDefinition* def);
 
 #endif

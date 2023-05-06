@@ -7,11 +7,6 @@ typedef void* Checkpoint;
 
 #define MAX_CHECKPOINT_SIZE 2048
 
-struct PartialTransform {
-    struct Vector3 position;
-    struct Quaternion rotation;
-};
-
 void checkpointClear();
 void checkpointUse(Checkpoint checkpoint);
 void checkpointSave(struct Scene* scene);

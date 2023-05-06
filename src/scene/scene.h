@@ -21,7 +21,6 @@
 #include "ball_launcher.h"
 #include "ball_catcher.h"
 #include "portal_gun.h"
-#include "../savefile/serializer.h"
 
 struct SavedPortal{
     struct Ray ray;
@@ -81,8 +80,5 @@ void sceneUpdate(struct Scene* scene);
 
 int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex, int fromPlayer, int just_checking);
 void sceneClosePortal(struct Scene* scene, int portalIndex);
-
-void sceneSerializePortals(struct Serializer* serializer, SerializeAction action, struct Scene* scene);
-void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene);
 
 #endif

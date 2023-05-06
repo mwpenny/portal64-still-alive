@@ -1,0 +1,215 @@
+#include "./scene_serialize.h"
+
+#include "../physics/collision_scene.h"
+#include "../decor/decor_object_list.h"
+#include "../util/memory.h"
+#include "../levels/levels.h"
+
+void playerSerialize(struct Serializer* serializer, SerializeAction action, struct Player* player) {
+    action(serializer, &player->lookTransform, sizeof(struct PartialTransform));
+    action(serializer, &player->body.velocity, sizeof(player->body.velocity));
+    action(serializer, &player->body.currentRoom, sizeof(player->body.currentRoom));
+    action(serializer, &player->flags, sizeof(player->flags));
+}
+
+void playerDeserialize(struct Serializer* serializer, struct Player* player) {
+    serializeRead(serializer, &player->lookTransform, sizeof(struct PartialTransform));
+    player->body.transform.position = player->lookTransform.position;
+    player->body.velocity = gZeroVec;
+
+    serializeRead(serializer, &player->body.currentRoom, sizeof(player->body.currentRoom));
+    serializeRead(serializer, &player->body.velocity, sizeof(player->body.velocity));
+    serializeRead(serializer, &player->flags, sizeof(player->flags));
+}
+
+void sceneSerializePortals(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+    for (int portalIndex = 0; portalIndex < 2; ++portalIndex) {
+        if (!gCollisionScene.portalTransforms[portalIndex]) {
+            char flags = 0xFF;
+            action(serializer, &flags, sizeof(flags));
+            continue;
+        }
+
+        struct Portal* portal = &scene->portals[portalIndex];
+        char flags = portal->flags;
+        action(serializer, &flags, sizeof(flags));
+
+        action(serializer, &portal->transform, sizeof(struct PartialTransform));
+        action(serializer, &portal->portalSurfaceIndex, sizeof(portal->portalSurfaceIndex));
+        action(serializer, &portal->roomIndex, sizeof(portal->roomIndex));
+        action(serializer, &portal->transformIndex, sizeof(portal->transformIndex));
+
+        if (portal->transformIndex != NO_TRANSFORM_INDEX) {
+            action(serializer, &portal->relativePos, sizeof(portal->relativePos));
+        }
+    }
+}
+
+void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene) {
+    for (int portalIndex = 0; portalIndex < 2; ++portalIndex) {
+        char flags;
+        serializeRead(serializer, &flags, sizeof(flags));
+
+        if (flags == 0xFF) {
+            continue;
+        }
+
+        struct Portal* portal = &scene->portals[portalIndex];
+
+        struct Transform transform;
+        serializeRead(serializer, &transform, sizeof(struct PartialTransform));  
+        transform.scale = gOneVec;
+
+        short portalSurfaceIndex;
+        short roomIndex;
+        serializeRead(serializer, &portalSurfaceIndex, sizeof(portalSurfaceIndex));
+        serializeRead(serializer, &roomIndex, sizeof(roomIndex));
+
+        struct PortalSurface* existingSurface = portalSurfaceGetOriginalSurface(portalSurfaceIndex, portalIndex);
+
+        portalAttachToSurface(
+            portal, 
+            existingSurface, 
+            portalSurfaceIndex, 
+            &transform,
+            0
+        );
+
+        serializeRead(serializer, &portal->transformIndex, sizeof(portal->transformIndex));
+        if (portal->transformIndex != NO_TRANSFORM_INDEX) {
+            serializeRead(serializer, &portal->relativePos, sizeof(portal->relativePos));
+        }
+
+        portal->transform = transform;
+        gCollisionScene.portalVelocity[portalIndex] = gZeroVec;
+        portal->roomIndex = roomIndex;
+        portal->scale = 1.0f;
+        gCollisionScene.portalTransforms[portalIndex] = &portal->transform;
+        gCollisionScene.portalRooms[portalIndex] = roomIndex;
+
+        if (flags & PortalFlagsPlayerPortal) {
+            portal->flags |= PortalFlagsPlayerPortal;
+        } else {
+            portal->flags &= ~PortalFlagsPlayerPortal;
+        }
+
+        portal->opacity = 0.0f;
+    }
+}   
+
+void buttonsSerializeRW(struct Serializer* serializer, SerializeAction action, struct Button* buttons, int count) {
+    for (int i = 0; i < count; ++i) {
+        action(serializer, &buttons[i].rigidBody.transform.position.y, sizeof(float));
+        action(serializer, &buttons[i].flags, sizeof(buttons[i].flags));
+    }
+}
+
+void decorSerialize(struct Serializer* serializer, SerializeAction action, struct DecorObject** decor, int count) {
+    short countAsShort = 0;
+
+    for (int i = 0; i < count; ++i) {
+        struct DecorObject* entry = decor[i];
+        if (entry->definition->colliderType.type == CollisionShapeTypeNone) {
+            // non moving objects can be loaded from the level definition
+            continue;
+        }
+        
+        ++countAsShort;
+    }
+
+    action(serializer, &countAsShort, sizeof(short));
+
+    for (int i = 0; i < count; ++i) {
+        struct DecorObject* entry = decor[i];
+        if (entry->definition->colliderType.type == CollisionShapeTypeNone) {
+            // non moving objects can be loaded from the level definition
+            continue;
+        }
+
+        short id = decorIdForObjectDefinition(entry->definition);
+
+        action(serializer, &id, sizeof(short));
+
+        action(serializer, &entry->originalPosition, sizeof(struct Vector3));
+        action(serializer, &entry->originalRotation, sizeof(struct Quaternion));
+        action(serializer, &entry->originalRoom, sizeof(short));
+
+        action(serializer, &entry->rigidBody.transform, sizeof(struct PartialTransform));
+        action(serializer, &entry->rigidBody.velocity, sizeof(struct Vector3));
+        action(serializer, &entry->rigidBody.angularVelocity, sizeof(struct Vector3));
+        action(serializer, &entry->rigidBody.flags, sizeof(enum RigidBodyFlags));
+        action(serializer, &entry->rigidBody.currentRoom, sizeof(struct Vector3));
+    }
+}
+
+void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
+    if (scene->decor) {
+        for (int i = 0; i < scene->decorCount; ++i) {
+            decorObjectDelete(scene->decor[i]);
+        }
+        free(scene->decor);
+    }
+
+    scene->decorCount = 0;
+
+    short countAsShort;
+    serializeRead(serializer, &countAsShort, sizeof(short));
+
+    scene->decor = malloc(sizeof(struct DecorObject*) * (countAsShort + gCurrentLevel->decorCount));
+
+    for (int i = 0; i < countAsShort; ++i) {
+        short id;
+
+        serializeRead(serializer, &id, sizeof(short));
+
+        struct Transform transform;
+        short originalRoom;
+
+        serializeRead(serializer, &transform.position, sizeof(struct Vector3));
+        serializeRead(serializer, &transform.rotation, sizeof(struct Quaternion));
+        serializeRead(serializer, &originalRoom, sizeof(short));
+
+        struct DecorObject* entry = decorObjectNew(decorObjectDefinitionForId(id), &transform, originalRoom);
+
+        serializeRead(serializer, &entry->rigidBody.transform, sizeof(struct PartialTransform));
+        serializeRead(serializer, &entry->rigidBody.velocity, sizeof(struct Vector3));
+        serializeRead(serializer, &entry->rigidBody.angularVelocity, sizeof(struct Vector3));
+        serializeRead(serializer, &entry->rigidBody.flags, sizeof(enum RigidBodyFlags));
+        serializeRead(serializer, &entry->rigidBody.currentRoom, sizeof(struct Vector3));
+
+        scene->decor[i] = entry;
+    }
+
+    for (int i = 0; i < gCurrentLevel->decorCount; ++i) {
+        struct DecorDefinition* decorDef = &gCurrentLevel->decor[i];
+        struct DecorObjectDefinition* def = decorObjectDefinitionForId(decorDef->decorId);
+
+        if (def->colliderType.type != CollisionShapeTypeNone) {
+            // dynamic objects are serialized
+            continue;
+        }
+
+        struct Transform decorTransform;
+        decorTransform.position = decorDef->position;
+        decorTransform.rotation = decorDef->rotation;
+        decorTransform.scale = gOneVec;
+        scene->decor[countAsShort] = decorObjectNew(def, &decorTransform, decorDef->roomIndex);
+        ++countAsShort;
+    }
+
+    scene->decorCount = countAsShort;
+}
+
+void sceneSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+    playerSerialize(serializer, action, &scene->player);
+    sceneSerializePortals(serializer, action, scene);
+    buttonsSerializeRW(serializer, action, scene->buttons, scene->buttonCount);
+    decorSerialize(serializer, action, scene->decor, scene->decorCount);
+}
+
+void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
+    playerDeserialize(serializer, &scene->player);
+    sceneDeserializePortals(serializer, scene);
+    buttonsSerializeRW(serializer, serializeRead, scene->buttons, scene->buttonCount);
+    decorDeserialize(serializer, scene);
+}

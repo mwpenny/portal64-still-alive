@@ -48,6 +48,8 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
 
     if (startSelection == -1) {
         saveGame->savefileList->selectedSave = numberOfSaves - 1;
+    } else {
+        saveGame->savefileList->selectedSave = startSelection;
     }
 }
 

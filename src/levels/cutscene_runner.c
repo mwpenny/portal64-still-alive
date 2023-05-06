@@ -477,6 +477,7 @@ void cutsceneSerializeWrite(struct Serializer* serializer, SerializeAction actio
             action(serializer, &curr->soundId, sizeof(u16));
             u8 volume = (u8)(clampf(curr->volume, 0.0f, 1.0f) * 255.0f);
             action(serializer, &volume, sizeof(volume));
+            curr = curr->next;
         }
 
         s16 noSound = SOUND_ID_NONE;
@@ -506,6 +507,7 @@ void cutsceneSerializeRead(struct Serializer* serializer) {
             u8 volume;
             serializeRead(serializer, &volume, sizeof(volume));
             cutsceneQueueSound(nextId, volume * (1.0f / 255.0f), i);
+            serializeRead(serializer, &nextId, sizeof(nextId));
         }
     }
 }

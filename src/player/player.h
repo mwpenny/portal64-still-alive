@@ -10,7 +10,6 @@
 #include "../sk64/skelatool_animator.h"
 #include "../sk64/skelatool_armature.h"
 #include "../physics/point_constraint.h"
-#include "../savefile/serializer.h"
 
 #define PLAYER_GRABBING_THROUGH_NOTHING -1
 

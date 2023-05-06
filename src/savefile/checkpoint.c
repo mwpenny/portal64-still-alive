@@ -3,6 +3,7 @@
 #include "../util/memory.h"
 #include "../levels/cutscene_runner.h"
 #include "../levels/levels.h"
+#include "./scene_serialize.h"
 #include "serializer.h"
 
 char gHasCheckpoint = 0;
@@ -13,8 +14,7 @@ void ckeckpointSerialize(struct Serializer* serializer, SerializeAction action, 
 
     signalsSerializeRW(serializer, action);
     cutsceneSerializeWrite(serializer, action);
-    playerSerialize(serializer, action, &scene->player);
-    sceneSerializePortals(serializer, action, scene);
+    sceneSerialize(serializer, action, scene);
 }
 
 void checkpointDeserialize(struct Serializer* serializer, void* data) {
@@ -22,8 +22,7 @@ void checkpointDeserialize(struct Serializer* serializer, void* data) {
 
     signalsSerializeRW(serializer, serializeRead);
     cutsceneSerializeRead(serializer);
-    playerDeserialize(serializer, &scene->player);
-    sceneDeserializePortals(serializer, scene);
+    sceneDeserialize(serializer, scene);
 }
 
 int checkpointEstimateSize(struct Scene* scene) {

@@ -123,16 +123,22 @@ void sceneInitNoPauseMenu(struct Scene* scene) {
         buttonInit(&scene->buttons[i], &gCurrentLevel->buttons[i]);
     }
 
-    scene->decorCount = gCurrentLevel->decorCount;
-    scene->decor = malloc(sizeof(struct DecorObject*) * scene->decorCount);
+    if (checkpointExists()) {
+        // if a checkpoint exists it will load the decor
+        scene->decorCount = 0;
+        scene->decor = NULL;
+    } else {
+        scene->decorCount = gCurrentLevel->decorCount;
+        scene->decor = malloc(sizeof(struct DecorObject*) * scene->decorCount);
 
-    for (int i = 0; i < scene->decorCount; ++i) {
-        struct DecorDefinition* decorDef = &gCurrentLevel->decor[i];
-        struct Transform decorTransform;
-        decorTransform.position = decorDef->position;
-        decorTransform.rotation = decorDef->rotation;
-        decorTransform.scale = gOneVec;
-        scene->decor[i] = decorObjectNew(decorObjectDefinitionForId(decorDef->decorId), &decorTransform, decorDef->roomIndex);
+        for (int i = 0; i < scene->decorCount; ++i) {
+            struct DecorDefinition* decorDef = &gCurrentLevel->decor[i];
+            struct Transform decorTransform;
+            decorTransform.position = decorDef->position;
+            decorTransform.rotation = decorDef->rotation;
+            decorTransform.scale = gOneVec;
+            scene->decor[i] = decorObjectNew(decorObjectDefinitionForId(decorDef->decorId), &decorTransform, decorDef->roomIndex);
+        }
     }
 
     scene->doorCount = gCurrentLevel->doorCount;
@@ -798,79 +804,3 @@ void sceneClosePortal(struct Scene* scene, int portalIndex) {
     }
     return;
 }
-
-void sceneSerializePortals(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
-    for (int portalIndex = 0; portalIndex < 2; ++portalIndex) {
-        if (!gCollisionScene.portalTransforms[portalIndex]) {
-            char flags = 0xFF;
-            action(serializer, &flags, sizeof(flags));
-            continue;
-        }
-
-        struct Portal* portal = &scene->portals[portalIndex];
-        char flags = portal->flags;
-        action(serializer, &flags, sizeof(flags));
-
-        action(serializer, &portal->transform, sizeof(struct PartialTransform));
-        action(serializer, &portal->portalSurfaceIndex, sizeof(portal->portalSurfaceIndex));
-        action(serializer, &portal->roomIndex, sizeof(portal->roomIndex));
-        action(serializer, &portal->transformIndex, sizeof(portal->transformIndex));
-
-        if (portal->transformIndex != NO_TRANSFORM_INDEX) {
-            action(serializer, &portal->relativePos, sizeof(portal->relativePos));
-        }
-    }
-}
-
-void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene) {
-    for (int portalIndex = 0; portalIndex < 2; ++portalIndex) {
-        char flags;
-        serializeRead(serializer, &flags, sizeof(flags));
-
-        if (flags == 0xFF) {
-            continue;
-        }
-
-        struct Portal* portal = &scene->portals[portalIndex];
-
-        struct Transform transform;
-        serializeRead(serializer, &transform, sizeof(struct PartialTransform));  
-        transform.scale = gOneVec;
-
-        short portalSurfaceIndex;
-        short roomIndex;
-        serializeRead(serializer, &portalSurfaceIndex, sizeof(portalSurfaceIndex));
-        serializeRead(serializer, &roomIndex, sizeof(roomIndex));
-
-        struct PortalSurface* existingSurface = portalSurfaceGetOriginalSurface(portalSurfaceIndex, portalIndex);
-
-        portalAttachToSurface(
-            portal, 
-            existingSurface, 
-            portalSurfaceIndex, 
-            &transform,
-            0
-        );
-
-        serializeRead(serializer, &portal->transformIndex, sizeof(portal->transformIndex));
-        if (portal->transformIndex != NO_TRANSFORM_INDEX) {
-            serializeRead(serializer, &portal->relativePos, sizeof(portal->relativePos));
-        }
-
-        portal->transform = transform;
-        gCollisionScene.portalVelocity[portalIndex] = gZeroVec;
-        portal->roomIndex = roomIndex;
-        portal->scale = 1.0f;
-        gCollisionScene.portalTransforms[portalIndex] = &portal->transform;
-        gCollisionScene.portalRooms[portalIndex] = roomIndex;
-
-        if (flags & PortalFlagsPlayerPortal) {
-            portal->flags |= PortalFlagsPlayerPortal;
-        } else {
-            portal->flags &= ~PortalFlagsPlayerPortal;
-        }
-
-        portal->opacity = 0.0f;
-    }
-
-}   

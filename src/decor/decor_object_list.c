@@ -118,3 +118,13 @@ struct DecorObjectDefinition* decorObjectDefinitionForId(int id) {
 
     return &gDecorObjectDefinitions[id];
 }
+
+int decorIdForObjectDefinition(struct DecorObjectDefinition* def) {
+    int result = def - gDecorObjectDefinitions;
+
+    if (result < 0 || result >= sizeof(gDecorObjectDefinitions) / sizeof(*gDecorObjectDefinitions)) {
+        return -1;
+    }
+
+    return result;
+}
