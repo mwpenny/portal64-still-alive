@@ -203,7 +203,6 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             transformConcat(&exitInverse, &gScene.player.lookTransform, &relativeExit);
             quatMultVector(&exitInverse.rotation, &gScene.player.body.velocity, &relativeVelocity);
             levelQueueLoad(step->loadLevel.levelIndex, &relativeExit, &relativeVelocity);
-            checkpointSave(&gScene);
             break;
         }
         case CutsceneStepTypeGoto:
@@ -480,7 +479,7 @@ void cutsceneSerializeWrite(struct Serializer* serializer, SerializeAction actio
             action(serializer, &volume, sizeof(volume));
         }
 
-        u16 noSound = SOUND_ID_NONE;
+        s16 noSound = SOUND_ID_NONE;
         action(serializer, &noSound, sizeof(noSound));
     }
 }
@@ -500,7 +499,7 @@ void cutsceneSerializeRead(struct Serializer* serializer) {
     serializeRead(serializer, &gTriggeredCutscenes, sizeof (gTriggeredCutscenes));
 
     for (int i = 0; i < CH_COUNT; ++i) {
-        u16 nextId;
+        s16 nextId;
         serializeRead(serializer, &nextId, sizeof(nextId));
 
         while (nextId != SOUND_ID_NONE) {

@@ -232,7 +232,6 @@ static void gameProc(void* arg) {
                         levelLoadWithCallbacks(levelGetQueued());
                         cutsceneRunnerReset();
                         gSceneCallbacks->initCallback(gSceneCallbacks->data);
-                        checkpointLoadLast(&gScene);
                     }
 
                     break;

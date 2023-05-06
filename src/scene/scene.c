@@ -76,10 +76,14 @@ void sceneInitDynamicColliders(struct Scene* scene) {
 
 void sceneInit(struct Scene* scene) {
     sceneInitNoPauseMenu(scene);
+    
+    gameMenuInit(&gGameMenu, gPauseMenuOptions, sizeof(gPauseMenuOptions) / sizeof(*gPauseMenuOptions), 1);
+
     if (!checkpointExists()) {
         checkpointSave(scene);
+    } else {
+        checkpointLoadLast(scene);
     }
-    gameMenuInit(&gGameMenu, gPauseMenuOptions, sizeof(gPauseMenuOptions) / sizeof(*gPauseMenuOptions), 1);
 
     gGameMenu.state = GameMenuStateResumeGame;
 }

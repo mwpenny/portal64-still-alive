@@ -102,6 +102,6 @@ void signalsEvaluateSignals(struct SignalOperator* operator, unsigned count) {
 
 void signalsSerializeRW(struct Serializer* serializer, SerializeAction action) {
     int binCount = SIGNAL_BIN_COUNT(gSignalCount);
-    action(serializer, serializer, sizeof(unsigned long long) * binCount);
+    action(serializer, gSignals, sizeof(unsigned long long) * binCount);
     action(serializer, gDefaultSignals, sizeof(unsigned long long) * binCount);
 }
