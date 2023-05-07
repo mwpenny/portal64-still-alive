@@ -104,23 +104,29 @@ void buttonsSerializeRW(struct Serializer* serializer, SerializeAction action, s
     }
 }
 
-void decorSerialize(struct Serializer* serializer, SerializeAction action, struct DecorObject** decor, int count) {
+void decorSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     short countAsShort = 0;
+    short heldObject = -1;
 
-    for (int i = 0; i < count; ++i) {
-        struct DecorObject* entry = decor[i];
+    for (int i = 0; i < scene->decorCount; ++i) {
+        struct DecorObject* entry = scene->decor[i];
         if (entry->definition->colliderType.type == CollisionShapeTypeNone) {
             // non moving objects can be loaded from the level definition
             continue;
+        }
+
+        if (scene->player.grabConstraint.object == &entry->collisionObject) {
+            heldObject = countAsShort;
         }
         
         ++countAsShort;
     }
 
     action(serializer, &countAsShort, sizeof(short));
+    action(serializer, &heldObject, sizeof(short));
 
-    for (int i = 0; i < count; ++i) {
-        struct DecorObject* entry = decor[i];
+    for (int i = 0; i < scene->decorCount; ++i) {
+        struct DecorObject* entry = scene->decor[i];
         if (entry->definition->colliderType.type == CollisionShapeTypeNone) {
             // non moving objects can be loaded from the level definition
             continue;
@@ -154,6 +160,8 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
 
     short countAsShort;
     serializeRead(serializer, &countAsShort, sizeof(short));
+    short heldObject;
+    serializeRead(serializer, &heldObject, sizeof(short));
 
     scene->decor = malloc(sizeof(struct DecorObject*) * (countAsShort + gCurrentLevel->decorCount));
 
@@ -179,6 +187,10 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
         serializeRead(serializer, &entry->rigidBody.currentRoom, sizeof(short));
 
         scene->decor[i] = entry;
+
+        if (heldObject == i) {
+            playerSetGrabbing(&scene->player, &entry->collisionObject);
+        }
     }
 
     for (int i = 0; i < gCurrentLevel->decorCount; ++i) {
@@ -205,7 +217,7 @@ void sceneSerialize(struct Serializer* serializer, SerializeAction action, struc
     playerSerialize(serializer, action, &scene->player);
     sceneSerializePortals(serializer, action, scene);
     buttonsSerializeRW(serializer, action, scene->buttons, scene->buttonCount);
-    decorSerialize(serializer, action, scene->decor, scene->decorCount);
+    decorSerialize(serializer, action, scene);
 }
 
 void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
