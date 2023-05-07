@@ -9,26 +9,26 @@ First, you will need to setup [Modern SDK](https://crashoveride95.github.io/n64h
 
 After installing modern sdk you will want to also install
 
-```
+```sh
 sudo apt install libnustd
 ```
 
 Next, you will need to download Blender 3.0 or higher. Then set the environment variable `BLENDER_3_0` to be the absolute path where the Blender executable is located on your system.
 
-```
+```sh
 sudo apt install blender
 ```
 
 e.g. add this to your ~/.bashrc
 
-```
+```bash
 export BLENDER_3_0="/usr/bin/blender"
 ```
 
 <br />
 
 You will need to install Python `vpk`.
-```
+```sh
 pip install vpk
 ```
 
@@ -46,7 +46,7 @@ sudo apt install vtf2png sfz2n64 mpg123 sox imagemagick
 
 Install lua5.4 (remove other perhaps installed versions first, skelatool64 needs to be build with luac 5.4!)
 
-```
+```sh
 sudo apt install lua5.4 liblua5.4-dev liblua5.4-0
 ```
 
@@ -54,7 +54,7 @@ sudo apt install lua5.4 liblua5.4-dev liblua5.4-0
 
 Setup and build skelatool64 (the version included in this portal64 repo!)
 
-```
+```sh
 cd skelatool64
 ./setup_dependencies.sh
 make
@@ -64,7 +64,7 @@ make
 
 You will need to install nodejs. You can use apt for this
 
-```
+```sh
 sudo apt install nodejs
 ```
 
@@ -87,6 +87,18 @@ hl2/hl2_sound_misc_dir.vpk
 ```
 
 Finally, run `make` to build the project.
+```sh
+# Clean out any previous build files
+make clean
+
+# Build
+make
+
+# In case you have any trouble with ROM running on hardware try
+# wine install required to run properly
+sudo apt install wine
+make fix
+```
 
 <br />
 
@@ -95,7 +107,7 @@ Finally, run `make` to build the project.
 
 
 Build the Docker image.
-```
+```sh
 docker build . -t portal64
 ```
 
