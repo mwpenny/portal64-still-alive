@@ -15,17 +15,17 @@ void playerSerialize(struct Serializer* serializer, SerializeAction action, stru
 void playerDeserialize(struct Serializer* serializer, struct Player* player) {
     serializeRead(serializer, &player->lookTransform, sizeof(struct PartialTransform));
     player->body.transform.position = player->lookTransform.position;
-    player->body.velocity = gZeroVec;
-
-    serializeRead(serializer, &player->body.currentRoom, sizeof(player->body.currentRoom));
     serializeRead(serializer, &player->body.velocity, sizeof(player->body.velocity));
+    serializeRead(serializer, &player->body.currentRoom, sizeof(player->body.currentRoom));
     serializeRead(serializer, &player->flags, sizeof(player->flags));
 }
+
+#define PORTAL_FLAGS_NO_PORTAL  -1
 
 void sceneSerializePortals(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     for (int portalIndex = 0; portalIndex < 2; ++portalIndex) {
         if (!gCollisionScene.portalTransforms[portalIndex]) {
-            char flags = 0xFF;
+            char flags = PORTAL_FLAGS_NO_PORTAL;
             action(serializer, &flags, sizeof(flags));
             continue;
         }
@@ -50,7 +50,7 @@ void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene)
         char flags;
         serializeRead(serializer, &flags, sizeof(flags));
 
-        if (flags == 0xFF) {
+        if (flags == PORTAL_FLAGS_NO_PORTAL) {
             continue;
         }
 
@@ -138,7 +138,7 @@ void decorSerialize(struct Serializer* serializer, SerializeAction action, struc
         action(serializer, &entry->rigidBody.velocity, sizeof(struct Vector3));
         action(serializer, &entry->rigidBody.angularVelocity, sizeof(struct Vector3));
         action(serializer, &entry->rigidBody.flags, sizeof(enum RigidBodyFlags));
-        action(serializer, &entry->rigidBody.currentRoom, sizeof(struct Vector3));
+        action(serializer, &entry->rigidBody.currentRoom, sizeof(short));
     }
 }
 
@@ -167,6 +167,7 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
 
         serializeRead(serializer, &transform.position, sizeof(struct Vector3));
         serializeRead(serializer, &transform.rotation, sizeof(struct Quaternion));
+        transform.scale = gOneVec;
         serializeRead(serializer, &originalRoom, sizeof(short));
 
         struct DecorObject* entry = decorObjectNew(decorObjectDefinitionForId(id), &transform, originalRoom);
@@ -175,7 +176,7 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
         serializeRead(serializer, &entry->rigidBody.velocity, sizeof(struct Vector3));
         serializeRead(serializer, &entry->rigidBody.angularVelocity, sizeof(struct Vector3));
         serializeRead(serializer, &entry->rigidBody.flags, sizeof(enum RigidBodyFlags));
-        serializeRead(serializer, &entry->rigidBody.currentRoom, sizeof(struct Vector3));
+        serializeRead(serializer, &entry->rigidBody.currentRoom, sizeof(short));
 
         scene->decor[i] = entry;
     }
