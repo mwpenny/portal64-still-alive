@@ -105,6 +105,9 @@ void sceneInitNoPauseMenu(struct Scene* scene) {
     playerInit(&scene->player, &combinedLocation, &startVelocity, &scene->portalGun.collisionObject);
     sceneUpdateListeners(scene);
 
+    scene->camera.transform.rotation = scene->player.lookTransform.rotation;
+    scene->camera.transform.position = scene->player.lookTransform.position;
+
     if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_0) {
         playerGivePortalGun(&scene->player, PlayerHasFirstPortalGun);
     }

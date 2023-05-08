@@ -213,11 +213,69 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
     scene->decorCount = countAsShort;
 }
 
+void boxDropperSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+    short heldCube = -1;
+    for (int i = 0; i < scene->boxDropperCount; ++i) {
+        if (&scene->boxDroppers[i].activeCube.collisionObject == scene->player.grabConstraint.object) {
+            heldCube = i;
+            break;
+        }
+    }
+
+    action(serializer, &heldCube, sizeof(short));
+
+    for (int i = 0; i < scene->boxDropperCount; ++i) {
+        struct BoxDropper* dropper = &scene->boxDroppers[i];
+        action(serializer, &dropper->flags, sizeof(short));
+
+        if (!(dropper->flags & BoxDropperFlagsCubeIsActive)) {
+            continue;
+        }
+
+        action(serializer, &dropper->activeCube.rigidBody.transform, sizeof(struct PartialTransform));
+        action(serializer, &dropper->activeCube.rigidBody.currentRoom, sizeof(short));
+        action(serializer, &dropper->activeCube.rigidBody.velocity, sizeof(struct Vector3));
+        action(serializer, &dropper->activeCube.rigidBody.angularVelocity, sizeof(struct Vector3));
+        action(serializer, &dropper->activeCube.rigidBody.flags, sizeof(enum RigidBodyFlags));
+    }
+}
+
+void boxDropperDeserialize(struct Serializer* serializer, struct Scene* scene) {
+    short heldCube;
+    serializeRead(serializer, &heldCube, sizeof(short));
+
+    for (int i = 0; i < scene->boxDropperCount; ++i) {
+        struct BoxDropper* dropper = &scene->boxDroppers[i];
+        serializeRead(serializer, &dropper->flags, sizeof(short));
+
+        if (!(dropper->flags & BoxDropperFlagsCubeIsActive)) {
+            continue;
+        }
+
+        struct Transform cubePosition;
+        short cubeRoom;
+        serializeRead(serializer, &cubePosition, sizeof(struct PartialTransform));
+        cubePosition.scale = gOneVec;
+        serializeRead(serializer, &cubeRoom, sizeof(short));
+
+        decorObjectInit(&dropper->activeCube, decorObjectDefinitionForId(DECOR_TYPE_CUBE_UNIMPORTANT), &cubePosition, cubeRoom);
+
+        serializeRead(serializer, &dropper->activeCube.rigidBody.velocity, sizeof(struct Vector3));
+        serializeRead(serializer, &dropper->activeCube.rigidBody.angularVelocity, sizeof(struct Vector3));
+        serializeRead(serializer, &dropper->activeCube.rigidBody.flags, sizeof(enum RigidBodyFlags));
+
+        if (heldCube == i) {
+            playerSetGrabbing(&scene->player, &dropper->activeCube.collisionObject);
+        }
+    }
+}
+
 void sceneSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     playerSerialize(serializer, action, &scene->player);
     sceneSerializePortals(serializer, action, scene);
     buttonsSerializeRW(serializer, action, scene->buttons, scene->buttonCount);
     decorSerialize(serializer, action, scene);
+    boxDropperSerialize(serializer, action, scene);
 }
 
 void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
@@ -225,4 +283,5 @@ void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
     sceneDeserializePortals(serializer, scene);
     buttonsSerializeRW(serializer, serializeRead, scene->buttons, scene->buttonCount);
     decorDeserialize(serializer, scene);
+    boxDropperDeserialize(serializer, scene);
 }

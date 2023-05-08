@@ -22,7 +22,7 @@
 #include "ball_catcher.h"
 #include "portal_gun.h"
 
-struct SavedPortal{
+struct SavedPortal {
     struct Ray ray;
     struct Vector3 transformUp;
     int portalIndex;
