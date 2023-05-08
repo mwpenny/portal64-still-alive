@@ -270,12 +270,110 @@ void boxDropperDeserialize(struct Serializer* serializer, struct Scene* scene) {
     }
 }
 
+void elevatorSerializeRW(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+    for (int i = 0; i < scene->elevatorCount; ++i) {
+        action(serializer, &scene->elevators[i].flags, sizeof(short));
+    }
+}
+
+void pedestalSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+    for (int i = 0; i < scene->pedestalCount; ++i) {
+        action(serializer, &scene->pedestals[i].flags, sizeof(short));
+    }
+}
+
+void pedestalDeserialize(struct Serializer* serializer, struct Scene* scene) {
+    for (int i = 0; i < scene->pedestalCount; ++i) {
+        serializeRead(serializer, &scene->pedestals[i].flags, sizeof(short));
+
+        if (scene->pedestals[i].flags & PedestalFlagsDown) {
+            pedestalSetDown(&scene->pedestals[i]);
+        }
+    }
+}
+
+void launcherSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+    for (int i = 0; i < scene->ballLancherCount; ++i) {
+        struct BallLauncher* launcher = &scene->ballLaunchers[i];
+        action(serializer, &launcher->currentBall.targetSpeed, sizeof(float));
+        action(serializer, &launcher->currentBall.flags, sizeof(short));
+
+
+        if (!ballIsActive(&launcher->currentBall) || ballIsCaught(&launcher->currentBall)) {
+            continue;
+        }
+    
+        action(serializer, &launcher->currentBall.rigidBody.transform.position, sizeof (struct Vector3));
+        action(serializer, &launcher->currentBall.rigidBody.velocity, sizeof (struct Vector3));
+        action(serializer, &launcher->rigidBody.currentRoom, sizeof(short));
+        action(serializer, &launcher->ballLifetime, sizeof(float));
+    }
+}
+
+void launcherDeserialize(struct Serializer* serializer, struct Scene* scene) {
+    for (int i = 0; i < scene->ballLancherCount; ++i) {
+        struct BallLauncher* launcher = &scene->ballLaunchers[i];
+        serializeRead(serializer, &launcher->currentBall.targetSpeed, sizeof(float));
+        serializeRead(serializer, &launcher->currentBall.flags, sizeof(short));
+
+        if (!ballIsActive(&launcher->currentBall) || ballIsCaught(&launcher->currentBall)) {
+            continue;
+        }
+
+        struct Vector3 position;
+        struct Vector3 velocity;
+        short currentRoom;
+        float lifetime;
+        serializeRead(serializer, &position, sizeof (struct Vector3));
+        serializeRead(serializer, &velocity, sizeof (struct Vector3));
+        serializeRead(serializer, &currentRoom, sizeof(short));
+        serializeRead(serializer, &lifetime, sizeof(float));
+
+        ballInit(&launcher->currentBall, &position, &velocity, currentRoom, lifetime);
+    }
+}
+
+void catcherSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+    for (int i = 0; i < scene->ballCatcherCount; ++i) {
+        struct BallCatcher* catcher = &scene->ballCatchers[i];
+
+        short caughtIndex = -1;
+
+        for (int launcherIndex = 0; launcherIndex < scene->ballLancherCount; ++launcherIndex) {
+            if (&scene->ballLaunchers[i].currentBall == catcher->caughtBall) {
+                caughtIndex = launcherIndex;
+                break;
+            }
+        }
+
+        action(serializer, &caughtIndex, sizeof(short));
+    }
+}
+
+void catcherDeserialize(struct Serializer* serializer, struct Scene* scene) {
+    for (int i = 0; i < scene->ballCatcherCount; ++i) {
+        short caughtIndex;
+        serializeRead(serializer, &caughtIndex, sizeof(short));
+
+        if (caughtIndex == -1) {
+            continue;
+        }
+
+        struct BallCatcher* catcher = &scene->ballCatchers[i];
+        catcher->caughtBall = &scene->ballLaunchers[caughtIndex].currentBall;
+    }
+}
+
 void sceneSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     playerSerialize(serializer, action, &scene->player);
     sceneSerializePortals(serializer, action, scene);
     buttonsSerializeRW(serializer, action, scene->buttons, scene->buttonCount);
     decorSerialize(serializer, action, scene);
     boxDropperSerialize(serializer, action, scene);
+    elevatorSerializeRW(serializer, action, scene);
+    pedestalSerialize(serializer, action, scene);
+    launcherSerialize(serializer, action, scene);
+    catcherSerialize(serializer, action, scene);
 }
 
 void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
@@ -284,4 +382,12 @@ void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
     buttonsSerializeRW(serializer, serializeRead, scene->buttons, scene->buttonCount);
     decorDeserialize(serializer, scene);
     boxDropperDeserialize(serializer, scene);
+    elevatorSerializeRW(serializer, serializeRead, scene);
+    pedestalDeserialize(serializer, scene);
+    launcherDeserialize(serializer, scene);
+    catcherDeserialize(serializer, scene);
+
+    for (int i = 0; i < scene->doorCount; ++i) {
+        doorCheckForOpenState(&scene->doors[i]);
+    }
 }

@@ -33,4 +33,6 @@ void pedestalUpdate(struct Pedestal* pedestal);
 void pedestalHide(struct Pedestal* pedestal);
 void pedestalPointAt(struct Pedestal* pedestal, struct Vector3* target);
 
+void pedestalSetDown(struct Pedestal* pedestal);
+
 #endif

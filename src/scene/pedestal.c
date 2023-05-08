@@ -119,3 +119,7 @@ void pedestalPointAt(struct Pedestal* pedestal, struct Vector3* target) {
     pedestal->pointAt = *target;
     pedestal->flags |= PedestalFlagsIsPointing;
 }
+
+void pedestalSetDown(struct Pedestal* pedestal) {
+    skAnimatorRunClip(&pedestal->animator, &pedestal_Armature_Hidden_clip, 0.0f, 0);
+}

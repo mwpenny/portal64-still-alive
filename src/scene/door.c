@@ -37,6 +37,7 @@ struct DoorTypeDefinition gDoorTypeDefinitions[] = {
         &props_door_01_model_gfx[0],
         &props_door_01_Armature_open_clip,
         &props_door_01_Armature_close_clip,
+        &props_door_01_Armature_opened_clip,
         DOOR_01_INDEX,
         -1,
         1.0f,
@@ -46,6 +47,7 @@ struct DoorTypeDefinition gDoorTypeDefinitions[] = {
         &props_door_02_model_gfx[0],
         &props_door_02_Armature_open_clip,
         &props_door_02_Armature_close_clip,
+        &props_door_02_Armature_opened_clip,
         DOOR_02_INDEX,
         PROPS_DOOR_02_DOOR_BONE,
         3.0f,
@@ -152,5 +154,14 @@ void doorUpdate(struct Door* door) {
         door->rigidBody.transform.position.y = 
             door->doorDefinition->location.y + 
             door->armature.pose[typeDefinition->colliderBoneIndex].position.y * (1.0f / SCENE_SCALE);
+    }
+}
+
+void doorCheckForOpenState(struct Door* door) {
+    struct DoorTypeDefinition* typeDefinition = &gDoorTypeDefinitions[door->doorDefinition->doorType];
+
+    int signal = signalsRead(door->signalIndex);
+    if (signal) {
+        skAnimatorRunClip(&door->animator, typeDefinition->openedClip, 0.0f, 0);
     }
 }
