@@ -364,6 +364,53 @@ void catcherDeserialize(struct Serializer* serializer, struct Scene* scene) {
     }
 }
 
+void sceneAnimatorSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+    for (int i = 0; i < scene->animator.animatorCount; ++i) {
+        action(serializer, &scene->animator.playbackSpeeds[i], sizeof(float));
+
+        struct SKArmature* armature = &scene->animator.armatures[i];
+        for (int boneIndex = 0; boneIndex < armature->numberOfBones; ++boneIndex) {
+            action(serializer, &armature->pose[boneIndex], sizeof(struct PartialTransform));
+        }
+
+        struct SKAnimator* animator = &scene->animator.animators[i];
+
+        short animationIndex = -1;
+
+        if (animator->currentClip) {
+            animationIndex = animator->currentClip - scene->animator.animationInfo[i].clips;
+        }
+
+        action(serializer, &animationIndex, sizeof(short));
+
+        if (animationIndex != -1) {
+            action(serializer, &animator->currentTime, sizeof(float));
+        }
+    }
+}
+
+void sceneAnimatorDeserialize(struct Serializer* serializer, struct Scene* scene) {
+    for (int i = 0; i < scene->animator.animatorCount; ++i) {
+        serializeRead(serializer, &scene->animator.playbackSpeeds[i], sizeof(float));
+
+        struct SKArmature* armature = &scene->animator.armatures[i];
+        for (int boneIndex = 0; boneIndex < armature->numberOfBones; ++boneIndex) {
+            serializeRead(serializer, &armature->pose[boneIndex], sizeof(struct PartialTransform));
+        }
+
+        struct SKAnimator* animator = &scene->animator.animators[i];
+
+        short animationIndex = -1;
+        serializeRead(serializer, &animationIndex, sizeof(short));
+
+        if (animationIndex != -1) {
+            float time;
+            serializeRead(serializer, &time, sizeof(float));
+            skAnimatorRunClip(animator, &scene->animator.animationInfo[i].clips[animationIndex], time, 0);
+        }
+    }
+}
+
 void sceneSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     playerSerialize(serializer, action, &scene->player);
     sceneSerializePortals(serializer, action, scene);
@@ -374,6 +421,7 @@ void sceneSerialize(struct Serializer* serializer, SerializeAction action, struc
     pedestalSerialize(serializer, action, scene);
     launcherSerialize(serializer, action, scene);
     catcherSerialize(serializer, action, scene);
+    sceneAnimatorSerialize(serializer, action, scene);
 }
 
 void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
@@ -386,6 +434,7 @@ void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
     pedestalDeserialize(serializer, scene);
     launcherDeserialize(serializer, scene);
     catcherDeserialize(serializer, scene);
+    sceneAnimatorDeserialize(serializer, scene);
 
     for (int i = 0; i < scene->doorCount; ++i) {
         doorCheckForOpenState(&scene->doors[i]);
