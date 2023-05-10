@@ -108,6 +108,8 @@ void sceneInitNoPauseMenu(struct Scene* scene) {
     scene->camera.transform.rotation = scene->player.lookTransform.rotation;
     scene->camera.transform.position = scene->player.lookTransform.position;
 
+    sceneUpdateListeners(scene);
+
     if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_0) {
         playerGivePortalGun(&scene->player, PlayerHasFirstPortalGun);
     }
@@ -480,6 +482,10 @@ void sceneUpdate(struct Scene* scene) {
             gGameMenu.state = GameMenuStateResumeGame;
         }
 
+        if (gGameMenu.state == GameMenuStateResumeGame) {
+            soundPlayerResume();
+        }
+
         if (gGameMenu.state == GameMenuStateQuit) {
             levelQueueLoad(MAIN_MENU, NULL, NULL);
             return;
@@ -490,6 +496,7 @@ void sceneUpdate(struct Scene* scene) {
         savefileGrabScreenshot();
         gGameMenu.state = GameMenuStateLanding;
         gGameMenu.landingMenu.selectedItem = 0;
+        soundPlayerPause();
     }
 
     signalsReset();

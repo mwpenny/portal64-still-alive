@@ -13,6 +13,7 @@ ALSndPlayer gSoundPlayer;
 #define SOUND_FLAGS_3D          (1 << 0)
 #define SOUND_FLAGS_LOOPING     (1 << 1)
 #define SOUND_HAS_STARTED       (1 << 2)
+#define SOUND_FLAGS_PAUSED      (1 << 3)
 
 #define SPEED_OF_SOUND          343.2f
 
@@ -201,6 +202,12 @@ void soundPlayerUpdate() {
     while (index < gActiveSoundCount) {
         struct ActiveSound* sound = &gActiveSounds[index];
 
+        if (sound->flags & SOUND_FLAGS_PAUSED) {
+            ++writeIndex;
+            ++index;
+            continue;
+        }
+
         sound->estimatedTimeLeft -= FIXED_DELTA_TIME;
 
         alSndpSetSound(&gSoundPlayer, sound->soundId);
@@ -322,4 +329,30 @@ void soundListenerUpdate(struct Vector3* position, struct Quaternion* rotation, 
 
 void soundListenerSetCount(int count) {
     gActiveListenerCount = count;
+}
+
+void soundPlayerPause() {
+    for (int i = 0; i < gActiveSoundCount; ++i) {
+        struct ActiveSound* activeSound = &gActiveSounds[i];
+        if (activeSound->soundId != SOUND_ID_NONE) {
+            activeSound->flags |= SOUND_FLAGS_PAUSED;
+
+            alSndpSetSound(&gSoundPlayer, activeSound->soundId);
+            alSndpSetPitch(&gSoundPlayer, 0.0f);
+            alSndpSetVol(&gSoundPlayer, 0);
+        }
+    }
+}
+
+void soundPlayerResume() {
+    for (int i = 0; i < gActiveSoundCount; ++i) {
+        struct ActiveSound* activeSound = &gActiveSounds[i];
+        if (activeSound->flags & SOUND_FLAGS_PAUSED) {
+            activeSound->flags &= ~SOUND_FLAGS_PAUSED;
+
+            alSndpSetSound(&gSoundPlayer, activeSound->soundId);
+            alSndpSetPitch(&gSoundPlayer, activeSound->basePitch);
+            alSndpSetVol(&gSoundPlayer, (short)(32767 * activeSound->volume));
+        }
+    }
 }

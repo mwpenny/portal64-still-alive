@@ -24,6 +24,9 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
 void soundPlayerStop(ALSndId soundId);
 void soundPlayerStopAll();
 
+void soundPlayerPause();
+void soundPlayerResume();
+
 void soundPlayerUpdatePosition(ALSndId soundId, struct Vector3* at, struct Vector3* velocity);
 void soundPlayerAdjustVolume(ALSndId soundId, float newVolume);
 
