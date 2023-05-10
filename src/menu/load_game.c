@@ -4,6 +4,9 @@
 #include "../controls/controller.h"
 #include "../levels/levels.h"
 #include "../util/memory.h"
+#include "../audio/soundplayer.h"
+
+#include "../build/src/audio/clips.h"
 
 void loadGameMenuInit(struct LoadGameMenu* loadGame, struct SavefileListMenu* savefileList) {
     loadGame->savefileList = savefileList;
@@ -37,6 +40,8 @@ enum MenuDirection loadGameUpdate(struct LoadGameMenu* loadGame) {
         checkpointUse(save);
 
         stackMallocFree(save);
+
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
     }
 
     return savefileListUpdate(loadGame->savefileList);

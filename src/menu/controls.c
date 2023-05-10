@@ -3,8 +3,11 @@
 #include "../font/dejavusans.h"
 #include "../font/font.h"
 #include "../controls/controller.h"
+#include "../audio/soundplayer.h"
 
 #include "../build/assets/materials/ui.h"
+
+#include "../build/src/audio/clips.h"
 
 #define CONTROL_ROW_HEIGHT  14
 
@@ -254,6 +257,8 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
             controlsMenu->waitingForAction = ControllerActionNone;
 
             controlsLayout(controlsMenu);
+
+            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
         }
 
         return MenuDirectionStay;
@@ -307,6 +312,8 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
             controllerSetDefaultSource();
             controlsLayout(controlsMenu);
         }
+
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
     }
 
     if (controllerGetButtonDown(0, B_BUTTON)) {

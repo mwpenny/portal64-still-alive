@@ -4,9 +4,11 @@
 #include "../controls/controller.h"
 #include "../util/rom.h"
 #include "../graphics/image.h"
+#include "../audio/soundplayer.h"
 #include <string.h>
 
 #include "../build/assets/materials/ui.h"
+#include "../build/src/audio/clips.h"
 
 #define SAVE_SLOT_RENDER_W  (SAVE_SLOT_IMAGE_W * 2)
 #define SAVE_SLOT_RENDER_H  (SAVE_SLOT_IMAGE_H * 2)
@@ -150,6 +152,7 @@ enum MenuDirection savefileListUpdate(struct SavefileListMenu* savefileList) {
         if (savefileList->selectedSave == savefileList->numberOfSaves) {
             savefileList->selectedSave = 0;
         }
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL);
     }
 
     if (controllerDir & ControllerDirectionUp) {
@@ -158,6 +161,7 @@ enum MenuDirection savefileListUpdate(struct SavefileListMenu* savefileList) {
         if (savefileList->selectedSave < 0) {
             savefileList->selectedSave = savefileList->numberOfSaves - 1;
         }
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL);
     }
 
     int selectTop = SCROLLED_ROW_Y(savefileList->selectedSave, savefileList->scrollOffset) - 8;

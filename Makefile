@@ -247,15 +247,17 @@ build/src/menu/main_menu.o: build/src/audio/clips.h build/assets/materials/ui.h 
 
 build/src/menu/new_game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
 
-build/src/menu/load_game.o: build/assets/materials/ui.h
+build/src/menu/load_game.o: build/assets/materials/ui.h build/src/audio/clips.h
 
-build/src/menu/savefile_list.o: build/assets/materials/ui.h
+build/src/menu/save_game_menu.o: build/src/audio/clips.h
 
-build/src/menu/landing_menu.o: build/assets/materials/ui.h
+build/src/menu/savefile_list.o: build/assets/materials/ui.h build/src/audio/clips.h
+
+build/src/menu/landing_menu.o: build/assets/materials/ui.h build/src/audio/clips.h
 
 build/src/menu/options_menu.o: build/assets/materials/ui.h
 
-build/src/menu/controls.o: build/assets/materials/ui.h
+build/src/menu/controls.o: build/assets/materials/ui.h build/src/audio/clips.h
 
 build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
 

@@ -6,9 +6,11 @@
 #include "../graphics/image.h"
 #include "../util/memory.h"
 #include "../util/rom.h"
+#include "../audio/soundplayer.h"
 
 #include "../build/assets/materials/ui.h"
 #include "../build/assets/materials/images.h"
+#include "../build/src/audio/clips.h"
 
 #include "../levels/levels.h"
 #include "../savefile/savefile.h"
@@ -126,6 +128,7 @@ enum MenuDirection newGameUpdate(struct NewGameMenu* newGameMenu) {
 
     if (controllerGetButtonDown(0, A_BUTTON) && gChapters[newGameMenu->selectedChapter + 1].testChamberNumber >= 0) {
         gCurrentTestSubject = savefileNextTestSubject();
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
         levelQueueLoad(gChapters[newGameMenu->selectedChapter].testChamberNumber, NULL, NULL);
     }
 
@@ -133,10 +136,12 @@ enum MenuDirection newGameUpdate(struct NewGameMenu* newGameMenu) {
         newGameMenu->selectedChapter < CHAPTER_COUNT &&
         gChapters[newGameMenu->selectedChapter + 1].imageData) {
         newGameMenu->selectedChapter = newGameMenu->selectedChapter + 1;
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL);
     }
 
     if ((controllerGetDirectionDown(0) & ControllerDirectionLeft) != 0 && newGameMenu->selectedChapter > 0) {
         newGameMenu->selectedChapter = newGameMenu->selectedChapter - 1;
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL);
     }
 
     int nextChapterOffset = newGameMenu->selectedChapter & ~1;

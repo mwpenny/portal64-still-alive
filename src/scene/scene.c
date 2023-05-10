@@ -103,7 +103,6 @@ void sceneInitNoPauseMenu(struct Scene* scene) {
     portalGunInit(&scene->portalGun, &combinedLocation.transform);
 
     playerInit(&scene->player, &combinedLocation, &startVelocity, &scene->portalGun.collisionObject);
-    sceneUpdateListeners(scene);
 
     scene->camera.transform.rotation = scene->player.lookTransform.rotation;
     scene->camera.transform.position = scene->player.lookTransform.position;

@@ -10,6 +10,7 @@
 #include "../controls/controller.h"
 
 #include "../build/assets/test_chambers/test_chamber_00/test_chamber_00.h"
+#include "../build/src/audio/clips.h"
 
 struct LandingMenuOption gMainMenuOptions[] = {
     {"NEW GAME", GameMenuStateNewGame},
@@ -31,6 +32,8 @@ void mainMenuInit(struct GameMenu* gameMenu) {
     mainMenuReadCamera(gameMenu);
 
     gScene.camera.fov = 56.0f;
+
+    soundPlayerPlay(SOUNDS_PORTAL_PROCEDURAL_JIGGLE_BONE, 1.0f, 0.5f, NULL, NULL);
 }
 
 void mainMenuUpdate(struct GameMenu* gameMenu) {

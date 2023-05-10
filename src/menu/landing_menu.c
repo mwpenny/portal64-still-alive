@@ -4,8 +4,10 @@
 #include "../font/dejavusans.h"
 #include "../controls/controller.h"
 #include "../util/memory.h"
+#include "../audio/soundplayer.h"
 
 #include "../build/assets/materials/ui.h"
+#include "../build/src/audio/clips.h"
 
 #define PORTAL_LOGO_X   30
 #define PORTAL_LOGO_Y   74
@@ -71,13 +73,16 @@ void landingMenuInit(struct LandingMenu* landingMenu, struct LandingMenuOption* 
 struct LandingMenuOption* landingMenuUpdate(struct LandingMenu* landingMenu) {
     if ((controllerGetDirectionDown(0) & ControllerDirectionUp) != 0 && landingMenu->selectedItem > 0) {
         --landingMenu->selectedItem;
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL);
     }
 
     if ((controllerGetDirectionDown(0) & ControllerDirectionDown) != 0 && landingMenu->selectedItem + 1 < landingMenu->optionCount) {
         ++landingMenu->selectedItem;
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL);
     }
 
     if (controllerGetButtonDown(0, A_BUTTON)) {
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
         return &landingMenu->options[landingMenu->selectedItem];
     }
 
