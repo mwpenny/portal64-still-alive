@@ -139,18 +139,6 @@ void savefileSave() {
     savefileSramSave((void*)SRAM_ADDR, &gSaveData, sizeof(gSaveData));
 }
 
-void savefileSetFlags(enum SavefileFlags flags) {
-    gSaveData.header.flags |= flags;
-}
-
-void savefileUnsetFlags(enum SavefileFlags flags) {
-    gSaveData.header.flags &= ~flags;
-}
-
-int savefileReadFlags(enum SavefileFlags flags) {
-    return gSaveData.header.flags & flags;
-}
-
 #define SAVE_SLOT_SRAM_ADDRESS(index) (SRAM_ADDR + (1 + (index)) * SAVE_SLOT_SIZE)
 
 void savefileSaveGame(Checkpoint checkpoint, u16* screenshot, int testChamberIndex, int subjectNumber, int slotIndex) {

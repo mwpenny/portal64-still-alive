@@ -26,11 +26,6 @@
 #define MAX_SAVE_SLOTS  ((int)(SRAM_SIZE / SAVE_SLOT_SIZE) - 1)
 #define MAX_USER_SAVE_SLOTS (MAX_SAVE_SLOTS - 1)
 
-enum SavefileFlags {
-    SavefileFlagsFirstPortalGun = (1 << 0),
-    SavefileFlagsSecondPortalGun = (1 << 1),
-};
-
 struct SaveHeader {
     unsigned header;
     unsigned char chapterProgress;
@@ -74,10 +69,6 @@ extern int gCurrentTestSubject;
 
 void savefileLoad();
 void savefileSave();
-
-void savefileSetFlags(enum SavefileFlags flags);
-void savefileUnsetFlags(enum SavefileFlags flags);
-int savefileReadFlags(enum SavefileFlags flags);
 
 void savefileSaveGame(Checkpoint checkpoint, u16* screenshot, int testChamberIndex, int subjectNumber, int slotIndex);
 int savefileListSaves(struct SaveSlotInfo* slots, int includeAuto);
