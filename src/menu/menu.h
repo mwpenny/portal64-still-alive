@@ -13,6 +13,21 @@ struct MenuButton {
     short w, h;
 };
 
+struct MenuCheckbox {
+    Gfx* outline;
+    Gfx* text;
+    Gfx* checkedIndicator;
+    short x, y;
+    short checked;
+};
+
+struct MenuSlider {
+    Gfx* back;
+    float value;
+    short x, y;
+    short w, h;
+};
+
 enum MenuDirection {
     MenuDirectionStay,
     MenuDirectionUp,
@@ -38,5 +53,8 @@ Gfx* menuBuildOutline(int x, int y, int width, int height, int invert);
 
 struct MenuButton menuBuildButton(struct Font* font, char* message, int x, int y, int width, int height);
 void menuSetRenderColor(struct RenderState* renderState, int isSelected, struct Coloru8* selected, struct Coloru8* defaultColor);
+
+struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, int y);
+struct MenuSlider menuBuildSlider(int x, int y, int w, int h, int tickCount);
 
 #endif

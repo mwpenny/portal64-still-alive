@@ -338,8 +338,10 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
 
     gSPDisplayList(renderState->dl++, ui_material_list[SOLID_ENV_INDEX]);
     gSPDisplayList(renderState->dl++, controlsMenu->scrollOutline);
+    gDPPipeSync(renderState->dl++);
     gDPSetEnvColor(renderState->dl++, 0, 0, 0, 255);
     renderStateInlineBranch(renderState, controlsMenu->headerSeparators);
+
 
     if (controlsMenu->selectedRow >= 0 && controlsMenu->selectedRow < ControllerActionCount) {
         struct ControlsMenuRow* selectedAction = &controlsMenu->actionRows[controlsMenu->selectedRow];
@@ -376,6 +378,7 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
 
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, CONTROLS_X, CONTROLS_Y, CONTROLS_X + CONTROLS_WIDTH, CONTROLS_Y + CONTROLS_HEIGHT);
+
 
     gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
 

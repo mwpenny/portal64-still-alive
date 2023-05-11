@@ -6,9 +6,11 @@
 #include "./tabs.h"
 #include "./controls.h"
 #include "./audio_options.h"
+#include "./joystick_options.h"
 
 enum OptionsMenuTabs {
-    OptionsMenuTabsControls,
+    OptionsMenuTabsControlMapping,
+    OptionsMenuTabsControlJoystick,
     OptionsMenuTabsAudio,
 
     OptionsMenuTabsCount,
@@ -21,6 +23,7 @@ struct OptionsMenu {
     struct Tabs tabs;
 
     struct ControlsMenu controlsMenu;
+    struct JoystickOptions joystickOptions;
     struct AudioOptions audioOptions;
 };
 

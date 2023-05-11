@@ -15,6 +15,9 @@ struct Tab gOptionTabs[] = {
         .message = "Controls",
     },
     {
+        .message = "Joystick",
+    },
+    {
         .message = "Audio",
     },
 };
@@ -42,6 +45,7 @@ void optionsMenuInit(struct OptionsMenu* options) {
     );
 
     controlsMenuInit(&options->controlsMenu);
+    joystickOptionsInit(&options->joystickOptions);
     audioOptionsInit(&options->audioOptions);
 }
 
@@ -49,8 +53,11 @@ enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options) {
     enum MenuDirection menuDirection = MenuDirectionStay;
 
     switch (options->tabs.selectedTab) {
-        case OptionsMenuTabsControls:
+        case OptionsMenuTabsControlMapping:
             menuDirection = controlsMenuUpdate(&options->controlsMenu);
+            break;
+        case OptionsMenuTabsControlJoystick:
+            menuDirection = joystickOptionsUpdate(&options->joystickOptions);
             break;
         case OptionsMenuTabsAudio:
             menuDirection = audioOptionsUpdate(&options->audioOptions);
@@ -104,8 +111,11 @@ void optionsMenuRender(struct OptionsMenu* options, struct RenderState* renderSt
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
 
     switch (options->tabs.selectedTab) {
-        case OptionsMenuTabsControls:
+        case OptionsMenuTabsControlMapping:
             controlsMenuRender(&options->controlsMenu, renderState, task);
+            break;
+        case OptionsMenuTabsControlJoystick:
+            joystickOptionsRender(&options->joystickOptions, renderState, task);
             break;
         case OptionsMenuTabsAudio:
             audioOptionsRender(&options->audioOptions, renderState, task);

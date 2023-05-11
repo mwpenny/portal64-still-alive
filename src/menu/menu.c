@@ -121,10 +121,7 @@ Gfx* menuBuildSolidBorder(int x, int y, int w, int h, int nx, int ny, int nw, in
     return result;
 }
 
-Gfx* menuBuildOutline(int x, int y, int width, int height, int invert) {
-    Gfx* result = malloc(sizeof(Gfx) * 9);
-    Gfx* dl = result;
-
+Gfx* menuRenderOutline(int x, int y, int width, int height, int invert, Gfx* dl) {
     gDPPipeSync(dl++);
     if (invert) {
         gDPSetEnvColor(dl++, gBorderDark.r, gBorderDark.g, gBorderDark.b, gBorderDark.a);
@@ -141,8 +138,14 @@ Gfx* menuBuildOutline(int x, int y, int width, int height, int invert) {
     }
     gDPFillRectangle(dl++, x, y + height - 1, x + width, y + height);
     gDPFillRectangle(dl++, x + width - 1, y, x + width, y + height - 1);
-    gSPEndDisplayList(dl++);
 
+    return dl;
+}
+
+Gfx* menuBuildOutline(int x, int y, int width, int height, int invert) {
+    Gfx* result = malloc(sizeof(Gfx) * 9);
+    Gfx* dl = menuRenderOutline(x, y, width, height, invert, result);
+    gSPEndDisplayList(dl++);
     return result;
 }
 
@@ -167,4 +170,63 @@ void menuSetRenderColor(struct RenderState* renderState, int isSelected, struct 
     } else {
         gDPSetEnvColor(renderState->dl++, defaultColor->r, defaultColor->g, defaultColor->b, defaultColor->a);
     }
+}
+
+#define CHECKBOX_SIZE   12
+
+struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, int y) {
+    struct MenuCheckbox result;
+
+    result.x = x;
+    result.y = y;
+
+    result.outline = malloc(sizeof(Gfx) * 12);
+
+    Gfx* dl = result.outline;
+
+    gDPPipeSync(dl++);
+    gDPSetEnvColor(dl++, 93, 96, 97, 255);
+    gDPFillRectangle(dl++, x, y, x + CHECKBOX_SIZE, y + CHECKBOX_SIZE);
+    dl = menuRenderOutline(x, y, CHECKBOX_SIZE, CHECKBOX_SIZE, 1, dl);
+    gSPEndDisplayList(dl++);
+
+    result.text = menuBuildText(font, message, x + CHECKBOX_SIZE + 6, y);
+
+    result.checked = 0;
+
+    return result;
+}
+
+#define SLIDER_CENTER_HEIGHT    4
+
+struct MenuSlider menuBuildSlider(int x, int y, int w, int h, int tickCount) {
+    struct MenuSlider result;
+
+    result.x = x;
+    result.y = y;
+    result.w = w;
+    result.h = h;
+
+    result.back = malloc(sizeof(Gfx) * 12 + tickCount + 2);
+
+    Gfx* dl = result.back;
+
+    int sliderX = x;
+    int sliderY = y + (h >> 1) - (SLIDER_CENTER_HEIGHT >> 1);
+
+    gDPPipeSync(dl++);
+    gDPSetEnvColor(dl++, 93, 96, 97, 255);
+    gDPFillRectangle(
+        dl++, 
+        sliderX, 
+        sliderY, 
+        sliderX + w, 
+        sliderY + SLIDER_CENTER_HEIGHT
+    );
+    dl = menuRenderOutline(sliderX, sliderY, w, SLIDER_CENTER_HEIGHT, 1, dl);
+    gSPEndDisplayList(dl++);
+
+    result.value = 0;
+
+    return result;
 }
