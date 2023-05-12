@@ -197,36 +197,90 @@ struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, i
     return result;
 }
 
-#define SLIDER_CENTER_HEIGHT    4
+Gfx* menuCheckboxRender(struct MenuCheckbox* checkbox, Gfx* dl) {
+    if (!checkbox->checked) {
+        return dl;
+    }
 
-struct MenuSlider menuBuildSlider(int x, int y, int w, int h, int tickCount) {
+    gDPPipeSync(dl++);
+    gDPSetEnvColor(dl++, 255, 255, 255, 255);
+    gDPFillRectangle(
+        dl++, 
+        checkbox->x + 3, 
+        checkbox->y + 3, 
+        checkbox->x + 8, 
+        checkbox->y + 8
+    );
+    return dl;
+}
+
+
+#define SLIDER_TRACK_HEIGHT     4
+#define SLIDER_HEIGHT           12
+#define SLIDER_WIDTH            6
+#define TICK_Y                  11
+#define TICK_HEIGHT             3
+
+struct MenuSlider menuBuildSlider(int x, int y, int w, int tickCount) {
     struct MenuSlider result;
 
     result.x = x;
     result.y = y;
     result.w = w;
-    result.h = h;
 
-    result.back = malloc(sizeof(Gfx) * 12 + tickCount + 2);
+    result.back = malloc(sizeof(Gfx) * (12 + tickCount));
 
     Gfx* dl = result.back;
 
     int sliderX = x;
-    int sliderY = y + (h >> 1) - (SLIDER_CENTER_HEIGHT >> 1);
+    int sliderY = y + (SLIDER_HEIGHT / 2) - (SLIDER_TRACK_HEIGHT / 2);
 
     gDPPipeSync(dl++);
-    gDPSetEnvColor(dl++, 93, 96, 97, 255);
+    gDPSetEnvColor(dl++, 25, 25, 25, 255);
     gDPFillRectangle(
         dl++, 
         sliderX, 
         sliderY, 
         sliderX + w, 
-        sliderY + SLIDER_CENTER_HEIGHT
+        sliderY + SLIDER_TRACK_HEIGHT
     );
-    dl = menuRenderOutline(sliderX, sliderY, w, SLIDER_CENTER_HEIGHT, 1, dl);
+    
+    int tickMin = x + (SLIDER_WIDTH / 2);
+    int tickWidth = w - SLIDER_WIDTH;
+    for (int i = 0; i < tickCount; ++i) {
+        int tickX = (i * tickWidth) / (tickCount - 1) + tickMin;
+        gDPFillRectangle(
+            dl++, 
+            tickX, 
+            y + TICK_Y, 
+            tickX + 1, 
+            y + TICK_Y + TICK_HEIGHT
+        );  
+    }
+
+    dl = menuRenderOutline(sliderX, sliderY, w, SLIDER_TRACK_HEIGHT, 1, dl);
+
     gSPEndDisplayList(dl++);
 
     result.value = 0;
 
     return result;
+}
+
+Gfx* menuSliderRender(struct MenuSlider* slider, Gfx* dl) {
+    gDPPipeSync(dl++);
+    gDPSetEnvColor(dl++, 93, 96, 97, 255);
+
+    int sliderPos = (slider->w - SLIDER_WIDTH) * slider->value + slider->x + (SLIDER_WIDTH / 2);
+
+    gDPFillRectangle(
+        dl++, 
+        sliderPos - (SLIDER_WIDTH / 2), 
+        slider->y, 
+        sliderPos + (SLIDER_WIDTH / 2), 
+        slider->y + SLIDER_HEIGHT
+    );
+    dl = menuRenderOutline(sliderPos - (SLIDER_WIDTH / 2), slider->y, SLIDER_WIDTH, SLIDER_HEIGHT, 0, dl);
+
+    return dl;
 }

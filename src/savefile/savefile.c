@@ -90,6 +90,9 @@ void savefileNew() {
     }
 
     controllerSetDefaultSource();
+    gSaveData.controls.flags = 0;
+    gSaveData.controls.sensitivity = 0x7FFF;
+    gSaveData.controls.acceleration = 0x7FFF;
 
     gSaveData.audio.soundVolume = 0xFF;
     gSaveData.audio.musicVolume = 0xFF;

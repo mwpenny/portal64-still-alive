@@ -4,9 +4,20 @@
 #include "./menu.h"
 #include "../graphics/graphics.h"
 
+enum JoystickOption {
+    JoystickOptionInvert,
+    JoystickOptionSensitivity,
+    JoystickOptionAcceleration,
+    
+    JoystickOptionCount,
+};
+
 struct JoystickOptions {
     struct MenuCheckbox invertControls;
     struct MenuSlider lookSensitivity;
+    struct MenuSlider lookAcceleration;
+    Gfx* lookSensitivityText;
+    Gfx* lookAccelerationText;
     short selectedItem;
 };
 

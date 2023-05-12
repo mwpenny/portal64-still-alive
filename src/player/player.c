@@ -186,9 +186,11 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
 #define PLAYER_STOP_ACCEL    (5.875f)
 #define PLAYER_SLIDE_ACCEL    (40.0f)
 
-#define ROTATE_RATE     (M_PI * 2.0f)
-#define ROTATE_RATE_DELTA     (M_PI * 0.125f)
-#define ROTATE_RATE_STOP_DELTA (M_PI * 0.25f)
+#define MIN_ROTATE_RATE (M_PI * 0.5f)
+#define MAX_ROTATE_RATE (M_PI * 3.5f)
+
+#define MIN_ROTATE_RATE_DELTA (M_PI * 0.06125f)
+#define MAX_ROTATE_RATE_DELTA MAX_ROTATE_RATE
 
 #define JUMP_IMPULSE   2.7f
 
@@ -718,18 +720,26 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
     }
 
     struct Vector2 lookInput = controllerDirectionGet(ControllerActionRotate);
-    float targetYaw = -lookInput.x * ROTATE_RATE;
-    float targetPitch = lookInput.y * ROTATE_RATE;
+    float rotateRate = mathfLerp(MIN_ROTATE_RATE, MAX_ROTATE_RATE, (float)gSaveData.controls.sensitivity / 0xFFFF);
+    float targetYaw = -lookInput.x * rotateRate;
+    float targetPitch = lookInput.y * rotateRate;
+
+    if (gSaveData.controls.flags & ControlSaveFlagsInvert) {
+        targetYaw = -targetYaw;
+        targetPitch = -targetPitch;
+    }
+
+    float rotateRateDelta = mathfLerp(MIN_ROTATE_RATE_DELTA, MAX_ROTATE_RATE_DELTA, (float)gSaveData.controls.acceleration / 0xFFFF);
 
     player->yawVelocity = mathfMoveTowards(
         player->yawVelocity, 
         targetYaw, 
-        player->yawVelocity * targetYaw > 0.0f ? ROTATE_RATE_DELTA : ROTATE_RATE_STOP_DELTA
+        rotateRateDelta
     );
     player->pitchVelocity = mathfMoveTowards(
         player->pitchVelocity, 
         targetPitch, 
-        player->pitchVelocity * targetPitch > 0.0f ? ROTATE_RATE_DELTA : ROTATE_RATE_STOP_DELTA
+        rotateRateDelta
     );
 
     struct Vector3 lookingForward;
