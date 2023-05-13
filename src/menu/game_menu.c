@@ -41,6 +41,7 @@ void gameMenuUpdate(struct GameMenu* gameMenu) {
             if (option) {
                 gameMenu->state = option->id;
             }
+
             break;
         }
         case GameMenuStateNewGame:

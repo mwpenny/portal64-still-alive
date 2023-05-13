@@ -85,6 +85,11 @@ void sceneInit(struct Scene* scene) {
         checkpointLoadLast(scene);
     }
 
+    if (gCurrentLevelIndex > gSaveData.header.chapterProgress) {
+        gSaveData.header.chapterProgress = gCurrentLevelIndex;
+        savefileSave();
+    }
+
     gGameMenu.state = GameMenuStateResumeGame;
 }
 
@@ -477,8 +482,10 @@ void sceneUpdate(struct Scene* scene) {
     if (gGameMenu.state != GameMenuStateResumeGame) {
         gameMenuUpdate(&gGameMenu);
 
-        if (controllerActionGet(ControllerActionPause)) {
+        if (controllerActionGet(ControllerActionPause) || 
+            (gGameMenu.state == GameMenuStateLanding && controllerGetButtonDown(0, B_BUTTON))) {
             gGameMenu.state = GameMenuStateResumeGame;
+            savefileSave();
         }
 
         if (gGameMenu.state == GameMenuStateResumeGame) {

@@ -40,6 +40,7 @@ struct NewGameMenu {
 
     short selectedChapter;
     short chapterOffset;
+    short chapterCount;
 };
 
 void newGameInit(struct NewGameMenu* newGameMenu);

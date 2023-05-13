@@ -31,16 +31,16 @@ struct Chapter gChapters[] = {
     {NULL, NULL, NULL},
 };
 
-#define CHAPTER_COUNT   ((sizeof(gChapters) / sizeof(*gChapters)) - 1)
+#define MAX_CHAPTER_COUNT   ((sizeof(gChapters) / sizeof(*gChapters)) - 1)
 
 struct Chapter* chapterFindForChamber(int chamberIndex) {
-    for (int i = 1; i < CHAPTER_COUNT; ++i) {
+    for (int i = 1; i < MAX_CHAPTER_COUNT; ++i) {
         if (gChapters[i].testChamberNumber > chamberIndex) {
             return &gChapters[i - 1];
         }
     }
 
-    return &gChapters[CHAPTER_COUNT - 1];
+    return &gChapters[MAX_CHAPTER_COUNT - 1];
 }
 
 void chapterMenuInit(struct ChapterMenu* chapterMenu, int x, int y) {
@@ -118,7 +118,15 @@ void newGameInit(struct NewGameMenu* newGameMenu) {
     chapterMenuSetChapter(&newGameMenu->chapter1, &gChapters[1]);
 
     newGameMenu->chapterOffset = 0;
-    newGameMenu->selectedChapter = 0;
+    newGameMenu->selectedChapter = 0;    
+
+    for (
+        newGameMenu->chapterCount = 1; 
+        newGameMenu->chapterCount < MAX_CHAPTER_COUNT && 
+            gChapters[newGameMenu->chapterCount].testChamberNumber <= gSaveData.header.chapterProgress; 
+        ++newGameMenu->chapterCount) {
+
+    }
 }
 
 enum MenuDirection newGameUpdate(struct NewGameMenu* newGameMenu) {
@@ -126,14 +134,14 @@ enum MenuDirection newGameUpdate(struct NewGameMenu* newGameMenu) {
         return MenuDirectionUp;
     }
 
-    if (controllerGetButtonDown(0, A_BUTTON) && gChapters[newGameMenu->selectedChapter + 1].testChamberNumber >= 0) {
+    if (controllerGetButtonDown(0, A_BUTTON) && gChapters[newGameMenu->selectedChapter].testChamberNumber >= 0) {
         gCurrentTestSubject = savefileNextTestSubject();
         soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
         levelQueueLoad(gChapters[newGameMenu->selectedChapter].testChamberNumber, NULL, NULL);
     }
 
     if ((controllerGetDirectionDown(0) & ControllerDirectionRight) != 0 && 
-        newGameMenu->selectedChapter < CHAPTER_COUNT &&
+        newGameMenu->selectedChapter + 1 < newGameMenu->chapterCount &&
         gChapters[newGameMenu->selectedChapter + 1].imageData) {
         newGameMenu->selectedChapter = newGameMenu->selectedChapter + 1;
         soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL);
@@ -174,7 +182,9 @@ void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderSt
     menuSetRenderColor(renderState, newGameMenu->selectedChapter == newGameMenu->chapterOffset, &gSelectionOrange, &gColorBlack);
     gSPDisplayList(renderState->dl++, newGameMenu->chapter0.border);
 
-    if (newGameMenu->chapter1.chapter->imageData) {
+    int showSecondChapter = newGameMenu->chapter1.chapter->imageData && newGameMenu->chapter1.chapter->testChamberNumber <= gSaveData.header.chapterProgress;
+
+    if (showSecondChapter) {
         gDPPipeSync(renderState->dl++);
         menuSetRenderColor(renderState, newGameMenu->selectedChapter != newGameMenu->chapterOffset, &gSelectionOrange, &gColorBlack);
         gSPDisplayList(renderState->dl++, newGameMenu->chapter1.border);
@@ -190,7 +200,7 @@ void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderSt
     gSPDisplayList(renderState->dl++, newGameMenu->chapter0.chapterText);
     gSPDisplayList(renderState->dl++, newGameMenu->chapter0.testChamberText);
 
-    if (newGameMenu->chapter1.chapter->imageData) {
+    if (showSecondChapter) {
         gDPPipeSync(renderState->dl++);
         menuSetRenderColor(renderState, newGameMenu->selectedChapter != newGameMenu->chapterOffset, &gSelectionOrange, &gColorWhite);
         gSPDisplayList(renderState->dl++, newGameMenu->chapter1.chapterText);
@@ -208,7 +218,7 @@ void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderSt
         gColorWhite
     );
 
-    if (newGameMenu->chapter1.chapter->imageData) {
+    if (showSecondChapter) {
         graphicsCopyImage(
             renderState, newGameMenu->chapter1.imageBuffer, 
             84, 48, 

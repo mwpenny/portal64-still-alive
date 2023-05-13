@@ -20,7 +20,7 @@
 
 #define SCREEN_SHOT_SRAM(slotIndex)     (((slotIndex) + 1) * SAVE_SLOT_SIZE + MAX_CHECKPOINT_SIZE + SRAM_START_ADDR)
 
-#define SAVEFILE_HEADER 0xDEA0
+#define SAVEFILE_HEADER 0xDEA1
 
 // first save slot is always reserved for auto save
 #define MAX_SAVE_SLOTS  ((int)(SRAM_SIZE / SAVE_SLOT_SIZE) - 1)
@@ -34,7 +34,7 @@ struct SaveHeader {
 };
 
 enum ControlSaveFlags {
-    ControlSaveFlagsInvert,
+    ControlSaveFlagsInvert = (1 << 0),
 };
 
 struct ControlSaveState {
