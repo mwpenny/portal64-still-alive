@@ -5,6 +5,10 @@
 #include "../util/memory.h"
 #include "../levels/levels.h"
 
+#ifdef PORTAL64_WITH_DEBUGGER
+#include "../debugger/debugger.h"
+#endif
+
 void playerSerialize(struct Serializer* serializer, SerializeAction action, struct Player* player) {
     action(serializer, &player->lookTransform, sizeof(struct PartialTransform));
     action(serializer, &player->body.velocity, sizeof(player->body.velocity));
@@ -389,6 +393,14 @@ void sceneAnimatorSerialize(struct Serializer* serializer, SerializeAction actio
     }
 }
 
+void switchSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+    for (int i = 0; i < scene->switchCount; ++i) {
+        struct Switch* switchObj = &scene->switches[i];
+
+        action(serializer, &switchObj->timeLeft, sizeof(switchObj->timeLeft));
+    }
+}
+
 void sceneAnimatorDeserialize(struct Serializer* serializer, struct Scene* scene) {
     for (int i = 0; i < scene->animator.animatorCount; ++i) {
         serializeRead(serializer, &scene->animator.playbackSpeeds[i], sizeof(float));
@@ -411,30 +423,65 @@ void sceneAnimatorDeserialize(struct Serializer* serializer, struct Scene* scene
     }
 }
 
+#define WRITE_ALIGN_CHECK   {action(serializer, &currentAlign, 1); ++currentAlign;}
+
+#ifdef PORTAL64_WITH_DEBUGGER
+#define READ_ALIGN_CHECK {serializeRead(serializer, &currentAlign, 1); if (currentAlign != expectedAlign) return; ++expectedAlign;}
+#else
+#define READ_ALIGN_CHECK {serializeRead(serializer, &currentAlign, 1); if (currentAlign != expectedAlign) gdbBreak(); ++expectedAlign;}
+#endif
+
 void sceneSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+    char currentAlign = 0;
     playerSerialize(serializer, action, &scene->player);
+    WRITE_ALIGN_CHECK;
     sceneSerializePortals(serializer, action, scene);
+    WRITE_ALIGN_CHECK;
     buttonsSerializeRW(serializer, action, scene->buttons, scene->buttonCount);
+    WRITE_ALIGN_CHECK;
     decorSerialize(serializer, action, scene);
+    WRITE_ALIGN_CHECK;
     boxDropperSerialize(serializer, action, scene);
+    WRITE_ALIGN_CHECK;
     elevatorSerializeRW(serializer, action, scene);
+    WRITE_ALIGN_CHECK;
     pedestalSerialize(serializer, action, scene);
+    WRITE_ALIGN_CHECK;
     launcherSerialize(serializer, action, scene);
+    WRITE_ALIGN_CHECK;
     catcherSerialize(serializer, action, scene);
+    WRITE_ALIGN_CHECK;
     sceneAnimatorSerialize(serializer, action, scene);
+    WRITE_ALIGN_CHECK;
+    switchSerialize(serializer, action, scene);
+    WRITE_ALIGN_CHECK;
 }
 
 void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
+    char currentAlign = 0;
+    char expectedAlign = 0;
     playerDeserialize(serializer, &scene->player);
+    READ_ALIGN_CHECK;
     sceneDeserializePortals(serializer, scene);
+    READ_ALIGN_CHECK;
     buttonsSerializeRW(serializer, serializeRead, scene->buttons, scene->buttonCount);
+    READ_ALIGN_CHECK;
     decorDeserialize(serializer, scene);
+    READ_ALIGN_CHECK;
     boxDropperDeserialize(serializer, scene);
+    READ_ALIGN_CHECK;
     elevatorSerializeRW(serializer, serializeRead, scene);
+    READ_ALIGN_CHECK;
     pedestalDeserialize(serializer, scene);
+    READ_ALIGN_CHECK;
     launcherDeserialize(serializer, scene);
+    READ_ALIGN_CHECK;
     catcherDeserialize(serializer, scene);
+    READ_ALIGN_CHECK;
     sceneAnimatorDeserialize(serializer, scene);
+    READ_ALIGN_CHECK;
+    switchSerialize(serializer, serializeRead, scene);
+    READ_ALIGN_CHECK;
 
     for (int i = 0; i < scene->doorCount; ++i) {
         doorCheckForOpenState(&scene->doors[i]);

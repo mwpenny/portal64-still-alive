@@ -64,6 +64,8 @@ struct SaveData {
     struct ControlSaveState controls;
     struct AudioSettingsSaveState audio;
     struct SaveSlotMetadata saveSlotMetadata[MAX_SAVE_SLOTS];
+    // without this the dma copy into SRAM is cut short
+    u64 __align;
 };
 
 struct SaveSlotInfo {

@@ -201,6 +201,7 @@ static void gameProc(void* arg) {
     portalSurfaceCleanupQueueInit();
     savefileLoad();
     levelLoadWithCallbacks(MAIN_MENU);
+    gCurrentTestSubject = 0;
     cutsceneRunnerReset();
     controllersInit();
     initAudio(fps);

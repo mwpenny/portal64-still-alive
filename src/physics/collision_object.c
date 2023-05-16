@@ -12,6 +12,7 @@ void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData
     rigidBodyInit(body, mass, collider->callbacks->mofICalculator(collider, mass));
     collisionObjectUpdateBB(object);
     object->collisionLayers = collisionLayers;
+    object->flags = 0;
     object->data = 0;
     object->trigger = 0;
     object->manifoldIds = 0;
