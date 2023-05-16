@@ -1,0 +1,9 @@
+clean:
+	sudo rm -rf build
+
+docker-build:
+	docker buildx use desktop-linux
+	docker buildx build --platform linux/amd64 -t portal64 .
+
+docker-make:
+	docker run  -v $$PWD:/usr/src/app -it portal64 make
