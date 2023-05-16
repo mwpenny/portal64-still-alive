@@ -428,11 +428,4 @@ clean:
 
 fix:
 	wine tools/romfix64.exe build/portal.z64 
-
-docker-build:
-	docker build . -t portal64
-
-docker-run:
-	docker run  -v $PWD:/usr/src/app -it portal64 bash
-
 .SECONDARY:
