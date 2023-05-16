@@ -108,14 +108,14 @@ make fix
 
 Build the Docker image.
 ```sh
-make -f Makefile.docker docker-build
+make -f Makefile.docker build
 ```
 
 <br />
 
 Then build.
 ```sh
-make -f Makefile.docker docker-make
+make -f Makefile.docker
 ```
 
 <br />
