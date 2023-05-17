@@ -523,7 +523,7 @@ struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* bl
     }
 }
 
-void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
+void playerUpdate(struct Player* player) {
     struct Vector3 forward;
     struct Vector3 right;
 
@@ -781,16 +781,10 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         player->pitchVelocity = 0.0f;
     }
 
-    cameraTransform->rotation = player->lookTransform.rotation;
-    cameraTransform->position = player->lookTransform.position;
     playerUpdateGrabbedObject(player);
     playerUpdateGunObject(player);
 
     collisionObjectUpdateBB(&player->collisionObject);
-
-    if (player->flags & PlayerIsDead) {
-        cameraTransform->position.y += DEAD_OFFSET;
-    }
 
     player->body.currentRoom = worldCheckDoorwayCrossings(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom, doorwayMask);
     dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
@@ -827,4 +821,13 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         }
     }
 
+}
+
+void playerApplyCameraTransform(struct Player* player, struct Transform* cameraTransform) {
+    cameraTransform->rotation = player->lookTransform.rotation;
+    cameraTransform->position = player->lookTransform.position;
+    
+    if (player->flags & PlayerIsDead) {
+        cameraTransform->position.y += DEAD_OFFSET;
+    }
 }

@@ -304,3 +304,25 @@ void savefileLoadScreenshot(u16* target, u16* location) {
         memCopy(target, location, THUMBANIL_IMAGE_SIZE);
     }
 }
+
+
+u16 gScreenGrabBuffer[SAVE_SLOT_IMAGE_W * SAVE_SLOT_IMAGE_H];
+
+#define IMAGE_SCALE_FACTOR      (int)((SCREEN_WD << 16) / SAVE_SLOT_IMAGE_W)
+#define SCALE_TO_SOURCE(value)  ((IMAGE_SCALE_FACTOR * (value)) >> 16)
+
+void savefileGrabScreenshot() {
+    u16* cfb = osViGetCurrentFramebuffer();
+    u16* dst = gScreenGrabBuffer;
+
+    for (int y = 0; y < SAVE_SLOT_IMAGE_H; ++y) {
+        for (int x = 0; x < SAVE_SLOT_IMAGE_W; ++x) {
+            int srcX = SCALE_TO_SOURCE(x);
+            int srcY = SCALE_TO_SOURCE(y);
+
+            *dst = cfb[srcX + srcY * SCREEN_WD];
+
+            ++dst;
+        }
+    }
+}

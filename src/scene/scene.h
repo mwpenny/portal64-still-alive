@@ -29,6 +29,12 @@ struct SavedPortal {
     int roomIndex;
 };
 
+enum SceneCheckpointState {
+    SceneCheckpointStateSaved,
+    SceneCheckpointStatePendingRender,
+    SceneCheckpointStateReady,
+};
+
 struct Scene {
     struct Camera camera;
     struct Player player;
@@ -63,10 +69,12 @@ struct Scene {
     u8 switchCount;
     u8 ballLancherCount;
     u8 ballCatcherCount;
+
     u8 last_portal_indx_shot;
     u8 looked_wall_portalable_0;
     u8 looked_wall_portalable_1;
     u8 continuouslyAttemptingPortalOpen;
+    u8 checkpointState;
 };
 
 extern struct Scene gScene;

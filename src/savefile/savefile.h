@@ -90,4 +90,8 @@ int savefileFirstFreeSlot();
 void savefileLoadGame(int slot, Checkpoint checkpoint, int* testChamberIndex, int* subjectNumber);
 void savefileLoadScreenshot(u16* target, u16* location);
 
+extern u16 gScreenGrabBuffer[SAVE_SLOT_IMAGE_W * SAVE_SLOT_IMAGE_H];
+
+void savefileGrabScreenshot();
+
 #endif

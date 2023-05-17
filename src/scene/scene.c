@@ -80,8 +80,9 @@ void sceneInit(struct Scene* scene) {
     gameMenuInit(&gGameMenu, gPauseMenuOptions, sizeof(gPauseMenuOptions) / sizeof(*gPauseMenuOptions), 1);
 
     if (!checkpointExists()) {
-        checkpointSave(scene);
+        scene->checkpointState = SceneCheckpointStatePendingRender;
     } else {
+        scene->checkpointState = SceneCheckpointStateSaved;
         checkpointLoadLast(scene);
     }
 
@@ -217,6 +218,7 @@ void sceneInitNoPauseMenu(struct Scene* scene) {
     scene->looked_wall_portalable_0=0;
     scene->looked_wall_portalable_1=0;
     scene->continuouslyAttemptingPortalOpen=0;
+    scene->checkpointState = SceneCheckpointStateSaved;
 
     scene->freeCameraOffset = gZeroVec;
 
@@ -246,6 +248,8 @@ void sceneRenderPerformanceMetrics(struct Scene* scene, struct RenderState* rend
 LookAt gLookAt = gdSPDefLookAt(127, 0, 0, 0, 127, 0);
 
 void sceneRender(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
+    playerApplyCameraTransform(&scene->player, &scene->camera.transform);
+
     gSPSetLights1(renderState->dl++, gSceneLights);
     LookAt* lookAt = renderStateRequestLookAt(renderState);
 
@@ -476,6 +480,11 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
 }
 
 void sceneUpdate(struct Scene* scene) {
+    if (scene->checkpointState == SceneCheckpointStateReady) {
+        checkpointSave(scene);
+        scene->checkpointState = SceneCheckpointStateSaved;
+    }
+    
     OSTime frameStart = osGetTime();
     scene->lastFrameTime = frameStart - scene->lastFrameStart;
 
@@ -508,7 +517,7 @@ void sceneUpdate(struct Scene* scene) {
     signalsReset();
 
     portalGunUpdate(&scene->portalGun, &scene->player);
-    playerUpdate(&scene->player, &scene->camera.transform);
+    playerUpdate(&scene->player);
     sceneUpdateListeners(scene);
     sceneCheckPortals(scene);
 
