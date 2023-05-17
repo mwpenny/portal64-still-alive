@@ -204,6 +204,7 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
             continue;
         }
 
+        gDPPipeSync(renderState->dl++);
         menuSetRenderColor(renderState, savefileList->indexOffset + i == savefileList->selectedSave, &gSelectionOrange, &gColorBlack);
 
         renderStateInlineBranch(renderState, slot->border);
@@ -229,6 +230,7 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
             continue;
         }
 
+        gDPPipeSync(renderState->dl++);
         menuSetRenderColor(renderState, savefileList->indexOffset + i == savefileList->selectedSave, &gSelectionOrange, &gColorWhite);
 
         renderStateInlineBranch(renderState, slot->testChamberText);

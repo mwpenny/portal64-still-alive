@@ -210,7 +210,7 @@ int savefileListSaves(struct SaveSlotInfo* slots, int includeAuto) {
             continue;
         }
 
-        if (gSaveData.saveSlotMetadata[i].testSubjectNumber == TEST_SUBJECT_AUTOSAVE && !includeAuto) {
+        if (i == 0 && !includeAuto) {
             continue;
         }
 

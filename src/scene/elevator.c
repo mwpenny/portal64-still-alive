@@ -8,6 +8,8 @@
 #include "../audio/soundplayer.h"
 #include "../audio/clips.h"
 
+#include "../savefile/checkpoint.h"
+
 #include "../../build/assets/models/props/round_elevator_collision.h"
 #include "../../build/assets/models/props/round_elevator_interior.h"
 #include "../../build/assets/models/props/round_elevator.h"
@@ -153,8 +155,16 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
     }
 
     if (shouldLock) {
-        
+        int shouldSaveCheckpoint = (elevator->flags & (ElevatorFlagsIsLocked | ElevatorFlagsIsExit)) == ElevatorFlagsIsExit;
+
         elevator->flags |= ElevatorFlagsIsLocked;   
+
+        if (shouldSaveCheckpoint) {
+            // save the checkpoint after flag ElevatorFlagsIsLocked is set
+            // so loading this checkpoint doesn't immediately create another
+            // save checkpoint
+            checkpointSave(&gScene);
+        }
     }
 
     if ((elevator->flags & ElevatorFlagsIsLocked) != 0) {

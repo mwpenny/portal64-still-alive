@@ -277,6 +277,7 @@ void boxDropperDeserialize(struct Serializer* serializer, struct Scene* scene) {
 void elevatorSerializeRW(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     for (int i = 0; i < scene->elevatorCount; ++i) {
         action(serializer, &scene->elevators[i].flags, sizeof(short));
+        action(serializer, &scene->elevators[i].timer, sizeof(float));
     }
 }
 
