@@ -163,7 +163,7 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
             // save the checkpoint after flag ElevatorFlagsIsLocked is set
             // so loading this checkpoint doesn't immediately create another
             // save checkpoint
-            checkpointSave(&gScene);
+            sceneQueueCheckpoint(&gScene);
         }
     }
 

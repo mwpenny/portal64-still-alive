@@ -600,7 +600,7 @@ void sceneUpdate(struct Scene* scene) {
                     &gZeroVec,
                     scene->elevators[teleportTo].roomIndex
                 );
-                checkpointSave(&gScene);
+                sceneQueueCheckpoint(&gScene);
                 sceneClosePortal(&gScene, 0);
                 sceneClosePortal(&gScene, 1);
             }
@@ -669,6 +669,10 @@ void sceneUpdate(struct Scene* scene) {
     if (controllerGetButtonDown(2, L_TRIG)) {
         levelQueueLoad(NEXT_LEVEL, NULL, NULL);
     }
+}
+
+void sceneQueueCheckpoint(struct Scene* scene) {
+    scene->checkpointState = SceneCheckpointStateReady;
 }
 
 int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformIndex, int portalIndex, struct PortalSurfaceMappingRange surfaceMapping, struct CollisionObject* collisionObject, int roomIndex, int fromPlayer, int just_checking) {

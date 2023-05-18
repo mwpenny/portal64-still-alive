@@ -191,7 +191,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 &gZeroVec,
                 gCurrentLevel->locations[step->teleportPlayer.toLocation].roomIndex
             );
-            checkpointSave(&gScene);
+            sceneQueueCheckpoint(&gScene);
             break;
         case CutsceneStepTypeLoadLevel:
         {
@@ -249,7 +249,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             );
             break;
         case CutsceneStepSaveCheckpoint:
-            checkpointSave(&gScene);
+            sceneQueueCheckpoint(&gScene);
             break;
         case CutsceneStepKillPlayer:
             playerKill(&gScene.player, step->killPlayer.isWater);

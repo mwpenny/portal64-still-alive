@@ -424,16 +424,20 @@ void sceneAnimatorDeserialize(struct Serializer* serializer, struct Scene* scene
     }
 }
 
-#define WRITE_ALIGN_CHECK   {action(serializer, &currentAlign, 1); ++currentAlign;}
+#define INCLUDE_SAVEFILE_ALIGH_CHECKS   0
 
-#ifdef PORTAL64_WITH_DEBUGGER
-#define READ_ALIGN_CHECK {serializeRead(serializer, &currentAlign, 1); if (currentAlign != expectedAlign) return; ++expectedAlign;}
-#else
+#if INCLUDE_SAVEFILE_ALIGH_CHECKS
+#define WRITE_ALIGN_CHECK   {action(serializer, &currentAlign, 1); ++currentAlign;}
 #define READ_ALIGN_CHECK {serializeRead(serializer, &currentAlign, 1); if (currentAlign != expectedAlign) gdbBreak(); ++expectedAlign;}
+#else
+#define WRITE_ALIGN_CHECK
+#define READ_ALIGN_CHECK
 #endif
 
 void sceneSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+#if INCLUDE_SAVEFILE_ALIGH_CHECKS
     char currentAlign = 0;
+#endif
     playerSerialize(serializer, action, &scene->player);
     WRITE_ALIGN_CHECK;
     sceneSerializePortals(serializer, action, scene);
@@ -459,8 +463,10 @@ void sceneSerialize(struct Serializer* serializer, SerializeAction action, struc
 }
 
 void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
+#if INCLUDE_SAVEFILE_ALIGH_CHECKS
     char currentAlign = 0;
     char expectedAlign = 0;
+#endif
     playerDeserialize(serializer, &scene->player);
     READ_ALIGN_CHECK;
     sceneDeserializePortals(serializer, scene);
