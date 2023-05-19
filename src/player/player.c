@@ -212,6 +212,7 @@ void playerHandleCollision(struct Player* player) {
         }
 
         float prevY = player->body.transform.position.y;
+        float prevVelY = player->body.velocity.y;
         
         if (offset != 0.0f) {
             vector3AddScaled(
@@ -222,14 +223,15 @@ void playerHandleCollision(struct Player* player) {
             );
         }
 
-        if (collisionObjectIsGrabbable(contact->shapeA) || collisionObjectIsGrabbable(contact->shapeB)) {
-            player->body.transform.position.y = MAX(player->body.transform.position.y, prevY);
-        }
-
         float relativeVelocity = vector3Dot(&contact->normal, &player->body.velocity);
 
         if ((contact->shapeA == &player->collisionObject) == (relativeVelocity > 0.0f)) {
             vector3ProjectPlane(&player->body.velocity, &contact->normal, &player->body.velocity);
+        }
+
+        if (collisionObjectIsGrabbable(contact->shapeA) || collisionObjectIsGrabbable(contact->shapeB)) {
+            player->body.transform.position.y = MAX(player->body.transform.position.y, prevY);
+            player->body.velocity.y = MAX(player->body.velocity.y, prevVelY);
         }
 
         if (((isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB)) && !playerIsDead(player))) {
