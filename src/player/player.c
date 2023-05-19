@@ -210,6 +210,8 @@ void playerHandleCollision(struct Player* player) {
             // objects being grabbed by the player shouldn't push the player
             continue;
         }
+
+        float prevY = player->body.transform.position.y;
         
         if (offset != 0.0f) {
             vector3AddScaled(
@@ -220,6 +222,9 @@ void playerHandleCollision(struct Player* player) {
             );
         }
 
+        if ((contact->shapeA->body->flags & RigidBodyFlagsGrabbable) || (contact->shapeB->body->flags & RigidBodyFlagsGrabbable)) {
+            player->body.transform.position.y = MAX(player->body.transform.position.y, prevY);
+        }
 
         float relativeVelocity = vector3Dot(&contact->normal, &player->body.velocity);
 
