@@ -426,7 +426,7 @@ void sceneAnimatorDeserialize(struct Serializer* serializer, struct Scene* scene
 #define WRITE_ALIGN_CHECK   {action(serializer, &currentAlign, 1); ++currentAlign;}
 
 #ifdef PORTAL64_WITH_DEBUGGER
-#define READ_ALIGN_CHECK {serializeRead(serializer, &currentAlign, 1); if (currentAlign != expectedAlign) return; ++expectedAlign;}
+#define READ_ALIGN_CHECK {serializeRead(serializer, &currentAlign, 1); if (currentAlign != expectedAlign) gdbBreak(); ++expectedAlign;}
 #else
 #define READ_ALIGN_CHECK {serializeRead(serializer, &currentAlign, 1); if (currentAlign != expectedAlign) return; ++expectedAlign;}
 #endif

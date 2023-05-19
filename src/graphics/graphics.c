@@ -124,6 +124,7 @@ void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callba
 
     if (gfxValidate(&scTask->list, renderStateMaxDLCount(renderState), &validationResult) != GFXValidatorErrorNone) {
         gfxGenerateReadableMessage(&validationResult, graphicsOutputMessageToDebugger);
+        gdbBreak();
     }
 
 #endif // PORTAL64_WITH_DEBUGGER
