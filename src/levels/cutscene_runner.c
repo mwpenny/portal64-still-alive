@@ -33,6 +33,7 @@ void cutsceneRunnerCancel(struct CutsceneRunner* runner);
 
 void cutsceneRunnerReset() {
     gRunningCutscenes = NULL;
+    gTriggeredCutscenes = 0;
 
     for (int i = 0; i < MAX_QUEUE_LENGTH; ++i) {
         gCutsceneSoundNodes[i].next = (i + 1) < MAX_QUEUE_LENGTH ? &gCutsceneSoundNodes[i + 1] : NULL;

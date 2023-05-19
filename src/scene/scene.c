@@ -489,13 +489,13 @@ void sceneUpdate(struct Scene* scene) {
     scene->lastFrameTime = frameStart - scene->lastFrameStart;
 
     if (gGameMenu.state != GameMenuStateResumeGame) {
-        gameMenuUpdate(&gGameMenu);
-
         if (controllerActionGet(ControllerActionPause) || 
             (gGameMenu.state == GameMenuStateLanding && controllerGetButtonDown(0, B_BUTTON))) {
             gGameMenu.state = GameMenuStateResumeGame;
             savefileSave();
         }
+
+        gameMenuUpdate(&gGameMenu);
 
         if (gGameMenu.state == GameMenuStateResumeGame) {
             soundPlayerResume();
