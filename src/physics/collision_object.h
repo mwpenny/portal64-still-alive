@@ -36,6 +36,7 @@ struct SweptCollisionObject {
 };
 
 int collisionObjectIsActive(struct CollisionObject* object);
+int collisionObjectIsGrabbable(struct CollisionObject* object);
 int collisionObjectShouldGenerateConctacts(struct CollisionObject* object);
 
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers);

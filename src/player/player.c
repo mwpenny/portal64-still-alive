@@ -222,7 +222,7 @@ void playerHandleCollision(struct Player* player) {
             );
         }
 
-        if ((contact->shapeA->body->flags & RigidBodyFlagsGrabbable) || (contact->shapeB->body->flags & RigidBodyFlagsGrabbable)) {
+        if (collisionObjectIsGrabbable(contact->shapeA) || collisionObjectIsGrabbable(contact->shapeB)) {
             player->body.transform.position.y = MAX(player->body.transform.position.y, prevY);
         }
 
