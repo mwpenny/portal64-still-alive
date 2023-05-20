@@ -94,3 +94,18 @@ void skCalculateBonePosition(struct SKArmature* object, unsigned short boneIndex
         boneIndex = object->boneParentIndex[boneIndex];
     }
 }
+
+void skCalculateBoneRotation(struct SKArmature* object, unsigned short boneIndex, struct Quaternion* out) {
+    if (!object->boneParentIndex) {
+        return;
+    }
+
+    quatIdent(out);
+
+    while (boneIndex < object->numberOfBones) {
+        struct Quaternion next;
+        quatMultiply(&object->pose[boneIndex].rotation, out, &next);
+        *out = next;
+        boneIndex = object->boneParentIndex[boneIndex];
+    }
+}

@@ -21,6 +21,7 @@ struct DoorTypeDefinition {
     short materialIndex;
     short colliderBoneIndex;
     float closeSpeed;
+    struct Quaternion relativeRotation;
 };
 
 struct Door {
