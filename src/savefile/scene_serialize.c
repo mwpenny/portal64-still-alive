@@ -369,7 +369,7 @@ void catcherDeserialize(struct Serializer* serializer, struct Scene* scene) {
         }
 
         struct BallCatcher* catcher = &scene->ballCatchers[i];
-        catcher->caughtBall = &scene->ballLaunchers[caughtIndex].currentBall;
+        ballCatcherHandBall(catcher, &scene->ballLaunchers[caughtIndex].currentBall);
     }
 }
 

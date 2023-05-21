@@ -5,7 +5,7 @@
 #include "collision_scene.h"
 #include "../math/mathf.h"
 #include "mesh_collider.h"
-
+// 0x807572ac
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers) {
     object->collider = collider;
     object->body = body;

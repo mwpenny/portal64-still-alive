@@ -5,7 +5,7 @@
 
 #include "../controls/controller_actions.h"
 
-struct SaveData gSaveData;
+struct SaveData __attribute__((aligned(8))) gSaveData;
 int gCurrentTestSubject = -1;
 
 #ifdef DEBUG

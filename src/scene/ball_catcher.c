@@ -87,7 +87,7 @@ void ballCatcherCheckBalls(struct BallCatcher* catcher, struct BallLauncher* bal
     for (int i = 0; i < ballLauncherCount; ++i) {
         struct BallLauncher* launcher = &ballLaunchers[i];
 
-        if (!ballIsActive(&launcher->currentBall)) {
+        if (!ballIsActive(&launcher->currentBall) || ballIsCaught(&launcher->currentBall)) {
             continue;
         }
 
@@ -135,4 +135,11 @@ void ballCatcherUpdate(struct BallCatcher* catcher, struct BallLauncher* ballLau
     } else {
         ballCatcherCheckBalls(catcher, ballLaunchers, ballLauncherCount);
     }
+}
+
+void ballCatcherHandBall(struct BallCatcher* catcher, struct Ball* caughtBall) {
+    catcher->caughtBall = caughtBall;
+    struct Vector3 targetPosition;
+    transformPoint(&catcher->rigidBody.transform, &gLocalCatcherLocation, &targetPosition);
+    catcher->caughtBall->rigidBody.transform.position = targetPosition;
 }
