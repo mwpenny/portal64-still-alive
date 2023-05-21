@@ -8,7 +8,7 @@
 #include "./savefile.h"
 
 char gHasCheckpoint = 0;
-char gCheckpoint[MAX_CHECKPOINT_SIZE];
+char __attribute__((aligned(8))) gCheckpoint[MAX_CHECKPOINT_SIZE];
 
 void ckeckpointSerialize(struct Serializer* serializer, SerializeAction action, void* data) {
     struct Scene* scene = data;
