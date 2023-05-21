@@ -123,7 +123,7 @@ void levelQueueLoad(int index, struct Transform* relativeExitTransform, struct V
         gQueuedLevel = gCurrentLevelIndex + 1;
 
         if (gQueuedLevel == LEVEL_COUNT) {
-            gQueuedLevel = 0;
+            gQueuedLevel = MAIN_MENU;
         }
     } else {
         gQueuedLevel = index;

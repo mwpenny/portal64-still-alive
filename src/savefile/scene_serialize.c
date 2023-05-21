@@ -277,18 +277,23 @@ void boxDropperDeserialize(struct Serializer* serializer, struct Scene* scene) {
 void elevatorSerializeRW(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     for (int i = 0; i < scene->elevatorCount; ++i) {
         action(serializer, &scene->elevators[i].flags, sizeof(short));
+        action(serializer, &scene->elevators[i].timer, sizeof(float));
     }
 }
 
 void pedestalSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     for (int i = 0; i < scene->pedestalCount; ++i) {
         action(serializer, &scene->pedestals[i].flags, sizeof(short));
+        action(serializer, &scene->pedestals[i].pointAt, sizeof(struct Vector3));
+        action(serializer, &scene->pedestals[i].currentRotation, sizeof(struct Vector2));
     }
 }
 
 void pedestalDeserialize(struct Serializer* serializer, struct Scene* scene) {
     for (int i = 0; i < scene->pedestalCount; ++i) {
         serializeRead(serializer, &scene->pedestals[i].flags, sizeof(short));
+        serializeRead(serializer, &scene->pedestals[i].pointAt, sizeof(struct Vector3));
+        serializeRead(serializer, &scene->pedestals[i].currentRotation, sizeof(struct Vector2));
 
         if (scene->pedestals[i].flags & PedestalFlagsDown) {
             pedestalSetDown(&scene->pedestals[i]);
@@ -364,7 +369,7 @@ void catcherDeserialize(struct Serializer* serializer, struct Scene* scene) {
         }
 
         struct BallCatcher* catcher = &scene->ballCatchers[i];
-        catcher->caughtBall = &scene->ballLaunchers[caughtIndex].currentBall;
+        ballCatcherHandBall(catcher, &scene->ballLaunchers[caughtIndex].currentBall);
     }
 }
 
@@ -423,16 +428,20 @@ void sceneAnimatorDeserialize(struct Serializer* serializer, struct Scene* scene
     }
 }
 
-#define WRITE_ALIGN_CHECK   {action(serializer, &currentAlign, 1); ++currentAlign;}
+#define INCLUDE_SAVEFILE_ALIGH_CHECKS   0
 
-#ifdef PORTAL64_WITH_DEBUGGER
+#if INCLUDE_SAVEFILE_ALIGH_CHECKS
+#define WRITE_ALIGN_CHECK   {action(serializer, &currentAlign, 1); ++currentAlign;}
 #define READ_ALIGN_CHECK {serializeRead(serializer, &currentAlign, 1); if (currentAlign != expectedAlign) gdbBreak(); ++expectedAlign;}
 #else
-#define READ_ALIGN_CHECK {serializeRead(serializer, &currentAlign, 1); if (currentAlign != expectedAlign) return; ++expectedAlign;}
+#define WRITE_ALIGN_CHECK
+#define READ_ALIGN_CHECK
 #endif
 
 void sceneSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+#if INCLUDE_SAVEFILE_ALIGH_CHECKS
     char currentAlign = 0;
+#endif
     playerSerialize(serializer, action, &scene->player);
     WRITE_ALIGN_CHECK;
     sceneSerializePortals(serializer, action, scene);
@@ -458,8 +467,10 @@ void sceneSerialize(struct Serializer* serializer, SerializeAction action, struc
 }
 
 void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
+#if INCLUDE_SAVEFILE_ALIGH_CHECKS
     char currentAlign = 0;
     char expectedAlign = 0;
+#endif
     playerDeserialize(serializer, &scene->player);
     READ_ALIGN_CHECK;
     sceneDeserializePortals(serializer, scene);

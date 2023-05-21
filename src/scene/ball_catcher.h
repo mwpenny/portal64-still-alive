@@ -25,4 +25,6 @@ struct BallCatcher {
 void ballCatcherInit(struct BallCatcher* catcher, struct BallCatcherDefinition* definition);
 void ballCatcherUpdate(struct BallCatcher* catcher, struct BallLauncher* ballLaunchers, int ballLauncherCount);
 
+void ballCatcherHandBall(struct BallCatcher* catcher, struct Ball* caughtBall);
+
 #endif

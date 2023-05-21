@@ -84,6 +84,8 @@ void ballBurnRender(void* data, struct DynamicRenderDataList* renderList, struct
 }
 
 void ballInitInactive(struct Ball* ball) {
+    collisionObjectInit(&ball->collisionObject, &gBallCollider, &ball->rigidBody, 1.0f, 0);
+
     ball->targetSpeed = 0.0f;
     ball->flags = 0;
     ball->soundLoopId = SOUND_ID_NONE;

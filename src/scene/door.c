@@ -41,6 +41,7 @@ struct DoorTypeDefinition gDoorTypeDefinitions[] = {
         DOOR_01_INDEX,
         -1,
         1.0f,
+        {0.0f, 0.0f, 0.0f, 1.0f},
     },
     [DoorType02] = {
         &props_door_02_armature,
@@ -51,6 +52,7 @@ struct DoorTypeDefinition gDoorTypeDefinitions[] = {
         DOOR_02_INDEX,
         PROPS_DOOR_02_DOOR_BONE,
         3.0f,
+        {0.707106781f, 0.0f, 0.0f, 0.707106781f},
     },
 };
 
@@ -93,7 +95,7 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct W
 
     door->rigidBody.transform.position = doorDefinition->location;
     door->rigidBody.transform.position.y += 1.0f;
-    door->rigidBody.transform.rotation = doorDefinition->rotation;
+    quatMultiply(&doorDefinition->rotation, &typeDefinition->relativeRotation, &door->rigidBody.transform.rotation);
     door->rigidBody.transform.scale = gOneVec;
 
     collisionObjectUpdateBB(&door->collisionObject);
@@ -151,9 +153,13 @@ void doorUpdate(struct Door* door) {
     if (typeDefinition->colliderBoneIndex == -1) {
         door->collisionObject.collisionLayers = isDoorwayOpen ? 0 : (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_STATIC);
     } else {
+        struct Vector3 finalPos;
+        skCalculateBonePosition(&door->armature, typeDefinition->colliderBoneIndex, &gZeroVec, &finalPos);
+
         door->rigidBody.transform.position.y = 
             door->doorDefinition->location.y + 
-            door->armature.pose[typeDefinition->colliderBoneIndex].position.y * (1.0f / SCENE_SCALE);
+            1.0f +
+            finalPos.z * (1.0f / SCENE_SCALE);
     }
 }
 

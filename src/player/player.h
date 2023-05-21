@@ -54,7 +54,8 @@ struct Player {
 };
 
 void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity, struct CollisionObject* portalGunObject);
-void playerUpdate(struct Player* player, struct Transform* cameraTransform);
+void playerUpdate(struct Player* player);
+void playerApplyCameraTransform(struct Player* player, struct Transform* cameraTransform);
 
 void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, struct Vector3* right);
 

@@ -210,6 +210,9 @@ void playerHandleCollision(struct Player* player) {
             // objects being grabbed by the player shouldn't push the player
             continue;
         }
+
+        float prevY = player->body.transform.position.y;
+        float prevVelY = player->body.velocity.y;
         
         if (offset != 0.0f) {
             vector3AddScaled(
@@ -220,11 +223,15 @@ void playerHandleCollision(struct Player* player) {
             );
         }
 
-
         float relativeVelocity = vector3Dot(&contact->normal, &player->body.velocity);
 
         if ((contact->shapeA == &player->collisionObject) == (relativeVelocity > 0.0f)) {
             vector3ProjectPlane(&player->body.velocity, &contact->normal, &player->body.velocity);
+        }
+
+        if (collisionObjectIsGrabbable(contact->shapeA) || collisionObjectIsGrabbable(contact->shapeB)) {
+            player->body.transform.position.y = MAX(player->body.transform.position.y, prevY);
+            player->body.velocity.y = MAX(player->body.velocity.y, prevVelY);
         }
 
         if (((isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB)) && !playerIsDead(player))) {
@@ -523,7 +530,7 @@ struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* bl
     }
 }
 
-void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
+void playerUpdate(struct Player* player) {
     struct Vector3 forward;
     struct Vector3 right;
 
@@ -781,16 +788,10 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         player->pitchVelocity = 0.0f;
     }
 
-    cameraTransform->rotation = player->lookTransform.rotation;
-    cameraTransform->position = player->lookTransform.position;
     playerUpdateGrabbedObject(player);
     playerUpdateGunObject(player);
 
     collisionObjectUpdateBB(&player->collisionObject);
-
-    if (player->flags & PlayerIsDead) {
-        cameraTransform->position.y += DEAD_OFFSET;
-    }
 
     player->body.currentRoom = worldCheckDoorwayCrossings(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom, doorwayMask);
     dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
@@ -827,4 +828,13 @@ void playerUpdate(struct Player* player, struct Transform* cameraTransform) {
         }
     }
 
+}
+
+void playerApplyCameraTransform(struct Player* player, struct Transform* cameraTransform) {
+    cameraTransform->rotation = player->lookTransform.rotation;
+    cameraTransform->position = player->lookTransform.position;
+    
+    if (player->flags & PlayerIsDead) {
+        cameraTransform->position.y += DEAD_OFFSET;
+    }
 }

@@ -20,7 +20,7 @@
 
 #define SCREEN_SHOT_SRAM(slotIndex)     (((slotIndex) + 1) * SAVE_SLOT_SIZE + MAX_CHECKPOINT_SIZE + SRAM_START_ADDR)
 
-#define SAVEFILE_HEADER 0xDEA1
+#define SAVEFILE_HEADER 0xDEAD
 
 // first save slot is always reserved for auto save
 #define MAX_SAVE_SLOTS  ((int)(SRAM_SIZE / SAVE_SLOT_SIZE) - 1)
@@ -50,7 +50,6 @@ struct AudioSettingsSaveState {
 };
 
 #define NO_TEST_CHAMBER         0xFF
-#define TEST_SUBJECT_AUTOSAVE   0xFF
 #define TEST_SUBJECT_MAX        99
 
 struct SaveSlotMetadata {
@@ -89,5 +88,9 @@ int savefileFirstFreeSlot();
 
 void savefileLoadGame(int slot, Checkpoint checkpoint, int* testChamberIndex, int* subjectNumber);
 void savefileLoadScreenshot(u16* target, u16* location);
+
+extern u16 gScreenGrabBuffer[SAVE_SLOT_IMAGE_W * SAVE_SLOT_IMAGE_H];
+
+void savefileGrabScreenshot();
 
 #endif

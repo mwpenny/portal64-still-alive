@@ -204,6 +204,7 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
             continue;
         }
 
+        gDPPipeSync(renderState->dl++);
         menuSetRenderColor(renderState, savefileList->indexOffset + i == savefileList->selectedSave, &gSelectionOrange, &gColorBlack);
 
         renderStateInlineBranch(renderState, slot->border);
@@ -229,6 +230,7 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
             continue;
         }
 
+        gDPPipeSync(renderState->dl++);
         menuSetRenderColor(renderState, savefileList->indexOffset + i == savefileList->selectedSave, &gSelectionOrange, &gColorWhite);
 
         renderStateInlineBranch(renderState, slot->testChamberText);
@@ -274,27 +276,6 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
 
     gDPPipeSync(renderState->dl++);
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT);
-}
-
-u16 gScreenGrabBuffer[SAVE_SLOT_IMAGE_W * SAVE_SLOT_IMAGE_H];
-
-#define IMAGE_SCALE_FACTOR      (int)((SCREEN_WD << 16) / SAVE_SLOT_IMAGE_W)
-#define SCALE_TO_SOURCE(value)  ((IMAGE_SCALE_FACTOR * (value)) >> 16)
-
-void savefileGrabScreenshot() {
-    u16* cfb = osViGetCurrentFramebuffer();
-    u16* dst = gScreenGrabBuffer;
-
-    for (int y = 0; y < SAVE_SLOT_IMAGE_H; ++y) {
-        for (int x = 0; x < SAVE_SLOT_IMAGE_W; ++x) {
-            int srcX = SCALE_TO_SOURCE(x);
-            int srcY = SCALE_TO_SOURCE(y);
-
-            *dst = cfb[srcX + srcY * SCREEN_WD];
-
-            ++dst;
-        }
-    }
 }
 
 int savefileGetSlot(struct SavefileListMenu* savefileList) {

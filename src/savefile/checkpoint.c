@@ -5,9 +5,10 @@
 #include "../levels/levels.h"
 #include "./scene_serialize.h"
 #include "serializer.h"
+#include "./savefile.h"
 
 char gHasCheckpoint = 0;
-char gCheckpoint[MAX_CHECKPOINT_SIZE];
+char __attribute__((aligned(8))) gCheckpoint[MAX_CHECKPOINT_SIZE];
 
 void ckeckpointSerialize(struct Serializer* serializer, SerializeAction action, void* data) {
     struct Scene* scene = data;
@@ -48,8 +49,10 @@ int checkpointExists() {
 }
 
 void checkpointSave(struct Scene* scene) {
+    savefileGrabScreenshot();
     gHasCheckpoint = checkpointSaveInto(scene, gCheckpoint);
-    gHasCheckpoint = 1;
+    // slot 0 is the autosave slot
+    savefileSaveGame(gCheckpoint, gScreenGrabBuffer, gCurrentLevelIndex, gCurrentTestSubject, 0);
 }
 
 void checkpointLoadLast(struct Scene* scene) {

@@ -33,6 +33,7 @@ void cutsceneRunnerCancel(struct CutsceneRunner* runner);
 
 void cutsceneRunnerReset() {
     gRunningCutscenes = NULL;
+    gTriggeredCutscenes = 0;
 
     for (int i = 0; i < MAX_QUEUE_LENGTH; ++i) {
         gCutsceneSoundNodes[i].next = (i + 1) < MAX_QUEUE_LENGTH ? &gCutsceneSoundNodes[i + 1] : NULL;
@@ -191,7 +192,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 &gZeroVec,
                 gCurrentLevel->locations[step->teleportPlayer.toLocation].roomIndex
             );
-            checkpointSave(&gScene);
+            sceneQueueCheckpoint(&gScene);
             break;
         case CutsceneStepTypeLoadLevel:
         {
@@ -249,7 +250,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             );
             break;
         case CutsceneStepSaveCheckpoint:
-            checkpointSave(&gScene);
+            sceneQueueCheckpoint(&gScene);
             break;
         case CutsceneStepKillPlayer:
             playerKill(&gScene.player, step->killPlayer.isWater);

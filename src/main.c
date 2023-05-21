@@ -264,6 +264,10 @@ static void gameProc(void* arg) {
             case (OS_SC_DONE_MSG):
                 --pendingGFX;
                 portalSurfaceCheckCleanupQueue();
+
+                if (gScene.checkpointState == SceneCheckpointStatePendingRender) {
+                    gScene.checkpointState = SceneCheckpointStateReady;
+                }
                 break;
             case (OS_SC_PRE_NMI_MSG):
                 pendingGFX += 2;
