@@ -428,5 +428,4 @@ clean:
 
 fix:
 	wine tools/romfix64.exe build/portal.z64 
-
 .SECONDARY:

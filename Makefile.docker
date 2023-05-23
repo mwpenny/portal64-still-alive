@@ -1,0 +1,12 @@
+all:
+	docker run  -v $$PWD:/usr/src/app -it portal64 make
+
+build:
+	docker build -t portal64 .
+
+bash:
+	docker run  -v $$PWD:/usr/src/app -it portal64 bash
+
+clean:
+	sudo rm -rf build
+
