@@ -131,8 +131,8 @@ std::unique_ptr<DataChunk> buildDataChunk(lua_State* L) {
     }
 
     if (type == LUA_TUSERDATA) {
-        if (luaIsLazyVector3DArray(L, -1)) {
-            struct aiVector3DArray* array = (struct aiVector3DArray*)lua_touserdata(L, -1);
+        if (luaIsLazyVector3DArray<aiVector3D>(L, -1)) {
+            struct LazyVectorWithLength<aiVector3D>* array = (struct LazyVectorWithLength<aiVector3D>*)lua_touserdata(L, -1);
 
             std::unique_ptr<StructureDataChunk> result(new StructureDataChunk());
 

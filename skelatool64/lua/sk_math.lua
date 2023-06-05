@@ -3,6 +3,7 @@
 local Vector3 = {}
 local Box3 = {}
 local Quaternion = {}
+local Color4 = {}
 
 --- creates a new 3d vector
 --- @function vector3
@@ -416,6 +417,25 @@ function Quaternion.slerp(a, b, t)
     )
 end
 
+--- creates a new 4d color
+--- @function color
+--- @tparam number r
+--- @tparam number g
+--- @tparam number b
+--- @tparam number a
+--- @treturn Color4
+local function color4(r, g, b, a) 
+    return setmetatable({ r = r or 1, g = g or 1, b = b or 1, a = a or 1 }, Color4)
+end
+
+--- determines if the input is a Vector3
+--- @function isColor4
+--- @tparam any obj
+--- @treturn boolean
+local function isColor4(obj)
+    return type(obj) == 'table' and type(obj.r) == 'number' and type(obj.g) == 'number' and type(obj.b) == 'number' and type(obj.a) == 'number'
+end
+
 return {
     vector3 = vector3,
     Vector3 = Vector3,
@@ -426,4 +446,6 @@ return {
     quaternion = quaternion,
     axis_angle = axis_angle,
     isQuaternion = isQuaternion,
+    color4 = color4,
+    isColor4 = isColor4,
 }

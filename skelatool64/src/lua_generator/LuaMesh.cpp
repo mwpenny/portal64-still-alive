@@ -13,8 +13,9 @@
 #include "./LuaTransform.h"
 #include "./LuaUtils.h"
 
+template <typename T>
 int luaGetVector3ArrayElement(lua_State* L) {
-    struct aiVector3DArray* array = (struct aiVector3DArray*)luaL_checkudata(L, 1, "aiVector3DArray");
+    struct LazyVectorWithLength<T>* array = (struct LazyVectorWithLength<T>*)luaL_checkudata(L, 1, luaGetVectorName<T>().c_str());
     int index = luaL_checkinteger(L, 2);
 
     if (index <= 0 || index > array->length) {
@@ -27,13 +28,14 @@ int luaGetVector3ArrayElement(lua_State* L) {
     return 1;
 }
 
+template <typename T>
 int luaSetVector3ArrayElement(lua_State* L) {
     lua_settop(L, 3);
     
-    aiVector3D value;
+    T value;
     fromLua(L, value);
 
-    struct aiVector3DArray* array = (struct aiVector3DArray*)luaL_checkudata(L, 1, "aiVector3DArray");
+    struct LazyVectorWithLength<T>* array = (struct LazyVectorWithLength<T>*)luaL_checkudata(L, 1, luaGetVectorName<T>().c_str());
     int index = luaL_checkinteger(L, 2);
 
     if (index <= 0 || index > array->length) {
@@ -45,14 +47,16 @@ int luaSetVector3ArrayElement(lua_State* L) {
     return 0;
 }
 
+template <typename T>
 int luaGetVector3ArrayLength(lua_State* L) {
-    struct aiVector3DArray* array = (struct aiVector3DArray*)luaL_checkudata(L, 1, "aiVector3DArray");
+    struct LazyVectorWithLength<T>* array = (struct LazyVectorWithLength<T>*)luaL_checkudata(L, 1, luaGetVectorName<T>().c_str());
     lua_pushinteger(L, array->length);
     return 1;
 }
 
+template <typename T>
 int luaVector3ArrayNext(lua_State* L) {
-    struct aiVector3DArray* array = (struct aiVector3DArray*)luaL_checkudata(L, 1, "aiVector3DArray");
+    struct LazyVectorWithLength<T>* array = (struct LazyVectorWithLength<T>*)luaL_checkudata(L, 1, luaGetVectorName<T>().c_str());
 
     if (lua_isnil(L, 2)) {
         if (array->length) {
@@ -82,39 +86,37 @@ int luaVector3ArrayNext(lua_State* L) {
     return 1;
 }
 
+template <typename T>
 int luaVector3ArrayPairs(lua_State* L) {
-    lua_pushcfunction(L, luaVector3ArrayNext);
+    lua_pushcfunction(L, luaVector3ArrayNext<T>);
     lua_pushnil(L);
     lua_copy(L, 1, -1);
     lua_pushnil(L);
     return 3;
 }
 
-void toLuaLazyArray(lua_State* L, aiVector3D* vertices, unsigned count) {
-    struct aiVector3DArray* result = (struct aiVector3DArray*)lua_newuserdata(L, sizeof(struct aiVector3DArray));
+template <typename T>
+void toLuaLazyArray(lua_State* L, T* vertices, unsigned count) {
+    struct LazyVectorWithLength<T>* result = (struct LazyVectorWithLength<T>*)lua_newuserdata(L, sizeof(struct LazyVectorWithLength<T>));
 
     result->vertices = vertices;
     result->length = count;
 
-    if(luaL_newmetatable(L, "aiVector3DArray")) {
-        lua_pushcfunction(L, luaGetVector3ArrayElement);
+    if(luaL_newmetatable(L, luaGetVectorName<T>().c_str())) {
+        lua_pushcfunction(L, luaGetVector3ArrayElement<T>);
         lua_setfield(L, -2, "__index");
 
-        lua_pushcfunction(L, luaSetVector3ArrayElement);
+        lua_pushcfunction(L, luaSetVector3ArrayElement<T>);
         lua_setfield(L, -2, "__newindex");
 
-        lua_pushcfunction(L, luaGetVector3ArrayLength);
+        lua_pushcfunction(L, luaGetVector3ArrayLength<T>);
         lua_setfield(L, -2, "__len");
 
-        lua_pushcfunction(L, luaVector3ArrayPairs);
+        lua_pushcfunction(L, luaVector3ArrayPairs<T>);
         lua_setfield(L, -2, "__pairs");
     }
 
     lua_setmetatable(L, -2);
-}
-
-bool luaIsLazyVector3DArray(lua_State* L, int index) {
-    return luaL_testudata(L, index, "aiVector3DArray");
 }
 
 /***
@@ -208,14 +210,21 @@ void meshToLua(lua_State* L, std::shared_ptr<ExtendedMesh> mesh) {
     lua_pushcfunction(L, luaTransformMesh);
     lua_setfield(L, -2, "transform");
 
-    toLuaLazyArray(L, mesh->mMesh->mVertices, mesh->mMesh->mNumVertices);
+    toLuaLazyArray<aiVector3D>(L, mesh->mMesh->mVertices, mesh->mMesh->mNumVertices);
     lua_setfield(L, -2, "vertices");
 
-    toLuaLazyArray(L, mesh->mMesh->mNormals, mesh->mMesh->mNumVertices);
+    toLuaLazyArray<aiVector3D>(L, mesh->mMesh->mNormals, mesh->mMesh->mNumVertices);
     lua_setfield(L, -2, "normals");
 
     toLua(L, mesh->mMesh->mFaces, mesh->mMesh->mNumFaces);
     lua_setfield(L, -2, "faces");
+
+    if (mesh->mMesh->mColors[0]) {
+        toLuaLazyArray<aiColor4D>(L, mesh->mMesh->mColors[0], mesh->mMesh->mNumVertices);
+    } else {
+        lua_pushnil(L);
+    }
+    lua_setfield(L, -2, "colors");
 
     if (mesh->mMesh->mMaterialIndex >= 0 && mesh->mMesh->mMaterialIndex < gLuaCurrentScene->mNumMaterials) {
         auto material = gLuaCurrentSettings->mMaterials.find(gLuaCurrentScene->mMaterials[mesh->mMesh->mMaterialIndex]->GetName().C_Str());
