@@ -113,7 +113,8 @@ void generateMeshIntoDLWithMaterials(const aiScene* scene, CFileDefinition& file
                 Material::GetVertexType(chunk->mMaterial), 
                 Material::TextureWidth(chunk->mMaterial),
                 Material::TextureHeight(chunk->mMaterial),
-                modelSuffix
+                modelSuffix,
+                chunk->mMaterial->mDefaultVertexColor
             );
             generateGeometry(*chunk, rcpState, vertexBuffer, displayList, settings.mHasTri2);
         } else if (chunk->mAttachedDLIndex != -1) {

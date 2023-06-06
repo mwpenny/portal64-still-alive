@@ -33,6 +33,7 @@ public:
     NormalSource mNormalSource;
     bool mExcludeFromOutut;
     int mSortOrder;
+    PixelRGBAu8 mDefaultVertexColor;
 
     void Write(CFileDefinition& fileDef, const MaterialState& from, StructureDataChunk& output, bool targetCIBuffer);
 

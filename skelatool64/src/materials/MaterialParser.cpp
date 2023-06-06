@@ -799,6 +799,10 @@ std::shared_ptr<Material> parseMaterial(const std::string& name, const YAML::Nod
     
     material->mSortOrder = parseOptionalInteger(node["sortOrder"], output, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), 0);
 
+    if (!parseMaterialColor(node["defaultVertexColor"], material->mDefaultVertexColor, output)) {
+        material->mDefaultVertexColor = PixelRGBAu8(255, 255, 255, 255);
+    }
+
     return material;
 
 }

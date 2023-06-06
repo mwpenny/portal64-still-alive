@@ -11,6 +11,7 @@
 #include "./ErrorResult.h"
 #include "./ExtendedMesh.h"
 #include "./definitions/FileDefinition.h"
+#include "./materials/TextureDefinition.h"
 
 class VertexBufferDefinition {
 public:
@@ -22,7 +23,7 @@ public:
     int mTextureWidth;
     int mTextureHeight;
 
-    ErrorResult Generate(float fixedPointScale, float modelScale, aiQuaternion rotate, std::unique_ptr<FileDefinition>& output, const std::string& fileSuffix);
+    ErrorResult Generate(float fixedPointScale, float modelScale, aiQuaternion rotate, std::unique_ptr<FileDefinition>& output, const std::string& fileSuffix, const PixelRGBAu8& defaultVertexColor);
 private:
 };
 
@@ -36,7 +37,7 @@ public:
 
     void AddHeader(const std::string& name);
 
-    std::string GetVertexBuffer(std::shared_ptr<ExtendedMesh> mesh, VertexType vertexType, int textureWidth, int textureHeight, const std::string& modelSuffix);
+    std::string GetVertexBuffer(std::shared_ptr<ExtendedMesh> mesh, VertexType vertexType, int textureWidth, int textureHeight, const std::string& modelSuffix, const PixelRGBAu8& defaultVertexColor);
     std::string GetCullingBuffer(const std::string& name, const aiVector3D& min, const aiVector3D& max, const std::string& modelSuffix);
 
     std::string GetUniqueName(std::string requestedName);

@@ -51,7 +51,7 @@ unsigned convertByteRange(float value) {
     }
 }
 
- ErrorResult VertexBufferDefinition::Generate(float fixedPointScale, float modelScale, aiQuaternion rotate, std::unique_ptr<FileDefinition>& output, const std::string& fileSuffix) {
+ ErrorResult VertexBufferDefinition::Generate(float fixedPointScale, float modelScale, aiQuaternion rotate, std::unique_ptr<FileDefinition>& output, const std::string& fileSuffix, const PixelRGBAu8& defaultVertexColor) {
     std::unique_ptr<StructureDataChunk> dataChunk(new StructureDataChunk());
 
     // aiQuaternion rotateInverse = rotate;
@@ -182,10 +182,10 @@ unsigned convertByteRange(float value) {
                 vertexNormal->AddPrimitive(convertByteRange(color.b));
                 vertexNormal->AddPrimitive(convertByteRange(color.a));
             } else {
-                vertexNormal->AddPrimitive(0);
-                vertexNormal->AddPrimitive(0);
-                vertexNormal->AddPrimitive(0);
-                vertexNormal->AddPrimitive(255);
+                vertexNormal->AddPrimitive((int)defaultVertexColor.r);
+                vertexNormal->AddPrimitive((int)defaultVertexColor.g);
+                vertexNormal->AddPrimitive((int)defaultVertexColor.b);
+                vertexNormal->AddPrimitive((int)defaultVertexColor.a);
             }
             break;
         }
@@ -232,7 +232,7 @@ void CFileDefinition::AddHeader(const std::string& name) {
     mHeaders.insert(name);
 }
 
-std::string CFileDefinition::GetVertexBuffer(std::shared_ptr<ExtendedMesh> mesh, VertexType vertexType, int textureWidth, int textureHeight, const std::string& modelSuffix) {
+std::string CFileDefinition::GetVertexBuffer(std::shared_ptr<ExtendedMesh> mesh, VertexType vertexType, int textureWidth, int textureHeight, const std::string& modelSuffix, const PixelRGBAu8& defaultVertexColor) {
     for (auto existing = mVertexBuffers.begin(); existing != mVertexBuffers.end(); ++existing) {
         if (existing->second.mTargetMesh == mesh && existing->second.mVertexType == vertexType) {
             return existing->first;
@@ -284,7 +284,7 @@ std::string CFileDefinition::GetVertexBuffer(std::shared_ptr<ExtendedMesh> mesh,
 
     std::unique_ptr<FileDefinition> vtxDef;
 
-    ErrorResult result = mVertexBuffers.find(name)->second.Generate(mFixedPointScale, mModelScale, mModelRotate, vtxDef, modelSuffix);
+    ErrorResult result = mVertexBuffers.find(name)->second.Generate(mFixedPointScale, mModelScale, mModelRotate, vtxDef, modelSuffix, defaultVertexColor);
 
     if (result.HasError()) {
         std::cerr << "Error generating vertex buffer " << name << " error: " << result.GetMessage() << std::endl;
@@ -311,7 +311,7 @@ std::string CFileDefinition::GetCullingBuffer(const std::string& name, const aiV
     mesh->mVertices[7] = aiVector3D(max.x, max.y, max.z);
 
     BoneHierarchy boneHierarchy;
-    return GetVertexBuffer(std::shared_ptr<ExtendedMesh>(new ExtendedMesh(mesh, boneHierarchy)), VertexType::PosUVNormal, 0, 0, modelSuffix);
+    return GetVertexBuffer(std::shared_ptr<ExtendedMesh>(new ExtendedMesh(mesh, boneHierarchy)), VertexType::PosUVNormal, 0, 0, modelSuffix, PixelRGBAu8());
 }
 
 

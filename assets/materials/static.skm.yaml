@@ -21,6 +21,13 @@ materials:
       tileSizeS: 1
       tileSizeT: 2
 
+      staticLit: true
+
+    defaultVertexColor:
+      r: 255
+      g: 255
+      b: 255
+
   concrete/observationwall_001a:
     gDPSetTile: 
       filename: ../../portal_pak_modified/materials/concrete/observationwall_001a.png

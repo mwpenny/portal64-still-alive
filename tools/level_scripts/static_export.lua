@@ -5,6 +5,7 @@ local sk_mesh = require('sk_mesh')
 local sk_input = require('sk_input')
 local room_export = require('tools.level_scripts.room_export')
 local animation = require('tools.level_scripts.animation')
+local static_lighting = require('tools.level_scripts.static_lighting');
 
 sk_definition_writer.add_header('"../build/assets/materials/static.h"')
 sk_definition_writer.add_header('"levels/level_definition.h"')
@@ -28,6 +29,12 @@ local function proccessStaticNodes(nodes)
             
                 original_bb.min = original_bb.min - parent_pos
                 original_bb.max = original_bb.max - parent_pos
+            end
+
+            if chunkV.material.properties.staticLit == "true" then
+                for index, pos in pairs(chunkV.mesh.vertices) do
+                    -- chunkV.mesh.colors[index] = static_lighting.light_vertex(pos, chunkV.mesh.normals[index])
+                end
             end
 
             local gfxName = sk_mesh.generate_mesh({chunkV}, "_geo", {defaultMaterial = chunkV.material})

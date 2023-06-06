@@ -141,6 +141,13 @@ void toLua(lua_State* L, Material* material) {
     toLua(L, MaterialGenerator::MaterialIndexMacroName(material->mName));
     lua_setfield(L, -2, "macro_name");
 
+    lua_createtable(L, 0, material->mProperties.size());
+    for (auto it : material->mProperties) {
+        toLua(L, it.second);
+        lua_setfield(L, -2, it.first.c_str());
+    }
+    lua_setfield(L, -2, "properties");
+
     lua_pushlightuserdata(L, material);
     lua_setfield(L, -2, "ptr");
 }
@@ -418,7 +425,8 @@ int luaGetMeshVertexBuffer(lua_State* L) {
         Material::GetVertexType(material), 
         Material::TextureWidth(material), 
         Material::TextureHeight(material), 
-        suffix
+        suffix,
+        material->mDefaultVertexColor
     );
 
     luaLoadModuleFunction(L, "sk_definition_writer", "raw");

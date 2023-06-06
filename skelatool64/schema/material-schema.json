@@ -704,6 +704,8 @@
                             "type": "number"
                         }, {
                             "type": "string"
+                        }, {
+                            "type": "boolean"
                         }]
                     }
                 },
@@ -715,6 +717,9 @@
                 },
                 "sortOrder": {
                     "type": "integer"
+                },
+                "defaultVertexColor": {
+                    "$ref": "#/definitions/color"
                 }
             }
         }
