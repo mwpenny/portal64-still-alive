@@ -325,6 +325,13 @@ function Box3.lerp(box, lerp)
     return Vector3.lerp(box.min, box.max, lerp)
 end
 
+--- Finds a lerp value, x, such that box:lerp(x) == pos
+--- @function pos
+--- @treturn Vector3
+function Box3.unlerp(box, pos)
+    return (pos - box.min) / (box.max - box.min)
+end
+
 
 --- Linearly interpolates between the min and max of the box
 --- @function union
@@ -434,6 +441,102 @@ end
 --- @treturn boolean
 local function isColor4(obj)
     return type(obj) == 'table' and type(obj.r) == 'number' and type(obj.g) == 'number' and type(obj.b) == 'number' and type(obj.a) == 'number'
+end
+
+--- @type Color4
+--- @tfield number r
+--- @tfield number g
+--- @tfield number b
+--- @tfield number a
+Color4.__index = Color4;
+
+
+--- @function __eq
+--- @tparam number|Color4 b
+--- @treturn Color4
+function Color4.__eq(a, b)
+    if (type(a) == 'number') then
+        return a == b.r and a == b.g and a == b.b and a == b.a
+    end
+
+    if (type(b) == 'number') then
+        return a.r == b and a.g == b and a.b + b and a.a == b
+    end
+
+    if (not isColor4(b)) then
+        error('Color4.__eq expected another vector as second operand', 2)
+    end
+
+    return a.r == b.r and a.g == b.g and a.b == b.b and a.a == a.a
+end
+
+--- @function __add
+--- @tparam number|Color4 b
+--- @treturn Color4
+function Color4.__add(a, b)
+    if (type(a) == 'number') then
+        return color4(a + b.r, a + b.g, a + b.b, a + b.a)
+    end
+
+    if (type(b) == 'number') then
+        return color4(a.r + b, a.g + b, a.b + b, a.a + b)
+    end
+
+    if (not isColor4(b)) then
+        error('Color4.__add expected another vector as second operand got ' .. type(b), 2)
+    end
+
+    return color4(a.r + b.r, a.g + b.g, a.b + b.b, a.a + b.a)
+end
+
+--- @function __sub
+--- @tparam number|Color4 b
+--- @treturn Color4
+function Color4.__sub(a, b)
+    if (type(a) == 'number') then
+        return color4(a - b.r, a - b.g, a - b.b, a - b.a)
+    end
+
+    if (type(b) == 'number') then
+        return color4(a.r - b, a.g - b, a.b - b, a.a - b)
+    end
+
+    if (not isColor4(b)) then
+        error('Color4.__sub expected another vector as second operand', 2)
+    end
+
+    if (a == nil) then
+        print(debug.traceback())
+    end
+
+    return color4(a.r - b.r, a.g - b.g, a.b - b.b, a.a - b.a)
+end
+
+--- @function __mul
+--- @tparam number|Color4 b
+--- @treturn Color4
+function Color4.__mul(a, b)
+    if (type(a) == 'number') then
+        return color4(a * b.r, a * b.g, a * b.b, a * b.a)
+    end
+
+    if (type(b) == 'number') then
+        return color4(a.r * b, a.g * b, a.b * b, a.a * b)
+    end
+
+    if (not isColor4(b)) then
+        error('Color4.__mul expected another vector or number as second operand got ' .. type(b), 2)
+    end
+
+    return color4(a.r * b.r, a.g * b.g, a.b * b.b, a.a * b.a)
+end
+
+--- Linearly interpolates between two points
+--- @function lerp
+--- @tparam Color4 b
+--- @treturn Color4
+function Color4.lerp(a, b, lerp)
+    return a * (1 - lerp) + b * lerp
 end
 
 return {

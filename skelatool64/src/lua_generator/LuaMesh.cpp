@@ -219,10 +219,17 @@ void meshToLua(lua_State* L, std::shared_ptr<ExtendedMesh> mesh) {
     toLua(L, mesh->mMesh->mFaces, mesh->mMesh->mNumFaces);
     lua_setfield(L, -2, "faces");
 
-    if (mesh->mMesh->mColors[0]) {
-        toLuaLazyArray<aiColor4D>(L, mesh->mMesh->mColors[0], mesh->mMesh->mNumVertices);
-    } else {
-        lua_pushnil(L);
+    lua_createtable(L, AI_MAX_NUMBER_OF_COLOR_SETS, 0);
+    for (int i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS; ++i) {
+        if (!mesh->mMesh->mColors[i]) {
+            mesh->mMesh->mColors[i] = new aiColor4D[mesh->mMesh->mNumVertices];
+
+            for (unsigned vertexIndex = 0; vertexIndex < mesh->mMesh->mNumVertices; ++vertexIndex) {
+                mesh->mMesh->mColors[i][vertexIndex] = aiColor4D(1.0, 1.0, 1.0, 1.0);
+            }
+        }
+        toLuaLazyArray<aiColor4D>(L, mesh->mMesh->mColors[i], mesh->mMesh->mNumVertices);
+        lua_seti(L, -2, i + 1);
     }
     lua_setfield(L, -2, "colors");
 
