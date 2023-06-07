@@ -33,7 +33,7 @@ local function proccessStaticNodes(nodes)
 
             if chunkV.material.properties.staticLit == "true" then
                 for index, pos in pairs(chunkV.mesh.vertices) do
-                    -- chunkV.mesh.colors[index] = static_lighting.light_vertex(pos, chunkV.mesh.normals[index])
+                    chunkV.mesh.colors[1][index] = static_lighting.light_vertex(pos, chunkV.mesh.normals[index])
                 end
             end
 

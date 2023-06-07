@@ -46,7 +46,7 @@ local function build_ambient_block(ambient_mesh)
 end
 
 local function evaluate_ambient_block(block, pos, normal)
-    local lerp_values = block.bb:unlerp(pos)
+    local lerp_values = block.bb:unlerp(pos):min(sk_math.vector3(1, 1, 1)):max(sk_math.vector3(0, 0, 0))
 
     local x0 = block.colors[1]:lerp(block.colors[2], lerp_values.x)
     local x1 = block.colors[3]:lerp(block.colors[4], lerp_values.x)
@@ -96,6 +96,10 @@ local function find_nearest_ambient_boxes(pos, max_count)
                 table.remove(distances)
             end
         end
+    end
+
+    if #distances == 1 then
+        return boxes, {1}
     end
 
     local weights = {}

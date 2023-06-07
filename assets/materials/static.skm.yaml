@@ -16,6 +16,16 @@ materials:
       twoTone: true
     gSPGeometryMode:
       clear: [G_LIGHTING]
+    
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode: 
+      - color: [PRIMITIVE, "ENVIRONMENT", TEXEL0, "ENVIRONMENT"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["COMBINED", "0", "SHADE", "0"]
+        alpha: ["0", "0", "0", "1"]
+    gDPSetRenderMode: 
+      - G_RM_PASS
+      - G_RM_ZB_OPA_SURF
 
     properties:
       tileSizeS: 1

@@ -531,6 +531,10 @@ function Color4.__mul(a, b)
     return color4(a.r * b.r, a.g * b.g, a.b * b.b, a.a * b.a)
 end
 
+function Color4.__tostring(v)
+    return 'color4(' .. v.r .. ', ' .. v.g .. ', ' .. v.b .. ', ' .. v.a .. ')'
+end
+
 --- Linearly interpolates between two points
 --- @function lerp
 --- @tparam Color4 b
