@@ -1,6 +1,7 @@
 import bpy
 import sys
 import operator
+import math
 
 print("Blender export scene in FBX Format in file "+sys.argv[-1])
 
@@ -22,6 +23,9 @@ def get_or_make_color_layer(mesh):
 def vector_add(a, b):
     return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
 
+def vector_sub(a, b):
+    return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
+
 def vector_min(a, b):
     return [min(a[0], b[0]), min(a[1], b[1]), min(a[2], b[2])]
 
@@ -36,7 +40,42 @@ def vector_mul(a, b):
         return [x * b for x in a]
 
     return [a[0] * b[0], a[1] * b[1], a[2] * b[2]]
+
+def vector_div(a, b):
+    if isinstance(a, float):
+        return [a / x for x in b]
     
+    if isinstance(b, float):
+        return [x / b for x in a]
+
+    return [a[0] / b[0], a[1] / b[1], a[2] / b[2]]
+
+def vector_dot(a, b):
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
+def vector_lerp(a, b, t):
+    if isinstance(t, float):
+        t_inv = 1 - t
+    else:
+        t_inv = vector_sub([1, 1, 1], t)
+
+    t_inv = 1 - t
+    return vector_add(vector_mul(a, t_inv), vector_mul(b, t))
+
+def vector_unlerp(a, b, pos):
+    return vector_div(vector_sub(pos, a), vector_sub(b, a))
+    
+
+def color_lerp(a, b, t):
+    t_inv = 1 - t
+
+    return [
+        a[0] * t_inv + b[0] * t,
+        a[1] * t_inv + b[1] * t,
+        a[2] * t_inv + b[2] * t,
+        a[3] * t_inv + b[3] * t
+    ]
+
 
 def calc_midpoint(vertices):
     result = [0, 0, 0]
@@ -62,6 +101,10 @@ def world_space_verts(obj):
 
     return vertices, normals
 
+class BoundingBox:
+    def __init__(self, min, max):
+        self.min = min
+        self.max = max
 
 class AmbientBlock:
     def __init__(self, obj):
@@ -78,9 +121,9 @@ class AmbientBlock:
         bb_min = vertices[0]
         bb_max = vertices[0]
 
-        for index in range(len(vertices)):
+        for loop in obj.data.loops:
             corner_index = 0
-            vertex = vertices[index]
+            vertex = vertices[loop.vertex_index]
 
             bb_min = vector_min(bb_min, vertex)
             bb_max = vector_max(bb_max, vertex)
@@ -94,10 +137,32 @@ class AmbientBlock:
             if vertex[2] > midpoint[2]:
                 corner_index = corner_index + 4
 
-            corner_colors[corner_index] = colors.data[index].color
-            
+            corner_colors[corner_index] = colors.data[loop.index].color
+
         self.corner_colors = corner_colors
-        self.bb = [bb_min, bb_max]
+        self.bb = BoundingBox(bb_min, bb_max)
+
+    def determine_distance(self, pos):
+        closest_point = vector_max(self.bb.min, vector_min(self.bb.max, pos))
+        diff = vector_sub(closest_point, pos)
+        distance_sqrd = vector_dot(diff, diff)
+        return math.sqrt(distance_sqrd)
+
+    def determine_color(self, pos):
+        lerp_values = vector_unlerp(self.bb.min, self.bb.max, pos)
+
+        lerp_values = vector_min(lerp_values, [1, 1, 1])
+        lerp_values = vector_max(lerp_values, [0, 0, 0])
+
+        x0 = color_lerp(self.corner_colors[0], self.corner_colors[1], lerp_values[0])
+        x1 = color_lerp(self.corner_colors[2], self.corner_colors[3], lerp_values[0])
+        x2 = color_lerp(self.corner_colors[4], self.corner_colors[5], lerp_values[0])
+        x3 = color_lerp(self.corner_colors[6], self.corner_colors[7], lerp_values[0])
+
+        y0 = color_lerp(x0, x1, lerp_values[1])
+        y1 = color_lerp(x2, x3, lerp_values[1])
+
+        return color_lerp(y0, y1, lerp_values[2])
 
     
 ambient_blocks = []
@@ -106,8 +171,59 @@ for obj in bpy.data.objects:
     if obj.name.startswith('@ambient '):
         ambient_blocks.append(AmbientBlock(obj))
 
+def min_indices(elements, count):
+    result = []
+    
+    for index in range(len(elements)):
+        insert_index = len(result)
+
+        curr_value = elements[index]
+
+        while insert_index > 0 and elements[insert_index - 1] < curr_value:
+            insert_index = insert_index - 1
+
+        if insert_index < count:
+            result.insert(insert_index, index)
+
+        if len(result) > count:
+            result.pop()
+
+    return result
+
+
+def determine_ambient_color(pos):
+    distances = [block.determine_distance(pos) for block in ambient_blocks]
+    two_closest = min_indices(distances, 2)
+
+    if len(two_closest) == 0:
+        return [1, 1, 1, 1]
+
+    if len(two_closest) == 1:
+        return ambient_blocks[two_closest[0]].determine_color(pos)
+
+    total_weight = distances[two_closest[0]] + distances[two_closest[1]]
+
+    if total_weight == 0:
+        return ambient_blocks[two_closest[0]].determine_color(pos)
+
+    return color_lerp(
+        ambient_blocks[two_closest[0]].determine_color(pos),
+        ambient_blocks[two_closest[1]].determine_color(pos),
+        distances[two_closest[0]] / total_weight
+    )
+
+def bake_object(obj):
+    color_layer = get_or_make_color_layer(obj.data)
+
+    vertices, normals = world_space_verts(obj)
+
+    for loop in obj.data.loops:
+        vertex_index = loop.vertex_index
+        color_layer.data[loop.index].color = determine_ambient_color(vertices[vertex_index])
+
+
 print("Found ambient_blocks count: " + str(len(ambient_blocks)))
 
 for obj in bpy.data.objects:
     if should_bake_object(obj):
-        get_or_make_color_layer(obj.data)
+        bake_object(obj)
