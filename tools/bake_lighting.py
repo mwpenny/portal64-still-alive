@@ -2,6 +2,9 @@ import bpy
 import sys
 import operator
 import math
+import mathutils
+
+debug = False
 
 print("Blender export scene in FBX Format in file "+sys.argv[-1])
 
@@ -69,12 +72,11 @@ def vector_unlerp(a, b, pos):
 def color_lerp(a, b, t):
     t_inv = 1 - t
 
-    return [
+    return mathutils.Color([
         a[0] * t_inv + b[0] * t,
         a[1] * t_inv + b[1] * t,
-        a[2] * t_inv + b[2] * t,
-        a[3] * t_inv + b[3] * t
-    ]
+        a[2] * t_inv + b[2] * t
+    ])
 
 
 def calc_midpoint(vertices):
@@ -90,16 +92,31 @@ def world_space_verts(obj):
         return None
 
     matrix_world = obj.matrix_world
+    rotation = obj.matrix_world.to_3x3()
 
     vertices = []
     normals = []
 
     for vertex in obj.data.vertices:
         vertices.append(matrix_world @ vertex.co)
-        # todo transform normal correctly
-        normals.append(matrix_world @ vertex.normal)
+        normals.append(rotation @ vertex.normal)
 
     return vertices, normals
+
+def calculate_point_light(point_light, pos, normal):
+
+    light_pos = point_light.matrix_world @ mathutils.Vector([0, 0, 0])
+    offset = light_pos - pos
+    distance_sqrd = offset.length_squared
+
+    offset.normalize()
+
+    scalar = offset.dot(normal)
+
+    if scalar <= 0:
+        return mathutils.Color([0, 0, 0])
+
+    return point_light.data.color * scalar
 
 class BoundingBox:
     def __init__(self, min, max):
@@ -141,6 +158,7 @@ class AmbientBlock:
 
         self.corner_colors = corner_colors
         self.bb = BoundingBox(bb_min, bb_max)
+        self.point_lights = []
 
     def determine_distance(self, pos):
         closest_point = vector_max(self.bb.min, vector_min(self.bb.max, pos))
@@ -148,7 +166,7 @@ class AmbientBlock:
         distance_sqrd = vector_dot(diff, diff)
         return math.sqrt(distance_sqrd)
 
-    def determine_color(self, pos):
+    def determine_color(self, pos, normal):
         lerp_values = vector_unlerp(self.bb.min, self.bb.max, pos)
 
         lerp_values = vector_min(lerp_values, [1, 1, 1])
@@ -162,7 +180,15 @@ class AmbientBlock:
         y0 = color_lerp(x0, x1, lerp_values[1])
         y1 = color_lerp(x2, x3, lerp_values[1])
 
-        return color_lerp(y0, y1, lerp_values[2])
+        result = color_lerp(y0, y1, lerp_values[2])
+
+        result = mathutils.Color([0, 0, 0])
+
+        for point_light in self.point_lights:
+            light_contribution = calculate_point_light(point_light, pos, normal)
+            result = result + light_contribution
+
+        return result
 
     
 ambient_blocks = []
@@ -179,7 +205,7 @@ def min_indices(elements, count):
 
         curr_value = elements[index]
 
-        while insert_index > 0 and elements[insert_index - 1] < curr_value:
+        while insert_index > 0 and elements[result[insert_index - 1]] > curr_value:
             insert_index = insert_index - 1
 
         if insert_index < count:
@@ -191,15 +217,15 @@ def min_indices(elements, count):
     return result
 
 
-def determine_ambient_color(pos):
+def determine_vertex_color(pos, normal):
     distances = [block.determine_distance(pos) for block in ambient_blocks]
     two_closest = min_indices(distances, 2)
 
     if len(two_closest) == 0:
-        return [1, 1, 1, 1]
+        return mathutils.Color([1, 1, 1])
 
-    if len(two_closest) == 1:
-        return ambient_blocks[two_closest[0]].determine_color(pos)
+    if len(two_closest) == 1 or distances[two_closest[0]] < 0.0001:
+        return ambient_blocks[two_closest[0]].determine_color(pos, normal)
 
     total_weight = distances[two_closest[0]] + distances[two_closest[1]]
 
@@ -207,19 +233,55 @@ def determine_ambient_color(pos):
         return ambient_blocks[two_closest[0]].determine_color(pos)
 
     return color_lerp(
-        ambient_blocks[two_closest[0]].determine_color(pos),
-        ambient_blocks[two_closest[1]].determine_color(pos),
+        ambient_blocks[two_closest[0]].determine_color(pos, normal),
+        ambient_blocks[two_closest[1]].determine_color(pos, normal),
         distances[two_closest[0]] / total_weight
     )
 
+for point_light in bpy.data.objects:
+    if point_light.type != 'LIGHT' or not point_light.name.startswith('@point_light'):
+        continue
+
+    pos = point_light.matrix_world @ mathutils.Vector([0, 0, 0])
+
+    distances = [block.determine_distance(pos) for block in ambient_blocks]
+    block_index = min_indices(distances, 1)
+
+    if len(block_index) == 0:
+        continue
+
+    ambient_blocks[block_index[0]].point_lights.append(point_light)
+
+
 def bake_object(obj):
+    global debug
     color_layer = get_or_make_color_layer(obj.data)
 
     vertices, normals = world_space_verts(obj)
 
-    for loop in obj.data.loops:
-        vertex_index = loop.vertex_index
-        color_layer.data[loop.index].color = determine_ambient_color(vertices[vertex_index])
+    rotation = obj.matrix_world.to_3x3()
+
+    for polygon in obj.data.polygons:
+        for loop_index in polygon.loop_indices:
+            loop = obj.data.loops[loop_index]
+            vertex_index = loop.vertex_index
+            
+            if polygon.use_smooth:
+                normal = normals[vertex_index]
+            else:
+                normal = rotation @ polygon.normal
+
+            vertex_color = determine_vertex_color(
+                vertices[vertex_index],
+                normal
+            )
+
+            color_layer.data[loop.index].color = [
+                min(vertex_color[0], 1), 
+                min(vertex_color[1], 1), 
+                min(vertex_color[2], 1),
+                1
+            ]
 
 
 print("Found ambient_blocks count: " + str(len(ambient_blocks)))
