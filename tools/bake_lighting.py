@@ -116,6 +116,8 @@ def calculate_point_light(point_light, pos, normal):
     if scalar <= 0:
         return mathutils.Color([0, 0, 0])
 
+    scalar = point_light.data.energy * scalar / distance_sqrd
+
     return point_light.data.color * scalar
 
 class BoundingBox:
@@ -181,8 +183,6 @@ class AmbientBlock:
         y1 = color_lerp(x2, x3, lerp_values[1])
 
         result = color_lerp(y0, y1, lerp_values[2])
-
-        result = mathutils.Color([0, 0, 0])
 
         for point_light in self.point_lights:
             light_contribution = calculate_point_light(point_light, pos, normal)
@@ -283,9 +283,29 @@ def bake_object(obj):
                 1
             ]
 
+def bake_scene():
+    for obj in bpy.data.objects:
+        if should_bake_object(obj):
+            bake_object(obj)
 
-print("Found ambient_blocks count: " + str(len(ambient_blocks)))
 
-for obj in bpy.data.objects:
-    if should_bake_object(obj):
-        bake_object(obj)
+bake_scene()
+
+class VertexBake(bpy.types.Operator):
+    bl_idname = "wm.vertex_bake"
+    bl_label = "Vertex Bake Lighting"
+
+    def execute(self, context):
+        bake_scene()
+        self.report({'INFO'}, "Baked!")
+
+        return {'FINISHED'}
+
+def vertex_bake_func(self, context):
+    self.layout.operator(VertexBake.bl_idname, text="Vertex Bake Lighting")
+
+bpy.utils.register_class(VertexBake)
+bpy.types.VIEW3D_MT_view.append(vertex_bake_func)
+
+# test call the operator
+bpy.ops.wm.vertex_bake()
