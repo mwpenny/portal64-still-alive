@@ -190,12 +190,28 @@ class AmbientBlock:
 
         return result
 
-    
-ambient_blocks = []
+def build_ambient_blocks():
+    ambient_blocks = []
 
-for obj in bpy.data.objects:
-    if obj.name.startswith('@ambient '):
-        ambient_blocks.append(AmbientBlock(obj))
+    for obj in bpy.data.objects:
+        if obj.name.startswith('@ambient '):
+            ambient_blocks.append(AmbientBlock(obj))
+
+    for point_light in bpy.data.objects:
+        if point_light.type != 'LIGHT' or not point_light.name.startswith('@point_light'):
+            continue
+
+        pos = point_light.matrix_world @ mathutils.Vector([0, 0, 0])
+
+        distances = [block.determine_distance(pos) for block in ambient_blocks]
+        block_index = min_indices(distances, 1)
+
+        if len(block_index) == 0:
+            continue
+
+        ambient_blocks[block_index[0]].point_lights.append(point_light)
+
+    return ambient_blocks
 
 def min_indices(elements, count):
     result = []
@@ -217,7 +233,7 @@ def min_indices(elements, count):
     return result
 
 
-def determine_vertex_color(pos, normal):
+def determine_vertex_color(ambient_blocks, pos, normal):
     distances = [block.determine_distance(pos) for block in ambient_blocks]
     two_closest = min_indices(distances, 2)
 
@@ -238,22 +254,14 @@ def determine_vertex_color(pos, normal):
         distances[two_closest[0]] / total_weight
     )
 
-for point_light in bpy.data.objects:
-    if point_light.type != 'LIGHT' or not point_light.name.startswith('@point_light'):
-        continue
 
-    pos = point_light.matrix_world @ mathutils.Vector([0, 0, 0])
+def bake_object(obj, ambient_blocks):
+    if obj.data.users > 1:
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = obj
+        obj.select_set(True)
+        bpy.ops.object.make_single_user(obdata = True)
 
-    distances = [block.determine_distance(pos) for block in ambient_blocks]
-    block_index = min_indices(distances, 1)
-
-    if len(block_index) == 0:
-        continue
-
-    ambient_blocks[block_index[0]].point_lights.append(point_light)
-
-
-def bake_object(obj):
     global debug
     color_layer = get_or_make_color_layer(obj.data)
 
@@ -272,6 +280,7 @@ def bake_object(obj):
                 normal = rotation @ polygon.normal
 
             vertex_color = determine_vertex_color(
+                ambient_blocks,
                 vertices[vertex_index],
                 normal
             )
@@ -284,9 +293,13 @@ def bake_object(obj):
             ]
 
 def bake_scene():
+    bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+
+    ambient_blocks = build_ambient_blocks()
+
     for obj in bpy.data.objects:
         if should_bake_object(obj):
-            bake_object(obj)
+            bake_object(obj, ambient_blocks)
 
 
 bake_scene()

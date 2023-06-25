@@ -15,6 +15,7 @@ materials:
       siz: G_IM_SIZ_4b
       twoTone: true
     gSPGeometryMode:
+      set: [G_SHADE]
       clear: [G_LIGHTING]
     
     gDPSetCycleType: G_CYC_2CYCLE
@@ -33,21 +34,17 @@ materials:
 
       staticLit: true
 
-    defaultVertexColor:
-      r: 255
-      g: 255
-      b: 255
-
   concrete/observationwall_001a:
     gDPSetTile: 
       filename: ../../portal_pak_modified/materials/concrete/observationwall_001a.png
       siz: G_IM_SIZ_8b
       fmt: G_IM_FMT_I
 
-    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCombineMode: G_CC_MODULATERGB
     gDPSetCycleType: G_CYC_1CYCLE
 
     gSPGeometryMode:
+      set: [G_SHADE]
       clear: [G_LIGHTING]
 
     properties:
@@ -59,8 +56,12 @@ materials:
       filename: ../../portal_pak_modified/materials/metal/metalwall048b.png
       siz: G_IM_SIZ_16b
     
-    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCombineMode: G_CC_MODULATERGB
     gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
 
     properties:
       tileSizeS: 0.5
@@ -99,6 +100,10 @@ materials:
     gDPSetCombineMode: G_CC_DECALRGB
     gDPSetCycleType: G_CYC_1CYCLE
 
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
     properties:
       tileSizeS: 0.5
       tileSizeT: 0.5
@@ -130,7 +135,7 @@ materials:
       filename: ../../portal_pak_modified/materials/metal/metalgrate018.png
       siz: G_IM_SIZ_16b
     
-    gDPSetCombineMode: G_CC_DECALRGBA
+    gDPSetCombineMode: G_CC_MODULATERGBA
     gDPSetCycleType: G_CYC_1CYCLE
     gDPSetAlphaCompare: G_AC_THRESHOLD
     gDPSetRenderMode: G_RM_AA_ZB_TEX_EDGE
@@ -139,6 +144,10 @@ materials:
       g: 255
       b: 255
       a: 128
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
 
     properties:
       tileSizeS: 0.125
@@ -215,8 +224,12 @@ materials:
       filename: ../../portal_pak_modified/materials/signage/hazard_orange_03b.png
       siz: G_IM_SIZ_16b
     
-    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCombineMode: G_CC_MODULATERGB
     gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
 
     properties:
       tileSizeS: 0.5
@@ -228,8 +241,12 @@ materials:
       filename: ../../portal_pak_modified/materials/concrete/concrete_modular_ceiling001a.png
       siz: G_IM_SIZ_16b
 
-    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCombineMode: G_CC_MODULATERGB
     gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
 
     properties:
       tileSizeS: 0.5
@@ -240,8 +257,12 @@ materials:
       filename: ../../portal_pak_modified/materials/concrete/concrete_modular_floor001a.png
       siz: G_IM_SIZ_16b
 
-    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCombineMode: G_CC_MODULATERGB
     gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
 
     properties:
       tileSizeS: 0.5
@@ -379,7 +400,8 @@ materials:
       g: 230
       b: 230
     gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
     gDPSetCombineMode: 
       color: ["SHADE", "0", "PRIMITIVE", "0"]
 
@@ -575,9 +597,13 @@ materials:
       t:
         mirror: true
     
-    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCombineMode: G_CC_MODULATERGB
     gDPSetCycleType: G_CYC_1CYCLE
     gDPSetTextureFilter: G_TF_BILERP
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
 
   radio:
     gDPSetTile:
