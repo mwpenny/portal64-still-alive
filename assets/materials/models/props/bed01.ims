@@ -1,0 +1,11 @@
+\( 
+    +clone 
+    -alpha off 
+    -crop 209x205+574+1832 
+    -resize 32x32!
+    -write portal_pak_modified/materials/models/props/bed01_screen.png
+\)
+-composite 
+-alpha off
+-crop 261x774+1164+78
+-resize 16x64!

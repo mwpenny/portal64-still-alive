@@ -59,4 +59,6 @@ sk_definition_writer.add_definition("level", "struct LevelDefinition", "_geo", {
     ballLauncherCount = #entities.ball_launchers,
     ballCatchers = sk_definition_writer.reference_to(entities.ball_catchers, 1),
     ballCatcherCount = #entities.ball_catchers,
+    clocks = sk_definition_writer.reference_to(entities.clocks, 1),
+    clockCount = #entities.clocks,
 })

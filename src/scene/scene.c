@@ -213,6 +213,11 @@ void sceneInitNoPauseMenu(struct Scene* scene) {
         ballCatcherInit(&scene->ballCatchers[i], &gCurrentLevel->ballCatchers[i]);
     }
 
+    scene->clockCount = gCurrentLevel->clockCount;
+    scene->clocks = malloc(sizeof(struct Clock) * scene->clockCount);
+    for (int i = 0; i < scene->clockCount; ++i) {
+        clockInit(&scene->clocks[i], &gCurrentLevel->clocks[i]);
+    }
 
     scene->last_portal_indx_shot=-1;
     scene->looked_wall_portalable_0=0;

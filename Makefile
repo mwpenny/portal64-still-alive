@@ -169,6 +169,8 @@ build/src/scene/elevator.o: build/assets/models/props/round_elevator_collision.h
 #
 
 MODEL_LIST = assets/models/cube/cube.blend \
+	assets/models/signage/clock.blend \
+	assets/models/signage/clock_digits.blend \
 	assets/models/player/chell.blend \
 	assets/models/portal_gun/v_portalgun.blend \
 	assets/models/portal_gun/w_portalgun.blend \
@@ -228,6 +230,8 @@ build/src/scene/pedestal.o: $(MODEL_HEADERS)
 build/src/scene/render_plan.o: $(MODEL_HEADERS)
 
 build/src/scene/portal_render.o: $(MODEL_HEADERS)
+
+build/src/scene/clock.o: $(MODEL_HEADERS)
 
 build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/materials/static.h
 

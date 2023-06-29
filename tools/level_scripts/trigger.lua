@@ -348,9 +348,14 @@ local triggers = generate_triggers(cutscenes)
 sk_definition_writer.add_definition("triggers", "struct Trigger[]", "_geo", triggers)
 sk_definition_writer.add_definition("cutscenes", "struct Cutscene[]", "_geo", cutscene_data)
 
+local function find_cutscene_index(name)
+    return cutscene_index(cutscenes, name)
+end
+
 return {
     triggers = triggers,
     cutscene_data = cutscene_data,
     location_data = location_data,
     find_location_index = find_location_index,
+    find_cutscene_index = find_cutscene_index,
 }

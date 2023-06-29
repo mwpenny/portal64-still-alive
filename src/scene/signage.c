@@ -141,22 +141,22 @@ void signageRender(void* data, struct DynamicRenderDataList* renderList, struct 
     
     if (signOn){
         dynamicRenderListAddData(
-        renderList,
-        props_signage_model_gfx,
-        matrix,
-        DEFAULT_INDEX,
-        &signage->transform.position,
-        NULL
+            renderList,
+            props_signage_model_gfx,
+            matrix,
+            DEFAULT_INDEX,
+            &signage->transform.position,
+            NULL
         );
     }
     else{
         dynamicRenderListAddData(
-        renderList,
-        props_signage_off_model_gfx,
-        matrix,
-        DEFAULT_INDEX,
-        &signage->transform.position,
-        NULL
+            renderList,
+            props_signage_off_model_gfx,
+            matrix,
+            DEFAULT_INDEX,
+            &signage->transform.position,
+            NULL
         );
     }
 
