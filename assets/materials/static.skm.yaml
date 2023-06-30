@@ -843,7 +843,8 @@ materials:
   clock_digits:
     gDPSetTile:
       filename: ./signage/clock_digits.png
-      siz: G_IM_SIZ_16b
+      siz: G_IM_SIZ_4b
+      twoTone: true
 
     gDPSetCombineMode: G_CC_DECALRGBA
     gDPSetCycleType: G_CYC_1CYCLE

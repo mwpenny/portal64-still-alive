@@ -32,6 +32,7 @@ void cutsceneStart(struct Cutscene* cutscene);
 void cutsceneStop(struct Cutscene* cutscene);
 int cutsceneIsRunning(struct Cutscene* cutscene);
 void cutscenesUpdate();
+float cutsceneEstimateTimeLeft(struct Cutscene* cutscene);
 
 void cutsceneCheckTriggers(struct Vector3* playerPos);
 
