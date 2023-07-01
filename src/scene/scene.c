@@ -219,6 +219,12 @@ void sceneInitNoPauseMenu(struct Scene* scene) {
         clockInit(&scene->clocks[i], &gCurrentLevel->clocks[i]);
     }
 
+    scene->securityCameraCount = gCurrentLevel->securityCameraCount;
+    scene->securityCameras = malloc(sizeof(struct SecurityCamera) * scene->securityCameraCount);
+    for (int i = 0 ; i < scene->securityCameraCount; ++i) {
+        securityCameraInit(&scene->securityCameras[i], &gCurrentLevel->securityCameras[i]);
+    }
+
     scene->last_portal_indx_shot=-1;
     scene->looked_wall_portalable_0=0;
     scene->looked_wall_portalable_1=0;

@@ -185,6 +185,7 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/round_elevator.blend \
 	assets/models/props/round_elevator_interior.blend \
 	assets/models/props/round_elevator_collision.blend \
+	assets/models/props/security_camera.blend \
 	assets/models/props/signage.blend \
 	assets/models/props/signage_off.blend \
 	assets/models/props/switch001.blend \
@@ -232,6 +233,8 @@ build/src/scene/render_plan.o: $(MODEL_HEADERS)
 build/src/scene/portal_render.o: $(MODEL_HEADERS)
 
 build/src/scene/clock.o: $(MODEL_HEADERS)
+
+build/src/scene/security_camera.o: $(MODEL_HEADERS)
 
 build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/materials/static.h
 

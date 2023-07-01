@@ -460,6 +460,21 @@ materials:
     gDPSetCombineMode: 
       color: ["SHADE", "0", "TEXEL0", "0"]
 
+  security_camera:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/security_camera.png
+      fmt: G_IM_FMT_RGBA
+      siz: G_IM_SIZ_16b
+      s:
+        wrap: false
+      t:
+        wrap: false
+        
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "TEXEL0", "0"]
+
   newsignage_back00:
     gDPSetTile: 
       filename: ../../portal_pak_modified/materials/models/props_animsigns/newsignage_back00.png
