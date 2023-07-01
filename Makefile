@@ -234,7 +234,7 @@ build/src/scene/portal_render.o: $(MODEL_HEADERS)
 
 build/src/scene/clock.o: $(MODEL_HEADERS)
 
-build/src/scene/security_camera.o: $(MODEL_HEADERS)
+build/src/scene/security_camera.o: build/src/audio/clips.h $(MODEL_HEADERS)
 
 build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/materials/static.h
 

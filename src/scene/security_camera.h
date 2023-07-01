@@ -14,4 +14,6 @@ struct SecurityCamera {
 
 void securityCameraInit(struct SecurityCamera* securityCamera, struct SecurityCameraDefinition* definition);
 
+void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int cameraCount, struct Box3D* portalBox);
+
 #endif

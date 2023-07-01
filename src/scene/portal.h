@@ -4,6 +4,7 @@
 #include "../math/transform.h"
 #include "../math/plane.h"
 #include "../math/vector2s16.h"
+#include "../math/box3d.h"
 #include "../graphics/renderstate.h"
 #include "camera.h"
 #include "static_scene.h"
@@ -47,6 +48,8 @@ extern struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE];
 
 void portalInit(struct Portal* portal, enum PortalFlags flags);
 void portalUpdate(struct Portal* portal, int isOpen);
+
+void portalCalculateBB(struct Portal* portal, struct Box3D* bb);
 
 int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt, int just_checking);
 void portalCheckForHoles(struct Portal* portals);

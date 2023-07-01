@@ -738,7 +738,10 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                 // the second portal is fully transparent right away
                 portal->opacity = 0.0f;
             }
+            struct Box3D portalBB;
+            portalCalculateBB(portal, &portalBB);
             contactSolverCheckPortalContacts(&gContactSolver, collisionObject);
+            securityCamerasCheckPortal(scene->securityCameras, scene->securityCameraCount, &portalBB);
             ballBurnFilterOnPortal(&portal->transform, portalIndex);
             playerSignalPortalChanged(&scene->player);
             return 1;
@@ -755,8 +758,6 @@ int sceneDynamicBoxIndex(struct Scene* scene, struct CollisionObject* hitObject)
 
     return hitObject - scene->dynamicColliders;
 }
-
-
 
 int sceneDetermineSurfaceMapping(struct Scene* scene, struct CollisionObject* hitObject, struct PortalSurfaceMappingRange* mappingRangeOut, int* relativeToOut) {
     int quadIndex = levelQuadIndex(hitObject);

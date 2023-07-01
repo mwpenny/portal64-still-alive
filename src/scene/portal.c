@@ -72,6 +72,46 @@ void portalUpdate(struct Portal* portal, int isOpen) {
     }
 }
 
+void portalCalculateBB(struct Portal* portal, struct Box3D* bb) {
+    struct Vector3 portalUp;
+    quatMultVector(&portal->transform.rotation, &gUp, &portalUp);
+    struct Vector3 portalRight;
+    quatMultVector(&portal->transform.rotation, &gRight, &portalRight);
+
+    vector3AddScaled(
+        &portal->transform.position,
+        &portalUp, PORTAL_COVER_HEIGHT * 0.5f,
+        &bb->min
+    );
+
+    bb->max = bb->min;
+
+    struct Vector3 nextPoint;
+    vector3AddScaled(
+        &portal->transform.position,
+        &portalUp, -PORTAL_COVER_HEIGHT * 0.5f,
+        &nextPoint
+    );
+
+    box3DUnionPoint(bb, &nextPoint, bb);
+
+    vector3AddScaled(
+        &portal->transform.position,
+        &portalRight, PORTAL_COVER_WIDTH * 0.25f,
+        &nextPoint
+    );
+
+    box3DUnionPoint(bb, &nextPoint, bb);
+
+    vector3AddScaled(
+        &portal->transform.position,
+        &portalRight, -PORTAL_COVER_WIDTH * 0.25f,
+        &nextPoint
+    );
+
+    box3DUnionPoint(bb, &nextPoint, bb);
+}
+
 int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt, int just_checking) {
     // determine if portal is on surface
     if (!portalSurfaceIsInside(surface, portalAt)) {

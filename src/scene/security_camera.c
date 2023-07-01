@@ -6,12 +6,14 @@
 #include "dynamic_scene.h"
 #include "scene.h"
 #include "../util/time.h"
+#include "../levels/cutscene_runner.h"
 
 #include "../build/assets/models/props/security_camera.h"
 #include "../build/assets/materials/static.h"
+#include "../build/src/audio/clips.h"
 
 struct CollisionBox gSecurityCameraCollisionBox = {
-    {0.3165f, 0.3165f, 0.3165f}
+    {0.15, 0.3f, 0.35f}
 };
 
 struct ColliderTypeData gSecurityCameraCollider = {
@@ -27,6 +29,10 @@ struct ColliderTypeData gSecurityCameraCollider = {
 struct Quaternion gBarBoneRelative = {1.0f, 0.0f, 0.0f, 0.0f};
 
 void securityCameraLookAt(struct SecurityCamera* camera, struct Vector3* target) {
+    if (!(camera->rigidBody.flags & RigidBodyIsKinematic)) {
+        return;
+    }
+
     struct Vector3 offset;
     vector3Sub(target, &camera->rigidBody.transform.position, &offset);
 
@@ -111,4 +117,29 @@ void securityCameraInit(struct SecurityCamera* securityCamera, struct SecurityCa
     securityCamera->dynamicId = dynamicSceneAdd(securityCamera, securityCameraRender, &securityCamera->rigidBody.transform.position, 0.4f);
 
     dynamicSceneSetRoomFlags(securityCamera->dynamicId, ROOM_FLAG_FROM_INDEX(securityCamera->rigidBody.currentRoom));
+}
+
+short gCameraDestroyClips[] = {
+    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_1,
+    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_2,
+    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_3,
+    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_4,
+    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_5,
+};
+
+void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int cameraCount, struct Box3D* portalBox) {
+    for (int i = 0; i < cameraCount; ++i) {
+        struct SecurityCamera* camera = &securityCameras[i];
+        if (!(camera->rigidBody.flags & RigidBodyIsKinematic)) {
+            // already free skip this one
+            continue;
+        }
+        if (box3DHasOverlap(&camera->collisionObject.boundingBox, portalBox)) {
+            rigidBodyUnmarkKinematic(&camera->rigidBody, 1.0f, collisionBoxSolidMofI(&gSecurityCameraCollider, 1.0f));
+            camera->collisionObject.collisionLayers |= COLLISION_LAYERS_GRABBABLE;
+            camera->rigidBody.flags |= RigidBodyFlagsGrabbable;
+            short clipIndex = randomInRange(0, sizeof(gCameraDestroyClips) / sizeof(*gCameraDestroyClips));
+            cutsceneQueueSoundInChannel(gCameraDestroyClips[clipIndex], CH_GLADOS, 1.0f);
+        }
+    }
 }
