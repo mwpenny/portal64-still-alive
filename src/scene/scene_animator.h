@@ -30,4 +30,6 @@ void sceneAnimatorSetSpeed(struct SceneAnimator* sceneAnimator, int animatorInde
 
 int sceneAnimatorIsRunning(struct SceneAnimator* sceneAnimator, int animatorIndex);
 
+float sceneAnimatorCurrentTime(struct SceneAnimator* sceneAnimator, int animatorIndex);
+
 #endif

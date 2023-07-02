@@ -81,6 +81,8 @@ struct Scene {
     u8 looked_wall_portalable_1;
     u8 continuouslyAttemptingPortalOpen;
     u8 checkpointState;
+
+    float fadeInTimer;
 };
 
 extern struct Scene gScene;

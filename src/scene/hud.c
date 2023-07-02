@@ -26,11 +26,28 @@
 #define RETICLE_WIDTH 16
 #define RETICLE_HEIGHT 16
 
-void hudRender(struct RenderState* renderState, struct Player* player, int last_portal_idx_shot, int looked_wall_portalable_0, int looked_wall_portalable_1) {
+void hudRender(struct RenderState* renderState, struct Player* player, int last_portal_idx_shot, int looked_wall_portalable_0, int looked_wall_portalable_1, float introAnimationTime) {
     if (player->flags & PlayerIsDead) {
         gSPDisplayList(renderState->dl++, hud_death_overlay);
         gDPFillRectangle(renderState->dl++, 0, 0, SCREEN_WD, SCREEN_HT);
         gSPDisplayList(renderState->dl++, hud_death_overlay_revert);
+    }
+
+    if (introAnimationTime > 0.0f) {
+        float alpha = 0.0f;
+
+        if (introAnimationTime > INTRO_FADE_TIME) {
+            alpha = 1.0f;
+        } else {
+            alpha = introAnimationTime * (1.0f / INTRO_FADE_TIME);
+        }
+
+        if (alpha >= 0.0f) {
+            gSPDisplayList(renderState->dl++, hud_death_overlay);
+            gDPSetPrimColor(renderState->dl++, 0, 0, 0, 0, 0, (u8)(255.0f * alpha));
+            gDPFillRectangle(renderState->dl++, 0, 0, SCREEN_WD, SCREEN_HT);
+            gSPDisplayList(renderState->dl++, hud_death_overlay_revert);
+        }
     }
 
     gSPDisplayList(renderState->dl++, hud_material_list[PORTAL_CROSSHAIRS_INDEX]);
@@ -108,12 +125,13 @@ void hudRender(struct RenderState* renderState, struct Player* player, int last_
         }
     }
 
-    // center reticle is drawn over top everything
-    gSPDisplayList(renderState->dl++, hud_material_list[CENTER_RETICLE_INDEX]);
-    gDPSetPrimColor(renderState->dl++, 255, 255, 210, 210, 210, 255);
-    gSPTextureRectangle(renderState->dl++, 
-            RETICLE_XMIN, RETICLE_YMIN,
-            RETICLE_XMIN + (RETICLE_WIDTH << 2), RETICLE_YMIN + (RETICLE_HEIGHT << 2), 
-            G_TX_RENDERTILE, 0 << 5, 0 << 5, 1 << 10, 1 << 10);
-
+    if (introAnimationTime < 0.0f) {
+        // center reticle is drawn over top everything
+        gSPDisplayList(renderState->dl++, hud_material_list[CENTER_RETICLE_INDEX]);
+        gDPSetPrimColor(renderState->dl++, 255, 255, 210, 210, 210, 255);
+        gSPTextureRectangle(renderState->dl++, 
+                RETICLE_XMIN, RETICLE_YMIN,
+                RETICLE_XMIN + (RETICLE_WIDTH << 2), RETICLE_YMIN + (RETICLE_HEIGHT << 2), 
+                G_TX_RENDERTILE, 0 << 5, 0 << 5, 1 << 10, 1 << 10);
+    }
 }

@@ -92,3 +92,15 @@ int sceneAnimatorIsRunning(struct SceneAnimator* sceneAnimator, int animatorInde
 
     return skAnimatorIsRunning(&sceneAnimator->animators[animatorIndex]);
 }
+
+float sceneAnimatorCurrentTime(struct SceneAnimator* sceneAnimator, int animatorIndex) {
+    if (animatorIndex < 0 || animatorIndex >= sceneAnimator->animatorCount) {
+        return -1.0;
+    }
+
+    if (!skAnimatorIsRunning(&sceneAnimator->animators[animatorIndex])) {
+        return -1.0f;
+    }
+
+    return sceneAnimator->animators[animatorIndex].currentTime;
+}

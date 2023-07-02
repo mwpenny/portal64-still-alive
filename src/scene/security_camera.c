@@ -42,6 +42,10 @@ void securityCameraLookAt(struct SecurityCamera* camera, struct Vector3* target)
         return;
     }
 
+    struct Quaternion invRotation;
+    quatConjugate(&camera->rigidBody.transform.rotation, &invRotation);
+    quatMultVector(&invRotation, &offset, &offset);
+
     float invMag = 1.0f / sqrtf(magSqrd);
 
     struct Vector2 pitch;
@@ -62,8 +66,8 @@ void securityCameraLookAt(struct SecurityCamera* camera, struct Vector3* target)
 
     invMag = invMag / pitch.x;
 
-    yaw.x = -offset.z * invMag;
-    yaw.y = offset.x * invMag;
+    yaw.x = -offset.x * invMag;
+    yaw.y = -offset.z * invMag;
 
     quatAxisComplex(&gUp, &yaw, &relativeRotation);
     quatMultiply(&gBarBoneRelative, &relativeRotation, &camera->armature.pose[PROPS_SECURITY_CAMERA_BAR_BONE].rotation);
@@ -139,7 +143,7 @@ void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int came
             camera->collisionObject.collisionLayers |= COLLISION_LAYERS_GRABBABLE;
             camera->rigidBody.flags |= RigidBodyFlagsGrabbable;
             short clipIndex = randomInRange(0, sizeof(gCameraDestroyClips) / sizeof(*gCameraDestroyClips));
-            cutsceneQueueSoundInChannel(gCameraDestroyClips[clipIndex], CH_GLADOS, 1.0f);
+            cutsceneQueueSoundInChannel(gCameraDestroyClips[clipIndex], 1.0f, CH_GLADOS);
         }
     }
 }

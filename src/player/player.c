@@ -534,6 +534,10 @@ void playerUpdate(struct Player* player) {
     struct Vector3 forward;
     struct Vector3 right;
 
+    if (player->flags & PlayerInCutscene) {
+        return;
+    }
+
     skBlenderUpdate(&player->animator, player->armature.pose, FIXED_DELTA_TIME);
 
     int doorwayMask = worldCheckDoorwaySides(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom);

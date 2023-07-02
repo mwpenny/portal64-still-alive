@@ -30,6 +30,7 @@ sk_definition_writer.add_definition("level", "struct LevelDefinition", "_geo", {
     locations = sk_definition_writer.reference_to(trigger.location_data, 1),
     locationCount = #trigger.location_data,
     startLocation = trigger.find_location_index("start"),
+    playerAnimatorIndex = animation.get_armature_index_with_name("player") or -1,
     world = world.world,
     boxDroppers = sk_definition_writer.reference_to(entities.box_droppers, 1),
     boxDropperCount = #entities.box_droppers,

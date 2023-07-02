@@ -28,6 +28,7 @@ enum PlayerFlags {
     PlayerJustSelect = (1 << 9),
     PlayerJustDeniedSelect = (1 << 10),
     PlayerJustShotPortalGun = (1 << 11),
+    PlayerInCutscene = (1 << 12),
 };
 
 struct Player {

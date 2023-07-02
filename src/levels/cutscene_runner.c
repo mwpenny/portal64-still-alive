@@ -568,7 +568,7 @@ void cutsceneSerializeRead(struct Serializer* serializer) {
     }
 }
 
-void cutsceneQueueSoundInChannel(int soundId, int channel, float volume) {
+void cutsceneQueueSoundInChannel(int soundId, float volume, int channel) {
     if (!gCutsceneSoundQueues[channel] && !soundPlayerIsPlaying(gCutsceneCurrentSound[channel])) {
         cutsceneQueueSound(soundsIntercom[0], volume, channel);
     }

@@ -48,6 +48,8 @@ Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 #define LEVEL_INDEX_WITH_GUN_0  2
 #define LEVEL_INDEX_WITH_GUN_1  8
 
+#define FADE_IN_
+
 void sceneUpdateListeners(struct Scene* scene);
 
 void sceneInitDynamicColliders(struct Scene* scene) {
@@ -236,6 +238,12 @@ void sceneInitNoPauseMenu(struct Scene* scene) {
     sceneInitDynamicColliders(scene);
 
     sceneAnimatorInit(&scene->animator, gCurrentLevel->animations, gCurrentLevel->animationInfoCount);
+
+    if (gCurrentLevelIndex == 0) {
+        scene->fadeInTimer = INTRO_TOTAL_TIME;
+    } else {
+        scene->fadeInTimer = 0.0f;
+    }
 }
 
 #define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
@@ -286,7 +294,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
 
-    hudRender(renderState, &scene->player, scene->last_portal_indx_shot, scene->looked_wall_portalable_0, scene->looked_wall_portalable_1);
+    hudRender(renderState, &scene->player, scene->last_portal_indx_shot, scene->looked_wall_portalable_0, scene->looked_wall_portalable_1, scene->fadeInTimer);
 
     if (gGameMenu.state != GameMenuStateResumeGame) {
         gameMenuRender(&gGameMenu, renderState, task);
@@ -527,6 +535,14 @@ void sceneUpdate(struct Scene* scene) {
 
     signalsReset();
 
+    if (sceneAnimatorIsRunning(&scene->animator, gCurrentLevel->playerAnimatorIndex)) {
+        scene->player.flags |= PlayerInCutscene;
+        sceneAnimatorTransformForIndex(&scene->animator, gCurrentLevel->playerAnimatorIndex, &scene->player.lookTransform);
+        scene->player.body.transform = scene->player.lookTransform;
+    } else if (scene->player.flags & PlayerInCutscene) {
+        scene->player.flags &= ~PlayerInCutscene;
+    }
+
     portalGunUpdate(&scene->portalGun, &scene->player);
     playerUpdate(&scene->player);
     sceneUpdateListeners(scene);
@@ -679,6 +695,14 @@ void sceneUpdate(struct Scene* scene) {
 
     if (controllerGetButtonDown(2, L_TRIG)) {
         levelQueueLoad(NEXT_LEVEL, NULL, NULL);
+    }
+
+    if (scene->fadeInTimer > 0.0f) {
+        scene->fadeInTimer -= FIXED_DELTA_TIME;
+
+        if (scene->fadeInTimer < 0.0f) {
+            scene->fadeInTimer = 0.0f;
+        }
     }
 }
 

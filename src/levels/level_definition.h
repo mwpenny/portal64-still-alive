@@ -303,6 +303,7 @@ struct LevelDefinition {
     short clockCount;
     short securityCameraCount;
     short startLocation;
+    short playerAnimatorIndex;
 };
 
 #endif
