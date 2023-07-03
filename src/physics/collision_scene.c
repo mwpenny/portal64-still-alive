@@ -210,17 +210,12 @@ void collisionScenePushObjectsOutOfPortal(int portalIndex) {
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
         struct CollisionObject* object = gCollisionScene.dynamicObjects[i];
 
-        if (!(object->flags & ((RigidBodyIsTouchingPortalA | RigidBodyWasTouchingPortalA) << portalIndex))) {
+        if (!(object->body->flags & ((RigidBodyIsTouchingPortalA | RigidBodyWasTouchingPortalA) << portalIndex))) {
             continue;
         }
 
         struct Vector3 colliderPoint;
-        object->collider->callbacks->minkowsiSum(
-            object->collider->data, 
-            &object->body->rotationBasis, 
-            &reversePortalNormal, 
-            &colliderPoint
-        );
+        minkowsiSumAgainstObject(object, &reversePortalNormal, &colliderPoint);
 
         struct Vector3 offset;
         vector3Sub(&portalTransform->position, &colliderPoint, &offset);
