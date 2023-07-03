@@ -35,6 +35,8 @@ int collisionSceneIsTouchingSinglePortal(struct Vector3* contactPoint, struct Ve
 int collisionSceneIsTouchingPortal(struct Vector3* contactPoint, struct Vector3* contactNormal);
 int collisionSceneIsPortalOpen();
 
+void collisionScenePushObjectsOutOfPortal(int portalIndex);
+
 int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, int collisionLayers, float maxDistance, int passThroughPortals, struct RaycastHit* hit);
 
 void collisionSceneGetPortalTransform(int fromPortal, struct Transform* out);

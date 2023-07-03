@@ -735,6 +735,9 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
             if (just_checking){
                 return 1;
             }
+
+            collisionScenePushObjectsOutOfPortal(portalIndex);
+
             soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &at->position, &gZeroVec);
 
             // the portal position may have been adjusted

@@ -196,6 +196,45 @@ int collisionSceneIsPortalOpen() {
     return gCollisionScene.portalTransforms[0] != NULL && gCollisionScene.portalTransforms[1] != NULL;
 }
 
+void collisionScenePushObjectsOutOfPortal(int portalIndex) {
+    if (!gCollisionScene.portalTransforms[portalIndex]) {
+        return;
+    }
+
+    struct Transform* portalTransform = gCollisionScene.portalTransforms[portalIndex];
+
+    struct Vector3 reversePortalNormal = gZeroVec;
+    reversePortalNormal.z = portalIndex ? -1.0f : 1.0f;
+    quatMultVector(&portalTransform->rotation, &reversePortalNormal, &reversePortalNormal);
+    
+    for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
+        struct CollisionObject* object = gCollisionScene.dynamicObjects[i];
+
+        if (!(object->flags & ((RigidBodyIsTouchingPortalA | RigidBodyWasTouchingPortalA) << portalIndex))) {
+            continue;
+        }
+
+        struct Vector3 colliderPoint;
+        object->collider->callbacks->minkowsiSum(
+            object->collider->data, 
+            &object->body->rotationBasis, 
+            &reversePortalNormal, 
+            &colliderPoint
+        );
+
+        struct Vector3 offset;
+        vector3Sub(&portalTransform->position, &colliderPoint, &offset);
+
+        float depth = vector3Dot(&offset, &reversePortalNormal);
+
+        if (depth > 0.0f) {
+            continue;
+        }
+
+        vector3AddScaled(&object->body->transform.position, &reversePortalNormal, depth, &object->body->transform.position);
+    }
+}
+
 void collisionSceneRaycastRoom(struct CollisionScene* scene, struct Room* room, struct Ray* ray, int collisionLayers, struct RaycastHit* hit) {
     int currX = GRID_CELL_X(room, ray->origin.x);
     int currZ = GRID_CELL_Z(room, ray->origin.z);
