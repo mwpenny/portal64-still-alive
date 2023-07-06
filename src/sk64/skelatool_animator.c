@@ -29,6 +29,8 @@ void skAnimatorCopy(u32 romAddress, void* target, u32 size) {
     OSIoMesg* ioMesg = &gAnimationIOMesg[gAnimationNextMessage];
     gAnimationNextMessage = (gAnimationNextMessage + 1) % MAX_ANIMATION_QUEUE_ENTRIES;
 
+    osInvalDCache((void*)target, size);
+
     ioMesg->hdr.pri = OS_MESG_PRI_NORMAL;
     ioMesg->hdr.retQueue = &gAnimationQueue;
     ioMesg->dramAddr = target;
