@@ -129,6 +129,8 @@ make -f Makefile.docker
 - [ ] Presort portal gun polygon order #102
 - [ ] Adding loading notice between levels #45
 - [ ] Vertex lighting #39
+- [ ] flash portal opacity when other portal moves
+- [ ] ball velocity in test chamber 11
 - [x] Adding y-axis/x-axis inverting options #55
 - [x] Adding look axis sensitivity setting
 - [x] Adding a menu to game #47
