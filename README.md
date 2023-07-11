@@ -131,6 +131,10 @@ make -f Makefile.docker
 - [ ] Vertex lighting #39
 - [ ] flash portal opacity when other portal moves
 - [ ] ball velocity in test chamber 11
+- [ ] test chamber 02 needs more light in the first room
+- [ ] pausing while glados is speaking can end her speech early
+- [ ] don't repeat camera destruction speech every time
+- [ ] glitch wall lighting when shooting portals on shaded walls
 - [x] Adding y-axis/x-axis inverting options #55
 - [x] Adding look axis sensitivity setting
 - [x] Adding a menu to game #47

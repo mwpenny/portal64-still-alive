@@ -125,7 +125,7 @@ void hudRender(struct RenderState* renderState, struct Player* player, int last_
         }
     }
 
-    if (introAnimationTime < 0.0f) {
+    if (introAnimationTime <= 0.0f) {
         // center reticle is drawn over top everything
         gSPDisplayList(renderState->dl++, hud_material_list[CENTER_RETICLE_INDEX]);
         gDPSetPrimColor(renderState->dl++, 255, 255, 210, 210, 210, 255);

@@ -36,6 +36,9 @@ void securityCameraLookAt(struct SecurityCamera* camera, struct Vector3* target)
     struct Vector3 offset;
     vector3Sub(target, &camera->rigidBody.transform.position, &offset);
 
+    // don't look directly at the player
+    offset.y -= 1.0f;
+
     float magSqrd = vector3MagSqrd(&offset);
 
     if (magSqrd > CAMERA_RANGE * CAMERA_RANGE || magSqrd < 0.01f) {

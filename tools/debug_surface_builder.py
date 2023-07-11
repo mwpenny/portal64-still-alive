@@ -4,11 +4,15 @@ from re import L
 import re
 import sys
 import traceback
-import gdb
 import contextlib
 import ctypes
+import sys
 from OpenGL import GL as gl
 import glfw
+import gdb
+
+# to use this script, you first need to install
+# pip PyOpenGL PyOpenGL_accelerate glfw numpy
 
 window_width = 800
 window_height = 600

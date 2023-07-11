@@ -975,8 +975,8 @@ int portalSurfacePokeHole(struct PortalSurface* surface, struct Vector2s16* loop
 
     surfaceBuilder.gfxVertices = stackMalloc(sizeof(Vtx) * (surface->vertexCount + ADDITIONAL_EDGE_CAPACITY));
 
-    zeroMemory(surfaceBuilder.edgeFlags, surface->edgeCount + edgeCapacity);
-    zeroMemory(surfaceBuilder.isLoopEdge, surface->edgeCount + edgeCapacity);
+    zeroMemory(surfaceBuilder.edgeFlags, edgeCapacity);
+    zeroMemory(surfaceBuilder.isLoopEdge, edgeCapacity);
     memCopy(surfaceBuilder.gfxVertices, surface->gfxVertices, sizeof(Vtx) * surface->vertexCount);
 
     struct Vector2s16* prev = &loop[0];
