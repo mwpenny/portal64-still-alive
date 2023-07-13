@@ -121,20 +121,23 @@ make -f Makefile.docker
 <br />
 
 ## Current New Feature TODO List
+- [ ] fizzle radio/camera
+- [ ] add fizller sides
 - [ ] Add auto save checkpoints
-- [ ] rotate auto uv
 - [ ] disable portal surfaces manually on some surfaces #135
 - [ ] Portal not rendering recursively sometimes #138
 - [ ] Correct elevator timing
 - [ ] Presort portal gun polygon order #102
 - [ ] Adding loading notice between levels #45
-- [ ] Vertex lighting #39
-- [ ] flash portal opacity when other portal moves
 - [ ] ball velocity in test chamber 11
 - [ ] test chamber 02 needs more light in the first room
 - [ ] pausing while glados is speaking can end her speech early
 - [ ] don't repeat camera destruction speech every time
 - [ ] don't count boxes on buttons until it is released and stable
+- [ ] dynamically load data
+- [x] flash portal opacity when other portal moves
+- [x] rotate auto uv
+- [x] Vertex lighting #39
 - [x] glitch wall lighting when shooting portals on shaded walls
 - [x] Adding y-axis/x-axis inverting options #55
 - [x] Adding look axis sensitivity setting
@@ -154,20 +157,20 @@ make -f Makefile.docker
 - [x] Fast flying air whoosh sound
 
 ## Current Bug TODO List (Hardware Verified) (High->Low priority)
-- [ ] investigate chell animation
 ----------------------- v8
 - [ ] Player can clip through chamber 7 by walking back up the stairs (near the top).
 - [ ] player can clip through back of elevator by jumping and strafeing at the back corners while inside.
 - [ ] Player can trap themselves in chamber 5 by following instructions issue #75
 - [ ] Two wall portals next to eachother can be used to clip any object out of any level by pushing it into corner, then dropping. 
-- [ ] Glass can be walked through from one side on multiple levels (0,1,4,...)
 - [ ] Passing into a ceiling portal can sometimes mess with the player rotation
 - [ ] Can shoot portals, and walk through signage
-- [ ] Chell animation problem (fixed itself, investigate)
 - [ ] Can place portals on ground after final fizzler on all levels
 - [ ] Door at end of room 2, chamber 10 isnt rendered properly
 - [ ] various visual glitches when running NTSC on PAL console #65
 - [ ] various visual glitches when running PAL on NTSC console #65
+- [x] Glass can be walked through from one side on multiple levels (0,1,4,...)
+- [x] Chell animation problem (fixed itself, investigate)
+- [x] investigate chell animation
 - [x] Any grabbable object can be clipped through level by wall/floor portals method.
 - [x] Player can clip through any level by placing one portal on wall and another portal right next to it on ground. #13
 - [x] Can shoot portals while holding an object
