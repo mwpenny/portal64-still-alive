@@ -61,6 +61,37 @@ int validateHeap(struct ExpandingSimplex* simplex) {
     return 1;
 }
 
+int validateExpandingSimplex(struct ExpandingSimplex* simplex) {
+    for (int triangleIndex = 0; triangleIndex < simplex->triangleCount; ++triangleIndex) {
+        struct SimplexTriangle* triangle = &simplex->triangles[triangleIndex];
+
+        for (int index = 0; index < 3; ++index) {
+            struct SimplexTriangle* adjacent = &simplex->triangles[triangle->indexData.adjacentFaces[index]];
+
+            int nextFromOpposite = NEXT_FACE(triangle->indexData.oppositePoints[index]);
+
+            // verify the back link
+            if (adjacent->indexData.adjacentFaces[nextFromOpposite] != triangleIndex) {
+                return 0;
+            }
+
+            struct Vector3 offset;
+            vector3Sub(
+                &simplex->points[adjacent->indexData.indices[triangle->indexData.oppositePoints[index]]], 
+                &simplex->points[triangle->indexData.indices[index]], 
+                &offset
+            );
+
+            // verify shape is convex
+            if (vector3Dot(&offset, &triangle->normal) > 0.000001f) {
+                return 0;
+            }
+        }
+    }
+
+    return 1;
+}
+
 void expandingSimplexAddPoint(struct ExpandingSimplex* simplex, struct Vector3* aPoint, struct Vector3* pointDiff, int id) {
     int result = simplex->pointCount;
     simplex->aPoints[result] = *aPoint;
@@ -233,6 +264,17 @@ void expandingSimplexRotateEdge(struct ExpandingSimplex* simplex, struct Simplex
     triangleB->indexData.oppositePoints[relativeIndex1] = triangleA->indexData.oppositePoints[1];
     triangleA->indexData.oppositePoints[1] = relativeIndex1;
     triangleB->indexData.oppositePoints[relativeIndex2] = 0;
+
+    // update back references from adjacent triangles
+    struct SimplexTriangle* adjTriangle = &simplex->triangles[triangleA->indexData.adjacentFaces[0]];
+    int adjIndex = NEXT_FACE(triangleA->indexData.oppositePoints[0]);
+    adjTriangle->indexData.adjacentFaces[adjIndex] = triangleAIndex;
+    adjTriangle->indexData.oppositePoints[adjIndex] = 2;
+
+    adjTriangle = &simplex->triangles[triangleB->indexData.adjacentFaces[relativeIndex1]];
+    adjIndex = NEXT_FACE(triangleB->indexData.oppositePoints[relativeIndex1]);
+    adjTriangle->indexData.adjacentFaces[adjIndex] = triangleBIndex;
+    adjTriangle->indexData.oppositePoints[adjIndex] = relativeIndex0;
 
     expandingSimplexTriangleInitNormal(simplex, triangleA);
     if (!(simplex->flags & SimplexFlagsSkipDistance)) {

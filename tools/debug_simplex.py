@@ -288,19 +288,40 @@ def extract_simplex_data(simplex, closestFace):
             int(input_triangle["indexData"]["indices"][2])
         ))
 
-    return Simplex(output_vertices, output_triangles, Triangle(
-        int(closestFace["indexData"]["indices"][0]),
-        int(closestFace["indexData"]["indices"][1]),
-        int(closestFace["indexData"]["indices"][2])
-    ))
+    if closestFace:
+        closestFaceTriangle = Triangle(
+            int(closestFace["indexData"]["indices"][0]),
+            int(closestFace["indexData"]["indices"][1]),
+            int(closestFace["indexData"]["indices"][2])
+        )
+    else:
+        closestFaceTriangle = None
+
+    return Simplex(output_vertices, output_triangles, closestFaceTriangle)
 
 def main():
     print("main")
     print(gl.glGetString(gl.GL_VENDOR), gl.glGetString(gl.GL_RENDERER))
     frame = gdb.selected_frame()
     print("Getting simplex")
-    simplex = extract_simplex_data(frame.read_var("simplex"), frame.read_var("closestFace"))
-    raycastDir = frame.read_var("raycastDir")
+    try:
+        closestFace = frame.read_var("closestFace")
+    except:
+        closestFace = None
+
+    simplexVar = None
+
+    try:
+        simplexVar = frame.read_var("simplex")
+    except:
+        simplexVar = frame.read_var("expandingSimplex")
+
+    simplex = extract_simplex_data(simplexVar, closestFace)
+
+    try:
+        raycastDir = frame.read_var("raycastDir")
+    except:
+        raycastDir = {"x": 0, "y": 0, "z": 0}
 
 
     with create_main_window() as window:

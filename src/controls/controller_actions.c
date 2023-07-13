@@ -102,8 +102,8 @@ void controllerActionReadDirection(enum ControllerActionSource source, int contr
         case ControllerActionSourceJoystick:
         {
             OSContPad* pad = controllersGetControllerData(controllerIndex);
-            result.x = controllerCleanupStickInput(pad->stick_x);
-            result.y = controllerCleanupStickInput(pad->stick_y);
+            result.x += controllerCleanupStickInput(pad->stick_x);
+            result.y += controllerCleanupStickInput(pad->stick_y);
             break;
         }
         default:

@@ -134,7 +134,8 @@ make -f Makefile.docker
 - [ ] test chamber 02 needs more light in the first room
 - [ ] pausing while glados is speaking can end her speech early
 - [ ] don't repeat camera destruction speech every time
-- [ ] glitch wall lighting when shooting portals on shaded walls
+- [ ] don't count boxes on buttons until it is released and stable
+- [x] glitch wall lighting when shooting portals on shaded walls
 - [x] Adding y-axis/x-axis inverting options #55
 - [x] Adding look axis sensitivity setting
 - [x] Adding a menu to game #47
