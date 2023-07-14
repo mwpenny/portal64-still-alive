@@ -565,6 +565,10 @@ void sceneUpdate(struct Scene* scene) {
         ballCatcherUpdate(&scene->ballCatchers[i], scene->ballLaunchers, scene->ballLancherCount);
     }
 
+    for (int i = 0; i < scene->securityCameraCount; ++i) {
+        securityCameraUpdate(&scene->securityCameras[i]);
+    }
+
     cutsceneCheckTriggers(&scene->player.lookTransform.position);
     signalsEvaluateSignals(gCurrentLevel->signalOperators, gCurrentLevel->signalOperatorCount);
 

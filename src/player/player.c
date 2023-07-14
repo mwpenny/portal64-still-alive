@@ -615,6 +615,10 @@ void playerUpdate(struct Player* player) {
         }
     }
 
+    if (player->grabConstraint.object && controllerActionGet(ControllerActionOpenPortal0)) {
+        player->grabConstraint.object->body->flags |= RigidBodyFizzled;
+    }
+
     targetVelocity.y = player->body.velocity.y;
 
     float velocityDot = vector3Dot(&player->body.velocity, &targetVelocity);

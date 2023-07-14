@@ -9,6 +9,28 @@
 #define TIME_TO_FIZZLE      2.0f
 #define FIZZLE_TIME_STEP    (FIXED_DELTA_TIME / TIME_TO_FIZZLE)
 
+Gfx* decorBuildFizzleGfx(Gfx* gfxToRender, float fizzleTime, struct RenderState* renderState) {
+    if (fizzleTime <= 0.0f) {
+        return gfxToRender;
+    }
+
+    Gfx* result = renderStateAllocateDLChunk(renderState, 3);
+
+    Gfx* curr = result;
+
+    int fizzleTimeAsInt = (int)(255.0f * fizzleTime);
+
+    if (fizzleTimeAsInt > 255) {
+        fizzleTimeAsInt = 255;
+    }
+
+    gDPSetPrimColor(curr++, 255, 255, fizzleTimeAsInt, fizzleTimeAsInt, fizzleTimeAsInt, 255 - fizzleTimeAsInt);
+    gSPDisplayList(curr++, gfxToRender);
+    gSPEndDisplayList(curr++);
+
+    return result;
+}
+
 void decorObjectRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct DecorObject* object = (struct DecorObject*)data;
 
@@ -20,29 +42,9 @@ void decorObjectRender(void* data, struct DynamicRenderDataList* renderList, str
 
     transformToMatrixL(&object->rigidBody.transform, matrix, SCENE_SCALE);
 
-    Gfx* gfxToRender;
-    
-    if (object->fizzleTime > 0.0f) {
-        gfxToRender = renderStateAllocateDLChunk(renderState, 3);
-
-        Gfx* curr = gfxToRender;
-
-        int fizzleTimeAsInt = (int)(255.0f * object->fizzleTime);
-
-        if (fizzleTimeAsInt > 255) {
-            fizzleTimeAsInt = 255;
-        }
-
-        gDPSetPrimColor(curr++, 255, 255, fizzleTimeAsInt, fizzleTimeAsInt, fizzleTimeAsInt, 255 - fizzleTimeAsInt);
-        gSPDisplayList(curr++, object->definition->graphics);
-        gSPEndDisplayList(curr++);
-    } else {
-        gfxToRender = object->definition->graphics;
-    }
-
     dynamicRenderListAddData(
         renderList, 
-        gfxToRender, 
+        decorBuildFizzleGfx(object->definition->graphics, object->fizzleTime, renderState), 
         matrix, 
         (object->fizzleTime > 0.0f) ? object->definition->materialIndexFizzled : object->definition->materialIndex, 
         &object->rigidBody.transform.position, 
@@ -73,6 +75,7 @@ void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* d
         collisionSceneAddDynamicObject(&object->collisionObject);
     } else {
         rigidBodyInit(&object->rigidBody, 1.0f, 1.0f);
+        object->collisionObject.body = NULL;
     }
 
     object->definition = definition;
@@ -114,6 +117,32 @@ void decorObjectDelete(struct DecorObject* decorObject) {
     free(decorObject);
 }
 
+int decorObjectUpdateFizzler(struct CollisionObject* collisionObject, float* fizzleTime) {
+    if (collisionObject->body && collisionObject->body->flags & RigidBodyFizzled) {
+        if (*fizzleTime == 0.0f) {
+            vector3Scale(&collisionObject->body->velocity, &collisionObject->body->velocity, 0.25f);
+
+            struct Quaternion randomRotation;
+            quatRandom(&randomRotation);
+            struct Vector3 randomAngularVelocity;
+            quatMultVector(&randomRotation, &gRight, &randomAngularVelocity);
+
+            vector3AddScaled(&collisionObject->body->angularVelocity, &randomAngularVelocity, 0.3f, &collisionObject->body->angularVelocity);
+        }
+
+        *fizzleTime += FIZZLE_TIME_STEP;
+        collisionObject->body->flags &= ~RigidBodyFlagsGrabbable;
+        collisionObject->body->flags |= RigidBodyDisableGravity;
+
+        if (*fizzleTime > 1.0f) {
+            collisionObject->body->flags &= ~RigidBodyFizzled;
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 int decorObjectUpdate(struct DecorObject* decorObject) {
     if (decorObject->playingSound != SOUND_ID_NONE) {
         soundPlayerUpdatePosition(
@@ -123,31 +152,14 @@ int decorObjectUpdate(struct DecorObject* decorObject) {
         );
     }
 
-    if (decorObject->rigidBody.flags & RigidBodyFizzled) {
+    if (decorObjectUpdateFizzler(&decorObject->collisionObject, &decorObject->fizzleTime)) {
         if (decorObject->definition->flags & DecorObjectFlagsImportant) {
             decorObjectReset(decorObject);
             dynamicSceneSetRoomFlags(decorObject->dynamicId, ROOM_FLAG_FROM_INDEX(decorObject->rigidBody.currentRoom));
             return 1;
         }
 
-        if (decorObject->fizzleTime == 0.0f) {
-            vector3Scale(&decorObject->rigidBody.velocity, &decorObject->rigidBody.velocity, 0.25f);
-
-            struct Quaternion randomRotation;
-            quatRandom(&randomRotation);
-            struct Vector3 randomAngularVelocity;
-            quatMultVector(&randomRotation, &gRight, &randomAngularVelocity);
-
-            vector3AddScaled(&decorObject->rigidBody.angularVelocity, &randomAngularVelocity, 0.6f, &decorObject->rigidBody.angularVelocity);
-        }
-
-        decorObject->fizzleTime += FIZZLE_TIME_STEP;
-        decorObject->collisionObject.body->flags &= ~RigidBodyFlagsGrabbable;
-        decorObject->collisionObject.body->flags |= RigidBodyDisableGravity;
-
-        if (decorObject->fizzleTime > 1.0f) {
-            return 0;
-        }
+        return 0;
     }
 
     dynamicSceneSetRoomFlags(decorObject->dynamicId, ROOM_FLAG_FROM_INDEX(decorObject->rigidBody.currentRoom));

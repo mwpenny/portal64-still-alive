@@ -4,6 +4,7 @@
 #include <ultra64.h>
 #include "../physics/collision_object.h"
 #include "../math/transform.h"
+#include "../graphics/renderstate.h"
 
 enum DecorObjectFlags {
     // important objects respawn at their original 
@@ -40,5 +41,8 @@ void decorObjectClenaup(struct DecorObject* decorObject);
 void decorObjectDelete(struct DecorObject* decorObject);
 
 int decorObjectUpdate(struct DecorObject* decorObject);
+
+Gfx* decorBuildFizzleGfx(Gfx* gfxToRender, float fizzleTime, struct RenderState* renderState);
+int decorObjectUpdateFizzler(struct CollisionObject* collisionObject, float* fizzleTime);
 
 #endif

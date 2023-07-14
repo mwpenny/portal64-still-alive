@@ -7,6 +7,7 @@
 #include "scene.h"
 #include "../util/time.h"
 #include "../levels/cutscene_runner.h"
+#include "../decor/decor_object.h"
 
 #include "../build/assets/models/props/security_camera.h"
 #include "../build/assets/materials/static.h"
@@ -99,9 +100,9 @@ void securityCameraRender(void* data, struct DynamicRenderDataList* renderList, 
 
     dynamicRenderListAddData(
         renderList, 
-        props_security_camera_model_gfx, 
+        decorBuildFizzleGfx(props_security_camera_model_gfx, securityCamera->fizzleTime, renderState), 
         matrix, 
-        SECURITY_CAMERA_INDEX, 
+        securityCamera->fizzleTime > 0.0f ? SECURITY_CAMERA_FIZZLED_INDEX : SECURITY_CAMERA_INDEX, 
         &securityCamera->rigidBody.transform.position, 
         armature
     );
@@ -122,6 +123,18 @@ void securityCameraInit(struct SecurityCamera* securityCamera, struct SecurityCa
     collisionObjectUpdateBB(&securityCamera->collisionObject);
 
     securityCamera->dynamicId = dynamicSceneAdd(securityCamera, securityCameraRender, &securityCamera->rigidBody.transform.position, 0.4f);
+
+    dynamicSceneSetRoomFlags(securityCamera->dynamicId, ROOM_FLAG_FROM_INDEX(securityCamera->rigidBody.currentRoom));
+
+    securityCamera->fizzleTime = 0.0f;
+}
+
+void securityCameraUpdate(struct SecurityCamera* securityCamera) {
+    if (decorObjectUpdateFizzler(&securityCamera->collisionObject, &securityCamera->fizzleTime)) {
+        dynamicSceneRemove(securityCamera->dynamicId);
+        collisionSceneRemoveDynamicObject(&securityCamera->collisionObject);
+        securityCamera->dynamicId = INVALID_DYNAMIC_OBJECT;
+    }
 
     dynamicSceneSetRoomFlags(securityCamera->dynamicId, ROOM_FLAG_FROM_INDEX(securityCamera->rigidBody.currentRoom));
 }

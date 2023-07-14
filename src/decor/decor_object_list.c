@@ -62,6 +62,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         0.4f,
         &props_radio_model_gfx[0],
         .materialIndex = RADIO_INDEX,
+        .materialIndexFizzled = RADIO_FIZZLED_INDEX,
         .soundClipId = SOUNDS_LOOPING_RADIO_MIX,
     },
     [DECOR_TYPE_CUBE] = {
