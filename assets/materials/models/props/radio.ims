@@ -1,1 +1,7 @@
--alpha off -crop 197x145+0+0 -resize 48x
+-alpha off 
+    \( -clone 0 -crop 197x145+0+0 -resize 48x  -repage +0+0 \)
+    \( -clone 0 -crop 6x6+358+29 -repage +0+0 \)
+    \( -clone 0 -crop 6x6+341+130 -repage +42+0 \)
+    -compose Over
+    -layers merge
+    -crop 48x35+0+0

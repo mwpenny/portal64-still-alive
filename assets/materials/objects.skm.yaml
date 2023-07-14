@@ -75,37 +75,6 @@ materials:
     gDPSetCombineMode: 
       color: ["SHADE", "0", "PRIMITIVE", "0"]
 
-  radio_face:
-    gDPSetTile:
-      filename: ../../portal_pak_modified/materials/models/props/radio.png
-      fmt: G_IM_FMT_RGBA
-      siz: G_IM_SIZ_16b
-        
-    gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
-    gDPSetCombineMode: 
-      color: ["SHADE", "0", "TEXEL0", "0"]
-
-  radio_black:
-    gDPSetPrimColor:
-      r: 32
-      g: 32
-      b: 32
-    gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
-    gDPSetCombineMode: 
-      color: ["SHADE", "0", "PRIMITIVE", "0"]
-
-  radio_white:
-    gDPSetPrimColor:
-      r: 240
-      g: 240
-      b: 240
-    gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
-    gDPSetCombineMode: 
-      color: ["SHADE", "0", "PRIMITIVE", "0"]
-
   solid_white:
     gDPSetPrimColor:
       r: 255

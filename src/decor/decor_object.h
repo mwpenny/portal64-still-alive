@@ -42,7 +42,13 @@ void decorObjectDelete(struct DecorObject* decorObject);
 
 int decorObjectUpdate(struct DecorObject* decorObject);
 
+enum FizzleCheckResult {
+    FizzleCheckResultNone,
+    FizzleCheckResultStart,
+    FizzleCheckResultEnd,
+};
+
 Gfx* decorBuildFizzleGfx(Gfx* gfxToRender, float fizzleTime, struct RenderState* renderState);
-int decorObjectUpdateFizzler(struct CollisionObject* collisionObject, float* fizzleTime);
+enum FizzleCheckResult decorObjectUpdateFizzler(struct CollisionObject* collisionObject, float* fizzleTime);
 
 #endif

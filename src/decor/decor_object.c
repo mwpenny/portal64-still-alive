@@ -117,8 +117,11 @@ void decorObjectDelete(struct DecorObject* decorObject) {
     free(decorObject);
 }
 
-int decorObjectUpdateFizzler(struct CollisionObject* collisionObject, float* fizzleTime) {
+enum FizzleCheckResult decorObjectUpdateFizzler(struct CollisionObject* collisionObject, float* fizzleTime) {
+    enum FizzleCheckResult result = FizzleCheckResultNone;
+
     if (collisionObject->body && collisionObject->body->flags & RigidBodyFizzled) {
+
         if (*fizzleTime == 0.0f) {
             vector3Scale(&collisionObject->body->velocity, &collisionObject->body->velocity, 0.25f);
 
@@ -128,6 +131,8 @@ int decorObjectUpdateFizzler(struct CollisionObject* collisionObject, float* fiz
             quatMultVector(&randomRotation, &gRight, &randomAngularVelocity);
 
             vector3AddScaled(&collisionObject->body->angularVelocity, &randomAngularVelocity, 0.3f, &collisionObject->body->angularVelocity);
+
+            result = FizzleCheckResultStart;
         }
 
         *fizzleTime += FIZZLE_TIME_STEP;
@@ -136,11 +141,11 @@ int decorObjectUpdateFizzler(struct CollisionObject* collisionObject, float* fiz
 
         if (*fizzleTime > 1.0f) {
             collisionObject->body->flags &= ~RigidBodyFizzled;
-            return 1;
+            result = FizzleCheckResultEnd;
         }
     }
 
-    return 0;
+    return result;
 }
 
 int decorObjectUpdate(struct DecorObject* decorObject) {
@@ -152,7 +157,14 @@ int decorObjectUpdate(struct DecorObject* decorObject) {
         );
     }
 
-    if (decorObjectUpdateFizzler(&decorObject->collisionObject, &decorObject->fizzleTime)) {
+    enum FizzleCheckResult fizzleResult = decorObjectUpdateFizzler(&decorObject->collisionObject, &decorObject->fizzleTime);
+
+    if (fizzleResult == FizzleCheckResultStart) {
+        if (decorObject->playingSound != SOUND_ID_NONE) {
+            soundPlayerStop(decorObject->playingSound);
+            decorObject->playingSound = SOUND_ID_NONE;
+        }
+    } else if (fizzleResult == FizzleCheckResultEnd) {
         if (decorObject->definition->flags & DecorObjectFlagsImportant) {
             decorObjectReset(decorObject);
             dynamicSceneSetRoomFlags(decorObject->dynamicId, ROOM_FLAG_FROM_INDEX(decorObject->rigidBody.currentRoom));
