@@ -230,7 +230,7 @@ build/src/scene/portal.o: $(MODEL_HEADERS)
 
 build/src/scene/signage.o: $(MODEL_HEADERS)
 
-build/src/scene/box_dropper.o: $(MODEL_HEADERS)
+build/src/scene/box_dropper.o: $(MODEL_HEADERS) build/assets/models/dynamic_model_list.h
 
 build/src/scene/pedestal.o: $(MODEL_HEADERS)
 

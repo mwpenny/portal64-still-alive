@@ -46,6 +46,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         PROPS_CYLINDER_TEST_DYNAMIC_MODEL,
         .materialIndex = PLASTIC_PLASTICWALL001A_INDEX,
         .soundClipId = -1,
+        .soundFizzleId = -1,
     },
     [DECOR_TYPE_RADIO] = {
         {
@@ -61,6 +62,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         .materialIndex = RADIO_INDEX,
         .materialIndexFizzled = RADIO_FIZZLED_INDEX,
         .soundClipId = SOUNDS_LOOPING_RADIO_MIX,
+        .soundFizzleId = SOUNDS_DINOSAUR_FIZZLE,
     },
     [DECOR_TYPE_CUBE] = {
         {
@@ -76,6 +78,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         .materialIndex = CUBE_INDEX,
         .materialIndexFizzled = CUBE_FIZZLED_INDEX,
         .soundClipId = -1,
+        .soundFizzleId = -1,
         .flags = DecorObjectFlagsImportant,
     },
     [DECOR_TYPE_CUBE_UNIMPORTANT] = {
@@ -92,6 +95,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         .materialIndex = CUBE_INDEX,
         .materialIndexFizzled = CUBE_FIZZLED_INDEX,
         .soundClipId = -1,
+        .soundFizzleId = -1,
     },
     [DECOR_TYPE_AUTOPORTAL_FRAME] = {
         {
@@ -106,6 +110,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         PROPS_AUTOPORTAL_FRAME_AUTOPORTAL_FRAME_DYNAMIC_MODEL,
         .materialIndex = AUTOPORTAL_FRAME_INDEX,
         .soundClipId = -1,
+        .soundFizzleId = -1,
     }
 };
 

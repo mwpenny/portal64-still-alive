@@ -20,6 +20,9 @@
 #include "../build/assets/models/player/chell.h"
 #include "../build/assets/materials/static.h"
 
+#include "../debugger/debugger.h"
+#include <string.h>
+
 #define GRAB_RAYCAST_DISTANCE   2.5f
 #define DROWN_TIME              2.0f
 #define STEP_TIME               0.35f
@@ -464,10 +467,13 @@ void playerGivePortalGun(struct Player* player, int flags) {
 }
 
 void playerUpdateSpeedSound(struct Player* player) {
-    float soundPlayerVolume;
-    soundPlayerVolume = sqrtf(vector3MagSqrd(&player->body.velocity))*(1.0f / MAX_PORTAL_SPEED);
-    soundPlayerVolume = clampf(soundPlayerVolume, 0.0, 1.0f);
-    soundPlayerAdjustVolume(player->flyingSoundLoopId, soundPlayerVolume);
+    // float soundPlayerVolume;
+    // soundPlayerVolume = sqrtf(vector3MagSqrd(&player->body.velocity))*(1.0f / MAX_PORTAL_SPEED);
+    // soundPlayerVolume = clampf(soundPlayerVolume, 0.0, 1.0f);
+    // soundPlayerAdjustVolume(player->flyingSoundLoopId, soundPlayerVolume);
+
+    // char message[32];
+    // gdbSendMessage(GDBDataTypeText, message, sprintf(message, "%d", (int)(soundPlayerVolume * 100.0f)));
 }
 
 void playerKill(struct Player* player, int isUnderwater) {
@@ -611,10 +617,6 @@ void playerUpdate(struct Player* player) {
                 player->lookTransform.rotation = behindRotation;
             }
         }
-    }
-
-    if (player->grabConstraint.object && controllerActionGet(ControllerActionOpenPortal0)) {
-        player->grabConstraint.object->body->flags |= RigidBodyFizzled;
     }
 
     targetVelocity.y = player->body.velocity.y;

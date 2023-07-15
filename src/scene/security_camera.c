@@ -109,7 +109,7 @@ void securityCameraRender(void* data, struct DynamicRenderDataList* renderList, 
 }
 
 void securityCameraInit(struct SecurityCamera* securityCamera, struct SecurityCameraDefinition* definition) {
-    collisionObjectInit(&securityCamera->collisionObject, &gSecurityCameraCollider, &securityCamera->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
+    collisionObjectInit(&securityCamera->collisionObject, &gSecurityCameraCollider, &securityCamera->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER);
     rigidBodyMarkKinematic(&securityCamera->rigidBody);
     collisionSceneAddDynamicObject(&securityCamera->collisionObject);
 
@@ -130,7 +130,7 @@ void securityCameraInit(struct SecurityCamera* securityCamera, struct SecurityCa
 }
 
 void securityCameraUpdate(struct SecurityCamera* securityCamera) {
-    if (decorObjectUpdateFizzler(&securityCamera->collisionObject, &securityCamera->fizzleTime)) {
+    if (decorObjectUpdateFizzler(&securityCamera->collisionObject, &securityCamera->fizzleTime) == FizzleCheckResultEnd) {
         dynamicSceneRemove(securityCamera->dynamicId);
         collisionSceneRemoveDynamicObject(&securityCamera->collisionObject);
         securityCamera->dynamicId = INVALID_DYNAMIC_OBJECT;

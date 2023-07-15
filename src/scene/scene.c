@@ -543,6 +543,28 @@ void sceneUpdate(struct Scene* scene) {
         scene->player.flags &= ~PlayerInCutscene;
     }
 
+    // objects that can fizzle need to update before the player
+    int decorWriteIndex = 0;
+
+    for (int i = 0; i < scene->decorCount; ++i) {
+        if (!decorObjectUpdate(scene->decor[i])) {
+            decorObjectDelete(scene->decor[i]);
+            continue;;
+        }
+
+        if (decorWriteIndex != i) {
+            scene->decor[decorWriteIndex] = scene->decor[i];
+        }
+
+        ++decorWriteIndex;
+    }
+
+    scene->decorCount = decorWriteIndex;
+
+    for (int i = 0; i < scene->securityCameraCount; ++i) {
+        securityCameraUpdate(&scene->securityCameras[i]);
+    }
+
     portalGunUpdate(&scene->portalGun, &scene->player);
     playerUpdate(&scene->player);
     sceneUpdateListeners(scene);
@@ -565,33 +587,12 @@ void sceneUpdate(struct Scene* scene) {
         ballCatcherUpdate(&scene->ballCatchers[i], scene->ballLaunchers, scene->ballLancherCount);
     }
 
-    for (int i = 0; i < scene->securityCameraCount; ++i) {
-        securityCameraUpdate(&scene->securityCameras[i]);
-    }
-
     cutsceneCheckTriggers(&scene->player.lookTransform.position);
     signalsEvaluateSignals(gCurrentLevel->signalOperators, gCurrentLevel->signalOperatorCount);
 
     for (int i = 0; i < scene->doorCount; ++i) {
         doorUpdate(&scene->doors[i]);
     }
-
-    int decorWriteIndex = 0;
-
-    for (int i = 0; i < scene->decorCount; ++i) {
-        if (!decorObjectUpdate(scene->decor[i])) {
-            decorObjectDelete(scene->decor[i]);
-            continue;;
-        }
-
-        if (decorWriteIndex != i) {
-            scene->decor[decorWriteIndex] = scene->decor[i];
-        }
-
-        ++decorWriteIndex;
-    }
-
-    scene->decorCount = decorWriteIndex;
 
     for (int i = 0; i < scene->fizzlerCount; ++i) {
         fizzlerUpdate(&scene->fizzlers[i]);

@@ -308,9 +308,15 @@ void soundPlayerAdjustVolume(ALSndId soundId, float newVolume) {
     if (activeSound) {
         if (activeSound->flags & SOUND_FLAGS_3D){
             activeSound->volume = newVolume;
-        }else{
-            alSndpSetSound(&gSoundPlayer, activeSound->soundId);
-            alSndpSetVol(&gSoundPlayer, (short)(32767 * newVolume));
+        } else {
+            short newVolumeInt = (short)(32767 * newVolume);
+            short existingVolume = (short)(32767 * activeSound->volume);
+
+            if (newVolumeInt != existingVolume) {
+                alSndpSetSound(&gSoundPlayer, activeSound->soundId);
+                alSndpSetVol(&gSoundPlayer, newVolumeInt);
+                activeSound->volume = newVolume;
+            }
         }
     }
 }

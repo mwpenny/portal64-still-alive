@@ -100,11 +100,7 @@ void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* d
 
     dynamicSceneSetRoomFlags(object->dynamicId, ROOM_FLAG_FROM_INDEX(room));
 
-    if (definition->soundClipId != -1) {
-        object->playingSound = soundPlayerPlay(definition->soundClipId, 1.0f, 1.0f, &object->rigidBody.transform.position, &object->rigidBody.velocity);
-    } else {
-        object->playingSound = SOUND_ID_NONE;
-    }
+    object->playingSound = SOUND_ID_NONE;
 }
 
 void decorObjectClenaup(struct DecorObject* decorObject) {
@@ -143,7 +139,6 @@ enum FizzleCheckResult decorObjectUpdateFizzler(struct CollisionObject* collisio
         collisionObject->body->flags |= RigidBodyDisableGravity;
 
         if (*fizzleTime > 1.0f) {
-            collisionObject->body->flags &= ~RigidBodyFizzled;
             result = FizzleCheckResultEnd;
         }
     }
@@ -166,6 +161,10 @@ int decorObjectUpdate(struct DecorObject* decorObject) {
         if (decorObject->playingSound != SOUND_ID_NONE) {
             soundPlayerStop(decorObject->playingSound);
             decorObject->playingSound = SOUND_ID_NONE;
+            
+            if (decorObject->definition->soundFizzleId != SOUND_ID_NONE) {
+                decorObject->playingSound = soundPlayerPlay(decorObject->definition->soundFizzleId, 2.0f, 0.5f, &decorObject->rigidBody.transform.position, &decorObject->rigidBody.velocity);
+            }
         }
     } else if (fizzleResult == FizzleCheckResultEnd) {
         if (decorObject->definition->flags & DecorObjectFlagsImportant) {
@@ -174,7 +173,15 @@ int decorObjectUpdate(struct DecorObject* decorObject) {
             return 1;
         }
 
+        if (soundPlayerIsPlaying(decorObject->playingSound)) {
+            return 1;
+        }
+
         return 0;
+    }
+
+    if (decorObject->definition->soundClipId != -1 && decorObject->playingSound == SOUND_ID_NONE && decorObject->fizzleTime == 0.0f) {
+        decorObject->playingSound = soundPlayerPlay(decorObject->definition->soundClipId, 1.0f, 1.0f, &decorObject->rigidBody.transform.position, &decorObject->rigidBody.velocity);
     }
 
     dynamicSceneSetRoomFlags(decorObject->dynamicId, ROOM_FLAG_FROM_INDEX(decorObject->rigidBody.currentRoom));

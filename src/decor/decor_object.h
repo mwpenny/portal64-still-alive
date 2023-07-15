@@ -20,6 +20,7 @@ struct DecorObjectDefinition {
     short materialIndex;
     short materialIndexFizzled;
     short soundClipId;
+    short soundFizzleId;
     short flags;
 };
 

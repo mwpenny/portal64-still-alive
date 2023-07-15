@@ -158,6 +158,7 @@ make -f Makefile.docker
 
 ## Current Bug TODO List (Hardware Verified) (High->Low priority)
 ----------------------- v8
+- [ ] Held objects to a funny rotation bit
 - [ ] Player can clip through chamber 7 by walking back up the stairs (near the top).
 - [ ] player can clip through back of elevator by jumping and strafeing at the back corners while inside.
 - [ ] Player can trap themselves in chamber 5 by following instructions issue #75
