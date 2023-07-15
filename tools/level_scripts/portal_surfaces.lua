@@ -8,12 +8,6 @@ local dynamic_collision_export = require('tools.level_scripts.dynamic_collision_
 
 local portal_surfaces = {}
 
-local portalable_surfaces = {
-    concrete_modular_wall001d = true,
-    concrete_modular_ceiling001a = true,
-    concrete_modular_floor001a = true,
-}
-
 local static_to_portable_surface_mapping = {}
 local portal_surfaces = {}
 
@@ -189,7 +183,7 @@ local function calculate_portal_single_surface(mesh, mesh_display_list)
 end
 
 for _, surface in pairs(static_export.static_nodes) do
-    if (surface.mesh.material and portalable_surfaces[surface.mesh.material.name]) then
+    if surface.accept_portals then
         table.insert(static_to_portable_surface_mapping, #portal_surfaces)
         table.insert(portal_surfaces, calculate_portal_single_surface(surface.mesh, surface.display_list))
     else
@@ -200,10 +194,6 @@ end
 sk_definition_writer.add_definition("portal_surfaces", "struct PortalSurface[]", "_geo", portal_surfaces)
 
 local function is_coplanar_portal_surface(quad, mesh, collision_bb)
-    if not mesh.material or not portalable_surfaces[mesh.material.name] then
-        return false
-    end
-
     if not collision_export.is_coplanar(quad, mesh) then
         return false
     end
@@ -229,7 +219,7 @@ for _, quad in pairs(collision_export.colliders) do
     collision_with_padding.max = collision_with_padding.max + 0.1
 
     for static_index, surface in pairs(static_export.static_nodes) do
-        if not surface.transform_index and is_coplanar_portal_surface(quad, surface.mesh, collision_with_padding) then
+        if not surface.transform_index and surface.accept_portals and is_coplanar_portal_surface(quad, surface.mesh, collision_with_padding) then
             local portal_surface_index = static_to_portable_surface_mapping[static_index]
 
             if portal_surface_index ~= -1 then

@@ -121,8 +121,6 @@ make -f Makefile.docker
 <br />
 
 ## Current New Feature TODO List
-- [ ] fizzle radio/camera
-- [ ] add fizller sides
 - [ ] Add auto save checkpoints
 - [ ] disable portal surfaces manually on some surfaces #135
 - [ ] Portal not rendering recursively sometimes #138
@@ -135,6 +133,8 @@ make -f Makefile.docker
 - [ ] don't repeat camera destruction speech every time
 - [ ] don't count boxes on buttons until it is released and stable
 - [ ] dynamically load data
+- [x] fizzle radio/camera
+- [x] add fizller sides
 - [x] flash portal opacity when other portal moves
 - [x] rotate auto uv
 - [x] Vertex lighting #39

@@ -9,6 +9,12 @@ local animation = require('tools.level_scripts.animation')
 sk_definition_writer.add_header('"../build/assets/materials/static.h"')
 sk_definition_writer.add_header('"levels/level_definition.h"')
 
+local portalable_surfaces = {
+    concrete_modular_wall001d = true,
+    concrete_modular_ceiling001a = true,
+    concrete_modular_floor001a = true,
+}
+
 local function proccessStaticNodes(nodes)
     local result = {}
     local bb_scale = sk_input.settings.fixed_point_scale
@@ -49,7 +55,8 @@ local function proccessStaticNodes(nodes)
                 display_list = sk_definition_writer.raw(gfxName), 
                 material_index = sk_definition_writer.raw(chunkV.material.macro_name),
                 transform_index = transform_index,
-                room_index = room_export.node_nearest_room_index(v.node) or 0
+                room_index = room_export.node_nearest_room_index(v.node) or 0,
+                accept_portals = chunkV.mesh.material and portalable_surfaces[chunkV.mesh.material.name] and not sk_scene.find_flag_argument(v.arguments, "no_portals"),
             })
         end
     end
