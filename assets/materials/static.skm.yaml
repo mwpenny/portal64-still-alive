@@ -775,6 +775,21 @@ materials:
           wrap: false
         t:
           wrap: false
+  
+  portal_cleanser_wall:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/portal_cleanser.png
+      fmt: G_IM_FMT_RGBA
+      siz: G_IM_SIZ_16b
+      s:
+        mirror: true
+      t:
+        mirror: true
+        
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "TEXEL0", "0"]
 
   light_rail_beam:
     gDPSetTile:

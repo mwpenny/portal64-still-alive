@@ -181,6 +181,7 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/combine_ball_catcher.blend \
 	assets/models/props/combine_ball_launcher.blend \
 	assets/models/props/cylinder_test.blend \
+	assets/models/props/portal_cleanser.blend \
 	assets/models/props/radio.blend \
 	assets/models/props/round_elevator.blend \
 	assets/models/props/round_elevator_interior.blend \
@@ -233,6 +234,8 @@ build/src/scene/render_plan.o: $(MODEL_HEADERS)
 build/src/scene/portal_render.o: $(MODEL_HEADERS)
 
 build/src/scene/clock.o: $(MODEL_HEADERS)
+
+build/src/scene/fizzler.o: $(MODEL_HEADERS)
 
 build/src/scene/security_camera.o: build/src/audio/clips.h $(MODEL_HEADERS)
 
