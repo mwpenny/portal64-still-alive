@@ -6,6 +6,7 @@
 #include "../levels/levels.h"
 #include "../levels/cutscene_runner.h"
 #include "../build/assets/models/signage/clock_digits.h"
+#include "../util/memory.h"
 
 #include "../build/assets/models/dynamic_model_list.h"
 
@@ -33,11 +34,13 @@ void clockSetDigit(int digitIndex, int currDigit) {
         return;
     }
 
+    Vtx* digitPointer = dynamicAssetFixPointer(SIGNAGE_CLOCK_DIGITS_DYNAMIC_MODEL, gClockDigits[digitIndex]);
+
     for (int i = 0; i < 4; ++i) {
-        gClockDigits[digitIndex][i].v.tc[0] += (currDigit - prevDigit) * DIGIT_WIDTH;
+        digitPointer[i].v.tc[0] += (currDigit - prevDigit) * DIGIT_WIDTH;
     }
     gCurrentClockDigits[digitIndex] = (u8)currDigit;
-    osWritebackDCache(gClockDigits[digitIndex], sizeof(Vtx) * 4);
+    osWritebackDCache(digitPointer, sizeof(Vtx) * 4);
 }
 
 void clockSetTime(float timeInSeconds) {
@@ -98,7 +101,7 @@ void clockRenderRender(void* data, struct DynamicRenderDataList* renderList, str
 
     dynamicRenderListAddData(
         renderList,
-        signage_clock_digits_model_gfx,
+        dynamicAssetModel(SIGNAGE_CLOCK_DIGITS_DYNAMIC_MODEL),
         matrix,
         CLOCK_DIGITS_INDEX,
         &clock->transform.position,
@@ -107,7 +110,8 @@ void clockRenderRender(void* data, struct DynamicRenderDataList* renderList, str
 }
 
 void clockInit(struct Clock* clock, struct ClockDefinition* definition) {
-    dynamicAssetPreload(SIGNAGE_CLOCK_DYNAMIC_MODEL);
+    dynamicAssetModelPreload(SIGNAGE_CLOCK_DYNAMIC_MODEL);
+    dynamicAssetModelPreload(SIGNAGE_CLOCK_DIGITS_DYNAMIC_MODEL);
 
     clock->transform.position = definition->position;
     clock->transform.rotation = definition->rotation;
@@ -117,6 +121,8 @@ void clockInit(struct Clock* clock, struct ClockDefinition* definition) {
 
     int dynamicId = dynamicSceneAdd(clock, clockRenderRender, &clock->transform.position, 0.8f);
     dynamicSceneSetRoomFlags(dynamicId, ROOM_FLAG_FROM_INDEX(clock->roomIndex));
+    
+    zeroMemory(gCurrentClockDigits, sizeof(gCurrentClockDigits));
 }
 
 void clockUpdate(struct Clock* clock) {

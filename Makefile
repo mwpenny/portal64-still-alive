@@ -168,20 +168,15 @@ build/src/scene/elevator.o: build/assets/models/props/round_elevator_collision.h
 # Source engine scale is 64x
 #
 
-MODEL_LIST = assets/models/cube/cube.blend \
-	assets/models/player/chell.blend \
+MODEL_LIST = assets/models/player/chell.blend \
 	assets/models/portal_gun/v_portalgun.blend \
 	assets/models/portal_gun/w_portalgun.blend \
-	assets/models/props/autoportal_frame/autoportal_frame.blend \
 	assets/models/props/button.blend \
-	assets/models/signage/clock_digits.blend \
 	assets/models/props/door_01.blend \
 	assets/models/props/door_02.blend \
 	assets/models/props/combine_ball_catcher.blend \
 	assets/models/props/combine_ball_launcher.blend \
-	assets/models/props/cylinder_test.blend \
 	assets/models/props/portal_cleanser.blend \
-	assets/models/props/radio.blend \
 	assets/models/props/round_elevator.blend \
 	assets/models/props/round_elevator_interior.blend \
 	assets/models/props/round_elevator_collision.blend \
@@ -201,7 +196,12 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/grav_flare.blend \
 	assets/models/fleck_ash2.blend
 
-DYNAMIC_MODEL_LIST = assets/models/signage/clock.blend
+DYNAMIC_MODEL_LIST = assets/models/cube/cube.blend \
+	assets/models/props/autoportal_frame/autoportal_frame.blend \
+	assets/models/props/cylinder_test.blend \
+	assets/models/props/radio.blend \
+	assets/models/signage/clock_digits.blend \
+	assets/models/signage/clock.blend
 	
 
 ANIM_LIST = build/assets/models/pedestal_anim.o \
@@ -224,7 +224,7 @@ build/assets/models/%.h build/assets/models/%_geo.c build/assets/models/%_anim.c
 
 build/src/models/models.o: $(MODEL_HEADERS)
 
-build/src/decor/decor_object_list.o: $(MODEL_HEADERS)
+build/src/decor/decor_object_list.o: build/assets/models/dynamic_model_list.h build/assets/materials/static.h
 
 build/src/scene/portal.o: $(MODEL_HEADERS)
 

@@ -7,10 +7,11 @@
 #include "../util/time.h"
 #include "signals.h"
 #include "../decor/decor_object_list.h"
+#include "../util/dynamic_asset_loader.h"
 
 #include "../../build/assets/materials/static.h"
-#include "../../build/assets/models/cube/cube.h"
 #include "../../build/assets/models/props/box_dropper.h"
+#include "../../build/assets/models/dynamic_model_list.h"
 
 #define DROOPER_RELOAD_TIME     2.0f
 #define DROPPER_DROP_TIME       0.5f
@@ -79,7 +80,7 @@ void boxDropperRender(void* data, struct DynamicRenderDataList* renderList, stru
 
         dynamicRenderListAddData(
             renderList, 
-            cube_cube_model_gfx, 
+            dynamicAssetModel(CUBE_CUBE_DYNAMIC_MODEL), 
             pendingBoxMatrix, 
             CUBE_INDEX, 
             &dropper->transform.position, 
@@ -106,6 +107,8 @@ void boxDropperInit(struct BoxDropper* dropper, struct BoxDropperDefinition* def
     dropper->reloadTimer = DROOPER_RELOAD_TIME;
 
     dynamicSceneSetRoomFlags(dropper->dynamicId, ROOM_FLAG_FROM_INDEX(dropper->roomIndex));
+
+    dynamicAssetModelPreload(CUBE_CUBE_DYNAMIC_MODEL);
 }
 
 void boxDropperUpdate(struct BoxDropper* dropper) {

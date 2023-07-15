@@ -10,11 +10,11 @@ struct DynamicAssetModel {
     Gfx* model;
 };
 
-Gfx* dynamicAssetLoadModel(struct DynamicAssetModel* model);
-
 void dynamicAssetsReset();
 
-void dynamicAssetPreload(int index);
+void dynamicAssetModelPreload(int index);
 Gfx* dynamicAssetModel(int index);
+
+void* dynamicAssetFixPointer(int index, void* ptr);
 
 #endif

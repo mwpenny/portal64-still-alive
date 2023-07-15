@@ -132,7 +132,7 @@ make -f Makefile.docker
 - [ ] pausing while glados is speaking can end her speech early
 - [ ] don't repeat camera destruction speech every time
 - [ ] don't count boxes on buttons until it is released and stable
-- [ ] dynamically load data
+- [x] dynamically load data
 - [x] fizzle radio/camera
 - [x] add fizller sides
 - [x] flash portal opacity when other portal moves

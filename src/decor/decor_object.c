@@ -5,6 +5,7 @@
 #include "../util/memory.h"
 #include "../audio/soundplayer.h"
 #include "../util/time.h"
+#include "../util/dynamic_asset_loader.h"
 
 #define TIME_TO_FIZZLE      2.0f
 #define FIZZLE_TIME_STEP    (FIXED_DELTA_TIME / TIME_TO_FIZZLE)
@@ -44,7 +45,7 @@ void decorObjectRender(void* data, struct DynamicRenderDataList* renderList, str
 
     dynamicRenderListAddData(
         renderList, 
-        decorBuildFizzleGfx(object->definition->graphics, object->fizzleTime, renderState), 
+        decorBuildFizzleGfx(dynamicAssetModel(object->definition->dynamicModelIndex), object->fizzleTime, renderState), 
         matrix, 
         (object->fizzleTime > 0.0f) ? object->definition->materialIndexFizzled : object->definition->materialIndex, 
         &object->rigidBody.transform.position, 
@@ -88,6 +89,8 @@ void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* d
     object->originalPosition = at->position;
     object->originalRotation = at->rotation;
     object->originalRoom = room;
+
+    dynamicAssetModelPreload(definition->dynamicModelIndex);
 
     if (definition->colliderType.type != CollisionShapeTypeNone) {
         collisionObjectUpdateBB(&object->collisionObject);

@@ -16,7 +16,7 @@ struct DecorObjectDefinition {
     struct ColliderTypeData colliderType;
     float mass;
     float radius;
-    Gfx* graphics;
+    short dynamicModelIndex;
     short materialIndex;
     short materialIndexFizzled;
     short soundClipId;
