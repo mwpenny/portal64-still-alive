@@ -10,11 +10,11 @@ function getSegmentName(objectLocation) {
     return noExtension.replace(InvalidTokenCharacter, '_');
 }
 
-function generateLD(objectLocation) {
+function generateLD(segmentLocation, objectLocation) {
     const segmentName = getSegmentName(objectLocation);
 
     return `
-    BEGIN_SEG(${segmentName}, 0x02000000)
+    BEGIN_SEG(${segmentName}, ${segmentLocation})
     {
        ${objectLocation}(.data);
        ${objectLocation}(.bss);
@@ -23,10 +23,11 @@ function generateLD(objectLocation) {
     `;
 }
 
-function generateData(objectLocations) {
-    return objectLocations.map(objectLocation => generateLD(objectLocation)).join('\n');
+function generateData(segmentLocation, objectLocations) {
+    return objectLocations.map(objectLocation => generateLD(segmentLocation, objectLocation)).join('\n');
 }
 
 const output = process.argv[2];
+const segmentLocation = process.argv[3];
 
-fs.writeFileSync(output, generateData(process.argv.slice(3)));
+fs.writeFileSync(output, generateData(segmentLocation, process.argv.slice(4)));

@@ -5,10 +5,13 @@
 
 #include "../levels/levels.h"
 #include "../levels/cutscene_runner.h"
-#include "../build/assets/models/signage/clock.h"
 #include "../build/assets/models/signage/clock_digits.h"
 
+#include "../build/assets/models/dynamic_model_list.h"
+
 #include "../../build/assets/materials/static.h"
+
+#include "../util/dynamic_asset_loader.h"
 
 #include <math.h>
 
@@ -86,7 +89,7 @@ void clockRenderRender(void* data, struct DynamicRenderDataList* renderList, str
 
     dynamicRenderListAddData(
         renderList,
-        signage_clock_model_gfx,
+        dynamicAssetModel(SIGNAGE_CLOCK_DYNAMIC_MODEL),
         matrix,
         AUTOPORTAL_FRAME_INDEX,
         &clock->transform.position,
@@ -104,6 +107,8 @@ void clockRenderRender(void* data, struct DynamicRenderDataList* renderList, str
 }
 
 void clockInit(struct Clock* clock, struct ClockDefinition* definition) {
+    dynamicAssetPreload(SIGNAGE_CLOCK_DYNAMIC_MODEL);
+
     clock->transform.position = definition->position;
     clock->transform.rotation = definition->rotation;
     clock->transform.scale = gOneVec;

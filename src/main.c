@@ -20,6 +20,7 @@
 #include "levels/cutscene_runner.h"
 #include "savefile/savefile.h"
 #include "sk64/skelatool_animator.h"
+#include "util/dynamic_asset_loader.h"
 
 #include "levels/levels.h"
 #include "savefile/checkpoint.h"
@@ -232,6 +233,7 @@ static void gameProc(void* arg) {
                         heapInit(_heapStart, memoryEnd);
                         levelLoadWithCallbacks(levelGetQueued());
                         cutsceneRunnerReset();
+                        dynamicAssetsReset();
                         gSceneCallbacks->initCallback(gSceneCallbacks->data);
                     }
 

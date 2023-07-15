@@ -169,13 +169,12 @@ build/src/scene/elevator.o: build/assets/models/props/round_elevator_collision.h
 #
 
 MODEL_LIST = assets/models/cube/cube.blend \
-	assets/models/signage/clock.blend \
-	assets/models/signage/clock_digits.blend \
 	assets/models/player/chell.blend \
 	assets/models/portal_gun/v_portalgun.blend \
 	assets/models/portal_gun/w_portalgun.blend \
 	assets/models/props/autoportal_frame/autoportal_frame.blend \
 	assets/models/props/button.blend \
+	assets/models/signage/clock_digits.blend \
 	assets/models/props/door_01.blend \
 	assets/models/props/door_02.blend \
 	assets/models/props/combine_ball_catcher.blend \
@@ -202,6 +201,9 @@ MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/grav_flare.blend \
 	assets/models/fleck_ash2.blend
 
+DYNAMIC_MODEL_LIST = assets/models/signage/clock.blend
+	
+
 ANIM_LIST = build/assets/models/pedestal_anim.o \
 	build/assets/models/props/box_dropper_anim.o \
 	build/assets/models/props/combine_ball_catcher_anim.o \
@@ -213,6 +215,9 @@ ANIM_LIST = build/assets/models/pedestal_anim.o \
 
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
 MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)
+
+DYNAMIC_MODEL_HEADERS = $(DYNAMIC_MODEL_LIST:%.blend=build/%.h)
+DYNAMIC_MODEL_OBJECTS = $(DYNAMIC_MODEL_LIST:%.blend=build/%_geo.o)
 
 build/assets/models/%.h build/assets/models/%_geo.c build/assets/models/%_anim.c: build/assets/models/%.fbx assets/models/%.flags assets/materials/elevator.skm.yaml assets/materials/objects.skm.yaml assets/materials/static.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
 	$(SKELATOOL64) --fixed-point-scale 256 --model-scale 0.01 --name $(<:build/assets/models/%.fbx=%) $(shell cat $(<:build/assets/models/%.fbx=assets/models/%.flags)) -o $(<:%.fbx=%.h) $<
@@ -233,7 +238,7 @@ build/src/scene/render_plan.o: $(MODEL_HEADERS)
 
 build/src/scene/portal_render.o: $(MODEL_HEADERS)
 
-build/src/scene/clock.o: $(MODEL_HEADERS)
+build/src/scene/clock.o: build/assets/models/dynamic_model_list.h
 
 build/src/scene/fizzler.o: $(MODEL_HEADERS)
 
@@ -271,11 +276,14 @@ build/src/menu/joystick_options.o: build/assets/materials/ui.h build/src/audio/c
 
 build/src/menu/controls.o: build/assets/materials/ui.h build/src/audio/clips.h
 
+build/src/util/dynamic_asset_data.o: build/assets/models/dynamic_model_list_data.h
+
 build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
 
 build/assets/models/props/combine_ball_catcher.h: assets/materials/ball_catcher.skm.yaml
 
 build/assets/models/props/combine_ball_launcher.h: assets/materials/ball_catcher.skm.yaml
+
 
 ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_00/test_chamber_00_anim.o \
     build/assets/test_chambers/test_chamber_03/test_chamber_03_anim.o \
@@ -329,9 +337,17 @@ build/assets/test_chambers/level_list.h: $(TEST_CHAMBER_HEADERS) tools/generate_
 	@mkdir -p $(@D)
 	node tools/generate_level_list.js $@ $(TEST_CHAMBER_HEADERS)
 
+build/assets/models/dynamic_model_list.h build/assets/models/dynamic_model_list_data.h: $(DYNAMIC_MODEL_HEADERS) tools/generate_dynamic_model_list.js
+	@mkdir -p $(@D)
+	node tools/generate_dynamic_model_list.js build/assets/models/dynamic_model_list.h build/assets/models/dynamic_model_list_data.h $(DYNAMIC_MODEL_HEADERS)
+
 build/levels.ld: $(TEST_CHAMBER_OBJECTS) tools/generate_level_ld.js
 	@mkdir -p $(@D)
-	node tools/generate_level_ld.js $@ $(TEST_CHAMBER_OBJECTS)
+	node tools/generate_level_ld.js $@ 0x02000000 $(TEST_CHAMBER_OBJECTS)
+
+build/dynamic_models.ld: $(DYNAMIC_MODEL_OBJECTS) tools/generate_level_ld.js
+	@mkdir -p $(@D)
+	node tools/generate_level_ld.js $@ 0x03000000 $(DYNAMIC_MODEL_OBJECTS)
 
 build/src/levels/levels.o: build/assets/test_chambers/level_list.h build/assets/materials/static.h
 
@@ -407,7 +423,7 @@ $(CODESEGMENT)_no_debug.o:	$(CODEOBJECTS_NO_DEBUG)
 	$(LD) -o $(CODESEGMENT)_no_debug.o -r $(CODEOBJECTS_NO_DEBUG) $(LDFLAGS)
 
 
-$(CP_LD_SCRIPT)_no_debug.ld: $(LD_SCRIPT) build/levels.ld build/anims.ld
+$(CP_LD_SCRIPT)_no_debug.ld: $(LD_SCRIPT) build/levels.ld build/dynamic_models.ld build/anims.ld
 	cpp -P -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_no_debug.o -o $@ $<
 
 $(BASE_TARGET_NAME).z64: $(CODESEGMENT)_no_debug.o $(OBJECTS) $(DATA_OBJECTS) $(CP_LD_SCRIPT)_no_debug.ld
@@ -425,7 +441,7 @@ endif
 $(CODESEGMENT)_debug.o:	$(CODEOBJECTS_DEBUG)
 	$(LD) -o $(CODESEGMENT)_debug.o -r $(CODEOBJECTS_DEBUG) $(LDFLAGS)
 
-$(CP_LD_SCRIPT)_debug.ld: $(LD_SCRIPT) build/levels.ld build/anims.ld
+$(CP_LD_SCRIPT)_debug.ld: $(LD_SCRIPT) build/levels.ld build/dynamic_models.ld build/anims.ld
 	cpp -P -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_debug.o -o $@ $<
 
 $(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(DATA_OBJECTS) $(CP_LD_SCRIPT)_debug.ld
