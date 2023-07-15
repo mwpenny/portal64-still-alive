@@ -465,10 +465,8 @@ void playerGivePortalGun(struct Player* player, int flags) {
 
 void playerUpdateSpeedSound(struct Player* player) {
     float soundPlayerVolume;
-    soundPlayerVolume = PLAYER_SPEED*8 - sqrtf(vector3MagSqrd(&player->body.velocity))*0.70;
-    soundPlayerVolume = clampf(soundPlayerVolume, 0.0, PLAYER_SPEED*8);
-    soundPlayerVolume /= PLAYER_SPEED*8;
-    soundPlayerVolume = 1.0 - soundPlayerVolume;
+    soundPlayerVolume = sqrtf(vector3MagSqrd(&player->body.velocity))*(1.0f / MAX_PORTAL_SPEED);
+    soundPlayerVolume = clampf(soundPlayerVolume, 0.0, 1.0f);
     soundPlayerAdjustVolume(player->flyingSoundLoopId, soundPlayerVolume);
 }
 
