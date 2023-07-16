@@ -8,10 +8,11 @@
 #include "signals.h"
 #include "../audio/clips.h"
 #include "../audio/soundplayer.h"
+#include "../util/dynamic_asset_loader.h"
 
 #include "../build/assets/models/props/combine_ball_launcher.h"
 #include "../build/assets/materials/static.h"
-
+#include "../../build/assets/models/dynamic_animated_model_list.h"
 
 struct CollisionBox gBallLauncherBox = {
     {0.5f, 0.5f, 0.5f},
@@ -46,7 +47,7 @@ void ballLauncherRender(void* data, struct DynamicRenderDataList* renderList, st
 
     dynamicRenderListAddData(
         renderList,
-        props_combine_ball_launcher_model_gfx,
+        launcher->armature.displayList,
         matrix,
         BALL_CATCHER_INDEX,
         &launcher->rigidBody.transform.position,
@@ -55,6 +56,8 @@ void ballLauncherRender(void* data, struct DynamicRenderDataList* renderList, st
 }
 
 void ballLauncherInit(struct BallLauncher* launcher, struct BallLauncherDefinition* definition) {
+    struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_COMBINE_BALL_LAUNCHER_DYNAMIC_ANIMATED_MODEL);
+
     collisionObjectInit(&launcher->collisionObject, &gBallLauncherCollider, &launcher->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_BLOCK_BALL);
     rigidBodyMarkKinematic(&launcher->rigidBody);
     collisionSceneAddDynamicObject(&launcher->collisionObject);
@@ -74,7 +77,7 @@ void ballLauncherInit(struct BallLauncher* launcher, struct BallLauncherDefiniti
     dynamicSceneSetRoomFlags(launcher->dynamicId, ROOM_FLAG_FROM_INDEX(launcher->rigidBody.currentRoom));
 
     skAnimatorInit(&launcher->animator, PROPS_COMBINE_BALL_LAUNCHER_DEFAULT_BONES_COUNT);
-    skArmatureInit(&launcher->armature, &props_combine_ball_launcher_armature);
+    skArmatureInit(&launcher->armature, armature->armature);
 
     ballInitInactive(&launcher->currentBall);
 }
@@ -94,7 +97,7 @@ void ballLauncherUpdate(struct BallLauncher* launcher) {
         vector3Scale(&initialVelocity, &initialVelocity, BALL_VELOCITY);
 
         ballInit(&launcher->currentBall, &launcher->rigidBody.transform.position, &initialVelocity, launcher->rigidBody.currentRoom, launcher->ballLifetime);
-        skAnimatorRunClip(&launcher->animator, &props_combine_ball_launcher_Armature_launch_clip, 0.0f, 0);
+        skAnimatorRunClip(&launcher->animator, dynamicAssetClip(PROPS_COMBINE_BALL_LAUNCHER_DYNAMIC_ANIMATED_MODEL, PROPS_COMBINE_BALL_LAUNCHER_ARMATURE_LAUNCH_CLIP_INDEX), 0.0f, 0);
         soundPlayerPlay(soundsBallLaunch, 1.0f, 1.0f, &launcher->rigidBody.transform.position, &gZeroVec);
     }
 

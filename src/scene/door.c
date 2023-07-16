@@ -2,15 +2,16 @@
 
 #include "../graphics/render_scene.h"
 #include "defs.h"
-#include "../models/models.h"
 #include "../scene/dynamic_scene.h"
 #include "signals.h"
 #include "../math/mathf.h"
 #include "../util/time.h"
 #include "../physics/collision_box.h"
 #include "../physics/collision_scene.h"
+#include "../util/dynamic_asset_loader.h"
 
 #include "../build/assets/materials/static.h"
+#include "../../build/assets/models/dynamic_animated_model_list.h"
 
 #include "../build/assets/models/props/door_01.h"
 #include "../build/assets/models/props/door_02.h"
@@ -33,22 +34,20 @@ struct ColliderTypeData gDoorCollider = {
 
 struct DoorTypeDefinition gDoorTypeDefinitions[] = {
     [DoorType01] = {
-        &props_door_01_armature,
-        &props_door_01_model_gfx[0],
-        &props_door_01_Armature_open_clip,
-        &props_door_01_Armature_close_clip,
-        &props_door_01_Armature_opened_clip,
+        PROPS_DOOR_01_DYNAMIC_ANIMATED_MODEL,
+        PROPS_DOOR_01_ARMATURE_OPEN_CLIP_INDEX,
+        PROPS_DOOR_01_ARMATURE_CLOSE_CLIP_INDEX,
+        PROPS_DOOR_01_ARMATURE_OPENED_CLIP_INDEX,
         DOOR_01_INDEX,
         -1,
         1.0f,
         {0.0f, 0.0f, 0.0f, 1.0f},
     },
     [DoorType02] = {
-        &props_door_02_armature,
-        &props_door_02_model_gfx[0],
-        &props_door_02_Armature_open_clip,
-        &props_door_02_Armature_close_clip,
-        &props_door_02_Armature_opened_clip,
+        PROPS_DOOR_02_DYNAMIC_ANIMATED_MODEL,
+        PROPS_DOOR_02_ARMATURE_OPEN_CLIP_INDEX,
+        PROPS_DOOR_02_ARMATURE_CLOSE_CLIP_INDEX,
+        PROPS_DOOR_02_ARMATURE_OPENED_CLIP_INDEX,
         DOOR_02_INDEX,
         PROPS_DOOR_02_DOOR_BONE,
         3.0f,
@@ -80,7 +79,7 @@ void doorRender(void* data, struct DynamicRenderDataList* renderList, struct Ren
 
     skCalculateTransforms(&door->armature, armature);
 
-    dynamicRenderListAddData(renderList, typeDefinition->model, matrix, typeDefinition->materialIndex, &door->rigidBody.transform.position, armature);
+    dynamicRenderListAddData(renderList, door->armature.displayList, matrix, typeDefinition->materialIndex, &door->rigidBody.transform.position, armature);
 }
 
 void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct World* world) {
@@ -89,9 +88,10 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct W
     collisionSceneAddDynamicObject(&door->collisionObject);
 
     struct DoorTypeDefinition* typeDefinition = &gDoorTypeDefinitions[doorDefinition->doorType];
+    struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(typeDefinition->armatureIndex);
 
-    skArmatureInit(&door->armature, typeDefinition->armature);
-    skAnimatorInit(&door->animator, typeDefinition->armature->numberOfBones);
+    skArmatureInit(&door->armature, armature->armature);
+    skAnimatorInit(&door->animator, armature->armature->numberOfBones);
 
     door->rigidBody.transform.position = doorDefinition->location;
     door->rigidBody.transform.position.y += 1.0f;
@@ -126,9 +126,9 @@ void doorUpdate(struct Door* door) {
 
     if (isOpen != signal) {
         if (signal) {
-            skAnimatorRunClip(&door->animator, typeDefinition->openClip, 0.0f, 0);
+            skAnimatorRunClip(&door->animator, dynamicAssetClip(typeDefinition->armatureIndex, typeDefinition->openClipIndex), 0.0f, 0);
         } else {
-            skAnimatorRunClip(&door->animator, typeDefinition->closeClip, 0.0f, 0);
+            skAnimatorRunClip(&door->animator, dynamicAssetClip(typeDefinition->armatureIndex, typeDefinition->closeClipIndex), 0.0f, 0);
         }
 
         soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec);
@@ -168,6 +168,6 @@ void doorCheckForOpenState(struct Door* door) {
 
     int signal = signalsRead(door->signalIndex);
     if (signal) {
-        skAnimatorRunClip(&door->animator, typeDefinition->openedClip, 0.0f, 0);
+        skAnimatorRunClip(&door->animator, dynamicAssetClip(typeDefinition->armatureIndex, typeDefinition->openedClipIndex), 0.0f, 0);
     }
 }

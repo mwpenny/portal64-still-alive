@@ -2,11 +2,13 @@
 
 #include "../scene/dynamic_scene.h"
 #include "../defs.h"
-#include "../models/models.h"
 #include "../util/time.h"
+#include "../util/dynamic_asset_loader.h"
 
 #include "../build/assets/materials/static.h"
 #include "../build/assets/models/pedestal.h"
+#include "../../build/assets/models/dynamic_animated_model_list.h"
+#include "../../build/assets/models/portal_gun/w_portalgun.h"
 
 struct Vector2 gMaxPedistalRotation;
 #define MAX_PEDISTAL_ROTATION_DEGREES_PER_SEC   (M_PI / 3.0f)
@@ -30,7 +32,8 @@ void pedestalRender(void* data, struct DynamicRenderDataList* renderList, struct
 
     skCalculateTransforms(&pedestal->armature, armature);
 
-    Gfx* attachments = skBuildAttachments(&pedestal->armature, (pedestal->flags & PedestalFlagsDown) ? NULL : &w_portal_gun_gfx, renderState);
+    Gfx* gunAttachment = portal_gun_w_portalgun_model_gfx;
+    Gfx* attachments = skBuildAttachments(&pedestal->armature, (pedestal->flags & PedestalFlagsDown) ? NULL : &gunAttachment, renderState);
 
     Gfx* objectRender = renderStateAllocateDLChunk(renderState, 4);
     Gfx* dl = objectRender;
@@ -39,7 +42,7 @@ void pedestalRender(void* data, struct DynamicRenderDataList* renderList, struct
         gSPSegment(dl++, BONE_ATTACHMENT_SEGMENT,  osVirtualToPhysical(attachments));
     }
     gSPSegment(dl++, MATRIX_TRANSFORM_SEGMENT,  osVirtualToPhysical(armature));
-    gSPDisplayList(dl++, pedestal_model_gfx);
+    gSPDisplayList(dl++, pedestal->armature.displayList);
     gSPEndDisplayList(dl++);
 
     dynamicRenderListAddData(
@@ -53,12 +56,14 @@ void pedestalRender(void* data, struct DynamicRenderDataList* renderList, struct
 }
 
 void pedestalInit(struct Pedestal* pedestal, struct PedestalDefinition* definition) {
+    struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PEDESTAL_DYNAMIC_ANIMATED_MODEL);
+
     transformInitIdentity(&pedestal->transform);
 
     pedestal->transform.position = definition->position;
     pedestal->roomIndex = definition->roomIndex;
 
-    skArmatureInit(&pedestal->armature, &pedestal_armature);
+    skArmatureInit(&pedestal->armature, armature->armature);
 
     skAnimatorInit(&pedestal->animator, PEDESTAL_DEFAULT_BONES_COUNT);
 
@@ -112,7 +117,7 @@ void pedestalUpdate(struct Pedestal* pedestal) {
 void pedestalHide(struct Pedestal* pedestal) {
     soundPlayerPlay(soundsReleaseCube, 3.0f, 0.5f, &pedestal->transform.position, &gZeroVec);
     pedestal->flags |= PedestalFlagsDown;
-    skAnimatorRunClip(&pedestal->animator, &pedestal_Armature_Hide_clip, 0.0f, 0);
+    skAnimatorRunClip(&pedestal->animator, dynamicAssetClip(PEDESTAL_DYNAMIC_ANIMATED_MODEL, PEDESTAL_ARMATURE_HIDE_CLIP_INDEX), 0.0f, 0);
 }
 
 void pedestalPointAt(struct Pedestal* pedestal, struct Vector3* target) {
@@ -121,5 +126,5 @@ void pedestalPointAt(struct Pedestal* pedestal, struct Vector3* target) {
 }
 
 void pedestalSetDown(struct Pedestal* pedestal) {
-    skAnimatorRunClip(&pedestal->animator, &pedestal_Armature_Hidden_clip, 0.0f, 0);
+    skAnimatorRunClip(&pedestal->animator, dynamicAssetClip(PEDESTAL_DYNAMIC_ANIMATED_MODEL, PEDESTAL_ARMATURE_HIDDEN_CLIP_INDEX), 0.0f, 0);
 }

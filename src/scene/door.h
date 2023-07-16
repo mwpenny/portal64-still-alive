@@ -13,11 +13,10 @@ enum DoorFlags {
 };
 
 struct DoorTypeDefinition {
-    struct SKArmatureDefinition* armature;
-    Gfx* model;
-    struct SKAnimationClip* openClip;
-    struct SKAnimationClip* closeClip;
-    struct SKAnimationClip* openedClip;
+    short armatureIndex;
+    short openClipIndex;
+    short closeClipIndex;
+    short openedClipIndex;
     short materialIndex;
     short colliderBoneIndex;
     float closeSpeed;

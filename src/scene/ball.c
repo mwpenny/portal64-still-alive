@@ -10,7 +10,6 @@
 
 #include "../build/assets/models/grav_flare.h"
 #include "../build/assets/models/fleck_ash2.h"
-#include "../build/assets/models/cube/cube.h"
 #include "../build/assets/materials/static.h"
 
 #include "../audio/soundplayer.h"

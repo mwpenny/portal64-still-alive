@@ -1,7 +1,6 @@
 #include "box_dropper.h"
 
 #include "../scene/dynamic_scene.h"
-#include "../models/models.h"
 #include "../defs.h"
 #include "../physics/config.h"
 #include "../util/time.h"
@@ -12,6 +11,7 @@
 #include "../../build/assets/materials/static.h"
 #include "../../build/assets/models/props/box_dropper.h"
 #include "../../build/assets/models/dynamic_model_list.h"
+#include "../../build/assets/models/dynamic_animated_model_list.h"
 
 #define DROOPER_RELOAD_TIME     2.0f
 #define DROPPER_DROP_TIME       0.5f
@@ -50,18 +50,18 @@ void boxDropperRender(void* data, struct DynamicRenderDataList* renderList, stru
 
     dynamicRenderListAddData(
         renderList,
-        props_box_dropper_model_gfx,
+        dropper->armature.displayList,
         matrix,
-        box_dropper_material_index,
+        DEFAULT_INDEX,
         &dropper->transform.position,
         armature
     );
 
     dynamicRenderListAddData(
         renderList, 
-        box_dropper_glass_gfx, 
+        dynamicAssetModel(PROPS_BOX_DROPPER_GLASS_DYNAMIC_MODEL), 
         matrix, 
-        box_dropper_glass_material_index, 
+        GLASSWINDOW_FROSTED_002_INDEX, 
         &dropper->transform.position, 
         NULL
     );
@@ -90,6 +90,8 @@ void boxDropperRender(void* data, struct DynamicRenderDataList* renderList, stru
 }
 
 void boxDropperInit(struct BoxDropper* dropper, struct BoxDropperDefinition* definition) {
+    struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_BOX_DROPPER_DYNAMIC_ANIMATED_MODEL);
+
     dropper->dynamicId = dynamicSceneAdd(dropper, boxDropperRender, &dropper->transform.position, 1.5f);
 
     dropper->transform.position = definition->position;
@@ -99,7 +101,7 @@ void boxDropperInit(struct BoxDropper* dropper, struct BoxDropperDefinition* def
     dropper->roomIndex = definition->roomIndex;
     dropper->signalIndex = definition->signalIndex;
 
-    skArmatureInit(&dropper->armature, &props_box_dropper_armature);
+    skArmatureInit(&dropper->armature, armature->armature);
 
     skAnimatorInit(&dropper->animator, PROPS_BOX_DROPPER_DEFAULT_BONES_COUNT);
 
@@ -109,6 +111,7 @@ void boxDropperInit(struct BoxDropper* dropper, struct BoxDropperDefinition* def
     dynamicSceneSetRoomFlags(dropper->dynamicId, ROOM_FLAG_FROM_INDEX(dropper->roomIndex));
 
     dynamicAssetModelPreload(CUBE_CUBE_DYNAMIC_MODEL);
+    dynamicAssetModelPreload(PROPS_BOX_DROPPER_GLASS_DYNAMIC_MODEL);
 }
 
 void boxDropperUpdate(struct BoxDropper* dropper) {
@@ -146,7 +149,7 @@ void boxDropperUpdate(struct BoxDropper* dropper) {
         boxDropperFakePos(dropper, &pendingCubePos);
 
         decorObjectInit(&dropper->activeCube, decorObjectDefinitionForId(DECOR_TYPE_CUBE_UNIMPORTANT), &pendingCubePos, dropper->roomIndex);
-        skAnimatorRunClip(&dropper->animator, &props_box_dropper_Armature_DropCube_clip, 0.0f, 0);
+        skAnimatorRunClip(&dropper->animator, dynamicAssetClip(PROPS_BOX_DROPPER_DYNAMIC_ANIMATED_MODEL, PROPS_BOX_DROPPER_ARMATURE_DROPCUBE_CLIP_INDEX), 0.0f, 0);
         soundPlayerPlay(soundsReleaseCube, 5.0f, 0.5f, &dropper->activeCube.rigidBody.transform.position, &gZeroVec);
 
         dropper->flags &= ~BoxDropperFlagsCubeRequested;

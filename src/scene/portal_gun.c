@@ -2,7 +2,8 @@
 
 #include "../physics/collision_scene.h"
 #include "../physics/collision_cylinder.h"
-#include "models/models.h"
+
+#include "../../build/assets/models/portal_gun/v_portalgun.h"
 
 #define PORTAL_GUN_RECOIL_TIME (0.18f)
 
@@ -55,7 +56,7 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
 
         transformToMatrixL(&portalGun->rigidBody.transform, matrix, SCENE_SCALE);
         gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
-        gSPDisplayList(renderState->dl++, v_portal_gun_gfx);
+        gSPDisplayList(renderState->dl++, portal_gun_v_portalgun_model_gfx);
         gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
     }
 }

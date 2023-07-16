@@ -4,9 +4,11 @@
 #include "../physics/collision_scene.h"
 #include "dynamic_scene.h"
 #include "signals.h"
+#include "../util/dynamic_asset_loader.h"
 
 #include "../build/assets/models/props/switch001.h"
 #include "../build/assets/materials/static.h"
+#include "../../build/assets/models/dynamic_animated_model_list.h"
 
 #include "../util/time.h"
 
@@ -62,7 +64,7 @@ void switchRender(void* data, struct DynamicRenderDataList* renderList, struct R
 
     dynamicRenderListAddData(
         renderList,
-        props_switch001_model_gfx,
+        switchObj->armature.displayList,
         matrix,
         BUTTON_INDEX,
         &switchObj->rigidBody.transform.position,
@@ -71,6 +73,8 @@ void switchRender(void* data, struct DynamicRenderDataList* renderList, struct R
 }
 
 void switchInit(struct Switch* switchObj, struct SwitchDefinition* definition) {
+    struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_SWITCH001_DYNAMIC_ANIMATED_MODEL);
+
     collisionObjectInit(&switchObj->collisionObject, &gSwitchCollider, &switchObj->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
     rigidBodyMarkKinematic(&switchObj->rigidBody);
     collisionSceneAddDynamicObject(&switchObj->collisionObject);
@@ -88,7 +92,7 @@ void switchInit(struct Switch* switchObj, struct SwitchDefinition* definition) {
     dynamicSceneSetRoomFlags(switchObj->dynamicId, ROOM_FLAG_FROM_INDEX(switchObj->rigidBody.currentRoom));
 
     skAnimatorInit(&switchObj->animator, PROPS_SWITCH001_DEFAULT_BONES_COUNT);
-    skArmatureInit(&switchObj->armature, &props_switch001_armature);
+    skArmatureInit(&switchObj->armature, armature->armature);
 
     switchObj->duration = definition->duration;
     switchObj->flags = 0;
@@ -105,7 +109,7 @@ void switchActivate(struct Switch* switchObj) {
     switchObj->flags |= SwitchFlagsDepressed;
     switchObj->timeLeft = switchObj->duration;
     signalsSend(switchObj->signalIndex);
-    skAnimatorRunClip(&switchObj->animator, &props_switch001_Armature_down_clip, 0.0f, 0);
+    skAnimatorRunClip(&switchObj->animator, dynamicAssetClip(PROPS_SWITCH001_DYNAMIC_ANIMATED_MODEL, PROPS_SWITCH001_ARMATURE_DOWN_CLIP_INDEX), 0.0f, 0);
 }
 
 void switchUpdate(struct Switch* switchObj) {
@@ -120,7 +124,7 @@ void switchUpdate(struct Switch* switchObj) {
         if ((switchObj->flags & SwitchFlagsDepressed) != 0 && 
             !skAnimatorIsRunning(&switchObj->animator)) {
             switchObj->flags &= ~SwitchFlagsDepressed;
-            skAnimatorRunClip(&switchObj->animator, &props_switch001_Armature_up_clip, 0.0f, 0);
+            skAnimatorRunClip(&switchObj->animator, dynamicAssetClip(PROPS_SWITCH001_DYNAMIC_ANIMATED_MODEL, PROPS_SWITCH001_ARMATURE_UP_CLIP_INDEX), 0.0f, 0);
         }
 
         return;

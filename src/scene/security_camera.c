@@ -8,10 +8,12 @@
 #include "../util/time.h"
 #include "../levels/cutscene_runner.h"
 #include "../decor/decor_object.h"
+#include "../util/dynamic_asset_loader.h"
 
-#include "../build/assets/models/props/security_camera.h"
 #include "../build/assets/materials/static.h"
 #include "../build/src/audio/clips.h"
+#include "../../build/assets/models/dynamic_animated_model_list.h"
+#include "../../build/assets/models/props/security_camera.h"
 
 struct CollisionBox gSecurityCameraCollisionBox = {
     {0.15, 0.3f, 0.35f}
@@ -100,7 +102,7 @@ void securityCameraRender(void* data, struct DynamicRenderDataList* renderList, 
 
     dynamicRenderListAddData(
         renderList, 
-        decorBuildFizzleGfx(props_security_camera_model_gfx, securityCamera->fizzleTime, renderState), 
+        decorBuildFizzleGfx(securityCamera->armature.displayList, securityCamera->fizzleTime, renderState), 
         matrix, 
         securityCamera->fizzleTime > 0.0f ? SECURITY_CAMERA_FIZZLED_INDEX : SECURITY_CAMERA_INDEX, 
         &securityCamera->rigidBody.transform.position, 
@@ -109,11 +111,13 @@ void securityCameraRender(void* data, struct DynamicRenderDataList* renderList, 
 }
 
 void securityCameraInit(struct SecurityCamera* securityCamera, struct SecurityCameraDefinition* definition) {
+    struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_SECURITY_CAMERA_DYNAMIC_ANIMATED_MODEL);
+
     collisionObjectInit(&securityCamera->collisionObject, &gSecurityCameraCollider, &securityCamera->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER);
     rigidBodyMarkKinematic(&securityCamera->rigidBody);
     collisionSceneAddDynamicObject(&securityCamera->collisionObject);
 
-    skArmatureInit(&securityCamera->armature, &props_security_camera_armature);
+    skArmatureInit(&securityCamera->armature, armature->armature);
 
     securityCamera->rigidBody.transform.position = definition->position;
     securityCamera->rigidBody.transform.rotation = definition->rotation;

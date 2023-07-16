@@ -6,9 +6,11 @@
 #include "../physics/collision_scene.h"
 #include "dynamic_scene.h"
 #include "signals.h"
+#include "../util/dynamic_asset_loader.h"
 
 #include "../build/assets/models/props/combine_ball_catcher.h"
 #include "../build/assets/materials/static.h"
+#include "../../build/assets/models/dynamic_animated_model_list.h"
 
 struct CollisionBox gBallCatcherBox = {
     {0.5f, 0.5f, 0.5f},
@@ -47,7 +49,7 @@ void ballCatcherRender(void* data, struct DynamicRenderDataList* renderList, str
 
     dynamicRenderListAddData(
         renderList,
-        props_combine_ball_catcher_model_gfx,
+        catcher->armature.displayList,
         matrix,
         BALL_CATCHER_INDEX,
         &catcher->rigidBody.transform.position,
@@ -56,8 +58,10 @@ void ballCatcherRender(void* data, struct DynamicRenderDataList* renderList, str
 }
 
 void ballCatcherInit(struct BallCatcher* catcher, struct BallCatcherDefinition* definition) {
+    struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_COMBINE_BALL_CATCHER_DYNAMIC_ANIMATED_MODEL);
+
     collisionObjectInit(&catcher->collisionObject, &gBallCatcherCollider, &catcher->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
-    rigidBodyMarkKinematic(&catcher->rigidBody);
+    rigidBodyMarkKinematic(&catcher->rigidBody); 
     collisionSceneAddDynamicObject(&catcher->collisionObject);
 
     catcher->rigidBody.transform.position = definition->position;
@@ -76,7 +80,7 @@ void ballCatcherInit(struct BallCatcher* catcher, struct BallCatcherDefinition* 
     dynamicSceneSetRoomFlags(catcher->dynamicId, ROOM_FLAG_FROM_INDEX(catcher->rigidBody.currentRoom));
 
     skAnimatorInit(&catcher->animator, PROPS_COMBINE_BALL_CATCHER_DEFAULT_BONES_COUNT);
-    skArmatureInit(&catcher->armature, &props_combine_ball_catcher_armature);
+    skArmatureInit(&catcher->armature, armature->armature);
 }
 
 void ballCatcherCheckBalls(struct BallCatcher* catcher, struct BallLauncher* ballLaunchers, int ballLauncherCount) {
@@ -105,7 +109,7 @@ void ballCatcherCheckBalls(struct BallCatcher* catcher, struct BallLauncher* bal
         catcher->caughtBall = &launcher->currentBall;
         soundPlayerPlay(soundsBallCatcher, 5.0f, 1.0f, &catcher->rigidBody.transform.position, &catcher->rigidBody.velocity);
         ballMarkCaught(catcher->caughtBall);
-        skAnimatorRunClip(&catcher->animator, &props_combine_ball_catcher_Armature_catch_clip, 0.0f, 0);
+        skAnimatorRunClip(&catcher->animator, dynamicAssetClip(PROPS_COMBINE_BALL_CATCHER_DYNAMIC_ANIMATED_MODEL, PROPS_COMBINE_BALL_CATCHER_ARMATURE_CATCH_CLIP_INDEX), 0.0f, 0);
     }
 }
 

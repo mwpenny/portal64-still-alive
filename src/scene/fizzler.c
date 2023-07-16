@@ -4,9 +4,10 @@
 #include "../graphics/render_scene.h"
 #include "../scene/dynamic_scene.h"
 #include "../physics/collision_scene.h"
-#include "../models/models.h"
+#include "../util/dynamic_asset_loader.h"
 
-#include "../build/assets/models/props/portal_cleanser.h"
+#include "../../build/assets/models/dynamic_model_list.h"
+
 #include "../build/assets/materials/static.h"
 
 #define GFX_PER_PARTICLE(particleCount) ((particleCount) + (((particleCount) + 7) >> 3) + 1)
@@ -40,7 +41,7 @@ void fizzlerRender(void* data, struct DynamicRenderDataList* renderList, struct 
     
     transformToMatrixL(&fizzler->rigidBody.transform, matrix, SCENE_SCALE);
 
-    dynamicRenderListAddData(renderList, fizzler->modelGraphics, matrix, fizzler_material_index, &fizzler->rigidBody.transform.position, NULL);
+    dynamicRenderListAddData(renderList, fizzler->modelGraphics, matrix, PORTAL_CLEANSER_INDEX, &fizzler->rigidBody.transform.position, NULL);
 
     Mtx* sideMatrices = renderStateRequestMatrices(renderState, 2);
     
@@ -52,12 +53,12 @@ void fizzlerRender(void* data, struct DynamicRenderDataList* renderList, struct 
     gRelativeLeft.position.x = fizzler->collisionBox.sideLength.x;
     transformConcat(&fizzler->rigidBody.transform, &gRelativeLeft, &combinedTransform);
     transformToMatrixL(&combinedTransform, &sideMatrices[0], SCENE_SCALE);
-    dynamicRenderListAddData(renderList, props_portal_cleanser_model_gfx, &sideMatrices[0], PORTAL_CLEANSER_WALL_INDEX, &fizzler->rigidBody.transform.position, NULL);
+    dynamicRenderListAddData(renderList, dynamicAssetModel(PROPS_PORTAL_CLEANSER_DYNAMIC_MODEL), &sideMatrices[0], PORTAL_CLEANSER_WALL_INDEX, &fizzler->rigidBody.transform.position, NULL);
 
     gRelativeRight.position.x = -fizzler->collisionBox.sideLength.x;
     transformConcat(&fizzler->rigidBody.transform, &gRelativeRight, &combinedTransform);
     transformToMatrixL(&combinedTransform, &sideMatrices[1], SCENE_SCALE);
-    dynamicRenderListAddData(renderList, props_portal_cleanser_model_gfx, &sideMatrices[1], PORTAL_CLEANSER_WALL_INDEX, &fizzler->rigidBody.transform.position, NULL);
+    dynamicRenderListAddData(renderList, dynamicAssetModel(PROPS_PORTAL_CLEANSER_DYNAMIC_MODEL), &sideMatrices[1], PORTAL_CLEANSER_WALL_INDEX, &fizzler->rigidBody.transform.position, NULL);
 }
 
 void fizzlerSpawnParticle(struct Fizzler* fizzler, int particleIndex) {
@@ -187,6 +188,8 @@ void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float wid
     fizzler->dynamicId = dynamicSceneAdd(fizzler, fizzlerRender, &fizzler->rigidBody.transform.position, sqrtf(width * width + height * height) * 0.5f);
 
     dynamicSceneSetRoomFlags(fizzler->dynamicId, ROOM_FLAG_FROM_INDEX(room));
+
+    dynamicAssetModelPreload(PROPS_PORTAL_CLEANSER_DYNAMIC_MODEL);
 }
 
 void fizzlerUpdate(struct Fizzler* fizzler) {

@@ -3,7 +3,6 @@
 
 #include "defs.h"
 #include "graphics/graphics.h"
-#include "models/models.h"
 #include "materials/shadow_caster.h"
 #include "materials/subject.h"
 #include "materials/light.h"

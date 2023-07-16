@@ -171,28 +171,17 @@ build/src/scene/elevator.o: build/assets/models/props/round_elevator_collision.h
 MODEL_LIST = assets/models/player/chell.blend \
 	assets/models/portal_gun/v_portalgun.blend \
 	assets/models/portal_gun/w_portalgun.blend \
-	assets/models/props/button.blend \
-	assets/models/props/door_01.blend \
-	assets/models/props/door_02.blend \
-	assets/models/props/combine_ball_catcher.blend \
-	assets/models/props/combine_ball_launcher.blend \
-	assets/models/props/portal_cleanser.blend \
 	assets/models/props/round_elevator.blend \
 	assets/models/props/round_elevator_interior.blend \
 	assets/models/props/round_elevator_collision.blend \
-	assets/models/props/security_camera.blend \
 	assets/models/props/signage.blend \
 	assets/models/props/signage_off.blend \
-	assets/models/props/switch001.blend \
-	assets/models/props/box_dropper.blend \
-	assets/models/props/box_dropper_glass.blend \
 	assets/models/portal/portal_blue.blend \
 	assets/models/portal/portal_blue_filled.blend \
 	assets/models/portal/portal_blue_face.blend \
 	assets/models/portal/portal_orange.blend \
 	assets/models/portal/portal_orange_filled.blend \
 	assets/models/portal/portal_orange_face.blend \
-	assets/models/pedestal.blend \
 	assets/models/grav_flare.blend \
 	assets/models/fleck_ash2.blend
 
@@ -201,16 +190,27 @@ DYNAMIC_MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/cylinder_test.blend \
 	assets/models/props/radio.blend \
 	assets/models/signage/clock_digits.blend \
-	assets/models/signage/clock.blend
-	
+	assets/models/signage/clock.blend \
+	assets/models/props/box_dropper_glass.blend \
+	assets/models/props/portal_cleanser.blend
+
+DYNAMIC_ANIMATED_MODEL_LIST = assets/models/pedestal.blend \
+	assets/models/props/box_dropper.blend \
+	assets/models/props/button.blend \
+	assets/models/props/combine_ball_catcher.blend \
+	assets/models/props/combine_ball_launcher.blend \
+	assets/models/props/door_01.blend \
+	assets/models/props/door_02.blend \
+	assets/models/props/security_camera.blend \
+	assets/models/props/switch001.blend
 
 ANIM_LIST = build/assets/models/pedestal_anim.o \
+	build/assets/models/player/chell_anim.o \
 	build/assets/models/props/box_dropper_anim.o \
 	build/assets/models/props/combine_ball_catcher_anim.o \
 	build/assets/models/props/combine_ball_launcher_anim.o \
 	build/assets/models/props/door_01_anim.o \
 	build/assets/models/props/door_02_anim.o \
-	build/assets/models/player/chell_anim.o \
 	build/assets/models/props/switch001_anim.o
 
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
@@ -219,70 +219,44 @@ MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)
 DYNAMIC_MODEL_HEADERS = $(DYNAMIC_MODEL_LIST:%.blend=build/%.h)
 DYNAMIC_MODEL_OBJECTS = $(DYNAMIC_MODEL_LIST:%.blend=build/%_geo.o)
 
+DYNAMIC_ANIMATED_MODEL_HEADERS = $(DYNAMIC_ANIMATED_MODEL_LIST:%.blend=build/%.h)
+DYNAMIC_ANIMATED_MODEL_OBJECTS = $(DYNAMIC_ANIMATED_MODEL_LIST:%.blend=build/%_geo.o)
+
 build/assets/models/%.h build/assets/models/%_geo.c build/assets/models/%_anim.c: build/assets/models/%.fbx assets/models/%.flags assets/materials/elevator.skm.yaml assets/materials/objects.skm.yaml assets/materials/static.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
 	$(SKELATOOL64) --fixed-point-scale 256 --model-scale 0.01 --name $(<:build/assets/models/%.fbx=%) $(shell cat $(<:build/assets/models/%.fbx=assets/models/%.flags)) -o $(<:%.fbx=%.h) $<
 
-build/src/models/models.o: $(MODEL_HEADERS)
-
-build/src/decor/decor_object_list.o: build/assets/models/dynamic_model_list.h build/assets/materials/static.h
-
-build/src/scene/portal.o: $(MODEL_HEADERS)
-
-build/src/scene/signage.o: $(MODEL_HEADERS)
-
-build/src/scene/box_dropper.o: $(MODEL_HEADERS) build/assets/models/dynamic_model_list.h
-
-build/src/scene/pedestal.o: $(MODEL_HEADERS)
-
-build/src/scene/render_plan.o: $(MODEL_HEADERS)
-
-build/src/scene/portal_render.o: $(MODEL_HEADERS)
-
-build/src/scene/clock.o: build/assets/models/dynamic_model_list.h
-
-build/src/scene/fizzler.o: $(MODEL_HEADERS)
-
-build/src/scene/security_camera.o: build/src/audio/clips.h $(MODEL_HEADERS)
-
-build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/materials/static.h
-
-build/src/player/player.o: build/assets/models/player/chell.h build/assets/materials/static.h
-
-build/src/scene/ball.o: build/assets/models/grav_flare.h build/assets/models/fleck_ash2.h build/assets/materials/static.h
-
-build/src/scene/ball_launcher.o: build/assets/models/props/combine_ball_launcher.h build/assets/materials/static.h
-
-build/src/scene/ball_catcher.o: build/assets/models/props/combine_ball_catcher.h build/assets/materials/static.h
-
-build/src/scene/door.o: build/assets/models/props/door_01.h build/assets/models/props/door_02.h
-
-build/src/menu/game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
-
-build/src/menu/main_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
-
-build/src/menu/new_game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
-
-build/src/menu/load_game.o: build/assets/materials/ui.h build/src/audio/clips.h
-
-build/src/menu/save_game_menu.o: build/src/audio/clips.h
-
-build/src/menu/savefile_list.o: build/assets/materials/ui.h build/src/audio/clips.h
-
-build/src/menu/landing_menu.o: build/assets/materials/ui.h build/src/audio/clips.h
-
-build/src/menu/options_menu.o: build/assets/materials/ui.h
-
-build/src/menu/joystick_options.o: build/assets/materials/ui.h build/src/audio/clips.h
-
-build/src/menu/controls.o: build/assets/materials/ui.h build/src/audio/clips.h
-
-build/src/util/dynamic_asset_data.o: build/assets/models/dynamic_model_list_data.h
-
 build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
-
 build/assets/models/props/combine_ball_catcher.h: assets/materials/ball_catcher.skm.yaml
-
 build/assets/models/props/combine_ball_launcher.h: assets/materials/ball_catcher.skm.yaml
+build/src/decor/decor_object_list.o: build/assets/models/dynamic_model_list.h build/assets/materials/static.h
+build/src/menu/controls.o: build/assets/materials/ui.h build/src/audio/clips.h
+build/src/menu/game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
+build/src/menu/joystick_options.o: build/assets/materials/ui.h build/src/audio/clips.h
+build/src/menu/landing_menu.o: build/assets/materials/ui.h build/src/audio/clips.h
+build/src/menu/load_game.o: build/assets/materials/ui.h build/src/audio/clips.h
+build/src/menu/main_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
+build/src/menu/new_game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
+build/src/menu/options_menu.o: build/assets/materials/ui.h
+build/src/menu/save_game_menu.o: build/src/audio/clips.h
+build/src/menu/savefile_list.o: build/assets/materials/ui.h build/src/audio/clips.h
+build/src/player/player.o: build/assets/models/player/chell.h build/assets/materials/static.h
+build/src/scene/ball_catcher.o: build/assets/models/props/combine_ball_catcher.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
+build/src/scene/ball_launcher.o: build/assets/models/props/combine_ball_launcher.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
+build/src/scene/ball.o: build/assets/models/grav_flare.h build/assets/models/fleck_ash2.h build/assets/materials/static.h
+build/src/scene/box_dropper.o: build/assets/materials/static.h build/assets/models/props/box_dropper.h build/assets/models/dynamic_model_list.h build/assets/models/dynamic_animated_model_list.h
+build/src/scene/button.o: build/assets/materials/static.h build/assets/models/props/button.h build/assets/models/dynamic_animated_model_list.h
+build/src/scene/clock.o: build/assets/models/dynamic_model_list.h
+build/src/scene/door.o: build/assets/materials/static.h build/assets/models/props/door_01.h build/assets/models/props/door_02.h build/assets/models/dynamic_animated_model_list.h
+build/src/scene/fizzler.o: build/assets/models/dynamic_model_list.h
+build/src/scene/pedestal.o: build/assets/materials/static.h build/assets/models/pedestal.h build/assets/models/dynamic_animated_model_list.h build/assets/models/portal_gun/w_portalgun.h
+build/src/scene/portal_gun.o: $(MODEL_HEADERS)
+build/src/scene/portal_render.o: $(MODEL_HEADERS)
+build/src/scene/portal.o: $(MODEL_HEADERS)
+build/src/scene/render_plan.o: $(MODEL_HEADERS)
+build/src/scene/security_camera.o: build/src/audio/clips.h build/assets/models/props/security_camera.h build/assets/models/dynamic_animated_model_list.h
+build/src/scene/signage.o: $(MODEL_HEADERS)
+build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
+build/src/util/dynamic_asset_data.o: build/assets/models/dynamic_model_list_data.h
 
 
 ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_00/test_chamber_00_anim.o \
@@ -341,13 +315,17 @@ build/assets/models/dynamic_model_list.h build/assets/models/dynamic_model_list_
 	@mkdir -p $(@D)
 	node tools/generate_dynamic_model_list.js build/assets/models/dynamic_model_list.h build/assets/models/dynamic_model_list_data.h $(DYNAMIC_MODEL_HEADERS)
 
+build/assets/models/dynamic_animated_model_list.h build/assets/models/dynamic_animated_model_list_data.h: $(DYNAMIC_ANIMATED_MODEL_HEADERS) tools/generate_dynamic_animated_model_list.js
+	@mkdir -p $(@D)
+	node tools/generate_dynamic_animated_model_list.js build/assets/models/dynamic_animated_model_list.h build/assets/models/dynamic_animated_model_list_data.h $(DYNAMIC_ANIMATED_MODEL_HEADERS)
+
 build/levels.ld: $(TEST_CHAMBER_OBJECTS) tools/generate_level_ld.js
 	@mkdir -p $(@D)
 	node tools/generate_level_ld.js $@ 0x02000000 $(TEST_CHAMBER_OBJECTS)
 
-build/dynamic_models.ld: $(DYNAMIC_MODEL_OBJECTS) tools/generate_level_ld.js
+build/dynamic_models.ld: $(DYNAMIC_MODEL_OBJECTS) $(DYNAMIC_ANIMATED_MODEL_OBJECTS) tools/generate_level_ld.js
 	@mkdir -p $(@D)
-	node tools/generate_level_ld.js $@ 0x03000000 $(DYNAMIC_MODEL_OBJECTS)
+	node tools/generate_level_ld.js $@ 0x03000000 $(DYNAMIC_MODEL_OBJECTS) $(DYNAMIC_ANIMATED_MODEL_OBJECTS)
 
 build/src/levels/levels.o: build/assets/test_chambers/level_list.h build/assets/materials/static.h
 

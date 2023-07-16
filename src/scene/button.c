@@ -1,15 +1,17 @@
 #include "button.h"
 
 #include "defs.h"
-#include "../models/models.h"
 #include "../graphics/renderstate.h"
 #include "dynamic_scene.h"
 #include "../physics/collision_cylinder.h"
 #include "../physics/collision_scene.h"
 #include "../physics/contact_solver.h"
 #include "../util/time.h"
+#include "../util/dynamic_asset_loader.h"
 
-#include "../build/assets/models/props/button.h"
+#include "../../build/assets/models/dynamic_animated_model_list.h"
+#include "../build/assets/materials/static.h"
+#include "../../build/assets/models/props/button.h"
 
 struct Vector2 gButtonCylinderEdgeVectors[] = {
     {0.0f, 1.0f},
@@ -59,16 +61,20 @@ void buttonRender(void* data, struct DynamicRenderDataList* renderList, struct R
         return;
     }
 
-    transformToMatrixL(&props_button_default_bones[PROPS_BUTTON_BUTTONBASE_BONE], &armature[PROPS_BUTTON_BUTTONBASE_BONE], 1.0f);
+    struct SKArmatureWithAnimations* armatureDef = dynamicAssetAnimatedModel(PROPS_BUTTON_DYNAMIC_ANIMATED_MODEL);
+
+    transformToMatrixL(&armatureDef->armature->pose[PROPS_BUTTON_BUTTONBASE_BONE], &armature[PROPS_BUTTON_BUTTONBASE_BONE], 1.0f);
 
     // reusing global memory
-    props_button_default_bones[PROPS_BUTTON_BUTTONPAD_BONE].position.y = (button->rigidBody.transform.position.y - button->originalPos.y) * SCENE_SCALE;
-    transformToMatrixL(&props_button_default_bones[PROPS_BUTTON_BUTTONPAD_BONE], &armature[PROPS_BUTTON_BUTTONPAD_BONE], 1.0f);
+    armatureDef->armature->pose[PROPS_BUTTON_BUTTONPAD_BONE].position.y = (button->rigidBody.transform.position.y - button->originalPos.y) * SCENE_SCALE;
+    transformToMatrixL(&armatureDef->armature->pose[PROPS_BUTTON_BUTTONPAD_BONE], &armature[PROPS_BUTTON_BUTTONPAD_BONE], 1.0f);
 
-    dynamicRenderListAddData(renderList, button_gfx, matrix, button_material_index, &button->rigidBody.transform.position, armature);
+    dynamicRenderListAddData(renderList, armatureDef->armature->displayList, matrix, BUTTON_INDEX, &button->rigidBody.transform.position, armature);
 }
 
 void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
+    dynamicAssetAnimatedModel(PROPS_BUTTON_DYNAMIC_ANIMATED_MODEL);
+
     collisionObjectInit(&button->collisionObject, &gButtonCollider, &button->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
     rigidBodyMarkKinematic(&button->rigidBody);
     collisionSceneAddDynamicObject(&button->collisionObject);

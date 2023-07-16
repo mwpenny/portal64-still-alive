@@ -1,6 +1,5 @@
 #include "portal.h"
 
-#include "models/models.h"
 #include "../graphics/screen_clipper.h"
 #include "../graphics/graphics.h"
 #include "../defs.h"

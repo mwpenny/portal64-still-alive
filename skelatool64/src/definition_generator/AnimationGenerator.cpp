@@ -155,7 +155,7 @@ aiQuaternion evaluateQuaternionAt(const aiQuatKey* keys, unsigned keyCount, doub
     return output;
 }
 
-void generateanimationV2(const aiAnimation& animation, BoneHierarchy& bones, CFileDefinition& fileDef, const DisplayListSettings& settings) {
+std::string generateanimationV2(const aiAnimation& animation, int index, BoneHierarchy& bones, CFileDefinition& fileDef, const DisplayListSettings& settings) {
     int nFrames = ceil(animation.mDuration * settings.mTicksPerSecond / animation.mTicksPerSecond) + 1;
 
     std::vector<std::vector<FrameData>> allFrameData(nFrames);
@@ -235,13 +235,28 @@ void generateanimationV2(const aiAnimation& animation, BoneHierarchy& bones, CFi
     clip->AddPrimitive(bones.GetBoneCount());
     clip->AddPrimitive(framesName);
     clip->AddPrimitive(settings.mTicksPerSecond);
-    fileDef.AddDataDefinition(std::string(animation.mName.C_Str()) + "_clip", "struct SKAnimationClip", false, "_geo", std::move(clip));
+    std::string result = fileDef.AddDataDefinition(std::string(animation.mName.C_Str()) + "_clip", "struct SKAnimationClip", false, "_geo", std::move(clip));
+
+    std::string animationMacroName = fileDef.GetUniqueName(std::string(animation.mName.C_Str()) + "_clip_index");
+    std::transform(animationMacroName.begin(), animationMacroName.end(), animationMacroName.begin(), ::toupper);
+    fileDef.AddMacro(animationMacroName, std::to_string(index));
+
+    return result;
 }
 
 void generateAnimationDataV2(const aiScene* scene, BoneHierarchy& bones, CFileDefinition& fileDef, const DisplayListSettings& settings) {
+    std::unique_ptr<StructureDataChunk> clipArray(new StructureDataChunk());
+
     for (unsigned animationIndex = 0; animationIndex < scene->mNumAnimations; ++animationIndex) {
-        generateanimationV2(*scene->mAnimations[animationIndex], bones, fileDef, settings);
+        std::string clipName = generateanimationV2(*scene->mAnimations[animationIndex], animationIndex, bones, fileDef, settings);
+        clipArray->AddPrimitive("&" + clipName);
     }
+
+    fileDef.AddDataDefinition("clips", "struct SKAnimationClip*", true, "_geo", std::move(clipArray));
+
+    std::string clipCountMacroName = fileDef.GetUniqueName("CLIP_COUNT");
+    std::transform(clipCountMacroName.begin(), clipCountMacroName.end(), clipCountMacroName.begin(), ::toupper);
+    fileDef.AddMacro(clipCountMacroName, std::to_string(scene->mNumAnimations));
 }
 
 AnimationResults generateAnimationForScene(const aiScene* scene, CFileDefinition &fileDefinition, DisplayListSettings& settings) {
