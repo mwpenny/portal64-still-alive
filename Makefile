@@ -30,6 +30,8 @@ BASE_TARGET_NAME = build/portal
 LD_SCRIPT	= portal.ld
 CP_LD_SCRIPT	= build/portal
 
+SCENE_SCALE = 128
+
 ASMFILES    =	$(shell find asm/ -type f -name '*.s')
 
 ASMOBJECTS  =	$(patsubst %.s, build/%.o, $(ASMFILES))
@@ -53,7 +55,7 @@ DEPS = $(patsubst %.c, build/%.d, $(CODEFILES)) $(patsubst %.c, build/%.d, $(DAT
 -include $(DEPS)
 
 LCINCS =	-I/usr/include/n64/PR 
-LCDEFS +=	-DF3DEX_GBI_2
+LCDEFS +=	-DF3DEX_GBI_2 -DSCENE_SCALE=${SCENE_SCALE}
 #LCDEFS +=	-DF3DEX_GBI_2 -DFOG
 #LCDEFS +=	-DF3DEX_GBI_2 -DFOG -DXBUS
 #LCDEFS +=	-DF3DEX_GBI_2 -DFOG -DXBUS -DSTOP_AUDIO
@@ -223,7 +225,7 @@ DYNAMIC_ANIMATED_MODEL_HEADERS = $(DYNAMIC_ANIMATED_MODEL_LIST:%.blend=build/%.h
 DYNAMIC_ANIMATED_MODEL_OBJECTS = $(DYNAMIC_ANIMATED_MODEL_LIST:%.blend=build/%_geo.o)
 
 build/assets/models/%.h build/assets/models/%_geo.c build/assets/models/%_anim.c: build/assets/models/%.fbx assets/models/%.flags assets/materials/elevator.skm.yaml assets/materials/objects.skm.yaml assets/materials/static.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
-	$(SKELATOOL64) --fixed-point-scale 256 --model-scale 0.01 --name $(<:build/assets/models/%.fbx=%) $(shell cat $(<:build/assets/models/%.fbx=assets/models/%.flags)) -o $(<:%.fbx=%.h) $<
+	$(SKELATOOL64) --fixed-point-scale ${SCENE_SCALE} --model-scale 0.01 --name $(<:build/assets/models/%.fbx=%) $(shell cat $(<:build/assets/models/%.fbx=assets/models/%.flags)) -o $(<:%.fbx=%.h) $<
 
 build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
 build/assets/models/props/combine_ball_catcher.h: assets/materials/ball_catcher.skm.yaml
@@ -292,7 +294,7 @@ build/%.fbx: %.blend
 	$(BLENDER_3_0) $< --background --python tools/export_fbx.py -- $@
 
 build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c build/assets/test_chambers/%_anim.c: build/assets/test_chambers/%.fbx build/assets/materials/static.h $(SKELATOOL64) $(TEXTURE_IMAGES) $(LUA_FILES)
-	$(SKELATOOL64) --script tools/export_level.lua --fixed-point-scale 256 --model-scale 0.01 --name $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
+	$(SKELATOOL64) --script tools/export_level.lua --fixed-point-scale ${SCENE_SCALE} --model-scale 0.01 --name $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
 
 build/assets/test_chambers/%.o: build/assets/test_chambers/%.c build/assets/materials/static.h
 	@mkdir -p $(@D)

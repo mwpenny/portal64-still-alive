@@ -21,7 +21,9 @@
 
 #define DMA_QUEUE_SIZE  200
 
+#ifndef SCENE_SCALE
 #define SCENE_SCALE 256
+#endif
 
 #define MAX_DYNAMIC_OBJECTS     32
 
