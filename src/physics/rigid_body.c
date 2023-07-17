@@ -92,23 +92,18 @@ float rigidBodyMassInverseAtLocalPoint(struct RigidBody* rigidBody, struct Vecto
     return rigidBody->massInv + rigidBody->momentOfInertiaInv * vector3MagSqrd(&crossPoint);
 }
 
-void rigidBodyClampToPortal(struct RigidBody* rigidBody, struct Transform* portal) {
-    struct Vector3 localPoint;
-
-    transformPointInverseNoScale(portal, &rigidBody->transform.position, &localPoint);
-
+void rigidBodyClampToPortal(struct RigidBody* rigidBody, struct Transform* portal, struct Vector3* localPoint) {
     //clamping the x and y of local point to a slightly smaller oval on the output portal
     struct Vector3 clampedLocalPoint;
-    clampedLocalPoint = localPoint;
-    clampedLocalPoint.y /= 2.0f;
+    clampedLocalPoint.x = localPoint->x;
+    clampedLocalPoint.y = localPoint->y * 0.5f;
     clampedLocalPoint.z = 0.0f;
-    while(sqrtf(vector3MagSqrd(&clampedLocalPoint))>PORTAL_EXIT_XY_CLAMP_DISTANCE){
+    while(vector3MagSqrd(&clampedLocalPoint)>PORTAL_EXIT_XY_CLAMP_DISTANCE*PORTAL_EXIT_XY_CLAMP_DISTANCE){
         vector3Scale(&clampedLocalPoint, &clampedLocalPoint, 0.90f);
     }
-    clampedLocalPoint.y *= 2.0f;
-    localPoint.x = clampedLocalPoint.x;
-    localPoint.y = clampedLocalPoint.y;
-    transformPoint(portal, &localPoint, &rigidBody->transform.position);
+    localPoint->x = clampedLocalPoint.x;
+    localPoint->y = clampedLocalPoint.y * 2.0f;
+    transformPoint(portal, localPoint, &rigidBody->transform.position);
 }
 
 int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
@@ -118,17 +113,7 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
         return 0;
     }
 
-    struct Vector3 localPoint;
-
     enum RigidBodyFlags newFlags = 0;
-
-    //if only touching one portal, clamp object to edges of that portal
-    if ((rigidBody->flags & RigidBodyIsTouchingPortalA) && !(rigidBody->flags & RigidBodyIsTouchingPortalB)){
-        rigidBodyClampToPortal(rigidBody, gCollisionScene.portalTransforms[0]);
-    }
-    else if ((rigidBody->flags & RigidBodyIsTouchingPortalB) && !(rigidBody->flags & RigidBodyIsTouchingPortalA)){
-        rigidBodyClampToPortal(rigidBody, gCollisionScene.portalTransforms[1]);
-    }
 
     if (rigidBody->flags & RigidBodyIsTouchingPortalA) {
         newFlags |= RigidBodyWasTouchingPortalA;
@@ -141,7 +126,11 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
     int result = 0;
 
     for (int i = 0; i < 2; ++i) {
-        transformPointInverseNoScale(gCollisionScene.portalTransforms[i], &rigidBody->transform.position, &localPoint);
+        struct Quaternion inverseRotation;
+        quatConjugate(&gCollisionScene.portalTransforms[i]->rotation, &inverseRotation);
+        struct Vector3 localPoint;
+        vector3Sub(&rigidBody->transform.position, &gCollisionScene.portalTransforms[i]->position, &localPoint);
+        quatMultVector(&inverseRotation, &localPoint, &localPoint);
 
         int mask = (RigidBodyFlagsInFrontPortal0 << i);
 
@@ -162,6 +151,14 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
             (newFlags & RigidBodyFlagsCrossedPortal0)
         ) {
             continue;
+        }
+
+        struct Vector3 localVelocity;
+        quatMultVector(&inverseRotation, &rigidBody->velocity, &localVelocity);
+
+        // if object is moving towards the portal make sure it is within the bounds of it
+        if (vector3Dot(&localVelocity, &localPoint) < 0.0f && !((RigidBodyIsTouchingPortalA << (1 - i)) & rigidBody->flags)) {
+            rigidBodyClampToPortal(rigidBody, gCollisionScene.portalTransforms[i], &localPoint);
         }
 
         // 0 !newFlags & flags
@@ -185,6 +182,21 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
         if (speedSqrd > MAX_PORTAL_SPEED * MAX_PORTAL_SPEED) {
             vector3Normalize(&rigidBody->velocity, &rigidBody->velocity);
             vector3Scale(&rigidBody->velocity, &rigidBody->velocity, MAX_PORTAL_SPEED);
+        }
+
+        if (speedSqrd < MIN_PORTAL_SPEED * MIN_PORTAL_SPEED) {
+            struct Vector3 portalNormal = gZeroVec;
+            portalNormal.z = i ? -1.0f : 1.0f;
+            quatMultVector(&otherPortal->rotation, &portalNormal, &portalNormal);
+
+            if (portalNormal.y > 0.9f) {
+                if (speedSqrd < 0.000001f) {
+                    vector3Scale(&portalNormal, &rigidBody->velocity, MIN_PORTAL_SPEED);
+                } else {
+                    vector3Normalize(&rigidBody->velocity, &rigidBody->velocity);
+                    vector3Scale(&rigidBody->velocity, &rigidBody->velocity, MIN_PORTAL_SPEED);
+                }
+            }
         }
 
         newFlags |= RigidBodyFlagsCrossedPortal0 << i;

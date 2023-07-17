@@ -11,6 +11,7 @@
 #define RIGID_BODY_NO_ROOM  0xFFFF
 
 #define MAX_PORTAL_SPEED (1000.0f / 64.0f)
+#define MIN_PORTAL_SPEED (300.0f / 64.0f)
 #define PORTAL_EXIT_XY_CLAMP_DISTANCE (0.15f)
 
 enum RigidBodyFlags {

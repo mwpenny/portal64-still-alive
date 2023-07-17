@@ -75,6 +75,10 @@ void pointConstraintRotateTo(struct RigidBody* rigidBody, struct Quaternion* wor
     struct Quaternion deltaAngle;
     quatMultiply(worldRotation, &inverseRigidBody, &deltaAngle);
 
+    if (deltaAngle.w < 0.0f) {
+        quatNegate(&deltaAngle, &deltaAngle);
+    }
+
     struct Vector3 axis;
     float angle;
     quatDecompose(&deltaAngle, &axis, &angle);

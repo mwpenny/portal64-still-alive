@@ -124,6 +124,9 @@ void sceneInitNoPauseMenu(struct Scene* scene) {
         playerGivePortalGun(&scene->player, PlayerHasSecondPortalGun);
     }
 
+        playerGivePortalGun(&scene->player, PlayerHasFirstPortalGun);
+        playerGivePortalGun(&scene->player, PlayerHasSecondPortalGun);
+
     portalInit(&scene->portals[0], 0);
     portalInit(&scene->portals[1], PortalFlagsOddParity);
 

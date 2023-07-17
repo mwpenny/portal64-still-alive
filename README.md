@@ -158,7 +158,6 @@ make -f Makefile.docker
 
 ## Current Bug TODO List (Hardware Verified) (High->Low priority)
 ----------------------- v8
-- [ ] Held objects to a funny rotation bit
 - [ ] Player can clip through chamber 7 by walking back up the stairs (near the top).
 - [ ] player can clip through back of elevator by jumping and strafeing at the back corners while inside.
 - [ ] Player can trap themselves in chamber 5 by following instructions issue #75
@@ -169,6 +168,7 @@ make -f Makefile.docker
 - [ ] Door at end of room 2, chamber 10 isnt rendered properly
 - [ ] various visual glitches when running NTSC on PAL console #65
 - [ ] various visual glitches when running PAL on NTSC console #65
+- [x] Held objects to a funny rotation bit
 - [x] Glass can be walked through from one side on multiple levels (0,1,4,...)
 - [x] Chell animation problem (fixed itself, investigate)
 - [x] investigate chell animation
