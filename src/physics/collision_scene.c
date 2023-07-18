@@ -19,6 +19,8 @@ void collisionSceneInit(struct CollisionScene* scene, struct CollisionObject* qu
     scene->dynamicObjectCount = 0;
     scene->portalTransforms[0] = NULL;
     scene->portalTransforms[1] = NULL;
+    scene->portalColliderIndex[0] = -1;
+    scene->portalColliderIndex[1] = -1;
 }
 
 int mergeColliderList(short* a, int aCount, short* b, int bCount, short* output) {
@@ -103,34 +105,19 @@ int collisionObjectRoomColliders(struct Room* room, struct Box3D* box, short out
     return result;
 }
 
-void collisionObjectCollideWithScene(struct CollisionObject* object, struct CollisionScene* scene, struct ContactSolver* contactSolver) {    
-    short colliderIndices[MAX_COLLIDERS];
-    int quadCount = collisionObjectRoomColliders(&scene->world->rooms[object->body->currentRoom], &object->boundingBox, colliderIndices);
-
-    for (int i = 0; i < quadCount; ++i) {
-        collisionObjectCollideWithQuad(object, &scene->quads[colliderIndices[i]], contactSolver);
-    }
-}
-
-void collisionObjectCollideWithSceneSwept(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionScene* scene, struct ContactSolver* contactSolver) {    
-    short colliderIndices[MAX_COLLIDERS];
-    int quadCount = collisionObjectRoomColliders(&scene->world->rooms[object->body->currentRoom], sweptBB, colliderIndices);
-
-    for (int i = 0; i < quadCount; ++i) {
-        collisionObjectCollideWithQuadSwept(object, objectPrevPos, sweptBB, &scene->quads[colliderIndices[i]], contactSolver);
-    }
-}
-
 void collisionObjectCollideMixed(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionScene* scene, struct ContactSolver* contactSolver) {    
     short colliderIndices[MAX_COLLIDERS];
     int quadCount = collisionObjectRoomColliders(&scene->world->rooms[object->body->currentRoom], sweptBB, colliderIndices);
 
     for (int i = 0; i < quadCount; ++i) {
-        struct CollisionObject* quad = &scene->quads[colliderIndices[i]];
+        int quadIndex = colliderIndices[i];
+        struct CollisionObject* quad = &scene->quads[quadIndex];
+        int shouldCheckPortals = gCollisionScene.portalColliderIndex[0] == quadIndex || gCollisionScene.portalColliderIndex[1] == quadIndex;
+
         if (quad->manifoldIds & object->manifoldIds) {
-            collisionObjectCollideWithQuad(object, quad, contactSolver);
+            collisionObjectCollideWithQuad(object, quad, contactSolver, shouldCheckPortals);
         } else {
-            collisionObjectCollideWithQuadSwept(object, objectPrevPos, sweptBB, quad, contactSolver);
+            collisionObjectCollideWithQuadSwept(object, objectPrevPos, sweptBB, quad, contactSolver, shouldCheckPortals);
         }
     }
 }
@@ -194,6 +181,27 @@ int collisionSceneIsTouchingPortal(struct Vector3* contactPoint, struct Vector3*
 
 int collisionSceneIsPortalOpen() {
     return gCollisionScene.portalTransforms[0] != NULL && gCollisionScene.portalTransforms[1] != NULL;
+}
+
+void collisionSceneSetPortal(int portalIndex, struct Transform* transform, int roomIndex, int colliderIndex) {
+    gCollisionScene.portalTransforms[portalIndex] = transform;
+    gCollisionScene.portalRooms[portalIndex] = roomIndex;
+    gCollisionScene.portalColliderIndex[portalIndex] = colliderIndex;
+
+    if (gCollisionScene.portalTransforms[1 - portalIndex]) {
+        struct Transform inverseTransform;
+        transformInvert(transform, &inverseTransform);
+        transformConcat(&inverseTransform, gCollisionScene.portalTransforms[1 - portalIndex], &gCollisionScene.toOtherPortalTransform[portalIndex]);
+        transformInvert(&gCollisionScene.toOtherPortalTransform[portalIndex], &gCollisionScene.toOtherPortalTransform[1 - portalIndex]);
+    }
+}
+
+struct Transform* collisionSceneTransformToPortal(int fromPortal) {
+    if (!collisionSceneIsPortalOpen()) {
+        return NULL;
+    }
+
+    return &gCollisionScene.toOtherPortalTransform[fromPortal];
 }
 
 void collisionScenePushObjectsOutOfPortal(int portalIndex) {

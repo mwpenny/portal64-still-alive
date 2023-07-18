@@ -15,7 +15,9 @@ struct CollisionScene {
     struct CollisionObject* quads;
     struct World* world;
     short portalRooms[2];
+    short portalColliderIndex[2];
     struct Transform* portalTransforms[2];
+    struct Transform toOtherPortalTransform[2];
     struct Vector3 portalVelocity[2];
     struct CollisionObject* dynamicObjects[MAX_DYNAMIC_OBJECTS];
     u16 dynamicObjectCount;
@@ -27,13 +29,14 @@ typedef void (*ManifoldCallback)(void* data, struct ContactManifold* contact);
 extern struct CollisionScene gCollisionScene;
 
 void collisionSceneInit(struct CollisionScene* scene, struct CollisionObject* quads, int quadCount, struct World* world);
-void collisionObjectCollideWithScene(struct CollisionObject* object, struct CollisionScene* scene, struct ContactSolver* contactSolver);
-void collisionObjectCollideWithSceneSwept(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionScene* scene, struct ContactSolver* contactSolver);
 void collisionObjectCollideMixed(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionScene* scene, struct ContactSolver* contactSolver);
 
 int collisionSceneIsTouchingSinglePortal(struct Vector3* contactPoint, struct Vector3* contactNormal, struct Transform* portalTransform, int portalIndex);
 int collisionSceneIsTouchingPortal(struct Vector3* contactPoint, struct Vector3* contactNormal);
 int collisionSceneIsPortalOpen();
+
+void collisionSceneSetPortal(int portalIndex, struct Transform* transform, int roomIndex, int colliderIndex);
+struct Transform* collisionSceneTransformToPortal(int fromPortal);
 
 void collisionScenePushObjectsOutOfPortal(int portalIndex);
 

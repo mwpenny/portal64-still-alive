@@ -536,6 +536,25 @@ struct ContactManifold* contactSolverNextManifold(struct ContactSolver* solver, 
 	return NULL;
 }
 
+
+float contactPenetration(struct ContactManifold* contact) {
+	float result = 0;
+
+	for (int i = 0; i < contact->contactCount; ++i) {
+		if (contact->contacts[i].penetration > result) {
+			result = contact->contacts[i].penetration;
+		}
+	}
+
+	return result;
+}
+
+void contactAdjustPenetration(struct ContactManifold* contact, float amount) {
+	for (int i = 0; i < contact->contactCount; ++i) {
+		contact->contacts[i].penetration += amount;
+	}
+}
+
 void contactSolverAddPointConstraint(struct ContactSolver* solver, struct PointConstraint* constraint) {
     constraint->nextConstraint = solver->firstPointConstraint;
     solver->firstPointConstraint = constraint;

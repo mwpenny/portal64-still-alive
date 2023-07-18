@@ -41,6 +41,7 @@ void sceneSerializePortals(struct Serializer* serializer, SerializeAction action
         action(serializer, &portal->transform, sizeof(struct PartialTransform));
         action(serializer, &portal->portalSurfaceIndex, sizeof(portal->portalSurfaceIndex));
         action(serializer, &portal->roomIndex, sizeof(portal->roomIndex));
+        action(serializer, &portal->colliderIndex, sizeof(portal->colliderIndex));
         action(serializer, &portal->transformIndex, sizeof(portal->transformIndex));
 
         if (portal->transformIndex != NO_TRANSFORM_INDEX) {
@@ -66,8 +67,10 @@ void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene)
 
         short portalSurfaceIndex;
         short roomIndex;
+        short colliderIndex;
         serializeRead(serializer, &portalSurfaceIndex, sizeof(portalSurfaceIndex));
         serializeRead(serializer, &roomIndex, sizeof(roomIndex));
+        serializeRead(serializer, &colliderIndex, sizeof(colliderIndex));
 
         struct PortalSurface* existingSurface = portalSurfaceGetOriginalSurface(portalSurfaceIndex, portalIndex);
 
@@ -87,9 +90,9 @@ void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene)
         portal->transform = transform;
         gCollisionScene.portalVelocity[portalIndex] = gZeroVec;
         portal->roomIndex = roomIndex;
+        portal->colliderIndex = colliderIndex;
         portal->scale = 1.0f;
-        gCollisionScene.portalTransforms[portalIndex] = &portal->transform;
-        gCollisionScene.portalRooms[portalIndex] = roomIndex;
+        collisionSceneSetPortal(portalIndex, &portal->transform, roomIndex, colliderIndex);
 
         if (flags & PortalFlagsPlayerPortal) {
             portal->flags |= PortalFlagsPlayerPortal;

@@ -36,17 +36,17 @@ int collisionObjectShouldGenerateConctacts(struct CollisionObject* object) {
     return collisionObjectIsActive(object) || (object->body->flags & RigidBodyIsPlayer) != 0;
 }
 
-void collisionObjectCollideWithQuad(struct CollisionObject* object, struct CollisionObject* quadObject, struct ContactSolver* contactSolver) {
+struct ContactManifold* collisionObjectCollideWithQuad(struct CollisionObject* object, struct CollisionObject* quadObject, struct ContactSolver* contactSolver, int shouldCheckPortals) {
     if ((object->collisionLayers & quadObject->collisionLayers) == 0) {
-        return;
+        return NULL;
     }
 
     if (!box3DHasOverlap(&object->boundingBox, &quadObject->boundingBox)) {
-        return;
+        return NULL;
     }
 
     if (object->trigger && quadObject->trigger) {
-        return;
+        return NULL;
     }
 
     struct Simplex simplex;
@@ -57,17 +57,17 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
                 quad, minkowsiSumAgainstQuad, 
                 object, minkowsiSumAgainstObject, 
                 &quad->plane.normal)) {
-        return;
+        return NULL;
     }
 
     if (object->trigger) {
         object->trigger(object->data, quadObject);
-        return;
+        return NULL;
     }
 
     if (quadObject->trigger) {
         quadObject->trigger(quadObject->data, object);
-        return;
+        return NULL;
     }
 
     struct EpaResult result;
@@ -78,17 +78,19 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
         &result
     );
 
-    int touchingPortals = collisionSceneIsTouchingPortal(&result.contactA, &result.normal);
-
-    if (touchingPortals) {
-        object->body->flags |= touchingPortals;
-        return;
+    
+    if (shouldCheckPortals) {
+        int touchingPortals = collisionSceneIsTouchingPortal(&result.contactA, &result.normal);
+        if (touchingPortals) {
+            object->body->flags |= touchingPortals;
+            return NULL;
+        }
     }
 
     struct ContactManifold* contact = contactSolverGetContactManifold(contactSolver, quadObject, object);
 
     if (!contact) {
-        return;
+        return NULL;
     }
 
     contact->friction = MAX(object->collider->friction, quadObject->collider->friction);
@@ -96,6 +98,8 @@ void collisionObjectCollideWithQuad(struct CollisionObject* object, struct Colli
 
     transformPointInverseNoScale(&object->body->transform, &result.contactB, &result.contactB);
     contactInsert(contact, &result);
+
+    return contact;
 }
 
 void collisionObjectHandleSweptCollision(struct CollisionObject* object, struct Vector3* normal, float restitution) {
@@ -107,17 +111,17 @@ void collisionObjectHandleSweptCollision(struct CollisionObject* object, struct 
     }
 }
 
-void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionObject* quadObject, struct ContactSolver* contactSolver) {
+struct ContactManifold* collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionObject* quadObject, struct ContactSolver* contactSolver, int shouldCheckPortals) {
     if ((object->collisionLayers & quadObject->collisionLayers) == 0) {
-        return;
+        return NULL;
     }
 
     if (!box3DHasOverlap(sweptBB, &quadObject->boundingBox)) {
-        return;
+        return NULL;
     }
 
     if (object->trigger && quadObject->trigger) {
-        return;
+        return NULL;
     }
 
     struct Simplex simplex;
@@ -132,17 +136,17 @@ void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct 
                 quad, minkowsiSumAgainstQuad, 
                 &sweptObject, minkowsiSumAgainstSweptObject, 
                 &quad->plane.normal)) {
-        return;
+        return NULL;
     }
 
     if (object->trigger) {
         object->trigger(object->data, quadObject);
-        return;
+        return NULL;
     }
 
     if (quadObject->trigger) {
         quadObject->trigger(quadObject->data, object);
-        return;
+        return NULL;
     }
 
     struct EpaResult result;
@@ -156,26 +160,27 @@ void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct 
         &objectEnd,
         &result
     )) {
-        collisionObjectCollideWithQuad(object, quadObject, contactSolver);
-        return;
+        return collisionObjectCollideWithQuad(object, quadObject, contactSolver, shouldCheckPortals);
     }
 
     // quads with a thickness of 0 are one sided
     if (quad->thickness == 0.0f && vector3Dot(&result.normal, &quad->plane.normal) < 0.0f) {
-        return;
+        return NULL;
     }
 
-    int touchingPortals = collisionSceneIsTouchingPortal(&result.contactA, &result.normal);
+    if (shouldCheckPortals) {
+        int touchingPortals = collisionSceneIsTouchingPortal(&result.contactA, &result.normal);
 
-    if (touchingPortals) {
-        object->body->flags |= touchingPortals;
-        return;
+        if (touchingPortals) {
+            object->body->flags |= touchingPortals;
+            return NULL;
+        }
     }
 
     struct ContactManifold* contact = contactSolverGetContactManifold(contactSolver, quadObject, object);
 
     if (!contact) {
-        return;
+        return NULL;
     }
 
     object->body->transform.position = objectEnd;
@@ -187,6 +192,8 @@ void collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct 
     contactInsert(contact, &result);
 
     collisionObjectHandleSweptCollision(object, &contact->normal, contact->restitution);
+
+    return contact;
 }
 
 

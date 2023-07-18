@@ -67,6 +67,9 @@ void contactSolverRemoveUnusedContacts(struct ContactSolver* contactSolver);
 void contactSolverCheckPortalContacts(struct ContactSolver* contactSolver, struct CollisionObject* objectWithNewPortal);
 void contactSolverCleanupManifold(struct ContactManifold* manifold);
 
+float contactPenetration(struct ContactManifold* contact);
+void contactAdjustPenetration(struct ContactManifold* contact, float amount);
+
 void contactSolverAddPointConstraint(struct ContactSolver* solver, struct PointConstraint* constraint);
 void contactSolverRemovePointConstraint(struct ContactSolver* solver, struct PointConstraint* constraint);
 

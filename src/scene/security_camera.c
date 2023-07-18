@@ -162,8 +162,11 @@ void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int came
             rigidBodyUnmarkKinematic(&camera->rigidBody, 1.0f, collisionBoxSolidMofI(&gSecurityCameraCollider, 1.0f));
             camera->collisionObject.collisionLayers |= COLLISION_LAYERS_GRABBABLE;
             camera->rigidBody.flags |= RigidBodyFlagsGrabbable;
-            short clipIndex = randomInRange(0, sizeof(gCameraDestroyClips) / sizeof(*gCameraDestroyClips));
-            cutsceneQueueSoundInChannel(gCameraDestroyClips[clipIndex], 1.0f, CH_GLADOS);
+
+            if (!cutsceneRunnerIsChannelPlaying(CH_GLADOS)) {
+                short clipIndex = randomInRange(0, sizeof(gCameraDestroyClips) / sizeof(*gCameraDestroyClips));
+                cutsceneQueueSoundInChannel(gCameraDestroyClips[clipIndex], 1.0f, CH_GLADOS);
+            }
         }
     }
 }

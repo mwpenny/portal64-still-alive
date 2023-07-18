@@ -243,6 +243,10 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
     }
 }
 
+int cutsceneRunnerIsChannelPlaying(int channel) {
+    return soundPlayerIsPlaying(gCutsceneCurrentSound[channel]) || gCutsceneSoundQueues[channel] != NULL;
+}
+
 int cutsceneRunnerUpdateCurrentStep(struct CutsceneRunner* runner) {
     struct CutsceneStep* step = &runner->currentCutscene->steps[runner->currentStep];
     switch (step->type) {
@@ -250,7 +254,7 @@ int cutsceneRunnerUpdateCurrentStep(struct CutsceneRunner* runner) {
             return !soundPlayerIsPlaying(runner->state.playSound.soundId);
         case CutsceneStepTypeWaitForChannel:
         {
-            int result = !soundPlayerIsPlaying(gCutsceneCurrentSound[step->waitForChannel.channel]) && gCutsceneSoundQueues[step->waitForChannel.channel] == NULL;
+            int result = !cutsceneRunnerIsChannelPlaying(step->waitForChannel.channel);
             return result;
         }
         case CutsceneStepTypeDelay:

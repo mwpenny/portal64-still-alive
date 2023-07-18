@@ -28,6 +28,8 @@ struct Portal {
     struct Vector2s16 fullSizeLoopCenter;
     short portalSurfaceIndex;
     short roomIndex;
+    short colliderIndex;
+    // used to attach portals to moving surfaces
     short transformIndex;
     struct Vector3 relativePos;
 };

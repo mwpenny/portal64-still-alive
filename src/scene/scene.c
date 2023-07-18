@@ -717,6 +717,13 @@ void sceneQueueCheckpoint(struct Scene* scene) {
     scene->checkpointState = SceneCheckpointStateReady;
 }
 
+
+void sceneCheckSecurityCamera(struct Scene* scene, struct Portal* portal) {
+    struct Box3D portalBB;
+    portalCalculateBB(portal, &portalBB);
+    securityCamerasCheckPortal(scene->securityCameras, scene->securityCameraCount, &portalBB);
+}
+
 int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformIndex, int portalIndex, struct PortalSurfaceMappingRange surfaceMapping, struct CollisionObject* collisionObject, int roomIndex, int fromPlayer, int just_checking) {
     struct Transform finalAt;
 
@@ -730,6 +737,8 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
     } else {
         finalAt = *at;
     }
+
+    int wasOpen = collisionSceneIsPortalOpen();
 
     for (int indexIndex = surfaceMapping.minPortalIndex; indexIndex < surfaceMapping.maxPortalIndex; ++indexIndex) {
         int surfaceIndex = gCurrentLevel->portalSurfaceMappingIndices[indexIndex];
@@ -756,9 +765,9 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
             gCollisionScene.portalVelocity[portalIndex] = gZeroVec;
             portal->transformIndex = transformIndex;
             portal->roomIndex = roomIndex;
+            portal->colliderIndex = levelQuadIndex(collisionObject);
             portal->scale = 0.0f;
-            gCollisionScene.portalTransforms[portalIndex] = &portal->transform;
-            gCollisionScene.portalRooms[portalIndex] = roomIndex;
+            collisionSceneSetPortal(portalIndex, &portal->transform, roomIndex, portal->colliderIndex);
 
             soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &portal->transform.position, &gZeroVec);
 
@@ -779,11 +788,15 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                     otherPortal->opacity = 1.0f;
                     soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &otherPortal->transform.position, &gZeroVec);
                 }
+
+                sceneCheckSecurityCamera(scene, portal);
+
+                if (!wasOpen) {
+                    sceneCheckSecurityCamera(scene, &scene->portals[1 - portalIndex]);
+                }
             }
-            struct Box3D portalBB;
-            portalCalculateBB(portal, &portalBB);
+
             contactSolverCheckPortalContacts(&gContactSolver, collisionObject);
-            securityCamerasCheckPortal(scene->securityCameras, scene->securityCameraCount, &portalBB);
             ballBurnFilterOnPortal(&portal->transform, portalIndex);
             playerSignalPortalChanged(&scene->player);
             return 1;
@@ -881,6 +894,7 @@ void sceneClosePortal(struct Scene* scene, int portalIndex) {
     else if (gCollisionScene.portalTransforms[portalIndex]) {
         soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position, &gZeroVec);
         gCollisionScene.portalTransforms[portalIndex] = NULL;
+        gCollisionScene.portalColliderIndex[portalIndex] = -1;
         scene->portals[portalIndex].flags |= PortalFlagsNeedsNewHole;
         scene->portals[portalIndex].portalSurfaceIndex = -1;
         scene->portals[portalIndex].transformIndex = NO_TRANSFORM_INDEX;
