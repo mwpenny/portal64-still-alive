@@ -191,7 +191,7 @@ void collisionSceneSetPortal(int portalIndex, struct Transform* transform, int r
     if (gCollisionScene.portalTransforms[1 - portalIndex]) {
         struct Transform inverseTransform;
         transformInvert(transform, &inverseTransform);
-        transformConcat(&inverseTransform, gCollisionScene.portalTransforms[1 - portalIndex], &gCollisionScene.toOtherPortalTransform[portalIndex]);
+        transformConcat(gCollisionScene.portalTransforms[1 - portalIndex], &inverseTransform, &gCollisionScene.toOtherPortalTransform[portalIndex]);
         transformInvert(&gCollisionScene.toOtherPortalTransform[portalIndex], &gCollisionScene.toOtherPortalTransform[1 - portalIndex]);
     }
 }

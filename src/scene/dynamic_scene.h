@@ -64,4 +64,14 @@ void dynamicRenderListAddData(
     Mtx* armature
 );
 
+void dynamicRenderListAddDataTouchingPortal(
+    struct DynamicRenderDataList* list,
+    Gfx* model,
+    Mtx* transform,
+    short materialIndex,
+    struct Vector3* position,
+    Mtx* armature,
+    int rigidBodyFlags
+);
+
 #endif

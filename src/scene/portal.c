@@ -21,9 +21,6 @@
 
 #define CALC_SCREEN_SPACE(clip_space, screen_size) ((clip_space + 1.0f) * ((screen_size) / 2))
 
-#define PORTAL_COVER_HEIGHT 0.708084f
-#define PORTAL_COVER_WIDTH  0.84085f
-
 struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE] = {
     {0.0f, 1.0f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
     {0.353553f * SCENE_SCALE * PORTAL_COVER_WIDTH, 0.707107f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},

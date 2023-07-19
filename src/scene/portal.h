@@ -34,6 +34,9 @@ struct Portal {
     struct Vector3 relativePos;
 };
 
+#define PORTAL_COVER_HEIGHT 0.708084f
+#define PORTAL_COVER_WIDTH  0.84085f
+
 #define NO_PORTAL 0xFF
 
 #define PORTAL_RENDER_TYPE_VISIBLE_0    (1 << 0)

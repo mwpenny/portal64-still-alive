@@ -15,14 +15,28 @@ struct DynamicRenderData {
     short renderStageCullingMask;
 };
 
+#define MAX_RENDER_STAGES   6
+
+struct DynamicRenderStageData {
+    short exitPortalView;
+    short parentStageIndex;
+};
+
 struct DynamicRenderDataList {
+    struct RenderState* renderState;
     struct DynamicRenderData* renderData;
     short maxLength;
     short currentLength;
+    short currentRenderStateCullingMask;
+    short stageCount;
+    struct DynamicRenderStageData stages[MAX_RENDER_STAGES];
+    float portalTransforms[2][4][4];
 };
 
-struct DynamicRenderDataList* dynamicRenderListNew(int maxLength);
+struct DynamicRenderDataList* dynamicRenderListNew(struct RenderState* renderState, int maxLength);
 void dynamicRenderListFree(struct DynamicRenderDataList* list);
+
+void dynamicRenderAddStage(struct DynamicRenderDataList* list, int exitPortalView, int parentStageIndex);
 
 void dynamicRenderListAddData(
     struct DynamicRenderDataList* list,
@@ -31,6 +45,16 @@ void dynamicRenderListAddData(
     short materialIndex,
     struct Vector3* position,
     Mtx* armature
+);
+
+void dynamicRenderListAddDataTouchingPortal(
+    struct DynamicRenderDataList* list,
+    Gfx* model,
+    Mtx* transform,
+    short materialIndex,
+    struct Vector3* position,
+    Mtx* armature,
+    int rigidBodyFlags
 );
 
 void dynamicRenderListPopulate(struct DynamicRenderDataList* list, struct RenderProps* stages, int stageCount, struct RenderState* renderState);

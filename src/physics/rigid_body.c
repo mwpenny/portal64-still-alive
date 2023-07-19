@@ -201,6 +201,7 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
 
         newFlags |= RigidBodyFlagsCrossedPortal0 << i;
         newFlags |= RigidBodyIsTouchingPortalA << (1 - i);
+        newFlags &= ~(RigidBodyWasTouchingPortalA << i);
         result = i + 1;
     }
 

@@ -32,6 +32,7 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
     props->currentDepth = STARTING_RENDER_DEPTH;
     props->exitPortalIndex = NO_PORTAL;
     props->fromRoom = roomIndex;
+    props->parentStageIndex = -1;
 
     props->clippingPortalIndex = -1;
 
@@ -290,7 +291,7 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
     struct Vector3 cameraForward;
     quatMultVector(&next->camera.transform.rotation, &gForward, &cameraForward);
 
-    next->camera.nearPlane = (-vector3Dot(&portalOffset, &cameraForward)) * SCENE_SCALE;
+    next->camera.nearPlane = (-vector3Dot(&portalOffset, &cameraForward)) * SCENE_SCALE - SCENE_SCALE * PORTAL_COVER_HEIGHT * 0.5f;
 
     if (next->camera.nearPlane < current->camera.nearPlane) {
         next->camera.nearPlane = current->camera.nearPlane;
@@ -323,6 +324,7 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
 
     next->exitPortalIndex = exitPortalIndex;
     next->fromRoom = gCollisionScene.portalRooms[next->exitPortalIndex];
+    next->parentStageIndex = current - renderPlan->stageProps;
 
     ++renderPlan->stageCount;
 
@@ -483,7 +485,11 @@ int fogIntValue(float floatValue) {
 }
 
 void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* staticTransforms, struct RenderState* renderState) {
-    struct DynamicRenderDataList* dynamicList = dynamicRenderListNew(MAX_DYNAMIC_SCENE_OBJECTS);
+    struct DynamicRenderDataList* dynamicList = dynamicRenderListNew(renderState, MAX_DYNAMIC_SCENE_OBJECTS);
+
+    for (int i = 0; i < renderPlan->stageCount; ++i) {
+        dynamicRenderAddStage(dynamicList, renderPlan->stageProps[i].exitPortalIndex, renderPlan->stageProps[i].parentStageIndex);
+    }
 
     dynamicRenderListPopulate(dynamicList, renderPlan->stageProps, renderPlan->stageCount, renderState);
 

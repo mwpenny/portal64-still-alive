@@ -24,6 +24,8 @@ struct RenderProps {
     s8 clippingPortalIndex;
     u8 portalRenderType;
 
+    s8 parentStageIndex;
+
     u16 fromRoom;
 
     short minX;

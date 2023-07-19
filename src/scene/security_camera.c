@@ -57,16 +57,20 @@ void securityCameraLookAt(struct SecurityCamera* camera, struct Vector3* target)
     struct Vector2 pitch;
     pitch.y = offset.y * invMag;
 
+    struct Quaternion targetPose;
+
     if (fabsf(pitch.y) > 0.99f) {
         pitch.x = 0.0f;
-        quatAxisComplex(&gRight, &pitch, &camera->armature.pose[PROPS_SECURITY_CAMERA_HEAD_BONE].rotation);
+        quatAxisComplex(&gForward, &pitch, &targetPose);
+        quatLerp(&camera->armature.pose[PROPS_SECURITY_CAMERA_HEAD_BONE].rotation, &targetPose, 0.1f, &camera->armature.pose[PROPS_SECURITY_CAMERA_HEAD_BONE].rotation);
         return;
     }
 
     pitch.x = sqrtf(offset.x * offset.x + offset.z * offset.z) * invMag;
 
     struct Quaternion relativeRotation;
-    quatAxisComplex(&gForward, &pitch, &camera->armature.pose[PROPS_SECURITY_CAMERA_HEAD_BONE].rotation);
+    quatAxisComplex(&gForward, &pitch, &targetPose);
+    quatLerp(&camera->armature.pose[PROPS_SECURITY_CAMERA_HEAD_BONE].rotation, &targetPose, 0.1f, &camera->armature.pose[PROPS_SECURITY_CAMERA_HEAD_BONE].rotation);
 
     struct Vector2 yaw;
 
@@ -76,7 +80,8 @@ void securityCameraLookAt(struct SecurityCamera* camera, struct Vector3* target)
     yaw.y = -offset.z * invMag;
 
     quatAxisComplex(&gUp, &yaw, &relativeRotation);
-    quatMultiply(&gBarBoneRelative, &relativeRotation, &camera->armature.pose[PROPS_SECURITY_CAMERA_BAR_BONE].rotation);
+    quatMultiply(&gBarBoneRelative, &relativeRotation, &targetPose);
+    quatLerp(&camera->armature.pose[PROPS_SECURITY_CAMERA_BAR_BONE].rotation, &targetPose, 0.1f, &camera->armature.pose[PROPS_SECURITY_CAMERA_BAR_BONE].rotation);
 }
 
 void securityCameraRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
@@ -100,13 +105,14 @@ void securityCameraRender(void* data, struct DynamicRenderDataList* renderList, 
 
     skCalculateTransforms(&securityCamera->armature, armature);
 
-    dynamicRenderListAddData(
+    dynamicRenderListAddDataTouchingPortal(
         renderList, 
         decorBuildFizzleGfx(securityCamera->armature.displayList, securityCamera->fizzleTime, renderState), 
         matrix, 
         securityCamera->fizzleTime > 0.0f ? SECURITY_CAMERA_FIZZLED_INDEX : SECURITY_CAMERA_INDEX, 
         &securityCamera->rigidBody.transform.position, 
-        armature
+        armature,
+        securityCamera->rigidBody.flags
     );
 }
 
