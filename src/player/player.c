@@ -20,11 +20,6 @@
 #include "../build/assets/models/player/chell.h"
 #include "../build/assets/materials/static.h"
 
-#ifdef PORTAL64_WITH_DEBUGGER
-#include "../debugger/debugger.h"
-#endif
-#include <string.h>
-
 #define GRAB_RAYCAST_DISTANCE   2.5f
 #define DROWN_TIME              2.0f
 #define STEP_TIME               0.35f
