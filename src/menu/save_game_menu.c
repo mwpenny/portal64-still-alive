@@ -37,7 +37,7 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
     if (includeNew && freeSlot != SAVEFILE_NO_SLOT) {
         savefileInfo[numberOfSaves].slotIndex = freeSlot;
         savefileInfo[numberOfSaves].savefileName = "NEW SAVE";
-        savefileInfo[numberOfSaves].testchamberIndex = gCurrentLevelIndex;
+        savefileInfo[numberOfSaves].testchamberIndex = levelGetChamberNumber(gCurrentLevelIndex, gScene.player.body.currentRoom);
         savefileInfo[numberOfSaves].screenshot = gScreenGrabBuffer;
 
         if (suggestedSlot == 0) {
@@ -60,7 +60,7 @@ enum MenuDirection saveGameUpdate(struct SaveGameMenu* saveGame) {
     if (controllerGetButtonDown(0, A_BUTTON) && saveGame->savefileList->numberOfSaves) {
         Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
         if (checkpointSaveInto(&gScene, save)) {
-            savefileSaveGame(save, gScreenGrabBuffer, gCurrentLevelIndex, gCurrentTestSubject, savefileGetSlot(saveGame->savefileList));
+            savefileSaveGame(save, gScreenGrabBuffer, levelGetChamberNumber(gCurrentLevelIndex, gScene.player.body.currentRoom), gCurrentTestSubject, savefileGetSlot(saveGame->savefileList));
             saveGamePopulate(saveGame, 0);
         }
         stackMallocFree(save);
