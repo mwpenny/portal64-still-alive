@@ -96,14 +96,17 @@ public:
         )));
     }
 
+    void AddNewlineHint();
+
     virtual bool Output(std::ostream& output, int indentLevel, int linePrefix);
     
     static void OutputIndent(std::ostream& output, int indentLevel);
-    static void OutputChildren(std::vector<std::unique_ptr<DataChunk>>& children, std::ostream& output, int indentLevel, int totalLength, bool trailingComma);
+    static void OutputChildren(std::vector<std::unique_ptr<DataChunk>>& children, std::ostream& output, int indentLevel, int totalLength, bool trailingComma, bool includeNewlines);
 protected:
     virtual int CalculateEstimatedLength();
 private:
     std::vector<std::unique_ptr<DataChunk>> mChildren;
+    bool mHasNewlineHints;
 };
 
 class MacroDataChunk : public DataChunk {
@@ -137,6 +140,14 @@ protected:
     virtual int CalculateEstimatedLength();
 private:
     std::string mComment;
+};
+
+class NewlineHintChunk : public DataChunk {
+public:
+    NewlineHintChunk();
+    virtual bool Output(std::ostream& output, int indentLevel, int linePrefix);
+protected:
+    virtual int CalculateEstimatedLength();
 };
 
 #endif

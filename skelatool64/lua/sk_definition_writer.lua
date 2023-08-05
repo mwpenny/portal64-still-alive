@@ -75,6 +75,39 @@ end
 
 exports.is_raw = is_raw
 
+--- @table CommentType
+local CommentType = {}
+
+local function comment(value)
+    return setmetatable({ value = value}, CommentType)
+end
+
+CommentType.__index = CommentType;
+
+function CommentType.__tostring(comment)
+    return 'comment(' .. comment.value .. ')'
+end
+
+--- renders a string as a comment
+---@function comment
+---@tparam string value
+---@treturn CommentType result
+exports.comment = comment
+
+--- returns true if value is a CommentType
+---@function is_comment
+---@tparam any value
+---@treturn boolean result
+local function is_comment(value)
+    return getmetatable(value) == CommentType
+end
+
+exports.is_comment = is_comment
+
+--- alias for raw("'\n")
+--- @table newline
+exports.newline = raw('\n')
+
 --- alias for raw("NULL")
 --- @table null_value
 local null_value = raw("NULL")

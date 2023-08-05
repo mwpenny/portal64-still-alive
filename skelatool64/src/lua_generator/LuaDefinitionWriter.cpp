@@ -88,6 +88,7 @@ std::unique_ptr<DataChunk> buildDataChunk(lua_State* L) {
     }
 
     if (type == LUA_TTABLE) {
+        // check if this is a raw value
         lua_getglobal(L, "require");
         lua_pushstring(L, "sk_definition_writer");
         lua_call(L, 1, 1);
@@ -103,12 +104,22 @@ std::unique_ptr<DataChunk> buildDataChunk(lua_State* L) {
             // pop the bool
             lua_pop(L, 1);
             lua_getfield(L, -1, "value");
-            std::unique_ptr<DataChunk> result(new PrimitiveDataChunk<std::string>(lua_tostring(L, -1)));
+
+            const char* buffer = lua_tostring(L, -1);
+
+            if (strcmp(buffer, "\n") == 0) {
+                std::unique_ptr<DataChunk> result(new NewlineHintChunk());
+                lua_pop(L, 1);
+                return result;
+            }
+
+            std::unique_ptr<DataChunk> result(new PrimitiveDataChunk<std::string>(buffer));
             lua_pop(L, 1);
             return result;
         }
         lua_pop(L, 1);
 
+        // check if ths is a macro value
         lua_getglobal(L, "require");
         lua_pushstring(L, "sk_definition_writer");
         lua_call(L, 1, 1);
@@ -124,6 +135,28 @@ std::unique_ptr<DataChunk> buildDataChunk(lua_State* L) {
             // pop the bool
             lua_pop(L, 1);
             return buildMacroChunk(L);
+        }
+        lua_pop(L, 1);
+
+        // check if this is a comment
+        lua_getglobal(L, "require");
+        lua_pushstring(L, "sk_definition_writer");
+        lua_call(L, 1, 1);
+
+        lua_getfield(L, -1, "is_comment");
+        // remove sk_definition_writer module
+        lua_remove(L, -2);
+
+        lua_pushnil(L);
+        lua_copy(L, -3, -1);
+        lua_call(L, 1, 1);
+        if (lua_toboolean(L, -1)) {
+            // pop the bool
+            lua_pop(L, 1);
+            lua_getfield(L, -1, "value");
+            std::unique_ptr<DataChunk> result(new CommentDataChunk(lua_tostring(L, -1)));
+            lua_pop(L, 1);
+            return result;
         }
         lua_pop(L, 1);
 

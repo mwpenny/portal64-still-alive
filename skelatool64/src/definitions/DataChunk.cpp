@@ -72,7 +72,7 @@ int StructureEntryDataChunk::CalculateEstimatedLength() {
     return mName.length() + 4 + mEntry->GetEstimatedLength();
 }
 
-StructureDataChunk::StructureDataChunk(): DataChunk() {}
+StructureDataChunk::StructureDataChunk(): DataChunk(), mHasNewlineHints(false) {}
 
 StructureDataChunk::StructureDataChunk(const aiVector3D& vector) : StructureDataChunk() {
     AddPrimitive(vector.x);
@@ -96,6 +96,10 @@ StructureDataChunk::StructureDataChunk(const aiAABB& bb) : StructureDataChunk() 
 
 
 void StructureDataChunk::Add(std::unique_ptr<DataChunk> entry) {
+    if (dynamic_cast<NewlineHintChunk*>(entry.get()) != nullptr) {
+        mHasNewlineHints = true;
+    }
+
     mChildren.push_back(std::move(entry));
 }
 
@@ -106,13 +110,18 @@ void StructureDataChunk::Add(const std::string& name, std::unique_ptr<DataChunk>
     )));
 }
 
+void StructureDataChunk::AddNewlineHint() {
+    mHasNewlineHints = true;
+    mChildren.push_back(std::unique_ptr<DataChunk>(new NewlineHintChunk()));
+}
+
 #define MAX_CHARS_PER_LINE  80
 #define SPACES_PER_INDENT   4
 
 bool StructureDataChunk::Output(std::ostream& output, int indentLevel, int linePrefix) {
     output << '{';
 
-    OutputChildren(mChildren, output, indentLevel, linePrefix + GetEstimatedLength(), true);
+    OutputChildren(mChildren, output, indentLevel, linePrefix + GetEstimatedLength(), true, !mHasNewlineHints);
 
     output << '}';
     return true;
@@ -138,7 +147,7 @@ void StructureDataChunk::OutputIndent(std::ostream& output, int indentLevel) {
     }
 }
 
-void StructureDataChunk::OutputChildren(std::vector<std::unique_ptr<DataChunk>>& children, std::ostream& output, int indentLevel, int totalLength, bool trailingComma) {
+void StructureDataChunk::OutputChildren(std::vector<std::unique_ptr<DataChunk>>& children, std::ostream& output, int indentLevel, int totalLength, bool trailingComma, bool includeNewlines) {
     bool needsComma = false;
     
     if (totalLength < MAX_CHARS_PER_LINE) {
@@ -147,17 +156,33 @@ void StructureDataChunk::OutputChildren(std::vector<std::unique_ptr<DataChunk>>&
                 output << ", ";
             }
 
+            if (dynamic_cast<NewlineHintChunk*>(children[i].get()) != nullptr) {
+                needsComma = false;
+                continue;
+            }
+
             needsComma = children[i]->Output(output, indentLevel, 0);
         }
     } else {
         output << '\n';
+        bool needsIndent = true;
         ++indentLevel;
         for (size_t i = 0; i < children.size(); ++i) {
-            OutputIndent(output, indentLevel);
-            if (children[i]->Output(output, indentLevel, indentLevel * SPACES_PER_INDENT) && (i < children.size() - 1 || trailingComma)) {
-                output << ",\n";
+            if (needsIndent) {
+                OutputIndent(output, indentLevel);
+                needsIndent = false;
             } else {
+                output << ' ';
+            }
+            if (children[i]->Output(output, indentLevel, indentLevel * SPACES_PER_INDENT) && (i < children.size() - 1 || trailingComma)) {
+                output << ",";
+            }
+
+            if (includeNewlines) {
                 output << "\n";
+                needsIndent = true;
+            } else if (dynamic_cast<NewlineHintChunk*>(children[i].get()) != nullptr) {
+                needsIndent = true;
             }
         }
         --indentLevel;
@@ -176,7 +201,7 @@ void MacroDataChunk::Add(std::unique_ptr<DataChunk> entry) {
 bool MacroDataChunk::Output(std::ostream& output, int indentLevel, int linePrefix) {
     output << mMacroName << '(';
 
-    StructureDataChunk::OutputChildren(mParameters, output, indentLevel, mSingleLine ? 0 : linePrefix + GetEstimatedLength(), false);
+    StructureDataChunk::OutputChildren(mParameters, output, indentLevel, mSingleLine ? 0 : linePrefix + GetEstimatedLength(), false, true);
 
     output << ')';
     return true;
@@ -206,4 +231,15 @@ bool CommentDataChunk::Output(std::ostream& output, int indentLevel, int linePre
 
 int CommentDataChunk::CalculateEstimatedLength() {
     return 6 + mComment.length();
+}
+
+NewlineHintChunk::NewlineHintChunk() : DataChunk() {}
+
+bool NewlineHintChunk::Output(std::ostream& output, int indentLevel, int linePrefix) {
+    output << "\n";
+    return false;
+}
+
+int NewlineHintChunk::CalculateEstimatedLength() {
+    return 0;
 }

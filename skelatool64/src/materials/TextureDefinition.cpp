@@ -1,7 +1,3 @@
-#define cimg_display 0
-#define cimg_use_png
-#define cimg_use_tiff
-#include "../../cimg/CImg.h"
 
 #include "TextureDefinition.h"
 #include "../FileUtils.h"
@@ -12,6 +8,8 @@
 #include <iomanip>
 #include <assimp/vector3.h>
 #include <assimp/vector3.inl>
+
+#include "CImgu8.h"
 
 DataChunkStream::DataChunkStream() :
     mCurrentBufferPos(0),
@@ -474,40 +472,56 @@ unsigned PalleteDefinition::ColorCount() const {
 }
 
 TextureDefinition::TextureDefinition(const std::string& filename, G_IM_FMT fmt, G_IM_SIZ siz, TextureDefinitionEffect effects, std::shared_ptr<PalleteDefinition> pallete) :
-    mName(getBaseName(replaceExtension(filename, "")) + "_" + gFormatShortName[(int)fmt] + "_" + gSizeName[(int)siz]),
-    mFmt(fmt),
-    mSiz(siz),
-    mPallete(pallete),
-    mEffects(effects) {
+    TextureDefinition(
+        new CImgu8(filename),
+        getBaseName(replaceExtension(filename, "")) + "_" + gFormatShortName[(int)fmt] + "_" + gSizeName[(int)siz],
+        fmt,
+        siz,
+        pallete,
+        effects
+    ) {
+}
 
-    cimg_library_suffixed::CImg<unsigned char> imageData(filename.c_str());
+TextureDefinition::~TextureDefinition() {
+    delete mImg;
+    mImg = NULL;
+}
 
+TextureDefinition::TextureDefinition(
+    CImgu8* img,
+    const std::string& name, 
+    G_IM_FMT fmt, 
+    G_IM_SIZ siz, 
+    std::shared_ptr<PalleteDefinition> pallete,
+    TextureDefinitionEffect effects
+): mImg(std::move(img)), mName(name), mFmt(fmt), mSiz(siz), mWidth(img->mImg.width()), mHeight(img->mImg.height()),
+    mPallete(pallete), mEffects(effects) {
     if (HasEffect(TextureDefinitionEffect::TwoToneGrayscale)) {
-        applyTwoToneEffect(imageData, mTwoToneMax, mTwoToneMin);
+        applyTwoToneEffect(mImg->mImg, mTwoToneMax, mTwoToneMin);
     }
 
     if (HasEffect(TextureDefinitionEffect::NormalMap)) {
-        calculateNormalMap(imageData);
+        calculateNormalMap(mImg->mImg);
     }
 
     if (HasEffect(TextureDefinitionEffect::Invert)) {
-        invertImage(imageData);
+        invertImage(mImg->mImg);
     }
 
     if (HasEffect(TextureDefinitionEffect::SelectR) || 
         HasEffect(TextureDefinitionEffect::SelectG) || 
         HasEffect(TextureDefinitionEffect::SelectB)) {
-        selectChannel(imageData, mEffects);
+        selectChannel(mImg->mImg, mEffects);
     }
 
-    mWidth = imageData.width();
-    mHeight = imageData.height();
+    mWidth = mImg->mImg.width();
+    mHeight = mImg->mImg.height();
 
     DataChunkStream dataStream;
 
     for (int y = 0; y < mHeight; ++y) {
         for (int x = 0; x < mWidth; ++x) {
-            convertPixel(imageData, x, y, dataStream, fmt, siz, pallete);
+            convertPixel(mImg->mImg, x, y, dataStream, fmt, siz, pallete);
         }
     }
 
@@ -520,8 +534,8 @@ TextureDefinition::TextureDefinition(const std::string& filename, G_IM_FMT fmt, 
         mFmt = G_IM_FMT::G_IM_FMT_CI;
         mSiz = pallete->ColorCount() <= 16 ? G_IM_SIZ::G_IM_SIZ_4b : G_IM_SIZ::G_IM_SIZ_8b;
     }
+    
 }
-
 bool isGrayscale(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y) {
     switch (input.spectrum()) {
         case 1:
@@ -668,6 +682,10 @@ bool TextureDefinition::GetLineForTile(int& line) const {
     return bitLine % 64 == 0;
 }
 
+const std::vector<unsigned long long>& TextureDefinition::GetData() const {
+    return mData;
+}
+
 const std::string& TextureDefinition::Name() const {
     return mName;
 }
@@ -686,4 +704,26 @@ PixelRGBAu8 TextureDefinition::GetTwoToneMax() const {
 
 std::shared_ptr<PalleteDefinition> TextureDefinition::GetPallete() const {
     return mPallete;
+}
+
+std::shared_ptr<TextureDefinition> TextureDefinition::Crop(int x, int y, int w, int h) const {
+    return std::shared_ptr<TextureDefinition>(new TextureDefinition(
+        new CImgu8(mImg->mImg.get_crop(x, y, x + w - 1, y + h - 1)),
+        mName,
+        mFmt,
+        mSiz,
+        mPallete,
+        mEffects
+    ));
+}
+
+std::shared_ptr<TextureDefinition> TextureDefinition::Resize(int w, int h) const {
+    return std::shared_ptr<TextureDefinition>(new TextureDefinition(
+        new CImgu8(mImg->mImg.get_resize(w, h, -100, -100, 5)),
+        mName,
+        mFmt,
+        mSiz,
+        mPallete,
+        mEffects
+    ));
 }

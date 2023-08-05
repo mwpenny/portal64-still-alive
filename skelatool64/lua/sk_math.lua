@@ -4,6 +4,7 @@ local Vector3 = {}
 local Box3 = {}
 local Quaternion = {}
 local Color4 = {}
+local Plane3 = {}
 
 --- creates a new 3d vector
 --- @function vector3
@@ -67,6 +68,32 @@ end
 --- @treturn boolean
 local function isQuaternion(obj)
     return type(obj) == 'table' and type(obj.x) == 'number' and type(obj.y) == 'number' and type(obj.z) == 'number' and type(obj.w) == 'number'
+end
+
+--- creates a new Plane3
+--- @function plane3
+--- @tparam Vector3 normal the normal of the plane
+--- @tparam number d the distance to the origin
+--- @treturn Plane3
+local function plane3(normal, d) 
+    return setmetatable({ normal = normal, d = d }, Plane3)
+end
+
+--- creates a new Plane3 using a point and a normal
+--- @function plane3
+--- @tparam Vector3 normal the normal of the plane
+--- @tparam Vector3 point a point on the plane
+--- @treturn Plane3
+local function plane3_with_point(normal, point) 
+    if not isVector3(normal) then
+        error('plane3_with_point expected vector as first operand got ' .. type(b), 2)
+    end
+
+    if not isVector3(point) then
+        error('plane3_with_point expected vector as second operand got ' .. type(b), 2)
+    end
+
+    return setmetatable({ normal = normal, d = -normal:dot(point) }, Plane3)
 end
 
 --- @type Vector3
@@ -135,6 +162,15 @@ function Vector3.__sub(a, b)
 
     return vector3(a.x - b.x, a.y - b.y, a.z - b.z)
 end
+
+--- @function __unm
+--- @tparam number|Vector3 b
+--- @treturn Vector3
+function Vector3.__unm(a)
+    return vector3(-a.x, -a.y, -a.z)
+end
+
+
 
 --- @function __mul
 --- @tparam number|Vector3 b
@@ -228,6 +264,9 @@ end
 --- @tparam Vector3 b
 --- @treturn number
 function Vector3.dot(a, b)
+    if not isVector3(b) then
+        error('Vector3.dot expected another vector as second operand', 2)
+    end
     return a.x * b.x + a.y * b.y + a.z * b.z
 end
 
@@ -248,6 +287,12 @@ end
 --- @tparam Vector3 b
 --- @treturn Vector3
 function Vector3.lerp(a, b, lerp)
+    if not isVector3(b) then
+        error('Vector3.lerp expected another vector as second operand', 2)
+    end
+    if type(lerp) ~= 'number' then
+        error('Vector3.lerp expected number as third operand', 2)
+    end
     return a * (1 - lerp) + b * lerp
 end
 
@@ -543,6 +588,15 @@ function Color4.lerp(a, b, lerp)
     return a * (1 - lerp) + b * lerp
 end
 
+--- @type Plane3
+--- @tfield Vector3 normal
+--- @tfield number d
+Plane3.__index = Plane3;
+
+function Plane3.distance_to_point(plane, point)
+    return plane.normal:dot(point) + plane.d
+end
+
 return {
     vector3 = vector3,
     Vector3 = Vector3,
@@ -555,4 +609,7 @@ return {
     isQuaternion = isQuaternion,
     color4 = color4,
     isColor4 = isColor4,
+    plane3 = plane3,
+    plane3_with_point = plane3_with_point,
+    Plane3 = Plane3,
 }

@@ -3,11 +3,14 @@
 
 #include <vector>
 #include <inttypes.h>
+#include <memory>
 
 #include "TextureFormats.h"
 
 #include "../definitions/DataChunk.h"
 #include "../definitions/FileDefinition.h"
+
+class CImgu8;
 
 class DataChunkStream {
 public:
@@ -85,6 +88,7 @@ private:
 class TextureDefinition {
 public:
     TextureDefinition(const std::string& filename, G_IM_FMT fmt, G_IM_SIZ siz, TextureDefinitionEffect effects, std::shared_ptr<PalleteDefinition> pallete);
+    ~TextureDefinition();
 
     static void DetermineIdealFormat(const std::string& filename, G_IM_FMT& fmt, G_IM_SIZ& siz);
 
@@ -102,6 +106,8 @@ public:
     int DTX() const;
     int NBytes() const;
 
+    const std::vector<unsigned long long>& GetData() const;
+
     const std::string& Name() const;
 
     bool HasEffect(TextureDefinitionEffect effect) const;
@@ -110,7 +116,20 @@ public:
     PixelRGBAu8 GetTwoToneMax() const;
 
     std::shared_ptr<PalleteDefinition> GetPallete() const;
+
+    std::shared_ptr<TextureDefinition> Crop(int x, int y, int w, int h) const;
+    std::shared_ptr<TextureDefinition> Resize(int w, int h) const;
 private:
+    TextureDefinition(
+        CImgu8* mImg,
+        const std::string& name, 
+        G_IM_FMT fmt, 
+        G_IM_SIZ siz, 
+        std::shared_ptr<PalleteDefinition> pallete,
+        TextureDefinitionEffect effects
+    );
+
+    CImgu8* mImg;
     std::string mName;
     G_IM_FMT mFmt;
     G_IM_SIZ mSiz;
