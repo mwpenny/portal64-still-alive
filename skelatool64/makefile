@@ -20,7 +20,7 @@ default: skeletool64
 
 build/lua/%.o: lua/%.lua
 	@mkdir -p $(@D)
-	luac -o $(@:%.o=%.out) $<
+	luac5.4 -o $(@:%.o=%.out) $<
 	ld -r -b binary -o $@ $(@:%.o=%.out)
 
 build/%.o: %.cpp
