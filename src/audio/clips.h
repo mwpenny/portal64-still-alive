@@ -1,6 +1,8 @@
 #ifndef __AUDIO_CLIPS_H__
 #define __AUDIO_CLIPS_H__
 
+extern unsigned short soundsSkippable[10];
+
 extern unsigned short soundsPortalEnter[2];
 extern unsigned short soundsPortalExit[2];
 
@@ -31,5 +33,7 @@ extern unsigned short soundsBallLaunch;
 extern unsigned short soundsBallBounce;
 extern unsigned short soundsBallKill;
 extern unsigned short soundsBallExplode;
+
+int clipsCheckSoundSkippable(unsigned short soundID);
 
 #endif

@@ -464,13 +464,10 @@ void playerGivePortalGun(struct Player* player, int flags) {
 }
 
 void playerUpdateSpeedSound(struct Player* player) {
-    // float soundPlayerVolume;
-    // soundPlayerVolume = sqrtf(vector3MagSqrd(&player->body.velocity))*(1.0f / MAX_PORTAL_SPEED);
-    // soundPlayerVolume = clampf(soundPlayerVolume, 0.0, 1.0f);
-    // soundPlayerAdjustVolume(player->flyingSoundLoopId, soundPlayerVolume);
-
-    // char message[32];
-    // gdbSendMessage(GDBDataTypeText, message, sprintf(message, "%d", (int)(soundPlayerVolume * 100.0f)));
+    float soundPlayerVolume;
+    soundPlayerVolume = sqrtf(vector3MagSqrd(&player->body.velocity))*(0.6f / MAX_PORTAL_SPEED);
+    soundPlayerVolume = clampf(soundPlayerVolume, 0.0, 1.0f);
+    soundPlayerAdjustVolume(player->flyingSoundLoopId, soundPlayerVolume);
 }
 
 void playerKill(struct Player* player, int isUnderwater) {
