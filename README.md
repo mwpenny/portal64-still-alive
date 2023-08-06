@@ -158,16 +158,16 @@ make -f Makefile.docker
 
 ## Current Bug TODO List (Hardware Verified) (High->Low priority)
 ----------------------- v8
-- [ ] Player can clip through chamber 7 by walking back up the stairs (near the top).
 - [ ] player can clip through back of elevator by jumping and strafeing at the back corners while inside.
 - [ ] Player can trap themselves in chamber 5 by following instructions issue #75
 - [ ] Two wall portals next to eachother can be used to clip any object out of any level by pushing it into corner, then dropping. 
 - [ ] Passing into a ceiling portal can sometimes mess with the player rotation
 - [ ] Can shoot portals, and walk through signage
 - [ ] Can place portals on ground after final fizzler on all levels
-- [ ] Door at end of room 2, chamber 10 isnt rendered properly
 - [ ] various visual glitches when running NTSC on PAL console #65
 - [ ] various visual glitches when running PAL on NTSC console #65
+- [x] Player can clip through chamber 7 by walking back up the stairs (near the top).
+- [x] Door at end of room 2, chamber 10 isnt rendered properly
 - [x] Held objects to a funny rotation bit
 - [x] Glass can be walked through from one side on multiple levels (0,1,4,...)
 - [x] Chell animation problem (fixed itself, investigate)
