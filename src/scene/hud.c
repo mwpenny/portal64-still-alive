@@ -74,22 +74,22 @@ void hudRender(struct RenderState* renderState, struct Player* player, int last_
         if (player->flags & PlayerHasFirstPortalGun){
             gDPSetPrimColor(renderState->dl++, 255, 255, 0, 128, 255, 255);
             if (looked_wall_portalable_1){
-                position_of_left_asset = (HUD_OUTER_WIDTH*2);
+                position_of_right_asset = (HUD_OUTER_WIDTH*3);
             }
             gSPTextureRectangle(renderState->dl++, 
-                HUD_UPPER_X, HUD_UPPER_Y,
-                HUD_UPPER_X + (HUD_OUTER_WIDTH << 2), HUD_UPPER_Y + (HUD_OUTER_HEIGHT << 2), 
-                G_TX_RENDERTILE, position_of_left_asset << 5, 0 << 5, 1 << 10, 1 << 10);
+                HUD_LOWER_X, HUD_LOWER_Y,
+                HUD_LOWER_X + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2), 
+                G_TX_RENDERTILE, position_of_right_asset << 5, 0 << 5, 1 << 10, 1 << 10);
             
             // if the player has the first gun but not second both left and right are blue
             if (!(player->flags & PlayerHasSecondPortalGun)){
                 if (looked_wall_portalable_1){
-                    position_of_right_asset = (HUD_OUTER_WIDTH*3);
+                    position_of_left_asset = (HUD_OUTER_WIDTH*2);
                 }   
                 gSPTextureRectangle(renderState->dl++, 
-                    HUD_LOWER_X, HUD_LOWER_Y,
-                    HUD_LOWER_X + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2), 
-                    G_TX_RENDERTILE, position_of_right_asset << 5, 0 << 5, 1 << 10, 1 << 10);
+                    HUD_UPPER_X, HUD_UPPER_Y,
+                    HUD_UPPER_X + (HUD_OUTER_WIDTH << 2), HUD_UPPER_Y + (HUD_OUTER_HEIGHT << 2),
+                    G_TX_RENDERTILE, position_of_left_asset << 5, 0 << 5, 1 << 10, 1 << 10);
             }
             
         }
@@ -97,30 +97,32 @@ void hudRender(struct RenderState* renderState, struct Player* player, int last_
         if (player->flags & PlayerHasSecondPortalGun){
             gDPSetPrimColor(renderState->dl++, 255, 255, 255, 128, 0, 255);
             if (looked_wall_portalable_0){
-                position_of_right_asset = (HUD_OUTER_WIDTH*3);
+                position_of_left_asset = (HUD_OUTER_WIDTH*2);
             }
             gSPTextureRectangle(renderState->dl++, 
-                HUD_LOWER_X, HUD_LOWER_Y,
-                HUD_LOWER_X + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2), 
-                G_TX_RENDERTILE, position_of_right_asset << 5, 0 << 5, 1 << 10, 1 << 10);
+                HUD_UPPER_X, HUD_UPPER_Y,
+                HUD_UPPER_X + (HUD_OUTER_WIDTH << 2), HUD_UPPER_Y + (HUD_OUTER_HEIGHT << 2), 
+                G_TX_RENDERTILE, position_of_left_asset << 5, 0 << 5, 1 << 10, 1 << 10);
         }
     }
     
 
     // both portal guns owned is only time when the last shot portal indicator appears
     if ((player->flags & PlayerHasSecondPortalGun) && (player->flags & PlayerHasFirstPortalGun) && last_portal_idx_shot != -1){
+        //orange indicator
         if (last_portal_idx_shot == 0){
             gDPSetPrimColor(renderState->dl++, 255, 255, 255, 128, 0, 255);
             gSPTextureRectangle(renderState->dl++, 
-                HUD_UPPER_X + 100, HUD_LOWER_Y,
-                HUD_UPPER_X + 100 + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2) , 
+                HUD_LOWER_X - 68, HUD_LOWER_Y,
+                HUD_LOWER_X - 68 + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2), 
                 G_TX_RENDERTILE, position_of_portal_indicator << 5, 0 << 5, 1 << 10, 1 << 10);
         }
+        //blue indicator
         else if (last_portal_idx_shot == 1){
             gDPSetPrimColor(renderState->dl++, 255, 255, 0, 128, 255, 255);
             gSPTextureRectangle(renderState->dl++, 
-                HUD_LOWER_X - 68, HUD_LOWER_Y,
-                HUD_LOWER_X - 68 + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2) , 
+                HUD_UPPER_X + 100, HUD_LOWER_Y,
+                HUD_UPPER_X + 100 + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2), 
                 G_TX_RENDERTILE, position_of_portal_indicator << 5, 0 << 5, 1 << 10, 1 << 10);
         }
     }
