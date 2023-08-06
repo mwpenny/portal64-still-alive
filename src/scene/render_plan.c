@@ -36,38 +36,6 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
 
     props->clippingPortalIndex = -1;
 
-    if (collisionSceneIsPortalOpen()) {
-        for (int i = 0; i < 2; ++i) {
-            struct Vector3 portalOffset;
-
-            vector3Sub(&camera->transform.position, &gCollisionScene.portalTransforms[i]->position, &portalOffset);
-
-            struct Vector3 portalNormal;
-            quatMultVector(&gCollisionScene.portalTransforms[i]->rotation, &gForward, &portalNormal);
-            struct Vector3 projectedPoint;
-
-            if (i == 0) {
-                vector3Negate(&portalNormal, &portalNormal);
-            }
-
-            float clippingDistnace = vector3Dot(&portalNormal, &portalOffset);
-
-            if (fabsf(clippingDistnace) > CAMERA_CLIPPING_RADIUS) {
-                continue;
-            }
-
-            vector3AddScaled(&camera->transform.position, &portalNormal, -clippingDistnace, &projectedPoint);
-
-            if (collisionSceneIsTouchingSinglePortal(&projectedPoint, &portalNormal, gCollisionScene.portalTransforms[i], i)) {
-                planeInitWithNormalAndPoint(&props->cameraMatrixInfo.cullingInformation.clippingPlanes[5], &portalNormal, &gCollisionScene.portalTransforms[i]->position);
-                props->cameraMatrixInfo.cullingInformation.clippingPlanes[5].d = (props->cameraMatrixInfo.cullingInformation.clippingPlanes[5].d + PORTAL_CLIPPING_OFFSET) * SCENE_SCALE;
-                ++props->cameraMatrixInfo.cullingInformation.usedClippingPlaneCount;
-                props->clippingPortalIndex = i;
-                break;
-            }
-        }
-    }
-
     props->minX = 0;
     props->minY = 0;
     props->maxX = SCREEN_WD;
@@ -312,14 +280,13 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
         return flags;
     }
 
-    if (current->clippingPortalIndex == -1) {
-        // set the near clipping plane to be the exit portal surface
-        quatMultVector(&exitPortal->rotation, &gForward, &next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal);
-        if (portalIndex == 1) {
-            vector3Negate(&next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal, &next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal);
-        }
-        next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].d = -vector3Dot(&next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal, &exitPortal->position) * SCENE_SCALE;
+    // set the near clipping plane to be the exit portal surface
+    quatMultVector(&exitPortal->rotation, &gForward, &next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal);
+    if (portalIndex == 1) {
+        vector3Negate(&next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal, &next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal);
     }
+    next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].d = -(vector3Dot(&next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal, &exitPortal->position) + 0.01f) * SCENE_SCALE;
+
     next->clippingPortalIndex = -1;
 
     next->exitPortalIndex = exitPortalIndex;
