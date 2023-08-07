@@ -128,6 +128,7 @@ make -f Makefile.docker
 - [ ] Presort portal gun polygon order #102
 - [ ] Adding loading notice between levels #45
 - [ ] ball velocity in test chamber 11
+- [ ] test chamber 04 has seams in a corner
 - [ ] test chamber 02 needs more light in the first room
 - [ ] pausing while glados is speaking can end her speech early
 - [ ] don't repeat camera destruction speech every time
