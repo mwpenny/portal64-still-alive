@@ -4,11 +4,13 @@
 #include "util/rom.h"
 #include "util/time.h"
 #include "math/mathf.h"
+#include "clips.h"
 
 struct SoundArray* gSoundClipArray;
 ALSndPlayer gSoundPlayer;
 
-#define MAX_ACTIVE_SOUNDS   16
+#define MAX_SKIPPABLE_SOUNDS    6
+#define MAX_ACTIVE_SOUNDS       12
 
 #define SOUND_FLAGS_3D          (1 << 0)
 #define SOUND_FLAGS_LOOPING     (1 << 1)
@@ -148,7 +150,10 @@ float soundPlayerEstimateLength(ALSound* sound, float speed) {
 }
 
 ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity) {
-    if (gActiveSoundCount == MAX_ACTIVE_SOUNDS || soundClipId < 0 || soundClipId >= gSoundClipArray->soundCount) {
+    if (gActiveSoundCount >= MAX_ACTIVE_SOUNDS || soundClipId < 0 || soundClipId >= gSoundClipArray->soundCount) {
+        return SOUND_ID_NONE;
+    }
+    if (gActiveSoundCount >= MAX_SKIPPABLE_SOUNDS && clipsCheckSoundSkippable(soundClipId)) {
         return SOUND_ID_NONE;
     }
     

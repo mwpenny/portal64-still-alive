@@ -3,6 +3,19 @@
 
 #include "../../build/src/audio/clips.h"
 
+unsigned short soundsSkippable[10] = {
+    SOUNDS_PORTAL_ENTER1,
+    SOUNDS_PORTAL_ENTER2,
+    SOUNDS_PORTAL_EXIT1,
+    SOUNDS_PORTAL_EXIT2,
+    SOUNDS_PORTALGUN_SHOOT_RED1,
+    SOUNDS_PORTALGUN_SHOOT_BLUE1,
+    SOUNDS_CONCRETE1, //left foot
+    SOUNDS_CONCRETE2, //right foot
+    SOUNDS_CONCRETE3, //land
+    SOUNDS_CONCRETE4 //jump
+};
+
 unsigned short soundsPortalEnter[2] = {
     SOUNDS_PORTAL_ENTER1,
     SOUNDS_PORTAL_ENTER2,
@@ -60,3 +73,13 @@ unsigned short soundsBallLaunch = SOUNDS_ENERGY_SING_FLYBY1;
 unsigned short soundsBallBounce = SOUNDS_ENERGY_BOUNCE1;
 unsigned short soundsBallKill = SOUNDS_ENERGY_DISINTEGRATE4;
 unsigned short soundsBallExplode = SOUNDS_ENERGY_SING_EXPLOSION2;
+
+int clipsCheckSoundSkippable(unsigned short soundID){
+    int arrayLength = sizeof(soundsSkippable)/sizeof(soundsSkippable[0]);
+    for(int i=0; i<arrayLength; i++){
+        if (soundID == soundsSkippable[i]){
+            return 1;
+        }
+    }
+    return 0;
+}
