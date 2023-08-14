@@ -322,8 +322,8 @@ std::string CFileDefinition::GetUniqueName(std::string requestedName) {
     int index = 1;
     
     while (mUsedNames.find(result) != mUsedNames.end()) {
-        char strBuffer[8];
-        snprintf(strBuffer, 8, "_%d", index);
+        char strBuffer[12];
+        snprintf(strBuffer, 12, "_%d", index);
         result = mPrefix + "_" + requestedName + strBuffer;
         makeCCompatible(result);
         ++index;
