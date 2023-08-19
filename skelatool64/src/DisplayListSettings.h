@@ -33,6 +33,8 @@ struct DisplayListSettings {
     bool mBonesAsVertexGroups;
     bool mTargetCIBuffer;
 
+    aiVector3D mSortDirection;
+
     aiMatrix4x4 CreateGlobalTransform() const;
     aiMatrix4x4 CreateCollisionTransform() const;
 

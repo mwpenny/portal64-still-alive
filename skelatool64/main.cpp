@@ -111,6 +111,7 @@ int main(int argc, char *argv[]) {
     settings.mForcePallete = args.mForcePallete;
     settings.mTargetCIBuffer = args.mTargetCIBuffer;
     settings.mTicksPerSecond = args.mFPS;
+    settings.mSortDirection = args.mSortDirection;
 
     bool hasError = false;
 

@@ -6,6 +6,7 @@
 #include "../StringUtils.h"
 #include "MaterialGenerator.h"
 #include "../RenderChunkOrder.h"
+#include "../ZSorter.h"
 
 bool extractMaterialAutoTileParameters(Material* material, double& sTile, double& tTile) {
     if (!material) {
@@ -156,7 +157,11 @@ MeshDefinitionResults MeshDefinitionGenerator::GenerateDefinitionsWithResults(co
         AppendRenderChunks(scene, *node, fileDefinition, mSettings, renderChunks);
     }
 
-    orderRenderChunks(renderChunks, mSettings);
+    if (mSettings.mSortDirection.SquareLength() > 0.0) {
+        renderChunks = renderChunksSortByZ(renderChunks, mSettings.mSortDirection, mSettings.mVertexCacheSize, fileDefinition.GetBoneHierarchy());
+    } else {
+        orderRenderChunks(renderChunks, mSettings);
+    }
 
     MeshDefinitionResults result;
 

@@ -1,7 +1,7 @@
 
 #include "CommandLineParser.h"
 
-void parseEulerAngles(const std::string& input, aiVector3D& output) {
+void parseVector3(const std::string& input, aiVector3D& output) {
     std::size_t firstComma = input.find(',');
     std::size_t secondComma = input.find(',', firstComma + 1);
     output.x = (float)atof(input.substr(0, firstComma).c_str());
@@ -53,7 +53,9 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
             } else if (lastParameter == "materials") {
                 output.mMaterialFiles.push_back(curr);
             } else if (lastParameter == "rotate") {
-                parseEulerAngles(curr, output.mEulerAngles);
+                parseVector3(curr, output.mEulerAngles);
+            } else if (lastParameter == "sort-dir") {
+                parseVector3(curr, output.mSortDirection);
             } else if (lastParameter == "default-material") {
                 output.mDefaultMaterial = curr;
             } else if (lastParameter == "force-material") {
@@ -91,6 +93,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
             strcmp(curr, "-r") == 0 || 
             strcmp(curr, "--rotate") == 0) {
             lastParameter = "rotate";
+        } else if (strcmp(curr, "--sort-dir") == 0) {
+            lastParameter = "sort-dir";
         } else if (
             strcmp(curr, "--pallete") == 0) {
             lastParameter = "pallete";

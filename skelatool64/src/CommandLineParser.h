@@ -33,6 +33,7 @@ struct CommandLineArguments {
     bool mTargetCIBuffer;
     bool mProcessAsModel;
     aiVector3D mEulerAngles;
+    aiVector3D mSortDirection;
 };
 
 bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArguments& output);
