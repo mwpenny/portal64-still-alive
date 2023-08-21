@@ -181,6 +181,7 @@ MODEL_LIST = assets/models/player/chell.blend \
 	assets/models/portal/portal_blue.blend \
 	assets/models/portal/portal_blue_filled.blend \
 	assets/models/portal/portal_blue_face.blend \
+	assets/models/portal/portal_collider.blend \
 	assets/models/portal/portal_orange.blend \
 	assets/models/portal/portal_orange_filled.blend \
 	assets/models/portal/portal_orange_face.blend \

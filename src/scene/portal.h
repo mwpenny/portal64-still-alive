@@ -9,6 +9,7 @@
 #include "camera.h"
 #include "static_scene.h"
 #include "./portal_surface.h"
+#include "../physics/collision_object.h"
 
 #define STARTING_RENDER_DEPTH       2
 #define PORTAL_LOOP_SIZE    8
@@ -20,14 +21,15 @@ enum PortalFlags {
 };
 
 struct Portal {
-    struct Transform transform;
+    struct CollisionObject collisionObject;
+    struct RigidBody rigidBody;
+    short dynamicId;
     enum PortalFlags flags;
     float opacity;
     float scale;
     struct Vector2s16 originCentertedLoop[PORTAL_LOOP_SIZE];
     struct Vector2s16 fullSizeLoopCenter;
     short portalSurfaceIndex;
-    short roomIndex;
     short colliderIndex;
     // used to attach portals to moving surfaces
     short transformIndex;

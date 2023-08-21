@@ -122,10 +122,10 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
     }
 
     struct Vector3 worldForward;
-    quatMultVector(&portal->transform.rotation, &forward, &worldForward);
+    quatMultVector(&portal->rigidBody.transform.rotation, &forward, &worldForward);
 
     struct Vector3 offsetFromCamera;
-    vector3Sub(&current->camera.transform.position, &portal->transform.position, &offsetFromCamera);
+    vector3Sub(&current->camera.transform.position, &portal->rigidBody.transform.position, &offsetFromCamera);
 
     // don't render the portal if it is facing the wrong way
     if (vector3Dot(&worldForward, &offsetFromCamera) < 0.0f) {
@@ -239,8 +239,8 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
         return 0;
     }
 
-    struct Transform* fromPortal = &scene->portals[portalIndex].transform;
-    struct Transform* exitPortal = &scene->portals[exitPortalIndex].transform;
+    struct Transform* fromPortal = &scene->portals[portalIndex].rigidBody.transform;
+    struct Transform* exitPortal = &scene->portals[exitPortalIndex].rigidBody.transform;
 
     struct Transform otherInverse;
     transformInvert(fromPortal, &otherInverse);
@@ -338,7 +338,7 @@ void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, st
 
     cameraSetupMatrices(&properties->camera, renderState, properties->aspectRatio, properties->viewport, 0, &properties->cameraMatrixInfo);
 
-    int closerPortal = vector3DistSqrd(&properties->camera.transform.position, &scene->portals[0].transform.position) < vector3DistSqrd(&properties->camera.transform.position, &scene->portals[1].transform.position) ? 0 : 1;
+    int closerPortal = vector3DistSqrd(&properties->camera.transform.position, &scene->portals[0].rigidBody.transform.position) < vector3DistSqrd(&properties->camera.transform.position, &scene->portals[1].rigidBody.transform.position) ? 0 : 1;
     int otherPortal = 1 - closerPortal;
     
     if (closerPortal) {

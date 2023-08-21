@@ -82,10 +82,10 @@ void portalRenderScreenCover(struct Vector2s16* points, int pointCount, struct R
 
 void portalDetermineTransform(struct Portal* portal, float portalTransform[4][4]) {
     struct Transform finalTransform;
-    finalTransform = portal->transform;
+    finalTransform = portal->rigidBody.transform;
 
     if (portal->flags & PortalFlagsOddParity) {
-        quatMultiply(&portal->transform.rotation, &gVerticalFlip, &finalTransform.rotation);
+        quatMultiply(&portal->rigidBody.transform.rotation, &gVerticalFlip, &finalTransform.rotation);
     }
     
     vector3Scale(&gOneVec, &finalTransform.scale, portal->scale);

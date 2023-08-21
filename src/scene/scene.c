@@ -407,14 +407,14 @@ void sceneCheckPortals(struct Scene* scene) {
 #define MAX_LISTEN_THROUGH_PORTAL_DISTANCE 3.0f
 
 int sceneUpdatePortalListener(struct Scene* scene, int portalIndex, int listenerIndex) {
-    if (vector3DistSqrd(&scene->player.lookTransform.position, &scene->portals[portalIndex].transform.position) > MAX_LISTEN_THROUGH_PORTAL_DISTANCE * MAX_LISTEN_THROUGH_PORTAL_DISTANCE) {
+    if (vector3DistSqrd(&scene->player.lookTransform.position, &scene->portals[portalIndex].rigidBody.transform.position) > MAX_LISTEN_THROUGH_PORTAL_DISTANCE * MAX_LISTEN_THROUGH_PORTAL_DISTANCE) {
         return 0;
     }
 
     struct Transform otherInverse;
-    transformInvert(&scene->portals[1 - portalIndex].transform, &otherInverse);
+    transformInvert(&scene->portals[1 - portalIndex].rigidBody.transform, &otherInverse);
     struct Transform portalCombined;
-    transformConcat(&scene->portals[portalIndex].transform, &otherInverse, &portalCombined);
+    transformConcat(&scene->portals[portalIndex].rigidBody.transform, &otherInverse, &portalCombined);
 
     struct Transform relativeTransform;
     transformConcat(&portalCombined, &scene->player.lookTransform, &relativeTransform);
@@ -473,6 +473,7 @@ void sceneUpdatePortalVelocity(struct Scene* scene) {
 
         // update portal position
         gCollisionScene.portalTransforms[i]->position = newPos;
+        collisionObjectUpdateBB(&portal->collisionObject);
     }
 }
 
@@ -754,19 +755,20 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
             // the portal position may have been adjusted
             if (transformIndex != NO_TRANSFORM_INDEX) {
                 portal->relativePos = finalAt.position;
-                transformConcat(&relativeToTransform, &finalAt, &portal->transform);
+                transformConcat(&relativeToTransform, &finalAt, &portal->rigidBody.transform);
             } else {
-                portal->transform = finalAt;
+                portal->rigidBody.transform = finalAt;
             }
             
             gCollisionScene.portalVelocity[portalIndex] = gZeroVec;
             portal->transformIndex = transformIndex;
-            portal->roomIndex = roomIndex;
+            portal->rigidBody.currentRoom = roomIndex;
             portal->colliderIndex = levelQuadIndex(collisionObject);
             portal->scale = 0.0f;
-            collisionSceneSetPortal(portalIndex, &portal->transform, roomIndex, portal->colliderIndex);
+            collisionSceneSetPortal(portalIndex, &portal->rigidBody.transform, roomIndex, portal->colliderIndex);
+            collisionObjectUpdateBB(&portal->collisionObject);
 
-            soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &portal->transform.position, &gZeroVec);
+            soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &portal->rigidBody.transform.position, &gZeroVec);
 
             if (fromPlayer) {
                 portal->flags |= PortalFlagsPlayerPortal;
@@ -783,7 +785,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                     // something changed and play sound near other portal
                     struct Portal* otherPortal = &scene->portals[1 - portalIndex];
                     otherPortal->opacity = 1.0f;
-                    soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &otherPortal->transform.position, &gZeroVec);
+                    soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &otherPortal->rigidBody.transform.position, &gZeroVec);
                 }
 
                 sceneCheckSecurityCamera(scene, portal);
@@ -794,7 +796,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
             }
 
             contactSolverCheckPortalContacts(&gContactSolver, collisionObject);
-            ballBurnFilterOnPortal(&portal->transform, portalIndex);
+            ballBurnFilterOnPortal(&portal->rigidBody.transform, portalIndex);
             playerSignalPortalChanged(&scene->player);
             return 1;
         }
@@ -895,6 +897,8 @@ void sceneClosePortal(struct Scene* scene, int portalIndex) {
         scene->portals[portalIndex].flags |= PortalFlagsNeedsNewHole;
         scene->portals[portalIndex].portalSurfaceIndex = -1;
         scene->portals[portalIndex].transformIndex = NO_TRANSFORM_INDEX;
+
+        collisionSceneRemoveDynamicObject(&scene->portals[portalIndex].collisionObject);
     }
     return;
 }
