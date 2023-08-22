@@ -34,14 +34,11 @@ typedef int (*RaycastCollider)(struct CollisionObject* object, struct Ray* ray, 
 
 typedef int (*MinkowsiSumWithBasis)(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output);
 
-typedef int (*CollideWithSphere)(void* data, struct Transform* transform, struct CollisionSphere* sphere, struct Vector3* spherePos, struct ContactManifold* contact);
-
 struct ColliderCallbacks {
     RaycastCollider raycast;
     MomentOfInertiaCalculator mofICalculator;
     BoundingBoxCalculator boundingBoxCalculator;
     MinkowsiSumWithBasis minkowsiSum;
-    CollideWithSphere collideWithSphere;
 };
 
 struct ColliderTypeData {

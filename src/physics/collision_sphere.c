@@ -79,12 +79,46 @@ void collisionSphereBoundingBox(struct ColliderTypeData* typeData, struct Transf
     box->max.z = transform->position.z + sphere->radius;
 }
 
+#define SQRT_3  0.577350269f
+
+int collisionSphereMinkowsiSum(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output) {
+    struct CollisionSphere* sphere = (struct CollisionSphere*)data;
+
+    float distance = fabsf(direction->x);
+    output->x = direction->x > 0.0f ? sphere->radius : -sphere->radius;
+    output->y = 0.0f;
+    output->z = 0.0f;
+
+    int result = direction->x > 0.0f ? 0x1 : 0x4;
+
+    for (int i = 1; i < 3; ++i) {
+        float distanceCheck = fabsf(VECTOR3_AS_ARRAY(direction)[i]);
+
+        if (distanceCheck > distance) {
+            distance = distanceCheck;
+            *output = gZeroVec;
+            VECTOR3_AS_ARRAY(output)[i] = VECTOR3_AS_ARRAY(direction)[i] > 0.0f ? sphere->radius : -sphere->radius;
+        }
+    }
+
+    float distanceCheck = fabsf(direction->x + direction->y + direction->z) * SQRT_3;
+
+    if (distanceCheck > distance) {
+        float scaledRadius = sphere->radius * SQRT_3;
+
+        output->x = direction->x > 0.0f ? scaledRadius : -scaledRadius;
+        output->y = direction->y > 0.0f ? scaledRadius : -scaledRadius;
+        output->z = direction->z > 0.0f ? scaledRadius : -scaledRadius;
+    }
+    
+    return result;
+}
+
 struct ColliderCallbacks gCollisionSphereCallbacks = {
     NULL, // TODO
     collisionSphereSolidMofI,
     collisionSphereBoundingBox,
-    NULL,
-    collisionSphereCollideWithSphere,
+    collisionSphereMinkowsiSum,
 };
 
 int collisionSphereCheckWithNearestPoint(struct Vector3* nearestPoint, struct CollisionSphere* otherSphere, struct Vector3* spherePos, struct ContactManifold* contact) {
@@ -115,46 +149,6 @@ int collisionSphereCheckWithNearestPoint(struct Vector3* nearestPoint, struct Co
     contactPoint->normalImpulse = 0.0f;
     contactPoint->normalMass = 0.0f;
     contactPoint->penetration = distance - otherSphere->radius;
-    contactPoint->tangentImpulse[0] = 0.0f;
-    contactPoint->tangentImpulse[1] = 0.0f;
-    contactPoint->tangentMass[0] = 0.0f;
-    contactPoint->tangentMass[0] = 0.0f;
-
-    return 1;
-}
-
-int collisionSphereCollideWithSphere(void* data, struct Transform* transform, struct CollisionSphere* otherSphere, struct Vector3* spherePos, struct ContactManifold* contact) {
-    struct CollisionSphere* sphere = (struct CollisionSphere*)data;
-
-    vector3Sub(spherePos, &transform->position, &contact->normal);
-
-    float radiusSum = sphere->radius + otherSphere->radius;
-
-    float distanceSqrd = vector3MagSqrd(&contact->normal);
-
-    if (distanceSqrd > radiusSum * radiusSum) {
-        return 0;
-    }
-
-    float distance = 0.0f;
-
-    if (distanceSqrd < 0.00001f) {
-        contact->normal = gRight;
-    } else {
-        distance = sqrtf(distanceSqrd);
-        vector3Scale(&contact->normal, &contact->normal, 1.0f / distance);
-    }
-
-    struct ContactPoint* contactPoint = &contact->contacts[0];
-
-    vector3Scale(&contact->normal, &contactPoint->contactAWorld, sphere->radius);
-    vector3Scale(&contact->normal, &contactPoint->contactBWorld, -otherSphere->radius);
-
-    contactPoint->bias = 0.0f;
-    contactPoint->id = 0;
-    contactPoint->normalImpulse = 0.0f;
-    contactPoint->normalMass = 0.0f;
-    contactPoint->penetration = distance - radiusSum;
     contactPoint->tangentImpulse[0] = 0.0f;
     contactPoint->tangentImpulse[1] = 0.0f;
     contactPoint->tangentMass[0] = 0.0f;

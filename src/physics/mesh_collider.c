@@ -13,7 +13,6 @@ struct ColliderCallbacks gMeshColliderCallbacks = {
     meshColliderMofI,
     meshColliderBoundingBox,
     NULL,
-    NULL,
 };
 
 struct CollisionObjectWithTransform {
