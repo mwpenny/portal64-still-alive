@@ -82,6 +82,14 @@ void contactSolverManifoldCleanup(struct ContactSolver* contactSolver, struct Co
 	int idMask = ~(1 << (contact - contactSolver->contacts));
 	contact->shapeA->manifoldIds &= idMask;
 	contact->shapeB->manifoldIds &= idMask;
+
+	if (contact->shapeA->body) {
+		contact->shapeA->body->flags &= ~RigidBodyIsSleeping;
+	}
+
+	if (contact->shapeB->body) {
+		contact->shapeB->body->flags &= ~RigidBodyIsSleeping;
+	}
 }
 
 void contactSolverRemoveUnusedContacts(struct ContactSolver* contactSolver) {

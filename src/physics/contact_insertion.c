@@ -64,12 +64,22 @@ void contactInsert(struct ContactManifold* contactState, struct EpaResult* epaRe
 
     if (contactState->shapeA->body) {
         quatMultVector(&contactState->shapeA->body->transform.rotation, &contactPoint->contactALocal, &contactPoint->contactAWorld);
+
+        if (insertIndex == contactState->contactCount) {
+            // new contact should wake a rigid body
+            contactState->shapeA->body->flags &= ~RigidBodyIsSleeping;
+        }
     } else {
         contactPoint->contactAWorld = contactPoint->contactALocal;
     }
 
     if (contactState->shapeB->body) {
         quatMultVector(&contactState->shapeB->body->transform.rotation, &contactPoint->contactBLocal, &contactPoint->contactBWorld);
+
+        if (insertIndex == contactState->contactCount) {
+            // new contact should wake a rigid body
+            contactState->shapeB->body->flags &= ~RigidBodyIsSleeping;
+        }
     } else {
         contactPoint->contactBWorld = contactPoint->contactBLocal;
     }

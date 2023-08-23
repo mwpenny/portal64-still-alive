@@ -54,6 +54,7 @@ struct RigidBody {
     
     enum RigidBodyFlags flags;
     unsigned short currentRoom;
+    unsigned short sleepFrames;
 };
 
 void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniteria);

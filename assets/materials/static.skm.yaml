@@ -268,6 +268,22 @@ materials:
       tileSizeS: 0.5
       tileSizeT: 0.5
 
+  observation_tilefloor001a:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/tile/observation_tilefloor001a.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+    properties:
+      tileSizeS: 0.5
+      tileSizeT: 0.5
+
   glasswindow_frosted_002:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/glass/glasswindow_frosted_002.png

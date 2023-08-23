@@ -6,6 +6,12 @@
 #include "defs.h"
 #include <math.h>
 
+
+#define VELOCITY_TRHESHOLD      0.00001f
+#define ANGULAR_VELOCITY_THRESHOLD  0.00001f
+
+#define IDLE_SLEEP_FRAMES   ((int)(0.5f / FIXED_DELTA_TIME))
+
 void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniteria) {
     transformInitIdentity(&rigidBody->transform);
     rigidBody->velocity = gZeroVec;
@@ -20,6 +26,7 @@ void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniter
     rigidBody->flags = 0;
 
     rigidBody->currentRoom = 0;
+    rigidBody->sleepFrames = IDLE_SLEEP_FRAMES;
 
     basisFromQuat(&rigidBody->rotationBasis, &rigidBody->transform.rotation);
 }
@@ -56,6 +63,19 @@ void rigidBodyAppyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoin
 #define ENERGY_SCALE_PER_STEP   0.99f
 
 void rigidBodyUpdate(struct RigidBody* rigidBody) {
+    // first check if body is ready to sleep
+    if (fabsf(rigidBody->velocity.x) < VELOCITY_TRHESHOLD &&  fabsf(rigidBody->velocity.y) < VELOCITY_TRHESHOLD &&  fabsf(rigidBody->velocity.z) < VELOCITY_TRHESHOLD && 
+        fabsf(rigidBody->angularVelocity.x) < VELOCITY_TRHESHOLD &&  fabsf(rigidBody->angularVelocity.y) < VELOCITY_TRHESHOLD &&  fabsf(rigidBody->angularVelocity.z) < VELOCITY_TRHESHOLD) {
+        --rigidBody->sleepFrames;
+
+        if (rigidBody->sleepFrames == 0) {
+            rigidBody->flags |= RigidBodyIsSleeping;
+            return;
+        }
+    } else {
+        rigidBody->sleepFrames = IDLE_SLEEP_FRAMES;
+    }
+
     if (!(rigidBody->flags & RigidBodyDisableGravity)) {
         rigidBody->velocity.y += GRAVITY_CONSTANT * FIXED_DELTA_TIME;
     }
