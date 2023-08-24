@@ -151,7 +151,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
             scene->decor[i] = decorObjectNew(decorObjectDefinitionForId(decorDef->decorId), &decorTransform, decorDef->roomIndex);
 
             if(mainMenuMode == 1) {
-                scene->decor[i]->flags = DecorObjectFlagsMuted;
+                scene->decor[i]->flags |= DecorObjectFlagsMuted;
             }            
         }
     }
