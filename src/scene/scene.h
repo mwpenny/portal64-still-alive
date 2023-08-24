@@ -90,7 +90,7 @@ extern struct Scene gScene;
 struct GraphicsTask;
 
 void sceneInit(struct Scene* scene);
-void sceneInitNoPauseMenu(struct Scene* scene);
+void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode);
 void sceneRender(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task);
 void sceneUpdate(struct Scene* scene);
 void sceneQueueCheckpoint(struct Scene* scene);
