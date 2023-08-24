@@ -24,6 +24,14 @@ void mainMenuReadCamera(struct GameMenu* gameMenu) {
     soundListenerUpdate(&gScene.camera.transform.position, &gScene.camera.transform.rotation, &gZeroVec, 0);
 }
 
+void mainMenuPlayAmbientSound() {
+    static ALSndId soundId = -1;
+    
+    if (soundId == -1 || !soundPlayerIsPlaying(soundId)) {
+        soundId = soundPlayerPlay(SOUNDS_PORTAL_PROCEDURAL_JIGGLE_BONE, 1.0f, 0.5f, NULL, NULL);
+    }
+}
+
 void mainMenuInit(struct GameMenu* gameMenu) {
     sceneInitNoPauseMenu(&gScene);
 
@@ -33,7 +41,7 @@ void mainMenuInit(struct GameMenu* gameMenu) {
 
     gScene.camera.fov = 56.0f;
 
-    soundPlayerPlay(SOUNDS_PORTAL_PROCEDURAL_JIGGLE_BONE, 1.0f, 0.5f, NULL, NULL);
+    mainMenuPlayAmbientSound();
 }
 
 void mainMenuUpdate(struct GameMenu* gameMenu) {
@@ -51,6 +59,8 @@ void mainMenuUpdate(struct GameMenu* gameMenu) {
     sceneAnimatorUpdate(&gScene.animator);
 
     gameMenuUpdate(gameMenu);
+    
+    mainMenuPlayAmbientSound();
 }
 
 extern Lights1 gSceneLights;
