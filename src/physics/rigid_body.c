@@ -7,8 +7,8 @@
 #include <math.h>
 
 
-#define VELOCITY_TRHESHOLD      0.00001f
-#define ANGULAR_VELOCITY_THRESHOLD  0.00001f
+#define VELOCITY_SLEEP_THRESHOLD      0.001f
+#define ANGULAR_VELOCITY_SLEEP_THRESHOLD  0.001f
 
 #define IDLE_SLEEP_FRAMES   ((int)(0.5f / FIXED_DELTA_TIME))
 
@@ -63,9 +63,13 @@ void rigidBodyAppyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoin
 #define ENERGY_SCALE_PER_STEP   0.99f
 
 void rigidBodyUpdate(struct RigidBody* rigidBody) {
+    if (!(rigidBody->flags & RigidBodyDisableGravity)) {
+        rigidBody->velocity.y += GRAVITY_CONSTANT * FIXED_DELTA_TIME;
+    }
+
     // first check if body is ready to sleep
-    if (fabsf(rigidBody->velocity.x) < VELOCITY_TRHESHOLD &&  fabsf(rigidBody->velocity.y) < VELOCITY_TRHESHOLD &&  fabsf(rigidBody->velocity.z) < VELOCITY_TRHESHOLD && 
-        fabsf(rigidBody->angularVelocity.x) < VELOCITY_TRHESHOLD &&  fabsf(rigidBody->angularVelocity.y) < VELOCITY_TRHESHOLD &&  fabsf(rigidBody->angularVelocity.z) < VELOCITY_TRHESHOLD) {
+    if (fabsf(rigidBody->velocity.x) < VELOCITY_SLEEP_THRESHOLD &&  fabsf(rigidBody->velocity.y) < VELOCITY_SLEEP_THRESHOLD &&  fabsf(rigidBody->velocity.z) < VELOCITY_SLEEP_THRESHOLD && 
+        fabsf(rigidBody->angularVelocity.x) < ANGULAR_VELOCITY_SLEEP_THRESHOLD &&  fabsf(rigidBody->angularVelocity.y) < ANGULAR_VELOCITY_SLEEP_THRESHOLD &&  fabsf(rigidBody->angularVelocity.z) < ANGULAR_VELOCITY_SLEEP_THRESHOLD) {
         --rigidBody->sleepFrames;
 
         if (rigidBody->sleepFrames == 0) {
@@ -74,10 +78,6 @@ void rigidBodyUpdate(struct RigidBody* rigidBody) {
         }
     } else {
         rigidBody->sleepFrames = IDLE_SLEEP_FRAMES;
-    }
-
-    if (!(rigidBody->flags & RigidBodyDisableGravity)) {
-        rigidBody->velocity.y += GRAVITY_CONSTANT * FIXED_DELTA_TIME;
     }
 
     vector3AddScaled(&rigidBody->transform.position, &rigidBody->velocity, FIXED_DELTA_TIME, &rigidBody->transform.position);
