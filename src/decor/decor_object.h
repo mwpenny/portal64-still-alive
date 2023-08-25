@@ -35,7 +35,6 @@ struct DecorObject {
     short dynamicId;
     ALSndId playingSound;
     float fizzleTime;
-    short flags;
 };
 
 struct DecorObject* decorObjectNew(struct DecorObjectDefinition* definition, struct Transform* at, int room);
