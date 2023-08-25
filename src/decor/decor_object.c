@@ -181,7 +181,7 @@ int decorObjectUpdate(struct DecorObject* decorObject) {
         return 0;
     }
 
-    if (decorObject->definition->soundClipId != -1 && decorObject->playingSound == SOUND_ID_NONE && decorObject->fizzleTime == 0.0f && !(decorObject->flags & DecorObjectFlagsMuted)) {
+    if (decorObject->definition->soundClipId != -1 && decorObject->playingSound == SOUND_ID_NONE && decorObject->fizzleTime == 0.0f && !(decorObject->definition->flags & DecorObjectFlagsMuted)) {
         decorObject->playingSound = soundPlayerPlay(decorObject->definition->soundClipId, 1.0f, 1.0f, &decorObject->rigidBody.transform.position, &decorObject->rigidBody.velocity);
     }
 
