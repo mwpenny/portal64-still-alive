@@ -10,6 +10,7 @@ enum DecorObjectFlags {
     // important objects respawn at their original 
     // location if they escape the level
     DecorObjectFlagsImportant = (1 << 0),
+    DecorObjectFlagsMuted = (1 << 1),
 };
 
 struct DecorObjectDefinition {

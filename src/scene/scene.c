@@ -76,7 +76,7 @@ void sceneInitDynamicColliders(struct Scene* scene) {
 }
 
 void sceneInit(struct Scene* scene) {
-    sceneInitNoPauseMenu(scene);
+    sceneInitNoPauseMenu(scene, 0);
     
     gameMenuInit(&gGameMenu, gPauseMenuOptions, sizeof(gPauseMenuOptions) / sizeof(*gPauseMenuOptions), 1);
 
@@ -95,7 +95,7 @@ void sceneInit(struct Scene* scene) {
     gGameMenu.state = GameMenuStateResumeGame;
 }
 
-void sceneInitNoPauseMenu(struct Scene* scene) {
+void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     signalsInit(1);
 
     cameraInit(&scene->camera, 70.0f, DEFAULT_NEAR_PLANE * SCENE_SCALE, DEFAULT_FAR_PLANE * SCENE_SCALE);
@@ -149,6 +149,12 @@ void sceneInitNoPauseMenu(struct Scene* scene) {
             decorTransform.rotation = decorDef->rotation;
             decorTransform.scale = gOneVec;
             scene->decor[i] = decorObjectNew(decorObjectDefinitionForId(decorDef->decorId), &decorTransform, decorDef->roomIndex);
+
+            if(mainMenuMode == 1) {
+                scene->decor[i]->definition->flags |= DecorObjectFlagsMuted;
+            } else {
+                scene->decor[i]->definition->flags &= ~(DecorObjectFlagsMuted);
+            }
         }
     }
 

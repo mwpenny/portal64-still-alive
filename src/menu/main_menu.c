@@ -33,7 +33,7 @@ void mainMenuPlayAmbientSound() {
 }
 
 void mainMenuInit(struct GameMenu* gameMenu) {
-    sceneInitNoPauseMenu(&gScene);
+    sceneInitNoPauseMenu(&gScene, 1);
 
     gameMenuInit(gameMenu, gMainMenuOptions, sizeof(gMainMenuOptions) / sizeof(*gMainMenuOptions), 0);
 
