@@ -326,14 +326,14 @@ void renderPlanDetermineFarPlane(struct Ray* cameraRay, struct RenderProps* prop
 }
 
 int renderShouldRenderOtherPortal(int visiblePortal, struct RenderProps* properties) {
-    if (!gCollisionScene.portalTransforms[0] || !gCollisionScene.portalTransforms[1]) {
+    if (!gCollisionScene.portalTransforms[visiblePortal]) {
         return 0;
     }
 
     struct Vector3 sceneScalePos;
     vector3Scale(&gCollisionScene.portalTransforms[visiblePortal]->position, &sceneScalePos, SCENE_SCALE);
 
-    return planePointDistance(&properties->cameraMatrixInfo.cullingInformation.clippingPlanes[4], &sceneScalePos) >= -0.1f * SCENE_SCALE;
+    return planePointDistance(&properties->cameraMatrixInfo.cullingInformation.clippingPlanes[4], &sceneScalePos) >= -1.0f * SCENE_SCALE;
 }
 
 void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderProps* properties, struct RenderState* renderState) {

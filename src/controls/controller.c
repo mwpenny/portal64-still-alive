@@ -4,7 +4,7 @@
 #include "util/memory.h"
 #include <sched.h>
 
-// 0 = disable 1 = record 2 = playbakc
+// 0 = disable, 1 = record, 2 = playback
 #define CONTROLLER_LOG_CONTROLLER_DATA  0
 
 #if CONTROLLER_LOG_CONTROLLER_DATA

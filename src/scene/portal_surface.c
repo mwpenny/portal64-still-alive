@@ -53,20 +53,6 @@ void portalSurfaceCleanupQueueInit() {
 
 struct PortalSurfaceReplacement gPortalSurfaceReplacements[2];
 
-int portalSurfaceAreBothOnSameSurface() {
-    return (gPortalSurfaceReplacements[0].flags & PortalSurfaceReplacementFlagsIsEnabled) != 0 &&
-        (gPortalSurfaceReplacements[1].flags & PortalSurfaceReplacementFlagsIsEnabled) != 0 &&
-        gPortalSurfaceReplacements[0].portalSurfaceIndex == gPortalSurfaceReplacements[1].portalSurfaceIndex;
-}
-
-int portalSurfaceShouldSwapOrder(int portalToMove) {
-    if (!portalSurfaceAreBothOnSameSurface()) {
-        return 0;
-    }
-
-    return gPortalSurfaceReplacements[1 - portalToMove].previousSurface.shouldCleanup;
-}
-
 void portalSurfaceReplacementRevert(struct PortalSurfaceReplacement* replacement) {
     if (!(replacement->flags & PortalSurfaceReplacementFlagsIsEnabled)) {
         return;

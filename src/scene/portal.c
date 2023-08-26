@@ -50,7 +50,7 @@ void portalInit(struct Portal* portal, enum PortalFlags flags) {
     rigidBodyMarkKinematic(&portal->rigidBody);
     portal->flags = flags;
     portal->opacity = 1.0f;
-    portal->scale = 0.0f;
+    portal->scale = 1.0f;
     portal->portalSurfaceIndex = -1;
     portal->transformIndex = NO_TRANSFORM_INDEX;
 }
@@ -182,7 +182,7 @@ int portalSurfaceCutNewHole(struct Portal* portal, int portalIndex) {
 
 void portalCheckForHoles(struct Portal* portals) {
     if ((portals[1].flags & PortalFlagsNeedsNewHole) != 0 || (
-        portalSurfaceAreBothOnSameSurface() && (portals[0].flags & PortalFlagsNeedsNewHole) != 0
+        portals[0].portalSurfaceIndex == portals[1].portalSurfaceIndex && (portals[0].flags & PortalFlagsNeedsNewHole) != 0
     )) {
         portalSurfaceRevert(1);
         portals[1].flags |= PortalFlagsNeedsNewHole;
