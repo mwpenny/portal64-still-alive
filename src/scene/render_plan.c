@@ -325,6 +325,17 @@ void renderPlanDetermineFarPlane(struct Ray* cameraRay, struct RenderProps* prop
     }
 }
 
+int renderShouldRenderOtherPortal(int visiblePortal, struct RenderProps* properties) {
+    if (!gCollisionScene.portalTransforms[0] || !gCollisionScene.portalTransforms[1]) {
+        return 0;
+    }
+
+    struct Vector3 sceneScalePos;
+    vector3Scale(&gCollisionScene.portalTransforms[visiblePortal]->position, &sceneScalePos, SCENE_SCALE);
+
+    return planePointDistance(&properties->cameraMatrixInfo.cullingInformation.clippingPlanes[4], &sceneScalePos) >= -0.1f * SCENE_SCALE;
+}
+
 void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderProps* properties, struct RenderState* renderState) {
     
     staticRenderDetermineVisibleRooms(&properties->cameraMatrixInfo.cullingInformation, properties->fromRoom, &properties->visiblerooms);
@@ -350,8 +361,8 @@ void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, st
     float furthestPortal = 0.0f;
 
     for (int i = 0; i < 2; ++i) {
-        if (gCollisionScene.portalTransforms[closerPortal] && 
-            properties->exitPortalIndex != closerPortal && 
+        if (properties->exitPortalIndex != closerPortal && 
+            renderShouldRenderOtherPortal(closerPortal, properties) &&
             staticRenderIsRoomVisible(properties->visiblerooms, gCollisionScene.portalRooms[closerPortal])) {
             int planResult = renderPlanPortal(
                 renderPlan,
