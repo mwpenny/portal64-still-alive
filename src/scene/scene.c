@@ -641,6 +641,7 @@ void sceneUpdate(struct Scene* scene) {
                 sceneQueueCheckpoint(&gScene);
                 sceneClosePortal(&gScene, 0);
                 sceneClosePortal(&gScene, 1);
+                scene->player.lookTransform.position = scene->player.body.transform.position;
             }
         }
     }
