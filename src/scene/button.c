@@ -107,7 +107,7 @@ void buttonUpdate(struct Button* button) {
             
             shouldPress = 1;
 
-            if (other->body->flags & RigidBodyFlagsGrabbable) {
+            if ((other->body->flags & (RigidBodyFlagsGrabbable | RigidBodyIsSleeping)) == (RigidBodyFlagsGrabbable | RigidBodyIsSleeping)) {
                 shouldPress = PRESSED_WITH_CUBE;
             }
 
