@@ -107,10 +107,12 @@ void pointConstraintInit(struct PointConstraint* constraint, struct CollisionObj
     constraint->teleportOnBreak = teleportOnBreak;
     constraint->movementScaleFactor = movementScaleFactor;
     constraint->object->body->flags &= ~RigidBodyIsSleeping;
+    constraint->object->body->sleepFrames = IDLE_SLEEP_FRAMES;
 }
 
 void pointConstraintUpdateTarget(struct PointConstraint* constraint, struct Vector3* worldPoint, struct Quaternion* worldRotation) {
     constraint->targetPos = *worldPoint;
     constraint->targetRot = *worldRotation;
     constraint->object->body->flags &= ~RigidBodyIsSleeping;
+    constraint->object->body->sleepFrames = IDLE_SLEEP_FRAMES;
 }

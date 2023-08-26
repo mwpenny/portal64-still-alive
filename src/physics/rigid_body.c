@@ -6,11 +6,8 @@
 #include "defs.h"
 #include <math.h>
 
-
 #define VELOCITY_SLEEP_THRESHOLD      0.001f
 #define ANGULAR_VELOCITY_SLEEP_THRESHOLD  0.001f
-
-#define IDLE_SLEEP_FRAMES   ((int)(0.5f / FIXED_DELTA_TIME))
 
 void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniteria) {
     transformInitIdentity(&rigidBody->transform);

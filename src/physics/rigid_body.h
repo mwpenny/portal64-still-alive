@@ -6,6 +6,9 @@
 #include "../math/mathf.h"
 #include "./collision.h"
 
+
+#define IDLE_SLEEP_FRAMES   ((int)(0.5f / FIXED_DELTA_TIME))
+
 #define KILL_PLANE_Y    -10.0f
 
 #define RIGID_BODY_NO_ROOM  0xFFFF
