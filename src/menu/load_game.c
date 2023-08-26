@@ -31,12 +31,12 @@ void loadGamePopulate(struct LoadGameMenu* loadGame) {
 enum MenuDirection loadGameUpdate(struct LoadGameMenu* loadGame) {
     if (controllerGetButtonDown(0, A_BUTTON) && loadGame->savefileList->numberOfSaves) {
         Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
-        int level;
+        int testChamber;
         int testSubject;
-        savefileLoadGame(savefileGetSlot(loadGame->savefileList), save, &level, &testSubject);
+        savefileLoadGame(savefileGetSlot(loadGame->savefileList), save, &testChamber, &testSubject);
         gCurrentTestSubject = testSubject;
         
-        levelQueueLoad(level, NULL, NULL);
+        levelQueueLoad(chamberNumberGetLevel(testChamber), NULL, NULL);
         checkpointUse(save);
 
         stackMallocFree(save);
