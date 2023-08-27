@@ -172,6 +172,7 @@ int portalSurfaceCutNewHole(struct Portal* portal, int portalIndex) {
     struct PortalSurface newSurface;
 
     if (!portalSurfacePokeHole(currentSurface, scaledLoop, &newSurface)) {
+        portalSurfacePokeHole(currentSurface, scaledLoop, &newSurface);
         return 0;
     }
     
@@ -180,10 +181,26 @@ int portalSurfaceCutNewHole(struct Portal* portal, int portalIndex) {
     return 1;
 }
 
+int portalNeedsToRemoveSecondPortal(struct Portal* portals) {
+    int secondPortalSurfaceIndex = portalSurfaceGetSurfaceIndex(1);
+
+    // second portal isn't placed so no need to temporarily remove it
+    if (secondPortalSurfaceIndex == -1) {
+        return 0;
+    }
+
+    // first portal doesn't need to move, so no need to temporarily remove
+    // second portal
+    if ((portals[0].flags & PortalFlagsNeedsNewHole) == 0) {
+        return 0;
+    }
+
+    // only remove second portal if the first one is moving to or from the same surface as the second
+    return portals[0].portalSurfaceIndex == secondPortalSurfaceIndex || portalSurfaceGetSurfaceIndex(0) == secondPortalSurfaceIndex;
+}
+
 void portalCheckForHoles(struct Portal* portals) {
-    if ((portals[1].flags & PortalFlagsNeedsNewHole) != 0 || (
-        portals[0].portalSurfaceIndex == portals[1].portalSurfaceIndex && (portals[0].flags & PortalFlagsNeedsNewHole) != 0
-    )) {
+    if ((portals[1].flags & PortalFlagsNeedsNewHole) != 0 || portalNeedsToRemoveSecondPortal(portals)) {
         portalSurfaceRevert(1);
         portals[1].flags |= PortalFlagsNeedsNewHole;
     }

@@ -14,12 +14,10 @@
 #define NO_EDGE_CONNECTION      0xFF
 
 struct SurfaceEdge {
-    u8 aIndex;
-    u8 bIndex;
+    u8 pointIndex;
     u8 nextEdge;
     u8 prevEdge;
-    u8 nextEdgeReverse;
-    u8 prevEdgeReverse;
+    u8 reverseEdge;
 };
 
 struct PortalSurface {
@@ -74,6 +72,7 @@ void portalSurfaceInverse(struct PortalSurface* surface, struct Vector2s16* inpu
 struct PortalSurface* portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex, struct PortalSurface* with);
 void portalSurfaceRevert(int portalIndex);
 void portalSurfaceCheckCleanupQueue();
+int portalSurfaceGetSurfaceIndex(int portalIndex);
 
 
 #endif

@@ -53,6 +53,15 @@ void portalSurfaceCleanupQueueInit() {
 
 struct PortalSurfaceReplacement gPortalSurfaceReplacements[2];
 
+
+int portalSurfaceGetSurfaceIndex(int portalIndex) {
+    if (gPortalSurfaceReplacements[portalIndex].flags & PortalSurfaceReplacementFlagsIsEnabled) {
+        return gPortalSurfaceReplacements[portalIndex].portalSurfaceIndex;
+    }
+
+    return -1;
+}
+
 void portalSurfaceReplacementRevert(struct PortalSurfaceReplacement* replacement) {
     if (!(replacement->flags & PortalSurfaceReplacementFlagsIsEnabled)) {
         return;
@@ -146,12 +155,12 @@ int portalSurfaceIsInside(struct PortalSurface* surface, struct Transform* porta
         struct SurfaceEdge* edge = &surface->edges[i];
 
         // only check edges that are one sided
-        if (edge->nextEdgeReverse != NO_EDGE_CONNECTION) {
+        if (edge->reverseEdge != NO_EDGE_CONNECTION) {
             continue;
         }
 
-        struct Vector2s16 a = surface->vertices[edge->aIndex];
-        struct Vector2s16 b = surface->vertices[edge->bIndex];
+        struct Vector2s16 a = surface->vertices[edge->pointIndex];
+        struct Vector2s16 b = surface->vertices[surface->edges[edge->nextEdge].pointIndex];
 
         if ((portalPosition.x - a.x) * (portalPosition.x - b.x) > 0) {
             // edge is to the left or to the right of the portal
@@ -241,12 +250,12 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
             struct SurfaceEdge* edge = &surface->edges[i];
 
             // only check edges that are one sided
-            if (edge->nextEdgeReverse != NO_EDGE_CONNECTION) {
+            if (edge->reverseEdge != NO_EDGE_CONNECTION) {
                 continue;
             }
 
-            struct Vector2s16 a = surface->vertices[edge->aIndex];
-            struct Vector2s16 b = surface->vertices[edge->bIndex];
+            struct Vector2s16 a = surface->vertices[edge->pointIndex];
+            struct Vector2s16 b = surface->vertices[surface->edges[edge->nextEdge].pointIndex];
 
             struct Vector2s16 edgeMin;
             edgeMin.x = MIN(a.x, b.x);

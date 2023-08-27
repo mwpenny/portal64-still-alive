@@ -4,43 +4,37 @@
 
 #define GFX_VERTEX_CACHE_SIZE   32
 
-void gfxBuilderFillTriangle(struct GfxBuilderState* gfxBuilder, struct PortalSurfaceBuilder* surfaceBuilder, struct SurfaceEdgeWithSide* edge) {
-    struct SurfaceEdgeWithSide nextEdge;
-    struct SurfaceEdgeWithSide prevEdge;
-    portalSurfaceNextEdge(surfaceBuilder, edge, &nextEdge);
-    portalSurfacePrevEdge(surfaceBuilder, edge, &prevEdge);
+void gfxBuilderFillTriangle(struct GfxBuilderState* gfxBuilder, struct PortalSurfaceBuilder* surfaceBuilder, int edge) {
+    int nextEdge = portalSurfaceNextEdge(surfaceBuilder, edge);
+    int prevEdge = portalSurfacePrevEdge(surfaceBuilder, edge);
 
-    struct SurfaceEdge* edgePtr = portalSurfaceGetEdge(surfaceBuilder, edge->edgeIndex);
-    struct SurfaceEdge* nextEdgePtr = portalSurfaceGetEdge(surfaceBuilder, nextEdge.edgeIndex);
-    struct SurfaceEdge* prevEdgePtr = portalSurfaceGetEdge(surfaceBuilder, prevEdge.edgeIndex);
+    struct SurfaceEdge* edgePtr = portalSurfaceGetEdge(surfaceBuilder, edge);
+    struct SurfaceEdge* nextEdgePtr = portalSurfaceGetEdge(surfaceBuilder, nextEdge);
+    struct SurfaceEdge* prevEdgePtr = portalSurfaceGetEdge(surfaceBuilder, prevEdge);
 
     portalSurfaceSetFlag(surfaceBuilder, edge, SurfaceEdgeFlagsFilled);
-    portalSurfaceSetFlag(surfaceBuilder, &nextEdge, SurfaceEdgeFlagsFilled);
-    portalSurfaceSetFlag(surfaceBuilder, &prevEdge, SurfaceEdgeFlagsFilled);
+    portalSurfaceSetFlag(surfaceBuilder, nextEdge, SurfaceEdgeFlagsFilled);
+    portalSurfaceSetFlag(surfaceBuilder, prevEdge, SurfaceEdgeFlagsFilled);
 
     struct GfxTraingleIndices* triangle = &gfxBuilder->triangles[gfxBuilder->triangleCount];
 
-    triangle->indices[0] = SB_GET_CURRENT_POINT(edgePtr, edge->isReverse);
-    triangle->indices[1] = SB_GET_CURRENT_POINT(nextEdgePtr, nextEdge.isReverse);
-    triangle->indices[2] = SB_GET_CURRENT_POINT(prevEdgePtr, prevEdge.isReverse);
+    triangle->indices[0] = edgePtr->pointIndex;
+    triangle->indices[1] = nextEdgePtr->pointIndex;
+    triangle->indices[2] = prevEdgePtr->pointIndex;
 
     ++gfxBuilder->triangleCount;
 }
 
 void gfxBuilderCollectTriangles(struct GfxBuilderState* gfxBuilder, struct PortalSurfaceBuilder* surfaceBuilder) {
-    struct SurfaceEdgeWithSide edge;
+    for (int edge = 0; edge < surfaceBuilder->currentEdge; ++edge) {
+        struct SurfaceEdge* edgePtr = portalSurfaceGetEdge(surfaceBuilder, edge);
 
-    for (edge.edgeIndex = 0; edge.edgeIndex < surfaceBuilder->currentEdge; ++edge.edgeIndex) {
-        struct SurfaceEdge* edgePtr = portalSurfaceGetEdge(surfaceBuilder, edge.edgeIndex);
+        if (edgePtr->nextEdge == NO_EDGE_CONNECTION) {
+            continue;
+        }
 
-        for (edge.isReverse = 0; edge.isReverse < 2; ++edge.isReverse) {
-            if (SB_GET_NEXT_EDGE(edgePtr, edge.isReverse) == NO_EDGE_CONNECTION) {
-                continue;
-            }
-
-            if (!portalSurfaceHasFlag(surfaceBuilder, &edge, SurfaceEdgeFlagsFilled)) {
-                gfxBuilderFillTriangle(gfxBuilder, surfaceBuilder, &edge);
-            }
+        if (!portalSurfaceHasFlag(surfaceBuilder, edge, SurfaceEdgeFlagsFilled)) {
+            gfxBuilderFillTriangle(gfxBuilder, surfaceBuilder, edge);
         }
     }
 }

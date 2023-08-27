@@ -72,9 +72,8 @@ local function calculate_portal_single_surface(mesh, mesh_display_list)
 
     sk_definition_writer.add_definition(mesh.name .. '_portal_mesh', 'struct Vector2s16[]', '_geo', vertices)
 
-    local edge_use_count = {}
-    local edge_direction = {}
-    local edge_order = {}
+    local edges = {}
+    local edge_for_points = {}
 
     for _, face in pairs(mesh.faces) do
         local edge_keys = {}
@@ -84,84 +83,42 @@ local function calculate_portal_single_surface(mesh, mesh_display_list)
             local next_index = face[index_index % #face + 1]
 
             local key = level_edge_key(current_index, next_index)
-            table.insert(edge_keys, key)
 
-            if (edge_use_count[key]) then
-                edge_use_count[key] = edge_use_count[key] + 1
-                table.insert(is_reverse_edge, true)
+            local edge_index = #edges
+            local next_index
+            local prev_index
+
+            if index_index == 1 then
+                next_index = edge_index + 1
+                prev_index = edge_index + #face - 1
+            elseif index_index == #face then
+                next_index = edge_index - #face + 1
+                prev_index = edge_index - 1
             else
-                edge_use_count[key] = 1
-                edge_direction[key] = {
-                    a = current_index, 
-                    b = next_index,
-                    edge_index = -1,
-                    next_edge_key = -1,
-                    prev_edge_key = -1,
-                    next_edge_reverse_key = -1,
-                    prev_edge_reverse_key = -1,
-                }
-                table.insert(is_reverse_edge, false)
-                table.insert(edge_order, key)
-            end
-        end
-
-        local prev_key = edge_keys[#edge_keys]
-
-        -- connect faces in a loop
-        for index, key in pairs(edge_keys) do
-            local next_key = edge_keys[index % #edge_keys + 1]
-
-            local edge = edge_direction[key]
-
-            if (is_reverse_edge[index]) then
-                edge.next_edge_reverse_key = next_key
-                edge.prev_edge_reverse_key = prev_key
-            else
-                edge.next_edge_key = next_key
-                edge.prev_edge_key = prev_key
+                next_index = edge_index + 1
+                prev_index = edge_index - 1
             end
 
-            prev_key = key
+            local edge = {
+                pointIndex = current_index - 1,
+                nextEdge = next_index,
+                prevEdge = prev_index,
+                reverseEdge = 0xFF
+            }
+
+            table.insert(edges, edge)
+
+            if edge_for_points[key] then
+                local reverseEdge = edges[edge_for_points[key] + 1]
+
+                reverseEdge.reverseEdge = edge_index
+                edge.reverseEdge = edge_for_points[key]
+
+                edge_for_points[key] = nil
+            else
+                edge_for_points[key] = edge_index
+            end
         end
-    end
-
-    -- edges go first
-    table.sort(edge_order, function(a, b)
-        local edge_diff = edge_use_count[a] - edge_use_count[b]
-
-        if edge_diff ~= 0 then
-            return edge_diff < 0
-        end
-
-        if edge_direction[a].a ~= edge_direction[b].a then 
-            return edge_direction[a].a < edge_direction[b].a
-        end
-
-        -- this is an attempt to make edges that are near each other
-        -- show up in memory near each other to improve cache
-        -- performance
-        return edge_direction[a].b < edge_direction[b].b
-    end)
-
-    local edge_index = 0
-
-    for _, key in pairs(edge_order) do
-        edge_direction[key].edge_index = edge_index
-        edge_index = edge_index + 1
-    end
-
-    local edges = {}
-
-    for _, key in pairs(edge_order) do
-        local indices = edge_direction[key];
-        table.insert(edges, {
-            indices.a - 1,
-            indices.b - 1,
-            get_edge_index(edge_direction, indices.next_edge_key),
-            get_edge_index(edge_direction, indices.prev_edge_key),
-            get_edge_index(edge_direction, indices.next_edge_reverse_key),
-            get_edge_index(edge_direction, indices.prev_edge_reverse_key),
-        });
     end
 
     sk_definition_writer.add_definition(mesh.name .. "_portal_edges", "struct SurfaceEdge[]", "_geo", edges)
@@ -169,7 +126,7 @@ local function calculate_portal_single_surface(mesh, mesh_display_list)
     return {
         vertices = sk_definition_writer.reference_to(vertices, 1),
         edges = sk_definition_writer.reference_to(edges, 1),
-        edgeCount = #edge_order,
+        edgeCount = #edges,
         vertexCount = #vertices,
         shouldCleanup = 0,
 
