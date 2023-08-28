@@ -72,22 +72,16 @@ class Vertex:
         return Vertex(self.x * scalar, self.y * scalar)
 
 class Edge:
-    def __init__(self, aIndex, bIndex, nextEdge, prevEdge, nextEdgeReverse, prevEdgeReverse):
-        self.aIndex = aIndex
-        self.bIndex = bIndex
-        self.nextEdge = nextEdge
-        self.prevEdge = prevEdge
-        self.nextEdgeReverse = nextEdgeReverse
-        self.prevEdgeReverse = prevEdgeReverse
-
+    def __init__(self, pointIndex, nextEdge, prevEdge, reverseEdge):
+        self.pointIndex = int(pointIndex)
+        self.nextEdge = int(nextEdge)
+        self.prevEdge = int(prevEdge)
+        self.reverseEdge = int(reverseEdge)
     def __repr__(self):
-        return "Edge(" + str(self.aIndex) + ", " + str(self.bIndex) + ", " + str(self.nextEdge) + ", " + str(self.prevEdge) + ", " + str(self.nextEdgeReverse) + ", " + str(self.prevEdgeReverse) + ")"
+        return "Edge(" + str(self.pointIndex) + ", " + str(self.nextEdge) + ", " + str(self.prevEdge) + ", " + str(self.reverseEdge) + ")"
 
 next_color = [0.1, 0.2, 0]
 prev_color = [0.2, 0.1, 0]
-
-next_color_reverse = [0.15, 0.2, 0]
-prev_color_reverse = [0.2, 0.15, 0]
 
 class SurfaceConnections:
     def __init__(self, vertices, edges):
@@ -95,8 +89,17 @@ class SurfaceConnections:
         self.edges = edges
 
     def generate_connection(self, fromEdge, toEdge, color, vertex_pos, vertex_color, indices):
-        fromMidpoint = self.vertices[fromEdge.aIndex].midpoint(self.vertices[fromEdge.bIndex])
-        toMidpoint = self.vertices[toEdge.aIndex].midpoint(self.vertices[toEdge.bIndex])
+        if fromEdge.pointIndex >= len(self.vertices) or toEdge.pointIndex >= len(self.vertices):
+            return
+
+        if fromEdge.nextEdge >= len(self.edges) or toEdge.nextEdge >= len(self.edges):
+            return
+        
+        if self.edges[fromEdge.nextEdge].pointIndex >= len(self.vertices) or self.edges[toEdge.nextEdge].pointIndex >= len(self.vertices):
+            return
+
+        fromMidpoint = self.vertices[fromEdge.pointIndex].midpoint(self.vertices[self.edges[fromEdge.nextEdge].pointIndex])
+        toMidpoint = self.vertices[toEdge.pointIndex].midpoint(self.vertices[self.edges[toEdge.nextEdge].pointIndex])
 
         midpointMidpoint = fromMidpoint.midpoint(toMidpoint)
 
@@ -141,8 +144,14 @@ class SurfaceConnections:
 
             curr_vertex = int(len(vertex_pos) / 3)
 
-            pointA = self.vertices[edge.aIndex]
-            pointB = self.vertices[edge.bIndex]
+            if edge.nextEdge >= len(self.edges) or self.edges[edge.nextEdge].pointIndex >= len(self.vertices):
+                continue
+
+            if edge.pointIndex >= len(self.vertices):
+                continue
+
+            pointA = self.vertices[edge.pointIndex]
+            pointB = self.vertices[self.edges[edge.nextEdge].pointIndex]
 
             vertex_pos.append(pointA.x)
             vertex_pos.append(pointA.y)
@@ -170,12 +179,6 @@ class SurfaceConnections:
 
             if edge.prevEdge != 255:
                 self.generate_connection(edge, self.edges[edge.prevEdge], prev_color, vertex_pos, vertex_color, indices)
-
-            if edge.nextEdgeReverse != 255:
-                self.generate_connection(edge, self.edges[edge.nextEdgeReverse], next_color_reverse, vertex_pos, vertex_color, indices)
-
-            if edge.prevEdgeReverse != 255:
-                self.generate_connection(edge, self.edges[edge.prevEdgeReverse], prev_color_reverse, vertex_pos, vertex_color, indices)
 
 
         array_type = (gl.GLfloat * len(vertex_pos))
@@ -225,8 +228,20 @@ class SurfaceConnections:
 
     def distance_to_edge(self, edge_index, from_point):
         edge = self.edges[edge_index]
-        a = self.vertices[edge.aIndex]
-        b = self.vertices[edge.bIndex]
+        a = self.vertices[edge.pointIndex]
+
+        if edge.nextEdge == 255:
+            return 10000000000000
+
+        if edge.nextEdge >= len(self.edges):
+            print("WARNING: " + str(edge.nextEdge) + " is an invalid edge index")
+            return 10000000000000
+        
+        if self.edges[edge.nextEdge].pointIndex >= len(self.vertices):
+            print("WARNING: " + str(self.edges[edge.nextEdge].pointIndex) + " is an invalid vertex index")
+            return 10000000000000
+
+        b = self.vertices[self.edges[edge.nextEdge].pointIndex]
 
         edge_dir = b.sub(a)
         point_dir = from_point.sub(a)
@@ -354,13 +369,12 @@ def extract_surface_data(surfaceBuilder):
 
     for edge_index in range(0, edge_count):
         input_edge = input_edges[edge_index]
+        
         output_edges.append(Edge(
-            input_edge["aIndex"],
-            input_edge["bIndex"],
+            input_edge["pointIndex"],
             input_edge["nextEdge"],
             input_edge["prevEdge"],
-            input_edge["nextEdgeReverse"],
-            input_edge["prevEdgeReverse"]
+            input_edge["reverseEdge"]
         ))
 
     return SurfaceConnections(output_vertices, output_edges)
@@ -435,8 +449,15 @@ def main():
                 closest_edge = surface.edges[closest_edge_index]
                 print(f"Edge index {closest_edge_index}")
                 print(closest_edge)
-                print(surface.vertices[closest_edge.aIndex])
-                print(surface.vertices[closest_edge.bIndex])
+                print(f"Vertex index {closest_edge.pointIndex}")
+                print(surface.vertices[closest_edge.pointIndex])
+                print(f"Next vertex index {surface.edges[closest_edge.nextEdge].pointIndex}")
+                print(surface.vertices[surface.edges[closest_edge.nextEdge].pointIndex])
+
+                if closest_edge.reverseEdge != 255:
+                    print(f"Reverse edge index {closest_edge.reverseEdge}")
+                    print(surface.edges[closest_edge.reverseEdge])
+                    
 
             last_button = current_button
 

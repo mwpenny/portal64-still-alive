@@ -197,12 +197,7 @@ void gfxBuilderBuildGfx(struct GfxBuilderState* gfxBuilder, struct PortalSurface
 struct DisplayListResult newGfxFromSurfaceBuilder(struct PortalSurfaceBuilder* surfaceBuilder) {
     struct GfxBuilderState builderState;
 
-    int possibleTriangleCount = (
-        // each edge can have 2 sides
-        surfaceBuilder->currentEdge * 2
-        // round up just in case
-        + 2
-    ) / 3;
+    int possibleTriangleCount = surfaceBuilder->currentEdge / 3;
 
     builderState.triangles = stackMalloc(sizeof(struct GfxTraingleIndices) * possibleTriangleCount);
     builderState.triangleCount = 0;
