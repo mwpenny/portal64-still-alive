@@ -55,6 +55,24 @@ void collisionObjectCollideTwoObjectsSwept(
     struct ContactSolver* contactSolver
 );
 
+enum SweptCollideResult {
+    SweptCollideResultMiss,
+    SweptCollideResultOverlap,
+    SweptCollideResultHit,
+};
+
+struct EpaResult;
+
+enum SweptCollideResult collisionObjectSweptCollide(
+    struct CollisionObject* object, 
+    struct Vector3* objectPrevPos, 
+    struct Box3D* sweptBB, 
+    struct CollisionObject* quadObject, 
+    int shouldCheckPortals, 
+    struct EpaResult* result, 
+    struct Vector3* objectEnd
+);
+
 void collisionObjectUpdateBB(struct CollisionObject* object);
 
 // data should be of type struct CollisionQuad

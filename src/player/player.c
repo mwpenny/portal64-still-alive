@@ -101,8 +101,6 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
 
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
 
-    
-
     // rigidBodyMarkKinematic(&player->body);
     player->body.flags |= RigidBodyIsKinematic | RigidBodyIsPlayer;
     collisionSceneAddDynamicObject(&player->collisionObject);
@@ -501,6 +499,58 @@ struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* bl
     }
 }
 
+#define FOOTING_CAST_DISTANCE   (PLAYER_HEAD_HEIGHT + 0.2f)
+
+void playerUpdateFooting(struct Player* player) {
+    player->anchoredTo = NULL;
+
+    struct Vector3 castOffset;
+    struct Vector3 hitLocation;
+
+    float hitDistance = FOOTING_CAST_DISTANCE;
+
+    vector3Scale(&gUp, &castOffset, -(hitDistance - gPlayerCollider.radius));
+    if (collisionObjectCollideShapeCast(&player->collisionObject, &castOffset, &gCollisionScene, &hitLocation)) {
+        hitDistance = gPlayerCollider.radius + player->collisionObject.body->transform.position.y - hitLocation.y;
+    }
+
+    struct RaycastHit hit;
+    struct Ray ray;
+    ray.origin = player->body.transform.position;
+    vector3Scale(&gUp, &ray.dir, -1.0f);
+    if (collisionSceneRaycastOnlyDynamic(&gCollisionScene, &ray, COLLISION_LAYERS_TANGIBLE, hitDistance, &hit)) {
+        hitDistance = hit.distance;
+
+        hit.object->flags |= COLLISION_OBJECT_PLAYER_STANDING;
+
+        if (hit.object == player->grabConstraint.object) {
+            playerSetGrabbing(player, NULL);
+        }
+
+        if (hit.object->body && (hit.object->body->flags & RigidBodyIsKinematic)) {
+            player->anchoredTo = hit.object->body;
+            player->lastAnchorPoint = hit.at;
+            transformPointInverseNoScale(&player->anchoredTo->transform, &hit.at, &player->relativeAnchor);
+        }
+    }
+    
+    float penetration = hitDistance - PLAYER_HEAD_HEIGHT;
+
+    if (penetration < 0.0f) {
+        vector3AddScaled(&player->body.transform.position, &gUp, MIN(-penetration, STAND_SPEED * FIXED_DELTA_TIME), &player->body.transform.position);
+        if (player->body.velocity.y < 0.0f) {
+            player->body.velocity.y = 0.0f;
+        }
+
+        if (!(player->flags & PlayerFlagsGrounded)){
+            player->flags |= PlayerJustLanded;
+        }
+        player->flags |= PlayerFlagsGrounded;
+    } else {
+        player->flags &= ~PlayerFlagsGrounded;
+    }
+}
+
 void playerUpdate(struct Player* player) {
     struct Vector3 forward;
     struct Vector3 right;
@@ -630,40 +680,7 @@ void playerUpdate(struct Player* player) {
     box3DUnion(&sweptBB, &player->collisionObject.boundingBox, &sweptBB);
     collisionObjectCollideMixed(&player->collisionObject, &prevPos, &sweptBB, &gCollisionScene, &gContactSolver);
 
-    player->anchoredTo = NULL;
-
-    struct RaycastHit hit;
-    struct Ray ray;
-    ray.origin = player->body.transform.position;
-    vector3Scale(&gUp, &ray.dir, -1.0f);
-    if (collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_TANGIBLE, PLAYER_HEAD_HEIGHT + 0.2f, 1, &hit)) {
-        float penetration = hit.distance - PLAYER_HEAD_HEIGHT;
-
-        if (penetration < 0.0f) {
-            vector3AddScaled(&player->body.transform.position, &gUp, MIN(-penetration, STAND_SPEED * FIXED_DELTA_TIME), &player->body.transform.position);
-            if (player->body.velocity.y < 0.0f) {
-                player->body.velocity.y = 0.0f;
-            }
-        }
-
-        hit.object->flags |= COLLISION_OBJECT_PLAYER_STANDING;
-        if (!(player->flags & PlayerFlagsGrounded)){
-            player->flags |= PlayerJustLanded;
-        }
-        player->flags |= PlayerFlagsGrounded;
-
-        if (hit.object == player->grabConstraint.object) {
-            playerSetGrabbing(player, NULL);
-        }
-
-        if (hit.object->body && (hit.object->body->flags & RigidBodyIsKinematic)) {
-            player->anchoredTo = hit.object->body;
-            player->lastAnchorPoint = hit.at;
-            transformPointInverseNoScale(&player->anchoredTo->transform, &hit.at, &player->relativeAnchor);
-        }
-    } else {
-        player->flags &= ~PlayerFlagsGrounded;
-    }
+    playerUpdateFooting(player);
     
     struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);
 

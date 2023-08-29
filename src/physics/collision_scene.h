@@ -31,6 +31,8 @@ extern struct CollisionScene gCollisionScene;
 void collisionSceneInit(struct CollisionScene* scene, struct CollisionObject* quads, int quadCount, struct World* world);
 void collisionObjectCollideMixed(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionScene* scene, struct ContactSolver* contactSolver);
 
+int collisionObjectCollideShapeCast(struct CollisionObject* object, struct Vector3* offset, struct CollisionScene* scene, struct Vector3* finalLocation);
+
 int collisionSceneIsTouchingSinglePortal(struct Vector3* contactPoint, struct Vector3* contactNormal, struct Transform* portalTransform, int portalIndex);
 int collisionSceneIsTouchingPortal(struct Vector3* contactPoint, struct Vector3* contactNormal);
 int collisionSceneIsPortalOpen();
@@ -41,6 +43,7 @@ struct Transform* collisionSceneTransformToPortal(int fromPortal);
 void collisionScenePushObjectsOutOfPortal(int portalIndex);
 
 int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, int collisionLayers, float maxDistance, int passThroughPortals, struct RaycastHit* hit);
+int collisionSceneRaycastOnlyDynamic(struct CollisionScene* scene, struct Ray* ray, int collisionLayers, float maxDistance, struct RaycastHit* hit);
 
 void collisionSceneGetPortalTransform(int fromPortal, struct Transform* out);
 

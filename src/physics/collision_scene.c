@@ -122,6 +122,41 @@ void collisionObjectCollideMixed(struct CollisionObject* object, struct Vector3*
     }
 }
 
+int collisionObjectCollideShapeCast(struct CollisionObject* object, struct Vector3* offset, struct CollisionScene* scene, struct Vector3* finalLocation) {
+    short colliderIndices[MAX_COLLIDERS];
+
+    struct Box3D sweptBB = object->boundingBox;
+
+    box3DExtendDirection(&sweptBB, offset, &sweptBB);
+
+    int quadCount = collisionObjectRoomColliders(&scene->world->rooms[object->body->currentRoom], &sweptBB, colliderIndices);
+
+    struct Vector3 startingPos = object->body->transform.position;
+
+    vector3Add(&object->body->transform.position, offset, &object->body->transform.position);
+
+    int result = 0;
+
+    for (int i = 0; i < quadCount; ++i) {
+        int quadIndex = colliderIndices[i];
+        struct CollisionObject* quad = &scene->quads[quadIndex];
+        int shouldCheckPortals = gCollisionScene.portalColliderIndex[0] == quadIndex || gCollisionScene.portalColliderIndex[1] == quadIndex;
+
+        struct EpaResult epaResult;
+        struct Vector3 objectEnd;
+        enum SweptCollideResult collideResult = collisionObjectSweptCollide(object, &startingPos, &sweptBB, quad, shouldCheckPortals, &epaResult, &objectEnd);
+
+        if (collideResult == SweptCollideResultHit) {
+            object->body->transform.position = objectEnd;
+            result = 1;
+        }
+    }
+
+    *finalLocation = object->body->transform.position;
+    object->body->transform.position = startingPos;
+
+    return result;
+}
 
 int collisionSceneFilterPortalContacts(struct ContactManifold* contact) {
     int writeIndex = 0;
@@ -356,6 +391,37 @@ int collisionSceneRaycastDoorways(struct CollisionScene* scene, struct Room* roo
     return nextRoom;
 }
 
+void collisionSceneRaycastDynamic(struct CollisionScene* scene, struct Ray* ray, int collisionLayers, struct RaycastHit* hit) {
+    for (int i = 0; i < scene->dynamicObjectCount; ++i) {
+        struct RaycastHit hitTest;
+
+        struct CollisionObject* object = scene->dynamicObjects[i];
+
+        if ((object->collisionLayers & collisionLayers) == 0) {
+            continue;
+        }
+
+        if (object->collider->callbacks->raycast && 
+            object->collider->callbacks->raycast(object, ray, hit->distance, &hitTest) &&
+            hitTest.distance < hit->distance) {
+            hit->at = hitTest.at;
+            hit->normal = hitTest.normal;
+            hit->distance = hitTest.distance;
+            hit->object = hitTest.object;
+            hit->roomIndex = hitTest.roomIndex;
+        }
+    }
+}
+
+int collisionSceneRaycastOnlyDynamic(struct CollisionScene* scene, struct Ray* ray, int collisionLayers, float maxDistance, struct RaycastHit* hit) {
+    hit->distance = maxDistance;
+    hit->throughPortal = NULL;
+
+    collisionSceneRaycastDynamic(scene, ray, collisionLayers, hit);
+
+    return hit->distance != maxDistance;
+}
+
 int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, int collisionLayers, float maxDistance, int passThroughPortals, struct RaycastHit* hit) {
     hit->distance = maxDistance;
     hit->throughPortal = NULL;
@@ -378,25 +444,7 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
         --roomsToCheck;
     }
 
-    for (int i = 0; i < scene->dynamicObjectCount; ++i) {
-        struct RaycastHit hitTest;
-
-        struct CollisionObject* object = scene->dynamicObjects[i];
-
-        if ((object->collisionLayers & collisionLayers) == 0) {
-            continue;
-        }
-
-        if (object->collider->callbacks->raycast && 
-            object->collider->callbacks->raycast(object, ray, hit->distance, &hitTest) &&
-            hitTest.distance < hit->distance) {
-            hit->at = hitTest.at;
-            hit->normal = hitTest.normal;
-            hit->distance = hitTest.distance;
-            hit->object = hitTest.object;
-            hit->roomIndex = hitTest.roomIndex;
-        }
-    }
+    collisionSceneRaycastDynamic(scene, ray, collisionLayers, hit);
 
     if (passThroughPortals && 
         hit->distance != maxDistance &&
