@@ -51,6 +51,7 @@ struct PortalSurfaceReplacement {
     short staticIndex;
     short portalSurfaceIndex;
     short roomIndex;
+    float portalScale;
 };
 
 void portalSurfaceCleanupQueueInit();
@@ -69,10 +70,11 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
 struct PortalSurface* portalSurfaceGetOriginalSurface(int portalSurfaceIndex, int portalIndex);
 void portalSurfaceInverse(struct PortalSurface* surface, struct Vector2s16* input, struct Vector3* output);
 
-struct PortalSurface* portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex, struct PortalSurface* with);
+struct PortalSurface* portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex, float portalScale, struct PortalSurface* with);
 void portalSurfaceRevert(int portalIndex);
 void portalSurfaceCheckCleanupQueue();
 int portalSurfaceGetSurfaceIndex(int portalIndex);
+int portalSurfaceShouldMove(int portalIndex, int portalSurfaceIndex, float portalScale);
 
 
 #endif

@@ -62,6 +62,23 @@ int portalSurfaceGetSurfaceIndex(int portalIndex) {
     return -1;
 }
 
+int portalSurfaceShouldMove(int portalIndex, int portalSurfaceIndex, float portalScale) {
+    struct PortalSurfaceReplacement* replacement = &gPortalSurfaceReplacements[portalIndex];
+
+    int noPortalSurfaceRequested = portalSurfaceIndex == -1;
+    int noPortalSurfacePresent = !(replacement->flags & PortalSurfaceReplacementFlagsIsEnabled);
+
+    if (noPortalSurfaceRequested && noPortalSurfacePresent) {
+        return 0;
+    }
+
+    if (noPortalSurfaceRequested != noPortalSurfacePresent) {
+        return 1;
+    }
+
+    return portalSurfaceIndex != replacement->portalSurfaceIndex || portalScale != replacement->portalScale;
+}
+
 void portalSurfaceReplacementRevert(struct PortalSurfaceReplacement* replacement) {
     if (!(replacement->flags & PortalSurfaceReplacementFlagsIsEnabled)) {
         return;
@@ -71,6 +88,7 @@ void portalSurfaceReplacementRevert(struct PortalSurfaceReplacement* replacement
     portalSurfaceCleanup(&gCurrentLevel->portalSurfaces[replacement->portalSurfaceIndex]);
     gCurrentLevel->portalSurfaces[replacement->portalSurfaceIndex] = replacement->previousSurface;
     replacement->flags = 0;
+    replacement->portalScale = 0.0f;
 }
 
 void portalSurfacePreSwap(int portalToMove) {
@@ -93,7 +111,7 @@ struct PortalSurface* portalSurfaceGetOriginalSurface(int portalSurfaceIndex, in
     }
 }
 
-struct PortalSurface* portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex, struct PortalSurface* with) {
+struct PortalSurface* portalSurfaceReplace(int portalSurfaceIndex, int roomIndex, int portalIndex, float portalScale, struct PortalSurface* with) {
     int staticIndex = -1;
 
     struct PortalSurfaceReplacement* replacement = &gPortalSurfaceReplacements[portalIndex];
@@ -122,6 +140,7 @@ struct PortalSurface* portalSurfaceReplace(int portalSurfaceIndex, int roomIndex
     replacement->staticIndex = staticIndex;
     replacement->portalSurfaceIndex = portalSurfaceIndex;
     replacement->roomIndex = roomIndex;
+    replacement->portalScale = portalScale;
 
     gCurrentLevel->staticContent[staticIndex].displayList = with->triangles;
     gCurrentLevel->portalSurfaces[portalSurfaceIndex] = *with;

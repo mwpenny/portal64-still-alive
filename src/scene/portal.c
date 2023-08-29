@@ -72,8 +72,6 @@ void portalUpdate(struct Portal* portal, int isOpen) {
         if (portal->scale > 1.0f) {
             portal->scale = 1.0f;
         }
-        portal->flags |= PortalFlagsNeedsNewHole;
-        
     }
 }
 
@@ -136,8 +134,7 @@ int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, 
     for (int i = 0; i < PORTAL_LOOP_SIZE; ++i) {
         vector2s16Sub(&portalOutline[i], &correctPosition, &portal->originCentertedLoop[i]);
     }
-
-    portal->flags |= PortalFlagsNeedsNewHole;
+    
     portal->fullSizeLoopCenter = correctPosition;
 
     if (portal->portalSurfaceIndex == -1) {
@@ -152,8 +149,6 @@ int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, 
 }
 
 int portalSurfaceCutNewHole(struct Portal* portal, int portalIndex) {
-    portal->flags &= ~PortalFlagsNeedsNewHole;
-
     if (portal->portalSurfaceIndex == -1) {
         return 1;
     }
@@ -176,12 +171,12 @@ int portalSurfaceCutNewHole(struct Portal* portal, int portalIndex) {
         return 0;
     }
     
-    portalSurfaceReplace(portal->portalSurfaceIndex, portal->rigidBody.currentRoom, portalIndex, &newSurface);
+    portalSurfaceReplace(portal->portalSurfaceIndex, portal->rigidBody.currentRoom, portalIndex, portal->scale, &newSurface);
 
     return 1;
 }
 
-int portalNeedsToRemoveSecondPortal(struct Portal* portals) {
+int portalNeedsToRemoveSecondPortal(struct Portal* portals, int shouldMoveFirstPortal) {
     int secondPortalSurfaceIndex = portalSurfaceGetSurfaceIndex(1);
 
     // second portal isn't placed so no need to temporarily remove it
@@ -191,7 +186,7 @@ int portalNeedsToRemoveSecondPortal(struct Portal* portals) {
 
     // first portal doesn't need to move, so no need to temporarily remove
     // second portal
-    if ((portals[0].flags & PortalFlagsNeedsNewHole) == 0) {
+    if (!shouldMoveFirstPortal) {
         return 0;
     }
 
@@ -200,20 +195,20 @@ int portalNeedsToRemoveSecondPortal(struct Portal* portals) {
 }
 
 void portalCheckForHoles(struct Portal* portals) {
-    if ((portals[1].flags & PortalFlagsNeedsNewHole) != 0 || portalNeedsToRemoveSecondPortal(portals)) {
+    int shouldMoveSecondPortal = portalSurfaceShouldMove(1, portals[1].portalSurfaceIndex, portals[1].scale);
+    int shouldMoveFirstPortal = portalSurfaceShouldMove(0, portals[0].portalSurfaceIndex, portals[0].scale);
+
+    if (shouldMoveSecondPortal || portalNeedsToRemoveSecondPortal(portals, shouldMoveFirstPortal)) {
         portalSurfaceRevert(1);
-        portals[1].flags |= PortalFlagsNeedsNewHole;
+        shouldMoveSecondPortal = 1;
     }
 
-    if ((portals[0].flags & PortalFlagsNeedsNewHole) != 0) {
+    if (shouldMoveFirstPortal) {
         portalSurfaceRevert(0);
-    }
-
-    if ((portals[0].flags & PortalFlagsNeedsNewHole) != 0) {
         portalSurfaceCutNewHole(&portals[0], 0);
     }
 
-    if ((portals[1].flags & PortalFlagsNeedsNewHole) != 0) {
+    if (shouldMoveSecondPortal) {
         portalSurfaceCutNewHole(&portals[1], 1);
     }
 }

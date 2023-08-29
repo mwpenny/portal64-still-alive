@@ -16,7 +16,6 @@
 
 enum PortalFlags {
     PortalFlagsOddParity = (1 << 0),
-    PortalFlagsNeedsNewHole = (1 << 1),
     PortalFlagsPlayerPortal = (1 << 2),
 };
 

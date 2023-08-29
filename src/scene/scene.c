@@ -897,18 +897,13 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
 }
 
 void sceneClosePortal(struct Scene* scene, int portalIndex) {
-    if (scene->player.body.flags & (RigidBodyIsTouchingPortalA|RigidBodyIsTouchingPortalB|RigidBodyWasTouchingPortalA|RigidBodyWasTouchingPortalB|RigidBodyFlagsCrossedPortal0|RigidBodyFlagsCrossedPortal1)){
-        return;
-    } 
-    else if (gCollisionScene.portalTransforms[portalIndex]) {
+    if (gCollisionScene.portalTransforms[portalIndex]) {
         soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position, &gZeroVec);
         gCollisionScene.portalTransforms[portalIndex] = NULL;
         gCollisionScene.portalColliderIndex[portalIndex] = -1;
-        scene->portals[portalIndex].flags |= PortalFlagsNeedsNewHole;
         scene->portals[portalIndex].portalSurfaceIndex = -1;
         scene->portals[portalIndex].transformIndex = NO_TRANSFORM_INDEX;
 
         collisionSceneRemoveDynamicObject(&scene->portals[portalIndex].collisionObject);
     }
-    return;
 }
