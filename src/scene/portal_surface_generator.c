@@ -527,15 +527,39 @@ int portalSurfaceSplitEdge(struct PortalSurfaceBuilder* surfaceBuilder, int edge
 int portalSurfaceConnectToPoint(struct PortalSurfaceBuilder* surfaceBuilder, int pointIndex, int edgeIndex, int isLoopEdge) {
     int originalEdge = surfaceBuilder->originalEdgeIndex[surfaceBuilder->edgeOnSearchLoop];
 
-    int newEdge = portalSurfaceNewEdge(surfaceBuilder, 0, originalEdge);
+    int newEdge = -1;
+    int newReverseEdge = -1;
 
-    if (newEdge == -1) {
-        return 0;
+    if (surfaceBuilder->hasEdge && surfaceBuilder->vertices[portalSurfaceNextPoint(surfaceBuilder, surfaceBuilder->cuttingEdge)].equalTest == surfaceBuilder->vertices[pointIndex].equalTest) {
+        // cutting edge is already directly on new point just not connected
+        // this sets up the state to connect it properly
+        struct SurfaceEdge* newEdgePtr = portalSurfaceGetEdge(surfaceBuilder, surfaceBuilder->cuttingEdge);
+
+        // reuse previous edges
+        newEdge = surfaceBuilder->cuttingEdge;
+        newReverseEdge = newEdgePtr->reverseEdge;
+
+        if (newEdgePtr->prevEdge == newEdgePtr->reverseEdge) {
+            // connect from the starting point
+            surfaceBuilder->hasEdge = 0;
+            surfaceBuilder->startingPoint = newEdgePtr->pointIndex;
+        } else {
+            // back up to new cuttingEdge
+            surfaceBuilder->cuttingEdge = newEdgePtr->prevEdge;
+        }
+    } else if (!surfaceBuilder->hasEdge && surfaceBuilder->vertices[surfaceBuilder->startingPoint].equalTest == surfaceBuilder->vertices[pointIndex].equalTest) {
+        // starting point is directly on edge use edage as new cutting edge
+        surfaceBuilder->hasEdge = 1;
+        surfaceBuilder->cuttingEdge = edgeIndex;
+        surfaceBuilder->edgeOnSearchLoop = edgeIndex;
+        return 1;
+    } else {
+        newEdge = portalSurfaceNewEdge(surfaceBuilder, 0, originalEdge);
+        newReverseEdge = portalSurfaceNewEdge(surfaceBuilder, isLoopEdge, originalEdge);
     }
 
-    int newReverseEdge = portalSurfaceNewEdge(surfaceBuilder, isLoopEdge, originalEdge);
 
-    if (newEdge == -1) {
+    if (newEdge == -1 || newReverseEdge == -1) {
         return 0;
     }
 
