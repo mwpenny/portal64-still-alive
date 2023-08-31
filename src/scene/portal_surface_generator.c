@@ -546,6 +546,12 @@ int portalSurfaceConnectToPoint(struct PortalSurfaceBuilder* surfaceBuilder, int
         } else {
             // back up to new cuttingEdge
             surfaceBuilder->cuttingEdge = newEdgePtr->prevEdge;
+
+            struct SurfaceEdge* reverseEdgePtr = portalSurfaceGetEdge(surfaceBuilder, newEdgePtr->reverseEdge);
+
+            // rejoin previous cuttingEdge 
+            portalSurfaceGetEdge(surfaceBuilder, surfaceBuilder->cuttingEdge)->nextEdge = reverseEdgePtr->nextEdge;
+            portalSurfaceGetEdge(surfaceBuilder, reverseEdgePtr->nextEdge)->prevEdge = surfaceBuilder->cuttingEdge;
         }
     } else if (!surfaceBuilder->hasEdge && surfaceBuilder->vertices[surfaceBuilder->startingPoint].equalTest == surfaceBuilder->vertices[pointIndex].equalTest) {
         // starting point is directly on edge use edage as new cutting edge
