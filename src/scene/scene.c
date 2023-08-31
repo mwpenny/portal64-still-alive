@@ -728,8 +728,22 @@ void sceneQueueCheckpoint(struct Scene* scene) {
 
 void sceneCheckSecurityCamera(struct Scene* scene, struct Portal* portal) {
     struct Box3D portalBB;
-    portalCalculateBB(portal, &portalBB);
+    portalCalculateBB(&portal->rigidBody.transform, &portalBB);
     securityCamerasCheckPortal(scene->securityCameras, scene->securityCameraCount, &portalBB);
+}
+
+int sceneCheckIsTouchingPortal(struct Scene* scene, int portalIndex, struct Transform* at, int surfaceIndex) {
+    struct Box3D portalBB;
+    struct Box3D transformBB;
+
+    if (!gCollisionScene.portalTransforms[portalIndex] || surfaceIndex != scene->portals[portalIndex].portalSurfaceIndex) {
+        return 0;
+    }
+
+    portalCalculateBB(&scene->portals[portalIndex].rigidBody.transform, &portalBB);
+    portalCalculateBB(at, &transformBB);
+
+    return box3DHasOverlap(&portalBB, &transformBB);
 }
 
 int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformIndex, int portalIndex, struct PortalSurfaceMappingRange surfaceMapping, struct CollisionObject* collisionObject, int roomIndex, int fromPlayer, int just_checking) {
@@ -755,7 +769,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
 
         struct Portal* portal = &scene->portals[portalIndex];
 
-        if (portalAttachToSurface(portal, existingSurface, surfaceIndex, &finalAt, just_checking)) {
+        if (!sceneCheckIsTouchingPortal(scene, 1 - portalIndex, &finalAt, surfaceIndex) && portalAttachToSurface(portal, existingSurface, surfaceIndex, &finalAt, just_checking)) {
             if (just_checking){
                 return 1;
             }

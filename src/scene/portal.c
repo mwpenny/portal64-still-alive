@@ -75,44 +75,31 @@ void portalUpdate(struct Portal* portal, int isOpen) {
     }
 }
 
-void portalCalculateBB(struct Portal* portal, struct Box3D* bb) {
+void portalCalculateBB(struct Transform* portalTransform, struct Box3D* bb) {
     struct Vector3 portalUp;
-    quatMultVector(&portal->rigidBody.transform.rotation, &gUp, &portalUp);
+    quatMultVector(&portalTransform->rotation, &gUp, &portalUp);
     struct Vector3 portalRight;
-    quatMultVector(&portal->rigidBody.transform.rotation, &gRight, &portalRight);
+    quatMultVector(&portalTransform->rotation, &gRight, &portalRight);
+    struct Vector3 portalNormal;
+    vector3Cross(&portalUp, &portalRight, &portalNormal);
 
-    vector3AddScaled(
-        &portal->rigidBody.transform.position,
-        &portalUp, PORTAL_COVER_HEIGHT * 0.5f,
-        &bb->min
-    );
+    bb->min = bb->max = portalTransform->position;
 
-    bb->max = bb->min;
+    struct Vector3 nextDir;
+    vector3Scale(&portalUp, &nextDir, PORTAL_COVER_HEIGHT * 0.5f);
+    box3DExtendDirection(bb, &nextDir, bb);
+    vector3Negate(&nextDir, &nextDir);
+    box3DExtendDirection(bb, &nextDir, bb);
 
-    struct Vector3 nextPoint;
-    vector3AddScaled(
-        &portal->rigidBody.transform.position,
-        &portalUp, -PORTAL_COVER_HEIGHT * 0.5f,
-        &nextPoint
-    );
+    vector3Scale(&portalRight, &nextDir, PORTAL_COVER_WIDTH * 0.5f);
+    box3DExtendDirection(bb, &nextDir, bb);
+    vector3Negate(&nextDir, &nextDir);
+    box3DExtendDirection(bb, &nextDir, bb);
 
-    box3DUnionPoint(bb, &nextPoint, bb);
-
-    vector3AddScaled(
-        &portal->rigidBody.transform.position,
-        &portalRight, PORTAL_COVER_WIDTH * 0.25f,
-        &nextPoint
-    );
-
-    box3DUnionPoint(bb, &nextPoint, bb);
-
-    vector3AddScaled(
-        &portal->rigidBody.transform.position,
-        &portalRight, -PORTAL_COVER_WIDTH * 0.25f,
-        &nextPoint
-    );
-
-    box3DUnionPoint(bb, &nextPoint, bb);
+    vector3Scale(&portalNormal, &nextDir, 0.1f);
+    box3DExtendDirection(bb, &nextDir, bb);
+    vector3Negate(&nextDir, &nextDir);
+    box3DExtendDirection(bb, &nextDir, bb);
 }
 
 int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt, int just_checking) {
@@ -129,7 +116,6 @@ int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, 
     if (!portalSurfaceAdjustPosition(surface, portalAt, &correctPosition, portalOutline)) {
         return 0;
     }
-    
 
     for (int i = 0; i < PORTAL_LOOP_SIZE; ++i) {
         vector2s16Sub(&portalOutline[i], &correctPosition, &portal->originCentertedLoop[i]);
