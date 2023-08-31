@@ -5,7 +5,7 @@
 #include <sched.h>
 
 // 0 = disable, 1 = record, 2 = playback
-#define CONTROLLER_LOG_CONTROLLER_DATA  2
+#define CONTROLLER_LOG_CONTROLLER_DATA  0
 
 #if CONTROLLER_LOG_CONTROLLER_DATA
     #include "../debugger/serial.h"
