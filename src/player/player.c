@@ -19,6 +19,7 @@
 
 #include "../build/assets/models/player/chell.h"
 #include "../build/assets/materials/static.h"
+#include "../build/assets/models/portal_gun/w_portalgun.h"
 
 #define GRAB_RAYCAST_DISTANCE   2.5f
 #define DROWN_TIME              2.0f
@@ -86,9 +87,22 @@ void playerRender(void* data, struct DynamicRenderDataList* renderList, struct R
 
     skCalculateTransforms(&player->armature, armature);
 
+    Gfx* gunAttachment = portal_gun_w_portalgun_model_gfx;
+    Gfx* attachments = skBuildAttachments(&player->armature, (player->flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) ? &gunAttachment : NULL, renderState);
+
+    Gfx* objectRender = renderStateAllocateDLChunk(renderState, 4);
+    Gfx* dl = objectRender;
+
+    if (attachments) {
+        gSPSegment(dl++, BONE_ATTACHMENT_SEGMENT,  osVirtualToPhysical(attachments));
+    }
+    gSPSegment(dl++, MATRIX_TRANSFORM_SEGMENT,  osVirtualToPhysical(armature));
+    gSPDisplayList(dl++, player->armature.displayList);
+    gSPEndDisplayList(dl++);
+
     dynamicRenderListAddData(
         renderList,
-        player_chell_model_gfx,
+        objectRender,
         matrix,
         DEFAULT_INDEX,
         &player->body.transform.position,
@@ -458,13 +472,44 @@ int playerIsDead(struct Player* player) {
     return (player->flags & PlayerIsDead) != 0;
 }
 
+struct SKAnimationClip* gPlayerIdleClips[] = {
+    &player_chell_Armature_idle_clip,
+    &player_chell_Armature_idle_portalgun_clip,
+};
+
+struct SKAnimationClip* gPlayerRunSClips[] = {
+    &player_chell_Armature_runs_clip,
+    &player_chell_Armature_runs_portalgun_clip,
+};
+
+struct SKAnimationClip* gPlayerRunNClips[] = {
+    &player_chell_Armature_runn_clip,
+    &player_chell_Armature_runn_portalgun_clip,
+};
+
+struct SKAnimationClip* gPlayerRunWClips[] = {
+    &player_chell_Armature_runw_clip,
+    &player_chell_Armature_runw_portalgun_clip,
+};
+
+struct SKAnimationClip* gPlayerRunEClips[] = {
+    &player_chell_Armature_rune_clip,
+    &player_chell_Armature_rune_portalgun_clip,
+};
+
 struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* blendLerp, float* startTime, struct Vector3* forwardDir, struct Vector3* rightDir) {
     float horzSpeed = player->body.velocity.x * player->body.velocity.x + player->body.velocity.z * player->body.velocity.z;
+
+    int clipOffset = 0;
+
+    if (player->flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
+        clipOffset = 1;
+    }
 
     if (horzSpeed < 0.0001f) {
         *blendLerp = 0.0f;
         *startTime = 0.0f;
-        return &player_chell_Armature_idle_clip;
+        return gPlayerIdleClips[clipOffset];
     }
 
     horzSpeed = sqrtf(horzSpeed);
@@ -486,15 +531,15 @@ struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* bl
 
     if (fabsf(forward) > fabsf(right)) {
         if (forward > 0.0f) {
-            return &player_chell_Armature_runs_clip;
+            return gPlayerRunSClips[clipOffset];
         } else {
-            return &player_chell_Armature_runn_clip;
+            return gPlayerRunNClips[clipOffset];
         }
     } else {
         if (right > 0.0f) {
-            return &player_chell_Armature_rune_clip;
+            return gPlayerRunEClips[clipOffset];
         } else {
-            return &player_chell_Armature_runw_clip;
+            return gPlayerRunWClips[clipOffset];
         }
     }
 }
