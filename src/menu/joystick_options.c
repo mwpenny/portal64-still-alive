@@ -20,15 +20,18 @@
 void joystickOptionsInit(struct JoystickOptions* joystickOptions) {
     joystickOptions->selectedItem = JoystickOptionInvert;
 
-    joystickOptions->invertControls = menuBuildCheckbox(&gDejaVuSansFont, "Invert Camera", JOYSTICK_X + 8, JOYSTICK_Y + 8);
+    joystickOptions->invertControls = menuBuildCheckbox(&gDejaVuSansFont, "Invert Camera Pitch", JOYSTICK_X + 8, JOYSTICK_Y + 8);
 
-    joystickOptions->lookSensitivityText = menuBuildText(&gDejaVuSansFont, "Look Sensitivity", JOYSTICK_X + 8, JOYSTICK_Y + 28);
-    joystickOptions->lookSensitivity = menuBuildSlider(JOYSTICK_X + 120, JOYSTICK_Y + 28, 120, SCROLL_TICKS);
+    joystickOptions->tankControls = menuBuildCheckbox(&gDejaVuSansFont, "Tank Controls", JOYSTICK_X + 8, JOYSTICK_Y + 28);
 
-    joystickOptions->lookAccelerationText = menuBuildText(&gDejaVuSansFont, "Look Acceleration", JOYSTICK_X + 8, JOYSTICK_Y + 48);
-    joystickOptions->lookAcceleration = menuBuildSlider(JOYSTICK_X + 120, JOYSTICK_Y + 48, 120, SCROLL_TICKS);
+    joystickOptions->lookSensitivityText = menuBuildText(&gDejaVuSansFont, "Look Sensitivity", JOYSTICK_X + 8, JOYSTICK_Y + 48);
+    joystickOptions->lookSensitivity = menuBuildSlider(JOYSTICK_X + 120, JOYSTICK_Y + 48, 120, SCROLL_TICKS);
+
+    joystickOptions->lookAccelerationText = menuBuildText(&gDejaVuSansFont, "Look Acceleration", JOYSTICK_X + 8, JOYSTICK_Y + 68);
+    joystickOptions->lookAcceleration = menuBuildSlider(JOYSTICK_X + 120, JOYSTICK_Y + 68, 120, SCROLL_TICKS);
 
     joystickOptions->invertControls.checked = (gSaveData.controls.flags & ControlSaveFlagsInvert) != 0;
+    joystickOptions->tankControls.checked = (gSaveData.controls.flags & ControlSaveTankControls) != 0;
     joystickOptions->lookSensitivity.value = (float)gSaveData.controls.sensitivity / 0xFFFF;
     joystickOptions->lookAcceleration.value = (float)gSaveData.controls.acceleration / 0xFFFF;
 }
@@ -106,6 +109,18 @@ enum MenuDirection joystickOptionsUpdate(struct JoystickOptions* joystickOptions
             }
 
             break;
+        case JoystickOptionTankControls:
+            if (controllerGetButtonDown(0, A_BUTTON)) {
+                joystickOptions->tankControls.checked = !joystickOptions->tankControls.checked;
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+
+                if (joystickOptions->tankControls.checked) {
+                    gSaveData.controls.flags |= ControlSaveTankControls;
+                } else {
+                    gSaveData.controls.flags &= ~ControlSaveTankControls;
+                }
+            }
+            break;
         case JoystickOptionSensitivity:
             joystickOptionsHandleSlider(&gSaveData.controls.sensitivity, &joystickOptions->lookSensitivity.value);
             return MenuDirectionStay;
@@ -130,6 +145,8 @@ void joystickOptionsRender(struct JoystickOptions* joystickOptions, struct Rende
     
     gSPDisplayList(renderState->dl++, joystickOptions->invertControls.outline);
     renderState->dl = menuCheckboxRender(&joystickOptions->invertControls, renderState->dl);
+    gSPDisplayList(renderState->dl++, joystickOptions->tankControls.outline);
+    renderState->dl = menuCheckboxRender(&joystickOptions->tankControls, renderState->dl);
     gSPDisplayList(renderState->dl++, joystickOptions->lookSensitivity.back);
     renderState->dl = menuSliderRender(&joystickOptions->lookSensitivity, renderState->dl);
 
@@ -143,6 +160,10 @@ void joystickOptionsRender(struct JoystickOptions* joystickOptions, struct Rende
     gDPPipeSync(renderState->dl++);
     menuSetRenderColor(renderState, joystickOptions->selectedItem == JoystickOptionInvert, &gSelectionGray, &gColorWhite);
     gSPDisplayList(renderState->dl++, joystickOptions->invertControls.text);
+
+    gDPPipeSync(renderState->dl++);
+    menuSetRenderColor(renderState, joystickOptions->selectedItem == JoystickOptionTankControls, &gSelectionGray, &gColorWhite);
+    gSPDisplayList(renderState->dl++, joystickOptions->tankControls.text);
 
     gDPPipeSync(renderState->dl++);
     menuSetRenderColor(renderState, joystickOptions->selectedItem == JoystickOptionSensitivity, &gSelectionGray, &gColorWhite);

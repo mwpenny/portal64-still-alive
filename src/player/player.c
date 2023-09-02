@@ -626,8 +626,17 @@ void playerUpdate(struct Player* player) {
         camera_y_modifier = 0.0;
     }
 
+    struct Vector2 moveInput = controllerDirectionGet(ControllerActionMove);
+    struct Vector2 lookInput = controllerDirectionGet(ControllerActionRotate);
+
+    if (gSaveData.controls.flags & ControlSaveTankControls) {
+        float tmp;
+        tmp = moveInput.y;
+        moveInput.y = lookInput.y;
+        lookInput.y = tmp;
+    }
+
     if (!isDead) {
-        struct Vector2 moveInput = controllerDirectionGet(ControllerActionMove);
 
         vector3AddScaled(&targetVelocity, &right, PLAYER_SPEED * moveInput.x, &targetVelocity);
         vector3AddScaled(&targetVelocity, &forward, -PLAYER_SPEED * moveInput.y, &targetVelocity);
@@ -755,7 +764,6 @@ void playerUpdate(struct Player* player) {
         soundPlayerPlay(soundsPortalExit[2 - didPassThroughPortal], 0.75f, 1.0f, NULL, NULL);
     }
 
-    struct Vector2 lookInput = controllerDirectionGet(ControllerActionRotate);
     float rotateRate = mathfLerp(MIN_ROTATE_RATE, MAX_ROTATE_RATE, (float)gSaveData.controls.sensitivity / 0xFFFF);
     float targetYaw = -lookInput.x * rotateRate;
     float targetPitch = lookInput.y * rotateRate;
