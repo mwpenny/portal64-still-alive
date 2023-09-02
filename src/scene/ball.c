@@ -151,7 +151,11 @@ void ballInitBurn(struct Ball* ball, struct ContactManifold* manifold) {
         burn->dynamicId = dynamicSceneAdd(burn, ballBurnRender, &burn->at, 0.2f);
     }
 
-    quatLook(&manifold->normal, &gUp, &burnTransform.rotation);
+    if (fabsf(manifold->normal.y) > 0.714f) {
+        quatLook(&manifold->normal, &gRight, &burnTransform.rotation);
+    } else {
+        quatLook(&manifold->normal, &gUp, &burnTransform.rotation);
+    }
     burnTransform.scale = gOneVec;
 
     transformToMatrixL(&burnTransform, &burn->matrix, SCENE_SCALE);
