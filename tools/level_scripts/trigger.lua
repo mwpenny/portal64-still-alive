@@ -289,6 +289,8 @@ local function generate_cutscenes()
     local cutscenes_result = {}
     local cutscene_data = {}
 
+    local cutscene_json = {}
+
     for _, cutscene in pairs(cutscenes) do
         local first_step = cutscene.steps[1]
         local other_steps = {table.unpack(cutscene.steps, 2)}
@@ -297,6 +299,12 @@ local function generate_cutscenes()
             return distance_from_start(first_step, a) < distance_from_start(first_step, b)
         end)
 
+        local string_steps = {}
+
+        for step_index, step in pairs(other_steps) do
+            table.insert(string_steps, step.command .. ' ' .. table.concat(step.args, ' '))
+        end
+
         local label_locations = find_label_locations(other_steps)
 
         local steps = {}
@@ -304,6 +312,8 @@ local function generate_cutscenes()
         for step_index, step in pairs(other_steps) do
             table.insert(steps, generate_cutscene_step(cutscene.name, step, step_index, label_locations, cutscenes))
         end
+
+        cutscene_json[cutscene.name] = string_steps
 
         sk_definition_writer.add_definition(cutscene.name .. '_steps', 'struct CutsceneStep[]', '_geo', steps)
 
@@ -319,7 +329,7 @@ local function generate_cutscenes()
         })
     end
 
-    return cutscenes_result, cutscene_data
+    return cutscenes_result, cutscene_data, cutscene_json
 end
 
 local function generate_triggers(cutscenes)
@@ -342,7 +352,7 @@ local function generate_triggers(cutscenes)
 
     return result
 end
-local cutscenes, cutscene_data = generate_cutscenes()
+local cutscenes, cutscene_data, cutscene_json = generate_cutscenes()
 local triggers = generate_triggers(cutscenes)
 
 sk_definition_writer.add_definition("triggers", "struct Trigger[]", "_geo", triggers)
@@ -355,6 +365,7 @@ end
 return {
     triggers = triggers,
     cutscene_data = cutscene_data,
+    cutscene_json = cutscene_json,
     location_data = location_data,
     find_location_index = find_location_index,
     find_cutscene_index = find_cutscene_index,

@@ -1,0 +1,49 @@
+operators:
+  []
+cutscenes:
+  GET_GUN:
+    - set_signal room_0_exit
+    - "hide_pedestal "
+    - stop_cutscene portal_loop
+    - q_sound 01_PART1_GET_PORTAL_GUN_1 CH_GLADOS
+    - q_sound 01_PART1_GET_PORTAL_GUN_2 CH_GLADOS
+    - q_sound 01_PART1_GET_PORTAL_GUN_3 CH_GLADOS
+    - q_sound 01_PART1_GET_PORTAL_GUN_4 CH_GLADOS
+    - q_sound 01_PART1_GET_PORTAL_GUN_5 CH_GLADOS
+    - q_sound 01_PART1_GET_PORTAL_GUN_6 CH_GLADOS
+    - q_sound 01_PART1_GET_PORTAL_GUN_7 CH_GLADOS
+    - q_sound 01_PART1_GET_PORTAL_GUN_8 CH_GLADOS
+  MIND_THE_GAP:
+    - open_portal portal_gap 0
+    - q_sound SOUNDS_01_PART2_ENTRY_1 CH_GLADOS
+  START:
+    - delay 1
+    - start_cutscene portal_loop
+    - set_signal FIRST_ELEVATOR
+  FINISH_03:
+    - q_sound SOUNDS_01_PART2_SUCCESS_1 CH_GLADOS
+  INTRO_CUTSCENE:
+    - q_sound SOUNDS_01_PART1_ENTRY_1 CH_GLADOS
+    - q_sound SOUNDS_01_PART1_ENTRY_2 CH_GLADOS
+    - wait_for_channel CH_GLADOS
+    - set_signal room_0_entrance
+  portal_loop:
+    - open_portal portal_exit 0
+    - label loop_start
+    - open_portal portal_0 1
+    - delay 3
+    - point_pedestal portal_1
+    - delay 4
+    - open_portal portal_1 1
+    - delay 3 2
+    - point_pedestal portal_2
+    - delay 4 2
+    - open_portal portal_2 1
+    - delay 3 3
+    - point_pedestal portal_3
+    - delay 4 3
+    - open_portal portal_3 1
+    - delay 3 4
+    - point_pedestal portal_0
+    - delay 4 4
+    - goto loop_start

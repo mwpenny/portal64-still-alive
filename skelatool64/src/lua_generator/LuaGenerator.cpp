@@ -8,6 +8,7 @@
 #include "LuaMesh.h"
 #include "LuaDisplayListSettings.h"
 #include "LuaBasicTypes.h"
+#include "LuaYaml.h"
 
 #include <lua5.4/lua.hpp>
 #include <iostream>
@@ -82,6 +83,7 @@ void generateFromLuaScript(
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
     generateLuaTransform(L);
+    generateLuaYaml(L);
     populateLuaMesh(L, scene, fileDefinition, settings);
 
     lua_getglobal(L, "package");

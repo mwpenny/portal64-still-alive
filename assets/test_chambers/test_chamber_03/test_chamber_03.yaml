@@ -1,0 +1,36 @@
+operators:
+  - not_on_piston = not on_piston
+cutscenes:
+  BALL_2:
+    - delay 3
+    - set_signal launch_ball_2
+    - wait_for_signal horizontal_activiate
+    - label horizontal_loop
+    - play_animation horizontal horizontal_slide
+    - wait_for_animation horizontal
+    - goto horizontal_loop
+  INTRO_2:
+    - save_checkpoint 0.001
+    - open_portal ground_portal_2
+    - start_cutscene BALL_2
+    - q_sound SOUNDS_03_PART2_ENTRY_1 CH_GLADOS
+    - wait_for_signal horizontal_activiate 2
+    - q_sound 03_PART2_PLATFORM_ACTIVATED_1 CH_GLADOS
+  INTRO:
+    - save_checkpoint 0
+    - open_portal ground_portal 0
+    - q_sound SOUNDS_03_PART1_ENTRY_1 CH_GLADOS
+    - q_sound SOUNDS_03_PART1_ENTRY_2 CH_GLADOS
+    - wait_for_signal exit_activate 2
+    - q_sound SOUNDS_03_PART1_SUCCESS_1 CH_GLADOS
+  START_BALL:
+    - set_signal launch_ball
+    - wait_for_signal exit_activate
+    - label piston_loop
+    - play_animation exit_piston piston_move_down
+    - wait_for_animation exit_piston 0
+    - wait_for_signal on_piston
+    - play_animation exit_piston piston_move_up
+    - wait_for_animation exit_piston
+    - wait_for_signal not_on_piston
+    - goto piston_loop

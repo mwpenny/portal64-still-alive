@@ -1,0 +1,72 @@
+cutscenes:
+  platform_ferry:
+    - wait_for_signal move_platform
+    - delay 1.5 pre_slide
+    - label anim_loop_start
+    - play_animation horizontal slide 1
+    - wait_for_animation horizontal
+    - wait_for_signal move_to_gun
+    - play_animation horizontal slide -1
+    - wait_for_signal not_move_to_gun
+    - goto anim_loop_start
+  platform_loop:
+    - label anim_platform_loop_start
+    - play_animation horizontal slide 1 loop
+    - wait_for_animation horizontal loop_out
+    - delay 3 anim_pause
+    - play_animation horizontal slide -1 slide_
+    - wait_for_animation horizontal loop_in
+    - delay 3 anim_pause_end
+    - goto anim_platform_loop_start
+  DROWN_PLAYER:
+    - kill_player water
+  START:
+    - delay 1
+    - start_cutscene portal_loop
+    - start_cutscene platform_ferry
+    - set_signal launch_ball
+    - q_sound 07_PART1_ENTRY_1 CH_GLADOS
+    - q_sound 07_PART1_ENTRY_2 CH_GLADOS
+    - q_sound 07_PART1_ENTRY_3 CH_GLADOS
+  TILT:
+    - delay 4
+    - set_signal cube_dropper
+    - play_animation tilt tilt
+  START_1:
+    - q_sound 07_PART2_ENTRY_1 CH_GLADOS
+    - wait_for_signal weeeee
+    - q_sound 07_PART2_SUCCESS_1 CH_GLADOS
+  portal_loop:
+    - label loop_start
+    - open_portal portal_0 0
+    - delay 3.001
+    - point_pedestal portal_1
+    - delay 4.001
+    - open_portal portal_1 0
+    - delay 3 2
+    - point_pedestal portal_2
+    - delay 4 2
+    - open_portal portal_2 0
+    - delay 3 3
+    - point_pedestal portal_3
+    - delay 4 3
+    - point_pedestal portal_0
+    - delay 4 4
+    - goto loop_start
+  GET_GUN:
+    - "hide_pedestal "
+    - stop_cutscene portal_loop
+    - stop_cutscene platform_ferry
+    - start_cutscene platform_loop
+    - close_portal 0
+    - q_sound 07_PART1_GET_DEVICE_COMPONENT_1 CH_GLADOS
+    - q_sound 07_PART1_GET_DEVICE_COMPONENT_2 CH_GLADOS
+    - q_sound 07_PART1_GET_DEVICE_COMPONENT_3 CH_GLADOS
+    - wait_for_signal trapped
+    - q_sound 07_PART1_TRAPPED_1 CH_GLADOS
+    - q_sound 07_PART1_TRAPPED_2 CH_GLADOS
+    - wait_for_channel CH_GLADOS
+    - set_signal trap_door
+operators:
+  - weeeee = exit_1 and flying
+  - not_move_to_gun = not move_to_gun

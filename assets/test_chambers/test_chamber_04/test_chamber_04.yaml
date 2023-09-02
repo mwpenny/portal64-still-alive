@@ -1,0 +1,19 @@
+cutscenes:
+  SUCCESS:
+    - q_sound SOUNDS_04_PART1_SUCCESS_1 CH_GLADOS
+  INTRO_CUTSCENE:
+    - q_sound SOUNDS_04_PART1_ENTRY_1 CH_GLADOS
+  DROWN_PLAYER:
+    - kill_player water
+  OPEN_PORTAL:
+    - "save_checkpoint "
+    - delay 1
+    - open_portal stationary_portal 0
+    - set_signal launch_ball
+    - wait_for_signal exit_activate
+    - label horizontal_loop
+    - play_animation horizontal horizontal_slide
+    - wait_for_animation horizontal
+    - goto horizontal_loop
+operators:
+  []

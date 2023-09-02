@@ -1,0 +1,20 @@
+cutscenes:
+  DROP_CUBE:
+    - set_signal cube_dropper
+  ENTER_BUTTON_ROOM:
+    - open_portal portal_1
+  ENTER_SMALL_ROOM:
+    - set_signal double_door
+    - open_portal portal_2 0
+    - q_sound SOUNDS_02_PART2_SUCCESS_1 CH_GLADOS
+    - q_sound SOUNDS_02_PART2_SUCCESS_2 CH_GLADOS
+  INTRO:
+    - q_sound SOUNDS_02_PART1_ENTRY_1 CH_GLADOS
+    - wait_for_channel CH_GLADOS
+    - open_portal portal_0 0
+    - q_sound SOUNDS_02_PART1_ENTRY_2 CH_GLADOS
+    - wait_for_signal success
+    - q_sound SOUNDS_02_PART1_SUCCESS_1 CH_GLADOS
+    - q_sound SOUNDS_02_PART1_SUCCESS_2 CH_GLADOS
+operators:
+  - double_door = exit_2_0 and exit_2_1

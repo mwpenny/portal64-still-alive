@@ -102,10 +102,28 @@ local function generate_operator_data(operator)
     }
 end
 
+local function format_operation(operation)
+    local result = operation.output .. ' = ' 
+
+    if operation.type == 'SignalOperatorTypeNot' then
+        return result .. 'not ' .. operation.input[1]
+    elseif operation.type == 'SignalOperatorTypeAnd' then
+        return result .. table.concat(operation.input, ' and ')
+    elseif operation.type == 'SignalOperatorTypeOr' then
+        return result .. table.concat(operation.input, ' or ')
+    end
+
+    return result;
+end
+
 local operators = {}
+
+local operator_json = {}
 
 for _, operation in pairs(ordered_operators) do
     table.insert(operators, generate_operator_data(operation))
+
+    table.insert(operator_json, format_operation(operation))
 end
 
 sk_definition_writer.add_definition('signal_operations', 'struct SignalOperator[]', '_geo', operators)
@@ -113,4 +131,5 @@ sk_definition_writer.add_definition('signal_operations', 'struct SignalOperator[
 return {
     signal_index_for_name = signal_index_for_name,
     operators = operators,
+    operator_json = operator_json,
 }

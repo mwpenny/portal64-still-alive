@@ -124,6 +124,7 @@ That will generate the rom at `/build/portal64.z64`
 <br />
 
 ## Current New Feature TODO List
+- [ ] rumble pak support?
 - [ ] Change default controls
 - [ ] Add puzzle element connections and additional signs
 - [ ] Use a much nearer clipping plane when rendering the portal gun
