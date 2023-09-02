@@ -761,7 +761,6 @@ void playerUpdate(struct Player* player) {
     float targetPitch = lookInput.y * rotateRate;
 
     if (gSaveData.controls.flags & ControlSaveFlagsInvert) {
-        targetYaw = -targetYaw;
         targetPitch = -targetPitch;
     }
 
