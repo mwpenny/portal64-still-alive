@@ -1,1 +1,6 @@
-*
+build
+vpk
+skelatool64/build
+skelatool64/cimg
+skelatool64/yaml-cpp
+skelatool64/skeletool64

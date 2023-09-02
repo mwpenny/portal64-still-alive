@@ -105,18 +105,21 @@ make fix
 
 ## Build with Docker
 
+Using the docker image the only setup step you need is to populating the vpk folder. After that you can build the docker image using
 
 Build the Docker image.
 ```sh
-make -f Makefile.docker build
+make -f Makefile.docker image
 ```
 
 <br />
 
-Then build.
+Then build the rom using
 ```sh
 make -f Makefile.docker
 ```
+
+That will generate the rom at `/build/portal64.z64`
 
 <br />
 
