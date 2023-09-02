@@ -46,6 +46,7 @@ void sceneSerializePortals(struct Serializer* serializer, SerializeAction action
 
         if (portal->transformIndex != NO_TRANSFORM_INDEX) {
             action(serializer, &portal->relativePos, sizeof(portal->relativePos));
+            action(serializer, &portal->relativeRotation, sizeof(portal->relativeRotation));
         }
     }
 }
@@ -85,6 +86,7 @@ void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene)
         serializeRead(serializer, &portal->transformIndex, sizeof(portal->transformIndex));
         if (portal->transformIndex != NO_TRANSFORM_INDEX) {
             serializeRead(serializer, &portal->relativePos, sizeof(portal->relativePos));
+            serializeRead(serializer, &portal->relativeRotation, sizeof(portal->relativeRotation));
         }
 
         portal->rigidBody.transform = transform;

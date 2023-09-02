@@ -33,6 +33,7 @@ struct Portal {
     // used to attach portals to moving surfaces
     short transformIndex;
     struct Vector3 relativePos;
+    struct Quaternion relativeRotation;
 };
 
 #define PORTAL_COVER_HEIGHT 0.708084f

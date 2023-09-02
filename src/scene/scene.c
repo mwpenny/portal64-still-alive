@@ -485,6 +485,7 @@ void sceneUpdatePortalVelocity(struct Scene* scene) {
 
         // update portal position
         gCollisionScene.portalTransforms[i]->position = newPos;
+        quatMultiply(&baseTransform.rotation, &portal->relativeRotation, &gCollisionScene.portalTransforms[i]->rotation);
         collisionObjectUpdateBB(&portal->collisionObject);
     }
 }
@@ -772,7 +773,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
 
         struct Portal* portal = &scene->portals[portalIndex];
 
-        if (!sceneCheckIsTouchingPortal(scene, 1 - portalIndex, &finalAt, surfaceIndex) && portalAttachToSurface(portal, existingSurface, surfaceIndex, &finalAt, just_checking)) {
+        if (!sceneCheckIsTouchingPortal(scene, 1 - portalIndex, at, surfaceIndex) && portalAttachToSurface(portal, existingSurface, surfaceIndex, &finalAt, just_checking)) {
             if (just_checking){
                 return 1;
             }
@@ -782,6 +783,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
             // the portal position may have been adjusted
             if (transformIndex != NO_TRANSFORM_INDEX) {
                 portal->relativePos = finalAt.position;
+                portal->relativeRotation = finalAt.rotation;
                 transformConcat(&relativeToTransform, &finalAt, &portal->rigidBody.transform);
             } else {
                 portal->rigidBody.transform = finalAt;
