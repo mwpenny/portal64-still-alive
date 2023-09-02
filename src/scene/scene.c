@@ -124,9 +124,6 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
         playerGivePortalGun(&scene->player, PlayerHasSecondPortalGun);
     }
 
-        playerGivePortalGun(&scene->player, PlayerHasFirstPortalGun);
-        playerGivePortalGun(&scene->player, PlayerHasSecondPortalGun);
-
     portalInit(&scene->portals[0], 0);
     portalInit(&scene->portals[1], PortalFlagsOddParity);
 
@@ -478,6 +475,12 @@ void sceneUpdatePortalVelocity(struct Scene* scene) {
         // calculate new portal velocity
         struct Vector3 offset;
         vector3Sub(&newPos, &gCollisionScene.portalTransforms[i]->position, &offset);
+
+        if (!vector3IsZero(&offset) && !(gSaveData.controls.flags & ControlSaveMoveablePortals)) {
+            sceneClosePortal(scene, i);
+            continue;
+        }
+
         vector3Scale(&offset, &gCollisionScene.portalVelocity[i], 1.0 / FIXED_DELTA_TIME);
 
         // update portal position

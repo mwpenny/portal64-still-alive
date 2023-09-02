@@ -20,6 +20,9 @@ struct Tab gOptionTabs[] = {
     {
         .message = "Audio",
     },
+    {
+        .message = "Gameplay",
+    },
 };
 
 #define MENU_WIDTH  280
@@ -47,6 +50,7 @@ void optionsMenuInit(struct OptionsMenu* options) {
     controlsMenuInit(&options->controlsMenu);
     joystickOptionsInit(&options->joystickOptions);
     audioOptionsInit(&options->audioOptions);
+    gameplayOptionsInit(&options->gameplayOptions);
 }
 
 enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options) {
@@ -61,6 +65,9 @@ enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options) {
             break;
         case OptionsMenuTabsAudio:
             menuDirection = audioOptionsUpdate(&options->audioOptions);
+            break;
+        case OptionsMenuTabsGameplay:
+            menuDirection = gameplayOptionsUpdate(&options->gameplayOptions);
             break;
     }
 
@@ -119,6 +126,9 @@ void optionsMenuRender(struct OptionsMenu* options, struct RenderState* renderSt
             break;
         case OptionsMenuTabsAudio:
             audioOptionsRender(&options->audioOptions, renderState, task);
+            break;
+        case OptionsMenuTabsGameplay:
+            gameplayOptionsRender(&options->gameplayOptions, renderState, task);
             break;
     }
 }
