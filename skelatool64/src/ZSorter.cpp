@@ -125,10 +125,28 @@ RenderChunk renderChunksRebuildFromFaces(std::vector<SingleFace>::iterator start
     return RenderChunk(start->bonePair, newMesh, start->meshRoot, start->material);
 }
 
+int renderChunkSortGroup(const std::string& nodeName) {
+    std::size_t startSortGroup = nodeName.find("sort-group ");
+
+    if (startSortGroup == std::string::npos) {
+        return 0;
+    }
+
+    startSortGroup += strlen("sort-group ");
+
+    std::size_t endSortGroup = nodeName.find(" ", startSortGroup);
+
+    std::string value = nodeName.substr(startSortGroup, endSortGroup == std::string::npos ? std::string::npos : endSortGroup - startSortGroup);
+
+    return std::stoi(value);
+}
+
 std::vector<RenderChunk> renderChunksSortByZ(const std::vector<RenderChunk>& source, const aiVector3D& direction, unsigned maxBufferSize, BoneHierarchy& boneHeirarchy) {
     std::vector<SingleFace> faces;
 
     for (auto chunk : source) {
+        int sortGroup = renderChunkSortGroup(chunk.mMeshRoot->mName.C_Str());
+
         for (auto face : chunk.GetFaces()) {
             SingleFace singleFace;
 
@@ -144,7 +162,7 @@ std::vector<RenderChunk> renderChunksSortByZ(const std::vector<RenderChunk>& sou
             singleFace.mesh = chunk.mMesh.get();
             singleFace.material = chunk.mMaterial;
             singleFace.meshRoot = chunk.mMeshRoot;
-            singleFace.sortKey = faceAverage * direction;
+            singleFace.sortKey = faceAverage * direction + sortGroup * 10000.0f;
 
             faces.push_back(singleFace);
         }
