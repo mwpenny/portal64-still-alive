@@ -12,6 +12,8 @@ cutscenes:
   ENTER_BUTTON_ROOM:
     - open_portal portal_1
   BAD_PERSON:
+    - q_sound SOUNDS_ESCAPE_01_PART1_NAG01_1 CH_GLADOS
+    - wait_for_channel CH_GLADOS
     - set_signal bad_person
   ENTER_SMALL_ROOM:
     - set_signal in_room

@@ -160,8 +160,11 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     scene->triggerListenerCount = gCurrentLevel->triggerCount;
     scene->triggerListeners = malloc(sizeof(struct TriggerListener) * scene->triggerListenerCount);
+    int triggerOffset = 0;
     for (int i = 0; i < scene->triggerListenerCount; ++i) {
-        triggerInit(&scene->triggerListeners[i], &gCurrentLevel->triggers[i], i);
+        triggerInit(&scene->triggerListeners[i], &gCurrentLevel->triggers[i], triggerOffset);
+
+        triggerOffset += gCurrentLevel->triggers[i].triggerCount;
     }
 
     scene->doorCount = gCurrentLevel->doorCount;

@@ -4,9 +4,15 @@
 #include "../decor/decor_object_list.h"
 #include "../levels/cutscene_runner.h"
 
+#include "./scene.h"
+
 extern struct ColliderTypeData gPlayerColliderData;
 
 enum ObjectTriggerType triggerDetermineType(struct CollisionObject* objectEnteringTrigger) {
+    if (gScene.player.grabConstraint.object == objectEnteringTrigger) {
+        return ObjectTriggerTypeNone;
+    }
+
     if (objectEnteringTrigger->collider == &gPlayerColliderData) {
         return ObjectTriggerTypePlayer;
     }
@@ -49,7 +55,7 @@ void triggerTrigger(void* data, struct CollisionObject* objectEnteringTrigger) {
                 signalsSend(triggerInfo->signalIndex);
             }
 
-            cutsceneTrigger(triggerInfo->cutsceneIndex, listener->triggerIndex);
+            cutsceneTrigger(triggerInfo->cutsceneIndex, listener->triggerIndex + i);
         }
     }
 }

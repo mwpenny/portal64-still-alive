@@ -287,20 +287,39 @@ local function generate_cutscenes()
     return cutscenes_result, cutscene_data
 end
 
+local function parse_trigger_signal(signal)
+    if not signal or signal == '-1' then
+        return -1
+    end
+
+    return signals.signal_index_for_name(signal)
+end
+
+local function signal_type_index(index)
+    if index == 3 then
+        return sk_definition_writer.raw('ObjectTriggerTypeCube')
+    end
+
+    return sk_definition_writer.raw('ObjectTriggerTypePlayer')
+end
+
 local function generate_triggers(cutscenes)
     local result = {}
     
     for _, trigger in pairs(sk_scene.nodes_for_type('@trigger')) do
         local first_mesh = trigger.node.meshes[1]
-        local cutscene = cutscene_index(cutscenes, trigger.arguments[1])
-
+        
         local triggers = {}
+        
+        for i = 1, #trigger.arguments, 2 do
+            local cutscene = cutscene_index(cutscenes, trigger.arguments[i])
+            table.insert(triggers, {
+                signal_type_index(i),
+                cutscene,
+                parse_trigger_signal(trigger.arguments[i + 1]),
+            })
+        end
 
-        table.insert(triggers, {
-            sk_definition_writer.raw('ObjectTriggerTypePlayer'),
-            cutscene,
-            trigger.arguments[2] and signals.signal_index_for_name(trigger.arguments[2]) or -1,
-        })
     
         if first_mesh then
             local transformed = first_mesh:transform(trigger.node.full_transformation)

@@ -8,6 +8,8 @@
 #include "../scene/portal.h"
 #include "../levels/levels.h"
 
+#include "../debugger/debugger.h"
+
 struct CollisionScene gCollisionScene;
 
 void collisionSceneInit(struct CollisionScene* scene, struct CollisionObject* quads, int quadCount, struct World* world) {
@@ -718,6 +720,10 @@ void collisionSceneUpdateDynamics() {
         prevPosList[i] = object->body->transform.position;
         sweptBB[i] = object->boundingBox;
 
+        if (i == 25) {
+            gdbSetWatchPoint(&prevPosList[i], 0, 1);
+        }
+
         if (!collisionObjectShouldGenerateConctacts(object)) {
             continue;
         }
@@ -746,6 +752,8 @@ void collisionSceneUpdateDynamics() {
     }
 
     collisionSceneCollideDynamicPairs(&gCollisionScene, prevPosList, sweptBB);
+
+    gdbClearWatchPoint();
 
     stackMallocFree(sweptBB);
     stackMallocFree(prevPosList);
