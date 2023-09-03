@@ -4,22 +4,10 @@ local sk_scene = require('sk_scene')
 local room_export = require('tools.level_scripts.room_export')
 local signals = require('tools.level_scripts.signals')
 local animation = require('tools.level_scripts.animation')
+local yaml_loader = require('tools.level_scripts.yaml_loader')
+local util = require('tools.level_scripts.util')
 
 sk_definition_writer.add_header('"../build/src/audio/clips.h"')
-
-
-local function does_belong_to_cutscene(first_step, step)
-    local offset = step.position - first_step.position
-    local local_pos = first_step.rotation * offset
-
-    return local_pos.z >= 0 and local_pos.x * local_pos.x + local_pos.y * local_pos.y < 0.1
-end
-
-local function distance_from_start(first_step, step)
-    local offset = step.position - first_step.position
-    local local_pos = first_step.rotation * offset
-    return local_pos.z
-end
 
 local function cutscene_index(cutscenes, name)
     for _, cutscene in pairs(cutscenes) do
@@ -247,62 +235,31 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
 end
 
 local function generate_cutscenes()
-    local step_nodes = sk_scene.nodes_for_type("@cutscene")
-
-    local steps = {}
-    local cutscenes = {}
-
-    for _, node_info in pairs(step_nodes) do
-        if #node_info.arguments > 0 then
-            local command = node_info.arguments[1]
-            local args = {table.unpack(node_info.arguments, 2)}
-
-            local position, rotation, scale = node_info.node.transformation:decompose()
-
-            local step = {
-                command = command,
-                args = args,
-                position = position,
-                rotation = rotation:conjugate(),
-            }
-
-            if command == "start" and #args >= 1 then
-                table.insert(cutscenes, {
-                    name = args[1],
-                    steps = {step},
-                    macro = sk_definition_writer.raw(sk_definition_writer.add_macro("CUTSCENE_" .. args[1], #cutscenes)),
-                })
-            else
-                table.insert(steps, step)
-            end
-        end
-    end
-
-    for _, cutscene in pairs(cutscenes) do
-        for _, step in pairs(steps) do
-            if does_belong_to_cutscene(cutscene.steps[1], step) then
-                table.insert(cutscene.steps, step)
-            end
-        end
-    end
-
     local cutscenes_result = {}
     local cutscene_data = {}
 
-    local cutscene_json = {}
+    local cutscene_json = yaml_loader.json_contents.cutscenes or {}
+
+    local cutscenes = {}
+
+    for cutscene_name, cutscene_steps in pairs(cutscene_json) do
+        table.insert(cutscenes, {
+            name = cutscene_name,
+            steps = cutscene_steps,
+            macro = sk_definition_writer.raw(sk_definition_writer.add_macro("CUTSCENE_" .. cutscene_name, #cutscenes)),
+        })
+    end
 
     for _, cutscene in pairs(cutscenes) do
-        local first_step = cutscene.steps[1]
-        local other_steps = {table.unpack(cutscene.steps, 2)}
+        local other_steps = {}
 
-        table.sort(other_steps, function(a, b)
-            return distance_from_start(first_step, a) < distance_from_start(first_step, b)
-        end)
+        for _, step_string in pairs(cutscene.steps) do
+            local args = util.string_split(step_string, ' ')
 
-        local string_steps = {}
-
-        for step_index, step in pairs(other_steps) do
-            table.insert(string_steps, step.command .. ' ' .. table.concat(step.args, ' '))
+            table.insert(other_steps, {
+                command = args[1],
+                args = {table.unpack(args, 2)},
+            })
         end
 
         local label_locations = find_label_locations(other_steps)
@@ -313,23 +270,21 @@ local function generate_cutscenes()
             table.insert(steps, generate_cutscene_step(cutscene.name, step, step_index, label_locations, cutscenes))
         end
 
-        cutscene_json[cutscene.name] = string_steps
-
         sk_definition_writer.add_definition(cutscene.name .. '_steps', 'struct CutsceneStep[]', '_geo', steps)
 
         table.insert(cutscenes_result, {
             name = cutscene.name,
             steps = steps,
-            macro = cutscene.macro,
+            macro = sk_definition_writer.raw(sk_definition_writer.add_macro("CUTSCENE_" .. cutscene.name, #cutscenes_result)),
         })
 
         table.insert(cutscene_data, {
             sk_definition_writer.reference_to(steps, 1),
-            #cutscene.steps - 1,
+            #steps,
         })
     end
 
-    return cutscenes_result, cutscene_data, cutscene_json
+    return cutscenes_result, cutscene_data
 end
 
 local function generate_triggers(cutscenes)
@@ -352,7 +307,7 @@ local function generate_triggers(cutscenes)
 
     return result
 end
-local cutscenes, cutscene_data, cutscene_json = generate_cutscenes()
+local cutscenes, cutscene_data = generate_cutscenes()
 local triggers = generate_triggers(cutscenes)
 
 sk_definition_writer.add_definition("triggers", "struct Trigger[]", "_geo", triggers)
@@ -365,7 +320,6 @@ end
 return {
     triggers = triggers,
     cutscene_data = cutscene_data,
-    cutscene_json = cutscene_json,
     location_data = location_data,
     find_location_index = find_location_index,
     find_cutscene_index = find_cutscene_index,

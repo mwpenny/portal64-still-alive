@@ -10,14 +10,6 @@ local entities = require('tools.level_scripts.entities')
 local signals = require('tools.level_scripts.signals')
 local animation = require('tools.level_scripts.animation')
 local dynamic_collision = require('tools.level_scripts.dynamic_collision_export')
-local yaml_loader = require('tools.level_scripts.yaml_loader')
-
-local jsonFile = {
-    operators = signals.operator_json,
-    cutscenes = trigger.cutscene_json,
-}
-
-yaml_loader.dump_json(jsonFile)
 
 sk_definition_writer.add_definition("level", "struct LevelDefinition", "_geo", {
     collisionQuads = sk_definition_writer.reference_to(collision_export.collision_objects, 1),
