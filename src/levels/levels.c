@@ -58,6 +58,11 @@ struct LevelDefinition* levelFixPointers(struct LevelDefinition* from, int point
     result->portalSurfaceDynamicMappingRange = ADJUST_POINTER_POS(result->portalSurfaceDynamicMappingRange, pointerOffset);
     result->portalSurfaceMappingIndices = ADJUST_POINTER_POS(result->portalSurfaceMappingIndices, pointerOffset);
     result->triggers = ADJUST_POINTER_POS(result->triggers, pointerOffset);
+
+    for (int i = 0; i < result->triggerCount; ++i) {
+        result->triggers[i].triggers = ADJUST_POINTER_POS(result->triggers[i].triggers, pointerOffset);
+    }
+    
     result->cutscenes = ADJUST_POINTER_POS(result->cutscenes, pointerOffset);
 
     for (int i = 0; i < result->cutsceneCount; ++i) {

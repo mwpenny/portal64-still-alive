@@ -129,10 +129,22 @@ struct Cutscene {
     u16 stepCount;
 };
 
-struct Trigger {
-    struct Box3D box;
+enum ObjectTriggerType {
+    ObjectTriggerTypeNone,
+    ObjectTriggerTypePlayer,
+    ObjectTriggerTypeCube,
+};
+
+struct ObjectTriggerInfo {
+    short objectType;
     short cutsceneIndex;
     short signalIndex;
+};
+
+struct Trigger {
+    struct Box3D box;
+    struct ObjectTriggerInfo* triggers;
+    short triggerCount;
 };
 
 struct Location {

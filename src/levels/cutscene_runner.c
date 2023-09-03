@@ -457,22 +457,18 @@ float cutsceneEstimateTimeLeft(struct Cutscene* cutscene) {
     return 0.0f;
 }
 
-void cutsceneCheckTriggers(struct Vector3* playerPos) {
-    for (int i = 0; i < gCurrentLevel->triggerCount; ++i) {
-        struct Trigger* trigger = &gCurrentLevel->triggers[i];
-        u64 cutsceneMask = 1LL << i;
-        if (box3DContainsPoint(&trigger->box, playerPos)) {
-            if (trigger->signalIndex != -1) {
-                signalsSend(trigger->signalIndex);
-            }
+int cutsceneTrigger(int cutsceneIndex, int triggerIndex) {
+    u64 cutsceneMask = 1LL << triggerIndex;
 
-            if (trigger->cutsceneIndex != -1 && !(gTriggeredCutscenes & cutsceneMask)) {
-                cutsceneStart(&gCurrentLevel->cutscenes[trigger->cutsceneIndex]);
-                // prevent the trigger from happening again
-                gTriggeredCutscenes |= cutsceneMask;
-            }
-        }
+    if (cutsceneIndex != -1 && !(gTriggeredCutscenes & cutsceneMask)) {
+        cutsceneStart(&gCurrentLevel->cutscenes[cutsceneIndex]);
+        // prevent the trigger from happening again
+        gTriggeredCutscenes |= cutsceneMask;
+
+        return 1;
     }
+
+    return 0;
 }
 
 void cutsceneSerialize(struct CutsceneRunner* runner, struct CutsceneSerialized* result) {

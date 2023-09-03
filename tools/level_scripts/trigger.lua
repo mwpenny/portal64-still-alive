@@ -292,16 +292,26 @@ local function generate_triggers(cutscenes)
     
     for _, trigger in pairs(sk_scene.nodes_for_type('@trigger')) do
         local first_mesh = trigger.node.meshes[1]
-        local cutscene_index = cutscene_index(cutscenes, trigger.arguments[1])
+        local cutscene = cutscene_index(cutscenes, trigger.arguments[1])
+
+        local triggers = {}
+
+        table.insert(triggers, {
+            sk_definition_writer.raw('ObjectTriggerTypePlayer'),
+            cutscene,
+            trigger.arguments[2] and signals.signal_index_for_name(trigger.arguments[2]) or -1,
+        })
     
         if first_mesh then
             local transformed = first_mesh:transform(trigger.node.full_transformation)
     
             table.insert(result, {
                 transformed.bb,
-                cutscene_index,
-                trigger.arguments[2] and signals.signal_index_for_name(trigger.arguments[2]) or -1,
+                sk_definition_writer.reference_to(triggers, 1),
+                #triggers,
             })
+
+            sk_definition_writer.add_definition("trigger_targets", "struct ObjectTriggerInfo[]", "_geo", triggers)
         end
     end
 

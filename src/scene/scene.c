@@ -158,6 +158,12 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
         }
     }
 
+    scene->triggerListenerCount = gCurrentLevel->triggerCount;
+    scene->triggerListeners = malloc(sizeof(struct TriggerListener) * scene->triggerListenerCount);
+    for (int i = 0; i < scene->triggerListenerCount; ++i) {
+        triggerInit(&scene->triggerListeners[i], &gCurrentLevel->triggers[i], i);
+    }
+
     scene->doorCount = gCurrentLevel->doorCount;
     scene->doors = malloc(sizeof(struct Door) * scene->doorCount);
     for (int i = 0; i < scene->doorCount; ++i) {
@@ -600,7 +606,6 @@ void sceneUpdate(struct Scene* scene) {
         ballCatcherUpdate(&scene->ballCatchers[i], scene->ballLaunchers, scene->ballLancherCount);
     }
 
-    cutsceneCheckTriggers(&scene->player.lookTransform.position);
     signalsEvaluateSignals(gCurrentLevel->signalOperators, gCurrentLevel->signalOperatorCount);
 
     for (int i = 0; i < scene->doorCount; ++i) {

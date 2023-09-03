@@ -23,6 +23,7 @@
 #include "portal_gun.h"
 #include "clock.h"
 #include "security_camera.h"
+#include "trigger_listener.h"
 
 struct SavedPortal {
     struct Ray ray;
@@ -44,6 +45,7 @@ struct Scene {
     struct Portal portals[2];
     struct Button* buttons;
     struct DecorObject** decor;
+    struct TriggerListener* triggerListeners;
     struct Door* doors;
     struct Fizzler* fizzlers;
     struct Elevator* elevators;
@@ -64,6 +66,7 @@ struct Scene {
     OSTime lastFrameTime;
     u8 buttonCount;
     u8 decorCount;
+    u8 triggerListenerCount;
     u8 doorCount;
     u8 fizzlerCount;
     u8 elevatorCount;

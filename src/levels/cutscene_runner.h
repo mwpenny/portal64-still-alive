@@ -34,7 +34,7 @@ int cutsceneIsRunning(struct Cutscene* cutscene);
 void cutscenesUpdate();
 float cutsceneEstimateTimeLeft(struct Cutscene* cutscene);
 
-void cutsceneCheckTriggers(struct Vector3* playerPos);
+int cutsceneTrigger(int cutsceneIndex, int triggerIndex);
 
 void cutsceneSerialize(struct CutsceneRunner* runner, struct CutsceneSerialized* result);
 void cutsceneStartSerialized(struct CutsceneSerialized* serialized);
