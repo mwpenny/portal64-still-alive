@@ -290,7 +290,7 @@ TEST_CHAMBER_OBJECTS = $(TEST_CHAMBERS:%.blend=build/%_geo.o)
 
 LUA_FILES = $(shell find tools/ -type f -name '*.lua')
 
-build/%.fbx: %.blend %.yaml
+build/%.fbx: %.blend
 	@mkdir -p $(@D)
 	$(BLENDER_3_0) $< --background --python tools/export_fbx.py -- $@
 
