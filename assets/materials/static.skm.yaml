@@ -958,3 +958,28 @@ materials:
 
     gDPSetCombineMode: G_CC_DECALRGBA
     gDPSetCycleType: G_CYC_1CYCLE
+
+  indicator_lights:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/signage/indicator_lights/indicator_lights_floor.png
+      siz: G_IM_SIZ_32b
+      s:
+        wrap: true
+      t:
+        wrap: false
+
+    gDPSetCombineMode: 
+      - color: ["SHADE", "0", "TEXEL0", "0"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["TEXEL1", "COMBINED", "TEXEL1_ALPHA", "COMBINED"]
+        alpha: ["0", "0", "0", "1"]
+
+    gDPSetRenderMode: 
+      - G_RM_PASS
+      - G_RM_RA_ZB_OPA_DECAL
+
+    gDPSetCycleType: G_CYC_2CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
