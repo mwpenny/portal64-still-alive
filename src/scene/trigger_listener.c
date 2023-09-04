@@ -19,7 +19,7 @@ enum ObjectTriggerType triggerDetermineType(struct CollisionObject* objectEnteri
 
     int decorType = decorIdForObjectDefinition((struct DecorObjectDefinition*)objectEnteringTrigger->collider);
 
-    if (decorType == DECOR_TYPE_CUBE || DECOR_TYPE_CUBE_UNIMPORTANT) {
+    if ((decorType == DECOR_TYPE_CUBE || decorType == DECOR_TYPE_CUBE_UNIMPORTANT) && (objectEnteringTrigger->body->sleepFrames & RigidBodyIsSleeping) < IDLE_SLEEP_FRAMES - 2) {
         return ObjectTriggerTypeCube;
     }
 
