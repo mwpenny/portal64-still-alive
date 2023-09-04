@@ -38,6 +38,7 @@ enum ControlSaveFlags {
     ControlSaveTankControls = (1 << 1),
 
     ControlSaveMoveablePortals = (1 << 8),
+    ControlSaveWideScreen = (1 << 9),
 };
 
 struct ControlSaveState {
