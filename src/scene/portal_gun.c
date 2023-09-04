@@ -46,19 +46,17 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at){
 }
 
 void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState){
-    if (portalGun->portalGunVisible){
-        portalGun->rigidBody.transform.scale = gOneVec;
-        Mtx* matrix = renderStateRequestMatrices(renderState, 1);
+    portalGun->rigidBody.transform.scale = gOneVec;
+    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
-        if (!matrix) {
-            return;
-        }
-
-        transformToMatrixL(&portalGun->rigidBody.transform, matrix, SCENE_SCALE);
-        gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
-        gSPDisplayList(renderState->dl++, portal_gun_v_portalgun_model_gfx);
-        gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
+    if (!matrix) {
+        return;
     }
+
+    transformToMatrixL(&portalGun->rigidBody.transform, matrix, SCENE_SCALE);
+    gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
+    gSPDisplayList(renderState->dl++, portal_gun_v_portalgun_model_gfx);
+    gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
 }
 
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player){
