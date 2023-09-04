@@ -22,7 +22,7 @@ void gameplayOptionsInit(struct GameplayOptions* gameplayOptions) {
 
     gameplayOptions->movingPortals = menuBuildCheckbox(&gDejaVuSansFont, "Movable Portals", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
 
-    gameplayOptions->movingPortals.checked = (gSaveData.controls.flags & ControlSaveFlagsInvert) != 0;
+    gameplayOptions->movingPortals.checked = (gSaveData.controls.flags & ControlSaveMoveablePortals) != 0;
 }
 
 enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions) {
