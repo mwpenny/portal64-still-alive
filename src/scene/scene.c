@@ -609,6 +609,10 @@ void sceneUpdate(struct Scene* scene) {
         ballCatcherUpdate(&scene->ballCatchers[i], scene->ballLaunchers, scene->ballLancherCount);
     }
 
+    for (int i = 0; i < scene->triggerListenerCount; ++i) {
+        triggerListenerUpdate(&scene->triggerListeners[i]);
+    }
+    
     signalsEvaluateSignals(gCurrentLevel->signalOperators, gCurrentLevel->signalOperatorCount);
 
     for (int i = 0; i < scene->doorCount; ++i) {

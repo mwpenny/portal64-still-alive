@@ -468,7 +468,7 @@ int cutsceneTrigger(int cutsceneIndex, int triggerIndex) {
         return 1;
     }
 
-    return 0;
+    return (gTriggeredCutscenes & cutsceneMask) != 0;
 }
 
 void cutsceneSerialize(struct CutsceneRunner* runner, struct CutsceneSerialized* result) {

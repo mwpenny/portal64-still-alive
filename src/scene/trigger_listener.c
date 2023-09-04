@@ -29,8 +29,6 @@ enum ObjectTriggerType triggerDetermineType(struct CollisionObject* objectEnteri
 void triggerTrigger(void* data, struct CollisionObject* objectEnteringTrigger) {
     struct TriggerListener* listener = data;
 
-    struct Trigger* trigger = listener->trigger;
-
     struct Vector3 offset;
     vector3Sub(
         &objectEnteringTrigger->body->transform.position, 
@@ -47,17 +45,7 @@ void triggerTrigger(void* data, struct CollisionObject* objectEnteringTrigger) {
 
     enum ObjectTriggerType triggerType = triggerDetermineType(objectEnteringTrigger);
 
-    for (int i = 0; i < trigger->triggerCount; ++i) {
-        struct ObjectTriggerInfo* triggerInfo = &trigger->triggers[i];
-
-        if (triggerInfo->objectType == triggerType) {
-            if (triggerInfo->signalIndex != -1) {
-                signalsSend(triggerInfo->signalIndex);
-            }
-
-            cutsceneTrigger(triggerInfo->cutsceneIndex, listener->triggerIndex + i);
-        }
-    }
+    listener->lastTriggerMask |= (1 << triggerType);
 }
 
 void triggerInit(struct TriggerListener* listener, struct Trigger* trigger, int triggerIndex) {
@@ -83,4 +71,28 @@ void triggerInit(struct TriggerListener* listener, struct Trigger* trigger, int 
     listener->triggerIndex = triggerIndex;
     
     collisionSceneAddDynamicObject(&listener->collisionObject);
+
+    listener->lastTriggerMask = 0;
+}
+
+void triggerListenerUpdate(struct TriggerListener* listener) {
+    if (!listener->lastTriggerMask) {
+        return;
+    }
+
+    struct Trigger* trigger = listener->trigger;
+
+    for (int i = 0; i < trigger->triggerCount; ++i) {
+        struct ObjectTriggerInfo* triggerInfo = &trigger->triggers[i];
+
+        if ((1 << triggerInfo->objectType) & listener->lastTriggerMask) {
+            if (triggerInfo->signalIndex != -1) {
+                signalsSend(triggerInfo->signalIndex);
+            }
+
+            cutsceneTrigger(triggerInfo->cutsceneIndex, listener->triggerIndex + i);
+        }
+    }
+
+    listener->lastTriggerMask = 0;
 }

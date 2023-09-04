@@ -15,8 +15,10 @@ struct TriggerListener {
 
     struct Trigger* trigger;
     short triggerIndex;
+    short lastTriggerMask;
 };
 
 void triggerInit(struct TriggerListener* listener, struct Trigger* trigger, int triggerIndex);
+void triggerListenerUpdate(struct TriggerListener* listener);
 
 #endif

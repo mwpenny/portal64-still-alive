@@ -397,7 +397,7 @@ void collisionSceneRaycastDynamic(struct CollisionScene* scene, struct Ray* ray,
 
         struct CollisionObject* object = scene->dynamicObjects[i];
 
-        if ((object->collisionLayers & collisionLayers) == 0) {
+        if ((object->collisionLayers & collisionLayers) == 0 || object->trigger != NULL) {
             continue;
         }
 
