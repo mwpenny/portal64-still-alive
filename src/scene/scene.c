@@ -299,6 +299,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     renderPlanBuild(&renderPlan, scene, renderState);
     renderPlanExecute(&renderPlan, scene, staticMatrices, renderState);
 
+    cameraModifyProjectionViewForPortalGun(&scene->camera, renderState, PORTAL_GUN_NEAR_PLANE * SCENE_SCALE, renderPlan.stageProps[0].aspectRatio);
     portalGunRenderReal(&scene->portalGun, renderState);
 
     gDPPipeSync(renderState->dl++);
