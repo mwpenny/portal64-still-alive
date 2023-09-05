@@ -4,6 +4,7 @@ local yaml_loader = require('tools.level_scripts.yaml_loader')
 local util = require('tools.level_scripts.util')
 
 local name_to_index = {}
+local name_to_number = {}
 local signal_count = 0
 
 local function signal_index_for_name(name)
@@ -15,8 +16,18 @@ local function signal_index_for_name(name)
 
     local result = sk_definition_writer.raw(sk_definition_writer.add_macro('SIGNAL_' .. name, tostring(signal_count)))
     name_to_index[name] = result
+    name_to_number[name] = signal_count + 1
     signal_count = signal_count + 1
     return result
+end
+
+local function signal_number_for_name(name)
+    signal_index_for_name(name)
+    return name_to_number[name]
+end
+
+local function get_signal_count()
+    return signal_count
 end
 
 local function generate_operator_data(operator)
@@ -84,5 +95,7 @@ sk_definition_writer.add_definition('signal_operations', 'struct SignalOperator[
 
 return {
     signal_index_for_name = signal_index_for_name,
+    signal_number_for_name = signal_number_for_name,
+    get_signal_count = get_signal_count,
     operators = operators,
 }

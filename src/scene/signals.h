@@ -25,6 +25,8 @@ struct SignalOperator {
 void signalsInit(unsigned signalCount);
 void signalsReset();
 int signalsRead(unsigned signalIndex);
+int signalsReadPrevious(unsigned signalIndex);
+int signalCount();
 void signalsSend(unsigned signalIndex);
 void signalsSetDefault(unsigned signalIndex, int value);
 void signalsEvaluateSignals(struct SignalOperator* operator, unsigned count);

@@ -12,6 +12,7 @@
 #include "portal_render.h"
 #include "../scene/dynamic_scene.h"
 #include "../levels/levels.h"
+#include "../savefile/savefile.h"
 
 #include "../build/assets/models/portal/portal_blue.h"
 #include "../build/assets/models/portal/portal_blue_face.h"
@@ -21,6 +22,8 @@
 #define MIN_VP_WIDTH 64
 #define CAMERA_CLIPPING_RADIUS  0.2f
 #define PORTAL_CLIPPING_OFFSET  0.1f
+#define ASPECT_SD 1.333333333333333    //  4:3
+#define ASPECT_WIDE 1.777777777777778  // 16:9
 
 void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex) {
     props->camera = *camera;
@@ -109,6 +112,10 @@ Vp* renderPropsBuildViewport(struct RenderProps* props, struct RenderState* rend
 
 void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderProps* properties, struct RenderState* renderState);
 
+inline static float getAspect()
+{
+    return (gSaveData.controls.flags & ControlSaveWideScreen) != 0 ? ASPECT_WIDE : ASPECT_SD;
+}
 
 #define CALC_SCREEN_SPACE(clip_space, screen_size) ((clip_space + 1.0f) * ((screen_size) / 2))
 
@@ -146,7 +153,7 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
 
     struct ScreenClipper clipper;
 
-    screenClipperInitWithCamera(&clipper, &current->camera, (float)SCREEN_WD / (float)SCREEN_HT, portalTransform);
+    screenClipperInitWithCamera(&clipper, &current->camera, getAspect(), portalTransform);
     struct Box2D clippingBounds;
     screenClipperBoundingPoints(&clipper, gPortalOutline, sizeof(gPortalOutline) / sizeof(*gPortalOutline), &clippingBounds);
 
@@ -437,7 +444,7 @@ void renderPlanAdjustViewportDepth(struct RenderPlan* renderPlan) {
 }
 
 void renderPlanBuild(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderState* renderState) {
-    renderPropsInit(&renderPlan->stageProps[0], &scene->camera, (float)SCREEN_WD / (float)SCREEN_HT, renderState, scene->player.body.currentRoom);
+    renderPropsInit(&renderPlan->stageProps[0], &scene->camera, getAspect(), renderState, scene->player.body.currentRoom);
     renderPlan->stageCount = 1;
     renderPlan->clippedPortalIndex = -1;
     renderPlan->nearPolygonCount = 0;

@@ -1,0 +1,13 @@
+-alpha off
+-crop 64x64+0+0 -resize 16x16
+\( portal_pak_dir/materials/signage/indicator_lights/indicator_lights_corner_floor_on.png -alpha off -resize 16x16 -repage +0+16 \)
+-compose Copy
+-layers merge
+-alpha Activate
+\(
+    \( portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor_on.png -alpha extract -crop 64x64+0+0 -resize 16x16 -repage +0+0 \)
+    \( portal_pak_dir/materials/signage/indicator_lights/indicator_lights_corner_floor_on.png -alpha extract -resize 16x16 -repage +0+16 \)
+    -compose Copy
+    -layers merge
+\)
+-compose CopyOpacity -composite

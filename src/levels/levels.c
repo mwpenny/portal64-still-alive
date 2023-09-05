@@ -46,6 +46,8 @@ struct LevelDefinition* levelFixPointers(struct LevelDefinition* from, int point
     result->staticContent = ADJUST_POINTER_POS(result->staticContent, pointerOffset);
     result->roomStaticMapping = ADJUST_POINTER_POS(result->roomStaticMapping, pointerOffset);
     result->staticBoundingBoxes = ADJUST_POINTER_POS(result->staticBoundingBoxes, pointerOffset);
+    result->signalToStaticRanges = ADJUST_POINTER_POS(result->signalToStaticRanges, pointerOffset);
+    result->signalToStaticIndices = ADJUST_POINTER_POS(result->signalToStaticIndices, pointerOffset);
     result->portalSurfaces = ADJUST_POINTER_POS(result->portalSurfaces, pointerOffset);
 
     for (int i = 0; i < result->portalSurfaceCount; ++i) {

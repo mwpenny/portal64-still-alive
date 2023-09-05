@@ -5,6 +5,7 @@ local sk_mesh = require('sk_mesh')
 local sk_input = require('sk_input')
 local room_export = require('tools.level_scripts.room_export')
 local animation = require('tools.level_scripts.animation')
+local signals = require('tools.level_scripts.signals')
 
 sk_definition_writer.add_header('"../build/assets/materials/static.h"')
 sk_definition_writer.add_header('"levels/level_definition.h"')
@@ -15,12 +16,16 @@ local portalable_surfaces = {
     concrete_modular_floor001a = true,
 }
 
+local signal_elements = {}
+
 local function proccessStaticNodes(nodes)
     local result = {}
     local bb_scale = sk_input.settings.fixed_point_scale
 
     for k, v in pairs(nodes) do
         local renderChunks = sk_mesh.generate_render_chunks(v.node)
+
+        local signal = sk_scene.find_named_argument(v.arguments, "indicator_lights")
         
         for _, chunkV in pairs(renderChunks) do
             local transform_index = animation.get_bone_index_for_node(v.node)
@@ -57,6 +62,7 @@ local function proccessStaticNodes(nodes)
                 transform_index = transform_index,
                 room_index = room_export.node_nearest_room_index(v.node) or 0,
                 accept_portals = chunkV.mesh.material and portalable_surfaces[chunkV.mesh.material.name] and not sk_scene.find_flag_argument(v.arguments, "no_portals"),
+                signal = signal,
             })
         end
     end
@@ -76,6 +82,16 @@ local room_ranges = {}
 local static_bounding_boxes = {}
 
 for index, static_node in pairs(static_nodes) do
+    if static_node.signal then
+        local signal_number = signals.signal_number_for_name(static_node.signal)
+        
+        while #signal_elements < signal_number do
+            table.insert(signal_elements, {})
+        end
+
+        table.insert(signal_elements[signal_number], #static_content_elements)
+    end
+
     table.insert(static_content_elements, {
         displayList = static_node.display_list,
         materialIndex = static_node.material_index,
@@ -109,9 +125,25 @@ sk_definition_writer.add_definition("static", "struct StaticContentElement[]", "
 sk_definition_writer.add_definition("room_mapping", "struct Rangeu16[]", "_geo", room_ranges)
 sk_definition_writer.add_definition('bounding_boxes', 'struct BoundingBoxs16[]', '_geo', static_bounding_boxes)
 
+local signal_indices = {}
+local signal_ranges = {}
+
+for _, element in pairs(signal_elements) do
+    table.insert(signal_ranges, {#signal_indices, #signal_indices + #element})
+
+    for _, index in pairs(element) do
+        table.insert(signal_indices, index)
+    end
+end
+
+sk_definition_writer.add_definition("signal_ranges", "struct Rangeu16[]", "_geo", signal_ranges)
+sk_definition_writer.add_definition('signal_indices', 'u16[]', '_geo', signal_indices)
+
 return {
     static_nodes = static_nodes,
     static_content_elements = static_content_elements,
     static_bounding_boxes = static_bounding_boxes,
     room_ranges = room_ranges,
+    signal_ranges = signal_ranges,
+    signal_indices = signal_indices,
 }

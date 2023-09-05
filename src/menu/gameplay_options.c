@@ -21,8 +21,10 @@ void gameplayOptionsInit(struct GameplayOptions* gameplayOptions) {
     gameplayOptions->selectedItem = GameplayOptionMovingPortals;
 
     gameplayOptions->movingPortals = menuBuildCheckbox(&gDejaVuSansFont, "Movable Portals", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
+    gameplayOptions->wideScreen = menuBuildCheckbox(&gDejaVuSansFont, "Wide Screen", GAMEPLAY_X + 8, GAMEPLAY_Y + 28);
 
     gameplayOptions->movingPortals.checked = (gSaveData.controls.flags & ControlSaveMoveablePortals) != 0;
+    gameplayOptions->wideScreen.checked = (gSaveData.controls.flags & ControlSaveWideScreen) != 0;
 }
 
 enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions) {
@@ -62,6 +64,18 @@ enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions
             }
 
             break;
+        case GameplayOptionWideScreen:
+            if (controllerGetButtonDown(0, A_BUTTON)) {
+                gameplayOptions->wideScreen.checked = !gameplayOptions->wideScreen.checked;
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+
+                if (gameplayOptions->wideScreen.checked) {
+                    gSaveData.controls.flags |= ControlSaveWideScreen;
+                } else {
+                    gSaveData.controls.flags &= ~ControlSaveWideScreen;
+                }
+            }
+        break;
     }
 
     if (controllerDir & ControllerDirectionLeft) {
@@ -80,6 +94,9 @@ void gameplayOptionsRender(struct GameplayOptions* gameplayOptions, struct Rende
     
     gSPDisplayList(renderState->dl++, gameplayOptions->movingPortals.outline);
     renderState->dl = menuCheckboxRender(&gameplayOptions->movingPortals, renderState->dl);
+    
+    gSPDisplayList(renderState->dl++, gameplayOptions->wideScreen.outline);
+    renderState->dl = menuCheckboxRender(&gameplayOptions->wideScreen, renderState->dl);
 
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
 
@@ -88,6 +105,9 @@ void gameplayOptionsRender(struct GameplayOptions* gameplayOptions, struct Rende
     gDPPipeSync(renderState->dl++);
     menuSetRenderColor(renderState, gameplayOptions->selectedItem == GameplayOptionMovingPortals, &gSelectionGray, &gColorWhite);
     gSPDisplayList(renderState->dl++, gameplayOptions->movingPortals.text);
+
+    menuSetRenderColor(renderState, gameplayOptions->selectedItem == GameplayOptionWideScreen, &gSelectionGray, &gColorWhite);
+    gSPDisplayList(renderState->dl++, gameplayOptions->wideScreen.text);
 
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
 }

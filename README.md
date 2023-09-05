@@ -123,6 +123,12 @@ That will generate the rom at `/build/portal64.z64`
 
 <br />
 
+## Current Level Checklist
+
+- [ ] Add indicator lights for signals
+- [ ] Apply rotation to static content
+- [ ] Remove overlap underneath doors
+
 ## Current New Feature TODO List
 - [ ] rumble pak support?
 - [ ] Change default controls
