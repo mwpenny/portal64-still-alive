@@ -140,6 +140,26 @@ error:
     return 0;
 }
 
+void cameraModifyProjectionViewForPortalGun(struct Camera* camera, struct RenderState* renderState, float newNearPlane, float aspectRatio)
+{
+    Mtx* portalGunProjectionView = renderStateRequestMatrices(renderState, 1);
+    if(!portalGunProjectionView)
+        return;
+    
+    struct Camera portalCam = *camera;
+    portalCam.nearPlane = newNearPlane;
+    float view[4][4];
+    float projectionView[4][4];
+    unsigned short perspectiveNormalize;
+    cameraBuildProjectionMatrix(&portalCam, projectionView, &perspectiveNormalize, aspectRatio);
+    cameraBuildViewMatrix(&portalCam, view);
+    guMtxCatF(view, projectionView, projectionView);
+    
+    guMtxF2L(projectionView, portalGunProjectionView);
+    gSPMatrix(renderState->dl++, osVirtualToPhysical(portalGunProjectionView), G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPPerspNormalize(renderState->dl++, perspectiveNormalize);
+}
+
 int cameraApplyMatrices(struct RenderState* renderState, struct CameraMatrixInfo* matrixInfo) {
     Mtx* modelMatrix = renderStateRequestMatrices(renderState, 1);
     
