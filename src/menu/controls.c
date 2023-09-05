@@ -320,11 +320,11 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
         return MenuDirectionUp;
     }
 
-    if (controllerDir & ControllerDirectionLeft) {
+    if ((controllerDir & ControllerDirectionLeft || controllerGetButtonDown(0, L_TRIG) || controllerGetButtonDown(0, Z_TRIG)) && !(controlsMenu->waitingForAction)) {
         return MenuDirectionLeft;
     }
 
-    if (controllerDir & ControllerDirectionRight) {
+    if ((controllerDir & ControllerDirectionRight || controllerGetButtonDown(0, R_TRIG) ) && !(controlsMenu->waitingForAction)) {
         return MenuDirectionRight;
     }
 

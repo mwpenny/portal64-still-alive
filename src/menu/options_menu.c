@@ -56,12 +56,6 @@ void optionsMenuInit(struct OptionsMenu* options) {
 enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options) {
     enum MenuDirection menuDirection = MenuDirectionStay;
 
-    if(controllerGetButtonDown(0, L_TRIG) || controllerGetButtonDown(0, Z_TRIG))
-        menuDirection = MenuDirectionLeft;
-
-    if(controllerGetButtonDown(0, R_TRIG))
-        menuDirection = MenuDirectionRight;
-
     if(menuDirection == MenuDirectionStay)
     {
         switch (options->tabs.selectedTab) {

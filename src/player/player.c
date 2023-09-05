@@ -771,6 +771,9 @@ void playerUpdate(struct Player* player) {
     if (gSaveData.controls.flags & ControlSaveFlagsInvert) {
         targetPitch = -targetPitch;
     }
+    if (gSaveData.controls.flags & ControlSaveFlagsInvertYaw) {
+        targetYaw = -targetYaw;
+    }
 
     float rotateRateDelta = mathfLerp(MIN_ROTATE_RATE_DELTA, MAX_ROTATE_RATE_DELTA, (float)gSaveData.controls.acceleration / 0xFFFF);
 

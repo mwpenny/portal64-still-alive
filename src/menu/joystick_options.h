@@ -6,6 +6,7 @@
 
 enum JoystickOption {
     JoystickOptionInvert,
+    JoystickOptionInvertYaw,
     JoystickOptionTankControls,
     JoystickOptionSensitivity,
     JoystickOptionAcceleration,
@@ -15,6 +16,7 @@ enum JoystickOption {
 
 struct JoystickOptions {
     struct MenuCheckbox invertControls;
+    struct MenuCheckbox invertControlsYaw;
     struct MenuCheckbox tankControls;
     struct MenuSlider lookSensitivity;
     struct MenuSlider lookAcceleration;
