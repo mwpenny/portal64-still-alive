@@ -44,7 +44,6 @@ RUN apt update -y && \
     lua5.4 \
     liblua5.4-dev \
     liblua5.4-0 \
-    blender \
     mpg123 \
     wget
 
@@ -55,17 +54,3 @@ RUN tar -xf blender-3.0.0-linux-x64.tar.xz
 ENV BLENDER_3_0 /usr/src/app/blender-3.0.0-linux-x64/blender
 
 RUN pip install vpk
-
-COPY ./asm ./asm
-COPY ./assets ./assets
-COPY ./skelatool64 ./skelatool64
-COPY ./src ./src
-COPY ./tools ./tools
-COPY ./Makefile ./Makefile
-COPY ./portal.ld ./portal.ld
-
-WORKDIR /usr/src/app/skelatool64
-RUN ./setup_dependencies.sh
-RUN make
-WORKDIR /usr/src/app
-

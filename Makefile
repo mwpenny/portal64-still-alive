@@ -107,7 +107,8 @@ portal_pak_dir: vpk/portal_pak_dir.vpk
 
 
 TEXTURE_SCRIPTS = $(shell find assets/ -type f -name '*.ims')
-TEXTURE_IMAGES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_modified/%.png)
+TEXTURE_IMAGES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_modified/%.png) \
+	portal_pak_dir/materials/signage/indicator_lights/indicator_lights_corner_floor.png
 TEXTURE_VTF_SOURCES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_dir/%.vtf)
 
 ALL_VTF_IMAGES = $(shell find portal_pak_dir/ -type f ! -wholename '* *' -name '*.vtf')
@@ -120,7 +121,7 @@ $(TEXTURE_VTF_SOURCES): portal_pak_dir
 
 %.png: %.vtf
 	-$(VTF2PNG) $< $@
-
+	
 portal_pak_dir/materials/signage/signage_doorstate_on.png: portal_pak_dir/materials/signage/signage_doorstate.vtf
 	$(VTF2PNG) -f 2 $< $@
 
