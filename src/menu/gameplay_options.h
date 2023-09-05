@@ -6,12 +6,14 @@
 
 enum GameplayOption {
     GameplayOptionMovingPortals,
+    GameplayOptionWideScreen,
     
     GameplayOptionCount,
 };
 
 struct GameplayOptions {
     struct MenuCheckbox movingPortals;
+    struct MenuCheckbox wideScreen;
     Gfx* lookSensitivityText;
     Gfx* lookAccelerationText;
     short selectedItem;
