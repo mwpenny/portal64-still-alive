@@ -23,7 +23,7 @@ void gameplayOptionsInit(struct GameplayOptions* gameplayOptions) {
     gameplayOptions->movingPortals = menuBuildCheckbox(&gDejaVuSansFont, "Movable Portals", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
     gameplayOptions->wideScreen = menuBuildCheckbox(&gDejaVuSansFont, "Wide Screen", GAMEPLAY_X + 8, GAMEPLAY_Y + 28);
 
-    gameplayOptions->movingPortals.checked = (gSaveData.controls.flags & ControlSaveFlagsInvert) != 0;
+    gameplayOptions->movingPortals.checked = (gSaveData.controls.flags & ControlSaveMoveablePortals) != 0;
     gameplayOptions->wideScreen.checked = (gSaveData.controls.flags & ControlSaveWideScreen) != 0;
 }
 
