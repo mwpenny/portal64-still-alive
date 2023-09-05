@@ -1,8 +1,11 @@
 all:
-	docker run  -v $$PWD:/usr/src/app -it portal64 make
+	docker run -v $$PWD:/usr/src/app -it portal64 make
 
 image:
 	docker build -t portal64 .
+
+convert_all_png:
+	docker run -v $$PWD:/usr/src/app -it portal64 make convert_all_png
 
 bash:
 	docker run  -v $$PWD:/usr/src/app -it portal64 bash
