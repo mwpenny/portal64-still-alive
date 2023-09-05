@@ -13,11 +13,11 @@ enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
         return MenuDirectionUp;
     }
 
-    if (controllerDir & ControllerDirectionLeft) {
+    if ((controllerDir & ControllerDirectionLeft || controllerGetButtonDown(0, L_TRIG) || controllerGetButtonDown(0, Z_TRIG))) {
         return MenuDirectionLeft;
     }
 
-    if (controllerDir & ControllerDirectionRight) {
+    if ((controllerDir & ControllerDirectionRight || controllerGetButtonDown(0, R_TRIG))) {
         return MenuDirectionRight;
     }
 

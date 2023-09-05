@@ -35,7 +35,8 @@ struct SaveHeader {
 
 enum ControlSaveFlags {
     ControlSaveFlagsInvert = (1 << 0),
-    ControlSaveTankControls = (1 << 1),
+    ControlSaveFlagsInvertYaw = (1 << 1),
+    ControlSaveTankControls = (1 << 2),
 
     ControlSaveMoveablePortals = (1 << 8),
     ControlSaveWideScreen = (1 << 9),

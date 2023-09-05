@@ -22,15 +22,18 @@ void joystickOptionsInit(struct JoystickOptions* joystickOptions) {
 
     joystickOptions->invertControls = menuBuildCheckbox(&gDejaVuSansFont, "Invert Camera Pitch", JOYSTICK_X + 8, JOYSTICK_Y + 8);
 
-    joystickOptions->tankControls = menuBuildCheckbox(&gDejaVuSansFont, "Tank Controls", JOYSTICK_X + 8, JOYSTICK_Y + 28);
+    joystickOptions->invertControlsYaw = menuBuildCheckbox(&gDejaVuSansFont, "Invert Camera Yaw", JOYSTICK_X + 8, JOYSTICK_Y + 28);
 
-    joystickOptions->lookSensitivityText = menuBuildText(&gDejaVuSansFont, "Look Sensitivity", JOYSTICK_X + 8, JOYSTICK_Y + 48);
-    joystickOptions->lookSensitivity = menuBuildSlider(JOYSTICK_X + 120, JOYSTICK_Y + 48, 120, SCROLL_TICKS);
+    joystickOptions->tankControls = menuBuildCheckbox(&gDejaVuSansFont, "Tank Controls", JOYSTICK_X + 8, JOYSTICK_Y + 48);
 
-    joystickOptions->lookAccelerationText = menuBuildText(&gDejaVuSansFont, "Look Acceleration", JOYSTICK_X + 8, JOYSTICK_Y + 68);
-    joystickOptions->lookAcceleration = menuBuildSlider(JOYSTICK_X + 120, JOYSTICK_Y + 68, 120, SCROLL_TICKS);
+    joystickOptions->lookSensitivityText = menuBuildText(&gDejaVuSansFont, "Look Sensitivity", JOYSTICK_X + 8, JOYSTICK_Y + 68);
+    joystickOptions->lookSensitivity = menuBuildSlider(JOYSTICK_X + 120, JOYSTICK_Y + 68, 120, SCROLL_TICKS);
+
+    joystickOptions->lookAccelerationText = menuBuildText(&gDejaVuSansFont, "Look Acceleration", JOYSTICK_X + 8, JOYSTICK_Y + 88);
+    joystickOptions->lookAcceleration = menuBuildSlider(JOYSTICK_X + 120, JOYSTICK_Y + 88, 120, SCROLL_TICKS);
 
     joystickOptions->invertControls.checked = (gSaveData.controls.flags & ControlSaveFlagsInvert) != 0;
+    joystickOptions->invertControlsYaw.checked = (gSaveData.controls.flags & ControlSaveFlagsInvertYaw) != 0;
     joystickOptions->tankControls.checked = (gSaveData.controls.flags & ControlSaveTankControls) != 0;
     joystickOptions->lookSensitivity.value = (float)gSaveData.controls.sensitivity / 0xFFFF;
     joystickOptions->lookAcceleration.value = (float)gSaveData.controls.acceleration / 0xFFFF;
@@ -109,6 +112,19 @@ enum MenuDirection joystickOptionsUpdate(struct JoystickOptions* joystickOptions
             }
 
             break;
+        case JoystickOptionInvertYaw:
+            if (controllerGetButtonDown(0, A_BUTTON)) {
+                joystickOptions->invertControlsYaw.checked = !joystickOptions->invertControlsYaw.checked;
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+
+                if (joystickOptions->invertControlsYaw.checked) {
+                    gSaveData.controls.flags |= ControlSaveFlagsInvertYaw;
+                } else {
+                    gSaveData.controls.flags &= ~ControlSaveFlagsInvertYaw;
+                }
+            }
+
+            break;
         case JoystickOptionTankControls:
             if (controllerGetButtonDown(0, A_BUTTON)) {
                 joystickOptions->tankControls.checked = !joystickOptions->tankControls.checked;
@@ -123,18 +139,28 @@ enum MenuDirection joystickOptionsUpdate(struct JoystickOptions* joystickOptions
             break;
         case JoystickOptionSensitivity:
             joystickOptionsHandleSlider(&gSaveData.controls.sensitivity, &joystickOptions->lookSensitivity.value);
-            return MenuDirectionStay;
+            break;
         case JoystickOptionAcceleration:
             joystickOptionsHandleSlider(&gSaveData.controls.acceleration, &joystickOptions->lookAcceleration.value);
-            return MenuDirectionStay;
+            break;
     }
 
-    if (controllerDir & ControllerDirectionLeft) {
-        return MenuDirectionLeft;
+    if (joystickOptions->selectedItem == JoystickOptionSensitivity ||
+        joystickOptions->selectedItem == JoystickOptionAcceleration){
+        if ((controllerGetButtonDown(0, L_TRIG) || controllerGetButtonDown(0, Z_TRIG))) {
+            return MenuDirectionLeft;
+        }
+        if ((controllerGetButtonDown(0, R_TRIG))) {
+            return MenuDirectionRight;
+        }
     }
-
-    if (controllerDir & ControllerDirectionRight) {
-        return MenuDirectionRight;
+    else{
+        if (controllerDir & ControllerDirectionLeft || controllerGetButtonDown(0, L_TRIG) || controllerGetButtonDown(0, Z_TRIG)) {
+            return MenuDirectionLeft;
+        }
+        if (controllerDir & ControllerDirectionRight || controllerGetButtonDown(0, R_TRIG)) {
+            return MenuDirectionRight;
+        }
     }
 
     return MenuDirectionStay;
@@ -145,6 +171,8 @@ void joystickOptionsRender(struct JoystickOptions* joystickOptions, struct Rende
     
     gSPDisplayList(renderState->dl++, joystickOptions->invertControls.outline);
     renderState->dl = menuCheckboxRender(&joystickOptions->invertControls, renderState->dl);
+    gSPDisplayList(renderState->dl++, joystickOptions->invertControlsYaw.outline);
+    renderState->dl = menuCheckboxRender(&joystickOptions->invertControlsYaw, renderState->dl);
     gSPDisplayList(renderState->dl++, joystickOptions->tankControls.outline);
     renderState->dl = menuCheckboxRender(&joystickOptions->tankControls, renderState->dl);
     gSPDisplayList(renderState->dl++, joystickOptions->lookSensitivity.back);
@@ -160,6 +188,10 @@ void joystickOptionsRender(struct JoystickOptions* joystickOptions, struct Rende
     gDPPipeSync(renderState->dl++);
     menuSetRenderColor(renderState, joystickOptions->selectedItem == JoystickOptionInvert, &gSelectionGray, &gColorWhite);
     gSPDisplayList(renderState->dl++, joystickOptions->invertControls.text);
+
+    gDPPipeSync(renderState->dl++);
+    menuSetRenderColor(renderState, joystickOptions->selectedItem == JoystickOptionInvertYaw, &gSelectionGray, &gColorWhite);
+    gSPDisplayList(renderState->dl++, joystickOptions->invertControlsYaw.text);
 
     gDPPipeSync(renderState->dl++);
     menuSetRenderColor(renderState, joystickOptions->selectedItem == JoystickOptionTankControls, &gSelectionGray, &gColorWhite);
