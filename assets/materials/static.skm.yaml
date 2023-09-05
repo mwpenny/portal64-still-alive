@@ -264,10 +264,6 @@ materials:
       set: [G_SHADE]
       clear: [G_LIGHTING]
 
-    properties:
-      tileSizeS: 0.5
-      tileSizeT: 0.5
-
   observation_tilefloor001a:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/tile/observation_tilefloor001a.png
@@ -983,3 +979,66 @@ materials:
     gSPGeometryMode:
       set: [G_SHADE]
       clear: [G_LIGHTING]
+
+  indicator_lights_on:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/signage/indicator_lights/indicator_lights_floor_on.png
+      siz: G_IM_SIZ_32b
+      s:
+        wrap: true
+      t:
+        wrap: false
+
+    gDPSetCombineMode: 
+      - color: ["SHADE", "0", "TEXEL0", "0"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["TEXEL1", "COMBINED", "TEXEL1_ALPHA", "COMBINED"]
+        alpha: ["0", "0", "0", "1"]
+
+    gDPSetRenderMode: 
+      - G_RM_PASS
+      - G_RM_RA_ZB_OPA_DECAL
+
+    gDPSetCycleType: G_CYC_2CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+  signage_exit:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/signage/signage_exit.png
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+
+    gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetRenderMode: G_RM_RA_ZB_OPA_DECAL
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+  signage_doorstate:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/signage/signage_doorstate.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetRenderMode: G_RM_RA_ZB_OPA_DECAL
+
+    gSPGeometryMode:
+      clear: [G_LIGHTING, G_SHADE]
+
+  signage_doorstate_on:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/signage/signage_doorstate_on.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetRenderMode: G_RM_RA_ZB_OPA_DECAL
+
+    gSPGeometryMode:
+      clear: [G_LIGHTING, G_SHADE]

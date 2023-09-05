@@ -265,6 +265,8 @@ struct SecurityCameraDefinition {
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
+    struct Rangeu16 *signalToStaticRanges;
+    u16 *signalToStaticIndices;
     struct Rangeu16 *roomStaticMapping;
     struct BoundingBoxs16* staticBoundingBoxes;
     struct PortalSurface* portalSurfaces;
@@ -294,6 +296,7 @@ struct LevelDefinition {
     struct SecurityCameraDefinition* securityCameras;
     short collisionQuadCount;
     short staticContentCount;
+    short signalToStaticCount;
     short portalSurfaceCount;
     short dynamicBoxCount;
     short triggerCount;

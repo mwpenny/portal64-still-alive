@@ -680,6 +680,8 @@ void sceneUpdate(struct Scene* scene) {
     sceneAnimatorUpdate(&scene->animator);
     sceneUpdatePortalVelocity(scene);
     sceneUpdateAnimatedObjects(scene);
+
+    staticRenderCheckSignalMaterials();
     
     collisionSceneUpdateDynamics();
 

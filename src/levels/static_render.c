@@ -5,6 +5,9 @@
 #include "defs.h"
 #include "../graphics/render_scene.h"
 #include "../math/mathf.h"
+#include "../scene/signals.h"
+
+#include "../build/assets/materials/static.h"
 
 void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, Mtx* staticTransforms, struct RenderScene* renderScene) {
     int currentRoom = 0;
@@ -123,4 +126,33 @@ void staticRender(struct Transform* cameraTransform, struct FrustrumCullingInfor
     renderSceneGenerate(renderScene, renderState);
 
     renderSceneFree(renderScene);
+}
+
+u8 gSignalMaterialMapping[] = {
+    INDICATOR_LIGHTS_INDEX, INDICATOR_LIGHTS_ON_INDEX,
+    SIGNAGE_DOORSTATE_INDEX, SIGNAGE_DOORSTATE_ON_INDEX,
+};
+
+void staticRenderCheckSignalMaterials() {
+    for (int signal = 0; signal < gCurrentLevel->signalToStaticCount; ++signal) {
+        int currentSignal = signalsRead(signal);
+
+        if (currentSignal != signalsReadPrevious(signal)) {
+            struct Rangeu16* range = &gCurrentLevel->signalToStaticRanges[signal];
+
+            int toIndex = currentSignal ? 1 : 0;
+            int fromIndex = currentSignal ? 0 : 1;
+
+            for (int index = range->min; index < range->max; ++index) {
+                struct StaticContentElement* element = &gCurrentLevel->staticContent[gCurrentLevel->signalToStaticIndices[index]];
+
+                for (int materialIndex = 0; materialIndex < sizeof(gSignalMaterialMapping) / sizeof(*gSignalMaterialMapping); materialIndex += 2) {
+                    if (element->materialIndex == gSignalMaterialMapping[materialIndex + fromIndex]) {
+                        element->materialIndex = gSignalMaterialMapping[materialIndex + toIndex];
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }
