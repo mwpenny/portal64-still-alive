@@ -140,25 +140,19 @@ That will generate the rom at `/build/portal64.z64`
 
 <br />
 
-## Current Level Checklist
-
-- [ ] Add indicator lights for signals
-- [ ] Apply rotation to static content
-- [ ] Remove overlap underneath doors
-
 ## Current New Feature TODO List
 - [ ] rumble pak support?
 - [ ] Change default controls
-- [ ] Add puzzle element connections and additional signs
-- [ ] Use a much nearer clipping plane when rendering the portal gun
 - [ ] Investigate crash after falling into death water on test chamber 8
 - [ ] Add particle effects (shooting portal gun, energy pellet)
 - [ ] Add auto save checkpoints
 - [ ] Correct elevator timing
 - [ ] Adding loading notice between levels #45
 - [ ] ball velocity in test chamber 11
-- [ ] test chamber 04 has seams in a corner
 - [ ] pausing while glados is speaking can end her speech early
+- [x] Use a much nearer clipping plane when rendering the portal gun
+- [x] test chamber 04 has seams in a corner
+- [x] Add puzzle element connections and additional signs
 - [x] don't count boxes on buttons until it is released and stable
 - [x] Portal not rendering recursively sometimes #138
 - [x] disable portal surfaces manually on some surfaces #135
@@ -173,10 +167,10 @@ That will generate the rom at `/build/portal64.z64`
 ## Current Bug TODO List (Hardware Verified) (High->Low priority)
 ----------------------- v8
 - [ ] player can clip through back of elevator by jumping and strafeing at the back corners while inside.
-- [ ] Player can trap themselves in chamber 5 by following instructions issue #75
 - [ ] Two wall portals next to eachother can be used to clip any object out of any level by pushing it into corner, then dropping. 
 - [ ] Passing into a ceiling portal can sometimes mess with the player rotation
 - [ ] various visual glitches when running NTSC on PAL console #65
 - [ ] various visual glitches when running PAL on NTSC console #65
+- [x] Player can trap themselves in chamber 5 by following instructions issue #75
 - [x] Can shoot portals, and walk through signage
 - [x] Can place portals on ground after final fizzler on all levels
