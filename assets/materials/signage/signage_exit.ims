@@ -1,15 +1,15 @@
 -alpha off
--resize 32x32
-\( portal_pak_dir/materials/signage/signage_overlay_arrow.png -alpha off -resize 32x32 -repage +32+0 \)
+-resize 32x32 -repage +32+0
+\( portal_pak_dir/materials/signage/signage_overlay_arrow.png -alpha off -resize 32x32 \)
 
 \( portal_pak_dir/materials/signage/signage_overlay_boxdispenser.png -alpha off -resize 32x32 -repage +0+32 \)
 \( portal_pak_dir/materials/signage/signage_overlay_boxhurt.png -alpha off -resize 32x32 -repage +32+32 \)
 
-\( portal_pak_dir/materials/signage/signage_overlay_cake.png -alpha off -resize 32x32 -repage +0+64 \)
+\( portal_pak_dir/materials/signage/signage_overlay_energyball.png -alpha off -resize 32x32 -repage +0+64 \)
 \( portal_pak_dir/materials/signage/signage_overlay_catcher.png -alpha off -resize 32x32 -repage +32+64 \)
 
-\( portal_pak_dir/materials/signage/signage_overlay_companioncube.png -alpha off -resize 32x32 -repage +0+96 \)
-\( portal_pak_dir/materials/signage/signage_overlay_companioncube_broken.png -alpha off -resize 32x32 -repage +32+96 \)
+\( portal_pak_dir/materials/signage/signage_overlay_toxic.png -alpha off -resize 32x32 -repage +0+96 \)
+\( portal_pak_dir/materials/signage/signage_overlay_fountain.png -alpha off -resize 32x32 -repage +32+96 \)
 
 -compose Copy
 -layers merge

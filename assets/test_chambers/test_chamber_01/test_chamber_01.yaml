@@ -1,9 +1,19 @@
 operators:
   []
 cutscenes:
+  START:
+    - delay 1
+    - start_cutscene portal_loop
+    - set_signal FIRST_ELEVATOR
+  INTRO_CUTSCENE:
+    - q_sound SOUNDS_01_PART1_ENTRY_1 CH_GLADOS
+    - q_sound SOUNDS_01_PART1_ENTRY_2 CH_GLADOS
+    - wait_for_channel CH_GLADOS
+    - set_signal room_0_entrance
   GET_GUN:
+    - close_portal 1
     - set_signal room_0_exit
-    - "hide_pedestal "
+    - hide_pedestal
     - stop_cutscene portal_loop
     - q_sound 01_PART1_GET_PORTAL_GUN_1 CH_GLADOS
     - q_sound 01_PART1_GET_PORTAL_GUN_2 CH_GLADOS
@@ -16,17 +26,8 @@ cutscenes:
   MIND_THE_GAP:
     - open_portal portal_gap 0
     - q_sound SOUNDS_01_PART2_ENTRY_1 CH_GLADOS
-  START:
-    - delay 1
-    - start_cutscene portal_loop
-    - set_signal FIRST_ELEVATOR
   FINISH_03:
     - q_sound SOUNDS_01_PART2_SUCCESS_1 CH_GLADOS
-  INTRO_CUTSCENE:
-    - q_sound SOUNDS_01_PART1_ENTRY_1 CH_GLADOS
-    - q_sound SOUNDS_01_PART1_ENTRY_2 CH_GLADOS
-    - wait_for_channel CH_GLADOS
-    - set_signal room_0_entrance
   portal_loop:
     - open_portal portal_exit 0
     - label loop_start

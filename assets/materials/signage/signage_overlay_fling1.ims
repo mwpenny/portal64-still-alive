@@ -1,0 +1,15 @@
+-alpha off
+-resize 32x32 -repage +0+0
+\( portal_pak_dir/materials/signage/signage_overlay_fling2.png -alpha off -resize 32x32 -repage +32+0 \)
+
+\( portal_pak_dir/materials/signage/signage_overlay_dots1.png -alpha off -resize 32x32 -repage +0+32 \)
+\( portal_pak_dir/materials/signage/signage_overlay_dots2.png -alpha off -resize 32x32 -repage +32+32 \)
+
+\( portal_pak_dir/materials/signage/signage_overlay_dots3.png -alpha off -resize 32x32 -repage +0+64 \)
+\( portal_pak_dir/materials/signage/signage_overlay_dots4.png -alpha off -resize 32x32 -repage +32+64 \)
+
+\( portal_pak_dir/materials/signage/signage_overlay_toxic.png -alpha off -resize 32x32 -repage +0+96 \)
+\( portal_pak_dir/materials/signage/signage_overlay_fountain.png -alpha off -resize 32x32 -repage +32+96 \)
+
+-compose Copy
+-layers merge

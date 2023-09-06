@@ -1019,6 +1019,20 @@ materials:
       set: [G_SHADE]
       clear: [G_LIGHTING]
 
+  signage_overlay_fling1:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/signage/signage_overlay_fling1.png
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+
+    gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetRenderMode: G_RM_RA_ZB_OPA_DECAL
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
   signage_doorstate:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/signage/signage_doorstate.png
