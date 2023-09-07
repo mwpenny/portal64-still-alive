@@ -155,6 +155,9 @@ void decorSerialize(struct Serializer* serializer, SerializeAction action, struc
         action(serializer, &entry->rigidBody.angularVelocity, sizeof(struct Vector3));
         action(serializer, &entry->rigidBody.flags, sizeof(enum RigidBodyFlags));
         action(serializer, &entry->rigidBody.currentRoom, sizeof(short));
+
+        entry->rigidBody.flags &= ~RigidBodyIsSleeping;
+        entry->rigidBody.sleepFrames = IDLE_SLEEP_FRAMES;
     }
 }
 
@@ -273,6 +276,9 @@ void boxDropperDeserialize(struct Serializer* serializer, struct Scene* scene) {
         serializeRead(serializer, &dropper->activeCube.rigidBody.velocity, sizeof(struct Vector3));
         serializeRead(serializer, &dropper->activeCube.rigidBody.angularVelocity, sizeof(struct Vector3));
         serializeRead(serializer, &dropper->activeCube.rigidBody.flags, sizeof(enum RigidBodyFlags));
+
+        dropper->activeCube.rigidBody.flags &= ~RigidBodyIsSleeping;
+        dropper->activeCube.rigidBody.sleepFrames = IDLE_SLEEP_FRAMES;
 
         if (heldCube == i) {
             playerSetGrabbing(&scene->player, &dropper->activeCube.collisionObject);

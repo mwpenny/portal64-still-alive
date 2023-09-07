@@ -21,7 +21,7 @@ cutscenes:
     - q_sound SOUNDS_02_PART2_SUCCESS_1 CH_GLADOS
     - q_sound SOUNDS_02_PART2_SUCCESS_2 CH_GLADOS
 operators:
-  - double_door = exit_2_0 and exit_2_1
-  - double_door = double_door or bad_person
+  - should_open_door = exit_2_0 and exit_2_1
+  - should_open_door = should_open_door or bad_person
   - not_in_room = not in_room
-  - double_door = double_door and not_in_room
+  - double_door = should_open_door and not_in_room

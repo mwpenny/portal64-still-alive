@@ -141,6 +141,8 @@ That will generate the rom at `/build/portal64.z64`
 <br />
 
 ## Current New Feature TODO List
+- [ ] clear sleeping object physics flag so buttons in savefiles remain pressed after loading
+- [ ] test chamber 11 is broken
 - [ ] rumble pak support?
 - [ ] Change default controls
 - [ ] Investigate crash after falling into death water on test chamber 8
@@ -150,6 +152,8 @@ That will generate the rom at `/build/portal64.z64`
 - [ ] Adding loading notice between levels #45
 - [ ] ball velocity in test chamber 11
 - [ ] pausing while glados is speaking can end her speech early
+- [x] test chamber 4 has an inverted indicator light sign 
+- [x] test chamber 4 door doesnt close
 - [x] Use a much nearer clipping plane when rendering the portal gun
 - [x] test chamber 04 has seams in a corner
 - [x] Add puzzle element connections and additional signs
