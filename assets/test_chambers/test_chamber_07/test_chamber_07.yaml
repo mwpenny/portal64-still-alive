@@ -54,7 +54,7 @@ cutscenes:
     - delay 4 4
     - goto loop_start
   GET_GUN:
-    - "hide_pedestal "
+    - hide_pedestal
     - stop_cutscene portal_loop
     - stop_cutscene platform_ferry
     - start_cutscene platform_loop

@@ -117,7 +117,7 @@ void quatRotatedBoundingBoxSize(struct Quaternion* q, struct Vector3* halfBoxSiz
 
     out->z = fabsf(2.0f * (xz - yw)) * halfBoxSize->x +
         fabsf(2.0f * (yz + xw)) * halfBoxSize->y +
-        fabsf(1.0f - 2.0f * (xx + yy));
+        fabsf(1.0f - 2.0f * (xx + yy)) * halfBoxSize->z;
 }
 
 void quatMultiply(struct Quaternion* a, struct Quaternion* b, struct Quaternion* out) {
