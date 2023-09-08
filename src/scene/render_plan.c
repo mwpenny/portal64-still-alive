@@ -332,8 +332,22 @@ void renderPlanDetermineFarPlane(struct Ray* cameraRay, struct RenderProps* prop
     }
 }
 
-int renderShouldRenderOtherPortal(int visiblePortal, struct RenderProps* properties) {
+int renderShouldRenderOtherPortal(struct Scene* scene, int visiblePortal, struct RenderProps* properties) {
     if (!gCollisionScene.portalTransforms[visiblePortal]) {
+        return 0;
+    }
+
+    struct Portal* portal = &scene->portals[visiblePortal];
+    struct BoundingBoxs16 portalBox;
+    portalBox.minX = (s16)(portal->collisionObject.boundingBox.min.x * SCENE_SCALE);
+    portalBox.minY = (s16)(portal->collisionObject.boundingBox.min.y * SCENE_SCALE);
+    portalBox.minZ = (s16)(portal->collisionObject.boundingBox.min.z * SCENE_SCALE);
+
+    portalBox.maxX = (s16)(portal->collisionObject.boundingBox.max.x * SCENE_SCALE);
+    portalBox.maxY = (s16)(portal->collisionObject.boundingBox.max.y * SCENE_SCALE);
+    portalBox.maxZ = (s16)(portal->collisionObject.boundingBox.max.z * SCENE_SCALE);
+
+    if (isOutsideFrustrum(&properties->cameraMatrixInfo.cullingInformation, &portalBox)) {
         return 0;
     }
 
@@ -369,7 +383,7 @@ void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, st
 
     for (int i = 0; i < 2; ++i) {
         if (properties->exitPortalIndex != closerPortal && 
-            renderShouldRenderOtherPortal(closerPortal, properties) &&
+            renderShouldRenderOtherPortal(scene, closerPortal, properties) &&
             staticRenderIsRoomVisible(properties->visiblerooms, gCollisionScene.portalRooms[closerPortal])) {
             int planResult = renderPlanPortal(
                 renderPlan,

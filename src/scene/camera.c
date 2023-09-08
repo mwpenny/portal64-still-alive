@@ -20,7 +20,6 @@ int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Boundi
         }
     }
 
-
     return 0;
 }
 
