@@ -14,8 +14,8 @@ int randomInRange(int min, int maxPlusOne) {
     return randomInt() * (maxPlusOne - min) / (MAX_INT_VALUE + 1) + min;
 }
 
-float randomInRangef(float min, float maxPlusOne) {
-    return randomInt() * (maxPlusOne - min) / (MAX_INT_VALUE + 1) + min;
+float randomInRangef(float min, float max) {
+    return randomInt() * (max - min) * (1.0f / MAX_INT_VALUE) + min;
 }
 
 float fabsf(float input) {

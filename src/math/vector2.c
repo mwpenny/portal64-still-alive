@@ -122,3 +122,18 @@ void vector2Lerp(struct Vector2* a, struct Vector2* b, float lerp, struct Vector
     out->x = (b->x - a->x) * lerp + a->x;
     out->y = (b->y - a->y) * lerp + a->y;
 }
+
+void vector2RandomUnitCircle(struct Vector2* result) {
+    float xSqrd = randomInRangef(0.0f, 1.0f);
+
+    result->x = sqrtf(xSqrd);
+    result->y = sqrtf(1.0f - xSqrd);
+
+    if (randomInt() & 0x800) {
+        result->x = -result->x;
+    }
+
+    if (randomInt() & 0x800) {
+        result->y = -result->y;
+    }
+}

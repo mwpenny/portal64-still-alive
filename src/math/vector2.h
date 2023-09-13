@@ -30,4 +30,6 @@ void vector2Max(struct Vector2* a, struct Vector2* b, struct Vector2* out);
 
 void vector2Lerp(struct Vector2* a, struct Vector2* b, float lerp, struct Vector2* out);
 
+void vector2RandomUnitCircle(struct Vector2* result);
+
 #endif

@@ -131,6 +131,9 @@ portal_pak_dir/materials/signage/indicator_lights/indicator_lights_corner_floor_
 portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor_on.png: portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor.vtf
 	$(VTF2PNG) -f 2 $< $@
 
+portal_pak_dir/materials/effects/portal_1_particle_orange.png: portal_pak_dir/materials/effects/portal_1_particle.vtf
+	$(VTF2PNG) -f 2 $< $@
+
 convert_all_png: $(ALL_PNG_IMAGES)
 
 portal_pak_dir/%_copy_0.png: portal_pak_dir/%.png
