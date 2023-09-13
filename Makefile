@@ -248,6 +248,7 @@ build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
 build/assets/models/props/combine_ball_catcher.h: assets/materials/ball_catcher.skm.yaml
 build/assets/models/props/combine_ball_launcher.h: assets/materials/ball_catcher.skm.yaml
 build/src/decor/decor_object_list.o: build/assets/models/dynamic_model_list.h build/assets/materials/static.h
+build/src/effects/fail_portal_splash.o: build/assets/materials/static.h
 build/src/menu/controls.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/menu/game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
 build/src/menu/joystick_options.o: build/assets/materials/ui.h build/src/audio/clips.h

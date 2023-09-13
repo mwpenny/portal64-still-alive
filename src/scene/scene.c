@@ -30,6 +30,7 @@
 #include "signals.h"
 #include "render_plan.h"
 #include "../menu/game_menu.h"
+#include "../effects/fail_portal_splash.h"
 
 extern struct GameMenu gGameMenu;
 
@@ -248,6 +249,8 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     scene->checkpointState = SceneCheckpointStateSaved;
 
     scene->freeCameraOffset = gZeroVec;
+
+    effectsInit(&scene->effects);
 
     sceneInitDynamicColliders(scene);
 
@@ -558,6 +561,8 @@ void sceneUpdate(struct Scene* scene) {
         soundPlayerPause();
     }
 
+    effectsUpdate(&scene->effects);
+
     signalsReset();
 
     if (sceneAnimatorIsRunning(&scene->animator, gCurrentLevel->playerAnimatorIndex)) {
@@ -861,7 +866,7 @@ int sceneDetermineSurfaceMapping(struct Scene* scene, struct CollisionObject* hi
     if (quadIndex != -1) {
         *mappingRangeOut = gCurrentLevel->portalSurfaceMappingRange[quadIndex];
         *relativeToOut = NO_TRANSFORM_INDEX;
-        return 1;
+        return mappingRangeOut->minPortalIndex != mappingRangeOut->maxPortalIndex;
     } 
 
     int dynamicBoxIndex = sceneDynamicBoxIndex(scene, hitObject);
@@ -886,6 +891,9 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
     int relativeIndex = NO_TRANSFORM_INDEX;
 
     if (!sceneDetermineSurfaceMapping(scene, hit.object, &mappingRange, &relativeIndex)) {
+        if (!just_checking) {
+            effectsSplashPlay(&scene->effects, &gFailPortalSplash, &hit.at, &hit.normal);
+        }
         return 0;
     }
 
@@ -913,13 +921,20 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
         quatLook(&hitDirection, &upDir, &portalLocation.rotation);
     }
 
-    if (!sceneOpenPortal(scene, &portalLocation, relativeIndex, portalIndex, mappingRange, hit.object, hit.roomIndex, fromPlayer, just_checking) && !fromPlayer){
-        sceneClosePortal(scene, 1-portalIndex);
-        scene->continuouslyAttemptingPortalOpen = 1;
-        scene->savedPortal.portalIndex = portalIndex;
-        scene->savedPortal.ray = *ray;
-        scene->savedPortal.roomIndex = roomIndex;
-        scene->savedPortal.transformUp = *playerUp;
+    if (!sceneOpenPortal(scene, &portalLocation, relativeIndex, portalIndex, mappingRange, hit.object, hit.roomIndex, fromPlayer, just_checking)) {
+        if (!fromPlayer) {
+            sceneClosePortal(scene, 1-portalIndex);
+            scene->continuouslyAttemptingPortalOpen = 1;
+            scene->savedPortal.portalIndex = portalIndex;
+            scene->savedPortal.ray = *ray;
+            scene->savedPortal.roomIndex = roomIndex;
+            scene->savedPortal.transformUp = *playerUp;
+        }
+
+        if (!just_checking) {
+            effectsSplashPlay(&scene->effects, &gFailPortalSplash, &hit.at, &hit.normal);
+        }
+
         return 0;
     }
     if (!fromPlayer){

@@ -24,6 +24,7 @@
 #include "clock.h"
 #include "security_camera.h"
 #include "trigger_listener.h"
+#include "../effects/effects.h"
 
 struct SavedPortal {
     struct Ray ray;
@@ -61,6 +62,7 @@ struct Scene {
     struct Clock* clocks;
     struct SecurityCamera* securityCameras;
     struct SavedPortal savedPortal;
+    struct Effects effects;
     OSTime cpuTime;
     OSTime lastFrameStart;
     OSTime lastFrameTime;

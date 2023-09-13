@@ -106,21 +106,19 @@ void splashParticleEffectPlay(struct SplashParticleEffect* effect, struct Splash
     for (int i = 0; i < effect->def->particleCount; ++i) {
         struct SplashParticle* particle = &effect->particles[i];
 
-        struct Vector3 initialVelocity;
-
         struct Vector2 tangentDir;
         vector2RandomUnitCircle(&tangentDir);
         float tangentMag = randomInRangef(definiton->minTangentVelocity, definiton->maxTangentVelocity);
         float normalMag = randomInRangef(definiton->minNormalVelocity, definiton->maxNormalVelocity);
 
-        vector3Scale(normal, &initialVelocity, normalMag);
-        vector3AddScaled(&initialVelocity, &right, tangentDir.x * tangentMag, &initialVelocity);
-        vector3AddScaled(&initialVelocity, &up, tangentDir.y * tangentMag, &initialVelocity);
+        vector3Scale(normal, &particle->velocity, normalMag);
+        vector3AddScaled(&particle->velocity, &right, tangentDir.x * tangentMag, &particle->velocity);
+        vector3AddScaled(&particle->velocity, &up, tangentDir.y * tangentMag, &particle->velocity);
 
         particle->position[1] = *origin;
-        vector3AddScaled(origin, &initialVelocity, definiton->particleTailDelay, &particle->position[0]);
+        vector3AddScaled(origin, &particle->velocity, definiton->particleTailDelay, &particle->position[0]);
 
-        vector3Cross(&initialVelocity, &gUp, &particle->widthOffset);
+        vector3Cross(&particle->velocity, &gUp, &particle->widthOffset);
 
         float widthMag = vector3MagSqrd(&particle->widthOffset);
 
