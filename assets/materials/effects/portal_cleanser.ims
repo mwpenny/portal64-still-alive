@@ -1,1 +1,7 @@
--resize 16x32 -alpha on -background none -fuzz 50% -transparent black -flatten
+\( +clone -colorspace gray -alpha off \)
+-compose copy-opacity
+-composite
+-crop 14x56+10+4 -resize 16x64
+
+\( +clone -modulate 100,100,200 -resize 8x32 -write portal_pak_modified/materials/effects/spark.png  \)
+-delete 1

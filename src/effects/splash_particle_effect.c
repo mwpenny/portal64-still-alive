@@ -25,8 +25,8 @@ void splashParticleEffectBuildVtx(Vtx* vtx, struct SplashParticle* particle, int
 
     vtx->v.flag = 0;
 
-    vtx->v.tc[0] = posIndex ? 0 : (32 << 5);
-    vtx->v.tc[1] = widthSign ? 0 : (32 << 5);
+    vtx->v.tc[0] = widthSign ? 0 : (32 << 5);
+    vtx->v.tc[1] = posIndex ? 0 : (32 << 5);
 
     vtx->v.cn[0] = color->r;
     vtx->v.cn[1] = color->g;

@@ -30,7 +30,7 @@
 #include "signals.h"
 #include "render_plan.h"
 #include "../menu/game_menu.h"
-#include "../effects/fail_portal_splash.h"
+#include "../effects/effect_definitions.h"
 
 extern struct GameMenu gGameMenu;
 

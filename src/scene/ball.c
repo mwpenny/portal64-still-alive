@@ -15,6 +15,9 @@
 #include "../audio/soundplayer.h"
 #include "../audio/clips.h"
 
+#include "../effects/effect_definitions.h"
+#include "./scene.h"
+
 #define BALL_RADIUS 0.1f
 
 struct CollisionBox gBallCollisionBox = {
@@ -194,6 +197,7 @@ void ballUpdate(struct Ball* ball) {
             dynamicSceneRemove(ball->dynamicId);
             soundPlayerStop(ball->soundLoopId);
             soundPlayerPlay(soundsBallExplode, 1.0f, 1.0f, &ball->rigidBody.transform.position, &gZeroVec);
+            effectsSplashPlay(&gScene.effects, &gBallBurst, &ball->rigidBody.transform.position, &gUp);
             ball->soundLoopId = SOUND_ID_NONE;
         }
     }

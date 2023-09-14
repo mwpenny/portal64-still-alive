@@ -10,6 +10,9 @@
 
 #include "../build/assets/materials/static.h"
 
+#define IMAGE_WIDTH     16
+#define IMAGE_HEIGHT    64
+
 #define GFX_PER_PARTICLE(particleCount) ((particleCount) + (((particleCount) + 7) >> 3) + 1)
 
 void fizzlerTrigger(void* data, struct CollisionObject* objectEnteringTrigger) {
