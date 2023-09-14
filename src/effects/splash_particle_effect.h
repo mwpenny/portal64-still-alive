@@ -2,9 +2,12 @@
 #define __SPLASH_PARTICLE_EFFECT_H__
 
 #include "../math/vector3.h"
+#include "../graphics/color.h"
 
 struct SplashParticleDefinition {
     float particleLifetime;
+    float fadeStartTime;
+    float fullWidthTime;
     float particleTailDelay;
     float minNormalVelocity;
     float maxNormalVelocity;
@@ -13,6 +16,7 @@ struct SplashParticleDefinition {
     short particleCount;
     short materialIndex;
     float particleHalfWidth;
+    struct Coloru8 particleColor;
 };
 
 struct SplashParticle {

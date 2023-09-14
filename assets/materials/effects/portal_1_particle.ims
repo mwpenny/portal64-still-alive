@@ -1,1 +1,1 @@
--resize 16x16
+-set colorspace Gray -separate -average -resize 32x32

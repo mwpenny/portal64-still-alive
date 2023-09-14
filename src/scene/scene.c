@@ -892,7 +892,7 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
 
     if (!sceneDetermineSurfaceMapping(scene, hit.object, &mappingRange, &relativeIndex)) {
         if (!just_checking) {
-            effectsSplashPlay(&scene->effects, &gFailPortalSplash, &hit.at, &hit.normal);
+            effectsSplashPlay(&scene->effects, &gFailPortalSplash[portalIndex], &hit.at, &hit.normal);
         }
         return 0;
     }
@@ -932,7 +932,7 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
         }
 
         if (!just_checking) {
-            effectsSplashPlay(&scene->effects, &gFailPortalSplash, &hit.at, &hit.normal);
+            effectsSplashPlay(&scene->effects, &gFailPortalSplash[portalIndex], &hit.at, &hit.normal);
         }
 
         return 0;

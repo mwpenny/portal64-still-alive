@@ -130,6 +130,11 @@ int meshColliderRaycast(struct CollisionObject* object, struct Ray* ray, float m
 
     for (int i = 0; i < meshCollider->childrenCount; ++i) {
         struct RaycastHit localHit;
+
+        if (!meshCollider->children[i].collisionLayers) {
+            continue;
+        }
+
         if (raycastQuad(&meshCollider->children[i], &localRay, maxDistance, &localHit) && localHit.distance < maxDistance) {
             maxDistance = localHit.distance;
             *contact = localHit;

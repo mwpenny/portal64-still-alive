@@ -3,6 +3,6 @@
 
 #include "splash_particle_effect.h"
 
-extern struct SplashParticleDefinition gFailPortalSplash;
+extern struct SplashParticleDefinition gFailPortalSplash[2];
 
 #endif

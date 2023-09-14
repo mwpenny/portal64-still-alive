@@ -7,16 +7,16 @@
 #include "../scene/dynamic_scene.h"
 #include "../defs.h"
 
-void splashParticleEffectBuildVtx(Vtx* vtx, struct SplashParticle* particle, int index) {
+void splashParticleEffectBuildVtx(Vtx* vtx, struct SplashParticle* particle, int index, struct Coloru8* color, float widthScalar) {
     int posIndex = index >> 1;
     int widthSign = index & 0x1;
 
     struct Vector3 finalPos;
 
     if (widthSign) {
-        vector3Add(&particle->position[posIndex], &particle->widthOffset, &finalPos);
+        vector3AddScaled(&particle->position[posIndex], &particle->widthOffset, widthScalar, &finalPos);
     } else {
-        vector3Sub(&particle->position[posIndex], &particle->widthOffset, &finalPos);
+        vector3AddScaled(&particle->position[posIndex], &particle->widthOffset, -widthScalar, &finalPos);
     }
 
     vtx->v.ob[0] = (short)(finalPos.x * SCENE_SCALE);
@@ -28,10 +28,10 @@ void splashParticleEffectBuildVtx(Vtx* vtx, struct SplashParticle* particle, int
     vtx->v.tc[0] = posIndex ? 0 : (32 << 5);
     vtx->v.tc[1] = widthSign ? 0 : (32 << 5);
 
-    vtx->v.cn[0] = 255;
-    vtx->v.cn[1] = 255;
-    vtx->v.cn[2] = 255;
-    vtx->v.cn[3] = 255;
+    vtx->v.cn[0] = color->r;
+    vtx->v.cn[1] = color->g;
+    vtx->v.cn[2] = color->b;
+    vtx->v.cn[3] = color->a;
 }
 
 void splashParticleEffectRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
@@ -40,20 +40,37 @@ void splashParticleEffectRender(void* data, struct DynamicRenderDataList* render
     Vtx* vertices = renderStateRequestVertices(renderState, effect->def->particleCount * 4);
     Vtx* curr = vertices;
 
+    struct Coloru8 color = effect->def->particleColor;
+    float width = 1.0f;
+
+    if (effect->time < effect->def->fullWidthTime) {
+        width = (effect->time + 0.5f) / (effect->def->fullWidthTime + 0.5f);
+    }
+
+    if (effect->time > effect->def->fadeStartTime) {
+        int alpha = (int)(255.0f * (effect->def->fadeStartTime - effect->time) / (effect->def->particleLifetime - effect->def->fadeStartTime));
+        
+        if (alpha > 255) {
+            alpha = 255;
+        }
+
+        color.a = alpha;
+    }
+
     for (int i = 0; i < effect->def->particleCount; ++i) {
-        splashParticleEffectBuildVtx(&curr[0], &effect->particles[i], 0);
-        splashParticleEffectBuildVtx(&curr[1], &effect->particles[i], 1);
-        splashParticleEffectBuildVtx(&curr[2], &effect->particles[i], 2);
-        splashParticleEffectBuildVtx(&curr[3], &effect->particles[i], 3);
+        splashParticleEffectBuildVtx(&curr[0], &effect->particles[i], 0, &color, width);
+        splashParticleEffectBuildVtx(&curr[1], &effect->particles[i], 1, &color, width);
+        splashParticleEffectBuildVtx(&curr[2], &effect->particles[i], 2, &color, width);
+        splashParticleEffectBuildVtx(&curr[3], &effect->particles[i], 3, &color, width);
 
         curr += 4;
     }
 
-    Gfx* displayList = renderStateAllocateDLChunk(renderState, effect->def->particleCount + (effect->def->particleCount >> 5) + 1);
+    Gfx* displayList = renderStateAllocateDLChunk(renderState, effect->def->particleCount + ((effect->def->particleCount + 7) >> 3) + 1);
     Gfx* dl = displayList;
 
     for (int i = 0; i < effect->def->particleCount; ++i) {
-        int relativeVertex = i & 0x1f;
+        int relativeVertex = (i << 2) & 0x1f;
 
         if (relativeVertex == 0) {
             int verticesLeft = (effect->def->particleCount - i) << 2;
@@ -152,6 +169,7 @@ void splashParticleEffectUpdate(struct SplashParticleEffect* effect) {
         // tailPos.y = tailPos.y + (yVelocity - effect->def->particleTailDelay * GRAVITY_CONSTANT) * FIXED_DELTA_TIME
         // tailPos.y = tailPos.y + yVelocity * FIXED_DELTA_TIME - effect->def->particleTailDelay * GRAVITY_CONSTANT * FIXED_DELTA_TIME
         particle->position[1].y -= effect->def->particleTailDelay * (GRAVITY_CONSTANT * FIXED_DELTA_TIME);
+
 
         particle->velocity.y += FIXED_DELTA_TIME * GRAVITY_CONSTANT;
     }
