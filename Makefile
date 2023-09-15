@@ -269,7 +269,7 @@ build/src/scene/clock.o: build/assets/models/dynamic_model_list.h
 build/src/scene/door.o: build/assets/materials/static.h build/assets/models/props/door_01.h build/assets/models/props/door_02.h build/assets/models/dynamic_animated_model_list.h
 build/src/scene/fizzler.o: build/assets/models/dynamic_model_list.h
 build/src/scene/pedestal.o: build/assets/materials/static.h build/assets/models/pedestal.h build/assets/models/dynamic_animated_model_list.h build/assets/models/portal_gun/w_portalgun.h
-build/src/scene/portal_gun.o: $(MODEL_HEADERS)
+build/src/scene/portal_gun.o: build/assets/materials/static.h $(MODEL_HEADERS)
 build/src/scene/portal_render.o: $(MODEL_HEADERS)
 build/src/scene/portal.o: $(MODEL_HEADERS)
 build/src/scene/render_plan.o: $(MODEL_HEADERS)

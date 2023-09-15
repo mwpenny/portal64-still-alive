@@ -148,7 +148,7 @@ void splashParticleEffectPlay(struct SplashParticleEffect* effect, struct Splash
     }
 
     effect->startPosition = *origin;
-    effect->dynamicId = dynamicSceneAdd(effect, splashParticleEffectRender, &effect->startPosition, 10.0f);
+    effect->dynamicId = dynamicSceneAdd(effect, splashParticleEffectRender, &effect->startPosition, 3.0f);
 }
 
 void splashParticleEffectUpdate(struct SplashParticleEffect* effect) {

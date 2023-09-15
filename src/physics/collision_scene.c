@@ -425,6 +425,7 @@ int collisionSceneRaycastOnlyDynamic(struct CollisionScene* scene, struct Ray* r
 int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, int collisionLayers, float maxDistance, int passThroughPortals, struct RaycastHit* hit) {
     hit->distance = maxDistance;
     hit->throughPortal = NULL;
+    hit->roomIndex = roomIndex;
 
     int roomsToCheck = 5;
 
@@ -440,6 +441,9 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
         int nextRoom = collisionSceneRaycastDoorways(scene, room, ray, hit->distance, roomIndex);
 
         roomIndex = nextRoom;
+
+        // even on a miss, the raycast should report which room it ended up in
+        hit->roomIndex = roomIndex;
 
         --roomsToCheck;
     }
