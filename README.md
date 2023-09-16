@@ -141,15 +141,17 @@ That will generate the rom at `/build/portal64.z64`
 <br />
 
 ## Current New Feature TODO List
+- [ ] Change default controls
+- [ ] investigate failed portal hole in test chamber 04
+- [ ] increaes collider height
+- [ ] ball velocity in test chamber 11
 - [ ] clear sleeping object physics flag so buttons in savefiles remain pressed after loading
 - [ ] rumble pak support?
-- [ ] Change default controls
 - [ ] Investigate crash after falling into death water on test chamber 8
 - [ ] Add particle effects (shooting portal gun, energy pellet)
 - [ ] Add auto save checkpoints
 - [ ] Correct elevator timing
 - [ ] Adding loading notice between levels #45
-- [ ] ball velocity in test chamber 11
 - [ ] pausing while glados is speaking can end her speech early
 - [x] test chamber 11 is broken
 - [x] test chamber 4 has an inverted indicator light sign 
