@@ -352,7 +352,6 @@ void sceneCheckPortals(struct Scene* scene) {
     }
 
     if (fireOrange && hasOrange && !playerIsGrabbing(&scene->player)) {
-        sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom, 1, 0);
         portalGunFire(&scene->portalGun, 0, &raycastRay, &playerUp, scene->player.body.currentRoom);
         scene->player.flags |= PlayerJustShotPortalGun;
         scene->last_portal_indx_shot=0;
@@ -360,7 +359,6 @@ void sceneCheckPortals(struct Scene* scene) {
     }
 
     if ((fireBlue || (!hasOrange && fireOrange)) && hasBlue && !playerIsGrabbing(&scene->player)) {
-        sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom, 1, 0);
         portalGunFire(&scene->portalGun, 1, &raycastRay, &playerUp, scene->player.body.currentRoom);
         scene->player.flags |= PlayerJustShotPortalGun;
         scene->last_portal_indx_shot=1;
@@ -880,6 +878,56 @@ int sceneDetermineSurfaceMapping(struct Scene* scene, struct CollisionObject* hi
     }
 
     return 0;
+}
+
+int sceneOpenPortalFromHit(struct Scene* scene, struct Ray* ray, struct RaycastHit* hit, struct Vector3* playerUp, int portalIndex, int roomIndex, int fromPlayer, int just_checking) {
+    struct PortalSurfaceMappingRange mappingRange;
+    int relativeIndex = NO_TRANSFORM_INDEX;
+
+    if (!sceneDetermineSurfaceMapping(scene, hit->object, &mappingRange, &relativeIndex)) {
+        return 0;
+    }
+
+    struct Transform portalLocation;
+
+    struct Vector3 hitDirection = hit->normal;
+
+    if (portalIndex == 1) {
+        vector3Negate(&hitDirection, &hitDirection);
+    }
+
+    portalLocation.position = hit->at;
+    portalLocation.scale = gOneVec;
+    if (fabsf(hit->normal.y) < 0.8) {
+        quatLook(&hitDirection, &gUp, &portalLocation.rotation);
+    } else {
+        struct Vector3 upDir;
+
+        if (ray->dir.y > 0.0f) {
+            vector3Negate(playerUp, &upDir);
+        } else {
+            upDir = *playerUp;
+        }
+
+        quatLook(&hitDirection, &upDir, &portalLocation.rotation);
+    }
+
+    if (!sceneOpenPortal(scene, &portalLocation, relativeIndex, portalIndex, mappingRange, hit->object, hit->roomIndex, fromPlayer, just_checking)) {
+        if (!fromPlayer) {
+            sceneClosePortal(scene, 1-portalIndex);
+            scene->continuouslyAttemptingPortalOpen = 1;
+            scene->savedPortal.portalIndex = portalIndex;
+            scene->savedPortal.ray = *ray;
+            scene->savedPortal.roomIndex = roomIndex;
+            scene->savedPortal.transformUp = *playerUp;
+        }
+
+        return 0;
+    }
+    if (!fromPlayer){
+        scene->continuouslyAttemptingPortalOpen = 0;
+    }
+    return 1;
 }
 
 int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex, int fromPlayer, int just_checking) {

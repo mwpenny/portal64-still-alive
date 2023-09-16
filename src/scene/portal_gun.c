@@ -2,6 +2,7 @@
 
 #include "../physics/collision_scene.h"
 #include "../physics/collision_cylinder.h"
+#include "./scene.h"
 
 #include "../effects/effect_definitions.h"
 
@@ -163,7 +164,18 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
         struct RaycastHit hit;
 
         if (collisionSceneRaycast(&gCollisionScene, projectile->roomIndex, &projectile->positionDirection, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, PORTAL_PROJECTILE_SPEED * FIXED_DELTA_TIME + 0.1f, 0, &hit)) {
-            // TODO open portal
+            if (!sceneOpenPortalFromHit(
+                &gScene,
+                &projectile->positionDirection,
+                &hit,
+                &projectile->playerUp,
+                i,
+                projectile->roomIndex,
+                1,
+                0
+            )) {
+                effectsSplashPlay(&gScene.effects, &gFailPortalSplash[i], &hit.at, &hit.normal);
+            }
             projectile->roomIndex = -1;
         } else {
             projectile->roomIndex = hit.roomIndex;
