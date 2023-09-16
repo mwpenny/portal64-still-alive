@@ -64,7 +64,12 @@ LDIRT  =	$(BASE_TARGET_NAME).elf $(CP_LD_SCRIPT) $(BASE_TARGET_NAME).z64 $(BASE_
 
 LDFLAGS =	-L/usr/lib/n64 $(N64LIB)  -L$(N64_LIBGCCDIR) -lgcc
 
-default:	$(BASE_TARGET_NAME).z64
+default:	prepare
+
+prepare: portal_pak_dir
+	@$(MAKE) buildgame
+
+buildgame: $(BASE_TARGET_NAME).z64
 
 include $(COMMONRULES)
 
@@ -121,7 +126,7 @@ $(TEXTURE_VTF_SOURCES): portal_pak_dir
 
 %.png: %.vtf
 	-$(VTF2PNG) $< $@
-	
+
 portal_pak_dir/materials/signage/signage_doorstate_on.png: portal_pak_dir/materials/signage/signage_doorstate.vtf
 	$(VTF2PNG) -f 2 $< $@
 
@@ -133,6 +138,12 @@ portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor_on.png:
 
 portal_pak_dir/materials/effects/portal_1_particle_orange.png: portal_pak_dir/materials/effects/portal_1_particle.vtf
 	$(VTF2PNG) -f 2 $< $@
+
+portal_pak_dir/materials/signage/signage_overlay_fling1.png: portal_pak_dir/materials/signage/signage_overlay_fling2.png portal_pak_dir/materials/signage/signage_overlay_dots1.png portal_pak_dir/materials/signage/signage_overlay_dots2.png portal_pak_dir/materials/signage/signage_overlay_dots3.png portal_pak_dir/materials/signage/signage_overlay_dots4.png portal_pak_dir/materials/signage/signage_overlay_toxic.png portal_pak_dir/materials/signage/signage_overlay_fountain.png
+portal_pak_dir/materials/signage/signage_exit.png: portal_pak_dir/materials/signage/signage_overlay_arrow.png portal_pak_dir/materials/signage/signage_overlay_boxdispenser.png portal_pak_dir/materials/signage/signage_overlay_boxhurt.png portal_pak_dir/materials/signage/signage_overlay_energyball.png portal_pak_dir/materials/signage/signage_overlay_catcher.png portal_pak_dir/materials/signage/signage_overlay_toxic.png portal_pak_dir/materials/signage/signage_overlay_fountain.png
+portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor.png: portal_pak_dir/materials/signage/indicator_lights/indicator_lights_corner_floor.png
+portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor_on.png: portal_pak_dir/materials/signage/indicator_lights/indicator_lights_corner_floor_on.png
+portal_pak_dir/materials/models/props/round_elevator_sheet_1.png: portal_pak_dir/materials/models/props/round_elevator_sheet_3.png
 
 convert_all_png: $(ALL_PNG_IMAGES)
 
@@ -251,6 +262,7 @@ build/src/decor/decor_object_list.o: build/assets/models/dynamic_model_list.h bu
 build/src/effects/effect_definitions.o: build/assets/materials/static.h
 build/src/menu/controls.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/menu/game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
+build/src/menu/gameplay_options.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/menu/joystick_options.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/menu/landing_menu.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/menu/load_game.o: build/assets/materials/ui.h build/src/audio/clips.h
@@ -449,6 +461,8 @@ $(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(DATA_OBJECTS)
 
 clean:
 	rm -rf build
+	rm -rf portal_pak_dir
+	rm -rf portal_pak_modified		
 
 fix:
 	wine tools/romfix64.exe build/portal.z64 
