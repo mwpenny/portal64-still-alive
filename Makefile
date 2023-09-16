@@ -464,6 +464,9 @@ clean:
 	rm -rf portal_pak_dir
 	rm -rf portal_pak_modified		
 
+clean-src:
+	rm -rf build/src
+
 fix:
 	wine tools/romfix64.exe build/portal.z64 
 .SECONDARY:

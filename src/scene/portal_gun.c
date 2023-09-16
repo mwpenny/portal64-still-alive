@@ -169,6 +169,6 @@ void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray
     vector3Sub(&fireFrom, &ray->origin, &projectile->effectOffset);
 
     if (projectile->dynamicId == -1) {
-        projectile->dynamicId = dynamicSceneAddViewDependant(projectile, portalBallRender, &fireFrom, 0.5f);
+        projectile->dynamicId = dynamicSceneAddViewDependant(projectile, portalBallRender, &projectile->positionDirection.origin, 0.5f);
     }
 }
