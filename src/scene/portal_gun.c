@@ -3,6 +3,8 @@
 #include "../physics/collision_scene.h"
 #include "../physics/collision_cylinder.h"
 
+#include "../effects/effect_definitions.h"
+
 #include "../../build/assets/models/grav_flare.h"
 #include "../../build/assets/models/portal_gun/v_portalgun.h"
 #include "../../build/assets/materials/static.h"
@@ -45,13 +47,76 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at){
     portalGun->portalGunVisible = 0;
     portalGun->shootAnimationTimer = 0.0;
 
-    portalGun->projectiles[0].dynamicId = -1;
     portalGun->projectiles[0].roomIndex = -1;
-    portalGun->projectiles[1].dynamicId = -1;
     portalGun->projectiles[1].roomIndex = -1;
 }
 
-void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState){
+#define PORTAL_PROJECTILE_RADIUS    0.15f
+
+#define DISTANCE_FADE_SCALAR        (255.0f / 5.0f)
+
+struct Coloru8 gProjectileColor[] = {
+    {200, 100, 50, 255},
+    {50, 70, 200, 255},
+};
+
+void portalBallRender(struct PortalGunProjectile* projectile, struct RenderState* renderState, struct Transform* fromView, int portalIndex) {
+    struct Transform transform;
+
+    if (projectile->distance < projectile->maxDistance) {
+        vector3AddScaled(
+            &projectile->positionDirection.origin, 
+            &projectile->effectOffset, 
+            1.0f - projectile->distance / projectile->maxDistance, 
+            &transform.position
+        );
+    } else {
+        transform.position = projectile->positionDirection.origin;
+    }
+
+    transform.rotation = fromView->rotation;
+    vector3Scale(&gOneVec, &transform.scale, PORTAL_PROJECTILE_RADIUS);
+
+    Mtx* mtx = renderStateRequestMatrices(renderState, 1);
+
+    transformToMatrixL(&transform, mtx, SCENE_SCALE);
+
+    Gfx* material = static_brightglow_y;
+    Gfx* materialRevert = static_brightglow_y_revert;
+
+    struct Coloru8* color = &gProjectileColor[portalIndex];
+
+    float alpha = projectile->distance * DISTANCE_FADE_SCALAR;
+
+    if (alpha > 255.0f) {
+        alpha = 255.0f;
+    }
+
+    gDPSetPrimColor(renderState->dl++, 255, 255, color->r, color->g, color->b, (u8)alpha);
+
+    if (projectile->distance == 0.0f) {
+        material = static_portal_2_particle;
+        materialRevert = static_portal_2_particle_revert;
+    }
+
+    gSPMatrix(renderState->dl++, mtx, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    gSPDisplayList(renderState->dl++, material);
+    gSPDisplayList(renderState->dl++, grav_flare_model_gfx);
+    gSPDisplayList(renderState->dl++, materialRevert);
+    gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
+}
+
+void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Transform* fromView){
+    for (int i = 0; i < 2; ++i) {
+        struct PortalGunProjectile* projectile = &portalGun->projectiles[i];
+
+        if (projectile->roomIndex == -1) {
+            continue;
+        }
+
+        portalBallRender(projectile, renderState, fromView, i);
+    }
+
     portalGun->rigidBody.transform.scale = gOneVec;
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
@@ -65,9 +130,8 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
 }
 
-#define PORTAL_PROJECTILE_RADIUS    0.2f
 #define NO_HIT_DISTANCE             20.0f
-#define PORTAL_PROJECTILE_SPEED     10.0f
+#define PORTAL_PROJECTILE_SPEED     50.0f
 #define MAX_PROJECTILE_DISTANCE     100.0f
 
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
@@ -92,7 +156,7 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
     for (int i = 0; i < 2; ++i) {
         struct PortalGunProjectile* projectile = &portalGun->projectiles[i];
 
-        if (projectile->dynamicId == -1) {
+        if (projectile->roomIndex == -1) {
             continue;
         }
 
@@ -100,8 +164,7 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
 
         if (collisionSceneRaycast(&gCollisionScene, projectile->roomIndex, &projectile->positionDirection, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, PORTAL_PROJECTILE_SPEED * FIXED_DELTA_TIME + 0.1f, 0, &hit)) {
             // TODO open portal
-            dynamicSceneRemove(projectile->dynamicId);
-            projectile->dynamicId = -1;
+            projectile->roomIndex = -1;
         } else {
             projectile->roomIndex = hit.roomIndex;
         }
@@ -114,31 +177,6 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
         );
         projectile->distance += PORTAL_PROJECTILE_SPEED * FIXED_DELTA_TIME;
     }
-}
-
-void portalBallRender(void* data, struct RenderScene* renderScene, struct Transform* fromView) {
-    struct PortalGunProjectile* projectile = (struct PortalGunProjectile*)data;
-    struct Transform transform;
-
-    if (projectile->distance < projectile->maxDistance) {
-        vector3AddScaled(
-            &projectile->positionDirection.origin, 
-            &projectile->effectOffset, 
-            1.0f - projectile->distance / projectile->maxDistance, 
-            &transform.position
-        );
-    } else {
-        transform.position = projectile->positionDirection.origin;
-    }
-
-    transform.rotation = fromView->rotation;
-    vector3Scale(&gOneVec, &transform.scale, PORTAL_PROJECTILE_RADIUS);
-
-    Mtx* mtx = renderStateRequestMatrices(renderScene->renderState, 1);
-
-    transformToMatrixL(&transform, mtx, SCENE_SCALE);
-
-    renderSceneAdd(renderScene, grav_flare_model_gfx, mtx, GRAV_FLARE_INDEX, &transform.position, NULL);
 }
 
 struct Vector3 gPortalGunExit = {0.0f, 0.0f, 0.154008};
@@ -167,8 +205,4 @@ void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray
     struct Vector3 fireFrom;
     transformPoint(&portalGun->rigidBody.transform, &gPortalGunExit, &fireFrom);
     vector3Sub(&fireFrom, &ray->origin, &projectile->effectOffset);
-
-    if (projectile->dynamicId == -1) {
-        projectile->dynamicId = dynamicSceneAddViewDependant(projectile, portalBallRender, &projectile->positionDirection.origin, 0.5f);
-    }
 }

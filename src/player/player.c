@@ -417,10 +417,8 @@ void playerUpdateGunObject(struct Player* player) {
     quatLook(&forward, &gPortalGunUp, &relativeRotation);
     quatMultiply(&player->lookTransform.rotation, &relativeRotation, &player->gunConstraint.object->body->transform.rotation);
 
-
     struct Vector3 gunPoint;
-    struct Vector3 temp_gun_dist = offset;
-    transformPoint(&player->lookTransform, &temp_gun_dist, &gunPoint);
+    transformPoint(&player->lookTransform, &offset, &gunPoint);
 
     pointConstraintUpdateTarget(&player->gunConstraint, &gunPoint, &player->gunConstraint.object->body->transform.rotation);
     

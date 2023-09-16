@@ -443,7 +443,9 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
         roomIndex = nextRoom;
 
         // even on a miss, the raycast should report which room it ended up in
-        hit->roomIndex = roomIndex;
+        if (roomIndex != -1) {
+            hit->roomIndex = roomIndex;
+        }
 
         --roomsToCheck;
     }

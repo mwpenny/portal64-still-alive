@@ -1,0 +1,10 @@
+-background black
+\( +clone -resize 80x80 -repage +0+2 \)
+\( +clone -resize 32x32 -repage +8+8 \)
+\( +clone -resize 10x10 -repage +12+12 \)
+-compose Plus
+-layers merge
+-resize 32x32
+\( +clone -set colorspace Gray -separate -average \)
+-compose CopyOpacity
+-composite

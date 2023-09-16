@@ -307,7 +307,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     if (scene->portalGun.portalGunVisible){
         cameraModifyProjectionViewForPortalGun(&scene->camera, renderState, PORTAL_GUN_NEAR_PLANE * SCENE_SCALE, renderPlan.stageProps[0].aspectRatio);
-        portalGunRenderReal(&scene->portalGun, renderState);
+        portalGunRenderReal(&scene->portalGun, renderState, &scene->camera.transform);
     }
 
     gDPPipeSync(renderState->dl++);
