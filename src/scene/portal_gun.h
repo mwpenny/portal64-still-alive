@@ -9,6 +9,7 @@
 #include "../scene/dynamic_scene.h"
 #include "../player/player.h"
 #include "../util/time.h"
+#include "../effects/portal_trail.h"
 
 struct PortalGunProjectile {
     struct Ray positionDirection;
@@ -16,6 +17,8 @@ struct PortalGunProjectile {
     struct Vector3 playerUp;
 
     struct Vector3 effectOffset;
+
+    struct PortalTrail trail;
 
     float distance;
     float maxDistance;

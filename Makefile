@@ -198,6 +198,7 @@ build/src/scene/elevator.o: build/assets/models/props/round_elevator_collision.h
 #
 
 MODEL_LIST = assets/models/player/chell.blend \
+	assets/models/portal_gun/ball_trail.blend \
 	assets/models/portal_gun/v_portalgun.blend \
 	assets/models/portal_gun/w_portalgun.blend \
 	assets/models/props/round_elevator.blend \
@@ -260,6 +261,7 @@ build/assets/models/props/combine_ball_catcher.h: assets/materials/ball_catcher.
 build/assets/models/props/combine_ball_launcher.h: assets/materials/ball_catcher.skm.yaml
 build/src/decor/decor_object_list.o: build/assets/models/dynamic_model_list.h build/assets/materials/static.h
 build/src/effects/effect_definitions.o: build/assets/materials/static.h
+build/src/effects/portal_trail.o: build/assets/materials/static.h build/assets/models/portal_gun/ball_trail.h
 build/src/menu/controls.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/menu/game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
 build/src/menu/gameplay_options.o: build/assets/materials/ui.h build/src/audio/clips.h
@@ -466,6 +468,21 @@ clean:
 
 clean-src:
 	rm -rf build/src
+	rm -f $(CODESEGMENT)_debug.o
+	rm -f $(CODESEGMENT)_no_debug.o
+	rm -f $(BASE_TARGET_NAME)_debug.elf
+	rm -f $(BASE_TARGET_NAME).elf
+	rm -f $(BASE_TARGET_NAME).z64
+	rm -f $(BASE_TARGET_NAME)_debug.z64
+
+clean-assets:
+	rm -rf build/assets
+	rm -f $(CODESEGMENT)_debug.o
+	rm -f $(CODESEGMENT)_no_debug.o
+	rm -f $(BASE_TARGET_NAME)_debug.elf
+	rm -f $(BASE_TARGET_NAME).elf
+	rm -f $(BASE_TARGET_NAME).z64
+	rm -f $(BASE_TARGET_NAME)_debug.z64
 
 fix:
 	wine tools/romfix64.exe build/portal.z64 

@@ -4,6 +4,8 @@
 #include "../physics/collision_cylinder.h"
 #include "./scene.h"
 
+#include "../levels/material_state.h"
+
 #include "../effects/effect_definitions.h"
 
 #include "../../build/assets/models/grav_flare.h"
@@ -50,6 +52,9 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at){
 
     portalGun->projectiles[0].roomIndex = -1;
     portalGun->projectiles[1].roomIndex = -1;
+
+    portalTrailInit(&portalGun->projectiles[0].trail);
+    portalTrailInit(&portalGun->projectiles[1].trail);
 }
 
 #define PORTAL_PROJECTILE_RADIUS    0.15f
@@ -61,7 +66,7 @@ struct Coloru8 gProjectileColor[] = {
     {50, 70, 200, 255},
 };
 
-void portalBallRender(struct PortalGunProjectile* projectile, struct RenderState* renderState, struct Transform* fromView, int portalIndex) {
+void portalBallRender(struct PortalGunProjectile* projectile, struct RenderState* renderState, struct MaterialState* materialState, struct Transform* fromView, int portalIndex) {
     struct Transform transform;
 
     if (projectile->distance < projectile->maxDistance) {
@@ -82,9 +87,6 @@ void portalBallRender(struct PortalGunProjectile* projectile, struct RenderState
 
     transformToMatrixL(&transform, mtx, SCENE_SCALE);
 
-    Gfx* material = static_brightglow_y;
-    Gfx* materialRevert = static_brightglow_y_revert;
-
     struct Coloru8* color = &gProjectileColor[portalIndex];
 
     float alpha = projectile->distance * DISTANCE_FADE_SCALAR;
@@ -93,29 +95,33 @@ void portalBallRender(struct PortalGunProjectile* projectile, struct RenderState
         alpha = 255.0f;
     }
 
-    gDPSetPrimColor(renderState->dl++, 255, 255, color->r, color->g, color->b, (u8)alpha);
 
     if (projectile->distance == 0.0f) {
-        material = static_portal_2_particle;
-        materialRevert = static_portal_2_particle_revert;
+        materialStateSet(materialState, PORTAL_2_PARTICLE_INDEX, renderState);
+    } else {
+        materialStateSet(materialState, BRIGHTGLOW_Y_INDEX, renderState);
+        gDPSetPrimColor(renderState->dl++, 255, 255, color->r, color->g, color->b, (u8)alpha);
     }
 
     gSPMatrix(renderState->dl++, mtx, G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-    gSPDisplayList(renderState->dl++, material);
     gSPDisplayList(renderState->dl++, grav_flare_model_gfx);
-    gSPDisplayList(renderState->dl++, materialRevert);
     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
 }
 
-void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Transform* fromView){
+void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Transform* fromView) {
+    struct MaterialState materialState;
+    materialStateInit(&materialState, DEFAULT_INDEX);
+    
     for (int i = 0; i < 2; ++i) {
         struct PortalGunProjectile* projectile = &portalGun->projectiles[i];
+
+        portalTrailRender(&projectile->trail, renderState, &materialState);
 
         if (projectile->roomIndex == -1) {
             continue;
         }
 
-        portalBallRender(projectile, renderState, fromView, i);
+        portalBallRender(projectile, renderState, &materialState, fromView, i);
     }
 
     portalGun->rigidBody.transform.scale = gOneVec;
@@ -217,4 +223,6 @@ void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray
     struct Vector3 fireFrom;
     transformPoint(&portalGun->rigidBody.transform, &gPortalGunExit, &fireFrom);
     vector3Sub(&fireFrom, &ray->origin, &projectile->effectOffset);
+
+    portalTrailPlay(&projectile->trail, &fireFrom, &hit.at);
 }

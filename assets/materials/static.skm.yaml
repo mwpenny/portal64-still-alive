@@ -1121,3 +1121,32 @@ materials:
       alpha: ["PRIMITIVE", "0", "TEXEL0", "0"]
     gSPGeometryMode:
       clear: [G_CULL_BACK, G_CULL_FRONT]
+
+  portal_trail:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/effects/brightglow_y.png
+      fmt: G_IM_FMT_I
+      siz: G_IM_SIZ_4b
+      s:
+        shift: 1
+      t:
+        shift: 1
+      
+    gDPSetRenderMode: 
+      flags:
+        - IM_RD
+        - CVG_DST_FULL
+        - FORCE_BL
+        - ZMODE_OPA
+      blend:
+        - G_BL_CLR_IN
+        - G_BL_A_IN
+        - G_BL_CLR_MEM
+        - G_BL_1MA
+
+    gDPSetCombineMode:
+      color: ["1", "PRIMITIVE", "TEXEL0", "PRIMITIVE"]
+      alpha: ["TEXEL0", "0", "SHADE", "0"]
+    gSPGeometryMode:
+      clear: [G_CULL_BACK, G_CULL_FRONT, G_ZBUFFER]
+      set: [G_FOG]
