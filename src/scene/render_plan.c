@@ -471,18 +471,6 @@ void renderPlanBuild(struct RenderPlan* renderPlan, struct Scene* scene, struct 
 #define MIN_FOG_DISTANCE 1.0f
 #define MAX_FOG_DISTANCE 2.5f
 
-int fogIntValue(float floatValue) {
-    if (floatValue < -1.0) {
-        return 0;
-    }
-
-    if (floatValue > 1.0) {
-        return 1000;
-    }
-
-    return (int)((floatValue + 1.0f) * 500.0f);
-}
-
 void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* staticTransforms, struct RenderState* renderState) {
     struct DynamicRenderDataList* dynamicList = dynamicRenderListNew(renderState, MAX_DYNAMIC_SCENE_OBJECTS);
 

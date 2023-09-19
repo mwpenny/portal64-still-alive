@@ -6,7 +6,6 @@
 
 #define DEFAULT_FAR_PLANE       30.0f
 #define DEFAULT_NEAR_PLANE      0.125f
-#define PORTAL_GUN_NEAR_PLANE   0.05f
 
 #define MAX_PORTAL_STEPS    6
 

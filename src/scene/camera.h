@@ -47,4 +47,6 @@ int cameraApplyMatrices(struct RenderState* renderState, struct CameraMatrixInfo
 
 float cameraClipDistance(struct Camera* camera, float distance);
 
+int fogIntValue(float floatValue);
+
 #endif

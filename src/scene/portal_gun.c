@@ -14,6 +14,8 @@
 
 #define PORTAL_GUN_RECOIL_TIME (0.18f)
 
+#define PORTAL_GUN_NEAR_PLANE   0.05f
+
 struct Vector2 gGunColliderEdgeVectors[] = {
     {0.0f, 1.0f},
     {0.707f, 0.707f},
@@ -108,20 +110,20 @@ void portalBallRender(struct PortalGunProjectile* projectile, struct RenderState
     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
 }
 
-void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Transform* fromView) {
+void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera) {
     struct MaterialState materialState;
     materialStateInit(&materialState, DEFAULT_INDEX);
     
     for (int i = 0; i < 2; ++i) {
         struct PortalGunProjectile* projectile = &portalGun->projectiles[i];
 
-        portalTrailRender(&projectile->trail, renderState, &materialState);
+        portalTrailRender(&projectile->trail, renderState, &materialState, fromCamera, i);
 
         if (projectile->roomIndex == -1) {
             continue;
         }
 
-        portalBallRender(projectile, renderState, &materialState, fromView, i);
+        portalBallRender(projectile, renderState, &materialState, &fromCamera->transform, i);
     }
 
     portalGun->rigidBody.transform.scale = gOneVec;
@@ -131,6 +133,8 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
         return;
     }
 
+    cameraModifyProjectionViewForPortalGun(fromCamera, renderState, PORTAL_GUN_NEAR_PLANE * SCENE_SCALE, (float)SCREEN_WD / (float)SCREEN_HT);
+
     transformToMatrixL(&portalGun->rigidBody.transform, matrix, SCENE_SCALE);
     gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
     gSPDisplayList(renderState->dl++, portal_gun_v_portalgun_model_gfx);
@@ -138,7 +142,6 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
 }
 
 #define NO_HIT_DISTANCE             20.0f
-#define PORTAL_PROJECTILE_SPEED     50.0f
 #define MAX_PROJECTILE_DISTANCE     100.0f
 
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
@@ -162,6 +165,8 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
 
     for (int i = 0; i < 2; ++i) {
         struct PortalGunProjectile* projectile = &portalGun->projectiles[i];
+
+        portalTrailUpdate(&projectile->trail);
 
         if (projectile->roomIndex == -1) {
             continue;

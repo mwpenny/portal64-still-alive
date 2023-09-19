@@ -195,3 +195,15 @@ float cameraClipDistance(struct Camera* camera, float distance) {
 
     return -((camera->nearPlane + camera->farPlane) * modifiedDistance + 2.0f * camera->nearPlane * camera->farPlane) / denom;
 }
+
+int fogIntValue(float floatValue) {
+    if (floatValue < -1.0) {
+        return 0;
+    }
+
+    if (floatValue > 1.0) {
+        return 1000;
+    }
+
+    return (int)((floatValue + 1.0f) * 500.0f);
+}
