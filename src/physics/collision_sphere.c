@@ -89,7 +89,7 @@ int collisionSphereMinkowsiSum(void* data, struct Basis* basis, struct Vector3* 
     output->y = 0.0f;
     output->z = 0.0f;
 
-    int result = direction->x > 0.0f ? 0x1 : 0x4;
+    int result = direction->x > 0.0f ? 0x1 : 0x8;
 
     for (int i = 1; i < 3; ++i) {
         float distanceCheck = fabsf(VECTOR3_AS_ARRAY(direction)[i]);
@@ -97,7 +97,13 @@ int collisionSphereMinkowsiSum(void* data, struct Basis* basis, struct Vector3* 
         if (distanceCheck > distance) {
             distance = distanceCheck;
             *output = gZeroVec;
-            VECTOR3_AS_ARRAY(output)[i] = VECTOR3_AS_ARRAY(direction)[i] > 0.0f ? sphere->radius : -sphere->radius;
+            if (VECTOR3_AS_ARRAY(direction)[i] > 0.0f) {
+                VECTOR3_AS_ARRAY(output)[i] = sphere->radius;
+                result = 0x1 << i;
+            } else {
+                VECTOR3_AS_ARRAY(output)[i] = -sphere->radius;
+                result = 0x8 << i;
+            }
         }
     }
 
@@ -106,9 +112,28 @@ int collisionSphereMinkowsiSum(void* data, struct Basis* basis, struct Vector3* 
     if (distanceCheck > distance) {
         float scaledRadius = sphere->radius * SQRT_3;
 
-        output->x = direction->x > 0.0f ? scaledRadius : -scaledRadius;
-        output->y = direction->y > 0.0f ? scaledRadius : -scaledRadius;
-        output->z = direction->z > 0.0f ? scaledRadius : -scaledRadius;
+        result = 64;
+
+        if (output->x > 0.0f) {
+            output->x = scaledRadius;
+            result <<= 1;
+        } else {
+            output->x = -scaledRadius;
+        }
+
+        if (output->y > 0.0f) {
+            output->y = scaledRadius;
+            result <<= 2;
+        } else {
+            output->y = -scaledRadius;
+        }
+
+        if (output->z > 0.0f) {
+            output->z = scaledRadius;
+            result <<= 4;
+        } else {
+            output->z = -scaledRadius;
+        }
     }
     
     return result;

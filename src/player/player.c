@@ -7,7 +7,7 @@
 #include "../defs.h"
 #include "../levels/levels.h"
 #include "../math/mathf.h"
-#include "../physics/collision_sphere.h"
+#include "../physics/collision_capsule.h"
 #include "../physics/collision_scene.h"
 #include "../physics/collision.h"
 #include "../physics/config.h"
@@ -43,8 +43,9 @@ struct Vector3 gPortalGunUp = {0.0f, 1.0f, 0.0f};
 
 struct CollisionQuad gPlayerColliderFaces[8];
 
-struct CollisionSphere gPlayerCollider = {
+struct CollisionCapsule gPlayerCollider = {
     0.25f,
+    0.5f,
 };
 
 struct ColliderTypeData gPlayerColliderData = {
@@ -52,7 +53,7 @@ struct ColliderTypeData gPlayerColliderData = {
     &gPlayerCollider,
     0.0f,
     0.6f,
-    &gCollisionSphereCallbacks,
+    &gCollisionCapsuleCallbacks,
 };
 
 void playerRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
@@ -552,9 +553,9 @@ void playerUpdateFooting(struct Player* player) {
 
     float hitDistance = FOOTING_CAST_DISTANCE;
 
-    vector3Scale(&gUp, &castOffset, -(hitDistance - gPlayerCollider.radius));
+    vector3Scale(&gUp, &castOffset, -(hitDistance - gPlayerCollider.radius - gPlayerCollider.extendDownward));
     if (collisionObjectCollideShapeCast(&player->collisionObject, &castOffset, &gCollisionScene, &hitLocation)) {
-        hitDistance = gPlayerCollider.radius + player->collisionObject.body->transform.position.y - hitLocation.y;
+        hitDistance = gPlayerCollider.radius + gPlayerCollider.extendDownward + player->collisionObject.body->transform.position.y - hitLocation.y;
     }
 
     struct RaycastHit hit;
