@@ -291,6 +291,7 @@ build/src/scene/security_camera.o: build/src/audio/clips.h build/assets/models/p
 build/src/scene/signage.o: $(MODEL_HEADERS)
 build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
 build/src/util/dynamic_asset_data.o: build/assets/models/dynamic_model_list_data.h
+build/src/util/dynamic_asset_loader.o: build/assets/models/dynamic_model_list.h build/assets/models/dynamic_animated_model_list.h
 
 
 ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_00/test_chamber_00_anim.o \
@@ -345,7 +346,7 @@ build/assets/test_chambers/level_list.h: $(TEST_CHAMBER_HEADERS) tools/generate_
 	@mkdir -p $(@D)
 	node tools/generate_level_list.js $@ $(TEST_CHAMBER_HEADERS)
 
-build/assets/models/dynamic_model_list.h build/assets/models/dynamic_model_list_data.h: $(DYNAMIC_MODEL_HEADERS) tools/generate_dynamic_model_list.js
+build/assets/models/dynamic_model_list.h build/assets/models/dynamic_model_list_data.h: $(DYNAMIC_MODEL_HEADERS) tools/generate_dynamic_model_list.js build/assets/models/cube/cube.h
 	@mkdir -p $(@D)
 	node tools/generate_dynamic_model_list.js build/assets/models/dynamic_model_list.h build/assets/models/dynamic_model_list_data.h $(DYNAMIC_MODEL_HEADERS)
 
