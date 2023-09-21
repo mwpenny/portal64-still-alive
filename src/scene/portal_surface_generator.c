@@ -235,23 +235,18 @@ int portalSurfaceFindNextLoop(struct PortalSurfaceBuilder* surfaceBuilder, struc
 #define MAX_INTERSECT_LOOPS 20
 
 int portalSurfaceIsPointOnLine(struct Vector2s16* pointA, struct Vector2s16* edgeA, struct Vector2s16* edgeDir) {
-    struct Vector2s16 originOffset;
-    struct Vector2s16 endpointOffset;
-
     if (edgeDir->equalTest == 0) {
         return 0;
     }
 
-    vector2s16Add(edgeA, edgeDir, &endpointOffset);
-    vector2s16Sub(&endpointOffset, pointA, &endpointOffset);
-
+    struct Vector2s16 originOffset;
     vector2s16Sub(edgeA, pointA, &originOffset);
 
-    int crossProduct = vector2s16Cross(&originOffset, &endpointOffset);
+    int dotProduct = vector2s16Dot(&originOffset, edgeDir);
+    int crossProduct = vector2s16Cross(&originOffset, edgeDir);
     int edgeDirLength = vector2s16MagSqr(edgeDir);
 
-    s64 angleCheck = (s64)crossProduct * 50LL / (s64)edgeDirLength;
-    return angleCheck == 0;
+    return dotProduct >= 0 && dotProduct <= edgeDirLength && abs(crossProduct) * 100 < edgeDirLength;
 }
 
 enum IntersectionType {
@@ -657,14 +652,6 @@ struct Vector2s16* portalSurfaceIntersectEdgeWithLoop(struct PortalSurfaceBuilde
 
         if (intersectType == IntersectionTypePoint) {
             int newPointIndex;
-
-            if (vector2s16DistSqr(&intersectionPoint, pointA) <= COLLAPSE_DISTANCE * COLLAPSE_DISTANCE) {
-                intersectionPoint = *pointA;
-            }
-
-            if (vector2s16DistSqr(&intersectionPoint, pointB) <= COLLAPSE_DISTANCE * COLLAPSE_DISTANCE) {
-                intersectionPoint = *pointB;
-            }
 
             if (intersectionPoint.equalTest == edgeA->equalTest) {
                 newPointIndex = edge->pointIndex;

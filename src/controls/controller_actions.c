@@ -6,20 +6,20 @@
 #include "../savefile/savefile.h"
 
 unsigned char gDefaultControllerSettings[ControllerActionSourceCount] = {
-    [ControllerActionSourceAButton] = ControllerActionJump,
-    [ControllerActionSourceBButton] = ControllerActionUseItem,
+    [ControllerActionSourceAButton] = ControllerActionOpenPortal1,
+    [ControllerActionSourceBButton] = ControllerActionOpenPortal0,
     [ControllerActionSourceCUpButton] = ControllerActionMove,
     [ControllerActionSourceCRightButton] = ControllerActionNone,
     [ControllerActionSourceCDownButton] = ControllerActionNone,
     [ControllerActionSourceCLeftButton] = ControllerActionNone,
-    [ControllerActionSourceDUpButton] = ControllerActionMove,
+    [ControllerActionSourceDUpButton] = ControllerActionLookForward,
     [ControllerActionSourceDRightButton] = ControllerActionNone,
-    [ControllerActionSourceDDownButton] = ControllerActionNone,
+    [ControllerActionSourceDDownButton] = ControllerActionLookBackward,
     [ControllerActionSourceDLeftButton] = ControllerActionNone,
     [ControllerActionSourceStartButton] = ControllerActionPause,
-    [ControllerActionSourceLTrig] = ControllerActionOpenPortal1,
-    [ControllerActionSourceRTrig] = ControllerActionOpenPortal1,
-    [ControllerActionSourceZTrig] = ControllerActionOpenPortal0,
+    [ControllerActionSourceLTrig] = ControllerActionDuck,
+    [ControllerActionSourceRTrig] = ControllerActionJump,
+    [ControllerActionSourceZTrig] = ControllerActionUseItem,
     [ControllerActionSourceJoystick] = ControllerActionRotate,
 };
 
