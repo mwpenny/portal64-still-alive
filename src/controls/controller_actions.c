@@ -51,8 +51,16 @@ void controllerActionApply(enum ControllerAction action) {
 #define DEADZONE_SIZE       5
 #define MAX_JOYSTICK_RANGE  80
 
+short gDeadzone = DEADZONE_SIZE;
+float gDeadzoneScale = 1.0f / (MAX_JOYSTICK_RANGE - DEADZONE_SIZE);
+
+void controllerSetDeadzone(float percent) {
+    gDeadzone = (short)(percent * MAX_JOYSTICK_RANGE);
+    gDeadzoneScale = 1.0f / (MAX_JOYSTICK_RANGE - gDeadzone);
+}
+
 float controllerCleanupStickInput(s8 input) {
-    if (input > -DEADZONE_SIZE && input < DEADZONE_SIZE) {
+    if (input > -gDeadzone && input < gDeadzone) {
         return 0.0f;
     }
 
@@ -64,7 +72,7 @@ float controllerCleanupStickInput(s8 input) {
         return -1.0f;
     }
 
-    return ((float)input + (input > 0 ? -DEADZONE_SIZE : DEADZONE_SIZE)) * (1.0f / (MAX_JOYSTICK_RANGE - DEADZONE_SIZE));
+    return ((float)input + (input > 0 ? -gDeadzone : gDeadzone)) * gDeadzoneScale;
 }
 
 void controllerActionReadDirection(enum ControllerActionSource source, int controllerIndex, int directionIndex) {

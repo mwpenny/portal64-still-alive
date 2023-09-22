@@ -93,9 +93,12 @@ void savefileNew() {
     gSaveData.controls.flags = 0;
     gSaveData.controls.sensitivity = 0x7FFF;
     gSaveData.controls.acceleration = 0x7FFF;
+    gSaveData.controls.deadzone = 0x4000;
 
     gSaveData.audio.soundVolume = 0xFF;
     gSaveData.audio.musicVolume = 0xFF;
+
+    controllerSetDeadzone(gSaveData.controls.deadzone * (1.0f / 0xFFFF) * MAX_DEADZONE);
 }
 
 void savefileLoad() {
@@ -136,6 +139,8 @@ void savefileLoad() {
     if (gSaveData.header.header != SAVEFILE_HEADER) {
         savefileNew();
     }
+
+    controllerSetDeadzone(gSaveData.controls.deadzone * (1.0f / 0xFFFF) * MAX_DEADZONE);
 }
 
 void savefileSave() {

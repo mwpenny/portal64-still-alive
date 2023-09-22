@@ -32,11 +32,15 @@ void joystickOptionsInit(struct JoystickOptions* joystickOptions) {
     joystickOptions->lookAccelerationText = menuBuildText(&gDejaVuSansFont, "Look Acceleration", JOYSTICK_X + 8, JOYSTICK_Y + 88);
     joystickOptions->lookAcceleration = menuBuildSlider(JOYSTICK_X + 120, JOYSTICK_Y + 88, 120, SCROLL_TICKS);
 
+    joystickOptions->joystickDeadzoneText = menuBuildText(&gDejaVuSansFont, "Deadzone", JOYSTICK_X + 8, JOYSTICK_Y + 108);
+    joystickOptions->joystickDeadzone = menuBuildSlider(JOYSTICK_X + 120, JOYSTICK_Y + 108, 120, SCROLL_TICKS);
+
     joystickOptions->invertControls.checked = (gSaveData.controls.flags & ControlSaveFlagsInvert) != 0;
     joystickOptions->invertControlsYaw.checked = (gSaveData.controls.flags & ControlSaveFlagsInvertYaw) != 0;
     joystickOptions->tankControls.checked = (gSaveData.controls.flags & ControlSaveTankControls) != 0;
     joystickOptions->lookSensitivity.value = (float)gSaveData.controls.sensitivity / 0xFFFF;
     joystickOptions->lookAcceleration.value = (float)gSaveData.controls.acceleration / 0xFFFF;
+    joystickOptions->joystickDeadzone.value = (float)gSaveData.controls.deadzone / 0xFFFF;
 }
 
 #define FULL_SCROLL_TIME    2.0f
@@ -143,10 +147,15 @@ enum MenuDirection joystickOptionsUpdate(struct JoystickOptions* joystickOptions
         case JoystickOptionAcceleration:
             joystickOptionsHandleSlider(&gSaveData.controls.acceleration, &joystickOptions->lookAcceleration.value);
             break;
+        case JoystickOptionDeadzone:
+            joystickOptionsHandleSlider(&gSaveData.controls.deadzone, &joystickOptions->joystickDeadzone.value);
+            controllerSetDeadzone(joystickOptions->joystickDeadzone.value * MAX_DEADZONE);
+            break;
     }
 
     if (joystickOptions->selectedItem == JoystickOptionSensitivity ||
-        joystickOptions->selectedItem == JoystickOptionAcceleration){
+        joystickOptions->selectedItem == JoystickOptionAcceleration ||
+        joystickOptions->selectedItem == JoystickOptionDeadzone){
         if ((controllerGetButtonDown(0, L_TRIG) || controllerGetButtonDown(0, Z_TRIG))) {
             return MenuDirectionLeft;
         }
@@ -181,6 +190,9 @@ void joystickOptionsRender(struct JoystickOptions* joystickOptions, struct Rende
     gSPDisplayList(renderState->dl++, joystickOptions->lookAcceleration.back);
     renderState->dl = menuSliderRender(&joystickOptions->lookAcceleration, renderState->dl);
 
+    gSPDisplayList(renderState->dl++, joystickOptions->joystickDeadzone.back);
+    renderState->dl = menuSliderRender(&joystickOptions->joystickDeadzone, renderState->dl);
+
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
 
     gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
@@ -204,6 +216,10 @@ void joystickOptionsRender(struct JoystickOptions* joystickOptions, struct Rende
     gDPPipeSync(renderState->dl++);
     menuSetRenderColor(renderState, joystickOptions->selectedItem == JoystickOptionAcceleration, &gSelectionGray, &gColorWhite);
     gSPDisplayList(renderState->dl++, joystickOptions->lookAccelerationText);
+
+    gDPPipeSync(renderState->dl++);
+    menuSetRenderColor(renderState, joystickOptions->selectedItem == JoystickOptionDeadzone, &gSelectionGray, &gColorWhite);
+    gSPDisplayList(renderState->dl++, joystickOptions->joystickDeadzoneText);
 
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
 }

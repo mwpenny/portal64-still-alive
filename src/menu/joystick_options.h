@@ -10,6 +10,7 @@ enum JoystickOption {
     JoystickOptionTankControls,
     JoystickOptionSensitivity,
     JoystickOptionAcceleration,
+    JoystickOptionDeadzone,
     
     JoystickOptionCount,
 };
@@ -20,8 +21,10 @@ struct JoystickOptions {
     struct MenuCheckbox tankControls;
     struct MenuSlider lookSensitivity;
     struct MenuSlider lookAcceleration;
+    struct MenuSlider joystickDeadzone;
     Gfx* lookSensitivityText;
     Gfx* lookAccelerationText;
+    Gfx* joystickDeadzoneText;
     short selectedItem;
 };
 
