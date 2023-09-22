@@ -242,11 +242,16 @@ int portalSurfaceIsPointOnLine(struct Vector2s16* pointA, struct Vector2s16* edg
     struct Vector2s16 originOffset;
     vector2s16Sub(edgeA, pointA, &originOffset);
 
-    int dotProduct = vector2s16Dot(&originOffset, edgeDir);
     int crossProduct = vector2s16Cross(&originOffset, edgeDir);
+
+    if (crossProduct != 0) {
+        return 0;
+    }
+
+    int dotProduct = vector2s16Dot(&originOffset, edgeDir);
     int edgeDirLength = vector2s16MagSqr(edgeDir);
 
-    return dotProduct >= 0 && dotProduct <= edgeDirLength && abs(crossProduct) * 100 < edgeDirLength;
+    return dotProduct >= 0 && dotProduct <= edgeDirLength;
 }
 
 enum IntersectionType {
@@ -304,7 +309,7 @@ enum IntersectionType portalSurfaceIntersect(struct Vector2s16* pointA, struct V
 
     int edgeLerp = vector2s16Cross(pointDir, &originOffset);
 
-    if (denominator > 0 ? (edgeLerp < 0 || edgeLerp > denominator) : (edgeLerp > 0 || edgeLerp < denominator)) {
+    if (denominator > 0 ? (edgeLerp <= 0 || edgeLerp > denominator) : (edgeLerp >= 0 || edgeLerp < denominator)) {
         return IntersectionTypeNone;
     }
 
