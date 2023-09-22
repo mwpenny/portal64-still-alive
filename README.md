@@ -141,6 +141,8 @@ That will generate the rom at `/build/portal64.z64`
 <br />
 
 ## Current New Feature TODO List
+- [ ] chell is short sometimes
+- [ ] near clipping plane when touching portals 
 - [ ] ball velocity in test chamber 11
 - [ ] clear sleeping object physics flag so buttons in savefiles remain pressed after loading
 - [ ] rumble pak support?
