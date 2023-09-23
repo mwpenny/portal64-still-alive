@@ -101,13 +101,15 @@ void playerRender(void* data, struct DynamicRenderDataList* renderList, struct R
     gSPDisplayList(dl++, player->armature.displayList);
     gSPEndDisplayList(dl++);
 
-    dynamicRenderListAddData(
+
+    dynamicRenderListAddDataTouchingPortal(
         renderList,
         objectRender,
         matrix,
         DEFAULT_INDEX,
         &player->body.transform.position,
-        armature
+        armature,
+        player->body.flags
     );
 }
 

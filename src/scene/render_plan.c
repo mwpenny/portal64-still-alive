@@ -337,6 +337,10 @@ int renderShouldRenderOtherPortal(struct Scene* scene, int visiblePortal, struct
         return 0;
     }
 
+    if ((scene->player.body.flags & (RigidBodyIsTouchingPortalA << visiblePortal)) != 0 && properties->currentDepth == STARTING_RENDER_DEPTH) {
+        return 1;
+    }
+
     struct Portal* portal = &scene->portals[visiblePortal];
     struct BoundingBoxs16 portalBox;
     portalBox.minX = (s16)(portal->collisionObject.boundingBox.min.x * SCENE_SCALE);

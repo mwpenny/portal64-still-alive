@@ -148,7 +148,7 @@ void dynamicRenderListAddDataTouchingPortal(
         }
 
         float finalTransform[4][4];
-        guMtxCatF(transformAsFloat, list->portalTransforms[1 - touchingPortalIndex], finalTransform);
+        guMtxCatF(transformAsFloat, list->portalTransforms[touchingPortalIndex], finalTransform);
 
         guMtxF2L(finalTransform, mtx);
 
@@ -157,7 +157,7 @@ void dynamicRenderListAddDataTouchingPortal(
 
         next->model = model;
         next->transform = mtx;
-        transformPoint(collisionSceneTransformToPortal(1 - touchingPortalIndex), position, &next->position);
+        transformPoint(collisionSceneTransformToPortal(touchingPortalIndex), position, &next->position);
         next->armature = armature;
         next->materialIndex = materialIndex;
         next->renderStageCullingMask = childCullingMask;
