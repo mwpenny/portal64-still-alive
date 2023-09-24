@@ -186,7 +186,8 @@ int collisionSceneIsTouchingSinglePortal(struct Vector3* contactPoint, struct Ve
         return 0;
     }
 
-    localPoint.x *= (1.0f / PORTAL_X_RADIUS);
+    localPoint.x *= (2.0f / PORTAL_COVER_WIDTH);
+    localPoint.y *= (2.0f / PORTAL_COVER_HEIGHT);
     localPoint.z = 0.0f;
 
     if (vector3MagSqrd(&localPoint) >= 1.0f) {
