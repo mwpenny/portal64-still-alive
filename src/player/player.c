@@ -549,7 +549,7 @@ struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* bl
 
 #define FOOTING_CAST_DISTANCE   (PLAYER_HEAD_HEIGHT + 0.2f)
 
-void playerUpdateFooting(struct Player* player) {
+void playerUpdateFooting(struct Player* player, float maxStandDistance) {
     player->anchoredTo = NULL;
 
     struct Vector3 castOffset;
@@ -585,7 +585,7 @@ void playerUpdateFooting(struct Player* player) {
     float penetration = hitDistance - PLAYER_HEAD_HEIGHT;
 
     if (penetration < 0.0f) {
-        vector3AddScaled(&player->body.transform.position, &gUp, MIN(-penetration, STAND_SPEED * FIXED_DELTA_TIME), &player->body.transform.position);
+        vector3AddScaled(&player->body.transform.position, &gUp, MIN(-penetration, maxStandDistance), &player->body.transform.position);
         if (player->body.velocity.y < 0.0f) {
             player->body.velocity.y = 0.0f;
         }
@@ -737,7 +737,7 @@ void playerUpdate(struct Player* player) {
     box3DUnion(&sweptBB, &player->collisionObject.boundingBox, &sweptBB);
     collisionObjectCollideMixed(&player->collisionObject, &prevPos, &sweptBB, &gCollisionScene, &gContactSolver);
 
-    playerUpdateFooting(player);
+    playerUpdateFooting(player, STAND_SPEED * FIXED_DELTA_TIME);
     
     struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);
 

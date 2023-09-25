@@ -261,7 +261,10 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     } else {
         scene->fadeInTimer = 0.0f;
     }
-}
+
+    playerUpdateFooting(&scene->player, PLAYER_HEAD_HEIGHT);  
+    scene->player.lookTransform.position = scene->player.body.transform.position;
+} 
 
 #define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
 
