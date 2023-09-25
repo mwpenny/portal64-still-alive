@@ -43,9 +43,11 @@ struct Vector3 gPortalGunUp = {0.0f, 1.0f, 0.0f};
 
 struct CollisionQuad gPlayerColliderFaces[8];
 
+#define TARGET_CAPSULE_EXTEND_HEIGHT   0.5f
+
 struct CollisionCapsule gPlayerCollider = {
     0.25f,
-    0.5f,
+    TARGET_CAPSULE_EXTEND_HEIGHT,
 };
 
 struct ColliderTypeData gPlayerColliderData = {
@@ -763,6 +765,9 @@ void playerUpdate(struct Player* player) {
     if (didPassThroughPortal) {
         soundPlayerPlay(soundsPortalEnter[didPassThroughPortal - 1], 0.75f, 1.0f, NULL, NULL);
         soundPlayerPlay(soundsPortalExit[2 - didPassThroughPortal], 0.75f, 1.0f, NULL, NULL);
+        gPlayerCollider.extendDownward = 0.0f;
+    } else {
+        gPlayerCollider.extendDownward = mathfMoveTowards(gPlayerCollider.extendDownward, TARGET_CAPSULE_EXTEND_HEIGHT, STAND_SPEED * FIXED_DELTA_TIME);
     }
 
     float rotateRate = mathfLerp(MIN_ROTATE_RATE, MAX_ROTATE_RATE, (float)gSaveData.controls.sensitivity / 0xFFFF);
