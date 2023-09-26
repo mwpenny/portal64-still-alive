@@ -330,7 +330,7 @@ void contactSolverIterateConstraints(struct ContactSolver* contactSolver) {
 	struct PointConstraint* prev = NULL;
 
 	while (curr) {
-		if (!pointConstraintMoveToPoint(curr->object, &curr->targetPos, curr->maxPosImpulse, curr->teleportOnBreak, curr->movementScaleFactor)) {
+		if (!pointConstraintMoveToPoint(curr->object, &curr->targetPos, curr->maxPosImpulse, curr->movementScaleFactor)) {
 			struct PointConstraint* next = curr->nextConstraint;
 
 			if (prev) {

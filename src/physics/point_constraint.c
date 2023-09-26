@@ -17,30 +17,14 @@ void pointConstraintTargetVelocity(struct RigidBody* rigidBody, struct Vector3* 
     }
 }
 
-int pointConstraintMoveToPoint(struct CollisionObject* object, struct Vector3* worldPoint, float maxImpulse, int teleportOnBreak, float movementScaleFactor) {
+int pointConstraintMoveToPoint(struct CollisionObject* object, struct Vector3* worldPoint, float maxImpulse, float movementScaleFactor) {
     struct RigidBody* rigidBody = object->body;
 
     struct Vector3 targetVelocity;
     vector3Sub(worldPoint, &rigidBody->transform.position, &targetVelocity);
 
     if (vector3MagSqrd(&targetVelocity) > BREAK_CONSTRAINT_DISTANCE * BREAK_CONSTRAINT_DISTANCE) {
-        if (teleportOnBreak){
-            object->body->transform.position = *worldPoint;
-            return 1;
-        }
         return 0;
-    }
-    if (teleportOnBreak){
-        if (fabsf(sqrtf(vector3DistSqrd(worldPoint, &rigidBody->transform.position))) > CLAMP_CONSTRAINT_DISTANCE){
-            while(sqrtf(vector3DistSqrd(worldPoint, &rigidBody->transform.position)) > CLAMP_CONSTRAINT_DISTANCE){
-                vector3Lerp(&rigidBody->transform.position, worldPoint, 0.01, &rigidBody->transform.position);
-            }       
-            vector3Sub(worldPoint, &rigidBody->transform.position, &targetVelocity);
-            vector3Scale(&targetVelocity, &targetVelocity, (1.0f / FIXED_DELTA_TIME));
-            vector3Scale(&targetVelocity, &targetVelocity, 0.5);
-            rigidBody->velocity = targetVelocity;
-            return 1;
-        }
     }
     
     vector3Scale(&targetVelocity, &targetVelocity, (1.0f / FIXED_DELTA_TIME));
@@ -99,14 +83,13 @@ void pointConstraintRotateTo(struct RigidBody* rigidBody, struct Quaternion* wor
     }
 }
 
-void pointConstraintInit(struct PointConstraint* constraint, struct CollisionObject* object, float maxPosImpulse, float maxRotImpulse, int teleportOnBreak, float movementScaleFactor) {
+void pointConstraintInit(struct PointConstraint* constraint, struct CollisionObject* object, float maxPosImpulse, float maxRotImpulse, float movementScaleFactor) {
     constraint->nextConstraint = NULL;
     constraint->object = object;
     constraint->targetPos = object->body->transform.position;
     constraint->targetRot = object->body->transform.rotation;
     constraint->maxPosImpulse = maxPosImpulse;
     constraint->maxRotImpulse = maxRotImpulse;
-    constraint->teleportOnBreak = teleportOnBreak;
     constraint->movementScaleFactor = movementScaleFactor;
     constraint->object->body->flags &= ~RigidBodyIsSleeping;
     constraint->object->body->sleepFrames = IDLE_SLEEP_FRAMES;

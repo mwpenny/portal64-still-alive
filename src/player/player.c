@@ -232,13 +232,13 @@ void playerApplyPortalGrab(struct Player* player, int portalIndex) {
 
 void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) {
     if (grabbing && !player->grabConstraint.object) {
-        pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 0, 1.0f);
+        pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 1.0f);
         contactSolverAddPointConstraint(&gContactSolver, &player->grabConstraint);
     } else if (!grabbing && player->grabConstraint.object) {
         player->grabConstraint.object = NULL;
         contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
     } else if (grabbing != player->grabConstraint.object) {
-        pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 0, 1.0f);
+        pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 1.0f);
     }
 }
 
