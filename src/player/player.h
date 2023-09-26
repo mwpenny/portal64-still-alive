@@ -40,7 +40,6 @@ struct Player {
     short grabbingThroughPortal;
     short dynamicId;
     struct PointConstraint grabConstraint;
-    struct PointConstraint gunConstraint;
     float pitchVelocity;
     float yawVelocity;
     enum PlayerFlags flags;
@@ -51,10 +50,11 @@ struct Player {
     float drownTimer;
     float stepTimer;
     float shakeTimer;
-    int currentFoot; //left=0, right=1
+    short currentFoot; //left=0, right=1
+    short passedThroughPortal;
 };
 
-void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity, struct CollisionObject* portalGunObject);
+void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity);
 void playerUpdate(struct Player* player);
 void playerUpdateFooting(struct Player* player, float maxStandDistance);
 void playerApplyCameraTransform(struct Player* player, struct Transform* cameraTransform);

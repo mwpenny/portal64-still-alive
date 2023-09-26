@@ -108,9 +108,9 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     transformConcat(&startLocation->transform, levelRelativeTransform(), &combinedLocation.transform);
     quatMultVector(&startLocation->transform.rotation, levelRelativeVelocity(), &startVelocity);
 
-    portalGunInit(&scene->portalGun, &combinedLocation.transform);
+    playerInit(&scene->player, &combinedLocation, &startVelocity);
 
-    playerInit(&scene->player, &combinedLocation, &startVelocity, &scene->portalGun.collisionObject);
+    portalGunInit(&scene->portalGun, &scene->player.lookTransform);
 
     scene->camera.transform.rotation = scene->player.lookTransform.rotation;
     scene->camera.transform.position = scene->player.lookTransform.position;
@@ -597,8 +597,8 @@ void sceneUpdate(struct Scene* scene) {
         securityCameraUpdate(&scene->securityCameras[i]);
     }
 
-    portalGunUpdate(&scene->portalGun, &scene->player);
     playerUpdate(&scene->player);
+    portalGunUpdate(&scene->portalGun, &scene->player);
     sceneUpdateListeners(scene);
     sceneCheckPortals(scene);
 

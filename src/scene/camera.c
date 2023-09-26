@@ -147,6 +147,7 @@ void cameraModifyProjectionViewForPortalGun(struct Camera* camera, struct Render
     
     struct Camera portalCam = *camera;
     portalCam.nearPlane = newNearPlane;
+    portalCam.transform.position = gZeroVec;
     float view[4][4];
     float projectionView[4][4];
     unsigned short perspectiveNormalize;

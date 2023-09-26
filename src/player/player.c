@@ -35,12 +35,6 @@
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
 
-struct Vector3 gPortalGunOffset = {0.120957, -0.113587, -0.20916};
-struct Vector3 gPortalGunShootOffset = {0.120957, -0.113587, -0.08};
-struct Vector3 gPortalGunForward = {0.1f, -0.1f, 1.0f};
-struct Vector3 gPortalGunShootForward = {0.3f, -0.25f, 1.0f};
-struct Vector3 gPortalGunUp = {0.0f, 1.0f, 0.0f};
-
 struct CollisionQuad gPlayerColliderFaces[8];
 
 #define TARGET_CAPSULE_EXTEND_HEIGHT   0.5f
@@ -115,7 +109,7 @@ void playerRender(void* data, struct DynamicRenderDataList* renderList, struct R
     );
 }
 
-void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity, struct CollisionObject* portalGunObject) {
+void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity) {
     player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, 0.0f, 0.5f, NULL, NULL);
 
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
@@ -133,13 +127,13 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->body.velocity = *velocity;
     player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
     player->grabConstraint.object = NULL;
-    player->gunConstraint.object = NULL;
     player->pitchVelocity = 0.0f;
     player->yawVelocity = 0.0f;
     player->flags = 0;
     player->stepTimer = STEP_TIME;
     player->shakeTimer = 0.0f;
     player->currentFoot = 0;
+    player->passedThroughPortal = 0;
 
     if (gCurrentLevelIndex == 0){
         player->flags &= ~PlayerHasFirstPortalGun;
@@ -165,9 +159,6 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     collisionObjectUpdateBB(&player->collisionObject);
 
     dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
-
-    pointConstraintInit(&player->gunConstraint, portalGunObject, 20.0f, 2.5f, 1, 0.5f);
-    contactSolverAddPointConstraint(&gContactSolver, &player->gunConstraint);
 }
 
 #define PLAYER_SPEED    (150.0f / 64.0f)
@@ -406,29 +397,6 @@ void playerUpdateGrabbedObject(struct Player* player) {
     }
 }
 
-void playerUpdateGunObject(struct Player* player) {
-    struct Vector3 forward;
-    struct Vector3 offset;
-
-    if (player->flags & PlayerJustShotPortalGun){
-        forward = gPortalGunShootForward;
-        offset = gPortalGunShootOffset;
-    }else{
-        forward = gPortalGunForward;
-        offset = gPortalGunOffset;
-    }
-
-    struct Quaternion relativeRotation;
-    quatLook(&forward, &gPortalGunUp, &relativeRotation);
-    quatMultiply(&player->lookTransform.rotation, &relativeRotation, &player->gunConstraint.object->body->transform.rotation);
-
-    struct Vector3 gunPoint;
-    transformPoint(&player->lookTransform, &offset, &gunPoint);
-
-    pointConstraintUpdateTarget(&player->gunConstraint, &gunPoint, &player->gunConstraint.object->body->transform.rotation);
-    
-}
-
 void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, struct Vector3* right) {
     quatMultVector(&transform->rotation, &gForward, forward);
     quatMultVector(&transform->rotation, &gRight, right);
@@ -603,6 +571,8 @@ void playerUpdate(struct Player* player) {
     struct Vector3 forward;
     struct Vector3 right;
 
+    player->passedThroughPortal = 0;
+
     if (player->flags & PlayerInCutscene) {
         return;
     }
@@ -752,6 +722,7 @@ void playerUpdate(struct Player* player) {
     player->body.transform.rotation = player->lookTransform.rotation;    
 
     int didPassThroughPortal = rigidBodyCheckPortals(&player->body);
+    player->passedThroughPortal = didPassThroughPortal;
 
     player->lookTransform.position = player->body.transform.position;
     player->lookTransform.position.y += camera_y_modifier;
@@ -834,7 +805,6 @@ void playerUpdate(struct Player* player) {
     }
 
     playerUpdateGrabbedObject(player);
-    playerUpdateGunObject(player);
 
     collisionObjectUpdateBB(&player->collisionObject);
 

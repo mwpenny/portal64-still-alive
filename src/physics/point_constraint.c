@@ -5,6 +5,18 @@
 #define BREAK_CONSTRAINT_DISTANCE 2.0f
 #define CLAMP_CONSTRAINT_DISTANCE 0.07f
 
+void pointConstraintTargetVelocity(struct RigidBody* rigidBody, struct Vector3* targetVelocity, float maxImpulse, float movementScaleFactor) {
+    struct Vector3 delta;
+    vector3Sub(targetVelocity, &rigidBody->velocity, &delta);
+    
+    float deltaSqrd = vector3MagSqrd(&delta);
+    if (deltaSqrd < maxImpulse * maxImpulse) {
+        vector3Scale(targetVelocity, &rigidBody->velocity, movementScaleFactor);
+    } else {
+        vector3AddScaled(&rigidBody->velocity, &delta, maxImpulse / sqrtf(deltaSqrd), &rigidBody->velocity);
+    }
+}
+
 int pointConstraintMoveToPoint(struct CollisionObject* object, struct Vector3* worldPoint, float maxImpulse, int teleportOnBreak, float movementScaleFactor) {
     struct RigidBody* rigidBody = object->body;
 
@@ -53,17 +65,7 @@ int pointConstraintMoveToPoint(struct CollisionObject* object, struct Vector3* w
         contact = contactSolverNextManifold(&gContactSolver, object, contact);
     }
 
-    struct Vector3 delta;
-    vector3Sub(&targetVelocity, &rigidBody->velocity, &delta);
-    
-
-    float deltaSqrd = vector3MagSqrd(&delta);
-    if (deltaSqrd < maxImpulse * maxImpulse) {
-        vector3Scale(&targetVelocity, &targetVelocity, movementScaleFactor);
-        rigidBody->velocity = targetVelocity;
-    } else {
-        vector3AddScaled(&rigidBody->velocity, &delta, maxImpulse / sqrtf(deltaSqrd), &rigidBody->velocity);
-    }
+    pointConstraintTargetVelocity(rigidBody, &targetVelocity, maxImpulse, movementScaleFactor);
 
     return 1;
 }

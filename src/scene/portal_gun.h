@@ -28,7 +28,6 @@ struct PortalGunProjectile {
 };
 
 struct PortalGun {
-    struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
     int portalGunVisible;
     float shootAnimationTimer;
