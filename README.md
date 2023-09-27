@@ -141,7 +141,6 @@ That will generate the rom at `/build/portal64.z64`
 <br />
 
 ## Current New Feature TODO List
-- [ ] chell is short sometimes
 - [ ] ball velocity in test chamber 11
 - [ ] clear sleeping object physics flag so buttons in savefiles remain pressed after loading
 - [ ] rumble pak support?
@@ -150,6 +149,7 @@ That will generate the rom at `/build/portal64.z64`
 - [ ] Correct elevator timing
 - [ ] Adding loading notice between levels #45
 - [ ] pausing while glados is speaking can end her speech early
+- [x] wall in test chamber 07
 - [x] near clipping plane when touching portals git 
 - [x] investigate failed portal hole in test chamber 04
 - [x] Change default controls

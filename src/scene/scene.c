@@ -659,14 +659,6 @@ void sceneUpdate(struct Scene* scene) {
                     &gZeroVec,
                     scene->elevators[teleportTo].roomIndex
                 );
-                rigidBodyTeleport(
-                    &scene->portalGun.rigidBody,
-                    &scene->elevators[i].rigidBody.transform,
-                    &scene->elevators[teleportTo].rigidBody.transform,
-                    &gZeroVec,
-                    &gZeroVec,
-                    scene->elevators[teleportTo].roomIndex
-                );
                 sceneQueueCheckpoint(&gScene);
                 sceneClosePortal(&gScene, 0);
                 sceneClosePortal(&gScene, 1);
