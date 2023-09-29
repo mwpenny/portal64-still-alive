@@ -148,6 +148,7 @@ That will generate the rom at `/build/portal64.z64`
 - [ ] Add auto save checkpoints
 - [ ] Correct elevator timing
 - [ ] pausing while glados is speaking can end her speech early
+- [x] investigate no_portals surface under portal pedestal
 - [x] Adding loading notice between levels #45
 - [x] clear sleeping object physics flag so buttons in savefiles remain pressed after loading
 - [x] ball velocity in test chamber 11

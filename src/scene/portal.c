@@ -153,7 +153,6 @@ int portalSurfaceCutNewHole(struct Portal* portal, int portalIndex) {
     struct PortalSurface newSurface;
 
     if (!portalSurfacePokeHole(currentSurface, scaledLoop, &newSurface)) {
-        portalSurfacePokeHole(currentSurface, scaledLoop, &newSurface);
         return 0;
     }
     
