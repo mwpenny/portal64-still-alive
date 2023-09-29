@@ -18,8 +18,8 @@ unsigned char gDefaultControllerSettings[ControllerActionSourceCount] = {
     [ControllerActionSourceDLeftButton] = ControllerActionNone,
     [ControllerActionSourceStartButton] = ControllerActionPause,
     [ControllerActionSourceLTrig] = ControllerActionDuck,
-    [ControllerActionSourceRTrig] = ControllerActionJump,
-    [ControllerActionSourceZTrig] = ControllerActionUseItem,
+    [ControllerActionSourceRTrig] = ControllerActionUseItem,
+    [ControllerActionSourceZTrig] = ControllerActionJump,
     [ControllerActionSourceJoystick] = ControllerActionRotate,
 };
 
