@@ -17,6 +17,7 @@ struct BallLauncher {
     short dynamicId;
     short signalIndex;
     float ballLifetime;
+    float ballVelocity;
     struct Ball currentBall;
 };
 

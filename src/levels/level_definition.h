@@ -240,6 +240,7 @@ struct BallLauncherDefinition {
     short roomIndex;
     short signalIndex;
     float ballLifetime;
+    float ballVelocity;
 };
 
 struct BallCatcherDefinition {

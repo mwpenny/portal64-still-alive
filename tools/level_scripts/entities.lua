@@ -195,7 +195,8 @@ for _, switch_element in pairs(sk_scene.nodes_for_type('@ball_launcher')) do
         rotation * sk_math.axis_angle(sk_math.vector3(1, 0, 0), math.pi * 0.5),
         room_index,
         signals.signal_index_for_name(switch_element.arguments[1]),
-        switch_element.arguments[2] and tonumber(switch_element.arguments[2]) or 10
+        switch_element.arguments[2] and tonumber(switch_element.arguments[2]) or 10,
+        switch_element.arguments[3] and tonumber(switch_element.arguments[3]) or 3
     })
 end
 

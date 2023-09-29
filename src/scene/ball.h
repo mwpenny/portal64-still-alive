@@ -11,6 +11,7 @@
 enum BallFlags {
     BallFlagsCaught = (1 << 0),
     BallFlagsPowering = (1 << 1),
+    BallJustBounced = (1 << 2),
 };
 
 struct BallBurnMark {

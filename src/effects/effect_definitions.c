@@ -47,3 +47,19 @@ struct SplashParticleDefinition gBallBurst = {
     .particleHalfWidth = 0.02f,
     .particleColor = {255, 255, 255, 255},
 };
+
+
+struct SplashParticleDefinition gBallBounce = {
+    .particleLifetime = 0.75f,
+    .fullWidthTime = 0.125f,
+    .fadeStartTime = 0.5f,
+    .particleTailDelay = 0.1f,
+    .minNormalVelocity = 0.5f,
+    .maxNormalVelocity = 1.5f,
+    .minTangentVelocity = 0.5f,
+    .maxTangentVelocity = 1.0f,
+    .particleCount = 16,
+    .materialIndex = SPARK_INDEX,
+    .particleHalfWidth = 0.02f,
+    .particleColor = {255, 255, 255, 255},
+};
