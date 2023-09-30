@@ -131,15 +131,39 @@ struct ControlActionDataRow gControllerDataRows[] = {
     {"Look backward", ControllerActionLookForward, NULL},
 };
 
-void controlsRenderIcons(Gfx* dl, enum ControllerAction action, int y) {
+int controlsMeasureIcons(enum ControllerAction action) {
     struct ControllerSourceWithController sources[MAX_SOURCES_PER_ACTION];
 
     int sourceCount = controllerSourcesForAction(action, sources, MAX_SOURCES_PER_ACTION);
 
     char* iconMapping;
     struct ControllerIcon* icons;
+    
+    if (IS_DIRECTION_ACTION(action)) {
+        iconMapping = gControllerActionToDirectionIcon;
+        icons = gControllerDirectionIcons;
+    } else {
+        iconMapping = gControllerActionToButtonIcon;
+        icons = gControllerButtonIcons;
+    }
 
-    int x = CONTROLS_X + CONTROLS_WIDTH - ROW_PADDING * 2;
+    int result = 0;
+
+    for (int i = 0; i < sourceCount; ++i) {
+        struct ControllerIcon icon = icons[(int)iconMapping[(int)sources[i].button]];
+        result += icon.w;
+    }
+
+    return result;
+}
+
+Gfx* controlsRenderIcons(Gfx* dl, enum ControllerAction action, int x, int y) {
+    struct ControllerSourceWithController sources[MAX_SOURCES_PER_ACTION];
+
+    int sourceCount = controllerSourcesForAction(action, sources, MAX_SOURCES_PER_ACTION);
+
+    char* iconMapping;
+    struct ControllerIcon* icons;
     
     if (IS_DIRECTION_ACTION(action)) {
         iconMapping = gControllerActionToDirectionIcon;
@@ -162,13 +186,14 @@ void controlsRenderIcons(Gfx* dl, enum ControllerAction action, int y) {
             0x400, 0x400
         );
     }
-
-    gSPEndDisplayList(dl++);
+    
+    return dl;
 }
 
 void controlsLayoutRow(struct ControlsMenuRow* row, struct ControlActionDataRow* data, int x, int y) {
     fontRender(&gDejaVuSansFont, data->name, x + ROW_PADDING, y, row->actionText);
-    controlsRenderIcons(row->sourceIcons, data->action, y);
+    Gfx* dl = controlsRenderIcons(row->sourceIcons, data->action, CONTROLS_X + CONTROLS_WIDTH - ROW_PADDING * 2, y);
+    gSPEndDisplayList(dl++);
     row->y = y;
 }
 
@@ -429,4 +454,53 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
     gSPDisplayList(renderState->dl++, ui_material_revert_list[BUTTON_ICONS_INDEX]);
 
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT);
+}
+
+#define CONTROL_PROMPT_RIGHT_MARGIN     20
+#define CONTROL_PROMPT_BOTTOM_MARGIN    50
+#define CONTROL_PROMPT_HEIGHT           24
+#define CONTROL_PROMPT_PADDING          6
+
+void controlsRenderPrompt(enum ControllerAction action, char* message, float opacity, struct RenderState* renderState) {
+    struct Vector2s16 size = fontMeasure(&gDejaVuSansFont, message);
+
+    int iconsWidth = controlsMeasureIcons(action);
+
+    int opacityAsInt = (int)(255 * opacity);
+
+    if (opacityAsInt > 255) {
+        opacityAsInt = 255;
+    } else if (opacityAsInt < 0) {
+        opacityAsInt = 0;
+    }
+
+    int textPositionX = (SCREEN_WD - CONTROL_PROMPT_RIGHT_MARGIN - CONTROL_PROMPT_PADDING) - size.x;
+    int textPositionY = (SCREEN_HT - CONTROL_PROMPT_BOTTOM_MARGIN - CONTROL_PROMPT_PADDING) - size.y;
+
+    gSPDisplayList(renderState->dl++, ui_material_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
+    gDPSetEnvColor(renderState->dl++, 0, 0, 0, opacityAsInt / 3);
+    gDPFillRectangle(
+        renderState->dl++, 
+        textPositionX - iconsWidth - CONTROL_PROMPT_PADDING * 2,
+        textPositionY - CONTROL_PROMPT_PADDING,
+        SCREEN_WD - CONTROL_PROMPT_RIGHT_MARGIN, 
+        SCREEN_HT - CONTROL_PROMPT_BOTTOM_MARGIN
+    );
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
+
+    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
+    gDPSetEnvColor(renderState->dl++, 232, 206, 80, opacityAsInt);
+    renderState->dl = fontRender(
+        &gDejaVuSansFont, 
+        message, 
+        textPositionX, 
+        textPositionY, 
+        renderState->dl
+    );
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
+
+    gSPDisplayList(renderState->dl++, ui_material_list[BUTTON_ICONS_INDEX]);
+    gDPSetEnvColor(renderState->dl++, 232, 206, 80, opacityAsInt);
+    renderState->dl = controlsRenderIcons(renderState->dl, action, textPositionX - CONTROL_PROMPT_PADDING, textPositionY);
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[BUTTON_ICONS_INDEX]);
 }

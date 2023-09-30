@@ -41,4 +41,6 @@ void controlsMenuInit(struct ControlsMenu* controlsMenu);
 enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu);
 void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* renderState, struct GraphicsTask* task);
 
+void controlsRenderPrompt(enum ControllerAction action, char* message, float opacity, struct RenderState* renderState);
+
 #endif

@@ -13,6 +13,7 @@
 #include "./door.h"
 #include "./fizzler.h"
 #include "elevator.h"
+#include "hud.h"
 #include "pedestal.h"
 #include "signage.h"
 #include "box_dropper.h"
@@ -63,6 +64,7 @@ struct Scene {
     struct SecurityCamera* securityCameras;
     struct SavedPortal savedPortal;
     struct Effects effects;
+    struct Hud hud;
     OSTime cpuTime;
     OSTime lastFrameStart;
     OSTime lastFrameTime;
@@ -81,13 +83,8 @@ struct Scene {
     u8 clockCount;
     u8 securityCameraCount;
 
-    u8 last_portal_indx_shot;
-    u8 looked_wall_portalable_0;
-    u8 looked_wall_portalable_1;
     u8 continuouslyAttemptingPortalOpen;
     u8 checkpointState;
-
-    float fadeInTimer;
 };
 
 extern struct Scene gScene;

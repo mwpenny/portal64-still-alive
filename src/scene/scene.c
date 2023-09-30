@@ -242,9 +242,6 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
         securityCameraInit(&scene->securityCameras[i], &gCurrentLevel->securityCameras[i]);
     }
 
-    scene->last_portal_indx_shot=-1;
-    scene->looked_wall_portalable_0=0;
-    scene->looked_wall_portalable_1=0;
     scene->continuouslyAttemptingPortalOpen=0;
     scene->checkpointState = SceneCheckpointStateSaved;
 
@@ -256,11 +253,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     sceneAnimatorInit(&scene->animator, gCurrentLevel->animations, gCurrentLevel->animationInfoCount);
 
-    if (gCurrentLevelIndex == 0) {
-        scene->fadeInTimer = INTRO_TOTAL_TIME;
-    } else {
-        scene->fadeInTimer = 0.0f;
-    }
+    hudInit(&scene->hud);
 
     playerUpdateFooting(&scene->player, PLAYER_HEAD_HEIGHT);  
     scene->player.lookTransform.position = scene->player.body.transform.position;
@@ -316,7 +309,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
 
-    hudRender(renderState, &scene->player, scene->last_portal_indx_shot, scene->looked_wall_portalable_0, scene->looked_wall_portalable_1, scene->fadeInTimer);
+    hudRender(&scene->hud, &scene->player, renderState);
 
     if (gGameMenu.state != GameMenuStateResumeGame) {
         gameMenuRender(&gGameMenu, renderState, task);
@@ -356,23 +349,20 @@ void sceneCheckPortals(struct Scene* scene) {
     if (fireOrange && hasOrange && !playerIsGrabbing(&scene->player)) {
         portalGunFire(&scene->portalGun, 0, &raycastRay, &playerUp, scene->player.body.currentRoom);
         scene->player.flags |= PlayerJustShotPortalGun;
-        scene->last_portal_indx_shot=0;
+        hudPortalFired(&scene->hud, 0);
         soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL);
     }
 
     if ((fireBlue || (!hasOrange && fireOrange)) && hasBlue && !playerIsGrabbing(&scene->player)) {
         portalGunFire(&scene->portalGun, 1, &raycastRay, &playerUp, scene->player.body.currentRoom);
         scene->player.flags |= PlayerJustShotPortalGun;
-        scene->last_portal_indx_shot=1;
+        hudPortalFired(&scene->hud, 1);
         soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL, NULL);
     }
 
     if ((fireOrange || fireBlue) && playerIsGrabbing(&scene->player)){
         playerSetGrabbing(&scene->player, NULL);
     }
-
-    scene->looked_wall_portalable_0 = 0;
-    scene->looked_wall_portalable_1 = 0;
     
     if ((scene->player.flags & PlayerFlagsGrounded) && (scene->player.flags & PlayerIsStepping)){
         soundPlayerPlay(soundsConcreteFootstep[scene->player.currentFoot], 1.0f, 1.0f, NULL, NULL);
@@ -400,14 +390,7 @@ void sceneCheckPortals(struct Scene* scene) {
         scene->player.flags &= ~PlayerJustDeniedSelect;
     }
 
-    if (scene->player.flags & PlayerHasFirstPortalGun){
-        if (sceneFirePortal(scene, &raycastRay, &playerUp, 0, scene->player.body.currentRoom, 1, 1)){
-            scene->looked_wall_portalable_0 = 1;
-        }
-        if (sceneFirePortal(scene, &raycastRay, &playerUp, 1, scene->player.body.currentRoom, 1, 1)){
-            scene->looked_wall_portalable_1 = 1;
-        }
-    }
+    hudUpdatePortalIndicators(&scene->hud, &raycastRay, &playerUp);
 
     if (scene->player.body.flags & RigidBodyFizzled) {
         if (scene->portals[0].flags & PortalFlagsPlayerPortal) {
@@ -732,13 +715,8 @@ void sceneUpdate(struct Scene* scene) {
         levelQueueLoad(NEXT_LEVEL, NULL, NULL);
     }
 
-    if (scene->fadeInTimer > 0.0f) {
-        scene->fadeInTimer -= FIXED_DELTA_TIME;
+    hudUpdate(&scene->hud);
 
-        if (scene->fadeInTimer < 0.0f) {
-            scene->fadeInTimer = 0.0f;
-        }
-    }
 }
 
 void sceneQueueCheckpoint(struct Scene* scene) {
@@ -935,9 +913,6 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
     int relativeIndex = NO_TRANSFORM_INDEX;
 
     if (!sceneDetermineSurfaceMapping(scene, hit.object, &mappingRange, &relativeIndex)) {
-        if (!just_checking) {
-            effectsSplashPlay(&scene->effects, &gFailPortalSplash[portalIndex], &hit.at, &hit.normal);
-        }
         return 0;
     }
 
@@ -973,10 +948,6 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
             scene->savedPortal.ray = *ray;
             scene->savedPortal.roomIndex = roomIndex;
             scene->savedPortal.transformUp = *playerUp;
-        }
-
-        if (!just_checking) {
-            effectsSplashPlay(&scene->effects, &gFailPortalSplash[portalIndex], &hit.at, &hit.normal);
         }
 
         return 0;
