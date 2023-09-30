@@ -30,12 +30,14 @@
 #define RETICLE_WIDTH 16
 #define RETICLE_HEIGHT 16
 
+#define PROMPT_FADE_TIME        2.0f
+
 void hudInit(struct Hud* hud) {
-    hud->promptAction = ControllerActionNone;
-    hud->promptMessage = NULL;
+    hud->promptType = CutscenePromptTypeNone;
     hud->promptOpacity = 0.0f;
 
     hud->flags = 0;
+    hud->resolvedPrompts = 0;
     hud->lastPortalIndexShot = -1;
 
     if (gCurrentLevelIndex == 0) {
@@ -54,6 +56,16 @@ void hudUpdate(struct Hud* hud) {
             hud->fadeInTimer = 0.0f;
         }
     }
+
+    float targetPromptOpacity = (hud->flags & HudFlagsShowingPrompt) ? 1.0 : 0.0f;
+
+    if (targetPromptOpacity != hud->promptOpacity) {
+        hud->promptOpacity = mathfMoveTowards(hud->promptOpacity, targetPromptOpacity, FIXED_DELTA_TIME / PROMPT_FADE_TIME);
+    }
+
+    if (targetPromptOpacity && (hud->resolvedPrompts & (1 << hud->promptType)) != 0) {
+        hudShowActionPrompt(hud, CutscenePromptTypeNone);
+    }
 }
 
 void hudUpdatePortalIndicators(struct Hud* hud, struct Ray* raycastRay,  struct Vector3* playerUp) { 
@@ -71,6 +83,52 @@ void hudUpdatePortalIndicators(struct Hud* hud, struct Ray* raycastRay,  struct 
 
 void hudPortalFired(struct Hud* hud, int index) {
     hud->lastPortalIndexShot = index;
+
+    if (index == 0) {
+        hudResolvePrompt(hud, CutscenePromptTypePortal0);
+    }
+ 
+    if (index == 1) {
+        hudResolvePrompt(hud, CutscenePromptTypePortal1);
+    }
+}
+
+u8 gPromptActions[] = {
+    ControllerActionNone,
+    ControllerActionOpenPortal1,
+    ControllerActionOpenPortal0,
+    ControllerActionUseItem,
+    ControllerActionUseItem,
+    ControllerActionUseItem,
+    ControllerActionDuck,
+    ControllerActionMove,
+    ControllerActionJump,
+};
+
+char* gPromptText[] = {
+    NULL,
+    "TO PLACE THE BLUE PORTAL",
+    "TO PLACE THE ORANGE PORTAL",
+    "TO PICKUP AND OBJECT",
+    "TO DROP AND OBJECT",
+    "TO USE",
+    "TO CROUCH",
+    "TO MOVE",
+    "TO JUMP",
+};
+
+void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType) {
+    if (promptType == CutscenePromptTypeNone) {
+        hud->flags &= ~HudFlagsShowingPrompt;
+        return;
+    }
+
+    hud->flags |= HudFlagsShowingPrompt;
+    hud->promptType = promptType;
+}
+
+void hudResolvePrompt(struct Hud* hud, enum CutscenePromptType promptType) {
+    hud->resolvedPrompts |= (1 << promptType);
 }
 
 void hudRender(struct Hud* hud, struct Player* player, struct RenderState* renderState) {
@@ -184,7 +242,7 @@ void hudRender(struct Hud* hud, struct Player* player, struct RenderState* rende
                 G_TX_RENDERTILE, 0 << 5, 0 << 5, 1 << 10, 1 << 10);
     }
 
-    if (hud->flags & HudFlagsShowingPrompt) {
-        controlsRenderPrompt(hud->promptAction, hud->promptMessage, hud->promptOpacity, renderState);
+    if (hud->promptOpacity > 0.0f && hud->promptType != CutscenePromptTypeNone) {
+        controlsRenderPrompt(gPromptActions[hud->promptType], gPromptText[hud->promptType], hud->promptOpacity, renderState);
     }
 }

@@ -164,6 +164,11 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             sceneClosePortal(&gScene, step->closePortal.portalIndex);
             break;
         }
+        case CutsceneStepShowPrompt:
+        {
+            hudShowActionPrompt(&gScene.hud, step->showPrompt.actionPromptType);
+            break;
+        }
         case CutsceneStepTypeSetSignal:
             signalsSetDefault(step->setSignal.signalIndex, step->setSignal.signalValue);
             break;

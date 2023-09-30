@@ -234,9 +234,11 @@ void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) 
     if (grabbing && !player->grabConstraint.object) {
         pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 1.0f);
         contactSolverAddPointConstraint(&gContactSolver, &player->grabConstraint);
+        hudResolvePrompt(&gScene.hud, CutscenePromptTypePickup);
     } else if (!grabbing && player->grabConstraint.object) {
         player->grabConstraint.object = NULL;
         contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
+        hudResolvePrompt(&gScene.hud, CutscenePromptTypeDrop);
     } else if (grabbing != player->grabConstraint.object) {
         pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 1.0f);
     }
@@ -326,6 +328,7 @@ void playerUpdateGrabbedObject(struct Player* player) {
                 }
                 else if ((hit.object->body)){
                     player->flags |= PlayerJustSelect;
+                    hudResolvePrompt(&gScene.hud, CutscenePromptTypeSwitch);
                 }
                 else{
                     player->flags |= PlayerJustDeniedSelect;
@@ -587,6 +590,7 @@ void playerUpdate(struct Player* player) {
     if (!isDead && (player->flags & PlayerFlagsGrounded) && controllerActionGet(ControllerActionJump)) {
         player->body.velocity.y = JUMP_IMPULSE;
         player->flags |= PlayerJustJumped;
+        hudResolvePrompt(&gScene.hud, CutscenePromptTypeJump);
     }
 
     struct Vector3 targetVelocity = gZeroVec;
@@ -609,8 +613,11 @@ void playerUpdate(struct Player* player) {
         lookInput.y = tmp;
     }
 
-    if (!isDead) {
+    if (moveInput.x != 0.0f || moveInput.y != 0.0f) {
+        hudResolvePrompt(&gScene.hud, CutscenePromptTypeMove);
+    }
 
+    if (!isDead) {
         vector3AddScaled(&targetVelocity, &right, PLAYER_SPEED * moveInput.x, &targetVelocity);
         vector3AddScaled(&targetVelocity, &forward, -PLAYER_SPEED * moveInput.y, &targetVelocity);
 

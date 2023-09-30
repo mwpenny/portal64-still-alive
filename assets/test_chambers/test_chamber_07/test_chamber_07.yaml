@@ -59,6 +59,7 @@ cutscenes:
     - stop_cutscene platform_ferry
     - start_cutscene platform_loop
     - close_portal 0
+    - show_prompt CutscenePromptTypePortal0
     - q_sound 07_PART1_GET_DEVICE_COMPONENT_1 CH_GLADOS
     - q_sound 07_PART1_GET_DEVICE_COMPONENT_2 CH_GLADOS
     - q_sound 07_PART1_GET_DEVICE_COMPONENT_3 CH_GLADOS

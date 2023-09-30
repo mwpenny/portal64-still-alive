@@ -16,13 +16,13 @@ enum HudFlags {
 };
 
 struct Hud {
-    enum ControllerAction promptAction;
-    char* promptMessage;
+    enum CutscenePromptType promptType;
     float promptOpacity;
 
     float fadeInTimer;
 
     u16 flags;
+    u16 resolvedPrompts;
 
     u8 lastPortalIndexShot;
 };
@@ -33,6 +33,8 @@ void hudUpdate(struct Hud* hud);
 void hudUpdatePortalIndicators(struct Hud* hud, struct Ray* raycastRay,  struct Vector3* playerUp);
 
 void hudPortalFired(struct Hud* hud, int index);
+void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType);
+void hudResolvePrompt(struct Hud* hud, enum CutscenePromptType promptType);
 
 void hudRender(struct Hud* hud, struct Player* player, struct RenderState* renderState);
 

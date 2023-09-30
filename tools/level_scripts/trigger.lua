@@ -225,6 +225,11 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
         result.killPlayer = {
             step.args[1] == 'water' and 1 or 0,
         }
+    elseif step.command == "show_prompt" then
+        result.type = sk_definition_writer.raw('CutsceneStepShowPrompt')
+        result.showPrompt = {
+            sk_definition_writer.raw(step.args[1]),
+        }
     else
         error("Unrecognized cutscene step " .. step.command)
         result.type = sk_definition_writer.raw('CutsceneStepTypeNoop')

@@ -15,6 +15,7 @@ cutscenes:
     - set_signal room_0_exit
     - hide_pedestal
     - stop_cutscene portal_loop
+    - show_prompt CutscenePromptTypePortal1
     - q_sound 01_PART1_GET_PORTAL_GUN_1 CH_GLADOS
     - q_sound 01_PART1_GET_PORTAL_GUN_2 CH_GLADOS
     - q_sound 01_PART1_GET_PORTAL_GUN_3 CH_GLADOS

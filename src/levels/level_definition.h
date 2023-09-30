@@ -48,6 +48,19 @@ enum CutsceneStepType {
     CutsceneStepSaveCheckpoint,
     CutsceneStepKillPlayer,
     CutsceneStepTypeClosePortal,
+    CutsceneStepShowPrompt,
+};
+
+enum CutscenePromptType {
+    CutscenePromptTypeNone,
+    CutscenePromptTypePortal0,
+    CutscenePromptTypePortal1,
+    CutscenePromptTypePickup,
+    CutscenePromptTypeDrop,
+    CutscenePromptTypeSwitch,
+    CutscenePromptTypeCrouch,
+    CutscenePromptTypeMove,
+    CutscenePromptTypeJump,
 };
 
 #define CH_NONE    0xFF
@@ -120,6 +133,9 @@ struct CutsceneStep {
         struct {
             u8 isWater;
         } killPlayer;
+        struct {
+            u8 actionPromptType;
+        } showPrompt;
         int noop;
     };
 };
