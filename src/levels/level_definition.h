@@ -149,6 +149,7 @@ enum ObjectTriggerType {
     ObjectTriggerTypeNone,
     ObjectTriggerTypePlayer,
     ObjectTriggerTypeCube,
+    ObjectTriggerTypeCubeHover,
 };
 
 struct ObjectTriggerInfo {

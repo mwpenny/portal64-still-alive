@@ -300,8 +300,12 @@ local function parse_trigger_signal(signal)
     return signals.signal_index_for_name(signal)
 end
 
-local function signal_type_index(index)
+local function signal_type_index(index, is_hover)
     if index == 3 then
+        if is_hover then
+            return sk_definition_writer.raw('ObjectTriggerTypeCubeHover')
+        end
+
         return sk_definition_writer.raw('ObjectTriggerTypeCube')
     end
 
@@ -317,9 +321,10 @@ local function generate_triggers(cutscenes)
         local triggers = {}
         
         for i = 1, #trigger.arguments, 2 do
-            local cutscene = cutscene_index(cutscenes, trigger.arguments[i])
+            local cutscene_name = trigger.arguments[i]
+            local cutscene = cutscene_index(cutscenes, cutscene_name)
             table.insert(triggers, {
-                signal_type_index(i),
+                signal_type_index(i, string.sub(cutscene_name, 1, 6) == "HOVER_"),
                 cutscene,
                 parse_trigger_signal(trigger.arguments[i + 1]),
             })

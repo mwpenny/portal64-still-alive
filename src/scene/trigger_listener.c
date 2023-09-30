@@ -9,10 +9,6 @@
 extern struct ColliderTypeData gPlayerColliderData;
 
 enum ObjectTriggerType triggerDetermineType(struct CollisionObject* objectEnteringTrigger) {
-    if (gScene.player.grabConstraint.object == objectEnteringTrigger) {
-        return ObjectTriggerTypeNone;
-    }
-
     if (objectEnteringTrigger->collider == &gPlayerColliderData) {
         return ObjectTriggerTypePlayer;
     }
@@ -20,7 +16,7 @@ enum ObjectTriggerType triggerDetermineType(struct CollisionObject* objectEnteri
     int decorType = decorIdForObjectDefinition((struct DecorObjectDefinition*)objectEnteringTrigger->collider);
 
     if (decorType == DECOR_TYPE_CUBE || decorType == DECOR_TYPE_CUBE_UNIMPORTANT) {
-        return ObjectTriggerTypeCube;
+        return gScene.player.grabConstraint.object == objectEnteringTrigger ? ObjectTriggerTypeCubeHover : ObjectTriggerTypeCube;
     }
 
     return ObjectTriggerTypeNone;

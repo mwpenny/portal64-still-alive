@@ -509,4 +509,6 @@ void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
     for (int i = 0; i < scene->doorCount; ++i) {
         doorCheckForOpenState(&scene->doors[i]);
     }
+
+    scene->hud.fadeInTimer = 0.0f;
 }
