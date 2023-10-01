@@ -68,6 +68,8 @@ cutscenes:
     - q_sound 07_PART1_TRAPPED_2 CH_GLADOS
     - wait_for_channel CH_GLADOS
     - set_signal trap_door
+  PROMPT_SWITCH:
+    - show_prompt CutscenePromptTypeUse
 operators:
   - weeeee = exit_1 and flying
   - not_move_to_gun = not move_to_gun

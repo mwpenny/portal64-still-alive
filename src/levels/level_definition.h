@@ -57,7 +57,7 @@ enum CutscenePromptType {
     CutscenePromptTypePortal1,
     CutscenePromptTypePickup,
     CutscenePromptTypeDrop,
-    CutscenePromptTypeSwitch,
+    CutscenePromptTypeUse,
     CutscenePromptTypeCrouch,
     CutscenePromptTypeMove,
     CutscenePromptTypeJump,

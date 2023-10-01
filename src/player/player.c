@@ -328,7 +328,7 @@ void playerUpdateGrabbedObject(struct Player* player) {
                 }
                 else if ((hit.object->body)){
                     player->flags |= PlayerJustSelect;
-                    hudResolvePrompt(&gScene.hud, CutscenePromptTypeSwitch);
+                    hudResolvePrompt(&gScene.hud, CutscenePromptTypeUse);
                 }
                 else{
                     player->flags |= PlayerJustDeniedSelect;
