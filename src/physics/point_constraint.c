@@ -2,7 +2,7 @@
 
 #include "../util/time.h"
 
-#define BREAK_CONSTRAINT_DISTANCE 2.0f
+#define BREAK_CONSTRAINT_DISTANCE 1.25f
 #define CLAMP_CONSTRAINT_DISTANCE 0.07f
 
 void pointConstraintTargetVelocity(struct RigidBody* rigidBody, struct Vector3* targetVelocity, float maxImpulse, float movementScaleFactor) {
@@ -43,7 +43,7 @@ int pointConstraintMoveToPoint(struct CollisionObject* object, struct Vector3* w
         float overlap = vector3Dot(&contactNormal, &targetVelocity);
 
         if (overlap < 0.0f) {
-            vector3AddScaled(&targetVelocity, &contact->normal, -overlap * 0.7f, &targetVelocity);
+            vector3AddScaled(&targetVelocity, &contact->normal, -overlap * 0.85f, &targetVelocity);
         }
 
         contact = contactSolverNextManifold(&gContactSolver, object, contact);
