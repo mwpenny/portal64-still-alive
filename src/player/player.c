@@ -815,7 +815,9 @@ void playerUpdate(struct Player* player) {
 
     collisionObjectUpdateBB(&player->collisionObject);
 
-    player->body.currentRoom = worldCheckDoorwayCrossings(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom, doorwayMask);
+    if (!didPassThroughPortal) {
+        player->body.currentRoom = worldCheckDoorwayCrossings(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom, doorwayMask);
+    }
     dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
 
     float startTime = 0.0f;
