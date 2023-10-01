@@ -141,13 +141,13 @@ That will generate the rom at `/build/portal64.z64`
 <br />
 
 ## Current New Feature TODO List
-- [ ] button prompts
 - [ ] wake up objects after opening a portal under them
 - [ ] rumble pak support?
 - [ ] Investigate crash after falling into death water on test chamber 8
 - [ ] Add auto save checkpoints
 - [ ] Correct elevator timing
 - [ ] pausing while glados is speaking can end her speech early
+- [x] button prompts
 - [x] investigate no_portals surface under portal pedestal
 - [x] Adding loading notice between levels #45
 - [x] clear sleeping object physics flag so buttons in savefiles remain pressed after loading
