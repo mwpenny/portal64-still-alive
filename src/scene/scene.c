@@ -301,6 +301,8 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     renderPlanBuild(&renderPlan, scene, renderState);
     renderPlanExecute(&renderPlan, scene, staticMatrices, renderState);
 
+    // contactSolverDebugDraw(&gContactSolver, renderState);
+
     if (scene->portalGun.portalGunVisible){
         portalGunRenderReal(&scene->portalGun, renderState, &scene->camera);
     }
@@ -317,7 +319,6 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     // sceneRenderPerformanceMetrics(scene, renderState, task);
 
-    // contactSolverDebugDraw(&gContactSolver, renderState);
 }
 
 
@@ -814,7 +815,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                 }
             }
 
-            contactSolverCheckPortalContacts(&gContactSolver, collisionObject);
+            contactSolverCheckPortalContacts(&gContactSolver);
             ballBurnFilterOnPortal(&portal->rigidBody.transform, portalIndex);
             playerSignalPortalChanged(&scene->player);
             return 1;

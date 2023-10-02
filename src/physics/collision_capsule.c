@@ -90,39 +90,3 @@ struct ColliderCallbacks gCollisionCapsuleCallbacks = {
     collisionCapsuleBoundingBox,
     collisionCapsuleMinkowsiSum,
 };
-
-int collisionCapsuleCheckWithNearestPoint(struct Vector3* nearestPoint, struct CollisionCapsule* otherCapsule, struct Vector3* capsulePos, struct ContactManifold* contact) {
-    vector3Sub(capsulePos, nearestPoint, &contact->normal);
-
-    float distanceSqrd = vector3MagSqrd(&contact->normal);
-
-    if (distanceSqrd > otherCapsule->radius * otherCapsule->radius) {
-        return 0;
-    }
-
-    float distance = 0.0f;
-
-    if (distanceSqrd < 0.00001f) {
-        contact->normal = gRight;
-    } else {
-        distance = sqrtf(distanceSqrd);
-        vector3Scale(&contact->normal, &contact->normal, 1.0f / distance);
-    }
-
-    struct ContactPoint* contactPoint = &contact->contacts[0];
-
-    vector3Scale(&contact->normal, &contactPoint->contactAWorld, otherCapsule->radius);
-    vector3Scale(&contact->normal, &contactPoint->contactBWorld, -otherCapsule->radius);
-
-    contactPoint->bias = 0.0f;
-    contactPoint->id = 0;
-    contactPoint->normalImpulse = 0.0f;
-    contactPoint->normalMass = 0.0f;
-    contactPoint->penetration = distance - otherCapsule->radius;
-    contactPoint->tangentImpulse[0] = 0.0f;
-    contactPoint->tangentImpulse[1] = 0.0f;
-    contactPoint->tangentMass[0] = 0.0f;
-    contactPoint->tangentMass[0] = 0.0f;
-
-    return 1;
-}

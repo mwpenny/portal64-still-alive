@@ -48,10 +48,10 @@ void contactConstraintStateDebugDraw(struct ContactManifold* constraintState, st
         mat[2][2] = constraintState->tangentVectors[1].z;
         mat[2][3] = 0.0f;
 
-        struct Vector3 pos = contact->contactBLocal;
+        struct Vector3 pos = contact->contactBWorld;
 
         if (constraintState->shapeB->body) {
-            transformPoint(&constraintState->shapeB->body->transform, &pos, &pos);
+            vector3Add(&constraintState->shapeB->body->transform.position, &pos, &pos);
         }
 
         mat[3][0] = pos.x * SCENE_SCALE;
