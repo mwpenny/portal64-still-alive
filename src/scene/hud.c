@@ -107,8 +107,8 @@ u8 gPromptActions[] = {
 
 char* gPromptText[] = {
     NULL,
-    "TO PLACE THE BLUE PORTAL",
     "TO PLACE THE ORANGE PORTAL",
+    "TO PLACE THE BLUE PORTAL",
     "TO PICKUP AND OBJECT",
     "TO DROP AND OBJECT",
     "TO USE",

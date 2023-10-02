@@ -784,7 +784,7 @@ int portalSurfaceJoinInnerLoopToOuterLoop(struct PortalSurfaceBuilder* surfaceBu
     int currentEdge = surfaceBuilder->cuttingEdge;
     int nextEdge;
 
-    int closestEdge;
+    int closestEdge = currentEdge;
     int closestDistance = 0x7FFFFFFF;
 
     while ((nextEdge = portalSurfaceNextEdge(surfaceBuilder, currentEdge)), nextEdge != surfaceBuilder->cuttingEdge) {
