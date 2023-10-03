@@ -255,6 +255,75 @@ std::shared_ptr<ExtendedMesh> ExtendedMesh::Transform(const aiMatrix4x4& transfo
     return result;
 }
 
+template <typename T>
+T* joinVector3DArrays(T* a, size_t aCount, T* b, size_t bCount) {
+    T* result = new T[aCount + bCount];
+    if (a) {
+        std::copy(a, a + aCount, result);
+    }
+    if (b) {
+        std::copy(b, b + bCount, result + aCount);
+    }
+    return result;
+}
+
+void copyFaceContents(aiFace& into, const aiFace& from, unsigned int offset) {
+    into.mNumIndices = from.mNumIndices;
+    into.mIndices = new unsigned int[into.mNumIndices];
+
+    for (unsigned i = 0; i < into.mNumIndices; ++i) {
+        into.mIndices[i] = from.mIndices[i] + offset;
+    }
+}
+
+std::shared_ptr<ExtendedMesh> ExtendedMesh::Join(std::shared_ptr<ExtendedMesh>& other) const {
+    aiMesh* result = new aiMesh;
+
+    result->mPrimitiveTypes = mMesh->mPrimitiveTypes;
+    result->mNumVertices = mMesh->mNumVertices + other->mMesh->mNumVertices;
+
+    result->mVertices = joinVector3DArrays(mMesh->mVertices, mMesh->mNumVertices, other->mMesh->mVertices, other->mMesh->mNumVertices);
+    result->mNormals = joinVector3DArrays(mMesh->mNormals, mMesh->mNumVertices, other->mMesh->mNormals, other->mMesh->mNumVertices);
+    result->mTangents = joinVector3DArrays(mMesh->mTangents, mMesh->mNumVertices, other->mMesh->mTangents, other->mMesh->mNumVertices);
+    result->mBitangents = joinVector3DArrays(mMesh->mBitangents, mMesh->mNumVertices, other->mMesh->mBitangents, other->mMesh->mNumVertices);
+
+    for (int i = 0; i < AI_MAX_NUMBER_OF_COLOR_SETS; ++i) {
+        result->mColors[i] = joinVector3DArrays(mMesh->mColors[i], mMesh->mNumVertices, other->mMesh->mColors[i], other->mMesh->mNumVertices);
+    }
+
+    for (int i = 0; i < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++i) {
+        result->mTextureCoords[i] = joinVector3DArrays(mMesh->mTextureCoords[i], mMesh->mNumVertices, other->mMesh->mTextureCoords[i], other->mMesh->mNumVertices);
+        result->mNumUVComponents[i] = mMesh->mNumUVComponents[i];
+    }
+
+    result->mNumFaces = mMesh->mNumFaces + other->mMesh->mNumFaces;
+
+    result->mFaces = new aiFace[result->mNumFaces];
+
+    aiFace* curr = result->mFaces;
+
+    for (unsigned i = 0; i < mMesh->mNumFaces; ++i, ++curr) {
+        copyFaceContents(*curr, mMesh->mFaces[i], 0);
+    }
+
+    for (unsigned i = 0; i < other->mMesh->mNumFaces; ++i, ++curr) {
+        copyFaceContents(*curr, other->mMesh->mFaces[i], mMesh->mNumVertices);
+    }
+
+    // TODO
+    result->mNumBones = 0;
+
+    result->mMaterialIndex = mMesh->mMaterialIndex;
+    result->mAABB.mMin = min(mMesh->mAABB.mMin, other->mMesh->mAABB.mMin);
+    result->mAABB.mMax = min(mMesh->mAABB.mMax, other->mMesh->mAABB.mMax);
+
+    result->mName = "joined";
+    
+    // TODO use global bone heirarchy
+    BoneHierarchy boneHeirarchy;
+    return std::shared_ptr<ExtendedMesh>(new ExtendedMesh(result, boneHeirarchy));
+}
+
 void ExtendedMesh::ReplaceColor(const aiColor4D& color) {
     if (mMesh->mColors[0]) {
         delete [] mMesh->mColors[0];

@@ -34,6 +34,7 @@ public:
     void RecalcBB();
 
     std::shared_ptr<ExtendedMesh> Transform(const aiMatrix4x4& transform) const;
+    std::shared_ptr<ExtendedMesh> Join(std::shared_ptr<ExtendedMesh>& other) const;
     void ReplaceColor(const aiColor4D& color);
     void CubeProjectTex(double sTile, double tTile, aiQuaternion rotation, aiVector3D translation);
 

@@ -21,6 +21,7 @@
 #include "savefile/savefile.h"
 #include "sk64/skelatool_animator.h"
 #include "util/dynamic_asset_loader.h"
+#include "util/profile.h"
 
 #include "levels/levels.h"
 #include "savefile/checkpoint.h"
@@ -241,7 +242,9 @@ static void gameProc(void* arg) {
                 }
 
                 if (pendingGFX < 2 && drawingEnabled) {
+                    u64 renderStart = profileStart();
                     graphicsCreateTask(&gGraphicsTasks[drawBufferIndex], gSceneCallbacks->graphicsCallback, gSceneCallbacks->data);
+                    profileEnd(renderStart, 1);
                     drawBufferIndex = drawBufferIndex ^ 1;
                     ++pendingGFX;
                 }
@@ -254,12 +257,16 @@ static void gameProc(void* arg) {
                 if (inputIgnore) {
                     --inputIgnore;
                 } else {
+                    u64 updateStart = profileStart();
                     gSceneCallbacks->updateCallback(gSceneCallbacks->data);
+                    profileEnd(updateStart, 0);
                     drawingEnabled = 1;
                 }
                 timeUpdateDelta();
                 soundPlayerUpdate();
                 controllersSavePreviousState();
+
+                profileReport();
 
                 break;
 

@@ -322,6 +322,21 @@ int luaTransformMesh(lua_State* L) {
     return 1;
 }
 
+int luaJoinMesh(lua_State* L) {
+    lua_settop(L, 2);
+
+    std::shared_ptr<ExtendedMesh> otherMesh;
+    meshFromLua(L, otherMesh);
+
+    std::shared_ptr<ExtendedMesh> mesh;
+    meshFromLua(L, mesh);
+
+    std::shared_ptr<ExtendedMesh> result = mesh->Join(otherMesh);
+
+    meshToLua(L, result);
+    return 1;
+}
+
 /***
  @table Mesh
  @tfield string name
@@ -351,6 +366,9 @@ void meshToLua(lua_State* L, std::shared_ptr<ExtendedMesh> mesh) {
 
     lua_pushcfunction(L, luaTransformMesh);
     lua_setfield(L, -2, "transform");
+
+    lua_pushcfunction(L, luaJoinMesh);
+    lua_setfield(L, -2, "join");
 
     toLuaLazyArray<aiVector3D>(L, mesh->mMesh->mVertices, mesh->mMesh->mNumVertices);
     lua_setfield(L, -2, "vertices");

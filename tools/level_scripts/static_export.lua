@@ -2,6 +2,7 @@
 local sk_definition_writer = require('sk_definition_writer')
 local sk_scene = require('sk_scene')
 local sk_mesh = require('sk_mesh')
+local sk_math = require('sk_math')
 local sk_input = require('sk_input')
 local room_export = require('tools.level_scripts.room_export')
 local animation = require('tools.level_scripts.animation')
@@ -18,7 +19,44 @@ local portalable_surfaces = {
 
 local signal_elements = {}
 
-local function proccessStaticNodes(nodes)
+local coplanar_tolerance = 0.1
+
+local function is_coplanar(mesh, plane)
+    for _, vertex in pairs(mesh.vertices) do
+        if math.abs(plane:distance_to_point(vertex)) > coplanar_tolerance then
+            return false
+        end
+    end
+
+    return true
+end
+
+local function should_join_mesh(entry)
+    return entry.plane ~= nil
+end
+
+local function insert_or_merge(static_list, new_entry)
+    if not should_join_mesh(new_entry) then
+        table.insert(static_list, new_entry)
+        return
+    end 
+
+    for _, other_entry in pairs(static_list) do
+        if should_join_mesh(other_entry) and 
+            other_entry.material_index == new_entry.material_index and
+            other_entry.room_index == new_entry.room_index and 
+            is_coplanar(new_entry.chunk.mesh, other_entry.plane) then
+                
+            other_entry.chunk.mesh = other_entry.chunk.mesh:join(new_entry.chunk.mesh)
+            other_entry.original_bb = other_entry.chunk.mesh.bb
+            return
+        end
+    end
+
+    table.insert(static_list, new_entry)
+end
+
+local function list_static_nodes(nodes)
     local result = {}
     local bb_scale = sk_input.settings.fixed_point_scale
 
@@ -41,30 +79,60 @@ local function proccessStaticNodes(nodes)
                 original_bb.max = original_bb.max - parent_pos
             end
 
-            local gfxName = sk_mesh.generate_mesh({chunkV}, "_geo", {defaultMaterial = chunkV.material})
+            local plane = sk_math.plane3_with_point(chunkV.mesh.normals[1], chunkV.mesh.vertices[1])
+            local accept_portals =chunkV.mesh.material and portalable_surfaces[chunkV.mesh.material.name] and not sk_scene.find_flag_argument(v.arguments, "no_portals")
 
-            local mesh_bb = original_bb * bb_scale
-
-            mesh_bb.min.x = math.floor(mesh_bb.min.x + 0.5)
-            mesh_bb.min.y = math.floor(mesh_bb.min.y + 0.5)
-            mesh_bb.min.z = math.floor(mesh_bb.min.z + 0.5)
-
-            mesh_bb.max.x = math.floor(mesh_bb.max.x + 0.5)
-            mesh_bb.max.y = math.floor(mesh_bb.max.y + 0.5)
-            mesh_bb.max.z = math.floor(mesh_bb.max.z + 0.5)
+            if transform_index or signal or accept_portals or not is_coplanar(chunkV.mesh, plane) then
+                plane = nil
+            end
     
-            table.insert(result, {
+            insert_or_merge(result, {
                 node = v.node, 
-                mesh = chunkV.mesh,
-                mesh_bb = mesh_bb,
-                display_list = sk_definition_writer.raw(gfxName), 
-                material_index = sk_definition_writer.raw(chunkV.material.macro_name),
+                chunk = chunkV,
+                material_index = chunkV.material.macro_name,
                 transform_index = transform_index,
                 room_index = room_export.node_nearest_room_index(v.node) or 0,
-                accept_portals = chunkV.mesh.material and portalable_surfaces[chunkV.mesh.material.name] and not sk_scene.find_flag_argument(v.arguments, "no_portals"),
+                accept_portals = accept_portals,
                 signal = signal,
+                original_bb = original_bb,
+                plane = plane,
             })
         end
+    end
+
+    return result;
+end
+
+local function proccessStaticNodes(nodes)
+    local result = {}
+    local bb_scale = sk_input.settings.fixed_point_scale
+
+    local source_nodes = list_static_nodes(nodes)
+
+    for _, source_node in pairs(source_nodes) do
+        local gfxName = sk_mesh.generate_mesh({source_node.chunk}, "_geo", {defaultMaterial = source_node.chunk.material})
+
+        local mesh_bb = source_node.original_bb * bb_scale
+
+        mesh_bb.min.x = math.floor(mesh_bb.min.x + 0.5)
+        mesh_bb.min.y = math.floor(mesh_bb.min.y + 0.5)
+        mesh_bb.min.z = math.floor(mesh_bb.min.z + 0.5)
+
+        mesh_bb.max.x = math.floor(mesh_bb.max.x + 0.5)
+        mesh_bb.max.y = math.floor(mesh_bb.max.y + 0.5)
+        mesh_bb.max.z = math.floor(mesh_bb.max.z + 0.5)
+
+        table.insert(result, {
+            node = source_node.node, 
+            mesh = source_node.chunk.mesh,
+            mesh_bb = mesh_bb,
+            display_list = sk_definition_writer.raw(gfxName), 
+            material_index = sk_definition_writer.raw(source_node.chunk.material.macro_name),
+            transform_index = source_node.transform_index,
+            room_index = source_node.room_index,
+            accept_portals = source_node.accept_portals,
+            signal = source_node.signal,
+        })
     end
 
     table.sort(result, function(a, b)

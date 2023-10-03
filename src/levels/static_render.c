@@ -6,6 +6,7 @@
 #include "../graphics/render_scene.h"
 #include "../math/mathf.h"
 #include "../scene/signals.h"
+#include "../util/profile.h"
 
 #include "../build/assets/materials/static.h"
 
@@ -119,11 +120,17 @@ void staticRender(struct Transform* cameraTransform, struct FrustrumCullingInfor
 
     struct RenderScene* renderScene = renderSceneNew(cameraTransform, renderState, MAX_RENDER_COUNT, visibleRooms);
 
+    u64 startTime = profileStart();
     staticRenderPopulateRooms(cullingInfo, staticTransforms, renderScene);
+    profileEnd(startTime, 4);
 
+    startTime = profileStart();
     dynamicRenderPopulateRenderScene(dynamicList, stageIndex, renderScene, cameraTransform, cullingInfo, visibleRooms);
+    profileEnd(startTime, 5);
 
+    startTime = profileStart();
     renderSceneGenerate(renderScene, renderState);
+    profileEnd(startTime, 6);
 
     renderSceneFree(renderScene);
 }
