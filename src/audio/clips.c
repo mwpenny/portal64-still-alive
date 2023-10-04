@@ -3,13 +3,11 @@
 
 #include "../../build/src/audio/clips.h"
 
-unsigned short soundsSkippable[10] = {
+unsigned short soundsSkippable[8] = {
     SOUNDS_PORTAL_ENTER1,
     SOUNDS_PORTAL_ENTER2,
     SOUNDS_PORTAL_EXIT1,
     SOUNDS_PORTAL_EXIT2,
-    SOUNDS_PORTALGUN_SHOOT_RED1,
-    SOUNDS_PORTALGUN_SHOOT_BLUE1,
     SOUNDS_CONCRETE1, //left foot
     SOUNDS_CONCRETE2, //right foot
     SOUNDS_CONCRETE3, //land
