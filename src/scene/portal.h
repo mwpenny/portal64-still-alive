@@ -11,7 +11,7 @@
 #include "./portal_surface.h"
 #include "../physics/collision_object.h"
 
-#define STARTING_RENDER_DEPTH       2
+#define PORTAL_RENDER_DEPTH_MAX  8
 #define PORTAL_LOOP_SIZE    8
 
 enum PortalFlags {

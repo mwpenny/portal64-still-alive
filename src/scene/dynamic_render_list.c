@@ -3,6 +3,7 @@
 #include "dynamic_scene.h"
 #include "../util/memory.h"
 #include "../physics/collision_scene.h"
+#include "../savefile/savefile.h"
 
 extern struct DynamicScene gDynamicScene;
 
@@ -183,7 +184,7 @@ void dynamicRenderListPopulate(struct DynamicRenderDataList* list, struct Render
                 continue;
             }
 
-            if (stages[stageIndex].currentDepth == STARTING_RENDER_DEPTH && (object->flags & DYNAMIC_SCENE_OBJECT_SKIP_ROOT)) {
+            if (stages[stageIndex].currentDepth == ((int)(gSaveData.controls.portalRenderDepth * (1.0f / 0xFFFF) * PORTAL_RENDER_DEPTH_MAX)) && (object->flags & DYNAMIC_SCENE_OBJECT_SKIP_ROOT)) {
                 continue;
             }
 

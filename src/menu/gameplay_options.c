@@ -23,8 +23,47 @@ void gameplayOptionsInit(struct GameplayOptions* gameplayOptions) {
     gameplayOptions->movingPortals = menuBuildCheckbox(&gDejaVuSansFont, "Movable Portals", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
     gameplayOptions->wideScreen = menuBuildCheckbox(&gDejaVuSansFont, "Wide Screen", GAMEPLAY_X + 8, GAMEPLAY_Y + 28);
 
+    gameplayOptions->portalRenderDepthText = menuBuildText(&gDejaVuSansFont, "Portal Render Depth", GAMEPLAY_X + 8, GAMEPLAY_Y + 48);
+    gameplayOptions->portalRenderDepth = menuBuildSlider(GAMEPLAY_X + 126, GAMEPLAY_Y + 48, 126, SCROLL_TICKS);
+
     gameplayOptions->movingPortals.checked = (gSaveData.controls.flags & ControlSaveMoveablePortals) != 0;
     gameplayOptions->wideScreen.checked = (gSaveData.controls.flags & ControlSaveWideScreen) != 0;
+    gameplayOptions->portalRenderDepth.value = (float)gSaveData.controls.portalRenderDepth / 0xFFFF;
+}
+
+#define FULL_SCROLL_TIME    2.0f
+#define SCROLL_MULTIPLIER   (int)(0xFFFF * FIXED_DELTA_TIME / (80 * FULL_SCROLL_TIME))
+#define SCROLL_CHUNK_SIZE   (0x10000 / SCROLL_INTERVALS)
+
+void gameplayOptionsHandleSlider(unsigned short* settingValue, float* sliderValue) {
+    OSContPad* pad = controllersGetControllerData(0);
+
+    int newValue = (int)*settingValue + pad->stick_x * SCROLL_MULTIPLIER;
+
+    if (controllerGetButtonDown(0, A_BUTTON | R_JPAD)) {
+        if (newValue >= 0xFFFF && controllerGetButtonDown(0, A_BUTTON)) {
+            newValue = 0;
+        } else {
+            newValue = newValue + SCROLL_CHUNK_SIZE;
+            newValue = newValue - (newValue % SCROLL_CHUNK_SIZE);
+        }
+    }
+
+    if (controllerGetButtonDown(0, L_JPAD)) {
+        newValue = newValue - 1;
+        newValue = newValue - (newValue % SCROLL_CHUNK_SIZE);
+    }
+
+    if (newValue < 0) {
+        newValue = 0;
+    }
+
+    if (newValue > 0xFFFF) {
+        newValue = 0xFFFF;
+    }
+
+    *settingValue = newValue;
+    *sliderValue = (float)newValue / 0xFFFF;
 }
 
 enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions) {
@@ -75,15 +114,27 @@ enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions
                     gSaveData.controls.flags &= ~ControlSaveWideScreen;
                 }
             }
+        case GameplayOptionPortalRenderDepth:
+            gameplayOptionsHandleSlider(&gSaveData.controls.portalRenderDepth, &gameplayOptions->portalRenderDepth.value);
+            break;
         break;
     }
 
-    if ((controllerDir & ControllerDirectionLeft || controllerGetButtonDown(0, L_TRIG) || controllerGetButtonDown(0, Z_TRIG))) {
-        return MenuDirectionLeft;
+    if (gameplayOptions->selectedItem == GameplayOptionPortalRenderDepth){
+        if ((controllerGetButtonDown(0, L_TRIG) || controllerGetButtonDown(0, Z_TRIG))) {
+            return MenuDirectionLeft;
+        }
+        if ((controllerGetButtonDown(0, R_TRIG))) {
+            return MenuDirectionRight;
+        }
     }
-
-    if ((controllerDir & ControllerDirectionRight || controllerGetButtonDown(0, R_TRIG))) {
-        return MenuDirectionRight;
+    else{
+        if (controllerDir & ControllerDirectionLeft || controllerGetButtonDown(0, L_TRIG) || controllerGetButtonDown(0, Z_TRIG)) {
+            return MenuDirectionLeft;
+        }
+        if (controllerDir & ControllerDirectionRight || controllerGetButtonDown(0, R_TRIG)) {
+            return MenuDirectionRight;
+        }
     }
 
     return MenuDirectionStay;
@@ -98,6 +149,9 @@ void gameplayOptionsRender(struct GameplayOptions* gameplayOptions, struct Rende
     gSPDisplayList(renderState->dl++, gameplayOptions->wideScreen.outline);
     renderState->dl = menuCheckboxRender(&gameplayOptions->wideScreen, renderState->dl);
 
+    gSPDisplayList(renderState->dl++, gameplayOptions->portalRenderDepth.back);
+    renderState->dl = menuSliderRender(&gameplayOptions->portalRenderDepth, renderState->dl);
+
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
 
     gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
@@ -108,6 +162,10 @@ void gameplayOptionsRender(struct GameplayOptions* gameplayOptions, struct Rende
 
     menuSetRenderColor(renderState, gameplayOptions->selectedItem == GameplayOptionWideScreen, &gSelectionGray, &gColorWhite);
     gSPDisplayList(renderState->dl++, gameplayOptions->wideScreen.text);
+
+    gDPPipeSync(renderState->dl++);
+    menuSetRenderColor(renderState, gameplayOptions->selectedItem == GameplayOptionPortalRenderDepth, &gSelectionGray, &gColorWhite);
+    gSPDisplayList(renderState->dl++, gameplayOptions->portalRenderDepthText);
 
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
 }
