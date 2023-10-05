@@ -1,0 +1,1 @@
+--rotate 90,0,180 -m assets/materials/static.skm.yaml -m assets/materials/objects.skm.yaml --default-material light_rail_endcap

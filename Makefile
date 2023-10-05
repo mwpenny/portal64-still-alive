@@ -223,7 +223,8 @@ DYNAMIC_MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/signage/clock_digits.blend \
 	assets/models/signage/clock.blend \
 	assets/models/props/box_dropper_glass.blend \
-	assets/models/props/portal_cleanser.blend
+	assets/models/props/portal_cleanser.blend \
+	assets/models/props/light_rail_endcap.blend
 
 DYNAMIC_ANIMATED_MODEL_LIST = assets/models/pedestal.blend \
 	assets/models/props/box_dropper.blend \

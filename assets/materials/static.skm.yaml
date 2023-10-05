@@ -820,6 +820,21 @@ materials:
     gDPSetCombineMode: 
       color: ["SHADE", "0", "TEXEL0", "0"]
 
+  light_rail_endcap:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/light_rail_endcap.png
+      fmt: G_IM_FMT_RGBA
+      siz: G_IM_SIZ_16b
+      s:
+        wrap: true
+      t:
+        wrap: false
+        
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "TEXEL0", "0"]
+
   light_rail_beam:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/effects/light_rail_beam1.png
