@@ -237,10 +237,17 @@ struct BoxDropperDefinition {
     short signalIndex;
 };
 
+enum AnimationSoundType {
+    AnimationSoundTypeNone,
+    AnimationSoundTypeLightRail,
+    AnimationSoundTypePiston,
+};
+
 struct AnimationInfo {
     struct SKArmatureDefinition armature;
     struct SKAnimationClip* clips;
     short clipCount;
+    short soundType;
 };
 
 struct DynamicBoxDefinition {

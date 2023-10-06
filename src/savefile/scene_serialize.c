@@ -387,7 +387,7 @@ void catcherDeserialize(struct Serializer* serializer, struct Scene* scene) {
 
 void sceneAnimatorSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     for (int i = 0; i < scene->animator.animatorCount; ++i) {
-        action(serializer, &scene->animator.playbackSpeeds[i], sizeof(float));
+        action(serializer, &scene->animator.state[i].playbackSpeed, sizeof(float));
 
         struct SKArmature* armature = &scene->animator.armatures[i];
         for (int boneIndex = 0; boneIndex < armature->numberOfBones; ++boneIndex) {
@@ -420,7 +420,7 @@ void switchSerialize(struct Serializer* serializer, SerializeAction action, stru
 
 void sceneAnimatorDeserialize(struct Serializer* serializer, struct Scene* scene) {
     for (int i = 0; i < scene->animator.animatorCount; ++i) {
-        serializeRead(serializer, &scene->animator.playbackSpeeds[i], sizeof(float));
+        serializeRead(serializer, &scene->animator.state[i].playbackSpeed, sizeof(float));
 
         struct SKArmature* armature = &scene->animator.armatures[i];
         for (int boneIndex = 0; boneIndex < armature->numberOfBones; ++boneIndex) {

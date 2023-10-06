@@ -115,7 +115,7 @@ void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* veloc
 
     dynamicSceneSetRoomFlags(ball->dynamicId, ROOM_FLAG_FROM_INDEX(startingRoom));
 
-    ball->soundLoopId = soundPlayerPlay(soundsBallLoop, 3.0f, 1.0f, &ball->rigidBody.transform.position, &ball->rigidBody.velocity);
+    ball->soundLoopId = soundPlayerPlay(soundsBallLoop, 1.0f, 1.0f, &ball->rigidBody.transform.position, &ball->rigidBody.velocity);
 }
 
 void ballTurnOnCollision(struct Ball* ball) {
@@ -134,7 +134,7 @@ void ballInitBurn(struct Ball* ball, struct ContactManifold* manifold) {
             vector3Negate(&normal, &normal);
         }
         effectsSplashPlay(&gScene.effects, &gBallBounce, &ball->rigidBody.transform.position, &manifold->normal);
-        soundPlayerPlay(soundsBallBounce, 3.0f, 1.0f, &manifold->contacts[0].contactAWorld, &gZeroVec);
+        soundPlayerPlay(soundsBallBounce, 1.0f, 1.0f, &manifold->contacts[0].contactAWorld, &gZeroVec);
         ball->flags |= BallJustBounced;
     }
 
@@ -205,7 +205,7 @@ void ballUpdate(struct Ball* ball) {
             collisionSceneRemoveDynamicObject(&ball->collisionObject);
             dynamicSceneRemove(ball->dynamicId);
             soundPlayerStop(ball->soundLoopId);
-            soundPlayerPlay(soundsBallExplode, 4.0f, 1.0f, &ball->rigidBody.transform.position, &gZeroVec);
+            soundPlayerPlay(soundsBallExplode, 2.0f, 1.0f, &ball->rigidBody.transform.position, &gZeroVec);
             effectsSplashPlay(&gScene.effects, &gBallBurst, &ball->rigidBody.transform.position, &gUp);
             ball->soundLoopId = SOUND_ID_NONE;
         }

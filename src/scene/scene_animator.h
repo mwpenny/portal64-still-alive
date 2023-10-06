@@ -8,11 +8,17 @@
 
 #include "../graphics/renderstate.h"
 
+struct SceneAnimatorState {
+    float playbackSpeed;
+    ALSndId soundId;
+    struct Vector3 lastPosition;
+};
+
 struct SceneAnimator {
     struct SKArmature* armatures;
     struct SKAnimator* animators;
     struct AnimationInfo* animationInfo;
-    float* playbackSpeeds;
+    struct SceneAnimatorState* state;
     short animatorCount;
     short boneCount;
 };

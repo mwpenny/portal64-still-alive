@@ -10,9 +10,9 @@ for _, node in pairs(sk_scene.nodes_for_type('@anim')) do
     local existing = armature_bones_by_name[name]
 
     if existing then
-        table.insert(existing, node.node)
+        table.insert(existing.nodes, node.node)
     else
-        armature_bones_by_name[name] = {node.node}
+        armature_bones_by_name[name] = {nodes = {node.node}, arguments = node.arguments}
     end
 end
 
@@ -25,8 +25,8 @@ local node_to_bone_index = {}
 local node_to_armature_index = {}
 local bones_as_array = {}
 
-for name, nodes in pairs(armature_bones_by_name) do
-    table.insert(armatures, {name = name, armature = sk_animation.build_armature(nodes)})
+for name, data in pairs(armature_bones_by_name) do
+    table.insert(armatures, {name = name, armature = sk_animation.build_armature(data.nodes), sound_type = sk_scene.find_named_argument(data.arguments, "sound_type")})
 end
 
 table.sort(armatures, function(a, b)
@@ -76,7 +76,8 @@ for index, armature in pairs(armatures) do
     table.insert(animated_nodes, {
         armature = armature_data,
         clips = sk_definition_writer.reference_to(animation_clips, 1),
-        clipCount = #animation_clips
+        clipCount = #animation_clips,
+        soundType = sk_definition_writer.raw('AnimationSoundType' .. (armature.sound_type or 'None')),
     })
 
     armature_indices_by_name[armature.name] = sk_definition_writer.raw(sk_definition_writer.add_macro('ARMATURE_' .. armature.name, tostring(index - 1)))
