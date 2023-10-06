@@ -15,7 +15,7 @@
 void audioOptionsInit(struct AudioOptions* audioOptions) {
     audioOptions->selectedItem = AudioOptionSubtitlesEnabled;
 
-    audioOptions->subtitlesEnabled = menuBuildCheckbox(&gDejaVuSansFont, "Enable Subtitles", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
+    audioOptions->subtitlesEnabled = menuBuildCheckbox(&gDejaVuSansFont, "Closed Captions", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
     audioOptions->subtitlesEnabled.checked = (gSaveData.controls.flags & ControlSaveSubtitlesEnabled) != 0;
 }
 
