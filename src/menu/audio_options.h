@@ -4,7 +4,14 @@
 #include "./menu.h"
 #include "../graphics/graphics.h"
 
+enum AudioOption {
+    AudioOptionSubtitlesEnabled,
+
+    AudioOptionCount,
+};
+
 struct AudioOptions {
+    struct MenuCheckbox subtitlesEnabled;
     short selectedItem;
 };
 

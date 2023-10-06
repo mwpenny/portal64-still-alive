@@ -6,6 +6,7 @@
 #include "../util/time.h"
 #include "../levels/levels.h"
 #include "./scene.h"
+#include "../savefile/savefile.h"
 
 #define HUD_CENTER_WIDTH 6
 #define HUD_CENTER_HEIGHT 8
@@ -35,6 +36,7 @@
 void hudInit(struct Hud* hud) {
     hud->promptType = CutscenePromptTypeNone;
     hud->promptOpacity = 0.0f;
+    hud->subtitleOpacity = 0.0f;
 
     hud->flags = 0;
     hud->resolvedPrompts = 0;
@@ -63,9 +65,11 @@ void hudUpdate(struct Hud* hud) {
         hud->promptOpacity = mathfMoveTowards(hud->promptOpacity, targetPromptOpacity, FIXED_DELTA_TIME / PROMPT_FADE_TIME);
     }
 
+
     if (targetPromptOpacity && (hud->resolvedPrompts & (1 << hud->promptType)) != 0) {
         hudShowActionPrompt(hud, CutscenePromptTypeNone);
     }
+
 }
 
 void hudUpdatePortalIndicators(struct Hud* hud, struct Ray* raycastRay,  struct Vector3* playerUp) { 
@@ -117,6 +121,71 @@ char* gPromptText[] = {
     "TO JUMP",
 };
 
+char* gSubtitleText[] = {
+    "",
+    "Hello and, again, welcome to the Aperture Science \ncomputer-aided enrichment center.",
+    "We hope your brief detention in the relaxation \nvault has been a pleasant one.",
+    "Your specimen has been processed and we are now\nready to begin the test proper.",
+    "Before we start, however, keep in mind that \nalthough fun and learning are the primary goals of\nall enrichment center activities, serious\ninjuries may occur.", 
+    "For your own safety and the safety of others, \nplease refrain from t-*bzzzzzt*",
+    "Por favor bordón de fallar. Muchos gracias de \nfallar gra-*bzzt*",
+    "Stand back. The portal will open in three, two, one.",
+    "Excellent. Please proceed into the chamberlock\nafter completing each test.",
+    "First, however, note the incandescent particle\nfield across the exit.",
+    "This Aperture Science Material Emancipation Grid\nwill vaporize any unauthorized equipment that\npasses through it - for instance, the Aperture\nScience Weighted Storage Cube.", 
+    "Please place the Weighted Storage Cube on the \nFifteen Hundred Megawatt Aperture Science Heavy \nDuty Super-Colliding Super Button.", 
+    "Perfect. Please move quickly to the chamberlock,\nas the effects of prolonged exposure to the \nbutton are not part of this test.",
+    "You're doing very well!",
+    "Please be advised that a noticeable taste of blood\nis not part of any test protocol but is an \nunintended side effect of the Aperture Science \nMaterial Emancipation Grill, which may,\nin semi-rare cases, emancipate dental \nfillings, crowns, tooth enamel and teeth.",
+    "Very good! You are now in possession of the \nAperture Science Handheld Portal Device.",
+    "With it, you can create your own portals.",
+    "These intra dimensional gates have proven to \nbe completely safe.",
+    "The device, however, has not.",
+    "Do not touch the operational end of the device.",
+    "Do not look directly at the operational end of the\ndevice.",
+    "Do not submerge the device in liquid, even partially.",
+    "Most importantly, under no circumstances should \nyou-*bzzzpt*",
+    "Please proceed to the chamberlock. Mind the gap.",
+    "Well done! Remember: The Aperture Science Bring \nYour Daughter to Work Day is the perfect time to\nhave her tested.",
+    "Welcome to test chamber four.",
+    "You're doing quite well.",
+    "Once again, excellent work.",
+    "As part of a required test protocol, we will not \nmonitor the next test chamber. You will be \nentirely on your own.Good luck.",
+    "You're not a good person. You know that, right?",
+    "As part of a required test protocol, our previous\nstatement suggesting that we would not monitor \nthis chamber was an outright fabrication.",
+    "Good job! As part of a required test protocol, we\nwill stop enhancing the truth in three, two, o-\n*bzzt*",
+    "Warning devices are required on all mobile \nequipment. However, alarms and flashing hazard lights \nhave been found to agitate the high energy pellet\nand have therefore been disabled for \nyour safety.",
+    "Good. Now use the Aperture Science Unstationary\nScaffold to reach the chamberlock.",
+    "While safety is one of many Enrichment Center goals,\nthe Aperture Science High Energy Pellet, seen \nto the left of the chamber, can and has \ncaused permanent disabilities such as \nvaporization.",
+    "Please be careful.",
+    "Unbelievable! You, <B>Subject Name Here<B>, must be\nthe pride of <B>Subject Hometown Here<B>.",
+    "Very impressive. Please note that any appearance of\ndanger is merely a device to enhance your \ntesting experience.",
+    "Please note that we have added a consequence for \nfailure. Any contact with the chamber floor will \nresult in an 'unsatisfactory' mark on your \nofficial testing record followed by \ndeath. Good luck!",
+    "The Enrichment Center regrets to inform you that\nthis next test is impossible.",
+    "Make no attempt to solve it.",
+    "Fantastic! You remained resolute and resourceful in\nan atmosphere of extreme pessimism.",
+    "The Enrichment Center apologizes for this clearly \nbroken test chamber.",
+    "Once again, the Enrichment Center offers its most \nsincere apologies on the occasion of this \nunsolvable test environment.",
+    "Frankly, this chamber was a mistake. If we were you,\nwe would quit now.",
+    "No one will blame you for giving up. In fact, quitting\nat this point is a perfectly reasonable \nresponse.",
+    "Quit now and cake will be served immediately.",
+    "Hello again. To reiterate our previous warning: This\ntest (garbled) -ard momentum.",
+    "Momentum, a function of mass and velocity, is\nconserved between portals. In layman's terms: speedy\nthing goes in, speedy thing comes out.",
+    "Spectacular. You appear to understand how a portal\naffects forward momentum, or to be more precise,\nhow it does not.",
+    "The Enrichment Center promises to always provide a\nsafe testing environment.",
+    "In dangerous testing environments, the Enrichment \nCenter promises to always provide useful advice.",
+    "For instance, the floor here will kill you - try to \navoid it.",
+    "Get ot ydaer f-f-fling yourself. F-Fling into sp\n-*bzzt*",
+    "Weeeeeeeeeeeeeeeeeeeeee-*bzzt*",
+    "The device has been modified so that it can now \nmanufacture two linked portals at once.",
+    "As part of an optional test protocol, we are pleased\nto present an amusing fact:",
+    "The device is now more valuable than the organs \nand combined incomes of everyone in <B>Subject \nHometown Here<B>.",
+    "Through no fault of the Enrichment Center, you \nhave managed to trap yourself in this room.",
+    "An escape hatch will open in three, two, one."
+};
+
+
+
 void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType) {
     if (promptType == CutscenePromptTypeNone) {
         hud->flags &= ~HudFlagsShowingPrompt;
@@ -127,8 +196,25 @@ void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType) {
     hud->promptType = promptType;
 }
 
+void hudShowSubtitle(struct Hud* hud, enum CutsceneSubtitleType subtitleType) {
+    if (subtitleType == CutsceneSubtitleTypeNone) {
+        hud->flags &= ~HudFlagsShowingSubtitle;
+        hud->subtitleOpacity = 0.0;
+        return;
+    }
+
+    hud->flags |= HudFlagsShowingSubtitle;
+    hud->subtitleType = subtitleType;
+    hud->subtitleOpacity = 0.6;
+}
+
 void hudResolvePrompt(struct Hud* hud, enum CutscenePromptType promptType) {
     hud->resolvedPrompts |= (1 << promptType);
+}
+
+void hudResolveSubtitle(struct Hud* hud) {
+    hud->subtitleOpacity = 0.0;
+    hud->flags &= ~HudFlagsShowingSubtitle;
 }
 
 void hudRender(struct Hud* hud, struct Player* player, struct RenderState* renderState) {
@@ -244,5 +330,9 @@ void hudRender(struct Hud* hud, struct Player* player, struct RenderState* rende
 
     if (hud->promptOpacity > 0.0f && hud->promptType != CutscenePromptTypeNone) {
         controlsRenderPrompt(gPromptActions[hud->promptType], gPromptText[hud->promptType], hud->promptOpacity, renderState);
+    }
+
+    if (hud->flags & HudFlagsShowingSubtitle && gSaveData.controls.flags & ControlSaveSubtitlesEnabled) {
+        controlsRenderSubtitle(gSubtitleText[hud->subtitleType], hud->subtitleOpacity, renderState);
     }
 }
