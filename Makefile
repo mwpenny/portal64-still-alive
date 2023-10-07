@@ -109,6 +109,7 @@ src/models/sphere.h src/models/sphere_geo.inc.h: assets/fbx/Sphere.fbx
 portal_pak_dir: vpk/portal_pak_dir.vpk
 	vpk -x portal_pak_dir vpk/portal_pak_dir.vpk
 	vpk -x portal_pak_dir vpk/hl2_sound_misc_dir.vpk
+	vpk -x portal_pak_dir vpk/hl2_misc_dir.vpk
 
 
 TEXTURE_SCRIPTS = $(shell find assets/ -type f -name '*.ims')
@@ -273,6 +274,7 @@ build/src/menu/main_menu.o: build/src/audio/clips.h build/assets/materials/ui.h 
 build/src/menu/new_game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
 build/src/menu/options_menu.o: build/assets/materials/ui.h
 build/src/menu/save_game_menu.o: build/src/audio/clips.h
+build/src/scene/scene_animator.o: build/src/audio/clips.h
 build/src/menu/savefile_list.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/player/player.o: build/assets/models/player/chell.h build/assets/materials/static.h
 build/src/scene/ball_catcher.o: build/assets/models/props/combine_ball_catcher.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
@@ -384,6 +386,10 @@ $(INS_SOUNDS): portal_pak_dir
 
 portal_pak_dir/sound/music/%.wav: portal_pak_dir/sound/music/%.mp3
 
+build/assets/sound/vehicles/tank_turret_loop1.wav: portal_pak_dir
+	@mkdir -p $(@D)
+	sox portal_pak_dir/sound/vehicles/tank_turret_loop1.wav -b 16 $@
+
 build/%.aifc: %.sox portal_pak_dir
 	@mkdir -p $(@D)
 	sox $(<:assets/%.sox=portal_pak_dir/%.wav) $(shell cat $<) $(@:%.aifc=%.wav)
@@ -400,7 +406,7 @@ build/%.aifc: %.msox portal_pak_dir
 	sox $(<:assets/%.msox=portal_pak_dir/%.wav) $(shell cat $<) $(@:%.aifc=%.wav)
 	$(SFZ2N64) -o $@ $(@:%.aifc=%.wav)
 
-build/assets/sound/sounds.sounds build/assets/sound/sounds.sounds.tbl: $(SOUND_CLIPS)
+build/assets/sound/sounds.sounds build/assets/sound/sounds.sounds.tbl: $(SOUND_CLIPS) build/assets/sound/vehicles/tank_turret_loop1.wav
 	@mkdir -p $(@D)
 	$(SFZ2N64) -o $@ $^
 
