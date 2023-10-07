@@ -64,9 +64,13 @@ LDIRT  =	$(BASE_TARGET_NAME).elf $(CP_LD_SCRIPT) $(BASE_TARGET_NAME).z64 $(BASE_
 
 LDFLAGS =	-L/usr/lib/n64 $(N64LIB)  -L$(N64_LIBGCCDIR) -lgcc
 
-default:	prepare
+default:	english_audio
 
-prepare: portal_pak_dir
+english_audio: portal_pak_dir
+	@$(MAKE) buildgame
+
+german_audio: vpk/portal_sound_vo_german_dir.vpk portal_pak_dir
+	vpk -x portal_pak_dir vpk/portal_sound_vo_german_dir.vpk
 	@$(MAKE) buildgame
 
 buildgame: $(BASE_TARGET_NAME).z64
@@ -109,7 +113,6 @@ src/models/sphere.h src/models/sphere_geo.inc.h: assets/fbx/Sphere.fbx
 portal_pak_dir: vpk/portal_pak_dir.vpk
 	vpk -x portal_pak_dir vpk/portal_pak_dir.vpk
 	vpk -x portal_pak_dir vpk/hl2_sound_misc_dir.vpk
-
 
 TEXTURE_SCRIPTS = $(shell find assets/ -type f -name '*.ims')
 TEXTURE_IMAGES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_modified/%.png) \
