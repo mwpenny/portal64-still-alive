@@ -60,11 +60,15 @@ void hudUpdate(struct Hud* hud) {
     }
 
     float targetPromptOpacity = (hud->flags & HudFlagsShowingPrompt) ? 1.0 : 0.0f;
+    float targetSubtitleOpacity = (hud->flags & HudFlagsShowingSubtitle) ? 0.7: 0.0f;
 
     if (targetPromptOpacity != hud->promptOpacity) {
         hud->promptOpacity = mathfMoveTowards(hud->promptOpacity, targetPromptOpacity, FIXED_DELTA_TIME / PROMPT_FADE_TIME);
     }
 
+    if (targetSubtitleOpacity != hud->subtitleOpacity) {
+        hud->subtitleOpacity = mathfMoveTowards(hud->subtitleOpacity, targetSubtitleOpacity, FIXED_DELTA_TIME / PROMPT_FADE_TIME);
+    }
 
     if (targetPromptOpacity && (hud->resolvedPrompts & (1 << hud->promptType)) != 0) {
         hudShowActionPrompt(hud, CutscenePromptTypeNone);
@@ -199,13 +203,11 @@ void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType) {
 void hudShowSubtitle(struct Hud* hud, enum CutsceneSubtitleType subtitleType) {
     if (subtitleType == CutsceneSubtitleTypeNone) {
         hud->flags &= ~HudFlagsShowingSubtitle;
-        hud->subtitleOpacity = 0.0;
         return;
     }
 
     hud->flags |= HudFlagsShowingSubtitle;
     hud->subtitleType = subtitleType;
-    hud->subtitleOpacity = 0.6;
 }
 
 void hudResolvePrompt(struct Hud* hud, enum CutscenePromptType promptType) {
@@ -213,7 +215,6 @@ void hudResolvePrompt(struct Hud* hud, enum CutscenePromptType promptType) {
 }
 
 void hudResolveSubtitle(struct Hud* hud) {
-    hud->subtitleOpacity = 0.0;
     hud->flags &= ~HudFlagsShowingSubtitle;
 }
 
@@ -332,7 +333,7 @@ void hudRender(struct Hud* hud, struct Player* player, struct RenderState* rende
         controlsRenderPrompt(gPromptActions[hud->promptType], gPromptText[hud->promptType], hud->promptOpacity, renderState);
     }
 
-    if (hud->flags & HudFlagsShowingSubtitle && gSaveData.controls.flags & ControlSaveSubtitlesEnabled) {
+    if (hud->subtitleOpacity > 0.0f && gSaveData.controls.flags & ControlSaveSubtitlesEnabled) {
         controlsRenderSubtitle(gSubtitleText[hud->subtitleType], hud->subtitleOpacity, renderState);
     }
 }
