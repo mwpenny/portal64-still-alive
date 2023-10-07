@@ -108,7 +108,7 @@ Finally, run `make` to build the project.
 # Clean out any previous build files
 make clean
 
-# Build
+# Build (default english audio build)
 make
 
 # In case you have any trouble with ROM running on hardware try
@@ -117,8 +117,20 @@ sudo apt install wine
 make fix
 ```
 
-<br />
+You can also build with different audio languages, like this:
+```
+make german_audio
+```
 
+This requires additional *.vpk files:
+
+- German:
+```
+portal/portal_sound_vo_german_000.vpk
+portal/portal_sound_vo_german_dir.vpk
+```
+
+<br/>
 
 ## Build with Docker
 
