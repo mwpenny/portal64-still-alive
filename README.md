@@ -117,9 +117,12 @@ sudo apt install wine
 make fix
 ```
 
-You can also build with different audio languages, like this:
+Alternatively, you can also build with different audio languages, like this:
 ```
 make german_audio
+make french_audio
+make russian_audio
+make spanish_audio
 ```
 
 This requires additional *.vpk files:
@@ -128,6 +131,24 @@ This requires additional *.vpk files:
 ```
 portal/portal_sound_vo_german_000.vpk
 portal/portal_sound_vo_german_dir.vpk
+```
+
+- French:
+```
+portal/portal_sound_vo_french_000.vpk
+portal/portal_sound_vo_french_dir.vpk
+```
+
+- Russian:
+```
+portal/portal_sound_vo_russian_000.vpk
+portal/portal_sound_vo_russian_dir.vpk
+```
+
+- Spanish:
+```
+portal/portal_sound_vo_spanish_000.vpk
+portal/portal_sound_vo_spanish_dir.vpk
 ```
 
 <br/>
