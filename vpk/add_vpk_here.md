@@ -10,10 +10,16 @@
   portal_pak_005.vpk  
   portal_pak_dir.vpk
   ```
-- Copy `hl2_sound_misc` files commonly found in `SteamLibrary\steamapps\common\Portal\hl2` to this directory
+- Copy `hl2_*_misc` files commonly found in `SteamLibrary\steamapps\common\Portal\hl2` to this directory
   ```
   hl2_sound_misc_000.vpk
   hl2_sound_misc_001.vpk
   hl2_sound_misc_002.vpk
   hl2_sound_misc_dir.vpk
+
+  hl2_misc_000.vpk
+  hl2_misc_001.vpk
+  hl2_misc_002.vpk
+  hl2_misc_003.vpk
+  hl2_misc_dir.vpk
   ```

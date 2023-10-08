@@ -101,6 +101,12 @@ hl2/hl2_sound_misc_000.vpk
 hl2/hl2_sound_misc_001.vpk
 hl2/hl2_sound_misc_002.vpk
 hl2/hl2_sound_misc_dir.vpk
+
+hl/hl2_misc_000.vpk
+hl/hl2_misc_001.vpk
+hl/hl2_misc_002.vpk
+hl/hl2_misc_003.vpk
+hl/hl2_misc_dir.vpk
 ```
 
 Finally, run `make` to build the project.
