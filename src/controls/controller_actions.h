@@ -61,6 +61,7 @@ void controllerActionRead();
 void controllerSetDeadzone(float percent);
 struct Vector2 controllerDirectionGet(enum ControllerAction direction);
 int controllerActionGet(enum ControllerAction action);
+void controllerActionMuteActive();
 
 int controllerSourcesForAction(enum ControllerAction action, struct ControllerSourceWithController* sources, int maxSources);
 

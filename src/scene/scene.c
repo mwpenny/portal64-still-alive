@@ -354,7 +354,7 @@ void sceneCheckPortals(struct Scene* scene) {
         soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL);
     }
 
-    if ((fireBlue || (!hasOrange && fireOrange)) && !fireOrange && hasBlue && !playerIsGrabbing(&scene->player) &&!portalGunIsFiring(&scene->portalGun)) {
+    if (((fireBlue && !fireOrange) || (!hasOrange && fireOrange)) && hasBlue && !playerIsGrabbing(&scene->player) && !portalGunIsFiring(&scene->portalGun)) {
         portalGunFire(&scene->portalGun, 1, &raycastRay, &playerUp, scene->player.body.currentRoom);
         scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 1);
