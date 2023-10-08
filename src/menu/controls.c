@@ -461,6 +461,11 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
 #define CONTROL_PROMPT_HEIGHT           24
 #define CONTROL_PROMPT_PADDING          6
 
+#define SUBTITLE_LEFT_MARGIN     10
+#define SUBTITLE_BOTTOM_MARGIN    10
+#define SUBTITLE_PADDING   5
+
+
 void controlsRenderPrompt(enum ControllerAction action, char* message, float opacity, struct RenderState* renderState) {
     struct Vector2s16 size = fontMeasure(&gDejaVuSansFont, message);
 
@@ -503,4 +508,41 @@ void controlsRenderPrompt(enum ControllerAction action, char* message, float opa
     gDPSetEnvColor(renderState->dl++, 232, 206, 80, opacityAsInt);
     renderState->dl = controlsRenderIcons(renderState->dl, action, textPositionX - CONTROL_PROMPT_PADDING, textPositionY);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[BUTTON_ICONS_INDEX]);
+}
+
+void controlsRenderSubtitle(char* message, float opacity, struct RenderState* renderState) {
+    struct Vector2s16 size = fontMeasure(&gDejaVuSansFont, message);
+
+    int opacityAsInt = (int)(255 * opacity);
+
+    if (opacityAsInt > 255) {
+        opacityAsInt = 255;
+    } else if (opacityAsInt < 0) {
+        opacityAsInt = 0;
+    }
+
+    int textPositionX = (SUBTITLE_LEFT_MARGIN + SUBTITLE_PADDING);
+    int textPositionY = (SCREEN_HT - SUBTITLE_BOTTOM_MARGIN - SUBTITLE_PADDING) - size.y;
+
+    gSPDisplayList(renderState->dl++, ui_material_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
+    gDPSetEnvColor(renderState->dl++, 0, 0, 0, opacityAsInt / 3);
+    gDPFillRectangle(
+        renderState->dl++, 
+        textPositionX - CONTROL_PROMPT_PADDING,
+        textPositionY - CONTROL_PROMPT_PADDING,
+        textPositionX + size.x + CONTROL_PROMPT_PADDING, 
+        SCREEN_HT - SUBTITLE_BOTTOM_MARGIN
+    );
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
+
+    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
+    gDPSetEnvColor(renderState->dl++, 255, 60, 60, opacityAsInt);
+    renderState->dl = fontRender(
+        &gDejaVuSansFont, 
+        message, 
+        textPositionX, 
+        textPositionY, 
+        renderState->dl
+    );
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
 }

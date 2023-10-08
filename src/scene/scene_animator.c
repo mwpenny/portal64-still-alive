@@ -9,14 +9,17 @@
 #include "../build/src/audio/clips.h"
 
 struct AnimatedAudioInfo {
-    short soundId;
+    short startSoundId;
+    short loopSoundId;
+    short endSoundId;
     float pitch;
 };
 
 struct AnimatedAudioInfo gAnimatedAudioInfo[] = {
-    {.soundId = SOUND_ID_NONE},
-    {.soundId = SOUNDS_BEAM_PLATFORM_LOOP1, .pitch = 0.5f},
-    {.soundId = SOUNDS_BEAM_PLATFORM_LOOP1, .pitch = 0.5f},
+    {.startSoundId = SOUND_ID_NONE, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUND_ID_NONE},
+    {.startSoundId = SOUND_ID_NONE, .loopSoundId = SOUNDS_BEAM_PLATFORM_LOOP1, .endSoundId = SOUND_ID_NONE, .pitch = 0.5f},
+    {.startSoundId = SOUNDS_DOORMOVE1, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUND_ID_NONE, .pitch = 0.4f},
+    {.startSoundId = SOUNDS_TANK_TURRET_START1, .loopSoundId = SOUNDS_TANK_TURRET_LOOP1, .endSoundId = SOUNDS_ELEVATOR_STOP1, .pitch = 0.5f},
 };
 
 void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo* animationInfo, int animatorCount) {
@@ -34,6 +37,7 @@ void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo
         skAnimatorInit(&sceneAnimator->animators[i], animationInfo[i].armature.numberOfBones);
         sceneAnimator->state[i].playbackSpeed = 1.0f;
         sceneAnimator->state[i].soundId = SOUND_ID_NONE;
+        sceneAnimator->state[i].flags = 0;
         vector3Scale(&sceneAnimator->armatures[i].pose[0].position, &sceneAnimator->state[i].lastPosition, 1.0f / SCENE_SCALE);
 
         sceneAnimator->boneCount += animationInfo[i].armature.numberOfBones;
@@ -48,24 +52,36 @@ void sceneAnimatorUpdate(struct SceneAnimator* sceneAnimator) {
 
         struct AnimatedAudioInfo* audioInfo = &gAnimatedAudioInfo[sceneAnimator->animationInfo[i].soundType];
 
-        if (audioInfo->soundId == SOUND_ID_NONE) {
-            continue;
-        }
 
         struct Vector3 currentPos;
         vector3Scale(&sceneAnimator->armatures[i].pose[0].position, &currentPos, 1.0f / SCENE_SCALE);
         int isMoving = currentPos.x != state->lastPosition.x || currentPos.y != state->lastPosition.y || currentPos.z != state->lastPosition.z;
+        int wasMoving = (state->flags & SceneAnimatorStateWasMoving) != 0;
 
-        if (isMoving && state->soundId == SOUND_ID_NONE) {
-            state->soundId = soundPlayerPlay(audioInfo->soundId, 1.0f, audioInfo->pitch, &currentPos, &gZeroVec);
-        } else if (isMoving && state->soundId != SOUND_ID_NONE) {
-            soundPlayerUpdatePosition(state->soundId, &currentPos, &gZeroVec);
-        } else if (!isMoving && state->soundId != SOUND_ID_NONE) {
-            soundPlayerStop(state->soundId);
-            state->soundId = SOUND_ID_NONE;
+        if (audioInfo->loopSoundId != SOUND_ID_NONE) {
+            if (isMoving && state->soundId == SOUND_ID_NONE) {
+                state->soundId = soundPlayerPlay(audioInfo->loopSoundId, 1.0f, audioInfo->pitch, &currentPos, &gZeroVec);
+            } else if (isMoving && state->soundId != SOUND_ID_NONE) {
+                soundPlayerUpdatePosition(state->soundId, &currentPos, &gZeroVec);
+            } else if (!isMoving && state->soundId != SOUND_ID_NONE) {
+                soundPlayerStop(state->soundId);
+                state->soundId = SOUND_ID_NONE;
+            }
+        }
+
+        if (isMoving && !wasMoving && audioInfo->startSoundId != SOUND_ID_NONE) {
+            soundPlayerPlay(audioInfo->startSoundId, 1.0f, audioInfo->pitch, &currentPos, &gZeroVec);
+        }
+
+        if (!wasMoving && isMoving && audioInfo->endSoundId != SOUND_ID_NONE) {
+            soundPlayerPlay(audioInfo->endSoundId, 1.0f, audioInfo->pitch, &currentPos, &gZeroVec);
         }
 
         state->lastPosition = currentPos;
+        state->flags &= ~SceneAnimatorStateWasMoving;
+        if (isMoving) {
+            state->flags |= SceneAnimatorStateWasMoving;
+        }
     }
 }
 

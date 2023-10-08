@@ -235,6 +235,9 @@ static void gameProc(void* arg) {
                         levelLoadWithCallbacks(levelGetQueued());
                         cutsceneRunnerReset();
                         dynamicAssetsReset();
+                        // if a portal fire button is being held
+                        // don't fire portals until it is released
+                        controllerActionMuteActive();
                         gSceneCallbacks->initCallback(gSceneCallbacks->data);
                     }
 

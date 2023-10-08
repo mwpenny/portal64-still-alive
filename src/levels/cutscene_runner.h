@@ -43,6 +43,6 @@ void cutsceneSerializeWrite(struct Serializer* serializer, SerializeAction actio
 void cutsceneSerializeRead(struct Serializer* serializer);
 
 int cutsceneRunnerIsChannelPlaying(int channel);
-void cutsceneQueueSoundInChannel(int soundId, float volume, int channel);
+void cutsceneQueueSoundInChannel(int soundId, float volume, int channel, int subtitleId);
 
 #endif

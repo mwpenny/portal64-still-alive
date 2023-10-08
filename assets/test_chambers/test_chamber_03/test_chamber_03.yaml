@@ -13,16 +13,16 @@ cutscenes:
     - save_checkpoint 0.001
     - open_portal ground_portal_2
     - start_cutscene BALL_2
-    - q_sound SOUNDS_03_PART2_ENTRY_1 CH_GLADOS
+    - q_sound SOUNDS_03_PART2_ENTRY_1 CH_GLADOS SUBTITLE_03_PART2_ENTRY_1
     - wait_for_signal horizontal_activiate 2
-    - q_sound 03_PART2_PLATFORM_ACTIVATED_1 CH_GLADOS
+    - q_sound 03_PART2_PLATFORM_ACTIVATED_1 CH_GLADOS SUBTITLE_03_PART2_PLATFORM_ACTIVATED_1
   INTRO:
     - save_checkpoint 0
     - open_portal ground_portal 0
-    - q_sound SOUNDS_03_PART1_ENTRY_1 CH_GLADOS
-    - q_sound SOUNDS_03_PART1_ENTRY_2 CH_GLADOS
+    - q_sound SOUNDS_03_PART1_ENTRY_1 CH_GLADOS SUBTITLE_03_PART1_ENTRY_1
+    - q_sound SOUNDS_03_PART1_ENTRY_2 CH_GLADOS SUBTITLE_03_PART1_ENTRY_2
     - wait_for_signal exit_activate 2
-    - q_sound SOUNDS_03_PART1_SUCCESS_1 CH_GLADOS
+    - q_sound SOUNDS_03_PART1_SUCCESS_1 CH_GLADOS SUBTITLE_03_PART1_SUCCESS_1
   START_BALL:
     - set_signal launch_ball
     - wait_for_signal exit_activate

@@ -31,6 +31,7 @@ struct PortalGun {
     struct RigidBody rigidBody;
     int portalGunVisible;
     float shootAnimationTimer;
+    float shootTotalAnimationTimer;
 
     struct PortalGunProjectile projectiles[2];
 };
@@ -41,5 +42,6 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player);
 void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera);
 
 void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray, struct Vector3* playerUp, int roomIndex);
+int portalGunIsFiring(struct PortalGun* portalGun);
 
 #endif

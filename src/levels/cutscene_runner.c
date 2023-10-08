@@ -18,6 +18,7 @@ u64 gTriggeredCutscenes;
 struct QueuedSound {
     struct QueuedSound* next;
     u16 soundId;
+    u16 subtitleId;
     float volume;
 };
 
@@ -94,7 +95,7 @@ void cutsceneRunnerCancel(struct CutsceneRunner* runner) {
     runner->currentCutscene = NULL;
 }
 
-void cutsceneQueueSound(int soundId, float volume, int channel) {
+void cutsceneQueueSound(int soundId, float volume, int channel, int subtitleId) {
     struct QueuedSound* next = gCutsceneNextFreeSound;
 
     if (!next) {
@@ -106,6 +107,7 @@ void cutsceneQueueSound(int soundId, float volume, int channel) {
     next->next = NULL;
     next->soundId = soundId;
     next->volume = volume;
+    next->subtitleId = subtitleId;
 
     struct QueuedSound* tail = gCutsceneSoundQueues[channel];
 
@@ -140,7 +142,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             break;
         case CutsceneStepTypeQueueSound:
         {
-            cutsceneQueueSoundInChannel(step->queueSound.soundId, step->queueSound.volume * (1.0f / 255.0f), step->queueSound.channel);
+            cutsceneQueueSoundInChannel(step->queueSound.soundId, step->queueSound.volume * (1.0f / 255.0f), step->queueSound.channel, step->queueSound.subtitleId);
             break;
         }
         case CutsceneStepTypeDelay:
@@ -395,6 +397,8 @@ void cutscenesUpdateSounds() {
                 struct QueuedSound* curr = gCutsceneSoundQueues[i];
 
                 gCutsceneCurrentSound[i] = soundPlayerPlay(curr->soundId, curr->volume, gCutsceneChannelPitch[i], NULL, NULL);
+                hudShowSubtitle(&gScene.hud, curr->subtitleId);
+
                 gCutsceneSoundQueues[i] = curr->next;
 
                 curr->next = gCutsceneNextFreeSound;
@@ -402,6 +406,7 @@ void cutscenesUpdateSounds() {
             } else {
                 if (gCutsceneCurrentSound[i] != SOUND_ID_NONE) {
                     soundPlayerPlay(soundsIntercom[1], 1.0f, gCutsceneChannelPitch[i], NULL, NULL);
+                    hudResolveSubtitle(&gScene.hud);
                 }
 
                 gCutsceneCurrentSound[i] = SOUND_ID_NONE;
@@ -563,20 +568,23 @@ void cutsceneSerializeRead(struct Serializer* serializer) {
     for (int i = 0; i < CH_COUNT; ++i) {
         s16 nextId;
         serializeRead(serializer, &nextId, sizeof(nextId));
+        
 
         while (nextId != SOUND_ID_NONE) {
+            s16 nextSubtitleId;
+            serializeRead(serializer, &nextSubtitleId, sizeof(nextSubtitleId));
             u8 volume;
             serializeRead(serializer, &volume, sizeof(volume));
-            cutsceneQueueSound(nextId, volume * (1.0f / 255.0f), i);
+            cutsceneQueueSound(nextId, volume * (1.0f / 255.0f), i, nextSubtitleId);
             serializeRead(serializer, &nextId, sizeof(nextId));
         }
     }
 }
 
-void cutsceneQueueSoundInChannel(int soundId, float volume, int channel) {
+void cutsceneQueueSoundInChannel(int soundId, float volume, int channel, int subtitleId) {
     if (!gCutsceneSoundQueues[channel] && !soundPlayerIsPlaying(gCutsceneCurrentSound[channel])) {
-        cutsceneQueueSound(soundsIntercom[0], volume, channel);
+        cutsceneQueueSound(soundsIntercom[0], volume, channel, subtitleId);
     }
 
-    cutsceneQueueSound(soundId, volume, channel);
+    cutsceneQueueSound(soundId, volume, channel, subtitleId);
 }

@@ -347,14 +347,14 @@ void sceneCheckPortals(struct Scene* scene) {
         sceneFirePortal(scene, &scene->savedPortal.ray, &scene->savedPortal.transformUp, scene->savedPortal.portalIndex, scene->savedPortal.roomIndex, 0, 0);
     }
 
-    if (fireOrange && hasOrange && !playerIsGrabbing(&scene->player)) {
+    if (fireOrange && !fireBlue && hasOrange && !playerIsGrabbing(&scene->player) && !portalGunIsFiring(&scene->portalGun)) {
         portalGunFire(&scene->portalGun, 0, &raycastRay, &playerUp, scene->player.body.currentRoom);
         scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 0);
         soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL);
     }
 
-    if ((fireBlue || (!hasOrange && fireOrange)) && hasBlue && !playerIsGrabbing(&scene->player)) {
+    if (((fireBlue && !fireOrange) || (!hasOrange && fireOrange)) && hasBlue && !playerIsGrabbing(&scene->player) && !portalGunIsFiring(&scene->portalGun)) {
         portalGunFire(&scene->portalGun, 1, &raycastRay, &playerUp, scene->player.body.currentRoom);
         scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 1);

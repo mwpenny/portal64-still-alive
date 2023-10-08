@@ -12,13 +12,13 @@ cutscenes:
     - delay 2
     - show_prompt CutscenePromptTypeJump
     - delay 3
-    - q_sound SOUNDS_00_PART1_ENTRY_1 CH_GLADOS
-    - q_sound SOUNDS_00_PART1_ENTRY_2 CH_GLADOS
-    - q_sound SOUNDS_00_PART1_ENTRY_3 CH_GLADOS
-    - q_sound SOUNDS_00_PART1_ENTRY_4 CH_GLADOS
-    - q_sound SOUNDS_00_PART1_ENTRY_5 CH_GLADOS
-    - q_sound SOUNDS_00_PART1_ENTRY_6 CH_GLADOS
-    - q_sound SOUNDS_00_PART1_ENTRY_7 CH_GLADOS
+    - q_sound SOUNDS_00_PART1_ENTRY_1 CH_GLADOS SUBTITLE_00_PART1_ENTRY_1
+    - q_sound SOUNDS_00_PART1_ENTRY_2 CH_GLADOS SUBTITLE_00_PART1_ENTRY_2
+    - q_sound SOUNDS_00_PART1_ENTRY_3 CH_GLADOS SUBTITLE_00_PART1_ENTRY_3
+    - q_sound SOUNDS_00_PART1_ENTRY_4 CH_GLADOS SUBTITLE_00_PART1_ENTRY_4
+    - q_sound SOUNDS_00_PART1_ENTRY_5 CH_GLADOS SUBTITLE_00_PART1_ENTRY_5
+    - q_sound SOUNDS_00_PART1_ENTRY_6 CH_GLADOS SUBTITLE_00_PART1_ENTRY_6
+    - q_sound SOUNDS_00_PART1_ENTRY_7 CH_GLADOS SUBTITLE_00_PART1_ENTRY_7
     - delay 7
     - show_prompt CutscenePromptTypeNone
     - wait_for_channel CH_GLADOS
@@ -30,9 +30,9 @@ cutscenes:
     - set_signal cube_dropper
     - show_prompt CutscenePromptTypePickup
     - wait_for_signal success
-    - q_sound SOUNDS_00_PART1_SUCCESS_1 CH_GLADOS
-    - q_sound SOUNDS_00_PART1_SUCCESS_2 CH_GLADOS
-    - q_sound SOUNDS_00_PART1_SUCCESS_3 CH_GLADOS
+    - q_sound SOUNDS_00_PART1_SUCCESS_1 CH_GLADOS SUBTITLE_00_PART1_SUCCESS_1
+    - q_sound SOUNDS_00_PART1_SUCCESS_2 CH_GLADOS SUBTITLE_00_PART1_SUCCESS_2
+    - q_sound SOUNDS_00_PART1_SUCCESS_3 CH_GLADOS SUBTITLE_00_PART1_SUCCESS_3
   START_SECOND_ROOM:
     - start_cutscene SECOND_ROOM_INSTRUCTIONS
     - open_portal stationary_portal 1
@@ -45,8 +45,8 @@ cutscenes:
     - delay 5
     - goto portal_loop
   SECOND_ROOM_INSTRUCTIONS:
-    - q_sound SOUNDS_00_PART2_ENTRY_1 CH_GLADOS
+    - q_sound SOUNDS_00_PART2_ENTRY_1 CH_GLADOS SUBTITLE_00_PART2_ENTRY_1
     - wait_for_signal success_1
-    - q_sound SOUNDS_00_PART2_SUCCESS_1 CH_GLADOS
+    - q_sound SOUNDS_00_PART2_SUCCESS_1 CH_GLADOS SUBTITLE_00_PART2_SUCCESS_1
   HOVER_CUBE_PROMPT:
     - show_prompt CutscenePromptTypeDrop

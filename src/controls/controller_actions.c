@@ -42,10 +42,13 @@ unsigned short gActionSourceButtonMask[ControllerActionSourceCount] = {
 };
 
 int gActionState = 0;
+int gMutedActions = 0;
 struct Vector2 gDirections[2];
 
+#define ACTION_TO_BITMASK(action)       (1 << (action))
+
 void controllerActionApply(enum ControllerAction action) {
-    gActionState |= (1 << action);
+    gActionState |= ACTION_TO_BITMASK(action);
 }
 
 #define DEADZONE_SIZE       5
@@ -126,6 +129,8 @@ void controllerActionRead() {
     gDirections[0] = gZeroVec2;
     gDirections[1] = gZeroVec2;
 
+    int nextMutedState = 0;
+
     for (int controllerIndex = 0; controllerIndex < 2; ++controllerIndex) {
         for (int sourceIndex = 0; sourceIndex < ControllerActionSourceCount; ++sourceIndex) {
             enum ControllerAction action = gSaveData.controls.controllerSettings[controllerIndex][sourceIndex];
@@ -135,6 +140,12 @@ void controllerActionRead() {
 
                 if (sourceIndex == ControllerActionSourceCUpButton || sourceIndex == ControllerActionSourceDUpButton) {
                     sourceIndex += 3;
+                }
+            } else if (IS_HOLDABLE_ACTION(action) && controllerGetButton(controllerIndex, gActionSourceButtonMask[sourceIndex])) {
+                if (ACTION_TO_BITMASK(action) & gMutedActions) {
+                    nextMutedState |= ACTION_TO_BITMASK(action);
+                } else {
+                    controllerActionApply(action);
                 }
             } else if (controllerGetButtonDown(controllerIndex, gActionSourceButtonMask[sourceIndex])) {
                 controllerActionApply(action);
@@ -146,6 +157,8 @@ void controllerActionRead() {
         gDirections[i].x = clampf(gDirections[i].x, -1.0f, 1.0f);
         gDirections[i].y = clampf(gDirections[i].y, -1.0f, 1.0f);
     }
+
+    gMutedActions = nextMutedState;
 }
 
 struct Vector2 controllerDirectionGet(enum ControllerAction direction) {
@@ -158,6 +171,10 @@ struct Vector2 controllerDirectionGet(enum ControllerAction direction) {
 
 int controllerActionGet(enum ControllerAction action) {
     return (gActionState & (1 << action)) != 0;
+}
+
+void controllerActionMuteActive() {
+    gMutedActions = gActionState;
 }
 
 int controllerSourcesForAction(enum ControllerAction action, struct ControllerSourceWithController* sources, int maxSources) {

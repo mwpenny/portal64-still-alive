@@ -8,9 +8,14 @@
 
 #include "../graphics/renderstate.h"
 
+enum SceneAnimatorStateFlags {
+    SceneAnimatorStateWasMoving = (1 << 0),
+};
+
 struct SceneAnimatorState {
     float playbackSpeed;
     ALSndId soundId;
+    short flags;
     struct Vector3 lastPosition;
 };
 
