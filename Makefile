@@ -69,9 +69,21 @@ default:	english_audio
 english_audio: portal_pak_dir
 	@$(MAKE) buildgame
 
-german_audio: vpk/portal_sound_vo_german_dir.vpk portal_pak_dir
+german_audio: vpk/portal_sound_vo_german_dir.vpk vpk/portal_sound_vo_german_000.vpk portal_pak_dir
 	vpk -x portal_pak_dir vpk/portal_sound_vo_german_dir.vpk
 	@$(MAKE) buildgame
+	
+french_audio: vpk/portal_sound_vo_french_dir.vpk vpk/portal_sound_vo_french_000.vpk portal_pak_dir
+	vpk -x portal_pak_dir vpk/portal_sound_vo_french_dir.vpk
+	@$(MAKE) buildgame
+	
+russian_audio: vpk/portal_sound_vo_russian_dir.vpk vpk/portal_sound_vo_russian_000.vpk portal_pak_dir
+	vpk -x portal_pak_dir vpk/portal_sound_vo_russian_dir.vpk
+	@$(MAKE) buildgame	
+	
+spanish_audio: vpk/portal_sound_vo_spanish_dir.vpk vpk/portal_sound_vo_spanish_000.vpk portal_pak_dir
+	vpk -x portal_pak_dir vpk/portal_sound_vo_spanish_dir.vpk
+	@$(MAKE) buildgame	
 
 buildgame: $(BASE_TARGET_NAME).z64
 
