@@ -13,11 +13,14 @@ enum HudFlags {
     HudFlagsLookedPortalable0 = (1 << 0),
     HudFlagsLookedPortalable1 = (1 << 1),
     HudFlagsShowingPrompt = (1 << 2),
+    HudFlagsShowingSubtitle= (1 << 3),
 };
 
 struct Hud {
     enum CutscenePromptType promptType;
+    enum CutsceneSubtitleType subtitleType;
     float promptOpacity;
+    float subtitleOpacity;
 
     float fadeInTimer;
 
@@ -35,6 +38,8 @@ void hudUpdatePortalIndicators(struct Hud* hud, struct Ray* raycastRay,  struct 
 void hudPortalFired(struct Hud* hud, int index);
 void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType);
 void hudResolvePrompt(struct Hud* hud, enum CutscenePromptType promptType);
+void hudShowSubtitle(struct Hud* hud, enum CutsceneSubtitleType subtitleType);
+void hudResolveSubtitle(struct Hud* hud);
 
 void hudRender(struct Hud* hud, struct Player* player, struct RenderState* renderState);
 

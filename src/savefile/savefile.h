@@ -38,6 +38,8 @@ enum ControlSaveFlags {
     ControlSaveFlagsInvertYaw = (1 << 1),
     ControlSaveTankControls = (1 << 2),
 
+    ControlSaveSubtitlesEnabled = (1 << 5),
+
     ControlSaveMoveablePortals = (1 << 8),
     ControlSaveWideScreen = (1 << 9),
 };

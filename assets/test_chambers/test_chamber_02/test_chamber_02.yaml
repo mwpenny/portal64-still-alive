@@ -1,25 +1,25 @@
 cutscenes:
   INTRO:
-    - q_sound SOUNDS_02_PART1_ENTRY_1 CH_GLADOS
+    - q_sound SOUNDS_02_PART1_ENTRY_1 CH_GLADOS SUBTITLE_02_PART1_ENTRY_1
     - wait_for_channel CH_GLADOS
     - open_portal portal_0 0
-    - q_sound SOUNDS_02_PART1_ENTRY_2 CH_GLADOS
+    - q_sound SOUNDS_02_PART1_ENTRY_2 CH_GLADOS SUBTITLE_02_PART1_ENTRY_2
     - wait_for_signal success
-    - q_sound SOUNDS_02_PART1_SUCCESS_1 CH_GLADOS
-    - q_sound SOUNDS_02_PART1_SUCCESS_2 CH_GLADOS
+    - q_sound SOUNDS_02_PART1_SUCCESS_1 CH_GLADOS SUBTITLE_02_PART1_SUCCESS_1
+    - q_sound SOUNDS_02_PART1_SUCCESS_2 CH_GLADOS SUBTITLE_02_PART1_SUCCESS_2
   DROP_CUBE:
     - set_signal cube_dropper
   ENTER_BUTTON_ROOM:
     - open_portal portal_1
   BAD_PERSON:
-    - q_sound SOUNDS_ESCAPE_01_PART1_NAG01_1 CH_GLADOS
+    - q_sound SOUNDS_ESCAPE_01_PART1_NAG01_1 CH_GLADOS SUBTITLE_ESCAPE_01_PART1_NAG01_1
     - wait_for_channel CH_GLADOS
     - set_signal bad_person
   ENTER_SMALL_ROOM:
     - set_signal in_room
     - open_portal portal_2 0
-    - q_sound SOUNDS_02_PART2_SUCCESS_1 CH_GLADOS
-    - q_sound SOUNDS_02_PART2_SUCCESS_2 CH_GLADOS
+    - q_sound SOUNDS_02_PART2_SUCCESS_1 CH_GLADOS SUBTITLE_02_PART2_SUCCESS_1
+    - q_sound SOUNDS_02_PART2_SUCCESS_2 CH_GLADOS SUBTITLE_02_PART2_SUCCESS_2
 operators:
   - should_open_door = exit_2_0 and exit_2_1
   - should_open_door = should_open_door or bad_person
