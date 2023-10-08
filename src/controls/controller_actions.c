@@ -136,7 +136,9 @@ void controllerActionRead() {
                 if (sourceIndex == ControllerActionSourceCUpButton || sourceIndex == ControllerActionSourceDUpButton) {
                     sourceIndex += 3;
                 }
-            } else if (controllerGetButtonDown(controllerIndex, gActionSourceButtonMask[sourceIndex])) {
+            }else if (IS_HOLDABLE_ACTION(action) && controllerGetButton(controllerIndex, gActionSourceButtonMask[sourceIndex])){
+                controllerActionApply(action);
+            }else if (controllerGetButtonDown(controllerIndex, gActionSourceButtonMask[sourceIndex])) {
                 controllerActionApply(action);
             }
         }

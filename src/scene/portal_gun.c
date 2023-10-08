@@ -12,7 +12,7 @@
 #include "../../build/assets/models/portal_gun/v_portalgun.h"
 #include "../../build/assets/materials/static.h"
 
-#define PORTAL_GUN_RECOIL_TIME (0.18f)
+#define PORTAL_GUN_RECOIL_TIME (0.22f)
 
 #define PORTAL_GUN_NEAR_PLANE   0.05f
 
@@ -52,6 +52,7 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at){
     portalGun->rigidBody.angularVelocity = gZeroVec;
     portalGun->portalGunVisible = 0;
     portalGun->shootAnimationTimer = 0.0;
+    portalGun->shootTotalAnimationTimer = 0.0;
 
     portalGunCalcTargetPosition(portalGun, at, &portalGun->rigidBody.transform.position, 0);
 
@@ -180,6 +181,7 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
 
     if (player->flags & PlayerJustShotPortalGun && portalGun->shootAnimationTimer <= 0.0f) {
         portalGun->shootAnimationTimer = PORTAL_GUN_RECOIL_TIME;
+        portalGun->shootTotalAnimationTimer = PORTAL_GUN_RECOIL_TIME * 2.0f; 
     }
 
     if (portalGun->shootAnimationTimer >= 0.0f) {
@@ -187,6 +189,12 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
         if (portalGun->shootAnimationTimer <= 0.0f){
             portalGun->shootAnimationTimer = 0.0f;
             player->flags &= ~PlayerJustShotPortalGun;
+        }
+    }
+    if (portalGun->shootTotalAnimationTimer >= 0.0f) {
+        portalGun->shootTotalAnimationTimer -= FIXED_DELTA_TIME;
+        if (portalGun->shootTotalAnimationTimer <= 0.0f){
+            portalGun->shootTotalAnimationTimer = 0.0f;
         }
     }
 
@@ -258,4 +266,10 @@ void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray
     vector3Add(&projectile->effectOffset, &ray->origin, &fireFrom);
 
     portalTrailPlay(&projectile->trail, &fireFrom, &hit.at);
+}
+int portalGunIsFiring(struct PortalGun* portalGun){
+    if (portalGun->shootTotalAnimationTimer > 0.0f){
+        return 1;
+    }
+    return 0;
 }
