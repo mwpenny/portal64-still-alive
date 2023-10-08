@@ -17,3 +17,27 @@
   hl2_sound_misc_002.vpk
   hl2_sound_misc_dir.vpk
   ```
+- If you want multi-language support, copy `portal_sound_vo_*.vpk` files commonly found in `SteamLibrary\steamapps\common\Portal\` to this directory
+  - German:
+  ```
+  portal/portal_sound_vo_german_000.vpk
+  portal/portal_sound_vo_german_dir.vpk
+  ```
+
+  - French:
+  ```
+  portal/portal_sound_vo_french_000.vpk
+  portal/portal_sound_vo_french_dir.vpk
+  ```
+
+  - Russian:
+  ```
+  portal/portal_sound_vo_russian_000.vpk
+  portal/portal_sound_vo_russian_dir.vpk
+  ```
+
+  - Spanish:
+  ```
+  portal/portal_sound_vo_spanish_000.vpk
+  portal/portal_sound_vo_spanish_dir.vpk
+  ```
