@@ -12,24 +12,10 @@
 #define GAMEPLAY_WIDTH  252
 #define GAMEPLAY_HEIGHT 124
 
-#define SCROLL_TICKS        9
+#define SCROLL_TICKS        PORTAL_RENDER_DEPTH_MAX - 1
 #define SCROLL_INTERVALS    (SCROLL_TICKS - 1)
 
 #define GAMEPLAY_X      ((SCREEN_WD - GAMEPLAY_WIDTH) / 2)
-
-void gameplayOptionsInit(struct GameplayOptions* gameplayOptions) {
-    gameplayOptions->selectedItem = GameplayOptionMovingPortals;
-
-    gameplayOptions->movingPortals = menuBuildCheckbox(&gDejaVuSansFont, "Movable Portals", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
-    gameplayOptions->wideScreen = menuBuildCheckbox(&gDejaVuSansFont, "Wide Screen", GAMEPLAY_X + 8, GAMEPLAY_Y + 28);
-
-    gameplayOptions->portalRenderDepthText = menuBuildText(&gDejaVuSansFont, "Portal Render Depth", GAMEPLAY_X + 8, GAMEPLAY_Y + 48);
-    gameplayOptions->portalRenderDepth = menuBuildSlider(GAMEPLAY_X + 126, GAMEPLAY_Y + 48, 126, SCROLL_TICKS);
-
-    gameplayOptions->movingPortals.checked = (gSaveData.controls.flags & ControlSaveMoveablePortals) != 0;
-    gameplayOptions->wideScreen.checked = (gSaveData.controls.flags & ControlSaveWideScreen) != 0;
-    gameplayOptions->portalRenderDepth.value = (float)gSaveData.controls.portalRenderDepth / 0xFFFF;
-}
 
 #define FULL_SCROLL_TIME    2.0f
 #define SCROLL_MULTIPLIER   (int)(0xFFFF * FIXED_DELTA_TIME / (80 * FULL_SCROLL_TIME))
@@ -64,6 +50,22 @@ void gameplayOptionsHandleSlider(unsigned short* settingValue, float* sliderValu
 
     *settingValue = newValue;
     *sliderValue = (float)newValue / 0xFFFF;
+}
+
+void gameplayOptionsInit(struct GameplayOptions* gameplayOptions) {
+    gameplayOptions->selectedItem = GameplayOptionMovingPortals;
+
+    gameplayOptions->movingPortals = menuBuildCheckbox(&gDejaVuSansFont, "Movable Portals", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
+    gameplayOptions->wideScreen = menuBuildCheckbox(&gDejaVuSansFont, "Wide Screen", GAMEPLAY_X + 8, GAMEPLAY_Y + 28);
+
+    gameplayOptions->portalRenderDepthText = menuBuildText(&gDejaVuSansFont, "Portal Render Depth", GAMEPLAY_X + 8, GAMEPLAY_Y + 48);
+    gameplayOptions->portalRenderDepth = menuBuildSlider(GAMEPLAY_X + 126, GAMEPLAY_Y + 48, 126, SCROLL_TICKS);
+
+    gameplayOptions->movingPortals.checked = (gSaveData.controls.flags & ControlSaveMoveablePortals) != 0;
+    gameplayOptions->wideScreen.checked = (gSaveData.controls.flags & ControlSaveWideScreen) != 0;
+    gameplayOptions->portalRenderDepth.value = (float)(gSaveData.controls.portalRenderDepth / PORTAL_RENDER_DEPTH_MAX);
+    gameplayOptions->render_depth = (0xFFFF/PORTAL_RENDER_DEPTH_MAX)* gSaveData.controls.portalRenderDepth;
+    gameplayOptionsHandleSlider(&gameplayOptions->render_depth, &gameplayOptions->portalRenderDepth.value);
 }
 
 enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions) {
@@ -115,7 +117,9 @@ enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions
                 }
             }
         case GameplayOptionPortalRenderDepth:
-            gameplayOptionsHandleSlider(&gSaveData.controls.portalRenderDepth, &gameplayOptions->portalRenderDepth.value);
+            
+            gameplayOptionsHandleSlider(&gameplayOptions->render_depth, &gameplayOptions->portalRenderDepth.value);
+            gSaveData.controls.portalRenderDepth = (int)((gameplayOptions->render_depth * (1.0f/0xFFFF) * PORTAL_RENDER_DEPTH_MAX));
             break;
         break;
     }

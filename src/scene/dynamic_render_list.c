@@ -184,7 +184,7 @@ void dynamicRenderListPopulate(struct DynamicRenderDataList* list, struct Render
                 continue;
             }
 
-            if (stages[stageIndex].currentDepth == ((int)(gSaveData.controls.portalRenderDepth * (1.0f / 0xFFFF) * PORTAL_RENDER_DEPTH_MAX)) && (object->flags & DYNAMIC_SCENE_OBJECT_SKIP_ROOT)) {
+            if (stages[stageIndex].currentDepth == gSaveData.controls.portalRenderDepth && (object->flags & DYNAMIC_SCENE_OBJECT_SKIP_ROOT)) {
                 continue;
             }
 

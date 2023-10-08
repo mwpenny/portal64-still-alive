@@ -47,7 +47,7 @@ struct ControlSaveState {
     unsigned short flags;
     unsigned short sensitivity;
     unsigned short acceleration;
-    unsigned short portalRenderDepth;
+    int portalRenderDepth;
     unsigned short deadzone;
 };
 

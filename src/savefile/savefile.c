@@ -94,7 +94,7 @@ void savefileNew() {
     gSaveData.controls.sensitivity = 0x4000;
     gSaveData.controls.acceleration = 0x4000;
     gSaveData.controls.deadzone = 0x4000;
-    gSaveData.controls.portalRenderDepth = 0x4000;
+    gSaveData.controls.portalRenderDepth = 2;
 
     gSaveData.audio.soundVolume = 0xFF;
     gSaveData.audio.musicVolume = 0xFF;
