@@ -522,8 +522,7 @@ void sceneUpdate(struct Scene* scene) {
     scene->lastFrameTime = frameStart - scene->lastFrameStart;
 
     if (gGameMenu.state != GameMenuStateResumeGame) {
-        if (controllerActionGet(ControllerActionPause) || 
-            (gGameMenu.state == GameMenuStateLanding && controllerGetButtonDown(0, B_BUTTON))) {
+        if (gGameMenu.state == GameMenuStateLanding && controllerGetButtonDown(0, B_BUTTON)) {
             gGameMenu.state = GameMenuStateResumeGame;
             savefileSave();
         }

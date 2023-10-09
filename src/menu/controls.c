@@ -128,7 +128,7 @@ struct ControlActionDataRow gControllerDataRows[] = {
     {"Pause", ControllerActionPause, "Misc"},
 
     {"Look forward", ControllerActionLookForward, "Misc Movement"},
-    {"Look backward", ControllerActionLookForward, NULL},
+    {"Look backward", ControllerActionLookBackward, NULL},
 };
 
 int controlsMeasureIcons(enum ControllerAction action) {
