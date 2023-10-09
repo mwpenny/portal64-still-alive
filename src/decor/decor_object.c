@@ -121,7 +121,6 @@ enum FizzleCheckResult decorObjectUpdateFizzler(struct CollisionObject* collisio
     enum FizzleCheckResult result = FizzleCheckResultNone;
 
     if (collisionObject->body && collisionObject->body->flags & RigidBodyFizzled) {
-
         if (*fizzleTime == 0.0f) {
             vector3Scale(&collisionObject->body->velocity, &collisionObject->body->velocity, 0.25f);
 
@@ -133,6 +132,8 @@ enum FizzleCheckResult decorObjectUpdateFizzler(struct CollisionObject* collisio
             vector3AddScaled(&collisionObject->body->angularVelocity, &randomAngularVelocity, 0.3f, &collisionObject->body->angularVelocity);
 
             result = FizzleCheckResultStart;
+
+            collisionObject->collisionLayers = 0;
         }
 
         *fizzleTime += FIZZLE_TIME_STEP;
