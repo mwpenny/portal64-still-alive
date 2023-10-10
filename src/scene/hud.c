@@ -38,6 +38,8 @@ void hudInit(struct Hud* hud) {
     hud->promptType = CutscenePromptTypeNone;
     hud->promptOpacity = 0.0f;
     hud->subtitleOpacity = 0.0f;
+    hud->backgroundOpacity = 0.0f;
+    hud->subtitleFadeTime = 0.75;
     hud->chosenLanguage = gSaveData.controls.subtitleLanguage;
     hud->flags = 0;
     hud->resolvedPrompts = 0;
@@ -63,14 +65,25 @@ void hudUpdate(struct Hud* hud) {
     hud->chosenLanguage = gSaveData.controls.subtitleLanguage;
 
     float targetPromptOpacity = (hud->flags & HudFlagsShowingPrompt) ? 1.0 : 0.0f;
-    float targetSubtitleOpacity = (hud->flags & HudFlagsShowingSubtitle) ? 0.85: 0.0f;
+    float targetSubtitleOpacity = ((hud->flags & HudFlagsShowingSubtitle) && !(hud->flags & HudFlagsSubtitleQueued)) ? 0.85: 0.0f;
+    float targetBackgroundOpacity = (hud->flags & HudFlagsShowingSubtitle && !(hud->flags & HudFlagsSubtitleQueued)) ? 0.45: 0.0f;
 
     if (targetPromptOpacity != hud->promptOpacity) {
         hud->promptOpacity = mathfMoveTowards(hud->promptOpacity, targetPromptOpacity, FIXED_DELTA_TIME / PROMPT_FADE_TIME);
     }
 
     if (targetSubtitleOpacity != hud->subtitleOpacity) {
-        hud->subtitleOpacity = mathfMoveTowards(hud->subtitleOpacity, targetSubtitleOpacity, FIXED_DELTA_TIME / SUBTITLE_FADE_TIME);
+        hud->subtitleOpacity = mathfMoveTowards(hud->subtitleOpacity, targetSubtitleOpacity, FIXED_DELTA_TIME / hud->subtitleFadeTime);
+    }
+
+    if ((hud->subtitleOpacity == 0.0f) && (hud->flags & HudFlagsSubtitleQueued)){
+        hud->flags &= ~HudFlagsSubtitleQueued;
+        hud->subtitleType = hud->queuedSubtitleType;
+        hud->queuedSubtitleType = SubtitleKeyNone;
+    }
+
+    if (targetBackgroundOpacity != hud->backgroundOpacity) {
+        hud->backgroundOpacity = mathfMoveTowards(hud->backgroundOpacity, targetBackgroundOpacity, FIXED_DELTA_TIME / hud->subtitleFadeTime);
     }
 
     if (targetPromptOpacity && (hud->resolvedPrompts & (1 << hud->promptType)) != 0) {
@@ -139,13 +152,29 @@ void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType) {
 }
 
 void hudShowSubtitle(struct Hud* hud, enum SubtitleKey subtitleType) {
-    if (subtitleType == SubtitleKeyNone) {
-        hud->flags &= ~HudFlagsShowingSubtitle;
+    if (subtitleType == hud->subtitleType){
         return;
     }
 
-    hud->flags |= HudFlagsShowingSubtitle;
-    hud->subtitleType = subtitleType;
+    if (subtitleType == SubtitleKeyNone) {
+        hud->flags &= ~HudFlagsShowingSubtitle;
+        hud->flags &= ~HudFlagsSubtitleQueued;
+        hud->subtitleFadeTime = 0.75;
+        return;
+    }
+    if (hud->flags & HudFlagsShowingSubtitle){
+        hud->flags |= HudFlagsSubtitleQueued;
+        hud->queuedSubtitleType = subtitleType;
+        hud->subtitleFadeTime = 0.3;
+    }
+    else{
+        hud->flags |= HudFlagsShowingSubtitle;
+        hud->subtitleType = subtitleType;
+        hud->subtitleFadeTime = 0.75;
+    }
+
+
+    
 }
 
 void hudResolvePrompt(struct Hud* hud, enum CutscenePromptType promptType) {
@@ -272,6 +301,6 @@ void hudRender(struct Hud* hud, struct Player* player, struct RenderState* rende
     }
 
     if (hud->subtitleOpacity > 0.0f && gSaveData.controls.flags & ControlSaveSubtitlesEnabled) {
-        controlsRenderSubtitle(SubtitleLanguageValues[hud->chosenLanguage][hud->subtitleType], hud->subtitleOpacity, renderState);
+        controlsRenderSubtitle(SubtitleLanguageValues[hud->chosenLanguage][hud->subtitleType], hud->subtitleOpacity, hud->backgroundOpacity, renderState);
     }
 }

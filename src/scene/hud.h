@@ -17,15 +17,19 @@ enum HudFlags {
     HudFlagsLookedPortalable1 = (1 << 1),
     HudFlagsShowingPrompt = (1 << 2),
     HudFlagsShowingSubtitle= (1 << 3),
+    HudFlagsSubtitleQueued= (1 << 4),
 };
 
 struct Hud {
     int chosenLanguage;
     enum CutscenePromptType promptType;
     enum SubtitleKey subtitleType;
+    enum SubtitleKey queuedSubtitleType;
     float promptOpacity;
     float subtitleOpacity;
+    float backgroundOpacity;
 
+    float subtitleFadeTime;
     float fadeInTimer;
 
     u16 flags;
