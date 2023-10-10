@@ -180,47 +180,23 @@ That will generate the rom at `/build/portal64.z64`
 <br />
 
 ## Current New Feature TODO List
-- [ ] rumble pak support?
-- [ ] Add auto save checkpoints
-- [ ] Correct elevator timing
+- [ ] polish up subtitles
+- [ ] more sound settings
+- [ ] add desk chairs and monitors
+- [ ] rumble pak support
 - [ ] pausing while glados is speaking can end her speech early
-- [x] Investigate crash after falling into death water on test chamber 8
-- [x] wake up objects after opening a portal under them
-- [x] button prompts
-- [x] investigate no_portals surface under portal pedestal
-- [x] Adding loading notice between levels #45
-- [x] clear sleeping object physics flag so buttons in savefiles remain pressed after loading
-- [x] ball velocity in test chamber 11
-- [x] wall in test chamber 07
-- [x] near clipping plane when touching portals git 
-- [x] investigate failed portal hole in test chamber 04
-- [x] Change default controls
-- [x] Add particle effects (shooting portal gun, energy pellet)
-- [x] increaes collider height
-- [x] test chamber 11 is broken
-- [x] test chamber 4 has an inverted indicator light sign 
-- [x] test chamber 4 door doesnt close
-- [x] Use a much nearer clipping plane when rendering the portal gun
-- [x] test chamber 04 has seams in a corner
-- [x] Add puzzle element connections and additional signs
-- [x] don't count boxes on buttons until it is released and stable
-- [x] Portal not rendering recursively sometimes #138
-- [x] disable portal surfaces manually on some surfaces #135
-- [x] test chamber 02 needs more light in the first room
-- [x] Presort portal gun polygon order #102
+- [x] Add auto save checkpoints
+- [x] Correct elevator timing
 
 ## Current New Sounds TODO List
 - [ ] Box collision sounds
-- [ ] Unstationary scaffolding moving sound
 - [ ] Ambient background loop
+- [x] Unstationary scaffolding moving sound
 
 ## Current Bug TODO List (Hardware Verified) (High->Low priority)
 ----------------------- v8
-- [ ] player can clip through back of elevator by jumping and strafeing at the back corners while inside.
 - [ ] Two wall portals next to eachother can be used to clip any object out of any level by pushing it into corner, then dropping. 
 - [ ] Passing into a ceiling portal can sometimes mess with the player rotation
 - [ ] various visual glitches when running NTSC on PAL console #65
 - [ ] various visual glitches when running PAL on NTSC console #65
-- [x] Player can trap themselves in chamber 5 by following instructions issue #75
-- [x] Can shoot portals, and walk through signage
-- [x] Can place portals on ground after final fizzler on all levels
+- [x] player can clip through back of elevator by jumping and strafeing at the back corners while inside.
