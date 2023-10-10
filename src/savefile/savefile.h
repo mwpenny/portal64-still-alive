@@ -3,6 +3,7 @@
 
 #include "./checkpoint.h"
 #include "../controls/controller_actions.h"
+#include "../audio/subtitles.h"
 
 #define SRAM_START_ADDR  0x08000000 
 #define SRAM_SIZE        0x8000 
@@ -51,6 +52,7 @@ struct ControlSaveState {
     unsigned short acceleration;
     unsigned short deadzone;
     unsigned char portalRenderDepth;
+    int subtitleLanguage;
 };
 
 struct AudioSettingsSaveState {

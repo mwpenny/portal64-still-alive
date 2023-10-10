@@ -15,9 +15,13 @@ vpk/
 portal_pak_dir/
 portal_pak_modified/
 
+resource/closecaption_*
+
 tools/skeletool64
 tools/vtf2png
 
 skelatool64/*.zip
 
 src/controls/controller-data.h
+src/audio/subtitles.c
+src/audio/subtitles.h

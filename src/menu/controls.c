@@ -461,8 +461,8 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
 #define CONTROL_PROMPT_HEIGHT           24
 #define CONTROL_PROMPT_PADDING          6
 
-#define SUBTITLE_LEFT_MARGIN     10
-#define SUBTITLE_BOTTOM_MARGIN    10
+#define SUBTITLE_SIDE_MARGIN     17
+#define SUBTITLE_BOTTOM_MARGIN    11
 #define SUBTITLE_PADDING   5
 
 
@@ -521,22 +521,22 @@ void controlsRenderSubtitle(char* message, float opacity, struct RenderState* re
         opacityAsInt = 0;
     }
 
-    int textPositionX = (SUBTITLE_LEFT_MARGIN + SUBTITLE_PADDING);
+    int textPositionX = (SUBTITLE_SIDE_MARGIN + SUBTITLE_PADDING);
     int textPositionY = (SCREEN_HT - SUBTITLE_BOTTOM_MARGIN - SUBTITLE_PADDING) - size.y;
 
     gSPDisplayList(renderState->dl++, ui_material_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
-    gDPSetEnvColor(renderState->dl++, 0, 0, 0, opacityAsInt / 3);
+    gDPSetEnvColor(renderState->dl++, 0, 0, 0, opacityAsInt / 2);
     gDPFillRectangle(
         renderState->dl++, 
         textPositionX - CONTROL_PROMPT_PADDING,
         textPositionY - CONTROL_PROMPT_PADDING,
-        textPositionX + size.x + CONTROL_PROMPT_PADDING, 
+        SCREEN_WD - SUBTITLE_SIDE_MARGIN, 
         SCREEN_HT - SUBTITLE_BOTTOM_MARGIN
     );
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
 
     gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
-    gDPSetEnvColor(renderState->dl++, 255, 60, 60, opacityAsInt);
+    gDPSetEnvColor(renderState->dl++, 255, 140, 155, opacityAsInt);
     renderState->dl = fontRender(
         &gDejaVuSansFont, 
         message, 

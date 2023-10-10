@@ -6,12 +6,17 @@
 
 enum AudioOption {
     AudioOptionSubtitlesEnabled,
+    AudioOptionSubtitlesLanguage,
 
     AudioOptionCount,
 };
 
 struct AudioOptions {
     struct MenuCheckbox subtitlesEnabled;
+    struct MenuSlider subtitlesLanguage;
+    Gfx* subtitlesLanguageText;
+    Gfx* subtitlesLanguageDynamicText;
+    unsigned short subtitles_language_temp;
     short selectedItem;
 };
 

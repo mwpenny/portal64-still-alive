@@ -87,6 +87,12 @@ sudo apt install nodejs
 
 <br />
 
+Optionally, for closed captions you will need to add the following files from where Portal is installed to the folder `resource/`. If no files are placed here Portal64 will still build without them, it simply wont have an option for close captions in the game menu. 2-3 languages seems to work best.
+```
+portal/resource/closecaption_<your desired language 1>.txt
+portal/resource/closecaption_<your desired language 2>.txt
+```
+
 You then need to add the following files from where Portal is installed to the folder `vpk`. (see vpk/add_vpk_here.md  for more details!)
 ```
 portal/portal_pak_000.vpk  

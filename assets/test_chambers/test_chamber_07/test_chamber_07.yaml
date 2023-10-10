@@ -25,17 +25,17 @@ cutscenes:
     - start_cutscene portal_loop
     - start_cutscene platform_ferry
     - set_signal launch_ball
-    - q_sound 07_PART1_ENTRY_1 CH_GLADOS SUBTITLE_07_PART1_ENTRY_1
-    - q_sound 07_PART1_ENTRY_2 CH_GLADOS SUBTITLE_07_PART1_ENTRY_2
-    - q_sound 07_PART1_ENTRY_3 CH_GLADOS SUBTITLE_07_PART1_ENTRY_3
+    - q_sound 07_PART1_ENTRY_1 CH_GLADOS PORTAL_07_PART1_ENTRY_1
+    - q_sound 07_PART1_ENTRY_2 CH_GLADOS PORTAL_07_PART1_ENTRY_2
+    - q_sound 07_PART1_ENTRY_3 CH_GLADOS PORTAL_07_PART1_ENTRY_3
   TILT:
     - delay 4
     - set_signal cube_dropper
     - play_animation tilt tilt
   START_1:
-    - q_sound 07_PART2_ENTRY_1 CH_GLADOS SUBTITLE_07_PART2_ENTRY_1
+    - q_sound 07_PART2_ENTRY_1 CH_GLADOS PORTAL_07_PART2_ENTRY_1
     - wait_for_signal weeeee
-    - q_sound 07_PART2_SUCCESS_1 CH_GLADOS SUBTITLE_07_PART2_SUCCESS_1
+    - q_sound 07_PART2_SUCCESS_1 CH_GLADOS PORTAL_07_PART2_SUCCESS_1
   portal_loop:
     - label loop_start
     - open_portal portal_0 0
@@ -60,12 +60,12 @@ cutscenes:
     - start_cutscene platform_loop
     - close_portal 0
     - show_prompt CutscenePromptTypePortal0
-    - q_sound 07_PART1_GET_DEVICE_COMPONENT_1 CH_GLADOS SUBTITLE_07_PART1_GET_DEVICE_COMPONENT_1
-    - q_sound 07_PART1_GET_DEVICE_COMPONENT_2 CH_GLADOS SUBTITLE_07_PART1_GET_DEVICE_COMPONENT_2
-    - q_sound 07_PART1_GET_DEVICE_COMPONENT_3 CH_GLADOS SUBTITLE_07_PART1_GET_DEVICE_COMPONENT_3
+    - q_sound 07_PART1_GET_DEVICE_COMPONENT_1 CH_GLADOS PORTAL_07_PART1_GET_DEVICE_COMPONENT_1
+    - q_sound 07_PART1_GET_DEVICE_COMPONENT_2 CH_GLADOS PORTAL_07_PART1_GET_DEVICE_COMPONENT_2
+    - q_sound 07_PART1_GET_DEVICE_COMPONENT_3 CH_GLADOS PORTAL_07_PART1_GET_DEVICE_COMPONENT_3
     - wait_for_signal trapped
-    - q_sound 07_PART1_TRAPPED_1 CH_GLADOS SUBTITLE_07_PART1_TRAPPED_1
-    - q_sound 07_PART1_TRAPPED_2 CH_GLADOS SUBTITLE_07_PART1_TRAPPED_2
+    - q_sound 07_PART1_TRAPPED_1 CH_GLADOS PORTAL_07_PART1_TRAPPED_1
+    - q_sound 07_PART1_TRAPPED_2 CH_GLADOS PORTAL_07_PART1_TRAPPED_2
     - wait_for_channel CH_GLADOS
     - set_signal trap_door
   PROMPT_SWITCH:
