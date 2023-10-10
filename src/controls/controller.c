@@ -85,13 +85,8 @@ void controllersInit(void)
     osSetEventMesg(OS_EVENT_SI, &gControllerMsgQ, (OSMesg)&gControllerMessage);
 }
 
-u64 gRumblePattern = 0xFFFF0000FFFF0000;
-int gRumbleBit = 0;
-
 int controllerGetTargetRumbleStatus() {
-    ++gRumbleBit;
-    return (gRumbleBit & 0x10) != 0;
-    // return (gRumblePattern & (1LL << (gRumbleBit & 63))) != 0;
+    return 0;
 }
 
 void controllerHandleMessage() {
