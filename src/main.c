@@ -284,9 +284,8 @@ static void gameProc(void* arg) {
             case (OS_SC_PRE_NMI_MSG):
                 pendingGFX += 2;
                 break;
-            case SIMPLE_CONTROLLER_MSG:
-                controllersReadPendingData();
-                break;
         }
+
+        controllersReadPendingData();
     }
 }

@@ -4,6 +4,9 @@
 #include "util/memory.h"
 #include <sched.h>
 
+#include "../debugger/serial.h"
+#include <string.h>
+
 // 0 = disable, 1 = record, 2 = playback
 #define CONTROLLER_LOG_CONTROLLER_DATA  0
 
@@ -13,8 +16,26 @@
 
 #define MAX_PLAYERS 4
 
-static u8    validcontrollers = 0;
-static u8    cntrlReadInProg  = 0;
+enum ControllerEventType {
+    ControllerEventTypeNone,
+    ControllerEventTypeData,
+    ControllerEventTypeStatus,
+};
+
+enum RumblepakState {
+    RumblepakStateDisconnected,
+    RumplepakStateUninitialized,
+    RumblepakStateInitialized,
+};
+
+static u8 gValidControllers = 0;
+static u8 gControllerReadInProgress  = 0;
+static u8 gLastControllerQuery = ControllerEventTypeNone;
+static u8 gRumblePakState;
+static u8 gRumblePakOn;
+static u8 gRumbleDelay;
+
+static OSPfs gRumbleBackFs;
 
 static OSContStatus  gControllerStatus[MAX_PLAYERS];
 static OSContPad     gControllerData[MAX_PLAYERS];
@@ -23,7 +44,8 @@ static u16           gControllerLastButton[MAX_PLAYERS];
 static enum ControllerDirection gControllerLastDirection[MAX_PLAYERS];
 static int gControllerDeadFrames;
 
-extern OSMesgQueue gfxFrameMsgQ;
+OSMesgQueue gControllerMsgQ;
+OSMesg gControllerMsg;
 
 #define REMAP_PLAYER_INDEX(index)   (index)
 // #define REMAP_PLAYER_INDEX(index)   0
@@ -40,12 +62,6 @@ int controllerIsConnected(int index) {
     return !gControllerStatus[index].errno;
 }
 
-void controllersListen() {
-    /**** Set up message and queue, for read completion notification ****/
-    gControllerMessage.type = SIMPLE_CONTROLLER_MSG;
-    osSetEventMesg(OS_EVENT_SI, &gfxFrameMsgQ, (OSMesg)&gControllerMessage);
-}
-
 void controllersInit(void)
 {
     OSMesgQueue         serialMsgQ;
@@ -55,27 +71,97 @@ void controllersInit(void)
     osCreateMesgQueue(&serialMsgQ, &serialMsg, 1);
     osSetEventMesg(OS_EVENT_SI, &serialMsgQ, (OSMesg)1);
 
-    if((i = osContInit(&serialMsgQ, &validcontrollers, &gControllerStatus[0])) != 0)
+    if((i = osContInit(&serialMsgQ, &gValidControllers, &gControllerStatus[0])) != 0)
         return;
+
+    if (gControllerStatus[0].status == CONT_CARD_ON) {
+        gRumblePakState = RumplepakStateUninitialized;
+        gRumblePakOn = 0;
+    }
     
     /**** Set up message and queue, for read completion notification ****/
     gControllerMessage.type = SIMPLE_CONTROLLER_MSG;
-    osSetEventMesg(OS_EVENT_SI, &gfxFrameMsgQ, (OSMesg)&gControllerMessage);
+    osCreateMesgQueue(&gControllerMsgQ, &gControllerMsg, 1);
+    osSetEventMesg(OS_EVENT_SI, &gControllerMsgQ, (OSMesg)&gControllerMessage);
 }
 
+u64 gRumblePattern = 0xFFFF0000FFFF0000;
+int gRumbleBit = 0;
+
+int controllerGetTargetRumbleStatus() {
+    ++gRumbleBit;
+    return (gRumbleBit & 0x10) != 0;
+    // return (gRumblePattern & (1LL << (gRumbleBit & 63))) != 0;
+}
+
+void controllerHandleMessage() {
+    if (gLastControllerQuery == ControllerEventTypeData) {
+        osContGetReadData(gControllerData);
+        gControllerReadInProgress = 0;
+
+        if (gControllerDeadFrames) {
+            --gControllerDeadFrames;
+            zeroMemory(gControllerData, sizeof(gControllerData));
+        }
+
+        for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
+            if (gControllerStatus[i].errno & CONT_NO_RESPONSE_ERROR) {
+                zeroMemory(&gControllerData[i], sizeof(OSContPad));
+            }
+        }
+
+        if (gRumblePakState != RumblepakStateInitialized) {
+            osContStartQuery(&gControllerMsgQ);
+            gControllerReadInProgress = 1;
+            gLastControllerQuery = ControllerEventTypeStatus;
+        }
+
+    } else if (gLastControllerQuery == ControllerEventTypeStatus) {
+        int prevStatus = gControllerStatus[0].status;
+
+        osContGetQuery(&gControllerStatus[0]);
+        gLastControllerQuery = ControllerEventTypeNone;
+
+        if ((prevStatus != CONT_CARD_ON && gControllerStatus[0].status == CONT_CARD_ON && gRumblePakState == RumblepakStateDisconnected) || gRumblePakState == RumplepakStateUninitialized) {
+            if (osMotorInit(&gControllerMsgQ, &gRumbleBackFs, 0) == 0) {
+                gRumblePakState = RumblepakStateInitialized;
+                gRumbleDelay = 16;
+            } else {
+                gRumblePakState = RumblepakStateDisconnected;
+                gRumblePakOn = 0;
+            }
+        } if (gControllerStatus[0].status != CONT_CARD_ON) {
+            gRumblePakState = RumblepakStateDisconnected;
+            gRumblePakOn = 0;
+        }
+    }
+}
 
 void controllersReadPendingData(void) {
-    osContGetReadData(gControllerData);
-    cntrlReadInProg = 0;
-
-    if (gControllerDeadFrames) {
-        --gControllerDeadFrames;
-        zeroMemory(gControllerData, sizeof(gControllerData));
+    OSMesg msg;
+    if (osRecvMesg(&gControllerMsgQ, &msg, OS_MESG_NOBLOCK) != -1) {
+        controllerHandleMessage();
     }
 
-    for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
-        if (gControllerStatus[i].errno & CONT_NO_RESPONSE_ERROR) {
-            zeroMemory(&gControllerData[i], sizeof(OSContPad));
+    if (gRumblePakState == RumblepakStateInitialized) {
+        int targetRumbleStatus = controllerGetTargetRumbleStatus();
+
+        if (gRumbleDelay > 0) {
+            --gRumbleDelay;
+            return;
+        }
+
+        if (targetRumbleStatus != gRumblePakOn) {
+            s32 rumbleError = targetRumbleStatus ? osMotorStart(&gRumbleBackFs) : osMotorStop(&gRumbleBackFs);
+
+            if (rumbleError == PFS_ERR_CONTRFAIL) {
+                gRumblePakState = RumplepakStateUninitialized;
+            } else if (rumbleError != 0) {
+                gRumblePakState = RumblepakStateDisconnected;
+                gRumblePakOn = 0;
+            } else {
+                gRumblePakOn = targetRumbleStatus;
+            }
         }
     }
 }
@@ -88,17 +174,18 @@ void controllersSavePreviousState(void) {
 }
 
 int controllerHasPendingMessage() {
-    return cntrlReadInProg;
+    return gControllerReadInProgress;
 }
 
 #define CONTROLLER_READ_SKIP_NUMBER 10
 
 void controllersTriggerRead(void) {
-    if (validcontrollers && !cntrlReadInProg) {
-        cntrlReadInProg = CONTROLLER_READ_SKIP_NUMBER;
-        osContStartReadData(&gfxFrameMsgQ);
-    } else if (cntrlReadInProg) {
-        --cntrlReadInProg;
+    if (gValidControllers && !gControllerReadInProgress) {
+        gControllerReadInProgress = CONTROLLER_READ_SKIP_NUMBER;
+        gLastControllerQuery = ControllerEventTypeData;
+        osContStartReadData(&gControllerMsgQ);
+    } else if (gControllerReadInProgress) {
+        --gControllerReadInProgress;
     }
 }
 

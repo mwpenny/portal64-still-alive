@@ -17,7 +17,7 @@ $(SKELATOOL64):
 	skelatool64/setup_dependencies.sh
 	make -C skelatool64
 
-OPTIMIZER		:= -Os
+OPTIMIZER		:= -Og
 LCDEFS			:= -DDEBUG -g -Isrc/ -I/usr/include/n64/nustd -Werror -Wall
 N64LIB			:= -lultra_rom -lnustd
 

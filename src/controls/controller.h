@@ -15,7 +15,6 @@ enum ControllerDirection {
     ControllerDirectionLeft = (1 << 3),
 };
 
-void controllersListen();
 void controllersClearState();
 int controllerHasPendingMessage();
 int controllerIsConnected(int index);
