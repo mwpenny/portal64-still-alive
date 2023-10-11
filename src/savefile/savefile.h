@@ -3,7 +3,6 @@
 
 #include "./checkpoint.h"
 #include "../controls/controller_actions.h"
-#include "../audio/subtitles.h"
 
 #define SRAM_START_ADDR  0x08000000 
 #define SRAM_SIZE        0x8000 
@@ -21,7 +20,7 @@
 
 #define SCREEN_SHOT_SRAM(slotIndex)     (((slotIndex) + 1) * SAVE_SLOT_SIZE + MAX_CHECKPOINT_SIZE + SRAM_START_ADDR)
 
-#define SAVEFILE_HEADER 0xDEF1
+#define SAVEFILE_HEADER 0xDEF2
 
 // first save slot is always reserved for auto save
 #define MAX_SAVE_SLOTS  ((int)(SRAM_SIZE / SAVE_SLOT_SIZE) - 1)
@@ -52,7 +51,7 @@ struct ControlSaveState {
     unsigned short acceleration;
     unsigned short deadzone;
     unsigned char portalRenderDepth;
-    int subtitleLanguage;
+    unsigned char subtitleLanguage;
 };
 
 struct AudioSettingsSaveState {

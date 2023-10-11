@@ -4,7 +4,7 @@
 #include "../savefile/savefile.h"
 #include "../font/dejavusans.h"
 #include "../audio/soundplayer.h"
-#include "../audio/subtitles.h"
+#include "../build/src/audio/subtitles.h"
 #include "../build/assets/materials/ui.h"
 #include "../build/src/audio/clips.h"
 

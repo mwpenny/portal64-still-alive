@@ -77,7 +77,7 @@ def make_overall_subtitles_header(all_header_lines, languages_list):
 
     header_lines.append("#endif")
 
-    with open("src/audio/subtitles.h", "w") as f:
+    with open("build/src/audio/subtitles.h", "w") as f:
         f.writelines(header_lines)
 
 def make_SubtitleKey_headerlines(keys):
@@ -134,7 +134,7 @@ def make_overall_subtitles_sourcefile(other_sourcefile_lines, language_list):
     sourcefile_lines.append("\n")
     sourcefile_lines.extend(other_sourcefile_lines)
 
-    with open("src/audio/subtitles.c", "w") as f:
+    with open("build/src/audio/subtitles.c", "w") as f:
         f.writelines(sourcefile_lines)
 
 def process_all_closecaption_files(dir):

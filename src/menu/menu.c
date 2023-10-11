@@ -248,7 +248,7 @@ struct MenuSlider menuBuildSlider(int x, int y, int w, int tickCount) {
     int tickMin = x + (SLIDER_WIDTH / 2);
     int tickWidth = w - SLIDER_WIDTH;
     for (int i = 0; i < tickCount; ++i) {
-        int tickX = (i * tickWidth) / (tickCount - 1) + tickMin;
+        int tickX = tickCount <= 1 ? tickMin : (i * tickWidth) / (tickCount - 1) + tickMin;
         gDPFillRectangle(
             dl++, 
             tickX, 

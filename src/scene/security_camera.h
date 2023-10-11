@@ -4,7 +4,6 @@
 #include "../physics/collision_object.h"
 #include "../levels/level_definition.h"
 #include "../sk64/skelatool_armature.h"
-#include "../audio/subtitles.h"
 
 struct SecurityCamera {
     struct CollisionObject collisionObject;

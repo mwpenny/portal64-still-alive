@@ -10,7 +10,7 @@
 #include "../sk64/skelatool_clip.h"
 #include "../sk64/skelatool_armature.h"
 #include "../physics/collision_box.h"
-#include "../audio/subtitles.h"
+#include "../build/src/audio/subtitles.h"
 
 #define NO_TRANSFORM_INDEX  0xFF
 

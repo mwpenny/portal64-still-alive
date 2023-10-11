@@ -1,6 +1,7 @@
 #include "hud.h"
 
 #include "../../build/assets/materials/hud.h"
+#include "../../build/src/audio/subtitles.h"
 #include "../menu/controls.h"
 #include "../graphics/graphics.h"
 #include "../util/time.h"

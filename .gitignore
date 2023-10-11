@@ -23,5 +23,3 @@ tools/vtf2png
 skelatool64/*.zip
 
 src/controls/controller-data.h
-src/audio/subtitles.c
-src/audio/subtitles.h

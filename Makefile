@@ -67,26 +67,21 @@ LDFLAGS =	-L/usr/lib/n64 $(N64LIB)  -L$(N64_LIBGCCDIR) -lgcc
 default:	english_audio
 
 english_audio: portal_pak_dir
-	@python tools/level_scripts/subtitle_generate.py
 	@$(MAKE) buildgame
 
 german_audio: vpk/portal_sound_vo_german_dir.vpk vpk/portal_sound_vo_german_000.vpk portal_pak_dir
-	@python tools/level_scripts/subtitle_generate.py
 	vpk -x portal_pak_dir vpk/portal_sound_vo_german_dir.vpk
 	@$(MAKE) buildgame
 	
 french_audio: vpk/portal_sound_vo_french_dir.vpk vpk/portal_sound_vo_french_000.vpk portal_pak_dir
-	@python tools/level_scripts/subtitle_generate.py
 	vpk -x portal_pak_dir vpk/portal_sound_vo_french_dir.vpk
 	@$(MAKE) buildgame
 	
 russian_audio: vpk/portal_sound_vo_russian_dir.vpk vpk/portal_sound_vo_russian_000.vpk portal_pak_dir
-	@python tools/level_scripts/subtitle_generate.py
 	vpk -x portal_pak_dir vpk/portal_sound_vo_russian_dir.vpk
 	@$(MAKE) buildgame	
 	
 spanish_audio: vpk/portal_sound_vo_spanish_dir.vpk vpk/portal_sound_vo_spanish_000.vpk portal_pak_dir
-	@python tools/level_scripts/subtitle_generate.py
 	vpk -x portal_pak_dir vpk/portal_sound_vo_spanish_dir.vpk
 	@$(MAKE) buildgame	
 
@@ -315,6 +310,8 @@ build/src/scene/signage.o: $(MODEL_HEADERS)
 build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
 build/src/util/dynamic_asset_data.o: build/assets/models/dynamic_model_list_data.h
 build/src/util/dynamic_asset_loader.o: build/assets/models/dynamic_model_list.h build/assets/models/dynamic_animated_model_list.h
+build/src/menu/audio_options.o: build/src/audio/subtitles.h
+build/src/scene/hud.o: build/src/audio/subtitles.h
 
 
 ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_00/test_chamber_00_anim.o \
@@ -441,6 +438,14 @@ build/src/audio/clips.o: build/src/audio/clips.h
 build/src/decor/decor_object_list.o: build/src/audio/clips.h
 
 ####################
+## Subtitles
+####################
+
+build/src/audio/subtitles.h build/src/audio/subtitles.c: tools/level_scripts/subtitle_generate.py 
+	@mkdir -p build/src/audio
+	python3 tools/level_scripts/subtitle_generate.py
+
+####################
 ## Linking
 ####################
 
@@ -449,7 +454,12 @@ $(BOOT_OBJ): $(BOOT)
 
 # without debugger
 
-CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) $(MODEL_OBJECTS) build/assets/materials/static_mat.o build/assets/materials/ui_mat.o build/assets/materials/hud_mat.o
+CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) \
+	$(MODEL_OBJECTS) \
+	build/assets/materials/static_mat.o \
+	build/assets/materials/ui_mat.o \
+	build/assets/materials/hud_mat.o \
+	build/src/audio/subtitles.o
 
 CODEOBJECTS_NO_DEBUG = $(CODEOBJECTS)
 
@@ -514,8 +524,5 @@ clean-assets:
 
 fix:
 	wine tools/romfix64.exe build/portal.z64 
-
-subtitles: tools/level_scripts/subtitle_generate.py 
-	python3 tools/level_scripts/subtitle_generate.py
 
 .SECONDARY:
