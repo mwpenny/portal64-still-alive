@@ -3,8 +3,8 @@
 #include "defs.h"
 #include "util/memory.h"
 #include <sched.h>
+#include "rumble_pak.h"
 
-#include "../debugger/serial.h"
 #include <string.h>
 
 // 0 = disable, 1 = record, 2 = playback
@@ -33,7 +33,6 @@ static u8 gControllerReadInProgress  = 0;
 static u8 gLastControllerQuery = ControllerEventTypeNone;
 static u8 gRumblePakState;
 static u8 gRumblePakOn;
-static u8 gRumbleDelay;
 
 static OSPfs gRumbleBackFs;
 
@@ -85,11 +84,13 @@ void controllersInit(void)
     osSetEventMesg(OS_EVENT_SI, &gControllerMsgQ, (OSMesg)&gControllerMessage);
 }
 
-int controllerGetTargetRumbleStatus() {
-    return 0;
+void controllerQueryStatus() {
+    osContStartQuery(&gControllerMsgQ);
+    gControllerReadInProgress = 1;
+    gLastControllerQuery = ControllerEventTypeStatus;
 }
 
-void controllerHandleMessage() {
+int controllerHandleMessage() {
     if (gLastControllerQuery == ControllerEventTypeData) {
         osContGetReadData(gControllerData);
         gControllerReadInProgress = 0;
@@ -105,14 +106,10 @@ void controllerHandleMessage() {
             }
         }
 
-        if (gRumblePakState != RumblepakStateInitialized) {
-            osContStartQuery(&gControllerMsgQ);
-            gControllerReadInProgress = 1;
-            gLastControllerQuery = ControllerEventTypeStatus;
-        }
-
+        return TRUE;
     } else if (gLastControllerQuery == ControllerEventTypeStatus) {
         int prevStatus = gControllerStatus[0].status;
+        gControllerReadInProgress = 0;
 
         osContGetQuery(&gControllerStatus[0]);
         gLastControllerQuery = ControllerEventTypeNone;
@@ -120,7 +117,6 @@ void controllerHandleMessage() {
         if ((prevStatus != CONT_CARD_ON && gControllerStatus[0].status == CONT_CARD_ON && gRumblePakState == RumblepakStateDisconnected) || gRumblePakState == RumplepakStateUninitialized) {
             if (osMotorInit(&gControllerMsgQ, &gRumbleBackFs, 0) == 0) {
                 gRumblePakState = RumblepakStateInitialized;
-                gRumbleDelay = 16;
             } else {
                 gRumblePakState = RumblepakStateDisconnected;
                 gRumblePakOn = 0;
@@ -130,34 +126,45 @@ void controllerHandleMessage() {
             gRumblePakOn = 0;
         }
     }
+    
+    return FALSE;
 }
 
 void controllersReadPendingData(void) {
     OSMesg msg;
+    int shouldCheckStatus;
+
     if (osRecvMesg(&gControllerMsgQ, &msg, OS_MESG_NOBLOCK) != -1) {
-        controllerHandleMessage();
+        shouldCheckStatus = controllerHandleMessage();
+    } else {
+        shouldCheckStatus = FALSE;
     }
 
+    int targetRumbleStatus = rumblePakCalculateState();
+
     if (gRumblePakState == RumblepakStateInitialized) {
-        int targetRumbleStatus = controllerGetTargetRumbleStatus();
-
-        if (gRumbleDelay > 0) {
-            --gRumbleDelay;
-            return;
-        }
-
         if (targetRumbleStatus != gRumblePakOn) {
-            s32 rumbleError = targetRumbleStatus ? osMotorStart(&gRumbleBackFs) : osMotorStop(&gRumbleBackFs);
+            shouldCheckStatus = FALSE;
 
-            if (rumbleError == PFS_ERR_CONTRFAIL) {
-                gRumblePakState = RumplepakStateUninitialized;
-            } else if (rumbleError != 0) {
-                gRumblePakState = RumblepakStateDisconnected;
-                gRumblePakOn = 0;
-            } else {
-                gRumblePakOn = targetRumbleStatus;
+            for (int i = 0; i < 3; ++i) {
+                s32 rumbleError = targetRumbleStatus ? osMotorStart(&gRumbleBackFs) : osMotorStop(&gRumbleBackFs);
+
+                if (rumbleError == PFS_ERR_CONTRFAIL) {
+                    continue;
+                } else if (rumbleError != 0) {
+                    gRumblePakState = RumblepakStateDisconnected;
+                    gRumblePakOn = 0;
+                    break;
+                } else {
+                    gRumblePakOn = targetRumbleStatus;
+                    break;
+                }
             }
         }
+    }
+
+    if (shouldCheckStatus) {
+        controllerQueryStatus();
     }
 }
 

@@ -31,6 +31,7 @@
 #include "render_plan.h"
 #include "../menu/game_menu.h"
 #include "../effects/effect_definitions.h"
+#include "../controls/rumble_pak.h"
 
 extern struct GameMenu gGameMenu;
 
@@ -321,7 +322,15 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
 }
 
+u8 gFireGunRumbleWaveData[] = {
+    0xFF, 0xE9,
+};
 
+struct RumblePakWave gFireGunRumbleWave = {
+    .samples = gFireGunRumbleWaveData,
+    .sampleCount = 8,
+    .samplesPerTick = 1 << 6,
+};
 
 void sceneCheckPortals(struct Scene* scene) {
     if (playerIsDead(&scene->player)) {
@@ -352,6 +361,7 @@ void sceneCheckPortals(struct Scene* scene) {
         scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 0);
         soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL);
+        rumblePakClipPlay(&gFireGunRumbleWave);
     }
 
     if (((fireBlue && !fireOrange) || (!hasOrange && fireOrange)) && hasBlue && !playerIsGrabbing(&scene->player) && !portalGunIsFiring(&scene->portalGun)) {
@@ -359,6 +369,7 @@ void sceneCheckPortals(struct Scene* scene) {
         scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 1);
         soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL, NULL);
+        rumblePakClipPlay(&gFireGunRumbleWave);
     }
 
     if ((fireOrange || fireBlue) && playerIsGrabbing(&scene->player)){
