@@ -279,6 +279,7 @@ build/assets/models/props/combine_ball_launcher.h: assets/materials/ball_catcher
 build/src/decor/decor_object_list.o: build/assets/models/dynamic_model_list.h build/assets/materials/static.h
 build/src/effects/effect_definitions.o: build/assets/materials/static.h
 build/src/effects/portal_trail.o: build/assets/materials/static.h build/assets/models/portal_gun/ball_trail.h
+build/src/levels/level_definition.o: build/src/audio/subtitles.h
 build/src/menu/controls.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/menu/game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
 build/src/menu/gameplay_options.o: build/assets/materials/ui.h build/src/audio/clips.h
@@ -291,7 +292,7 @@ build/src/menu/options_menu.o: build/assets/materials/ui.h
 build/src/menu/save_game_menu.o: build/src/audio/clips.h
 build/src/scene/scene_animator.o: build/src/audio/clips.h
 build/src/menu/savefile_list.o: build/assets/materials/ui.h build/src/audio/clips.h
-build/src/player/player.o: build/assets/models/player/chell.h build/assets/materials/static.h
+build/src/player/player.o: build/assets/models/player/chell.h build/assets/materials/static.h build/src/audio/subtitles.h
 build/src/scene/ball_catcher.o: build/assets/models/props/combine_ball_catcher.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
 build/src/scene/ball_launcher.o: build/assets/models/props/combine_ball_launcher.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
 build/src/scene/ball.o: build/assets/models/grav_flare.h build/assets/models/fleck_ash2.h build/assets/materials/static.h
@@ -441,8 +442,8 @@ build/src/decor/decor_object_list.o: build/src/audio/clips.h
 ## Subtitles
 ####################
 
-build/src/audio/subtitles.h build/src/audio/subtitles.c: tools/level_scripts/subtitle_generate.py 
-	@mkdir -p build/src/audio
+build/src/audio/subtitles.h build/src/audio/subtitles.c: resource/closecaption_english.txt tools/level_scripts/subtitle_generate.py 
+	@mkdir -p $(@D)
 	python3 tools/level_scripts/subtitle_generate.py
 
 ####################
