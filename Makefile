@@ -92,7 +92,7 @@ include $(COMMONRULES)
 .s.o:
 	$(AS) -Wa,-Iasm -o $@ $<
 
-build/%.o: %.c
+build/%.o: %.c 
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -MM $^ -MF "$(@:.o=.d)" -MT"$@"
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -312,7 +312,7 @@ build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/mat
 build/src/util/dynamic_asset_data.o: build/assets/models/dynamic_model_list_data.h
 build/src/util/dynamic_asset_loader.o: build/assets/models/dynamic_model_list.h build/assets/models/dynamic_animated_model_list.h
 build/src/menu/audio_options.o: build/src/audio/subtitles.h
-build/src/scene/hud.o: build/src/audio/subtitles.h
+build/src/scene/scene.o: build/src/audio/subtitles.h
 
 
 ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_00/test_chamber_00_anim.o \
@@ -443,8 +443,7 @@ build/src/decor/decor_object_list.o: build/src/audio/clips.h
 ####################
 
 build/src/audio/subtitles.h build/src/audio/subtitles.c: resource/closecaption_english.txt tools/level_scripts/subtitle_generate.py 
-	@mkdir -p $(@D)
-	python3 tools/level_scripts/subtitle_generate.py
+	@python tools/level_scripts/subtitle_generate.py
 
 ####################
 ## Linking
