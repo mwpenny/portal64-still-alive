@@ -89,6 +89,7 @@ sudo apt install nodejs
 
 You will need to add at least one of the following files from where Portal is installed to the folder `resource/`. You can add multiple languages if desired.
 ```
+portal/resource/closecaption_english.txt
 portal/resource/closecaption_<your desired language 1>.txt
 portal/resource/closecaption_<your desired language 2>.txt
 ```
