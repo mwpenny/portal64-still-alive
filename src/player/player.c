@@ -110,7 +110,7 @@ void playerRender(void* data, struct DynamicRenderDataList* renderList, struct R
 }
 
 void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity) {
-    player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, 0.0f, 0.5f, NULL, NULL);
+    player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, 0.0f, 0.5f, NULL, NULL, SoundTypeAll);
 
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
 
@@ -217,7 +217,7 @@ void playerHandleCollision(struct Player* player) {
 
         if (((isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB)) && !playerIsDead(player))) {
             playerKill(player, 0);
-            soundPlayerPlay(soundsBallKill, 1.0f, 1.0f, NULL, NULL);
+            soundPlayerPlay(soundsBallKill, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         }
     }
 }
@@ -741,8 +741,8 @@ void playerUpdate(struct Player* player) {
     quatIdent(&player->body.transform.rotation);
 
     if (didPassThroughPortal) {
-        soundPlayerPlay(soundsPortalEnter[didPassThroughPortal - 1], 0.75f, 1.0f, NULL, NULL);
-        soundPlayerPlay(soundsPortalExit[2 - didPassThroughPortal], 0.75f, 1.0f, NULL, NULL);
+        soundPlayerPlay(soundsPortalEnter[didPassThroughPortal - 1], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(soundsPortalExit[2 - didPassThroughPortal], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
         gPlayerCollider.extendDownward = 0.0f;
     } else {
         gPlayerCollider.extendDownward = mathfMoveTowards(gPlayerCollider.extendDownward, TARGET_CAPSULE_EXTEND_HEIGHT, STAND_SPEED * FIXED_DELTA_TIME);

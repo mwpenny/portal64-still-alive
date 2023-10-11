@@ -141,14 +141,14 @@ void buttonUpdate(struct Button* button) {
         //actively going down
         if (shouldPress){
             if (!(button->flags & ButtonFlagsBeingPressed)){
-                soundPlayerPlay(soundsButton, 2.5f, 0.5f, &button->rigidBody.transform.position, &gZeroVec);
+                soundPlayerPlay(soundsButton, 2.5f, 0.5f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             }
             button->flags |= ButtonFlagsBeingPressed;
         }
         // actively going up
         else{
             if ((button->flags & ButtonFlagsBeingPressed)){
-                soundPlayerPlay(soundsButtonRelease, 2.5f, 0.4f, &button->rigidBody.transform.position, &gZeroVec);
+                soundPlayerPlay(soundsButtonRelease, 2.5f, 0.4f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             }
             button->flags &= ~ButtonFlagsBeingPressed;
         }

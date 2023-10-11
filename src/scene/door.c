@@ -131,7 +131,7 @@ void doorUpdate(struct Door* door) {
             skAnimatorRunClip(&door->animator, dynamicAssetClip(typeDefinition->armatureIndex, typeDefinition->closeClipIndex), 0.0f, 0);
         }
 
-        soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec);
+        soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
 
         if (signal) {
             door->flags |= DoorFlagsIsOpen;

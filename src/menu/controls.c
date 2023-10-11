@@ -283,7 +283,7 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
 
             controlsLayout(controlsMenu);
 
-            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         }
 
         return MenuDirectionStay;
@@ -338,7 +338,7 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
             controlsLayout(controlsMenu);
         }
 
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (controllerGetButtonDown(0, B_BUTTON)) {

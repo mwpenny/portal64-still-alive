@@ -360,7 +360,7 @@ void sceneCheckPortals(struct Scene* scene) {
         portalGunFire(&scene->portalGun, 0, &raycastRay, &playerUp, scene->player.body.currentRoom);
         scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 0);
-        soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL);
+        soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         rumblePakClipPlay(&gFireGunRumbleWave);
     }
 
@@ -368,7 +368,7 @@ void sceneCheckPortals(struct Scene* scene) {
         portalGunFire(&scene->portalGun, 1, &raycastRay, &playerUp, scene->player.body.currentRoom);
         scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 1);
-        soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL, NULL);
+        soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         rumblePakClipPlay(&gFireGunRumbleWave);
     }
 
@@ -377,27 +377,27 @@ void sceneCheckPortals(struct Scene* scene) {
     }
     
     if ((scene->player.flags & PlayerFlagsGrounded) && (scene->player.flags & PlayerIsStepping)){
-        soundPlayerPlay(soundsConcreteFootstep[scene->player.currentFoot], 1.0f, 1.0f, NULL, NULL);
+        soundPlayerPlay(soundsConcreteFootstep[scene->player.currentFoot], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         scene->player.flags &= ~PlayerIsStepping;
     }
     if (scene->player.flags & PlayerJustJumped){
-        soundPlayerPlay(soundsConcreteFootstep[3], 1.0f, 1.0f, NULL, NULL);
+        soundPlayerPlay(soundsConcreteFootstep[3], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         scene->player.flags &= ~PlayerJustJumped;
     }
     if (scene->player.flags & PlayerJustLanded){
-        soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 1.0f, NULL, NULL);
+        soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         scene->player.flags &= ~PlayerJustLanded;
     }
     if (scene->player.flags & PlayerJustSelect){
-        soundPlayerPlay(soundsSelecting[1], 1.0f, 0.5f, NULL, NULL);
+        soundPlayerPlay(soundsSelecting[1], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         scene->player.flags &= ~PlayerJustSelect;
     }
     if (scene->player.flags & PlayerJustDeniedSelect){
         if (scene->player.flags & PlayerHasFirstPortalGun){
-            soundPlayerPlay(soundsSelecting[0], 1.0f, 0.5f, NULL, NULL);
+            soundPlayerPlay(soundsSelecting[0], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         }
         else{
-            soundPlayerPlay(soundsSelecting[2], 1.0f, 0.5f, NULL, NULL);
+            soundPlayerPlay(soundsSelecting[2], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         }
         scene->player.flags &= ~PlayerJustDeniedSelect;
     }
@@ -798,7 +798,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
             collisionSceneSetPortal(portalIndex, &portal->rigidBody.transform, roomIndex, portal->colliderIndex);
             collisionObjectUpdateBB(&portal->collisionObject);
 
-            soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &portal->rigidBody.transform.position, &gZeroVec);
+            soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &portal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
 
             if (fromPlayer) {
                 portal->flags |= PortalFlagsPlayerPortal;
@@ -815,7 +815,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                     // something changed and play sound near other portal
                     struct Portal* otherPortal = &scene->portals[1 - portalIndex];
                     otherPortal->opacity = 1.0f;
-                    soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &otherPortal->rigidBody.transform.position, &gZeroVec);
+                    soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &otherPortal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
                 }
 
                 sceneCheckSecurityCamera(scene, portal);
@@ -971,7 +971,7 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
 
 void sceneClosePortal(struct Scene* scene, int portalIndex) {
     if (gCollisionScene.portalTransforms[portalIndex]) {
-        soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position, &gZeroVec);
+        soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position, &gZeroVec, SoundTypeAll);
         gCollisionScene.portalTransforms[portalIndex] = NULL;
         gCollisionScene.portalColliderIndex[portalIndex] = -1;
         scene->portals[portalIndex].portalSurfaceIndex = -1;

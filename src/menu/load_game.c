@@ -41,7 +41,7 @@ enum MenuDirection loadGameUpdate(struct LoadGameMenu* loadGame) {
 
         stackMallocFree(save);
 
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     return savefileListUpdate(loadGame->savefileList);

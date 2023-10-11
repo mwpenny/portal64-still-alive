@@ -55,8 +55,8 @@ struct ControlSaveState {
 };
 
 struct AudioSettingsSaveState {
-    unsigned char soundVolume;
-    unsigned char musicVolume;
+    unsigned short soundVolume;
+    unsigned short musicVolume;
 };
 
 #define NO_TEST_CHAMBER         0xFF

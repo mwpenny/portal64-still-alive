@@ -104,8 +104,8 @@ void switchActivate(struct Switch* switchObj) {
     if (switchObj->timeLeft > 0.0f) {
         return;
     }
-    soundPlayerPlay(soundsButton, 1.0f, 0.5f, &switchObj->rigidBody.transform.position, &gZeroVec);
-    switchObj->ticktockSoundLoopId = soundPlayerPlay(soundsTickTock, 1.0f, 0.5f, NULL, NULL);
+    soundPlayerPlay(soundsButton, 1.0f, 0.5f, &switchObj->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+    switchObj->ticktockSoundLoopId = soundPlayerPlay(soundsTickTock, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     switchObj->flags |= SwitchFlagsDepressed;
     switchObj->timeLeft = switchObj->duration;
     signalsSend(switchObj->signalIndex);
@@ -143,7 +143,7 @@ void switchUpdate(struct Switch* switchObj) {
                 switchObj->ticktockPauseTimer += FIXED_DELTA_TIME;
             }else{
                 switchObj->ticktockPauseTimer = 0; 
-                switchObj->ticktockSoundLoopId = soundPlayerPlay(soundsTickTock, 1.0f, 0.5f, NULL, NULL);
+                switchObj->ticktockSoundLoopId = soundPlayerPlay(soundsTickTock, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
             }
         }else{
             switchObj->ticktockPauseTimer = 0; 

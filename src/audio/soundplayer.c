@@ -5,6 +5,7 @@
 #include "util/time.h"
 #include "math/mathf.h"
 #include "clips.h"
+#include "../savefile/savefile.h"
 
 struct SoundArray* gSoundClipArray;
 ALSndPlayer gSoundPlayer;
@@ -26,7 +27,9 @@ struct ActiveSound {
     struct Vector3 pos3D;
     struct Vector3 velocity3D;
     float volume;
+    float originalVolume;
     float basePitch;
+    enum SoundType soundType;
 };
 
 struct SoundListener {
@@ -149,7 +152,8 @@ float soundPlayerEstimateLength(ALSound* sound, float speed) {
     return sampleCount * (1.0f / OUTPUT_RATE) / speed;
 }
 
-ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity) {
+ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType type) {
+
     if (gActiveSoundCount >= MAX_ACTIVE_SOUNDS || soundClipId < 0 || soundClipId >= gSoundClipArray->soundCount) {
         return SOUND_ID_NONE;
     }
@@ -171,9 +175,16 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     sound->flags = 0;
     sound->estimatedTimeLeft = soundPlayerEstimateLength(alSound, pitch);
     sound->volume = volume;
+    sound->originalVolume = volume;
     sound->basePitch = pitch;
+    sound->soundType = type;
 
-    float startingVolume = volume;
+    float newVolume = sound->originalVolume * gSaveData.audio.soundVolume/0xFFFF;
+    if (type == SoundTypeMusic){
+        newVolume = newVolume * gSaveData.audio.musicVolume/0xFFFF;
+    }
+    sound->volume = newVolume;
+
     int panning = 64;
 
     if (at) {
@@ -181,7 +192,7 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
         sound->pos3D = *at;
         sound->velocity3D = *velocity;
         float pitchBend;
-        soundPlayerDetermine3DSound(at, velocity, &startingVolume, &startingVolume, &panning, &pitchBend);
+        soundPlayerDetermine3DSound(at, velocity, &newVolume, &newVolume, &panning, &pitchBend);
         pitch = pitch * pitchBend;
     }
 
@@ -189,13 +200,17 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
         sound->flags |= SOUND_FLAGS_LOOPING;
     }
 
+    
+
     alSndpSetSound(&gSoundPlayer, result);
-    alSndpSetVol(&gSoundPlayer, (short)(32767 * startingVolume));
+    alSndpSetVol(&gSoundPlayer, (short)(32767 * newVolume));
     alSndpSetPitch(&gSoundPlayer, pitch);
     alSndpSetPan(&gSoundPlayer, panning);
     alSndpPlay(&gSoundPlayer);
 
     ++gActiveSoundCount;
+
+    
 
     return result;
 }
@@ -207,6 +222,48 @@ float soundClipDuration(int soundClipId, float pitch) {
 
     ALSound* alSound = gSoundClipArray->sounds[soundClipId];
     return soundPlayerEstimateLength(alSound, pitch);
+}
+
+void soundPlayerGameVolumeUpdate(enum SoundType type) {
+    int index = 0;
+    while (index < gActiveSoundCount) {
+        struct ActiveSound* sound = &gActiveSounds[index];
+        if (!sound){
+            ++index;
+            continue;
+        }
+
+        float newVolume = sound->originalVolume * gSaveData.audio.soundVolume/0xFFFF;
+        if (type == SoundTypeMusic){
+            newVolume = newVolume* gSaveData.audio.musicVolume/0xFFFF;
+        }
+        
+        if (sound->flags & SOUND_FLAGS_PAUSED) {
+            sound->volume = newVolume;
+            ++index;
+            continue;
+        }
+        if (sound->flags & SOUND_FLAGS_3D){
+            sound->volume = newVolume;
+            float volume;
+            float pitch;
+            int panning;
+            soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &panning, &pitch);
+            alSndpSetSound(&gSoundPlayer, sound->soundId);
+            alSndpSetVol(&gSoundPlayer, (short)(32767 * volume));
+            alSndpSetPan(&gSoundPlayer, panning);
+            alSndpSetPitch(&gSoundPlayer, sound->basePitch * pitch);
+            ++index;
+            continue;
+            
+        } else {
+            alSndpSetSound(&gSoundPlayer, sound->soundId);
+            alSndpSetVol(&gSoundPlayer, (short)(32767 * newVolume));
+            sound->volume = newVolume;
+            ++index;
+            continue;
+        }
+    }
 }
 
 void soundPlayerUpdate() {
@@ -311,6 +368,10 @@ void soundPlayerAdjustVolume(ALSndId soundId, float newVolume) {
     struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
 
     if (activeSound) {
+        newVolume = newVolume * gSaveData.audio.soundVolume/0xFFFF;
+        if (activeSound->soundType == SoundTypeMusic){
+            newVolume = newVolume * gSaveData.audio.musicVolume/0xFFFF;
+        }
         if (activeSound->flags & SOUND_FLAGS_3D){
             activeSound->volume = newVolume;
         } else {

@@ -150,7 +150,7 @@ void boxDropperUpdate(struct BoxDropper* dropper) {
 
         decorObjectInit(&dropper->activeCube, decorObjectDefinitionForId(DECOR_TYPE_CUBE_UNIMPORTANT), &pendingCubePos, dropper->roomIndex);
         skAnimatorRunClip(&dropper->animator, dynamicAssetClip(PROPS_BOX_DROPPER_DYNAMIC_ANIMATED_MODEL, PROPS_BOX_DROPPER_ARMATURE_DROPCUBE_CLIP_INDEX), 0.0f, 0);
-        soundPlayerPlay(soundsReleaseCube, 5.0f, 0.5f, &dropper->activeCube.rigidBody.transform.position, &gZeroVec);
+        soundPlayerPlay(soundsReleaseCube, 5.0f, 0.5f, &dropper->activeCube.rigidBody.transform.position, &gZeroVec, SoundTypeAll);
 
         dropper->flags &= ~BoxDropperFlagsCubeRequested;
         dropper->flags |= BoxDropperFlagsCubeIsActive;

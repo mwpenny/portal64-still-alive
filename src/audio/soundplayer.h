@@ -18,9 +18,16 @@ extern char _soundsSegmentRomEnd[];
 extern char _soundsTblSegmentRomStart[];
 extern char _soundsTblSegmentRomEnd[];
 
+enum SoundType{
+    SoundTypeNone,
+    SoundTypeMusic,
+    SoundTypeAll,
+};
+
 void soundPlayerInit();
+void soundPlayerGameVolumeUpdate();
 void soundPlayerUpdate();
-ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity);
+ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType);
 float soundClipDuration(int soundClipId, float pitch);
 void soundPlayerStop(ALSndId soundId);
 void soundPlayerStopAll();
