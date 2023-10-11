@@ -461,8 +461,8 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
 #define CONTROL_PROMPT_HEIGHT           24
 #define CONTROL_PROMPT_PADDING          6
 
-#define SUBTITLE_LEFT_MARGIN     10
-#define SUBTITLE_BOTTOM_MARGIN    10
+#define SUBTITLE_SIDE_MARGIN     17
+#define SUBTITLE_BOTTOM_MARGIN    11
 #define SUBTITLE_PADDING   5
 
 
@@ -510,33 +510,41 @@ void controlsRenderPrompt(enum ControllerAction action, char* message, float opa
     gSPDisplayList(renderState->dl++, ui_material_revert_list[BUTTON_ICONS_INDEX]);
 }
 
-void controlsRenderSubtitle(char* message, float opacity, struct RenderState* renderState) {
+void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOpacity, struct RenderState* renderState) {
     struct Vector2s16 size = fontMeasure(&gDejaVuSansFont, message);
 
-    int opacityAsInt = (int)(255 * opacity);
+    int textOpacityAsInt = (int)(255 * textOpacity);
 
-    if (opacityAsInt > 255) {
-        opacityAsInt = 255;
-    } else if (opacityAsInt < 0) {
-        opacityAsInt = 0;
+    if (textOpacityAsInt > 255) {
+        textOpacityAsInt = 255;
+    } else if (textOpacityAsInt < 0) {
+        textOpacityAsInt = 0;
     }
 
-    int textPositionX = (SUBTITLE_LEFT_MARGIN + SUBTITLE_PADDING);
+    int backgroundOpacityAsInt = (int)(255 * backgroundOpacity);
+
+    if (backgroundOpacityAsInt > 255) {
+        backgroundOpacityAsInt = 255;
+    } else if (backgroundOpacityAsInt < 0) {
+        backgroundOpacityAsInt = 0;
+    }
+
+    int textPositionX = (SUBTITLE_SIDE_MARGIN + SUBTITLE_PADDING);
     int textPositionY = (SCREEN_HT - SUBTITLE_BOTTOM_MARGIN - SUBTITLE_PADDING) - size.y;
 
     gSPDisplayList(renderState->dl++, ui_material_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
-    gDPSetEnvColor(renderState->dl++, 0, 0, 0, opacityAsInt / 3);
+    gDPSetEnvColor(renderState->dl++, 0, 0, 0, backgroundOpacityAsInt);
     gDPFillRectangle(
         renderState->dl++, 
         textPositionX - CONTROL_PROMPT_PADDING,
         textPositionY - CONTROL_PROMPT_PADDING,
-        textPositionX + size.x + CONTROL_PROMPT_PADDING, 
+        SCREEN_WD - SUBTITLE_SIDE_MARGIN, 
         SCREEN_HT - SUBTITLE_BOTTOM_MARGIN
     );
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
 
     gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
-    gDPSetEnvColor(renderState->dl++, 255, 60, 60, opacityAsInt);
+    gDPSetEnvColor(renderState->dl++, 255, 140, 155, textOpacityAsInt);
     renderState->dl = fontRender(
         &gDejaVuSansFont, 
         message, 

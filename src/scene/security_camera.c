@@ -171,7 +171,7 @@ void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int came
 
             if (!cutsceneRunnerIsChannelPlaying(CH_GLADOS)) {
                 short clipIndex = randomInRange(0, sizeof(gCameraDestroyClips) / sizeof(*gCameraDestroyClips));
-                cutsceneQueueSoundInChannel(gCameraDestroyClips[clipIndex], 1.0f, CH_GLADOS, CutsceneSubtitleTypeNone);
+                cutsceneQueueSoundInChannel(gCameraDestroyClips[clipIndex], 1.0f, CH_GLADOS, SubtitleKeyNone);
             }
         }
     }
