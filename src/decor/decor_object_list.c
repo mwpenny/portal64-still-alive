@@ -128,6 +128,21 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         .soundClipId = -1,
         .soundFizzleId = -1,
     },
+    [DECOR_TYPE_LAB_MONITOR] = {
+        {
+            CollisionShapeTypeNone,
+            NULL,
+            0.0f,
+            0.0f,
+            NULL,  
+        },
+        0.0f, 
+        1.0f,
+        PROPS_LAB_MONITOR_DYNAMIC_MODEL,
+        .materialIndex = LAB_MONITOR_SCREEN_TEXT_INDEX,
+        .soundClipId = -1,
+        .soundFizzleId = -1,
+    },
 };
 
 struct DecorObjectDefinition* decorObjectDefinitionForId(int id) {

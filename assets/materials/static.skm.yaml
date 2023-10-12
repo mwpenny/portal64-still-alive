@@ -1165,3 +1165,20 @@ materials:
     gSPGeometryMode:
       clear: [G_CULL_BACK, G_CULL_FRONT, G_ZBUFFER]
       set: [G_FOG]
+
+  lab_monitor_screen_text:
+    gDPSetTile: 
+      filename: ../../portal_pak_modified/materials/models/props/lab_monitor/lab_monitor_screen_text.png
+      siz: G_IM_SIZ_4b
+      twoTone: true
+      s:
+        wrap: false
+      t:
+        wrap: false
+
+    gDPSetRenderMode: G_RM_ZB_OPA_SURF
+        
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+    gDPSetCycleType: G_CYC_1CYCLE
+    

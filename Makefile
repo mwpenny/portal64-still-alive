@@ -17,7 +17,7 @@ $(SKELATOOL64):
 	skelatool64/setup_dependencies.sh
 	make -C skelatool64
 
-OPTIMIZER		:= -Og
+OPTIMIZER		:= -Os
 LCDEFS			:= -DDEBUG -g -Isrc/ -I/usr/include/n64/nustd -Werror -Wall
 N64LIB			:= -lultra_rom -lnustd
 
@@ -235,6 +235,7 @@ MODEL_LIST = assets/models/player/chell.blend \
 DYNAMIC_MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/autoportal_frame/autoportal_frame.blend \
 	assets/models/props/cylinder_test.blend \
+	assets/models/props/lab_monitor.blend \
 	assets/models/props/radio.blend \
 	assets/models/signage/clock_digits.blend \
 	assets/models/signage/clock.blend \
