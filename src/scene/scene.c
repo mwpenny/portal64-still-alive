@@ -312,11 +312,13 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
 
-    hudRender(&scene->hud, &scene->player, renderState);
-
     if (gGameMenu.state != GameMenuStateResumeGame) {
         gameMenuRender(&gGameMenu, renderState, task);
     }
+    else{
+        hudRender(&scene->hud, &scene->player, renderState);
+    }
+        
 
     // sceneRenderPerformanceMetrics(scene, renderState, task);
 
