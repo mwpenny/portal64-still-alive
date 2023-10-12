@@ -6,7 +6,6 @@
 #include "../graphics/render_scene.h"
 #include "../math/mathf.h"
 #include "../scene/signals.h"
-#include "../util/profile.h"
 
 #include "../build/assets/materials/static.h"
 
@@ -28,14 +27,10 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, M
 
                 struct Vector3 boxCenter;
 
-                u64 startTime = profileStart();
-
                 if (transformIndex == NO_TRANSFORM_INDEX) {
                     if (isOutsideFrustrum(cullingInfo, box)) {
-                        profileEnd(startTime, 2);
                         continue;
                     }
-                    profileEnd(startTime, 2);
 
                     boxCenter.x = (float)((box->minX + box->maxX) * (0.5f / SCENE_SCALE));
                     boxCenter.y = (float)(box->minY + box->maxY) * (0.5f / SCENE_SCALE);
@@ -61,19 +56,15 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, M
                     shiftedBox.maxZ = box->maxZ + z;
 
                     if (isOutsideFrustrum(cullingInfo, &shiftedBox)) {
-                        profileEnd(startTime, 2);
                         continue;
                     }
-                    profileEnd(startTime, 2);
 
                     boxCenter.x = (float)(shiftedBox.minX + shiftedBox.maxX) * (0.5f / SCENE_SCALE);
                     boxCenter.y = (float)(shiftedBox.minY + shiftedBox.maxY) * (0.5f / SCENE_SCALE);
                     boxCenter.z = (float)(shiftedBox.minZ + shiftedBox.maxZ) * (0.5f / SCENE_SCALE);
                 }
                 
-                startTime = profileStart();
                 renderSceneAdd(renderScene, gCurrentLevel->staticContent[i].displayList, matrix, gCurrentLevel->staticContent[i].materialIndex, &boxCenter, NULL);
-                profileEnd(startTime, 3);
             }
         }
 
@@ -128,17 +119,9 @@ void staticRender(struct Transform* cameraTransform, struct FrustrumCullingInfor
 
     struct RenderScene* renderScene = renderSceneNew(cameraTransform, renderState, MAX_RENDER_COUNT, visibleRooms);
 
-    u64 startTime = profileStart();
     staticRenderPopulateRooms(cullingInfo, staticTransforms, renderScene);
-    profileEnd(startTime, 4);
-
-    startTime = profileStart();
     dynamicRenderPopulateRenderScene(dynamicList, stageIndex, renderScene, cameraTransform, cullingInfo, visibleRooms);
-    profileEnd(startTime, 5);
-
-    startTime = profileStart();
     renderSceneGenerate(renderScene, renderState);
-    profileEnd(startTime, 6);
 
     renderSceneFree(renderScene);
 }

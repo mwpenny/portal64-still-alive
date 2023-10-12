@@ -20,7 +20,7 @@ void profileReport() {
     OSTime reportStartTime = osGetTime();
 
     gProfileData.lastReportStart = OS_CYCLES_TO_USEC(reportStartTime - gProfileData.lastReportStart);
-    // gdbSendMessage(GDBDataTypeRawBinary, (char*)&gProfileData, sizeof(struct ProfileData));
+    gdbSendMessage(GDBDataTypeRawBinary, (char*)&gProfileData, sizeof(struct ProfileData));
 
     for (int i = 0; i < MAX_PROFILE_BINS; ++i) {
         gProfileData.timeAccumulation[i] = 0;

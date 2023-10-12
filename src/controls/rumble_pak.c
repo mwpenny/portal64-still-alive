@@ -25,6 +25,8 @@ void rumblePakClipInit() {
         curr->wave = NULL;
         curr->currentSample = 0;
         curr->rumbleId = 0;
+
+        prev = curr;
     }
 
     prev->next = NULL;
@@ -146,7 +148,7 @@ int rumblePakCalculateState() {
         amplitude = 3;
     }
 
-    int result = amplitude >= gRumbleCurrentBit;
+    int result = amplitude == 3 || amplitude > gRumbleCurrentBit;
     gRumbleCurrentBit = (gRumbleCurrentBit + 1) & 0x3;
     return result;
 }

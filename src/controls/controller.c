@@ -4,6 +4,7 @@
 #include "util/memory.h"
 #include <sched.h>
 #include "rumble_pak.h"
+#include "../util/profile.h"
 
 #include <string.h>
 
@@ -119,16 +120,16 @@ int controllerHandleMessage() {
                 gRumblePakState = RumblepakStateInitialized;
             } else {
                 gRumblePakState = RumblepakStateDisconnected;
-                gRumblePakOn = 0;
             }
         } if (gControllerStatus[0].status != CONT_CARD_ON) {
             gRumblePakState = RumblepakStateDisconnected;
-            gRumblePakOn = 0;
         }
     }
     
     return FALSE;
 }
+
+u8 gRumbleFailCount;
 
 void controllersReadPendingData(void) {
     OSMesg msg;
@@ -142,6 +143,8 @@ void controllersReadPendingData(void) {
 
     int targetRumbleStatus = rumblePakCalculateState();
 
+    u64 timeStart = profileStart();
+
     if (gRumblePakState == RumblepakStateInitialized) {
         if (targetRumbleStatus != gRumblePakOn) {
             shouldCheckStatus = FALSE;
@@ -150,16 +153,30 @@ void controllersReadPendingData(void) {
                 s32 rumbleError = targetRumbleStatus ? osMotorStart(&gRumbleBackFs) : osMotorStop(&gRumbleBackFs);
 
                 if (rumbleError == PFS_ERR_CONTRFAIL) {
-                    continue;
+                    if (i == 2) {
+                        ++gRumbleFailCount;
+                    }
                 } else if (rumbleError != 0) {
                     gRumblePakState = RumblepakStateDisconnected;
-                    gRumblePakOn = 0;
                     break;
                 } else {
                     gRumblePakOn = targetRumbleStatus;
-                    break;
+                    gRumbleFailCount = 0;
                 }
             }
+        } else if (!targetRumbleStatus) {
+            osMotorStop(&gRumbleBackFs);
+        }
+    }
+
+    profileEnd(timeStart, 2);
+
+    if (gRumbleFailCount == 3) {
+        if (osMotorInit(&gControllerMsgQ, &gRumbleBackFs, 0) == 0) {
+            gRumblePakState = RumblepakStateInitialized;
+        } else {
+            gRumblePakState = RumplepakStateUninitialized;
+
         }
     }
 

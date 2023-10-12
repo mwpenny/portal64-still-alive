@@ -22,6 +22,7 @@
 #include "sk64/skelatool_animator.h"
 #include "util/dynamic_asset_loader.h"
 #include "util/profile.h"
+#include "controls/rumble_pak.h"
 
 #include "levels/levels.h"
 #include "savefile/checkpoint.h"
@@ -202,10 +203,11 @@ static void gameProc(void* arg) {
     contactSolverInit(&gContactSolver);
     portalSurfaceCleanupQueueInit();
     savefileLoad();
-    levelLoadWithCallbacks(MAIN_MENU);
+    levelLoadWithCallbacks(7);
     gCurrentTestSubject = 0;
     cutsceneRunnerReset();
     controllersInit();
+    rumblePakClipInit();
     initAudio(fps);
     soundPlayerInit();
     skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
@@ -233,6 +235,7 @@ static void gameProc(void* arg) {
                         portalSurfaceCleanupQueueInit();
                         heapInit(_heapStart, memoryEnd);
                         levelLoadWithCallbacks(levelGetQueued());
+                        rumblePakClipInit();
                         cutsceneRunnerReset();
                         dynamicAssetsReset();
                         // if a portal fire button is being held
