@@ -9,6 +9,8 @@
 #include "../build/assets/models/pedestal.h"
 #include "../../build/assets/models/dynamic_animated_model_list.h"
 #include "../../build/assets/models/portal_gun/w_portalgun.h"
+#include "../scene/hud.h"
+#include "../scene/scene.h"
 
 struct Vector2 gMaxPedistalRotation;
 #define MAX_PEDISTAL_ROTATION_DEGREES_PER_SEC   (M_PI / 3.0f)
@@ -102,6 +104,7 @@ void pedestalUpdate(struct Pedestal* pedestal) {
         else{
             if (!(pedestal->flags & PedestalFlagsAlreadyMoving) && !(pedestal->flags & PedestalFlagsDown)){
                 soundPlayerPlay(soundsPedestalMoving, 5.0f, 0.5f, &pedestal->transform.position, &gZeroVec, SoundTypeAll);
+                hudShowSubtitle(&gScene.hud, PORTALGUN_PEDESTAL_ROTATE, SubtitleTypeCaption);
                 pedestal->flags |= PedestalFlagsAlreadyMoving;
             }
         }
@@ -116,6 +119,7 @@ void pedestalUpdate(struct Pedestal* pedestal) {
 
 void pedestalHide(struct Pedestal* pedestal) {
     soundPlayerPlay(soundsReleaseCube, 3.0f, 0.5f, &pedestal->transform.position, &gZeroVec, SoundTypeAll);
+    hudShowSubtitle(&gScene.hud, WEAPON_PORTALGUN_POWERUP, SubtitleTypeCaption);
     pedestal->flags |= PedestalFlagsDown;
     skAnimatorRunClip(&pedestal->animator, dynamicAssetClip(PEDESTAL_DYNAMIC_ANIMATED_MODEL, PEDESTAL_ARMATURE_HIDE_CLIP_INDEX), 0.0f, 0);
 }

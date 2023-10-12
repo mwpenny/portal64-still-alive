@@ -8,6 +8,7 @@ enum AudioOption {
     AudioOptionGameVolume,
     AudioOptionMusicVolume,
     AudioOptionSubtitlesEnabled,
+    AudioOptionAllSubtitlesEnabled,
     AudioOptionSubtitlesLanguage,
 
     AudioOptionCount,
@@ -17,6 +18,7 @@ struct AudioOptions {
     struct MenuSlider gameVolume;
     struct MenuSlider musicVolume;
     struct MenuCheckbox subtitlesEnabled;
+    struct MenuCheckbox allSubtitlesEnabled;
     struct MenuSlider subtitlesLanguage;
     Gfx* gameVolumeText;
     Gfx* musicVolumeText;

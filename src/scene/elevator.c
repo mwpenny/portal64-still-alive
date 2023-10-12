@@ -186,6 +186,7 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
         soundPlayerPlay(soundsElevatorDoor, 1.0f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
         if ((elevator->openAmount == 0.0f && shouldBeOpen) && (elevator->flags & ElevatorFlagsHasHadPlayer)){
             soundPlayerPlay(soundsElevatorChime, 1.5f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+            hudShowSubtitle(&gScene.hud, PORTAL_ELEVATOR_CHIME, SubtitleTypeCaption);
         }
     }
     
@@ -196,6 +197,7 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
 
     if ((elevator->flags & ElevatorFlagsIsLocked) && (elevator->openAmount == 0.0f) && !(elevator->flags & ElevatorFlagsMovingSoundPlayed) && (elevator->movingTimer <= 0.0f) && inside){
             soundPlayerPlay(soundsElevatorMoving, 1.25f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+            hudShowSubtitle(&gScene.hud, PORTAL_ELEVATOR_START, SubtitleTypeCaption);
             player->shakeTimer = SHAKE_DURATION;
             elevator->flags |= ElevatorFlagsMovingSoundPlayed;
     }

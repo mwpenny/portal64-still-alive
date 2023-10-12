@@ -398,7 +398,7 @@ void cutscenesUpdateSounds() {
                 struct QueuedSound* curr = gCutsceneSoundQueues[i];
 
                 gCutsceneCurrentSound[i] = soundPlayerPlay(curr->soundId, curr->volume, gCutsceneChannelPitch[i], NULL, NULL, SoundTypeAll);
-                hudShowSubtitle(&gScene.hud, curr->subtitleId);
+                hudShowSubtitle(&gScene.hud, curr->subtitleId, SubtitleTypeCloseCaption);
 
                 gCutsceneSoundQueues[i] = curr->next;
 

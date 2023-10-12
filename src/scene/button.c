@@ -12,6 +12,8 @@
 #include "../../build/assets/models/dynamic_animated_model_list.h"
 #include "../build/assets/materials/static.h"
 #include "../../build/assets/models/props/button.h"
+#include "../scene/hud.h"
+#include "../scene/scene.h"
 
 struct Vector2 gButtonCylinderEdgeVectors[] = {
     {0.0f, 1.0f},
@@ -142,6 +144,7 @@ void buttonUpdate(struct Button* button) {
         if (shouldPress){
             if (!(button->flags & ButtonFlagsBeingPressed)){
                 soundPlayerPlay(soundsButton, 2.5f, 0.5f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+                hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_DOWN, SubtitleTypeCaption);
             }
             button->flags |= ButtonFlagsBeingPressed;
         }
@@ -149,6 +152,7 @@ void buttonUpdate(struct Button* button) {
         else{
             if ((button->flags & ButtonFlagsBeingPressed)){
                 soundPlayerPlay(soundsButtonRelease, 2.5f, 0.4f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+                hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_UP, SubtitleTypeCaption);
             }
             button->flags &= ~ButtonFlagsBeingPressed;
         }

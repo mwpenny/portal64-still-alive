@@ -427,6 +427,9 @@ void playerUpdateSpeedSound(struct Player* player) {
     soundPlayerVolume = sqrtf(vector3MagSqrd(&player->body.velocity))*(0.6f / MAX_PORTAL_SPEED);
     soundPlayerVolume = clampf(soundPlayerVolume, 0.0, 1.0f);
     soundPlayerAdjustVolume(player->flyingSoundLoopId, soundPlayerVolume);
+    if (soundPlayerVolume >= 0.75){
+        hudShowSubtitle(&gScene.hud, PORTALPLAYER_WOOSH, SubtitleTypeCaption);
+    }
 }
 
 void playerKill(struct Player* player, int isUnderwater) {
@@ -742,7 +745,9 @@ void playerUpdate(struct Player* player) {
 
     if (didPassThroughPortal) {
         soundPlayerPlay(soundsPortalEnter[didPassThroughPortal - 1], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
+        hudShowSubtitle(&gScene.hud, PORTALPLAYER_ENTERPORTAL, SubtitleTypeCaption);
         soundPlayerPlay(soundsPortalExit[2 - didPassThroughPortal], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
+        hudShowSubtitle(&gScene.hud, PORTALPLAYER_EXITPORTAL, SubtitleTypeCaption);
         gPlayerCollider.extendDownward = 0.0f;
     } else {
         gPlayerCollider.extendDownward = mathfMoveTowards(gPlayerCollider.extendDownward, TARGET_CAPSULE_EXTEND_HEIGHT, STAND_SPEED * FIXED_DELTA_TIME);

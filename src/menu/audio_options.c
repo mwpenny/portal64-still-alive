@@ -53,7 +53,7 @@ void audioOptionsHandleSlider(unsigned short* settingValue, float* sliderValue) 
 void audioOptionsInit(struct AudioOptions* audioOptions) {
     audioOptions->selectedItem = AudioOptionGameVolume;
 
-    audioOptions->gameVolumeText = menuBuildText(&gDejaVuSansFont, "Master Volume", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
+    audioOptions->gameVolumeText = menuBuildText(&gDejaVuSansFont, "Game Volume", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
     audioOptions->gameVolume = menuBuildSlider(GAMEPLAY_X + 120, GAMEPLAY_Y + 8, 120, SCROLL_TICKS);
     audioOptions->gameVolume.value = gSaveData.audio.soundVolume/0xFFFF;
 
@@ -64,10 +64,13 @@ void audioOptionsInit(struct AudioOptions* audioOptions) {
     audioOptions->subtitlesEnabled = menuBuildCheckbox(&gDejaVuSansFont, "Closed Captions", GAMEPLAY_X + 8, GAMEPLAY_Y + 48);
     audioOptions->subtitlesEnabled.checked = (gSaveData.controls.flags & ControlSaveSubtitlesEnabled) != 0;
 
-    audioOptions->subtitlesLanguageText = menuBuildText(&gDejaVuSansFont, "Captions Language: ", GAMEPLAY_X + 8, GAMEPLAY_Y + 68);
-    audioOptions->subtitlesLanguageDynamicText = menuBuildText(&gDejaVuSansFont, SubtitleLanguages[gSaveData.controls.subtitleLanguage], GAMEPLAY_X + 125, GAMEPLAY_Y + 68);
+    audioOptions->allSubtitlesEnabled = menuBuildCheckbox(&gDejaVuSansFont, "All Captions", GAMEPLAY_X + 8, GAMEPLAY_Y + 68);
+    audioOptions->allSubtitlesEnabled.checked = (gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled) != 0;
 
-    audioOptions->subtitlesLanguage= menuBuildSlider(GAMEPLAY_X + 8, GAMEPLAY_Y + 88, 200, NUM_SUBTITLE_LANGUAGES);
+    audioOptions->subtitlesLanguageText = menuBuildText(&gDejaVuSansFont, "Captions Language: ", GAMEPLAY_X + 8, GAMEPLAY_Y + 88);
+    audioOptions->subtitlesLanguageDynamicText = menuBuildText(&gDejaVuSansFont, SubtitleLanguages[gSaveData.controls.subtitleLanguage], GAMEPLAY_X + 125, GAMEPLAY_Y + 88);
+
+    audioOptions->subtitlesLanguage= menuBuildSlider(GAMEPLAY_X + 8, GAMEPLAY_Y + 108, 200, NUM_SUBTITLE_LANGUAGES);
     audioOptions->subtitles_language_temp = (0xFFFF/NUM_SUBTITLE_LANGUAGES)* gSaveData.controls.subtitleLanguage;
     audioOptions->subtitlesLanguage.value = (int)gSaveData.controls.subtitleLanguage * (0xFFFF/NUM_SUBTITLE_LANGUAGES);
 }
@@ -111,8 +114,24 @@ enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
 
                 if (audioOptions->subtitlesEnabled.checked) {
                     gSaveData.controls.flags |= ControlSaveSubtitlesEnabled;
+                    gSaveData.controls.flags &= ~ControlSaveAllSubtitlesEnabled;
+                    audioOptions->allSubtitlesEnabled.checked = 0;
                 } else {
                     gSaveData.controls.flags &= ~ControlSaveSubtitlesEnabled;
+                }
+            }
+            break;
+        case AudioOptionAllSubtitlesEnabled:
+            if (controllerGetButtonDown(0, A_BUTTON)) {
+                audioOptions->allSubtitlesEnabled.checked = !audioOptions->allSubtitlesEnabled.checked;
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+
+                if (audioOptions->allSubtitlesEnabled.checked) {
+                    gSaveData.controls.flags |= ControlSaveAllSubtitlesEnabled;
+                    gSaveData.controls.flags &= ~ControlSaveSubtitlesEnabled;
+                    audioOptions->subtitlesEnabled.checked = 0;
+                } else {
+                    gSaveData.controls.flags &= ~ControlSaveAllSubtitlesEnabled;
                 }
             }
             break;
@@ -121,7 +140,7 @@ enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
             int temp = (int)((audioOptions->subtitles_language_temp * (1.0f/0xFFFF) * NUM_SUBTITLE_LANGUAGES));
             temp = (int)minf(maxf(0.0, temp), NUM_SUBTITLE_LANGUAGES-1);
             gSaveData.controls.subtitleLanguage = temp;
-            audioOptions->subtitlesLanguageDynamicText = menuBuildText(&gDejaVuSansFont, SubtitleLanguages[gSaveData.controls.subtitleLanguage], GAMEPLAY_X + 125, GAMEPLAY_Y + 68);
+            audioOptions->subtitlesLanguageDynamicText = menuBuildText(&gDejaVuSansFont, SubtitleLanguages[gSaveData.controls.subtitleLanguage], GAMEPLAY_X + 125, GAMEPLAY_Y + 88);
             break;
     }
     
@@ -161,6 +180,9 @@ void audioOptionsRender(struct AudioOptions* audioOptions, struct RenderState* r
     gSPDisplayList(renderState->dl++, audioOptions->subtitlesEnabled.outline);
     renderState->dl = menuCheckboxRender(&audioOptions->subtitlesEnabled, renderState->dl);
 
+    gSPDisplayList(renderState->dl++, audioOptions->allSubtitlesEnabled.outline);
+    renderState->dl = menuCheckboxRender(&audioOptions->allSubtitlesEnabled, renderState->dl);
+
     gSPDisplayList(renderState->dl++, audioOptions->subtitlesLanguage.back);
     renderState->dl = menuSliderRender(&audioOptions->subtitlesLanguage, renderState->dl);
 
@@ -177,10 +199,13 @@ void audioOptionsRender(struct AudioOptions* audioOptions, struct RenderState* r
     menuSetRenderColor(renderState, audioOptions->selectedItem == AudioOptionMusicVolume, &gSelectionGray, &gColorWhite);
     gSPDisplayList(renderState->dl++, audioOptions->musicVolumeText);
 
-
     gDPPipeSync(renderState->dl++);
     menuSetRenderColor(renderState, audioOptions->selectedItem == AudioOptionSubtitlesEnabled, &gSelectionGray, &gColorWhite);
     gSPDisplayList(renderState->dl++, audioOptions->subtitlesEnabled.text);
+
+    gDPPipeSync(renderState->dl++);
+    menuSetRenderColor(renderState, audioOptions->selectedItem == AudioOptionAllSubtitlesEnabled, &gSelectionGray, &gColorWhite);
+    gSPDisplayList(renderState->dl++, audioOptions->allSubtitlesEnabled.text);
 
     gDPPipeSync(renderState->dl++);
     menuSetRenderColor(renderState, audioOptions->selectedItem == AudioOptionSubtitlesLanguage, &gSelectionGray, &gColorWhite);

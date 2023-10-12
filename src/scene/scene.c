@@ -361,6 +361,7 @@ void sceneCheckPortals(struct Scene* scene) {
         scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 0);
         soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        hudShowSubtitle(&gScene.hud, WEAPON_PORTALGUN_FIRE_RED, SubtitleTypeCaption);
         rumblePakClipPlay(&gFireGunRumbleWave);
     }
 
@@ -369,6 +370,7 @@ void sceneCheckPortals(struct Scene* scene) {
         scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 1);
         soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        hudShowSubtitle(&gScene.hud, WEAPON_PORTALGUN_FIRE_BLUE, SubtitleTypeCaption);
         rumblePakClipPlay(&gFireGunRumbleWave);
     }
 
@@ -799,6 +801,11 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
             collisionObjectUpdateBB(&portal->collisionObject);
 
             soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &portal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+            if (portalIndex == 0){
+                hudShowSubtitle(&gScene.hud, PORTAL_OPEN_RED, SubtitleTypeCaption);
+            } else {
+                hudShowSubtitle(&gScene.hud, PORTAL_OPEN_BLUE, SubtitleTypeCaption);
+            }
 
             if (fromPlayer) {
                 portal->flags |= PortalFlagsPlayerPortal;
@@ -972,6 +979,7 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
 void sceneClosePortal(struct Scene* scene, int portalIndex) {
     if (gCollisionScene.portalTransforms[portalIndex]) {
         soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position, &gZeroVec, SoundTypeAll);
+        hudShowSubtitle(&gScene.hud, PORTAL_FIZZLE_MOVED, SubtitleTypeCaption);
         gCollisionScene.portalTransforms[portalIndex] = NULL;
         gCollisionScene.portalColliderIndex[portalIndex] = -1;
         scene->portals[portalIndex].portalSurfaceIndex = -1;
