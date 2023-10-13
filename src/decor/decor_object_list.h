@@ -12,8 +12,9 @@
 #define DECOR_TYPE_LAB_MONITOR          6
 #define DECOR_TYPE_LAB_CHAIR            7
 #define DECOR_TYPE_LAB_DESK01           8
-#define DECOR_TYPE_LAB_DESK03           9
-#define DECOR_TYPE_LAB_DESK04           10
+#define DECOR_TYPE_LAB_DESK02           8
+#define DECOR_TYPE_LAB_DESK03           10
+#define DECOR_TYPE_LAB_DESK04           11
 
 struct DecorObjectDefinition* decorObjectDefinitionForId(int id);
 int decorIdForObjectDefinition(struct DecorObjectDefinition* def);

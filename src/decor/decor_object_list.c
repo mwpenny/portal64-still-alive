@@ -173,6 +173,21 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         .soundClipId = -1,
         .soundFizzleId = -1,
     },
+    [DECOR_TYPE_LAB_DESK02] = {
+        {
+            CollisionShapeTypeNone,
+            NULL,
+            0.0f,
+            0.0f,
+            NULL,  
+        },
+        0.0f, 
+        1.0f,
+        PROPS_LAB_DESK_LAB_DESK02_DYNAMIC_MODEL,
+        .materialIndex = DEFAULT_INDEX,
+        .soundClipId = -1,
+        .soundFizzleId = -1,
+    },
     [DECOR_TYPE_LAB_DESK03] = {
         {
             CollisionShapeTypeNone,

@@ -237,6 +237,7 @@ DYNAMIC_MODEL_LIST = assets/models/cube/cube.blend \
 	assets/models/props/cylinder_test.blend \
 	assets/models/props/lab_chair.blend \
 	assets/models/props/lab_desk/lab_desk01.blend \
+	assets/models/props/lab_desk/lab_desk02.blend \
 	assets/models/props/lab_desk/lab_desk03.blend \
 	assets/models/props/lab_desk/lab_desk04.blend \
 	assets/models/props/lab_monitor.blend \
