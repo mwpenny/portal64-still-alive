@@ -95,6 +95,37 @@ materials:
     gDPSetCombineMode: 
       color: ["PRIMITIVE", "0", "SHADE", "0"]
 
+  solid_chair_brown:
+    gDPSetPrimColor:
+      r: 154
+      g: 115
+      b: 65
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["PRIMITIVE", "0", "SHADE", "0"]
+
+  solid_table_gray:
+    gDPSetPrimColor:
+      r: 68
+      g: 70
+      b: 70
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode: 
+      color: ["PRIMITIVE", "0", "SHADE", "0"]
+
+  solid_table_gray_two_sided:
+    gDPSetPrimColor:
+      r: 68
+      g: 70
+      b: 70
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+      clear: [G_CULL_BACK]
+    gDPSetCombineMode: 
+      color: ["PRIMITIVE", "0", "SHADE", "0"]
+
   blue_glow:
     gDPSetPrimColor:
       r: 89

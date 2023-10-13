@@ -1,0 +1,1 @@
+-alpha off -colorspace Gray -crop 222x509+0+65 -resize 64x128

@@ -34,6 +34,33 @@ materials:
 
       staticLit: true
 
+  door01a_skin6:
+    gDPSetTile: 
+      filename: ../../portal_pak_modified/materials/models/props_c17/door01a_skin6.png
+      siz: G_IM_SIZ_4b
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+    
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode: 
+      - color: [PRIMITIVE, "0", TEXEL0, "0"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["COMBINED", "0", "SHADE", "0"]
+        alpha: ["0", "0", "0", "1"]
+    gDPSetRenderMode: 
+      - G_RM_PASS
+      - G_RM_ZB_OPA_SURF
+    gDPSetPrimColor:
+      r: 25
+      g: 58
+      b: 43
+    properties:
+      tileSizeS: 1
+      tileSizeT: 2
+
+      staticLit: true
+
   concrete/observationwall_001a:
     gDPSetTile: 
       filename: ../../portal_pak_modified/materials/concrete/observationwall_001a.png
