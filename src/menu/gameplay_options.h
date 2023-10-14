@@ -7,6 +7,7 @@
 enum GameplayOption {
     GameplayOptionMovingPortals,
     GameplayOptionWideScreen,
+    GameplayOptionPortalFunneling,
     GameplayOptionPortalRenderDepth,
     
     GameplayOptionCount,
@@ -15,6 +16,7 @@ enum GameplayOption {
 struct GameplayOptions {
     struct MenuCheckbox movingPortals;
     struct MenuCheckbox wideScreen;
+    struct MenuCheckbox portalFunnel;
     struct MenuSlider portalRenderDepth;
     Gfx* portalRenderDepthText;
     short selectedItem;
