@@ -6,6 +6,7 @@
 #include "../levels/levels.h"
 #include "../util/memory.h"
 #include "../savefile/checkpoint.h"
+#include "../locales/locales.h"
 
 #include <math.h>
 
@@ -142,6 +143,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             break;
         case CutsceneStepTypeQueueSound:
         {
+            step->queueSound.soundId = mapLocaleSound(step->queueSound.soundId); 
             cutsceneQueueSoundInChannel(step->queueSound.soundId, step->queueSound.volume * (1.0f / 255.0f), step->queueSound.channel, step->queueSound.subtitleId);
             break;
         }

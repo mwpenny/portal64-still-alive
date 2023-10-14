@@ -7,6 +7,7 @@
 #include "../build/src/audio/subtitles.h"
 #include "../build/assets/materials/ui.h"
 #include "../build/src/audio/clips.h"
+#include "../build/src/audio/languages.h"
 
 #define GAMEPLAY_Y      54
 #define GAMEPLAY_WIDTH  252
@@ -15,14 +16,19 @@
 
 #define SCROLL_TICKS        (int)maxf(NUM_SUBTITLE_LANGUAGES, 1)
 #define SCROLL_INTERVALS    (int)maxf((SCROLL_TICKS - 1), 1)
+#define SCROLL_CHUNK_SIZE   (0x10000 / SCROLL_INTERVALS)
+
+#define SCROLL_TICKS_LANGUAGE        (int)maxf(NUM_AUDIO_LANGUAGES, 1)
+#define SCROLL_INTERVALS_LANGUAGE    (int)maxf((SCROLL_TICKS_LANGUAGE - 1), 1)
+#define SCROLL_CHUNK_SIZE_LANGUAGE   (0x10000 / SCROLL_INTERVALS_LANGUAGE)
+
 #define FULL_SCROLL_TIME    2.0f
 #define SCROLL_MULTIPLIER   (int)(0xFFFF * FIXED_DELTA_TIME / (80 * FULL_SCROLL_TIME))
-#define SCROLL_CHUNK_SIZE   (0x10000 / SCROLL_INTERVALS)
 
 void audioOptionsInit(struct AudioOptions* audioOptions) {
     audioOptions->selectedItem = AudioOptionSubtitlesEnabled;
 
-    if (NUM_SUBTITLE_LANGUAGES){
+    if (NUM_SUBTITLE_LANGUAGES) {
         audioOptions->subtitlesEnabled = menuBuildCheckbox(&gDejaVuSansFont, "Closed Captions", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
         audioOptions->subtitlesEnabled.checked = (gSaveData.controls.flags & ControlSaveSubtitlesEnabled) != 0;
 
@@ -32,6 +38,15 @@ void audioOptionsInit(struct AudioOptions* audioOptions) {
         audioOptions->subtitlesLanguage= menuBuildSlider(GAMEPLAY_X + 8, GAMEPLAY_Y + 48, 200, SCROLL_TICKS);
         audioOptions->subtitles_language_temp = (0xFFFF/SCROLL_TICKS)* gSaveData.controls.subtitleLanguage;
         audioOptions->subtitlesLanguage.value = (int)gSaveData.controls.subtitleLanguage * (0xFFFF/SCROLL_TICKS);
+    }
+    
+    if (NUM_AUDIO_LANGUAGES > 1) {
+        audioOptions->audioLanguageText = menuBuildText(&gDejaVuSansFont, "Audio Language: ", GAMEPLAY_X + 8, GAMEPLAY_Y + 68);
+        audioOptions->audioLanguageDynamicText = menuBuildText(&gDejaVuSansFont, AudioLanguages[gSaveData.audio.audioLanguage], GAMEPLAY_X + 150, GAMEPLAY_Y + 68);
+        
+        audioOptions->audioLanguage= menuBuildSlider(GAMEPLAY_X + 8, GAMEPLAY_Y + 88, 200, SCROLL_TICKS_LANGUAGE);
+        audioOptions->audio_language_temp = (0xFFFF/SCROLL_TICKS)* gSaveData.audio.audioLanguage;
+        audioOptions->audioLanguage.value = (int)gSaveData.audio.audioLanguage * (0xFFFF/SCROLL_TICKS_LANGUAGE);
     }
 }
 
@@ -44,14 +59,14 @@ void audioOptionsHandleSlider(unsigned short* settingValue, float* sliderValue) 
         if (newValue >= 0xFFFF && controllerGetButtonDown(0, A_BUTTON)) {
             newValue = 0;
         } else {
-            newValue = newValue + SCROLL_CHUNK_SIZE;
-            newValue = newValue - (newValue % SCROLL_CHUNK_SIZE);
+            newValue = newValue + SCROLL_CHUNK_SIZE_LANGUAGE;
+            newValue = newValue - (newValue % SCROLL_CHUNK_SIZE_LANGUAGE);
         }
     }
 
     if (controllerGetButtonDown(0, L_JPAD)) {
         newValue = newValue - 1;
-        newValue = newValue - (newValue % SCROLL_CHUNK_SIZE);
+        newValue = newValue - (newValue % SCROLL_CHUNK_SIZE_LANGUAGE);
     }
 
     if (newValue < 0) {
@@ -89,7 +104,6 @@ enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
         }
     }
 
-    if (NUM_SUBTITLE_LANGUAGES){
     switch (audioOptions->selectedItem) {
         case AudioOptionSubtitlesEnabled:
             if (controllerGetButtonDown(0, A_BUTTON)) {
@@ -110,10 +124,16 @@ enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
             gSaveData.controls.subtitleLanguage = temp;
             audioOptions->subtitlesLanguageDynamicText = menuBuildText(&gDejaVuSansFont, SubtitleLanguages[gSaveData.controls.subtitleLanguage], GAMEPLAY_X + 150, GAMEPLAY_Y + 28);
             break;
-    }
+        case AudioOptionAudioLanguage:
+            audioOptionsHandleSlider(&audioOptions->audio_language_temp, &audioOptions->audioLanguage.value);
+            int tempAudio = (int)((audioOptions->audio_language_temp * (1.0f/0xFFFF) * NUM_AUDIO_LANGUAGES));
+            tempAudio = (int)minf(maxf(0.0, tempAudio), NUM_AUDIO_LANGUAGES-1);
+            gSaveData.audio.audioLanguage = tempAudio;
+            audioOptions->audioLanguageDynamicText = menuBuildText(&gDejaVuSansFont, AudioLanguages[gSaveData.audio.audioLanguage], GAMEPLAY_X + 150, GAMEPLAY_Y + 68);
+            break;
     }
 
-    if (audioOptions->selectedItem == AudioOptionSubtitlesLanguage){
+    if (audioOptions->selectedItem == AudioOptionSubtitlesLanguage || audioOptions->selectedItem == AudioOptionAudioLanguage){
         if ((controllerGetButtonDown(0, L_TRIG) || controllerGetButtonDown(0, Z_TRIG))) {
             return MenuDirectionLeft;
         }
@@ -144,6 +164,11 @@ void audioOptionsRender(struct AudioOptions* audioOptions, struct RenderState* r
         renderState->dl = menuSliderRender(&audioOptions->subtitlesLanguage, renderState->dl);
     }
 
+    if (NUM_AUDIO_LANGUAGES > 1) {
+        gSPDisplayList(renderState->dl++, audioOptions->audioLanguage.back);
+        renderState->dl = menuSliderRender(&audioOptions->audioLanguage, renderState->dl);
+    }
+    
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
 
     gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
@@ -162,5 +187,14 @@ void audioOptionsRender(struct AudioOptions* audioOptions, struct RenderState* r
         gSPDisplayList(renderState->dl++, audioOptions->subtitlesLanguageDynamicText);
     }
 
+    if (NUM_AUDIO_LANGUAGES > 1) {
+        gDPPipeSync(renderState->dl++);
+        menuSetRenderColor(renderState, audioOptions->selectedItem == AudioOptionAudioLanguage, &gSelectionGray, &gColorWhite);
+        gSPDisplayList(renderState->dl++, audioOptions->audioLanguageText);
+        
+        gDPPipeSync(renderState->dl++);
+        menuSetRenderColor(renderState, audioOptions->selectedItem == AudioOptionAudioLanguage, &gSelectionGray, &gColorWhite);
+        gSPDisplayList(renderState->dl++, audioOptions->audioLanguageDynamicText);
+    }
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
 }

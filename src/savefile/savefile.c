@@ -99,6 +99,7 @@ void savefileNew() {
 
     gSaveData.audio.soundVolume = 0xFF;
     gSaveData.audio.musicVolume = 0xFF;
+    gSaveData.audio.audioLanguage = 0;
 
     controllerSetDeadzone(gSaveData.controls.deadzone * (1.0f / 0xFFFF) * MAX_DEADZONE);
 }

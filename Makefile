@@ -69,21 +69,48 @@ default:	english_audio
 english_audio: portal_pak_dir
 	@$(MAKE) buildgame
 
-german_audio: vpk/portal_sound_vo_german_dir.vpk vpk/portal_sound_vo_german_000.vpk portal_pak_dir
-	vpk -x portal_pak_dir vpk/portal_sound_vo_german_dir.vpk
+all_languages: portal_pak_dir german_audio french_audio russian_audio spanish_audio
 	@$(MAKE) buildgame
+
+german_audio: vpk/portal_sound_vo_german_dir.vpk vpk/portal_sound_vo_german_000.vpk portal_pak_dir
+	rm -rf portal_pak_dir/locales/de/
+	vpk -x portal_pak_dir/locales/de/ vpk/portal_sound_vo_german_dir.vpk
+	cd portal_pak_dir/locales/de/sound/vo/aperture_ai/; ls | xargs -I {} mv {} de_{}
+	rm -rf assets/locales/de/sound/vo/aperture_ai/
+	@mkdir -p assets/locales/de/sound/vo/aperture_ai/
+	cp assets/sound/vo/aperture_ai/*.sox assets/locales/de/sound/vo/aperture_ai/
+	cd assets/locales/de/sound/vo/aperture_ai/; rm -f ding_off.sox ding_on.sox
+	cd assets/locales/de/sound/vo/aperture_ai/; ls | xargs -I {} mv {} de_{}
 	
 french_audio: vpk/portal_sound_vo_french_dir.vpk vpk/portal_sound_vo_french_000.vpk portal_pak_dir
-	vpk -x portal_pak_dir vpk/portal_sound_vo_french_dir.vpk
-	@$(MAKE) buildgame
+	rm -rf portal_pak_dir/locales/fr/
+	vpk -x portal_pak_dir/locales/fr/ vpk/portal_sound_vo_french_dir.vpk
+	cd portal_pak_dir/locales/fr/sound/vo/aperture_ai/; ls | xargs -I {} mv {} fr_{}
+	rm -rf assets/locales/fr/sound/vo/aperture_ai/
+	@mkdir -p assets/locales/fr/sound/vo/aperture_ai/
+	cp assets/sound/vo/aperture_ai/*.sox assets/locales/fr/sound/vo/aperture_ai/
+	cd assets/locales/fr/sound/vo/aperture_ai/; rm -f ding_off.sox ding_on.sox
+	cd assets/locales/fr/sound/vo/aperture_ai/; ls | xargs -I {} mv {} fr_{}
 	
 russian_audio: vpk/portal_sound_vo_russian_dir.vpk vpk/portal_sound_vo_russian_000.vpk portal_pak_dir
-	vpk -x portal_pak_dir vpk/portal_sound_vo_russian_dir.vpk
-	@$(MAKE) buildgame	
+	rm -rf portal_pak_dir/locales/ru/
+	vpk -x portal_pak_dir/locales/ru/ vpk/portal_sound_vo_russian_dir.vpk
+	cd portal_pak_dir/locales/ru/sound/vo/aperture_ai/; ls | xargs -I {} mv {} ru_{}
+	rm -rf assets/locales/ru/sound/vo/aperture_ai/
+	@mkdir -p assets/locales/ru/sound/vo/aperture_ai/
+	cp assets/sound/vo/aperture_ai/*.sox assets/locales/ru/sound/vo/aperture_ai/
+	cd assets/locales/ru/sound/vo/aperture_ai/; rm -f ding_off.sox ding_on.sox
+	cd assets/locales/ru/sound/vo/aperture_ai/; ls | xargs -I {} mv {} ru_{}
 	
 spanish_audio: vpk/portal_sound_vo_spanish_dir.vpk vpk/portal_sound_vo_spanish_000.vpk portal_pak_dir
-	vpk -x portal_pak_dir vpk/portal_sound_vo_spanish_dir.vpk
-	@$(MAKE) buildgame	
+	rm -rf portal_pak_dir/locales/es/
+	vpk -x portal_pak_dir/locales/es/ vpk/portal_sound_vo_spanish_dir.vpk
+	cd portal_pak_dir/locales/es/sound/vo/aperture_ai/; ls | xargs -I {} mv {} es_{}
+	rm -rf assets/locales/es/sound/vo/aperture_ai/
+	@mkdir -p assets/locales/es/sound/vo/aperture_ai/
+	cp assets/sound/vo/aperture_ai/*.sox assets/locales/es/sound/vo/aperture_ai/
+	cd assets/locales/es/sound/vo/aperture_ai/; rm -f ding_off.sox ding_on.sox
+	cd assets/locales/es/sound/vo/aperture_ai/; ls | xargs -I {} mv {} es_{}
 
 buildgame: $(BASE_TARGET_NAME).z64
 
@@ -92,7 +119,7 @@ include $(COMMONRULES)
 .s.o:
 	$(AS) -Wa,-Iasm -o $@ $<
 
-build/%.o: %.c 
+build/%.o: %.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -MM $^ -MF "$(@:.o=.d)" -MT"$@"
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -286,6 +313,7 @@ build/src/decor/decor_object_list.o: build/assets/models/dynamic_model_list.h bu
 build/src/effects/effect_definitions.o: build/assets/materials/static.h
 build/src/effects/portal_trail.o: build/assets/materials/static.h build/assets/models/portal_gun/ball_trail.h
 build/src/levels/level_definition.o: build/src/audio/subtitles.h
+build/src/locales/locales.o: build/src/audio/clips.h build/src/audio/languages.h
 build/src/menu/controls.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/menu/game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
 build/src/menu/gameplay_options.o: build/assets/materials/ui.h build/src/audio/clips.h
@@ -437,9 +465,9 @@ build/assets/sound/sounds.sounds build/assets/sound/sounds.sounds.tbl: $(SOUND_C
 
 build/asm/sound_data.o: build/assets/sound/sounds.sounds build/assets/sound/sounds.sounds.tbl
 
-build/src/audio/clips.h: tools/generate_sound_ids.js $(SOUND_CLIPS)
+build/src/audio/clips.h build/src/audio/languages.h build/src/audio/languages.c: tools/generate_sound_ids.js $(SOUND_CLIPS)
 	@mkdir -p $(@D)
-	node tools/generate_sound_ids.js -o $@ -p SOUNDS_ $(SOUND_CLIPS)
+	node tools/generate_sound_ids.js -o $(@D) -p SOUNDS_ $(SOUND_CLIPS)
 
 build/src/audio/clips.o: build/src/audio/clips.h
 build/src/decor/decor_object_list.o: build/src/audio/clips.h
@@ -449,7 +477,7 @@ build/src/decor/decor_object_list.o: build/src/audio/clips.h
 ####################
 
 build/src/audio/subtitles.h build/src/audio/subtitles.c: resource/closecaption_english.txt tools/level_scripts/subtitle_generate.py 
-	@python tools/level_scripts/subtitle_generate.py
+	@python3 tools/level_scripts/subtitle_generate.py
 
 ####################
 ## Linking
@@ -465,7 +493,8 @@ CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) \
 	build/assets/materials/static_mat.o \
 	build/assets/materials/ui_mat.o \
 	build/assets/materials/hud_mat.o \
-	build/src/audio/subtitles.o
+	build/src/audio/subtitles.o \
+	build/src/audio/languages.o
 
 CODEOBJECTS_NO_DEBUG = $(CODEOBJECTS)
 
@@ -508,7 +537,8 @@ $(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(DATA_OBJECTS)
 clean:
 	rm -rf build
 	rm -rf portal_pak_dir
-	rm -rf portal_pak_modified		
+	rm -rf portal_pak_modified
+	rm -rf assets/locales/
 
 clean-src:
 	rm -rf build/src
@@ -521,6 +551,7 @@ clean-src:
 
 clean-assets:
 	rm -rf build/assets
+	rm -rf assets/locales/
 	rm -f $(CODESEGMENT)_debug.o
 	rm -f $(CODESEGMENT)_no_debug.o
 	rm -f $(BASE_TARGET_NAME)_debug.elf
