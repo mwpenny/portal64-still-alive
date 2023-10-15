@@ -5,15 +5,23 @@
 #include "../graphics/graphics.h"
 
 enum AudioOption {
+    AudioOptionGameVolume,
+    AudioOptionMusicVolume,
     AudioOptionSubtitlesEnabled,
+    AudioOptionAllSubtitlesEnabled,
     AudioOptionSubtitlesLanguage,
     AudioOptionAudioLanguage,
     AudioOptionCount,
 };
 
 struct AudioOptions {
+    struct MenuSlider gameVolume;
+    struct MenuSlider musicVolume;
     struct MenuCheckbox subtitlesEnabled;
+    struct MenuCheckbox allSubtitlesEnabled;
     struct MenuSlider subtitlesLanguage;
+    Gfx* gameVolumeText;
+    Gfx* musicVolumeText;
     Gfx* subtitlesLanguageText;
     Gfx* subtitlesLanguageDynamicText;
     unsigned short subtitles_language_temp;

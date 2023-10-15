@@ -283,7 +283,7 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
 
             controlsLayout(controlsMenu);
 
-            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         }
 
         return MenuDirectionStay;
@@ -338,7 +338,7 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
             controlsLayout(controlsMenu);
         }
 
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (controllerGetButtonDown(0, B_BUTTON)) {
@@ -510,7 +510,7 @@ void controlsRenderPrompt(enum ControllerAction action, char* message, float opa
     gSPDisplayList(renderState->dl++, ui_material_revert_list[BUTTON_ICONS_INDEX]);
 }
 
-void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOpacity, struct RenderState* renderState) {
+void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOpacity, struct RenderState* renderState, enum SubtitleType subtitleType) {
     struct Vector2s16 size = fontMeasure(&gDejaVuSansFont, message);
 
     int textOpacityAsInt = (int)(255 * textOpacity);
@@ -544,7 +544,12 @@ void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOp
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
 
     gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
-    gDPSetEnvColor(renderState->dl++, 255, 140, 155, textOpacityAsInt);
+    if (subtitleType == SubtitleTypeCloseCaption){
+        gDPSetEnvColor(renderState->dl++, 255, 140, 155, textOpacityAsInt);
+    } else if (subtitleType == SubtitleTypeCaption){
+        gDPSetEnvColor(renderState->dl++, 255, 255, 255, textOpacityAsInt);
+    }
+    
     renderState->dl = fontRender(
         &gDejaVuSansFont, 
         message, 

@@ -73,16 +73,16 @@ void landingMenuInit(struct LandingMenu* landingMenu, struct LandingMenuOption* 
 struct LandingMenuOption* landingMenuUpdate(struct LandingMenu* landingMenu) {
     if ((controllerGetDirectionDown(0) & ControllerDirectionUp) != 0 && landingMenu->selectedItem > 0) {
         --landingMenu->selectedItem;
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if ((controllerGetDirectionDown(0) & ControllerDirectionDown) != 0 && landingMenu->selectedItem + 1 < landingMenu->optionCount) {
         ++landingMenu->selectedItem;
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (controllerGetButtonDown(0, A_BUTTON)) {
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         return &landingMenu->options[landingMenu->selectedItem];
     }
 

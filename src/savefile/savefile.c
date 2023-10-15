@@ -97,8 +97,8 @@ void savefileNew() {
     gSaveData.controls.portalRenderDepth = 2;
     gSaveData.controls.subtitleLanguage = 0;
 
-    gSaveData.audio.soundVolume = 0xFF;
-    gSaveData.audio.musicVolume = 0xFF;
+    gSaveData.audio.soundVolume = 0xFFFF;
+    gSaveData.audio.musicVolume = 0xFFFF;
     gSaveData.audio.audioLanguage = 0;
 
     controllerSetDeadzone(gSaveData.controls.deadzone * (1.0f / 0xFFFF) * MAX_DEADZONE);

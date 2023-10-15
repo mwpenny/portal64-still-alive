@@ -189,9 +189,9 @@ That will generate the rom at `/build/portal64.z64`
 ## Current New Feature TODO List
 - [ ] polish up subtitles
 - [ ] more sound settings
-- [ ] add desk chairs and monitors
 - [ ] rumble pak support
 - [ ] pausing while glados is speaking can end her speech early
+- [x] add desk chairs and monitors
 - [x] Add auto save checkpoints
 - [x] Correct elevator timing
 

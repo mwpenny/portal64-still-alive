@@ -106,7 +106,7 @@ enum MenuDirection joystickOptionsUpdate(struct JoystickOptions* joystickOptions
         case JoystickOptionInvert:
             if (controllerGetButtonDown(0, A_BUTTON)) {
                 joystickOptions->invertControls.checked = !joystickOptions->invertControls.checked;
-                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
 
                 if (joystickOptions->invertControls.checked) {
                     gSaveData.controls.flags |= ControlSaveFlagsInvert;
@@ -119,7 +119,7 @@ enum MenuDirection joystickOptionsUpdate(struct JoystickOptions* joystickOptions
         case JoystickOptionInvertYaw:
             if (controllerGetButtonDown(0, A_BUTTON)) {
                 joystickOptions->invertControlsYaw.checked = !joystickOptions->invertControlsYaw.checked;
-                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
 
                 if (joystickOptions->invertControlsYaw.checked) {
                     gSaveData.controls.flags |= ControlSaveFlagsInvertYaw;
@@ -132,7 +132,7 @@ enum MenuDirection joystickOptionsUpdate(struct JoystickOptions* joystickOptions
         case JoystickOptionTankControls:
             if (controllerGetButtonDown(0, A_BUTTON)) {
                 joystickOptions->tankControls.checked = !joystickOptions->tankControls.checked;
-                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
 
                 if (joystickOptions->tankControls.checked) {
                     gSaveData.controls.flags |= ControlSaveTankControls;
