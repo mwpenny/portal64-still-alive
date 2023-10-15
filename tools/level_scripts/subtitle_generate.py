@@ -100,7 +100,7 @@ def make_SubtitleLanguageValues(values_list):
     sourcefile_lines = []
     if len(values_list) <= 0:
         sourcefile_lines.append("\n")
-        sourcefile_lines.append("char * SubtitleLanguageValues[][508] =\n")
+        sourcefile_lines.append("char* SubtitleLanguageValues[][508] =\n")
         sourcefile_lines.append("{\n")
         sourcefile_lines.append("    {\n")
         for val in range(508):
@@ -110,7 +110,7 @@ def make_SubtitleLanguageValues(values_list):
         sourcefile_lines.append("\n")
         return sourcefile_lines
     sourcefile_lines.append("\n")
-    sourcefile_lines.append("char * SubtitleLanguageValues[][508] =\n")
+    sourcefile_lines.append("char* SubtitleLanguageValues[][508] =\n")
     sourcefile_lines.append("{\n")
     for lang in values_list:
         sourcefile_lines.append("    {\n")
