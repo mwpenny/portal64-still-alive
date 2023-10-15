@@ -309,10 +309,12 @@ build/assets/models/%.h build/assets/models/%_geo.c build/assets/models/%_anim.c
 build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
 build/assets/models/props/combine_ball_catcher.h: assets/materials/ball_catcher.skm.yaml
 build/assets/models/props/combine_ball_launcher.h: assets/materials/ball_catcher.skm.yaml
+build/src/audio/soundplayer.o: build/src/audio/subtitles.h
 build/src/decor/decor_object_list.o: build/assets/models/dynamic_model_list.h build/assets/materials/static.h
 build/src/effects/effect_definitions.o: build/assets/materials/static.h
 build/src/effects/portal_trail.o: build/assets/materials/static.h build/assets/models/portal_gun/ball_trail.h
 build/src/levels/level_definition.o: build/src/audio/subtitles.h
+build/src/levels/level_definition.h: build/src/audio/subtitles.h
 build/src/locales/locales.o: build/src/audio/clips.h build/src/audio/languages.h
 build/src/menu/controls.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/menu/game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
