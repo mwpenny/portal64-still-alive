@@ -11,7 +11,7 @@ int mapLocaleSound(int soundId) {
     
     switch(language) {
         default:
-            soundId = AudioLanguageValues[language][soundId];
+            soundId = AudioLanguageValues[(language-1)][soundId]; // -1 offset to save RAM
             break;
         case AUDIO_LANGUAGE_EN:       
             break;

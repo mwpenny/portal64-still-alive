@@ -119,6 +119,7 @@ function generateLanguagesSourceFile() {
     sourcefile += 'int AudioLanguageValues[][' + allSounds.length + '] = \n{\n';
 
     for (let language of languages) {
+        if (language == "EN") continue; // save RAM
         sourcefile += '\t//' + language + '\n\t{\n';
 
         for (let baseSound of allSounds) {
