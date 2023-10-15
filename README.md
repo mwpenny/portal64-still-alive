@@ -121,7 +121,7 @@ Finally, run `make` to build the project.
 # Clean out any previous build files
 make clean
 
-# Build (default english audio build)
+# Build (default build with english audio)
 make
 
 # In case you have any trouble with ROM running on hardware try
@@ -130,12 +130,18 @@ sudo apt install wine
 make fix
 ```
 
-Alternatively, you can also build with different audio languages, like this:
+Alternatively, you can also prepare to build with additional audio languages, like this (multiple commands per build possible):
 ```
-make german_audio
 make french_audio
+make german_audio
 make russian_audio
 make spanish_audio
+```
+You still have run `make` after this.
+
+Also you can build with all audio languages integrated with this shortcut:
+```
+make all_languages
 ```
 
 This requires additional *.vpk files:
