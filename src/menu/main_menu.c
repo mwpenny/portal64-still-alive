@@ -28,7 +28,7 @@ void mainMenuPlayAmbientSound() {
     static ALSndId soundId = -1;
     
     if (soundId == -1 || !soundPlayerIsPlaying(soundId)) {
-        soundId = soundPlayerPlay(SOUNDS_PORTAL_PROCEDURAL_JIGGLE_BONE, 1.0f, 0.5f, NULL, NULL);
+        soundId = soundPlayerPlay(SOUNDS_PORTAL_PROCEDURAL_JIGGLE_BONE, 1.0f, 0.5f, NULL, NULL, SoundTypeMusic);
     }
 }
 

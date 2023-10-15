@@ -4,6 +4,7 @@
 #include "./menu.h"
 #include "../controls/controller_actions.h"
 #include "../graphics/graphics.h"
+#include "../scene/hud.h"
 
 #define MAX_SOURCES_PER_ACTION  4
 #define MAX_CONTROLS_SECTIONS   4
@@ -42,6 +43,6 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu);
 void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* renderState, struct GraphicsTask* task);
 
 void controlsRenderPrompt(enum ControllerAction action, char* message, float opacity, struct RenderState* renderState);
-void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOpacity, struct RenderState* renderState);
+void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOpacity, struct RenderState* renderState, enum SubtitleType subtitleType);
 
 #endif

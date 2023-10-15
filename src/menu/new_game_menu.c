@@ -136,7 +136,7 @@ enum MenuDirection newGameUpdate(struct NewGameMenu* newGameMenu) {
 
     if (controllerGetButtonDown(0, A_BUTTON) && gChapters[newGameMenu->selectedChapter].testChamberNumber >= 0) {
         gCurrentTestSubject = savefileNextTestSubject();
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         levelQueueLoad(gChapters[newGameMenu->selectedChapter].testChamberNumber, NULL, NULL);
     }
 
@@ -144,12 +144,12 @@ enum MenuDirection newGameUpdate(struct NewGameMenu* newGameMenu) {
         newGameMenu->selectedChapter + 1 < newGameMenu->chapterCount &&
         gChapters[newGameMenu->selectedChapter + 1].imageData) {
         newGameMenu->selectedChapter = newGameMenu->selectedChapter + 1;
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if ((controllerGetDirectionDown(0) & ControllerDirectionLeft) != 0 && newGameMenu->selectedChapter > 0) {
         newGameMenu->selectedChapter = newGameMenu->selectedChapter - 1;
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     int nextChapterOffset = newGameMenu->selectedChapter & ~1;

@@ -43,7 +43,7 @@ def get_caption_keys_values_language(lines):
         last_space = 0
         addition = 0
         for i,ch in enumerate(val):
-            if (i%40 == 0) and (i != 0):
+            if (i%38 == 0) and (i != 0):
                 newval = newval[:last_space+addition] + '\\n' + newval[last_space+addition+1:]
                 addition += 1
                 newval = newval + ch

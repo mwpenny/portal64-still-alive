@@ -39,6 +39,7 @@ enum ControlSaveFlags {
     ControlSaveTankControls = (1 << 2),
 
     ControlSaveSubtitlesEnabled = (1 << 5),
+    ControlSaveAllSubtitlesEnabled = (1 << 6),
 
     ControlSaveMoveablePortals = (1 << 8),
     ControlSaveWideScreen = (1 << 9),
@@ -55,8 +56,8 @@ struct ControlSaveState {
 };
 
 struct AudioSettingsSaveState {
-    unsigned char soundVolume;
-    unsigned char musicVolume;
+    unsigned short soundVolume;
+    unsigned short musicVolume;
 };
 
 #define NO_TEST_CHAMBER         0xFF

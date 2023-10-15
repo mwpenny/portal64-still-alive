@@ -95,7 +95,7 @@ enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions
         case GameplayOptionMovingPortals:
             if (controllerGetButtonDown(0, A_BUTTON)) {
                 gameplayOptions->movingPortals.checked = !gameplayOptions->movingPortals.checked;
-                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
 
                 if (gameplayOptions->movingPortals.checked) {
                     gSaveData.controls.flags |= ControlSaveMoveablePortals;
@@ -108,7 +108,7 @@ enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions
         case GameplayOptionWideScreen:
             if (controllerGetButtonDown(0, A_BUTTON)) {
                 gameplayOptions->wideScreen.checked = !gameplayOptions->wideScreen.checked;
-                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
 
                 if (gameplayOptions->wideScreen.checked) {
                     gSaveData.controls.flags |= ControlSaveWideScreen;
