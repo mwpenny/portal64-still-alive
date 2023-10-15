@@ -579,16 +579,16 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
 
 void playerPortalFunnel(struct Player* player) {
     if (gCollisionScene.portalTransforms[0] != NULL && gCollisionScene.portalTransforms[1] != NULL){
-        // portal funnelling testing!
         struct Transform portal0transform = *gCollisionScene.portalTransforms[0];
         struct Transform portal1transform = *gCollisionScene.portalTransforms[1];
         struct Transform targetPortalTransform;
+
         //remove z from distance calc
         portal0transform.position.y = player->body.transform.position.y;
         portal1transform.position.y = player->body.transform.position.y;
         
-        float portal0dist = sqrtf(vector3DistSqrd(&player->body.transform.position, &portal0transform.position));
-        float portal1dist = sqrtf(vector3DistSqrd(&player->body.transform.position, &portal1transform.position));
+        float portal0dist = vector3DistSqrd(&player->body.transform.position, &portal0transform.position);
+        float portal1dist = vector3DistSqrd(&player->body.transform.position, &portal1transform.position);
         float targetDist;
 
         if (portal0dist < portal1dist){
@@ -603,15 +603,8 @@ void playerPortalFunnel(struct Player* player) {
         vector3Negate(&gForward, &straightForward);
         quatMultVector(&targetPortalTransform.rotation, &straightForward, &straightForward);
         if (fabsf(straightForward.y) > 0.999f) {
-            // float dampeningConstant = 0.32f;
-            // float centeringConstant = 0.05;
-            // float acceptableCenteredDist = 0.1f;
-            // float maxFunnelingDist = 1.2f;
-            // float minFunnelDownVel = -2.25;
-            // float maxFunnelHorzVel = 7.0f;
-
             if (!(player->flags & PlayerFlagsGrounded) && 
-                targetDist < FUNNEL_MAX_DIST && 
+                targetDist < (FUNNEL_MAX_DIST*FUNNEL_MAX_DIST) && 
                 player->body.velocity.y < FUNNEL_MIN_DOWN_VEL && 
                 fabsf(player->body.velocity.x) < FUNNEL_MAX_HORZ_VEL && 
                 fabsf(player->body.velocity.z) < FUNNEL_MAX_HORZ_VEL){
@@ -635,8 +628,7 @@ void playerPortalFunnel(struct Player* player) {
                         player->body.velocity.z *= FUNNEL_CENTERING_CONSTANT;
                     }
             }
-
-            }
+        }
     }
 }
 
