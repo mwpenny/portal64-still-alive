@@ -11,8 +11,8 @@ let outputLanguagesSourceFile = '';
 let outputLanguagesHeader = '';
 let allSounds = [];
 let languages = [];
-let languages_codes = ["EN", "DE", "FR", "RU", "ES"];
-let language_names = {"EN": "English", "DE": "German", "FR": "French", "RU": "Russian", "ES": "Spanish"};
+let languages_codes = ["EN", "FR", "DE", "RU", "ES"];
+let language_names = {"EN": "English", "FR": "French", "DE": "German", "RU": "Russian", "ES": "Spanish"};
 let lookup = [];
 languages.push("EN"); // Always included by default
 
@@ -132,6 +132,14 @@ function generateLanguagesSourceFile() {
     sourcefile += '};';
     return sourcefile;
 }
+
+// sort found languages in order of elements in language_codes
+let temp = [...languages_codes];
+languages = temp.filter(function(cItem) {
+  return languages.find(function(aItem) {
+    return cItem === aItem
+  })
+})
 
 fs.writeFileSync(outputLanguagesHeader, generateLanguagesHeader());
 fs.writeFileSync(outputLanguagesSourceFile, generateLanguagesSourceFile());

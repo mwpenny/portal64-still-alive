@@ -150,7 +150,9 @@ def process_all_closecaption_files(dir):
     sourcefile_lines = []
     language_list = []
     SubtitleKey_generated = False
-    for filename in os.listdir(dir):
+    lst = os.listdir(dir)
+    lst.sort()
+    for filename in lst:
         if "closecaption_" not in filename:
             continue
         try:  
