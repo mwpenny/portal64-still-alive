@@ -11,6 +11,8 @@
 #include "../../build/assets/models/dynamic_animated_model_list.h"
 
 #include "../util/time.h"
+#include "../scene/hud.h"
+#include "../scene/scene.h"
 
 #define COLLIDER_HEIGHT   0.7f
 #define TICKTOCK_PAUSE_LENGTH  0.25f
@@ -104,8 +106,10 @@ void switchActivate(struct Switch* switchObj) {
     if (switchObj->timeLeft > 0.0f) {
         return;
     }
-    soundPlayerPlay(soundsButton, 1.0f, 0.5f, &switchObj->rigidBody.transform.position, &gZeroVec);
-    switchObj->ticktockSoundLoopId = soundPlayerPlay(soundsTickTock, 1.0f, 0.5f, NULL, NULL);
+    soundPlayerPlay(soundsButton, 1.0f, 0.5f, &switchObj->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+    hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_DOWN, SubtitleTypeCaption);
+    switchObj->ticktockSoundLoopId = soundPlayerPlay(soundsTickTock, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+    hudShowSubtitle(&gScene.hud, PORTAL_ROOM1_TICKTOCK, SubtitleTypeCaption);
     switchObj->flags |= SwitchFlagsDepressed;
     switchObj->timeLeft = switchObj->duration;
     signalsSend(switchObj->signalIndex);
@@ -143,7 +147,8 @@ void switchUpdate(struct Switch* switchObj) {
                 switchObj->ticktockPauseTimer += FIXED_DELTA_TIME;
             }else{
                 switchObj->ticktockPauseTimer = 0; 
-                switchObj->ticktockSoundLoopId = soundPlayerPlay(soundsTickTock, 1.0f, 0.5f, NULL, NULL);
+                switchObj->ticktockSoundLoopId = soundPlayerPlay(soundsTickTock, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+                hudShowSubtitle(&gScene.hud, PORTAL_ROOM1_TICKTOCK, SubtitleTypeCaption);
             }
         }else{
             switchObj->ticktockPauseTimer = 0; 

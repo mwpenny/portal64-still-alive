@@ -152,7 +152,7 @@ enum MenuDirection savefileListUpdate(struct SavefileListMenu* savefileList) {
         if (savefileList->selectedSave == savefileList->numberOfSaves) {
             savefileList->selectedSave = 0;
         }
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (controllerDir & ControllerDirectionUp) {
@@ -161,7 +161,7 @@ enum MenuDirection savefileListUpdate(struct SavefileListMenu* savefileList) {
         if (savefileList->selectedSave < 0) {
             savefileList->selectedSave = savefileList->numberOfSaves - 1;
         }
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     int selectTop = SCROLLED_ROW_Y(savefileList->selectedSave, savefileList->scrollOffset) - 8;

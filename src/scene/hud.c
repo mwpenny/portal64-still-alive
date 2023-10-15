@@ -1,7 +1,6 @@
 #include "hud.h"
 
 #include "../../build/assets/materials/hud.h"
-#include "../../build/src/audio/subtitles.h"
 #include "../menu/controls.h"
 #include "../graphics/graphics.h"
 #include "../util/time.h"
@@ -32,15 +31,23 @@
 #define RETICLE_WIDTH 16
 #define RETICLE_HEIGHT 16
 
-#define PROMPT_FADE_TIME        2.0f
-#define SUBTITLE_FADE_TIME        0.75f
+#define PROMPT_FADE_TIME               2.0f
+#define SUBTITLE_SLOW_FADE_TIME        0.75f
+#define SUBTITLE_FAST_FADE_TIME        0.25f
+#define CAPTION_EXPIRE_TIME            1.5f
+
+
 
 void hudInit(struct Hud* hud) {
     hud->promptType = CutscenePromptTypeNone;
+    hud->subtitleKey = SubtitleKeyNone;
+    hud->queuedSubtitleKey = SubtitleKeyNone;
+    hud->subtitleType = SubtitleTypeNone;
+    hud->queuedSubtitleType = SubtitleTypeNone;
     hud->promptOpacity = 0.0f;
     hud->subtitleOpacity = 0.0f;
     hud->backgroundOpacity = 0.0f;
-    hud->subtitleFadeTime = 0.75;
+    hud->subtitleFadeTime = SUBTITLE_SLOW_FADE_TIME;
     hud->chosenLanguage = gSaveData.controls.subtitleLanguage;
     hud->flags = 0;
     hud->resolvedPrompts = 0;
@@ -63,11 +70,19 @@ void hudUpdate(struct Hud* hud) {
         }
     }
 
+    if (hud->subtitleExpireTimer > 0.0f) {
+        hud->subtitleExpireTimer -= FIXED_DELTA_TIME;
+
+        if (hud->subtitleExpireTimer < 0.0f) {
+            hud->subtitleExpireTimer = 0.0f;
+        }
+    }
+
     hud->chosenLanguage = gSaveData.controls.subtitleLanguage;
 
     float targetPromptOpacity = (hud->flags & HudFlagsShowingPrompt) ? 1.0 : 0.0f;
-    float targetSubtitleOpacity = ((hud->flags & HudFlagsShowingSubtitle) && !(hud->flags & HudFlagsSubtitleQueued)) ? 0.85: 0.0f;
-    float targetBackgroundOpacity = (hud->flags & HudFlagsShowingSubtitle && !(hud->flags & HudFlagsSubtitleQueued)) ? 0.45: 0.0f;
+    float targetSubtitleOpacity = ((hud->flags & HudFlagsShowingSubtitle) && (!(hud->flags & HudFlagsSubtitleQueued) || (hud->subtitleExpireTimer > 0.0f))) ? 0.85: 0.0f;
+    float targetBackgroundOpacity = (hud->flags & HudFlagsShowingSubtitle && (!(hud->flags & HudFlagsSubtitleQueued) || (hud->subtitleExpireTimer > 0.0f))) ? 0.45: 0.0f;
 
     if (targetPromptOpacity != hud->promptOpacity) {
         hud->promptOpacity = mathfMoveTowards(hud->promptOpacity, targetPromptOpacity, FIXED_DELTA_TIME / PROMPT_FADE_TIME);
@@ -77,10 +92,22 @@ void hudUpdate(struct Hud* hud) {
         hud->subtitleOpacity = mathfMoveTowards(hud->subtitleOpacity, targetSubtitleOpacity, FIXED_DELTA_TIME / hud->subtitleFadeTime);
     }
 
-    if ((hud->subtitleOpacity == 0.0f) && (hud->flags & HudFlagsSubtitleQueued)){
-        hud->flags &= ~HudFlagsSubtitleQueued;
-        hud->subtitleType = hud->queuedSubtitleType;
-        hud->queuedSubtitleType = SubtitleKeyNone;
+    if ((hud->subtitleOpacity <= 0.0f) && (hud->flags & HudFlagsSubtitleQueued)){
+        if (!((hud->subtitleType == SubtitleTypeCaption) && (hud->queuedSubtitleType == SubtitleTypeCaption) && (hud->subtitleExpireTimer > 0.0))){
+            hud->flags &= ~HudFlagsSubtitleQueued;
+            hud->flags |= HudFlagsShowingSubtitle;
+            hud->subtitleKey = hud->queuedSubtitleKey;
+            hud->subtitleType= hud->queuedSubtitleType;
+            hud->queuedSubtitleKey = SubtitleKeyNone;
+            hud->queuedSubtitleType = SubtitleTypeNone;
+            if (hud->subtitleType == SubtitleTypeCaption){
+                hud->subtitleExpireTimer = CAPTION_EXPIRE_TIME;
+            }
+        }
+    }
+
+    if (hud->subtitleExpireTimer <= 0.0f && hud->subtitleType == SubtitleTypeCaption){
+        hudResolveSubtitle(&gScene.hud);
     }
 
     if (targetBackgroundOpacity != hud->backgroundOpacity) {
@@ -152,30 +179,64 @@ void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType) {
     hud->promptType = promptType;
 }
 
-void hudShowSubtitle(struct Hud* hud, enum SubtitleKey subtitleType) {
-    if (subtitleType == hud->subtitleType){
+void hudShowSubtitle(struct Hud* hud, enum SubtitleKey subtitleKey, enum SubtitleType subtitleType) {
+    if (!(gSaveData.controls.flags & ControlSaveSubtitlesEnabled || gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled)){
+        return;
+    }
+    if (subtitleKey == hud->subtitleKey){
         return;
     }
 
-    if (subtitleType == SubtitleKeyNone) {
+    if (subtitleType == SubtitleTypeNone) {
         hud->flags &= ~HudFlagsShowingSubtitle;
         hud->flags &= ~HudFlagsSubtitleQueued;
-        hud->subtitleFadeTime = 0.75;
+        hud->queuedSubtitleType = SubtitleTypeNone;
+        hud->queuedSubtitleKey = SubtitleKeyNone;
+        hud->subtitleFadeTime = SUBTITLE_SLOW_FADE_TIME;
         return;
     }
-    if (hud->flags & HudFlagsShowingSubtitle){
-        hud->flags |= HudFlagsSubtitleQueued;
-        hud->queuedSubtitleType = subtitleType;
-        hud->subtitleFadeTime = 0.3;
+    else if (subtitleType == SubtitleTypeCaption) {
+        if (!(gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled)){
+            return;
+        }
+        if ((hud->flags & HudFlagsShowingSubtitle) && ((hud->subtitleType > subtitleType) || (hud->queuedSubtitleType > subtitleType))){
+            return; // dont push off screen a higher importance subtitle
+        }
+        else if ((hud->flags & HudFlagsShowingSubtitle) && (hud->subtitleType <= subtitleType)){
+            hud->flags |= HudFlagsSubtitleQueued;
+            hud->queuedSubtitleKey = subtitleKey;
+            hud->queuedSubtitleType = subtitleType;
+            hud->subtitleFadeTime = SUBTITLE_FAST_FADE_TIME;
+        }
+        else{
+            hud->flags |= HudFlagsShowingSubtitle;
+            hud->subtitleKey = subtitleKey;
+            hud->subtitleType = subtitleType;
+            hud->queuedSubtitleType = SubtitleTypeNone;
+            hud->queuedSubtitleKey = SubtitleKeyNone;
+            hud->subtitleFadeTime = SUBTITLE_SLOW_FADE_TIME;
+            hud->subtitleExpireTimer = CAPTION_EXPIRE_TIME;
+        }
+        return;
     }
-    else{
-        hud->flags |= HudFlagsShowingSubtitle;
-        hud->subtitleType = subtitleType;
-        hud->subtitleFadeTime = 0.75;
+    else if (subtitleType == SubtitleTypeCloseCaption) {
+        if (hud->flags & HudFlagsShowingSubtitle){
+            hud->flags |= HudFlagsSubtitleQueued;
+            hud->queuedSubtitleKey = subtitleKey;
+            hud->queuedSubtitleType = subtitleType;
+            hud->subtitleFadeTime = SUBTITLE_FAST_FADE_TIME;
+        }
+        else{
+            hud->flags |= HudFlagsShowingSubtitle;
+            hud->flags &= ~HudFlagsSubtitleQueued;
+            hud->subtitleKey = subtitleKey;
+            hud->subtitleType = subtitleType;
+            hud->queuedSubtitleType = SubtitleTypeNone;
+            hud->queuedSubtitleKey = SubtitleKeyNone;
+            hud->subtitleFadeTime = SUBTITLE_SLOW_FADE_TIME;
+        }
+        return;
     }
-
-
-    
 }
 
 void hudResolvePrompt(struct Hud* hud, enum CutscenePromptType promptType) {
@@ -183,7 +244,9 @@ void hudResolvePrompt(struct Hud* hud, enum CutscenePromptType promptType) {
 }
 
 void hudResolveSubtitle(struct Hud* hud) {
+
     hud->flags &= ~HudFlagsShowingSubtitle;
+    hud->subtitleFadeTime = SUBTITLE_SLOW_FADE_TIME;
 }
 
 void hudRender(struct Hud* hud, struct Player* player, struct RenderState* renderState) {
@@ -301,7 +364,7 @@ void hudRender(struct Hud* hud, struct Player* player, struct RenderState* rende
         controlsRenderPrompt(gPromptActions[hud->promptType], gPromptText[hud->promptType], hud->promptOpacity, renderState);
     }
 
-    if (hud->subtitleOpacity > 0.0f && gSaveData.controls.flags & ControlSaveSubtitlesEnabled) {
-        controlsRenderSubtitle(SubtitleLanguageValues[hud->chosenLanguage][hud->subtitleType], hud->subtitleOpacity, hud->backgroundOpacity, renderState);
+    if (hud->subtitleOpacity > 0.0f && (gSaveData.controls.flags & ControlSaveSubtitlesEnabled || gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled) && hud->subtitleKey != SubtitleKeyNone) {
+        controlsRenderSubtitle(SubtitleLanguageValues[hud->chosenLanguage][hud->subtitleKey], hud->subtitleOpacity, hud->backgroundOpacity, renderState, hud->subtitleType);
     }
 }

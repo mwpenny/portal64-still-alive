@@ -137,7 +137,8 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 step->playSound.volume * (1.0f / 255.0f),
                 step->playSound.pitch * (1.0f / 64.0f),
                 NULL,
-                NULL
+                NULL,
+                SoundTypeAll
             );
             break;
         case CutsceneStepTypeQueueSound:
@@ -396,8 +397,8 @@ void cutscenesUpdateSounds() {
             if (gCutsceneSoundQueues[i]) {
                 struct QueuedSound* curr = gCutsceneSoundQueues[i];
 
-                gCutsceneCurrentSound[i] = soundPlayerPlay(curr->soundId, curr->volume, gCutsceneChannelPitch[i], NULL, NULL);
-                hudShowSubtitle(&gScene.hud, curr->subtitleId);
+                gCutsceneCurrentSound[i] = soundPlayerPlay(curr->soundId, curr->volume, gCutsceneChannelPitch[i], NULL, NULL, SoundTypeAll);
+                hudShowSubtitle(&gScene.hud, curr->subtitleId, SubtitleTypeCloseCaption);
 
                 gCutsceneSoundQueues[i] = curr->next;
 
@@ -405,7 +406,7 @@ void cutscenesUpdateSounds() {
                 gCutsceneNextFreeSound = curr;
             } else {
                 if (gCutsceneCurrentSound[i] != SOUND_ID_NONE) {
-                    soundPlayerPlay(soundsIntercom[1], 1.0f, gCutsceneChannelPitch[i], NULL, NULL);
+                    soundPlayerPlay(soundsIntercom[1], 1.0f, gCutsceneChannelPitch[i], NULL, NULL, SoundTypeAll);
                     hudResolveSubtitle(&gScene.hud);
                 }
 

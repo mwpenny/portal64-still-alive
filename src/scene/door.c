@@ -9,6 +9,8 @@
 #include "../physics/collision_box.h"
 #include "../physics/collision_scene.h"
 #include "../util/dynamic_asset_loader.h"
+#include "hud.h"
+#include "scene.h"
 
 #include "../build/assets/materials/static.h"
 #include "../../build/assets/models/dynamic_animated_model_list.h"
@@ -131,7 +133,8 @@ void doorUpdate(struct Door* door) {
             skAnimatorRunClip(&door->animator, dynamicAssetClip(typeDefinition->armatureIndex, typeDefinition->closeClipIndex), 0.0f, 0);
         }
 
-        soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec);
+        soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+        hudShowSubtitle(&gScene.hud, PORTAL_DOORCLOSE, SubtitleTypeCaption);
 
         if (signal) {
             door->flags |= DoorFlagsIsOpen;

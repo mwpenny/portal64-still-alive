@@ -203,7 +203,7 @@ static void gameProc(void* arg) {
     contactSolverInit(&gContactSolver);
     portalSurfaceCleanupQueueInit();
     savefileLoad();
-    levelLoadWithCallbacks(MAIN_MENU);
+    levelLoadWithCallbacks(5);
     gCurrentTestSubject = 0;
     cutsceneRunnerReset();
     controllersInit();
