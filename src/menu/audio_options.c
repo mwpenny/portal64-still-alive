@@ -76,14 +76,14 @@ void audioOptionsInit(struct AudioOptions* audioOptions) {
     audioOptions->subtitlesLanguageText = menuBuildText(&gDejaVuSansFont, "Captions Language: ", GAMEPLAY_X + 8, GAMEPLAY_Y + 88);
     audioOptions->subtitlesLanguageDynamicText = menuBuildText(&gDejaVuSansFont, SubtitleLanguages[gSaveData.controls.subtitleLanguage], GAMEPLAY_X + 125, GAMEPLAY_Y + 88);
 
-    audioOptions->subtitlesLanguage= menuBuildSlider(GAMEPLAY_X + 8, GAMEPLAY_Y + 108, 200, NUM_SUBTITLE_LANGUAGES);
+    audioOptions->subtitlesLanguage= menuBuildSlider(GAMEPLAY_X + 8, GAMEPLAY_Y + 104, 200, NUM_SUBTITLE_LANGUAGES);
     audioOptions->subtitles_language_temp = (0xFFFF/NUM_SUBTITLE_LANGUAGES)* gSaveData.controls.subtitleLanguage;
     audioOptions->subtitlesLanguage.value = (int)gSaveData.controls.subtitleLanguage * (0xFFFF/NUM_SUBTITLE_LANGUAGES);
 
-    audioOptions->audioLanguageText = menuBuildText(&gDejaVuSansFont, "Audio Language: ", GAMEPLAY_X + 8, GAMEPLAY_Y + 128);
-    audioOptions->audioLanguageDynamicText = menuBuildText(&gDejaVuSansFont, AudioLanguages[gSaveData.audio.audioLanguage], GAMEPLAY_X + 150, GAMEPLAY_Y + 128);
+    audioOptions->audioLanguageText = menuBuildText(&gDejaVuSansFont, "Audio Language: ", GAMEPLAY_X + 8, GAMEPLAY_Y + 124);
+    audioOptions->audioLanguageDynamicText = menuBuildText(&gDejaVuSansFont, AudioLanguages[gSaveData.audio.audioLanguage], GAMEPLAY_X + 150, GAMEPLAY_Y + 124);
 
-    audioOptions->audioLanguage= menuBuildSlider(GAMEPLAY_X + 8, GAMEPLAY_Y + 148, 200, SCROLL_TICKS_LANGUAGE);
+    audioOptions->audioLanguage= menuBuildSlider(GAMEPLAY_X + 8, GAMEPLAY_Y + 140, 200, SCROLL_TICKS_LANGUAGE);
     audioOptions->audio_language_temp = (0xFFFF/SCROLL_TICKS)* gSaveData.audio.audioLanguage;
     audioOptions->audioLanguage.value = (int)gSaveData.audio.audioLanguage * (0xFFFF/SCROLL_TICKS_LANGUAGE);
     
@@ -161,7 +161,7 @@ enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
             int tempAudio = (int)((audioOptions->audio_language_temp * (1.0f/0xFFFF) * NUM_AUDIO_LANGUAGES));
             tempAudio = (int)minf(maxf(0.0, tempAudio), NUM_AUDIO_LANGUAGES-1);
             gSaveData.audio.audioLanguage = tempAudio;
-            audioOptions->audioLanguageDynamicText = menuBuildText(&gDejaVuSansFont, AudioLanguages[gSaveData.audio.audioLanguage], GAMEPLAY_X + 150, GAMEPLAY_Y + 128);
+            audioOptions->audioLanguageDynamicText = menuBuildText(&gDejaVuSansFont, AudioLanguages[gSaveData.audio.audioLanguage], GAMEPLAY_X + 150, GAMEPLAY_Y + 124);
             break;
     }
     
