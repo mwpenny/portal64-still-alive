@@ -187,10 +187,10 @@ That will generate the rom at `/build/portal64.z64`
 <br />
 
 ## Current New Feature TODO List
-- [ ] polish up subtitles
-- [ ] more sound settings
 - [ ] rumble pak support
 - [ ] pausing while glados is speaking can end her speech early
+- [x] polish up subtitles
+- [x] more sound settings
 - [x] add desk chairs and monitors
 - [x] Add auto save checkpoints
 - [x] Correct elevator timing
@@ -204,6 +204,4 @@ That will generate the rom at `/build/portal64.z64`
 ----------------------- v8
 - [ ] Two wall portals next to eachother can be used to clip any object out of any level by pushing it into corner, then dropping. 
 - [ ] Passing into a ceiling portal can sometimes mess with the player rotation
-- [ ] various visual glitches when running NTSC on PAL console #65
-- [ ] various visual glitches when running PAL on NTSC console #65
 - [x] player can clip through back of elevator by jumping and strafeing at the back corners while inside.
