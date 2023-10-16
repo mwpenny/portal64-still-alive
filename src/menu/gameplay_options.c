@@ -12,13 +12,13 @@
 #define GAMEPLAY_WIDTH  252
 #define GAMEPLAY_HEIGHT 124
 
-#define SCROLL_TICKS        PORTAL_RENDER_DEPTH_MAX - 1
+#define SCROLL_TICKS        PORTAL_RENDER_DEPTH_MAX+1
 #define SCROLL_INTERVALS    (SCROLL_TICKS - 1)
 
 #define GAMEPLAY_X      ((SCREEN_WD - GAMEPLAY_WIDTH) / 2)
 
 #define FULL_SCROLL_TIME    2.0f
-#define SCROLL_MULTIPLIER   (int)(0xFFFF * FIXED_DELTA_TIME / (80 * FULL_SCROLL_TIME))
+#define SCROLL_MULTIPLIER   (int)(0x10000 * FIXED_DELTA_TIME / (80 * FULL_SCROLL_TIME))
 #define SCROLL_CHUNK_SIZE   (0x10000 / SCROLL_INTERVALS)
 
 void gameplayOptionsHandleSlider(unsigned short* settingValue, float* sliderValue) {
