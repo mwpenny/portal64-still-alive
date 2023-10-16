@@ -591,3 +591,14 @@ void cutsceneQueueSoundInChannel(int soundId, float volume, int channel, int sub
 
     cutsceneQueueSound(soundId, volume, channel, subtitleId);
 }
+
+int cutsceneIsSoundQueued(){
+    int soundQueued = 0;
+    for (int i = 0; i < CH_COUNT; ++i) {
+        if(gCutsceneSoundQueues[i] != NULL || gCutsceneCurrentSound[i] != SOUND_ID_NONE){
+            soundQueued = 1;
+            break;
+        }
+    }
+    return soundQueued;
+}

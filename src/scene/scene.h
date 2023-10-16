@@ -82,6 +82,7 @@ struct Scene {
     u8 ballCatcherCount;
     u8 clockCount;
     u8 securityCameraCount;
+    u8 boolCutsceneIsRunning;
 
     u8 continuouslyAttemptingPortalOpen;
     u8 checkpointState;
