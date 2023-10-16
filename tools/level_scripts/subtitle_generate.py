@@ -100,7 +100,7 @@ def make_SubtitleLanguageValues(values_list):
     sourcefile_lines = []
     if len(values_list) <= 0:
         sourcefile_lines.append("\n")
-        sourcefile_lines.append("char * SubtitleLanguageValues[][508] =\n")
+        sourcefile_lines.append("char* SubtitleLanguageValues[][508] =\n")
         sourcefile_lines.append("{\n")
         sourcefile_lines.append("    {\n")
         for val in range(508):
@@ -110,7 +110,7 @@ def make_SubtitleLanguageValues(values_list):
         sourcefile_lines.append("\n")
         return sourcefile_lines
     sourcefile_lines.append("\n")
-    sourcefile_lines.append("char * SubtitleLanguageValues[][508] =\n")
+    sourcefile_lines.append("char* SubtitleLanguageValues[][508] =\n")
     sourcefile_lines.append("{\n")
     for lang in values_list:
         sourcefile_lines.append("    {\n")
@@ -150,7 +150,9 @@ def process_all_closecaption_files(dir):
     sourcefile_lines = []
     language_list = []
     SubtitleKey_generated = False
-    for filename in os.listdir(dir):
+    lst = os.listdir(dir)
+    lst.sort()
+    for filename in lst:
         if "closecaption_" not in filename:
             continue
         try:  

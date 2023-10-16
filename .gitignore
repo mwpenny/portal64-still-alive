@@ -11,6 +11,7 @@ build/
 debugger
 gfxvalidator
 assets_working/
+assets/locales/
 vpk/
 portal_pak_dir/
 portal_pak_modified/
@@ -20,6 +21,6 @@ resource/closecaption_*
 tools/skeletool64
 tools/vtf2png
 
-skelatool64/*.zip
+skelatool64/*.zip*
 
 src/controls/controller-data.h
