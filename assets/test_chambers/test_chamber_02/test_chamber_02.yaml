@@ -2,7 +2,7 @@ cutscenes:
   INTRO:
     - q_sound SOUNDS_02_PART1_ENTRY_1 CH_GLADOS PORTAL_02_PART1_ENTRY_1
     - q_sound SOUNDS_02_PART1_ENTRY_2 CH_GLADOS PORTAL_02_PART1_ENTRY_2
-    - wait_for_channel CH_GLADOS
+    - delay 2
     - open_portal portal_0 0
     - wait_for_signal success
     - q_sound SOUNDS_02_PART1_SUCCESS_1 CH_GLADOS PORTAL_02_PART1_SUCCESS_1
