@@ -22,8 +22,8 @@
 #define OPEN_SPEED              2.0f
 
 #define OPEN_DELAY              1.0f
-#define CLOSE_DELAY             13.0f
-#define MOVING_SOUND_DELAY      3.5f  
+#define CLOSE_DELAY             10.0f
+#define MOVING_SOUND_DELAY      1.5f  
 #define SHAKE_DURATION          0.5f    
 
 struct ColliderTypeData gElevatorColliderType = {
@@ -129,7 +129,7 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
     short result = -1;
 
     if (elevator->flags & ElevatorFlagsIsExit) {
-        if (inside) {
+        if (inside && !(gScene.boolCutsceneIsRunning)) {
             elevator->timer -= FIXED_DELTA_TIME;
         }
 
@@ -139,7 +139,7 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
         shouldBeOpen = inRange && !inside;
         shouldLock = inside;
         
-        if (inside || (elevator->flags & ElevatorFlagsIsLocked) != 0) {
+        if ((inside || (elevator->flags & ElevatorFlagsIsLocked) != 0) && !(gScene.boolCutsceneIsRunning)) {
             elevator->timer -= FIXED_DELTA_TIME;
 
             if (elevator->timer < 0.0f) {
@@ -191,11 +191,11 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
     }
     
 
-    if ((elevator->flags & ElevatorFlagsIsLocked) && (elevator->openAmount == 0.0f) && (elevator->movingTimer > 0.0f)){
+    if ((elevator->flags & ElevatorFlagsIsLocked) && (elevator->openAmount == 0.0f) && (elevator->movingTimer > 0.0f) && !(gScene.boolCutsceneIsRunning)){
         elevator->movingTimer -= FIXED_DELTA_TIME;
     }
 
-    if ((elevator->flags & ElevatorFlagsIsLocked) && (elevator->openAmount == 0.0f) && !(elevator->flags & ElevatorFlagsMovingSoundPlayed) && (elevator->movingTimer <= 0.0f) && inside){
+    if ((elevator->flags & ElevatorFlagsIsLocked) && (elevator->openAmount == 0.0f) && !(elevator->flags & ElevatorFlagsMovingSoundPlayed) && (elevator->movingTimer <= 0.0f) && inside && !(gScene.boolCutsceneIsRunning)){
             soundPlayerPlay(soundsElevatorMoving, 1.25f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             hudShowSubtitle(&gScene.hud, PORTAL_ELEVATOR_START, SubtitleTypeCaption);
             player->shakeTimer = SHAKE_DURATION;

@@ -5,6 +5,7 @@
 #include "../physics/collision_object.h"
 #include "../player/player.h"
 #include "../levels/level_definition.h"
+#include "../scene/scene.h"
 
 enum ElevatorFlags {
     ElevatorFlagsIsLocked = (1 << 0),

@@ -244,6 +244,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     }
 
     scene->continuouslyAttemptingPortalOpen=0;
+    scene->boolCutsceneIsRunning=0;
     scene->checkpointState = SceneCheckpointStateSaved;
 
     scene->freeCameraOffset = gZeroVec;
@@ -528,6 +529,8 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
 }
 
 void sceneUpdate(struct Scene* scene) {
+    scene->boolCutsceneIsRunning = cutsceneIsSoundQueued();
+
     if (scene->checkpointState == SceneCheckpointStateReady) {
         checkpointSave(scene);
         scene->checkpointState = SceneCheckpointStateSaved;
