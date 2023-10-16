@@ -30,14 +30,14 @@ struct ColliderTypeData gPortalColliderType = {
 #define CALC_SCREEN_SPACE(clip_space, screen_size) ((clip_space + 1.0f) * ((screen_size) / 2))
 
 struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE] = {
-    {0.0f, 1.0f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
-    {0.353553f * SCENE_SCALE * PORTAL_COVER_WIDTH, 0.707107f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
-    {0.5f * SCENE_SCALE * PORTAL_COVER_WIDTH, 0.0f, 0},
-    {0.353553f * SCENE_SCALE * PORTAL_COVER_WIDTH, -0.707107f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
-    {0.0f, -1.0f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
-    {-0.353553f * SCENE_SCALE * PORTAL_COVER_WIDTH, -0.707107f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
-    {-0.5f * SCENE_SCALE * PORTAL_COVER_WIDTH, 0.0f, 0},
-    {-0.353553f * SCENE_SCALE * PORTAL_COVER_WIDTH, 0.707107f * SCENE_SCALE * PORTAL_COVER_HEIGHT, 0},
+    {0.0f, 1.0f * SCENE_SCALE * PORTAL_COVER_HEIGHT_RADIUS, 0},
+    {SCENE_SCALE * PORTAL_COVER_WIDTH_RADIUS, SCENE_SCALE * PORTAL_COVER_HEIGHT_RADIUS, 0},
+    {0.5f * SCENE_SCALE * PORTAL_COVER_WIDTH_RADIUS, 0.0f, 0},
+    {SCENE_SCALE * PORTAL_COVER_WIDTH_RADIUS, -1.0f * SCENE_SCALE * PORTAL_COVER_HEIGHT_RADIUS, 0},
+    {0.0f, -1.0f * SCENE_SCALE * PORTAL_COVER_HEIGHT_RADIUS, 0},
+    {-1.0f * SCENE_SCALE * PORTAL_COVER_WIDTH_RADIUS, -1.0f * SCENE_SCALE * PORTAL_COVER_HEIGHT_RADIUS, 0},
+    {-0.5f * SCENE_SCALE * PORTAL_COVER_WIDTH_RADIUS, 0.0f, 0},
+    {-1.0f * SCENE_SCALE * PORTAL_COVER_WIDTH_RADIUS, SCENE_SCALE * PORTAL_COVER_HEIGHT_RADIUS, 0},
 };
 
 #define PORTAL_CLIPPING_PLANE_BIAS  (SCENE_SCALE * 0.25f)
@@ -86,12 +86,12 @@ void portalCalculateBB(struct Transform* portalTransform, struct Box3D* bb) {
     bb->min = bb->max = portalTransform->position;
 
     struct Vector3 nextDir;
-    vector3Scale(&portalUp, &nextDir, PORTAL_COVER_HEIGHT * 0.5f);
+    vector3Scale(&portalUp, &nextDir, PORTAL_COVER_HEIGHT_RADIUS * 0.5f);
     box3DExtendDirection(bb, &nextDir, bb);
     vector3Negate(&nextDir, &nextDir);
     box3DExtendDirection(bb, &nextDir, bb);
 
-    vector3Scale(&portalRight, &nextDir, PORTAL_COVER_WIDTH * 0.5f);
+    vector3Scale(&portalRight, &nextDir, PORTAL_COVER_WIDTH_RADIUS * 0.5f);
     box3DExtendDirection(bb, &nextDir, bb);
     vector3Negate(&nextDir, &nextDir);
     box3DExtendDirection(bb, &nextDir, bb);

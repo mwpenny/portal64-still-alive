@@ -8,8 +8,8 @@
 #include "defs.h"
 #include "point_constraint.h"
 
-#define PORTAL_COVER_HEIGHT 1.6
-#define PORTAL_COVER_WIDTH  0.84085f
+#define PORTAL_COVER_HEIGHT_RADIUS 0.708084f
+#define PORTAL_COVER_WIDTH_RADIUS  0.420425f
 
 #define PORTAL_THICKNESS        0.11f
 
