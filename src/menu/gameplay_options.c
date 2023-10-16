@@ -121,7 +121,7 @@ enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions
         case GameplayOptionPortalFunneling:
             if (controllerGetButtonDown(0, A_BUTTON)) {
                 gameplayOptions->portalFunnel.checked = !gameplayOptions->portalFunnel.checked;
-                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
 
                 if (gameplayOptions->portalFunnel.checked) {
                     gSaveData.controls.flags |= ControlSavePortalFunneling;
