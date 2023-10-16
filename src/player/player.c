@@ -32,6 +32,13 @@
 
 #define PLAYER_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_BALL)
 
+#define FUNNEL_DAMPENING_CONSTANT 0.32f
+#define FUNNEL_CENTERING_CONSTANT 0.05f
+#define FUNNEL_ACCEPTABLE_CENTERED_DISTANCE 0.1f
+#define FUNNEL_MAX_DIST 1.2f
+#define FUNNEL_MIN_DOWN_VEL -2.25f
+#define FUNNEL_MAX_HORZ_VEL 7.0f
+
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
 
@@ -573,6 +580,61 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
     }
 }
 
+void playerPortalFunnel(struct Player* player) {
+    if (gCollisionScene.portalTransforms[0] != NULL && gCollisionScene.portalTransforms[1] != NULL){
+        struct Transform portal0transform = *gCollisionScene.portalTransforms[0];
+        struct Transform portal1transform = *gCollisionScene.portalTransforms[1];
+        struct Transform targetPortalTransform;
+
+        //remove z from distance calc
+        portal0transform.position.y = player->body.transform.position.y;
+        portal1transform.position.y = player->body.transform.position.y;
+        
+        float portal0dist = vector3DistSqrd(&player->body.transform.position, &portal0transform.position);
+        float portal1dist = vector3DistSqrd(&player->body.transform.position, &portal1transform.position);
+        float targetDist;
+
+        if (portal0dist < portal1dist){
+            targetPortalTransform = portal0transform;
+            targetDist = portal0dist;
+        } else{
+            targetPortalTransform = portal1transform;
+            targetDist = portal1dist;
+        }
+
+        struct Vector3 straightForward;
+        vector3Negate(&gForward, &straightForward);
+        quatMultVector(&targetPortalTransform.rotation, &straightForward, &straightForward);
+        if (fabsf(straightForward.y) > 0.999f) {
+            if (!(player->flags & PlayerFlagsGrounded) && 
+                targetDist < (FUNNEL_MAX_DIST*FUNNEL_MAX_DIST) && 
+                player->body.velocity.y < FUNNEL_MIN_DOWN_VEL && 
+                fabsf(player->body.velocity.x) < FUNNEL_MAX_HORZ_VEL && 
+                fabsf(player->body.velocity.z) < FUNNEL_MAX_HORZ_VEL){
+                    if (player->body.transform.position.x < targetPortalTransform.position.x - FUNNEL_ACCEPTABLE_CENTERED_DISTANCE){
+                        player->body.velocity.x += (FUNNEL_DAMPENING_CONSTANT * (targetPortalTransform.position.x - player->body.transform.position.x));
+                    }
+                    else if (player->body.transform.position.x > targetPortalTransform.position.x + FUNNEL_ACCEPTABLE_CENTERED_DISTANCE){
+                        player->body.velocity.x -= (FUNNEL_DAMPENING_CONSTANT * (player->body.transform.position.x - targetPortalTransform.position.x));
+                    }
+                    else{
+                        player->body.velocity.x *= FUNNEL_CENTERING_CONSTANT;
+                    }
+
+                    if (player->body.transform.position.z < targetPortalTransform.position.z - FUNNEL_ACCEPTABLE_CENTERED_DISTANCE){
+                        player->body.velocity.z += (FUNNEL_DAMPENING_CONSTANT * (targetPortalTransform.position.z - player->body.transform.position.z));
+                    }
+                    else if (player->body.transform.position.z > targetPortalTransform.position.z + FUNNEL_ACCEPTABLE_CENTERED_DISTANCE){
+                        player->body.velocity.z -= (FUNNEL_DAMPENING_CONSTANT * (player->body.transform.position.z - targetPortalTransform.position.z));
+                    }
+                    else{
+                        player->body.velocity.z *= FUNNEL_CENTERING_CONSTANT;
+                    }
+            }
+        }
+    }
+}
+
 void playerUpdate(struct Player* player) {
     struct Vector3 forward;
     struct Vector3 right;
@@ -841,6 +903,12 @@ void playerUpdate(struct Player* player) {
         }
     }
 
+
+    if (gSaveData.controls.flags & ControlSavePortalFunneling){
+        playerPortalFunnel(player);
+    }
+    
+    
     // player not moving on ground
     if ((player->flags & PlayerFlagsGrounded) && (player->body.velocity.x == 0) && (player->body.velocity.z == 0)){
         player->stepTimer = STEP_TIME;

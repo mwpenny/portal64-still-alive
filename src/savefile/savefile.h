@@ -41,6 +41,7 @@ enum ControlSaveFlags {
     ControlSaveSubtitlesEnabled = (1 << 5),
     ControlSaveAllSubtitlesEnabled = (1 << 6),
 
+    ControlSavePortalFunneling = (1 << 7),
     ControlSaveMoveablePortals = (1 << 8),
     ControlSaveWideScreen = (1 << 9),
 };

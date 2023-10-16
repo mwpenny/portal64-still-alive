@@ -57,12 +57,14 @@ void gameplayOptionsInit(struct GameplayOptions* gameplayOptions) {
 
     gameplayOptions->movingPortals = menuBuildCheckbox(&gDejaVuSansFont, "Movable Portals", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
     gameplayOptions->wideScreen = menuBuildCheckbox(&gDejaVuSansFont, "Wide Screen", GAMEPLAY_X + 8, GAMEPLAY_Y + 28);
+    gameplayOptions->portalFunnel = menuBuildCheckbox(&gDejaVuSansFont, "Portal Funneling", GAMEPLAY_X + 8, GAMEPLAY_Y + 48);
 
-    gameplayOptions->portalRenderDepthText = menuBuildText(&gDejaVuSansFont, "Portal Render Depth", GAMEPLAY_X + 8, GAMEPLAY_Y + 48);
-    gameplayOptions->portalRenderDepth = menuBuildSlider(GAMEPLAY_X + 126, GAMEPLAY_Y + 48, 126, SCROLL_TICKS);
+    gameplayOptions->portalRenderDepthText = menuBuildText(&gDejaVuSansFont, "Portal Render Depth", GAMEPLAY_X + 8, GAMEPLAY_Y + 68);
+    gameplayOptions->portalRenderDepth = menuBuildSlider(GAMEPLAY_X + 126, GAMEPLAY_Y + 68, 126, SCROLL_TICKS);
 
     gameplayOptions->movingPortals.checked = (gSaveData.controls.flags & ControlSaveMoveablePortals) != 0;
     gameplayOptions->wideScreen.checked = (gSaveData.controls.flags & ControlSaveWideScreen) != 0;
+    gameplayOptions->portalFunnel.checked = (gSaveData.controls.flags & ControlSavePortalFunneling) != 0;
     gameplayOptions->portalRenderDepth.value = (float)(gSaveData.controls.portalRenderDepth / PORTAL_RENDER_DEPTH_MAX);
     gameplayOptions->render_depth = (0xFFFF/PORTAL_RENDER_DEPTH_MAX)* gSaveData.controls.portalRenderDepth;
     gameplayOptionsHandleSlider(&gameplayOptions->render_depth, &gameplayOptions->portalRenderDepth.value);
@@ -103,7 +105,6 @@ enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions
                     gSaveData.controls.flags &= ~ControlSaveMoveablePortals;
                 }
             }
-
             break;
         case GameplayOptionWideScreen:
             if (controllerGetButtonDown(0, A_BUTTON)) {
@@ -116,11 +117,24 @@ enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions
                     gSaveData.controls.flags &= ~ControlSaveWideScreen;
                 }
             }
+            break;
+        case GameplayOptionPortalFunneling:
+            if (controllerGetButtonDown(0, A_BUTTON)) {
+                gameplayOptions->portalFunnel.checked = !gameplayOptions->portalFunnel.checked;
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL);
+
+                if (gameplayOptions->portalFunnel.checked) {
+                    gSaveData.controls.flags |= ControlSavePortalFunneling;
+                } else {
+                    gSaveData.controls.flags &= ~ControlSavePortalFunneling;
+                }
+            }
+            break;
         case GameplayOptionPortalRenderDepth:
-            
             gameplayOptionsHandleSlider(&gameplayOptions->render_depth, &gameplayOptions->portalRenderDepth.value);
             gSaveData.controls.portalRenderDepth = (int)((gameplayOptions->render_depth * (1.0f/0xFFFF) * PORTAL_RENDER_DEPTH_MAX));
             break;
+
         break;
     }
 
@@ -153,6 +167,9 @@ void gameplayOptionsRender(struct GameplayOptions* gameplayOptions, struct Rende
     gSPDisplayList(renderState->dl++, gameplayOptions->wideScreen.outline);
     renderState->dl = menuCheckboxRender(&gameplayOptions->wideScreen, renderState->dl);
 
+    gSPDisplayList(renderState->dl++, gameplayOptions->portalFunnel.outline);
+    renderState->dl = menuCheckboxRender(&gameplayOptions->portalFunnel, renderState->dl);
+
     gSPDisplayList(renderState->dl++, gameplayOptions->portalRenderDepth.back);
     renderState->dl = menuSliderRender(&gameplayOptions->portalRenderDepth, renderState->dl);
 
@@ -166,6 +183,9 @@ void gameplayOptionsRender(struct GameplayOptions* gameplayOptions, struct Rende
 
     menuSetRenderColor(renderState, gameplayOptions->selectedItem == GameplayOptionWideScreen, &gSelectionGray, &gColorWhite);
     gSPDisplayList(renderState->dl++, gameplayOptions->wideScreen.text);
+
+    menuSetRenderColor(renderState, gameplayOptions->selectedItem == GameplayOptionPortalFunneling, &gSelectionGray, &gColorWhite);
+    gSPDisplayList(renderState->dl++, gameplayOptions->portalFunnel.text);
 
     gDPPipeSync(renderState->dl++);
     menuSetRenderColor(renderState, gameplayOptions->selectedItem == GameplayOptionPortalRenderDepth, &gSelectionGray, &gColorWhite);
