@@ -266,7 +266,7 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
     struct Vector3 cameraForward;
     quatMultVector(&next->camera.transform.rotation, &gForward, &cameraForward);
 
-    next->camera.nearPlane = (-vector3Dot(&portalOffset, &cameraForward)) * SCENE_SCALE - SCENE_SCALE * PORTAL_COVER_HEIGHT_RADIUS * 0.5f;
+    next->camera.nearPlane = (-vector3Dot(&portalOffset, &cameraForward)) * SCENE_SCALE - SCENE_SCALE * PORTAL_COVER_HEIGHT_RADIUS;
 
     if (next->camera.nearPlane < current->camera.nearPlane) {
         next->camera.nearPlane = current->camera.nearPlane;
