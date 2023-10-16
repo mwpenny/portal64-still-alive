@@ -108,6 +108,7 @@ void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* veloc
     ball->rigidBody.currentRoom = startingRoom;
     ball->flags = 0;
     ball->lifetime = ballLifetime;
+    ball->originalLifetime = ballLifetime;
 
     ball->targetSpeed = sqrtf(vector3MagSqrd(&ball->rigidBody.velocity));
 
@@ -186,6 +187,10 @@ void ballInitBurn(struct Ball* ball, struct ContactManifold* manifold) {
 void ballUpdate(struct Ball* ball) {
     if (ball->targetSpeed == 0.0f || ballIsCaught(ball)) {
         return;
+    }
+
+    if (ball->rigidBody.flags & (RigidBodyFlagsCrossedPortal0 | RigidBodyFlagsCrossedPortal1)){
+        ball->lifetime = ball->originalLifetime;
     }
 
     float currentSpeed = sqrtf(vector3MagSqrd(&ball->rigidBody.velocity));
