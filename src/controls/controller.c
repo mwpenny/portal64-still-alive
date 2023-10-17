@@ -30,8 +30,6 @@ enum RumblepakState {
 };
 
 static u8 gValidControllers = 0;
-static u8 gControllerReadInProgress  = 0;
-static u8 gLastControllerQuery = ControllerEventTypeNone;
 static u8 gRumblePakState;
 static u8 gRumblePakOn;
 
@@ -39,13 +37,15 @@ static OSPfs gRumbleBackFs;
 
 static OSContStatus  gControllerStatus[MAX_PLAYERS];
 static OSContPad     gControllerData[MAX_PLAYERS];
-OSScMsg       gControllerMessage;
 static u16           gControllerLastButton[MAX_PLAYERS];
 static enum ControllerDirection gControllerLastDirection[MAX_PLAYERS];
 static int gControllerDeadFrames;
 
 OSMesgQueue gControllerMsgQ;
 OSMesg gControllerMsg;
+
+static OSMesgQueue gControllerDataQueue;
+static OSMesg gControllerDataMesg;
 
 #define REMAP_PLAYER_INDEX(index)   (index)
 // #define REMAP_PLAYER_INDEX(index)   0
@@ -62,149 +62,21 @@ int controllerIsConnected(int index) {
     return !gControllerStatus[index].errno;
 }
 
-void controllersInit(void)
-{
-    OSMesgQueue         serialMsgQ;
-    OSMesg              serialMsg;
-    s32                 i;
-
-    osCreateMesgQueue(&serialMsgQ, &serialMsg, 1);
-    osSetEventMesg(OS_EVENT_SI, &serialMsgQ, (OSMesg)1);
-
-    if((i = osContInit(&serialMsgQ, &gValidControllers, &gControllerStatus[0])) != 0)
-        return;
-
-    if (gControllerStatus[0].status == CONT_CARD_ON) {
-        gRumblePakState = RumplepakStateUninitialized;
-        gRumblePakOn = 0;
-    }
-    
-    /**** Set up message and queue, for read completion notification ****/
-    gControllerMessage.type = SIMPLE_CONTROLLER_MSG;
-    osCreateMesgQueue(&gControllerMsgQ, &gControllerMsg, 1);
-    osSetEventMesg(OS_EVENT_SI, &gControllerMsgQ, (OSMesg)&gControllerMessage);
-}
-
-void controllerQueryStatus() {
-    osContStartQuery(&gControllerMsgQ);
-    gControllerReadInProgress = 1;
-    gLastControllerQuery = ControllerEventTypeStatus;
-}
-
-int controllerHandleMessage() {
-    if (gLastControllerQuery == ControllerEventTypeData) {
-        osContGetReadData(gControllerData);
-        gControllerReadInProgress = 0;
-
-        if (gControllerDeadFrames) {
-            --gControllerDeadFrames;
-            zeroMemory(gControllerData, sizeof(gControllerData));
-        }
-
-        for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
-            if (gControllerStatus[i].errno & CONT_NO_RESPONSE_ERROR) {
-                zeroMemory(&gControllerData[i], sizeof(OSContPad));
-            }
-        }
-
-        return TRUE;
-    } else if (gLastControllerQuery == ControllerEventTypeStatus) {
-        int prevStatus = gControllerStatus[0].status;
-        gControllerReadInProgress = 0;
-
-        osContGetQuery(&gControllerStatus[0]);
-        gLastControllerQuery = ControllerEventTypeNone;
-
-        if ((prevStatus != CONT_CARD_ON && gControllerStatus[0].status == CONT_CARD_ON && gRumblePakState == RumblepakStateDisconnected) || gRumblePakState == RumplepakStateUninitialized) {
-            if (osMotorInit(&gControllerMsgQ, &gRumbleBackFs, 0) == 0) {
-                gRumblePakState = RumblepakStateInitialized;
-            } else {
-                gRumblePakState = RumblepakStateDisconnected;
-            }
-        } if (gControllerStatus[0].status != CONT_CARD_ON) {
-            gRumblePakState = RumblepakStateDisconnected;
-        }
-    }
-    
-    return FALSE;
-}
-
 u8 gRumbleFailCount;
 
-void controllersReadPendingData(void) {
-    OSMesg msg;
-    int shouldCheckStatus;
-
-    if (osRecvMesg(&gControllerMsgQ, &msg, OS_MESG_NOBLOCK) != -1) {
-        shouldCheckStatus = controllerHandleMessage();
-    } else {
-        shouldCheckStatus = FALSE;
-    }
-
-    int targetRumbleStatus = rumblePakCalculateState();
-
-    u64 timeStart = profileStart();
-
-    if (gRumblePakState == RumblepakStateInitialized) {
-        if (targetRumbleStatus != gRumblePakOn) {
-            shouldCheckStatus = FALSE;
-
-            for (int i = 0; i < 3; ++i) {
-                s32 rumbleError = targetRumbleStatus ? osMotorStart(&gRumbleBackFs) : osMotorStop(&gRumbleBackFs);
-
-                if (rumbleError == PFS_ERR_CONTRFAIL) {
-                    if (i == 2) {
-                        ++gRumbleFailCount;
-                    }
-                } else if (rumbleError != 0) {
-                    gRumblePakState = RumblepakStateDisconnected;
-                    break;
-                } else {
-                    gRumblePakOn = targetRumbleStatus;
-                    gRumbleFailCount = 0;
-                }
-            }
-        } else if (!targetRumbleStatus) {
-            osMotorStop(&gRumbleBackFs);
-        }
-    }
-
-    profileEnd(timeStart, 2);
-
-    if (gRumbleFailCount == 3) {
-        if (osMotorInit(&gControllerMsgQ, &gRumbleBackFs, 0) == 0) {
-            gRumblePakState = RumblepakStateInitialized;
-        } else {
-            gRumblePakState = RumplepakStateUninitialized;
-
-        }
-    }
-
-    if (shouldCheckStatus) {
-        controllerQueryStatus();
-    }
-}
-
-void controllersSavePreviousState(void) {
+void controllersSavePreviousState() {
     for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
         gControllerLastDirection[i] = controllerGetDirection(i);
         gControllerLastButton[i] = gControllerData[i].button;
     }
 }
 
-int controllerHasPendingMessage() {
-    return gControllerReadInProgress;
-}
-
 #define CONTROLLER_READ_SKIP_NUMBER 10
 
-void controllersTriggerRead(void) {
-    if (gValidControllers && !gControllerReadInProgress) {
-        gControllerReadInProgress = CONTROLLER_READ_SKIP_NUMBER;
-        gLastControllerQuery = ControllerEventTypeData;
-        osContStartReadData(&gControllerMsgQ);
-    } else if (gControllerReadInProgress) {
-        --gControllerReadInProgress;
+void controllersTriggerRead() {
+    OSMesg msg;
+    if (osRecvMesg(&gControllerDataQueue, &msg, OS_MESG_NOBLOCK) == 0) {
+        memCopy(&gControllerData, msg, sizeof(gControllerData));
     }
 }
 
@@ -278,4 +150,129 @@ void controllerHandlePlayback() {
         ++currentFrame;
     }
 #endif
+}
+
+static void controllerCheckRumble(int prevStatus) {
+    if ((prevStatus != CONT_CARD_ON && gControllerStatus[0].status == CONT_CARD_ON && gRumblePakState == RumblepakStateDisconnected) || gRumblePakState == RumplepakStateUninitialized) {
+        if (osMotorInit(&gControllerMsgQ, &gRumbleBackFs, 0) == 0) {
+            gRumblePakState = RumblepakStateInitialized;
+        } else {
+            gRumblePakState = RumblepakStateDisconnected;
+        }
+    } if (gControllerStatus[0].status != CONT_CARD_ON) {
+        gRumblePakState = RumblepakStateDisconnected;
+    }
+
+    int targetRumbleStatus = rumblePakCalculateState();
+
+    if (gRumblePakState == RumblepakStateInitialized) {
+        if (targetRumbleStatus != gRumblePakOn) {
+            for (int i = 0; i < 3; ++i) {
+                s32 rumbleError = targetRumbleStatus ? osMotorStart(&gRumbleBackFs) : osMotorStop(&gRumbleBackFs);
+
+                if (rumbleError == PFS_ERR_CONTRFAIL) {
+                    if (i == 2) {
+                        ++gRumbleFailCount;
+                    }
+                } else if (rumbleError != 0) {
+                    gRumblePakState = RumblepakStateDisconnected;
+                    break;
+                } else {
+                    gRumblePakOn = targetRumbleStatus;
+                    gRumbleFailCount = 0;
+                    break;
+                }
+            }
+        } else if (!targetRumbleStatus) {
+            osMotorStop(&gRumbleBackFs);
+        }
+
+        if (gRumbleFailCount >= 3) {
+            gRumbleFailCount = 0;
+            
+            if (osMotorInit(&gControllerMsgQ, &gRumbleBackFs, 0) == 0) {
+                gRumblePakState = RumblepakStateInitialized;
+            } else {
+                gRumblePakState = RumplepakStateUninitialized;
+            }
+        }
+    }
+}
+
+static void controllerThreadLoop(void* arg) {
+    OSMesgQueue         serialMsgQ;
+    OSMesg              serialMsg;
+
+    osCreateMesgQueue(&serialMsgQ, &serialMsg, 1);
+    osSetEventMesg(OS_EVENT_SI, &serialMsgQ, (OSMesg)1);
+
+    OSContPad     controllerData[MAX_PLAYERS];
+
+    for (;;) {
+        OSMesg msgRead;
+        // read the controller
+        osContStartReadData(&serialMsgQ);
+        osRecvMesg(&serialMsgQ, &msgRead, OS_MESG_BLOCK);
+        osContGetReadData(&controllerData[0]);
+
+        if (gControllerDeadFrames) {
+            --gControllerDeadFrames;
+            zeroMemory(controllerData, sizeof(controllerData));
+        }
+
+        // ingore controllers that aren't connected
+        for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
+            if (gControllerStatus[i].errno & CONT_NO_RESPONSE_ERROR) {
+                zeroMemory(&controllerData[i], sizeof(OSContPad));
+            }
+        }
+
+        // add controller data to queue and block until it is recieved
+        osSendMesg(&gControllerDataQueue, &controllerData, OS_MESG_BLOCK);
+
+        int prevStatus = gControllerStatus[0].status;
+
+        // check the controller status
+        osContStartQuery(&serialMsgQ);
+        osRecvMesg(&serialMsgQ, &msgRead, OS_MESG_BLOCK);
+        osContGetQuery(&gControllerStatus[0]);
+
+        controllerCheckRumble(prevStatus);
+    }
+}
+
+#define CONTROLLER_STACK_SIZE_BYTES 2048
+
+static OSThread controllerThread;
+static u64 controllerThreadStack[CONTROLLER_STACK_SIZE_BYTES/sizeof(u64)];
+
+void controllersInit()
+{
+    OSMesgQueue         serialMsgQ;
+    OSMesg              serialMsg;
+    s32                 i;
+
+    osCreateMesgQueue(&serialMsgQ, &serialMsg, 1);
+    osSetEventMesg(OS_EVENT_SI, &serialMsgQ, (OSMesg)1);
+
+    if((i = osContInit(&serialMsgQ, &gValidControllers, &gControllerStatus[0])) != 0)
+        return;
+
+    if (gControllerStatus[0].status == CONT_CARD_ON) {
+        gRumblePakState = RumplepakStateUninitialized;
+        gRumblePakOn = 0;
+    }
+
+    osCreateMesgQueue(&gControllerDataQueue, &gControllerDataMesg, 1);
+
+    osCreateThread(
+        &controllerThread, 
+        6, 
+        controllerThreadLoop, 
+        0, 
+        controllerThreadStack + (CONTROLLER_STACK_SIZE_BYTES/sizeof(u64)),
+        (OSPri)CONTROLLER_PRIORITY
+    );
+
+    osStartThread(&controllerThread);
 }

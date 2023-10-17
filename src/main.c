@@ -288,7 +288,5 @@ static void gameProc(void* arg) {
                 pendingGFX += 2;
                 break;
         }
-
-        controllersReadPendingData();
     }
 }
