@@ -14,8 +14,8 @@
 #define GAMEPLAY_HEIGHT 124
 #define GAMEPLAY_X      ((SCREEN_WD - GAMEPLAY_WIDTH) / 2)
 
-#define SCROLL_TICKS_VOLUME        10
-#define SCROLL_INTERVALS_VOLUME    (int)maxf((SCROLL_TICKS_VOLUME - 1), 1)
+#define SCROLL_TICKS_VOLUME        9
+#define SCROLL_INTERVALS_VOLUME    (int)maxf((SCROLL_TICKS_VOLUME-1), 1)
 #define SCROLL_CHUNK_SIZE_VOLUME   (0x10000 / SCROLL_INTERVALS_VOLUME)
 
 #define SCROLL_TICKS_SUBTITLES        (int)maxf(NUM_SUBTITLE_LANGUAGES, 1)
@@ -27,7 +27,7 @@
 #define SCROLL_CHUNK_SIZE_LANGUAGE   (0x10000 / SCROLL_INTERVALS_LANGUAGE)
 
 #define FULL_SCROLL_TIME    2.0f
-#define SCROLL_MULTIPLIER   (int)(0xFFFF * FIXED_DELTA_TIME / (80 * FULL_SCROLL_TIME))
+#define SCROLL_MULTIPLIER   (int)(0x10000 * FIXED_DELTA_TIME / (80 * FULL_SCROLL_TIME))
 
 void audioOptionsHandleSlider(short selectedItem, unsigned short* settingValue, float* sliderValue) {
 
