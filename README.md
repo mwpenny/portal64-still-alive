@@ -19,6 +19,7 @@ This project aims to reproduce Valve's original Portal, playable on the N64. [Re
 - Main/pause menus
 - Sound effects/dialogue
 - Cutscenes
+- Multi-language subtitles and audio dialogue
 - Much more!
 
 This is a community driven project that welcomes any and all game testers and or [Contributors](./CONTRIBUTING.md). 
