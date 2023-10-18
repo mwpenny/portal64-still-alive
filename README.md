@@ -1,7 +1,13 @@
 # Portal64
 ![](./assets/images/portal64_readme_logo.gif)
 
-A demake of Portal for the Nintendo 64.
+A demake *(remake for an older platform)* of Portal for the Nintendo 64.
+
+![](./assets/images/readme_slideshow.gif)
+
+Latest current progress video on Youtube:
+
+[![I fixed the portal gun, added particle effects, and more | Portal 64 0.12.0](https://img.youtube.com/vi/sAkSHzR-P7M/0.jpg)](https://www.youtube.com/watch?v=sAkSHzR-P7M)
 
 ## Overview
 
@@ -15,10 +21,9 @@ This project aims to reproduce Valve's original Portal, playable on the N64. [Re
 - Cutscenes
 - Much more!
 
-This is a community driven project that welcomes any and all game testers and or [Contributors](./CONTRIBUTING.md). Updates are constantly being made to the game, so we recommend checking out the author's [YouTube Channel](https://www.youtube.com/@happycoder1989) for the latest updates.
+This is a community driven project that welcomes any and all game testers and or [Contributors](./CONTRIBUTING.md). 
 
-![](./assets/images/readme_slideshow.gif)
-
+Updates are constantly being made to the game, so we recommend checking out the author's [YouTube Channel](https://www.youtube.com/@happycoder1989) for the latest updates.
 
 ## How to build
 
