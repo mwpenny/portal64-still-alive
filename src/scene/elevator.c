@@ -7,6 +7,7 @@
 #include "../util/time.h"
 #include "../audio/soundplayer.h"
 #include "../audio/clips.h"
+#include "../controls/rumble_pak.h"
 
 #include "../savefile/checkpoint.h"
 
@@ -111,6 +112,17 @@ void elevatorInit(struct Elevator* elevator, struct ElevatorDefinition* elevator
     dynamicSceneSetRoomFlags(elevator->dynamicId, ROOM_FLAG_FROM_INDEX(elevatorDefinition->roomIndex));
 }
 
+
+unsigned char gElevatorRumbleData[] = {
+    0xEF, 0xE9, 0xAA, 0xAA, 0xAA, 0x55
+};
+
+struct RumblePakWave gElevatorRumbleWave = {
+    .samples = gElevatorRumbleData,
+    .sampleCount = 24,
+    .samplesPerTick = 1 << 4,
+};
+
 int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
     struct Vector3 offset;
     vector3Sub(&elevator->rigidBody.transform.position, &player->lookTransform.position, &offset);
@@ -200,6 +212,7 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
             soundPlayerPlay(soundsElevatorMoving, 1.25f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             hudShowSubtitle(&gScene.hud, PORTAL_ELEVATOR_START, SubtitleTypeCaption);
             player->shakeTimer = SHAKE_DURATION;
+            rumblePakClipPlay(&gElevatorRumbleWave);
             elevator->flags |= ElevatorFlagsMovingSoundPlayed;
     }
 
