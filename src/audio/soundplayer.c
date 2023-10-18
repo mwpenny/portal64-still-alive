@@ -269,7 +269,7 @@ float soundClipDuration(int soundClipId, float pitch) {
     return soundPlayerEstimateLength(alSound, pitch);
 }
 
-void soundPlayerGameVolumeUpdate(enum SoundType type) {
+void soundPlayerGameVolumeUpdate() {
     int index = 0;
     while (index < gActiveSoundCount) {
         struct ActiveSound* sound = &gActiveSounds[index];
@@ -279,7 +279,7 @@ void soundPlayerGameVolumeUpdate(enum SoundType type) {
         }
 
         float newVolume = sound->originalVolume * gSaveData.audio.soundVolume/0xFFFF;
-        if (type == SoundTypeMusic){
+        if (sound->soundType == SoundTypeMusic){
             newVolume = newVolume* gSaveData.audio.musicVolume/0xFFFF;
         }
         

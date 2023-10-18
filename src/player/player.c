@@ -241,7 +241,10 @@ void playerApplyPortalGrab(struct Player* player, int portalIndex) {
 }
 
 void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) {
-    if (grabbing && !player->grabConstraint.object) {
+    if (grabbing && grabbing->flags & COLLISION_OBJECT_PLAYER_STANDING){
+        player->grabConstraint.object = NULL;
+    }
+    else if (grabbing && !player->grabConstraint.object) {
         pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 1.0f);
         contactSolverAddPointConstraint(&gContactSolver, &player->grabConstraint);
         hudResolvePrompt(&gScene.hud, CutscenePromptTypePickup);
