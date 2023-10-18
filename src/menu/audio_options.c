@@ -141,11 +141,11 @@ enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
     switch (audioOptions->selectedItem) {
         case AudioOptionGameVolume:
             audioOptionsHandleSlider(audioOptions->selectedItem, &gSaveData.audio.soundVolume, &audioOptions->gameVolume.value);
-            soundPlayerGameVolumeUpdate(SoundTypeAll);
+            soundPlayerGameVolumeUpdate();
             break;
         case AudioOptionMusicVolume:
             audioOptionsHandleSlider(audioOptions->selectedItem, &gSaveData.audio.musicVolume, &audioOptions->musicVolume.value);
-            soundPlayerGameVolumeUpdate(SoundTypeMusic);
+            soundPlayerGameVolumeUpdate();
             break;
         case AudioOptionSubtitlesEnabled:
             if (controllerGetButtonDown(0, A_BUTTON)) {
