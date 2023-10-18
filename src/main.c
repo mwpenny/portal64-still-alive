@@ -52,6 +52,7 @@ static OSScClient       gfxClient;
 OSSched scheduler;
 u64            scheduleStack[OS_SC_STACKSIZE/8];
 OSMesgQueue	*schedulerCommandQueue;
+u8 schedulerMode = OS_VI_NTSC_LPF1;
 
 OSPiHandle	*gPiHandle;
 
@@ -140,11 +141,10 @@ void levelLoadWithCallbacks(int levelIndex) {
     }
 }
 
-static void gameProc(void* arg) {
-    u8 schedulerMode = INTERLACED ? OS_VI_NTSC_LPF1 : OS_VI_NTSC_LPN1;
-
+int updateSchedulerModeAndGetFPS() {
     int fps = 60;
-
+    schedulerMode = INTERLACED ? OS_VI_NTSC_LPF1 : OS_VI_NTSC_LPN1;
+	
     switch (osTvType) {
 	case 0: // PAL
 		schedulerMode = HIGH_RES ? (INTERLACED ? OS_VI_PAL_HPF1 : OS_VI_PAL_HPN1) : (INTERLACED ? OS_VI_PAL_LPF1 : OS_VI_PAL_LPN1);
@@ -156,7 +156,13 @@ static void gameProc(void* arg) {
 	case 2: // MPAL
 		schedulerMode = HIGH_RES ? (INTERLACED ? OS_VI_MPAL_HPF1 : OS_VI_MPAL_HPN1) : (INTERLACED ? OS_VI_MPAL_LPF1 : OS_VI_MPAL_LPN1);
 		break;
+
     }
+    return fps;
+}
+
+static void gameProc(void* arg) {
+    int fps = updateSchedulerModeAndGetFPS();
 
     osCreateScheduler(
         &scheduler,
@@ -175,8 +181,6 @@ static void gameProc(void* arg) {
 		OS_VI_GAMMA_DITHER_OFF |
 		OS_VI_DIVOT_OFF |
 		OS_VI_DITHER_FILTER_OFF);
-
-    osViSetMode(&osViModeTable[schedulerMode]);
 	
     osViBlack(1);
 
