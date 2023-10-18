@@ -154,7 +154,7 @@ static void gameProc(void* arg) {
 		schedulerMode = HIGH_RES ? (INTERLACED ? OS_VI_NTSC_HPF1 : OS_VI_NTSC_HPN1) : (INTERLACED ? OS_VI_NTSC_LPF1 : OS_VI_NTSC_LPN1);
 		break;
 	case 2: // MPAL
-		schedulerMode = HIGH_RES ? (INTERLACED ? OS_VI_MPAL_HPF1 : OS_VI_MPAL_HPN1) : (INTERLACED OS_VI_MPAL_LPF1 ? OS_VI_MPAL_LPN1);
+		schedulerMode = HIGH_RES ? (INTERLACED ? OS_VI_MPAL_HPF1 : OS_VI_MPAL_HPN1) : (INTERLACED ? OS_VI_MPAL_LPF1 : OS_VI_MPAL_LPN1);
 		break;
     }
 
