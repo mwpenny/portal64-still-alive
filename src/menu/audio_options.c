@@ -126,6 +126,7 @@ enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
         if (audioOptions->selectedItem == AudioOptionCount) {
             audioOptions->selectedItem = 0;
         }
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (controllerDir & ControllerDirectionUp) {
@@ -134,6 +135,7 @@ enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
         } else {
             --audioOptions->selectedItem;
         }
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     switch (audioOptions->selectedItem) {

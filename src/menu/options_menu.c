@@ -8,6 +8,7 @@
 #include "../build/assets/materials/ui.h"
 
 #include "../controls/controller.h"
+#include "../build/src/audio/clips.h"
 
 
 struct Tab gOptionTabs[] = {
@@ -87,6 +88,7 @@ enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options) {
         }
 
         tabsSetSelectedTab(&options->tabs, options->tabs.selectedTab);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (menuDirection == MenuDirectionRight) {
@@ -95,6 +97,7 @@ enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options) {
         } else {
             tabsSetSelectedTab(&options->tabs, options->tabs.selectedTab + 1);
         }
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
 
     }
 

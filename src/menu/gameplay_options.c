@@ -83,6 +83,7 @@ enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions
         if (gameplayOptions->selectedItem == GameplayOptionCount) {
             gameplayOptions->selectedItem = 0;
         }
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (controllerDir & ControllerDirectionUp) {
@@ -91,6 +92,7 @@ enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions
         } else {
             --gameplayOptions->selectedItem;
         }
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     switch (gameplayOptions->selectedItem) {
