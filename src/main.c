@@ -141,22 +141,22 @@ void levelLoadWithCallbacks(int levelIndex) {
 }
 
 static void gameProc(void* arg) {
-    u8 schedulerMode = OS_VI_NTSC_LPF1;
+    u8 schedulerMode = INTERLACED ? OS_VI_NTSC_LPF1 : OS_VI_NTSC_LPN1;
 
     int fps = 60;
 
-	switch (osTvType) {
-		case 0: // PAL
-			schedulerMode = HIGH_RES ? OS_VI_PAL_HPF1 : OS_VI_PAL_LPF1;
-            fps = 50;
-			break;
-		case 1: // NTSC
-			schedulerMode = HIGH_RES ? OS_VI_NTSC_HPF1 : OS_VI_NTSC_LPF1;
-			break;
-		case 2: // MPAL
-            schedulerMode = HIGH_RES ? OS_VI_MPAL_HPF1 : OS_VI_MPAL_LPF1;
-			break;
-	}
+    switch (osTvType) {
+	case 0: // PAL
+		schedulerMode = HIGH_RES ? (INTERLACED ? OS_VI_PAL_HPF1 : OS_VI_PAL_HPN1) : (INTERLACED ? OS_VI_PAL_LPF1 : OS_VI_PAL_LPN1);
+		fps = 50;
+		break;
+	case 1: // NTSC
+		schedulerMode = HIGH_RES ? (INTERLACED ? OS_VI_NTSC_HPF1 : OS_VI_NTSC_HPN1) : (INTERLACED ? OS_VI_NTSC_LPF1 : OS_VI_NTSC_LPN1);
+		break;
+	case 2: // MPAL
+		schedulerMode = HIGH_RES ? (INTERLACED ? OS_VI_MPAL_HPF1 : OS_VI_MPAL_HPN1) : (INTERLACED OS_VI_MPAL_LPF1 ? OS_VI_MPAL_LPN1);
+		break;
+    }
 
     osCreateScheduler(
         &scheduler,
@@ -171,11 +171,13 @@ static void gameProc(void* arg) {
     osCreateMesgQueue(&gfxFrameMsgQ, gfxFrameMsgBuf, MAX_FRAME_BUFFER_MESGS);
     osScAddClient(&scheduler, &gfxClient, &gfxFrameMsgQ);
 
-	osViSetSpecialFeatures(OS_VI_GAMMA_OFF |
-			OS_VI_GAMMA_DITHER_OFF |
-			OS_VI_DIVOT_OFF |
-			OS_VI_DITHER_FILTER_OFF);
+    osViSetSpecialFeatures(OS_VI_GAMMA_OFF |
+		OS_VI_GAMMA_DITHER_OFF |
+		OS_VI_DIVOT_OFF |
+		OS_VI_DITHER_FILTER_OFF);
 
+    osViSetMode(&osViModeTable[schedulerMode]);
+	
     osViBlack(1);
 
     u32 pendingGFX = 0;
