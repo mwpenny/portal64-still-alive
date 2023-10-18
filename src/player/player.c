@@ -162,6 +162,8 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->body.transform = player->lookTransform;
 
     player->anchoredTo = NULL;
+    player->lastAnchorToPosition = gZeroVec;
+    player->lastAnchorToVelocity = gZeroVec;
 
     collisionObjectUpdateBB(&player->collisionObject);
 
@@ -531,6 +533,9 @@ struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* bl
 #define FOOTING_CAST_DISTANCE   (PLAYER_HEAD_HEIGHT + 0.2f)
 
 void playerUpdateFooting(struct Player* player, float maxStandDistance) {
+    if (player->anchoredTo){
+        player->lastAnchorToPosition = player->anchoredTo->transform.position;
+    }
     player->anchoredTo = NULL;
 
     struct Vector3 castOffset;
@@ -653,7 +658,11 @@ void playerUpdate(struct Player* player) {
     int isDead = playerIsDead(player);
 
     if (!isDead && (player->flags & PlayerFlagsGrounded) && controllerActionGet(ControllerActionJump)) {
-        player->body.velocity.y = JUMP_IMPULSE;
+        player->body.velocity.y += JUMP_IMPULSE;
+        if (!vector3IsZero(&player->lastAnchorToVelocity) && player->anchoredTo != NULL){
+            player->body.velocity.x += player->lastAnchorToVelocity.x;
+            player->body.velocity.z += player->lastAnchorToVelocity.z;
+        }
         player->flags |= PlayerJustJumped;
         hudResolvePrompt(&gScene.hud, CutscenePromptTypeJump);
     }
@@ -728,6 +737,10 @@ void playerUpdate(struct Player* player) {
     }
 
     targetVelocity.y = player->body.velocity.y;
+    if (!vector3IsZero(&player->lastAnchorToVelocity) && !(player->flags & PlayerFlagsGrounded) && !(player->anchoredTo)){
+        targetVelocity.x += player->lastAnchorToVelocity.x/FIXED_DELTA_TIME;
+        targetVelocity.z += player->lastAnchorToVelocity.z/FIXED_DELTA_TIME;
+    }
 
     float velocityDot = vector3Dot(&player->body.velocity, &targetVelocity);
     int isAccelerating = velocityDot > 0.0f;
@@ -772,6 +785,13 @@ void playerUpdate(struct Player* player) {
         transformPoint(&player->anchoredTo->transform, &player->relativeAnchor, &newAnchor);
         vector3Add(&player->body.transform.position, &newAnchor, &player->body.transform.position);
         vector3Sub(&player->body.transform.position, &player->lastAnchorPoint, &player->body.transform.position);
+    }
+
+    if (!vector3IsZero(&player->lastAnchorToPosition) && player->anchoredTo){
+        vector3Sub(&player->anchoredTo->transform.position, &player->lastAnchorToPosition, &player->lastAnchorToVelocity);
+    }
+    else if (!(player->anchoredTo) && (player->flags & PlayerFlagsGrounded)){
+        player->lastAnchorToVelocity = gZeroVec;
     }
 
     struct Box3D sweptBB = player->collisionObject.boundingBox;
