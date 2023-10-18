@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include "player.h"
+#include "player_rumble_clips.h"
 #include "../audio/clips.h"
 #include "../audio/soundplayer.h"
 #include "../controls/controller_actions.h"
@@ -452,6 +453,7 @@ void playerKill(struct Player* player, int isUnderwater) {
     // drop the portal gun
     player->flags &= ~(PlayerHasFirstPortalGun | PlayerHasSecondPortalGun);
     playerSetGrabbing(player, NULL);
+    rumblePakClipPlay(&gPlayerDieRumbleWave);
 }
 
 int playerIsDead(struct Player* player) {
@@ -831,6 +833,7 @@ void playerUpdate(struct Player* player) {
         soundPlayerPlay(soundsPortalExit[2 - didPassThroughPortal], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTALPLAYER_EXITPORTAL, SubtitleTypeCaption);
         gPlayerCollider.extendDownward = 0.0f;
+        rumblePakClipPlay(&gPlayerPassPortalWave);
     } else {
         gPlayerCollider.extendDownward = mathfMoveTowards(gPlayerCollider.extendDownward, TARGET_CAPSULE_EXTEND_HEIGHT, STAND_SPEED * FIXED_DELTA_TIME);
     }
