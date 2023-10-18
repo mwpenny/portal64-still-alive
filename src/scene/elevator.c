@@ -195,25 +195,34 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
         }
     }
 
-    if ((elevator->openAmount == 0.0f && shouldBeOpen) || (elevator->openAmount == 1.0f && !shouldBeOpen)) {
+    int isClosed = elevator->openAmount == 0.0f;
+    int isOpen = elevator->openAmount == 1.0f;
+
+    if ((isClosed && shouldBeOpen) || (isOpen && !shouldBeOpen)) {
         soundPlayerPlay(soundsElevatorDoor, 1.0f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
-        if ((elevator->openAmount == 0.0f && shouldBeOpen) && (elevator->flags & ElevatorFlagsHasHadPlayer)){
+        if ((isClosed && shouldBeOpen) && (elevator->flags & ElevatorFlagsHasHadPlayer)){
             soundPlayerPlay(soundsElevatorChime, 1.5f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             hudShowSubtitle(&gScene.hud, PORTAL_ELEVATOR_CHIME, SubtitleTypeCaption);
         }
     }
     
 
-    if ((elevator->flags & ElevatorFlagsIsLocked) && (elevator->openAmount == 0.0f) && (elevator->movingTimer > 0.0f) && !cutscenePreventingMovement){
+    if ((elevator->flags & ElevatorFlagsIsLocked) && isClosed && (elevator->movingTimer > 0.0f) && !cutscenePreventingMovement){
         elevator->movingTimer -= FIXED_DELTA_TIME;
     }
 
-    if ((elevator->flags & ElevatorFlagsIsLocked) && (elevator->openAmount == 0.0f) && !(elevator->flags & ElevatorFlagsMovingSoundPlayed) && (elevator->movingTimer <= 0.0f) && !cutscenePreventingMovement){
-            soundPlayerPlay(soundsElevatorMoving, 1.25f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
-            hudShowSubtitle(&gScene.hud, PORTAL_ELEVATOR_START, SubtitleTypeCaption);
-            player->shakeTimer = SHAKE_DURATION;
-            rumblePakClipPlay(&gElevatorRumbleWave);
-            elevator->flags |= ElevatorFlagsMovingSoundPlayed;
+    if ((elevator->flags & ElevatorFlagsIsLocked) && 
+        isClosed && 
+        !(elevator->flags & ElevatorFlagsMovingSoundPlayed) && 
+        (elevator->movingTimer <= 0.0f) && 
+        !cutscenePreventingMovement &&
+        elevator->targetElevator >= 0) {
+
+        soundPlayerPlay(soundsElevatorMoving, 1.25f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+        hudShowSubtitle(&gScene.hud, PORTAL_ELEVATOR_START, SubtitleTypeCaption);
+        player->shakeTimer = SHAKE_DURATION;
+        rumblePakClipPlay(&gElevatorRumbleWave);
+        elevator->flags |= ElevatorFlagsMovingSoundPlayed;
     }
 
     elevator->openAmount = mathfMoveTowards(elevator->openAmount, shouldBeOpen ? 1.0f : 0.0f, OPEN_SPEED * FIXED_DELTA_TIME);
