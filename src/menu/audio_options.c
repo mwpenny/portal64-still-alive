@@ -58,11 +58,13 @@ void audioOptionsHandleSlider(short selectedItem, unsigned short* settingValue, 
             newValue = newValue + chunk_size;
             newValue = newValue - (newValue % chunk_size);
         }
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (controllerGetButtonDown(0, L_JPAD)) {
         newValue = newValue - 1;
         newValue = newValue - (newValue % chunk_size);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (newValue < 0) {
