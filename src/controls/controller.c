@@ -41,9 +41,6 @@ static u16           gControllerLastButton[MAX_PLAYERS];
 static enum ControllerDirection gControllerLastDirection[MAX_PLAYERS];
 static int gControllerDeadFrames;
 
-OSMesgQueue gControllerMsgQ;
-OSMesg gControllerMsg;
-
 static OSMesgQueue gControllerDataQueue;
 static OSMesg gControllerDataMesg;
 
@@ -152,9 +149,9 @@ void controllerHandlePlayback() {
 #endif
 }
 
-static void controllerCheckRumble(int prevStatus) {
+void controllerCheckRumble(int prevStatus, OSMesgQueue* serialMsgQ) {
     if ((prevStatus != CONT_CARD_ON && gControllerStatus[0].status == CONT_CARD_ON && gRumblePakState == RumblepakStateDisconnected) || gRumblePakState == RumplepakStateUninitialized) {
-        if (osMotorInit(&gControllerMsgQ, &gRumbleBackFs, 0) == 0) {
+        if (osMotorInit(serialMsgQ, &gRumbleBackFs, 0) == 0) {
             gRumblePakState = RumblepakStateInitialized;
         } else {
             gRumblePakState = RumblepakStateDisconnected;
@@ -190,7 +187,7 @@ static void controllerCheckRumble(int prevStatus) {
         if (gRumbleFailCount >= 3) {
             gRumbleFailCount = 0;
             
-            if (osMotorInit(&gControllerMsgQ, &gRumbleBackFs, 0) == 0) {
+            if (osMotorInit(serialMsgQ, &gRumbleBackFs, 0) == 0) {
                 gRumblePakState = RumblepakStateInitialized;
             } else {
                 gRumblePakState = RumplepakStateUninitialized;
@@ -237,7 +234,7 @@ static void controllerThreadLoop(void* arg) {
         osRecvMesg(&serialMsgQ, &msgRead, OS_MESG_BLOCK);
         osContGetQuery(&gControllerStatus[0]);
 
-        controllerCheckRumble(prevStatus);
+        controllerCheckRumble(prevStatus, &serialMsgQ);
     }
 }
 

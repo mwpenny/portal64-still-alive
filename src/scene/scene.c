@@ -332,7 +332,7 @@ u8 gFireGunRumbleWaveData[] = {
 struct RumblePakWave gFireGunRumbleWave = {
     .samples = gFireGunRumbleWaveData,
     .sampleCount = 8,
-    .samplesPerTick = 1 << 5,
+    .samplesPerTick = 1 << 6,
 };
 
 void sceneCheckPortals(struct Scene* scene) {
