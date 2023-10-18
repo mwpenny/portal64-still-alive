@@ -34,7 +34,7 @@ void savefileSramSave(void* dst, void* src, int size) {
 
     OSIoMesg dmaIoMesgBuf;
 
-    // save chechpoint
+    // save checkpoint
     dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
     dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
     dmaIoMesgBuf.dramAddr = src;
@@ -92,6 +92,7 @@ void savefileNew() {
     controllerSetDefaultSource();
     gSaveData.controls.flags = 0;
     gSaveData.controls.flags |= ControlSavePortalFunneling;
+    gSaveData.controls.flags |= ControlSaveInterlacedMode;
     gSaveData.controls.sensitivity = 0x4000;
     gSaveData.controls.acceleration = 0x4000;
     gSaveData.controls.deadzone = 0x4000;

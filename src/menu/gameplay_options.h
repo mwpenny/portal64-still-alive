@@ -5,8 +5,9 @@
 #include "../graphics/graphics.h"
 
 enum GameplayOption {
-    GameplayOptionMovingPortals,
     GameplayOptionWideScreen,
+    GameplayOptionInterlacedMode,
+    GameplayOptionMovingPortals,
     GameplayOptionPortalFunneling,
     GameplayOptionPortalRenderDepth,
     
@@ -14,8 +15,9 @@ enum GameplayOption {
 };
 
 struct GameplayOptions {
-    struct MenuCheckbox movingPortals;
     struct MenuCheckbox wideScreen;
+    struct MenuCheckbox interlacedMode;
+    struct MenuCheckbox movingPortals;
     struct MenuCheckbox portalFunnel;
     struct MenuSlider portalRenderDepth;
     Gfx* portalRenderDepthText;
