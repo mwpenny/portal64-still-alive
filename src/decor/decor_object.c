@@ -149,6 +149,10 @@ enum FizzleCheckResult decorObjectUpdateFizzler(struct CollisionObject* collisio
 }
 
 int decorObjectUpdate(struct DecorObject* decorObject) {
+    if (decorObject->collisionObject.flags & COLLISION_OBJECT_PLAYER_STANDING) {
+        decorObject->collisionObject.flags &= ~COLLISION_OBJECT_PLAYER_STANDING;
+    }
+
     if (decorObject->playingSound != SOUND_ID_NONE) {
         soundPlayerUpdatePosition(
             decorObject->playingSound, 
