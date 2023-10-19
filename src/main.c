@@ -164,9 +164,14 @@ int updateSchedulerModeAndGetFPS() {
 
 void setViMode(int reload) {
     if (reload)
-      updateSchedulerModeAndGetFPS();
+        updateSchedulerModeAndGetFPS();
     
     osViSetMode(&osViModeTable[schedulerMode]);
+    
+    osViSetSpecialFeatures(OS_VI_GAMMA_OFF |
+		OS_VI_GAMMA_DITHER_OFF |
+		OS_VI_DIVOT_OFF |
+		OS_VI_DITHER_FILTER_OFF);
 }
 
 static void gameProc(void* arg) {
@@ -185,13 +190,6 @@ static void gameProc(void* arg) {
 
     osCreateMesgQueue(&gfxFrameMsgQ, gfxFrameMsgBuf, MAX_FRAME_BUFFER_MESGS);
     osScAddClient(&scheduler, &gfxClient, &gfxFrameMsgQ);
-
-    osViSetSpecialFeatures(OS_VI_GAMMA_OFF |
-		OS_VI_GAMMA_DITHER_OFF |
-		OS_VI_DIVOT_OFF |
-		OS_VI_DITHER_FILTER_OFF);
-	
-    osViBlack(1);
 
     u32 pendingGFX = 0;
     u32 drawBufferIndex = 0;
@@ -219,8 +217,10 @@ static void gameProc(void* arg) {
     portalSurfaceCleanupQueueInit();
     
     savefileLoad();
+    
     fps = updateSchedulerModeAndGetFPS();
     setViMode(0);
+    osViBlack(1);
     
     levelLoadWithCallbacks(MAIN_MENU);
     gCurrentTestSubject = 0;
