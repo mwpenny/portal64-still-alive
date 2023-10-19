@@ -30,6 +30,7 @@ void rumblePakClipInit() {
     }
 
     prev->next = NULL;
+    gFirstActiveClip = NULL;
 }
 
 RumbleID rumblePakClipPlay(struct RumblePakWave* wave) {

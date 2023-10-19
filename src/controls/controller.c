@@ -40,6 +40,7 @@ static OSContPad     gControllerData[MAX_PLAYERS];
 static u16           gControllerLastButton[MAX_PLAYERS];
 static enum ControllerDirection gControllerLastDirection[MAX_PLAYERS];
 static int gControllerDeadFrames;
+static int gTargetRumbleState;
 
 static OSMesgQueue gControllerDataQueue;
 static OSMesg gControllerDataMesg;
@@ -71,6 +72,8 @@ void controllersSavePreviousState() {
 #define CONTROLLER_READ_SKIP_NUMBER 10
 
 void controllersTriggerRead() {
+    gTargetRumbleState = rumblePakCalculateState();
+
     OSMesg msg;
     if (osRecvMesg(&gControllerDataQueue, &msg, OS_MESG_NOBLOCK) == 0) {
         memCopy(&gControllerData, msg, sizeof(gControllerData));
@@ -160,12 +163,10 @@ void controllerCheckRumble(int prevStatus, OSMesgQueue* serialMsgQ) {
         gRumblePakState = RumblepakStateDisconnected;
     }
 
-    int targetRumbleStatus = rumblePakCalculateState();
-
     if (gRumblePakState == RumblepakStateInitialized) {
-        if (targetRumbleStatus != gRumblePakOn) {
+        if (gTargetRumbleState != gRumblePakOn) {
             for (int i = 0; i < 3; ++i) {
-                s32 rumbleError = targetRumbleStatus ? osMotorStart(&gRumbleBackFs) : osMotorStop(&gRumbleBackFs);
+                s32 rumbleError = gTargetRumbleState ? osMotorStart(&gRumbleBackFs) : osMotorStop(&gRumbleBackFs);
 
                 if (rumbleError == PFS_ERR_CONTRFAIL) {
                     if (i == 2) {
@@ -175,12 +176,12 @@ void controllerCheckRumble(int prevStatus, OSMesgQueue* serialMsgQ) {
                     gRumblePakState = RumblepakStateDisconnected;
                     break;
                 } else {
-                    gRumblePakOn = targetRumbleStatus;
+                    gRumblePakOn = gTargetRumbleState;
                     gRumbleFailCount = 0;
                     break;
                 }
             }
-        } else if (!targetRumbleStatus) {
+        } else if (!gTargetRumbleState) {
             osMotorStop(&gRumbleBackFs);
         }
 

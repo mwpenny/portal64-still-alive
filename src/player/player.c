@@ -45,7 +45,7 @@ struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
 
 struct CollisionQuad gPlayerColliderFaces[8];
 
-#define TARGET_CAPSULE_EXTEND_HEIGHT   0.5f
+#define TARGET_CAPSULE_EXTEND_HEIGHT   0.45f
 
 struct CollisionCapsule gPlayerCollider = {
     0.25f,
@@ -241,7 +241,10 @@ void playerApplyPortalGrab(struct Player* player, int portalIndex) {
 }
 
 void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) {
-    if (grabbing && !player->grabConstraint.object) {
+    if (grabbing && grabbing->flags & COLLISION_OBJECT_PLAYER_STANDING){
+        player->grabConstraint.object = NULL;
+    }
+    else if (grabbing && !player->grabConstraint.object) {
         pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 1.0f);
         contactSolverAddPointConstraint(&gContactSolver, &player->grabConstraint);
         hudResolvePrompt(&gScene.hud, CutscenePromptTypePickup);
@@ -833,7 +836,6 @@ void playerUpdate(struct Player* player) {
         soundPlayerPlay(soundsPortalExit[2 - didPassThroughPortal], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTALPLAYER_EXITPORTAL, SubtitleTypeCaption);
         gPlayerCollider.extendDownward = 0.0f;
-        rumblePakClipPlay(&gPlayerPassPortalWave);
     } else {
         gPlayerCollider.extendDownward = mathfMoveTowards(gPlayerCollider.extendDownward, TARGET_CAPSULE_EXTEND_HEIGHT, STAND_SPEED * FIXED_DELTA_TIME);
     }

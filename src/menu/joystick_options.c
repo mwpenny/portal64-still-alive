@@ -60,11 +60,13 @@ void joystickOptionsHandleSlider(unsigned short* settingValue, float* sliderValu
             newValue = newValue + SCROLL_CHUNK_SIZE;
             newValue = newValue - (newValue % SCROLL_CHUNK_SIZE);
         }
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (controllerGetButtonDown(0, L_JPAD)) {
         newValue = newValue - 1;
         newValue = newValue - (newValue % SCROLL_CHUNK_SIZE);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (newValue < 0) {
@@ -92,6 +94,7 @@ enum MenuDirection joystickOptionsUpdate(struct JoystickOptions* joystickOptions
         if (joystickOptions->selectedItem == JoystickOptionCount) {
             joystickOptions->selectedItem = 0;
         }
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (controllerDir & ControllerDirectionUp) {
@@ -100,6 +103,7 @@ enum MenuDirection joystickOptionsUpdate(struct JoystickOptions* joystickOptions
         } else {
             --joystickOptions->selectedItem;
         }
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     switch (joystickOptions->selectedItem) {

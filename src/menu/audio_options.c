@@ -58,11 +58,13 @@ void audioOptionsHandleSlider(short selectedItem, unsigned short* settingValue, 
             newValue = newValue + chunk_size;
             newValue = newValue - (newValue % chunk_size);
         }
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (controllerGetButtonDown(0, L_JPAD)) {
         newValue = newValue - 1;
         newValue = newValue - (newValue % chunk_size);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (newValue < 0) {
@@ -126,6 +128,7 @@ enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
         if (audioOptions->selectedItem == AudioOptionCount) {
             audioOptions->selectedItem = 0;
         }
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (controllerDir & ControllerDirectionUp) {
@@ -134,16 +137,17 @@ enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
         } else {
             --audioOptions->selectedItem;
         }
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     switch (audioOptions->selectedItem) {
         case AudioOptionGameVolume:
             audioOptionsHandleSlider(audioOptions->selectedItem, &gSaveData.audio.soundVolume, &audioOptions->gameVolume.value);
-            soundPlayerGameVolumeUpdate(SoundTypeAll);
+            soundPlayerGameVolumeUpdate();
             break;
         case AudioOptionMusicVolume:
             audioOptionsHandleSlider(audioOptions->selectedItem, &gSaveData.audio.musicVolume, &audioOptions->musicVolume.value);
-            soundPlayerGameVolumeUpdate(SoundTypeMusic);
+            soundPlayerGameVolumeUpdate();
             break;
         case AudioOptionSubtitlesEnabled:
             if (controllerGetButtonDown(0, A_BUTTON)) {
