@@ -45,7 +45,7 @@ struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
 
 struct CollisionQuad gPlayerColliderFaces[8];
 
-#define TARGET_CAPSULE_EXTEND_HEIGHT   0.5f
+#define TARGET_CAPSULE_EXTEND_HEIGHT   0.45f
 
 struct CollisionCapsule gPlayerCollider = {
     0.25f,
