@@ -8,6 +8,8 @@
 #include "../build/assets/materials/ui.h"
 #include "../build/src/audio/clips.h"
 
+#include "../main.h"
+
 #define GAMEPLAY_Y      54
 #define GAMEPLAY_WIDTH  252
 #define GAMEPLAY_HEIGHT 124
@@ -55,17 +57,20 @@ void gameplayOptionsHandleSlider(unsigned short* settingValue, float* sliderValu
 }
 
 void gameplayOptionsInit(struct GameplayOptions* gameplayOptions) {
-    gameplayOptions->selectedItem = GameplayOptionMovingPortals;
+    gameplayOptions->selectedItem = GameplayOptionWideScreen;
+    
+    gameplayOptions->wideScreen = menuBuildCheckbox(&gDejaVuSansFont, "Wide Screen", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
+    gameplayOptions->interlacedMode = menuBuildCheckbox(&gDejaVuSansFont, "Interlaced Video", GAMEPLAY_X + 8, GAMEPLAY_Y + 28);
+    
+    gameplayOptions->movingPortals = menuBuildCheckbox(&gDejaVuSansFont, "Movable Portals", GAMEPLAY_X + 8, GAMEPLAY_Y + 48);
+    gameplayOptions->portalFunnel = menuBuildCheckbox(&gDejaVuSansFont, "Portal Funneling", GAMEPLAY_X + 8, GAMEPLAY_Y + 68);
 
-    gameplayOptions->movingPortals = menuBuildCheckbox(&gDejaVuSansFont, "Movable Portals", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
-    gameplayOptions->wideScreen = menuBuildCheckbox(&gDejaVuSansFont, "Wide Screen", GAMEPLAY_X + 8, GAMEPLAY_Y + 28);
-    gameplayOptions->portalFunnel = menuBuildCheckbox(&gDejaVuSansFont, "Portal Funneling", GAMEPLAY_X + 8, GAMEPLAY_Y + 48);
-
-    gameplayOptions->portalRenderDepthText = menuBuildText(&gDejaVuSansFont, "Portal Render Depth", GAMEPLAY_X + 8, GAMEPLAY_Y + 68);
-    gameplayOptions->portalRenderDepth = menuBuildSlider(GAMEPLAY_X + 126, GAMEPLAY_Y + 68, 126, SCROLL_TICKS);
-
-    gameplayOptions->movingPortals.checked = (gSaveData.controls.flags & ControlSaveMoveablePortals) != 0;
+    gameplayOptions->portalRenderDepthText = menuBuildText(&gDejaVuSansFont, "Portal Render Depth", GAMEPLAY_X + 8, GAMEPLAY_Y + 88);
+    gameplayOptions->portalRenderDepth = menuBuildSlider(GAMEPLAY_X + 126, GAMEPLAY_Y + 88, 126, SCROLL_TICKS);
+ 
     gameplayOptions->wideScreen.checked = (gSaveData.controls.flags & ControlSaveWideScreen) != 0;
+    gameplayOptions->interlacedMode.checked = (gSaveData.controls.flags & ControlSaveInterlacedMode) != 0;
+    gameplayOptions->movingPortals.checked = (gSaveData.controls.flags & ControlSaveMoveablePortals) != 0;
     gameplayOptions->portalFunnel.checked = (gSaveData.controls.flags & ControlSavePortalFunneling) != 0;
     gameplayOptions->portalRenderDepth.value = (float)(gSaveData.controls.portalRenderDepth / PORTAL_RENDER_DEPTH_MAX);
     gameplayOptions->render_depth = (0xFFFF/PORTAL_RENDER_DEPTH_MAX)* gSaveData.controls.portalRenderDepth;
@@ -98,18 +103,6 @@ enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions
     }
 
     switch (gameplayOptions->selectedItem) {
-        case GameplayOptionMovingPortals:
-            if (controllerGetButtonDown(0, A_BUTTON)) {
-                gameplayOptions->movingPortals.checked = !gameplayOptions->movingPortals.checked;
-                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
-
-                if (gameplayOptions->movingPortals.checked) {
-                    gSaveData.controls.flags |= ControlSaveMoveablePortals;
-                } else {
-                    gSaveData.controls.flags &= ~ControlSaveMoveablePortals;
-                }
-            }
-            break;
         case GameplayOptionWideScreen:
             if (controllerGetButtonDown(0, A_BUTTON)) {
                 gameplayOptions->wideScreen.checked = !gameplayOptions->wideScreen.checked;
@@ -119,6 +112,32 @@ enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions
                     gSaveData.controls.flags |= ControlSaveWideScreen;
                 } else {
                     gSaveData.controls.flags &= ~ControlSaveWideScreen;
+                }
+            }
+            break;
+        case GameplayOptionInterlacedMode:
+            if (controllerGetButtonDown(0, A_BUTTON)) {
+                gameplayOptions->interlacedMode.checked = !gameplayOptions->interlacedMode.checked;
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+
+                if (gameplayOptions->interlacedMode.checked) {
+                    gSaveData.controls.flags |= ControlSaveInterlacedMode;
+                } else {
+                    gSaveData.controls.flags &= ~ControlSaveInterlacedMode;
+                }
+                
+                setViMode(1);
+            }
+            break;
+        case GameplayOptionMovingPortals:
+            if (controllerGetButtonDown(0, A_BUTTON)) {
+                gameplayOptions->movingPortals.checked = !gameplayOptions->movingPortals.checked;
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+
+                if (gameplayOptions->movingPortals.checked) {
+                    gSaveData.controls.flags |= ControlSaveMoveablePortals;
+                } else {
+                    gSaveData.controls.flags &= ~ControlSaveMoveablePortals;
                 }
             }
             break;
@@ -164,12 +183,15 @@ enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions
 
 void gameplayOptionsRender(struct GameplayOptions* gameplayOptions, struct RenderState* renderState, struct GraphicsTask* task) {
     gSPDisplayList(renderState->dl++, ui_material_list[SOLID_ENV_INDEX]);
-    
-    gSPDisplayList(renderState->dl++, gameplayOptions->movingPortals.outline);
-    renderState->dl = menuCheckboxRender(&gameplayOptions->movingPortals, renderState->dl);
-    
+        
     gSPDisplayList(renderState->dl++, gameplayOptions->wideScreen.outline);
     renderState->dl = menuCheckboxRender(&gameplayOptions->wideScreen, renderState->dl);
+
+    gSPDisplayList(renderState->dl++, gameplayOptions->interlacedMode.outline);
+    renderState->dl = menuCheckboxRender(&gameplayOptions->interlacedMode, renderState->dl);
+
+    gSPDisplayList(renderState->dl++, gameplayOptions->movingPortals.outline);
+    renderState->dl = menuCheckboxRender(&gameplayOptions->movingPortals, renderState->dl);
 
     gSPDisplayList(renderState->dl++, gameplayOptions->portalFunnel.outline);
     renderState->dl = menuCheckboxRender(&gameplayOptions->portalFunnel, renderState->dl);
@@ -187,6 +209,9 @@ void gameplayOptionsRender(struct GameplayOptions* gameplayOptions, struct Rende
 
     menuSetRenderColor(renderState, gameplayOptions->selectedItem == GameplayOptionWideScreen, &gSelectionGray, &gColorWhite);
     gSPDisplayList(renderState->dl++, gameplayOptions->wideScreen.text);
+
+    menuSetRenderColor(renderState, gameplayOptions->selectedItem == GameplayOptionInterlacedMode, &gSelectionGray, &gColorWhite);
+    gSPDisplayList(renderState->dl++, gameplayOptions->interlacedMode.text);
 
     menuSetRenderColor(renderState, gameplayOptions->selectedItem == GameplayOptionPortalFunneling, &gSelectionGray, &gColorWhite);
     gSPDisplayList(renderState->dl++, gameplayOptions->portalFunnel.text);
