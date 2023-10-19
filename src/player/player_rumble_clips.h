@@ -3,7 +3,6 @@
 
 #include "../controls/rumble_pak.h"
 
-extern struct RumblePakWave gPlayerPassPortalWave;
 extern struct RumblePakWave gPlayerDieRumbleWave;
 
 #endif
