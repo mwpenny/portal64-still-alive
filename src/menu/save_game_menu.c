@@ -60,7 +60,7 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
 enum MenuDirection saveGameUpdate(struct SaveGameMenu* saveGame) {
     if (controllerGetButtonDown(0, A_BUTTON) && saveGame->savefileList->numberOfSaves) {
         Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
-        if (!cutsceneIsSoundQueued() && checkpointSaveInto(&gScene, save)) {
+        if (checkpointSaveInto(&gScene, save)) {
             savefileSaveGame(save, gScreenGrabBuffer, levelGetChamberNumber(gCurrentLevelIndex, gScene.player.body.currentRoom), gCurrentTestSubject, savefileGetSlot(saveGame->savefileList));
             saveGamePopulate(saveGame, 0);
             soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);

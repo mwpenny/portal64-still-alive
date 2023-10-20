@@ -157,7 +157,7 @@ void levelLoadLastCheckpoint() {
     gQueuedLevel = gCurrentLevelIndex;
     transformInitIdentity(&gRelativeTransform);
     gRelativeTransform.position.y = PLAYER_HEAD_HEIGHT;
-    gRelativeVelocity = gZeroVec;  
+    gRelativeVelocity = gZeroVec;
 }
 
 int levelGetQueued() {
