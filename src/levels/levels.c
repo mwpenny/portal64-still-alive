@@ -125,6 +125,7 @@ void levelLoad(int index) {
     gQueuedLevel = NO_QUEUED_LEVEL;
 
     collisionSceneInit(&gCollisionScene, gCurrentLevel->collisionQuads, gCurrentLevel->collisionQuadCount, &gCurrentLevel->world);
+    soundPlayerResume();
 }
 
 void levelQueueLoad(int index, struct Transform* relativeExitTransform, struct Vector3* relativeVelocity) {
@@ -156,7 +157,7 @@ void levelLoadLastCheckpoint() {
     gQueuedLevel = gCurrentLevelIndex;
     transformInitIdentity(&gRelativeTransform);
     gRelativeTransform.position.y = PLAYER_HEAD_HEIGHT;
-    gRelativeVelocity = gZeroVec;
+    gRelativeVelocity = gZeroVec;  
 }
 
 int levelGetQueued() {

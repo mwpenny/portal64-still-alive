@@ -491,4 +491,5 @@ void soundPlayerResume() {
             alSndpSetVol(&gSoundPlayer, (short)(32767 * activeSound->volume));
         }
     }
+    soundPlayerGameVolumeUpdate();
 }
