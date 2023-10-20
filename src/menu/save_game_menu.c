@@ -62,9 +62,11 @@ enum MenuDirection saveGameUpdate(struct SaveGameMenu* saveGame) {
         if (checkpointSaveInto(&gScene, save)) {
             savefileSaveGame(save, gScreenGrabBuffer, levelGetChamberNumber(gCurrentLevelIndex, gScene.player.body.currentRoom), gCurrentTestSubject, savefileGetSlot(saveGame->savefileList));
             saveGamePopulate(saveGame, 0);
+            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        }else{
+            soundPlayerPlay(SOUNDS_WPN_DENYSELECT, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         }
         stackMallocFree(save);
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     return savefileListUpdate(saveGame->savefileList);

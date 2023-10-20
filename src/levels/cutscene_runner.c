@@ -544,6 +544,7 @@ void cutsceneSerializeWrite(struct Serializer* serializer, SerializeAction actio
 
         while (curr) {
             action(serializer, &curr->soundId, sizeof(u16));
+            action(serializer, &curr->subtitleId, sizeof(s16));
             u8 volume = (u8)(clampf(curr->volume, 0.0f, 1.0f) * 255.0f);
             action(serializer, &volume, sizeof(volume));
             curr = curr->next;
