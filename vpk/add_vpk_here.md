@@ -2,9 +2,13 @@
 
 Copy the entire Portal folder, or create a symbolic link, in this folder
 
-`ln -s SteamLibrary\steamapps\common\Portal\ Portal`
+```
+ln -s SteamLibrary\steamapps\common\Portal\ Portal
+```
 
-- If you want multi-language support, copy `portal_sound_vo_*.vpk` files commonly found in `SteamLibrary\steamapps\common\Portal\` to this directory
+- If you want multi-language support, copy `portal_sound_vo_*.vpk` files commonly found in `SteamLibrary\steamapps\common\Portal\` to this directory.
+  (these files need to be copied, because the original Portal keeps only the files of ONE language at a time)
+
   - German:
   ```
   portal/portal_sound_vo_german_000.vpk
@@ -38,8 +42,8 @@ vpk/
   portal_sound_vo_german_dir.vpk
   portal_sound_vo_french_000.vpk
   portal_sound_vo_french_dir.vpk
-  portal/portal_sound_vo_russian_000.vpk
-  portal/portal_sound_vo_russian_dir.vpk
-  portal/portal_sound_vo_spanish_000.vpk
-  portal/portal_sound_vo_spanish_dir.vpk
+  portal_sound_vo_russian_000.vpk
+  portal_sound_vo_russian_dir.vpk
+  portal_sound_vo_spanish_000.vpk
+  portal_sound_vo_spanish_dir.vpk
 ```
