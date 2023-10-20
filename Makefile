@@ -149,10 +149,10 @@ src/models/sphere.h src/models/sphere_geo.inc.h: assets/fbx/Sphere.fbx
 ## vpk extraction
 ####################
 
-portal_pak_dir: vpk/portal_pak_dir.vpk
-	vpk -x portal_pak_dir vpk/portal_pak_dir.vpk
-	vpk -x portal_pak_dir vpk/hl2_sound_misc_dir.vpk
-	vpk -x portal_pak_dir vpk/hl2_misc_dir.vpk
+portal_pak_dir: vpk/Portal/portal/portal_pak_dir.vpk
+	vpk -x portal_pak_dir vpk/Portal/portal/portal_pak_dir.vpk
+	vpk -x portal_pak_dir vpk/Portal/hl2/hl2_sound_misc_dir.vpk
+	vpk -x portal_pak_dir vpk/Portal/hl2/hl2_misc_dir.vpk
 
 TEXTURE_SCRIPTS = $(shell find assets/ -type f -name '*.ims')
 TEXTURE_IMAGES = $(TEXTURE_SCRIPTS:assets/%.ims=portal_pak_modified/%.png) \
@@ -477,6 +477,8 @@ build/src/decor/decor_object_list.o: build/src/audio/clips.h
 ####################
 ## Subtitles
 ####################
+
+# TODO pull translations from vpk/Portal/portal/resource once the translations are loaded dynamically
 
 build/src/audio/subtitles.h build/src/audio/subtitles.c: resource/closecaption_english.txt tools/level_scripts/subtitle_generate.py 
 	@python3 tools/level_scripts/subtitle_generate.py
