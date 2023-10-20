@@ -50,14 +50,16 @@ export BLENDER_3_0="/usr/bin/blender"
 
 <br />
 
-You will need to install Python `vpk`.
+You will need to install Python `vpk`
+
 ```sh
 pip install vpk
 ```
 
 <br />
 
-Install `vtf2png`, `sfz2n64`, and setup `skeletool64`.
+Setup and install dependencies for `skeletool64`
+
 ```sh
 echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" \
     | sudo tee /etc/apt/sources.list.d/lambertjamesd.list
@@ -94,35 +96,40 @@ sudo apt install nodejs
 <br />
 
 You will need to add at least one of the following files from where Portal is installed to the folder `resource/`. You can add multiple languages if desired.
+
 ```
 portal/resource/closecaption_english.txt
 portal/resource/closecaption_<your desired language 1>.txt
 portal/resource/closecaption_<your desired language 2>.txt
 ```
 
-You then need to add the following files from where Portal is installed to the folder `vpk`. (see vpk/add_vpk_here.md  for more details!)
+You then need to add the following files from where Portal is installed to the folder `vpk/` OR create a symbolic link to the `Portal` folder there. (see [vpk/add_vpk_here.md](./vpk/add_vpk_here.md) for more details!)
+
 ```
-portal/portal_pak_000.vpk  
-portal/portal_pak_001.vpk  
-portal/portal_pak_002.vpk  
-portal/portal_pak_003.vpk  
-portal/portal_pak_004.vpk  
-portal/portal_pak_005.vpk  
-portal/portal_pak_dir.vpk
+Portal/portal/portal_pak_000.vpk  
+Portal/portal/portal_pak_001.vpk  
+Portal/portal/portal_pak_002.vpk  
+Portal/portal/portal_pak_003.vpk  
+Portal/portal/portal_pak_004.vpk
+Portal/portal/portal_pak_005.vpk  
+Portal/portal/portal_pak_dir.vpk
 
-hl2/hl2_sound_misc_000.vpk
-hl2/hl2_sound_misc_001.vpk
-hl2/hl2_sound_misc_002.vpk
-hl2/hl2_sound_misc_dir.vpk
+Portal/hl2/hl2_sound_misc_000.vpk
+Portal/hl2/hl2_sound_misc_001.vpk
+Portal/hl2/hl2_sound_misc_002.vpk
+Portal/hl2/hl2_sound_misc_dir.vpk
 
-hl/hl2_misc_000.vpk
-hl/hl2_misc_001.vpk
-hl/hl2_misc_002.vpk
-hl/hl2_misc_003.vpk
-hl/hl2_misc_dir.vpk
+Portal/hl2/hl2_misc_000.vpk
+Portal/hl2/hl2_misc_001.vpk
+Portal/hl2/hl2_misc_002.vpk
+Portal/hl2/hl2_misc_003.vpk
+Portal/hl2/hl2_misc_dir.vpk
+
+Portal/hl2/media/valve.bik
 ```
 
 Finally, run `make` to build the project.
+
 ```sh
 # Clean out any previous build files
 make clean
@@ -137,6 +144,7 @@ make fix
 ```
 
 Alternatively, you can also prepare to build with additional audio languages, like this (multiple commands per build possible):
+
 ```
 make french_audio
 make german_audio
@@ -146,11 +154,12 @@ make spanish_audio
 You still have run `make` after this.
 
 Also you can build with all audio languages integrated with this shortcut:
+
 ```
 make all_languages
 ```
 
-This requires additional *.vpk files:
+This requires additional *.vpk files copied to the folder `vpk/`:
 
 - German:
 ```
@@ -183,6 +192,7 @@ portal/portal_sound_vo_spanish_dir.vpk
 Using the docker image the only setup step you need is to populating the vpk folder. After that you can build the docker image using
 
 Build the Docker image.
+
 ```sh
 make -f Makefile.docker image
 ```
@@ -190,6 +200,7 @@ make -f Makefile.docker image
 <br />
 
 Then build the rom using
+
 ```sh
 make -f Makefile.docker
 ```
