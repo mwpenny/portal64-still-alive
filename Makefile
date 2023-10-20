@@ -203,6 +203,10 @@ portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims
 	@mkdir -p $(@D)
 	convert $< $(shell cat $(@:portal_pak_modified/%.png=assets/%.ims)) $@
 
+build/assets/images/valve.png:
+	@mkdir -p $(@D)
+	ffmpeg -ss 00:00:04 -i vpk/Portal/hl2/media/valve.bik -frames:v 1 -q:v 2 -y build/assets/images/valve-full.png
+	convert build/assets/images/valve-full.png -crop 491x369+265+202 -resize 224x168 build/assets/images/valve.png
 
 ####################
 ## Materials
@@ -216,7 +220,7 @@ build/assets/materials/ui.h build/assets/materials/ui_mat.c: assets/materials/ui
 	@mkdir -p $(@D)
 	$(SKELATOOL64) --name ui --default-material default_ui -m $< --material-output -o build/assets/materials/ui.h
 
-build/assets/materials/images.h build/assets/materials/images_mat.c: assets/materials/images.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
+build/assets/materials/images.h build/assets/materials/images_mat.c: assets/materials/images.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64) build/assets/images/valve.png
 	@mkdir -p $(@D)
 	$(SKELATOOL64) --name images --default-material default_ui -m $< --material-output -o build/assets/materials/images.h
 
@@ -327,6 +331,7 @@ build/src/menu/new_game_menu.o: build/src/audio/clips.h build/assets/materials/u
 build/src/menu/options_menu.o: build/assets/materials/ui.h
 build/src/menu/save_game_menu.o: build/src/audio/clips.h
 build/src/scene/scene_animator.o: build/src/audio/clips.h
+build/src/levels/intro.o: build/src/audio/clips.h
 build/src/menu/savefile_list.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/player/player.o: build/assets/models/player/chell.h build/assets/materials/static.h build/src/audio/subtitles.h
 build/src/scene/ball_catcher.o: build/assets/models/props/combine_ball_catcher.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
@@ -434,11 +439,16 @@ MUSIC_ATTRIBUTES = $(shell find assets/sound/music/ -type f -name '*.msox')
 
 INS_SOUNDS = $(shell find assets/ -type f -name '*.ins')
 
-SOUND_CLIPS = $(SOUND_ATTRIBUTES:%.sox=build/%.aifc) $(SOUND_JATTRIBUTES:%.jsox=build/%.aifc) $(INS_SOUNDS) $(MUSIC_ATTRIBUTES:%.msox=build/%.aifc)
+SOUND_CLIPS = $(SOUND_ATTRIBUTES:%.sox=build/%.aifc) $(SOUND_JATTRIBUTES:%.jsox=build/%.aifc) $(INS_SOUNDS) $(MUSIC_ATTRIBUTES:%.msox=build/%.aifc) build/assets/sound/music/valve.aifc
 
 $(INS_SOUNDS): portal_pak_dir
 
 portal_pak_dir/sound/music/%.wav: portal_pak_dir/sound/music/%.mp3
+
+build/assets/sound/music/valve.aifc:
+	@mkdir -p $(@D)
+	ffmpeg -i vpk/Portal/hl2/media/valve.bik -vn -ac 1 -ar 22050 -y build/assets/sound/music/valve.wav
+	$(SFZ2N64) -o $@ build/assets/sound/music/valve.wav
 
 build/assets/sound/vehicles/tank_turret_loop1.wav: portal_pak_dir
 	@mkdir -p $(@D)

@@ -45,6 +45,7 @@ RUN apt update -y && \
     liblua5.4-dev \
     liblua5.4-0 \
     mpg123 \
+    ffmpeg \
     wget
 
 RUN mkdir /opt/blender

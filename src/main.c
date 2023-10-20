@@ -17,6 +17,7 @@
 #include "scene/portal_surface.h"
 #include "sk64/skelatool_defs.h"
 #include "levels/cutscene_runner.h"
+#include "levels/intro.h"
 #include "savefile/savefile.h"
 #include "sk64/skelatool_animator.h"
 #include "util/dynamic_asset_loader.h"
@@ -97,6 +98,7 @@ static void initProc(void* arg) {
 
 struct Scene gScene;
 struct GameMenu gGameMenu;
+struct Intro gIntro;
 
 extern OSMesgQueue dmaMessageQ;
 
@@ -128,10 +130,19 @@ struct SceneCallbacks gMainMenuCallbacks = {
     .updateCallback = (UpdateCallback)&mainMenuUpdate,
 };
 
+struct SceneCallbacks gIntroCallbacks = {
+    .data = &gIntro,
+    .initCallback = (InitCallback)&introInit,
+    .graphicsCallback = (GraphicsCallback)&introRender,
+    .updateCallback = (UpdateCallback)&introUpdate,
+};
+
 struct SceneCallbacks* gSceneCallbacks = &gTestChamberCallbacks;
 
 void levelLoadWithCallbacks(int levelIndex) {
-    if (levelIndex == MAIN_MENU) {
+    if (levelIndex == INTRO_MENU) {
+        gSceneCallbacks = &gIntroCallbacks;
+    } else if (levelIndex == MAIN_MENU) {
         levelLoad(0);
         gSceneCallbacks = &gMainMenuCallbacks;
     } else {
@@ -222,7 +233,7 @@ static void gameProc(void* arg) {
     setViMode(0);
     osViBlack(1);
     
-    levelLoadWithCallbacks(MAIN_MENU);
+    levelLoadWithCallbacks(INTRO_MENU);
     gCurrentTestSubject = 0;
     cutsceneRunnerReset();
     controllersInit();

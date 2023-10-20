@@ -33,3 +33,6 @@ materials:
   chapter11:
     gDPSetTile: 
       filename: "../../portal_pak_modified/materials/vgui/chapters/chapter11.png"
+  valve:
+    gDPSetTile:
+      filename: "../../build/assets/images/valve.png"

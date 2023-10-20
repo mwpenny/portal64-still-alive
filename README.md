@@ -62,7 +62,7 @@ Install `vtf2png`, `sfz2n64`, and setup `skeletool64`.
 echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" \
     | sudo tee /etc/apt/sources.list.d/lambertjamesd.list
 sudo apt update
-sudo apt install vtf2png sfz2n64 mpg123 sox imagemagick unzip
+sudo apt install vtf2png sfz2n64 mpg123 sox imagemagick unzip ffmpeg
 ```
 
 <br />
