@@ -218,6 +218,7 @@ void playerHandleCollision(struct Player* player) {
 
         if ((contact->shapeA == &player->collisionObject) == (relativeVelocity > 0.0f)) {
             vector3ProjectPlane(&player->body.velocity, &contact->normal, &player->body.velocity);
+            playerHandleLandingRumble(relativeVelocity);
         }
 
         if (collisionObjectIsGrabbable(contact->shapeA) || collisionObjectIsGrabbable(contact->shapeB)) {
@@ -578,6 +579,7 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
     if (penetration < 0.0f) {
         vector3AddScaled(&player->body.transform.position, &gUp, MIN(-penetration, maxStandDistance), &player->body.transform.position);
         if (player->body.velocity.y < 0.0f) {
+            playerHandleLandingRumble(-player->body.velocity.y);
             player->body.velocity.y = 0.0f;
         }
 
