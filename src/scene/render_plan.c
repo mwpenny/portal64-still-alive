@@ -475,6 +475,8 @@ void renderPlanBuild(struct RenderPlan* renderPlan, struct Scene* scene, struct 
 #define MIN_FOG_DISTANCE 1.0f
 #define MAX_FOG_DISTANCE 2.5f
 
+extern LookAt gLookAt;
+
 void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* staticTransforms, struct RenderState* renderState) {
     struct DynamicRenderDataList* dynamicList = dynamicRenderListNew(renderState, MAX_DYNAMIC_SCENE_OBJECTS);
 
@@ -509,6 +511,23 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* 
         }
         
         gSPFogPosition(renderState->dl++, fogMin, fogMax);
+
+        // this lookat calcuation only takes into account 
+        // the direction of the camera. A better approach would
+        // be to take into account the direction towards each
+        // reflective object from the camera. fixing this could
+        // come later
+        LookAt* lookAt = renderStateRequestLookAt(renderState);
+        *lookAt = gLookAt;
+        struct Vector3 cameraForward;
+        quatMultVector(&current->camera.transform.rotation, &gForward, &cameraForward);
+        vector3Negate(&cameraForward, &cameraForward);
+        vector3ToVector3u8(&cameraForward, (struct Vector3u8*)&gLookAt.l[0].l.dir);
+
+        quatMultVector(&current->camera.transform.rotation, &gUp, &cameraForward);
+        vector3Negate(&cameraForward, &cameraForward);
+        vector3ToVector3u8(&cameraForward, (struct Vector3u8*)&gLookAt.l[1].l.dir);
+        gSPLookAt(renderState->dl++, lookAt);
 
         int portalIndex = (current->portalRenderType & PORTAL_RENDER_TYPE_SECOND_CLOSER) ? 1 : 0;
         

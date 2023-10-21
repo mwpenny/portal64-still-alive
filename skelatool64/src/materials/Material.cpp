@@ -61,7 +61,9 @@ VertexType Material::GetVertexType(Material* material) {
         return VertexType::PosUVNormal;
     }
 
-    if (material->mState.geometryModes.knownFlags & material->mState.geometryModes.flags & (int)GeometryMode::G_LIGHTING) {
+    if (material->mState.geometryModes.knownFlags & 
+        material->mState.geometryModes.flags & 
+        ((int)GeometryMode::G_LIGHTING | (int)GeometryMode::G_TEXTURE_GEN)) {
         return convertNormalSourceToVertexType(material->mNormalSource);
     }
 

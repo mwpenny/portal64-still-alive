@@ -196,6 +196,10 @@ materials:
       color: ["TEXEL0", "PRIMITIVE", "SHADE_ALPHA", "PRIMITIVE"]
     gDPSetCycleType: G_CYC_1CYCLE
 
+    gSPTexture:
+      sc: 1984
+      tc: 1984
+
     gDPSetPrimColor:
       r: 217
       g: 71
