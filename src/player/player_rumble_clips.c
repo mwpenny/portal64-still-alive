@@ -12,6 +12,16 @@ struct RumblePakWave gPlayerDieRumbleWave = {
     .samplesPerTick = 1 << 5,
 };
 
+unsigned char gPlayerClosePortalRumbleData[] = {
+    0xFF, 0xEE,
+};
+
+struct RumblePakWave gPlayerClosePortalRumble = {
+    .samples = gPlayerClosePortalRumbleData,
+    .sampleCount = 8,
+    .samplesPerTick = 1 << 5,
+};
+
 unsigned char gPlayerLandSoftData[] = {
     0xFE, 0x90,
 };

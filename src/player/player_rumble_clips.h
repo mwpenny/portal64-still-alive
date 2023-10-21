@@ -5,6 +5,8 @@
 
 extern struct RumblePakWave gPlayerDieRumbleWave;
 
+extern struct RumblePakWave gPlayerClosePortalRumble;
+
 void playerHandleLandingRumble(float velocityChange);
 
 #endif

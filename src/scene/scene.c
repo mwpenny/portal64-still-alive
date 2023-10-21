@@ -32,6 +32,7 @@
 #include "../menu/game_menu.h"
 #include "../effects/effect_definitions.h"
 #include "../controls/rumble_pak.h"
+#include "../player/player_rumble_clips.h"
 
 extern struct GameMenu gGameMenu;
 
@@ -410,13 +411,19 @@ void sceneCheckPortals(struct Scene* scene) {
     hudUpdatePortalIndicators(&scene->hud, &raycastRay, &playerUp);
 
     if (scene->player.body.flags & RigidBodyFizzled) {
+        int didClose = 0;
+
         if (scene->portals[0].flags & PortalFlagsPlayerPortal) {
-            sceneClosePortal(scene, 0);
+            didClose |= sceneClosePortal(scene, 0);
         }
         if (scene->portals[1].flags & PortalFlagsPlayerPortal) {
-            sceneClosePortal(scene, 1);
+            didClose |= sceneClosePortal(scene, 1);
         }
         scene->player.body.flags &= ~RigidBodyFizzled;
+
+        if (didClose) {
+            rumblePakClipPlay(&gPlayerClosePortalRumble);
+        }
     }
 
     int isOpen = collisionSceneIsPortalOpen();
@@ -981,7 +988,7 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
     return 1;
 }
 
-void sceneClosePortal(struct Scene* scene, int portalIndex) {
+int sceneClosePortal(struct Scene* scene, int portalIndex) {
     if (gCollisionScene.portalTransforms[portalIndex]) {
         soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position, &gZeroVec, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTAL_FIZZLE_MOVED, SubtitleTypeCaption);
@@ -991,5 +998,8 @@ void sceneClosePortal(struct Scene* scene, int portalIndex) {
         scene->portals[portalIndex].transformIndex = NO_TRANSFORM_INDEX;
 
         collisionSceneRemoveDynamicObject(&scene->portals[portalIndex].collisionObject);
+        return 1;
     }
+
+    return 0;
 }

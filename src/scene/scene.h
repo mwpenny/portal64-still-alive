@@ -100,6 +100,6 @@ void sceneQueueCheckpoint(struct Scene* scene);
 
 int sceneOpenPortalFromHit(struct Scene* scene, struct Ray* ray, struct RaycastHit* hit, struct Vector3* playerUp, int portalIndex, int roomIndex, int fromPlayer, int just_checking);
 int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex, int fromPlayer, int just_checking);
-void sceneClosePortal(struct Scene* scene, int portalIndex);
+int sceneClosePortal(struct Scene* scene, int portalIndex);
 
 #endif
