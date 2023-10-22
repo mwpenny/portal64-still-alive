@@ -23,6 +23,7 @@ void rumblePakClipInit();
 RumbleID rumblePakClipPlay(struct RumblePakWave* wave);
 int rumblePakClipIsActive(RumbleID clip);
 void rumblePakClipStop(RumbleID clip);
+void rumblePakSetPaused(int paused);
 
 int rumblePakCalculateState();
 

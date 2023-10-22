@@ -100,6 +100,7 @@ void sceneInit(struct Scene* scene) {
 
 void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     signalsInit(1);
+    rumblePakSetPaused(0);
 
     cameraInit(&scene->camera, 70.0f, DEFAULT_NEAR_PLANE * SCENE_SCALE, DEFAULT_FAR_PLANE * SCENE_SCALE);
 
@@ -554,6 +555,7 @@ void sceneUpdate(struct Scene* scene) {
 
         if (gGameMenu.state == GameMenuStateResumeGame) {
             soundPlayerResume();
+            rumblePakSetPaused(0);
         }
 
         if (gGameMenu.state == GameMenuStateQuit) {
@@ -567,6 +569,7 @@ void sceneUpdate(struct Scene* scene) {
         gGameMenu.state = GameMenuStateLanding;
         gGameMenu.landingMenu.selectedItem = 0;
         soundPlayerPause();
+        rumblePakSetPaused(1);
     }
 
     effectsUpdate(&scene->effects);

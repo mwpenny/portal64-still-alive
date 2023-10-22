@@ -9,6 +9,7 @@ struct RumblePakClip gClips[MAX_ACTIVE_RUMBLE];
 struct RumblePakClip* gFirstActiveClip = NULL;
 struct RumblePakClip* gFirstIdleClip = NULL;
 RumbleID gNextRumbleId = 1;
+u8 gRumbleIsPaused = 0;
 
 void rumblePakClipInit() {
     struct RumblePakClip* prev = NULL;
@@ -105,9 +106,17 @@ void rumblePakClipStop(RumbleID clipId) {
     
 }
 
+void rumblePakSetPaused(int paused) {
+    gRumbleIsPaused = paused;
+}
+
 int gRumbleCurrentBit = 0;
 
 int rumblePakCalculateState() {
+    if (gRumbleIsPaused) {
+        return 0;
+    }
+
     int amplitude = 0;
 
     struct RumblePakClip* curr = gFirstActiveClip;
