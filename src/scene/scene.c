@@ -306,9 +306,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     // contactSolverDebugDraw(&gContactSolver, renderState);
 
-    if (scene->portalGun.portalGunVisible){
-        portalGunRenderReal(&scene->portalGun, renderState, &scene->camera);
-    }
+    portalGunRenderReal(&scene->portalGun, renderState, &scene->camera, scene->portalGun.portalGunVisible);
 
     gDPPipeSync(renderState->dl++);
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);

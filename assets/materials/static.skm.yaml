@@ -1180,10 +1180,11 @@ materials:
       
     gDPSetRenderMode: 
       flags:
+        - Z_CMP
         - IM_RD
         - CVG_DST_FULL
         - FORCE_BL
-        - ZMODE_OPA
+        - ZMODE_XLU
       blend:
         - G_BL_CLR_IN
         - G_BL_A_IN
@@ -1194,8 +1195,8 @@ materials:
       color: ["1", "PRIMITIVE", "TEXEL0", "PRIMITIVE"]
       alpha: ["TEXEL0", "PRIMITIVE", "SHADE", "0"]
     gSPGeometryMode:
-      clear: [G_CULL_BACK, G_CULL_FRONT, G_ZBUFFER]
-      set: [G_FOG]
+      clear: [G_CULL_BACK, G_CULL_FRONT]
+      set: [G_FOG, G_ZBUFFER]
 
   lab_monitor_screen_text:
     gDPSetTile: 

@@ -114,7 +114,7 @@ void portalBallRender(struct PortalGunProjectile* projectile, struct RenderState
     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
 }
 
-void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera) {
+void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera, int portalGunVisible) {
     struct MaterialState materialState;
     materialStateInit(&materialState, DEFAULT_INDEX);
     
@@ -128,6 +128,10 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
         }
 
         portalBallRender(projectile, renderState, &materialState, &fromCamera->transform, i);
+    }
+
+    if (!portalGunVisible) {
+        return;
     }
 
     portalGun->rigidBody.transform.scale = gOneVec;
@@ -267,6 +271,24 @@ void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray
 
     portalTrailPlay(&projectile->trail, &fireFrom, &hit.at);
 }
+
+
+void portalGunFireWorld(struct PortalGun* portalGun, int portalIndex, struct Vector3* from, struct Vector3* to, int roomIndex) {
+    struct PortalGunProjectile* projectile = &portalGun->projectiles[portalIndex];
+    vector3Sub(to, from, &projectile->positionDirection.dir);
+    vector3Normalize(&projectile->positionDirection.dir, &projectile->positionDirection.dir);
+    projectile->positionDirection.origin = *from;
+    projectile->roomIndex = roomIndex;
+    projectile->playerUp = gUp;
+
+    projectile->distance = 0.0f;
+    projectile->maxDistance = sqrtf(vector3DistSqrd(from, to));
+
+    projectile->effectOffset = gZeroVec;
+
+    portalTrailPlay(&projectile->trail, from, to);
+}
+
 int portalGunIsFiring(struct PortalGun* portalGun){
     if (portalGun->shootTotalAnimationTimer > 0.0f){
         return 1;

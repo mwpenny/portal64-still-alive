@@ -90,7 +90,8 @@ struct CutsceneStep {
         } waitForChannel;
         struct {
             u16 locationIndex;
-            u16 portalIndex;
+            u8 portalIndex;
+            u8 fromPedestal;
         } openPortal;
         struct {
             u16 portalIndex;

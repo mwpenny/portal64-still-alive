@@ -120,6 +120,7 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
         result.openPortal = {
             find_location_index(step.args[1]),
             step.args[2] == "1" and 1 or 0,
+            step.args[3] == "pedestal" and 1 or 0
         }
     elseif step.command == "close_portal" and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeClosePortal')

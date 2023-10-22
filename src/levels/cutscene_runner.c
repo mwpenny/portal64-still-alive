@@ -7,8 +7,21 @@
 #include "../util/memory.h"
 #include "../savefile/checkpoint.h"
 #include "../locales/locales.h"
+#include "../controls/rumble_pak.h"
 
 #include <math.h>
+
+unsigned char gPortalOpenRumbleData[] = {
+    0xFF, 0xE9, 0x99,
+};
+
+struct RumblePakWave gPortalOpenRumbleWave = {
+    .samples = gPortalOpenRumbleData,
+    .sampleCount = 12,
+    .samplesPerTick = 1 << 5,
+};
+
+#define RUMBLE_PLAYER_DISTANCE  8.0f
 
 struct CutsceneRunner* gRunningCutscenes;
 struct CutsceneRunner* gUnusedRunners;
@@ -154,14 +167,26 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         case CutsceneStepTypeOpenPortal:
         {
             struct Location* location = &gCurrentLevel->locations[step->openPortal.locationIndex];
-            struct Ray firingRay;
-            struct Vector3 transformUp;
-            firingRay.origin = location->transform.position;
-            quatMultVector(&location->transform.rotation, &gForward, &firingRay.dir);
-            quatMultVector(&location->transform.rotation, &gRight, &transformUp);
-            vector3Negate(&transformUp, &transformUp);
-            vector3AddScaled(&location->transform.position, &firingRay.dir, -0.1f, &firingRay.origin);
-            sceneFirePortal(&gScene, &firingRay, &transformUp, step->openPortal.portalIndex, location->roomIndex, 0, 0);
+
+            if (step->openPortal.fromPedestal && gCurrentLevel->pedestalCount) {
+                struct Vector3 fireFrom = gScene.pedestals[0].transform.position;
+                fireFrom.y += 0.75f;
+                portalGunFireWorld(&gScene.portalGun, step->openPortal.portalIndex, &fireFrom, &location->transform.position, gScene.pedestals[0].roomIndex);
+            } else {
+                struct Ray firingRay;
+                struct Vector3 transformUp;
+                firingRay.origin = location->transform.position;
+                quatMultVector(&location->transform.rotation, &gForward, &firingRay.dir);
+                quatMultVector(&location->transform.rotation, &gRight, &transformUp);
+                vector3Negate(&transformUp, &transformUp);
+                vector3AddScaled(&location->transform.position, &firingRay.dir, -0.1f, &firingRay.origin);
+                sceneFirePortal(&gScene, &firingRay, &transformUp, step->openPortal.portalIndex, location->roomIndex, 0, 0);
+
+                if (vector3DistSqrd(&location->transform.position, &gScene.player.lookTransform.position) < RUMBLE_PLAYER_DISTANCE * RUMBLE_PLAYER_DISTANCE) {
+                    gScene.player.shakeTimer = 0.5f;
+                    rumblePakClipPlay(&gPortalOpenRumbleWave);
+                }
+            }
             break;
         }
         case CutsceneStepTypeClosePortal:

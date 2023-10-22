@@ -262,18 +262,17 @@ void playerShakeUpdate(struct Player* player) {
     if (player->shakeTimer > 0.0f){
         player->shakeTimer -= FIXED_DELTA_TIME;
 
-        float max = SHAKE_DISTANCE;
-        float min = -SHAKE_DISTANCE;
-        float x;
-        x = ((float)rand()/(float)(RAND_MAX));
-        x = min + x * ( max - min );
-        player->lookTransform.position.x += x;
-        x = ((float)rand()/(float)(RAND_MAX));
-        x = min + x * ( max - min );
-        player->lookTransform.position.y += x;
-        x = ((float)rand()/(float)(RAND_MAX));
-        x = min + x * ( max - min );
-        player->lookTransform.position.z += x;
+        float magnitude = 1.0f;
+
+        if (player->shakeTimer < 1.0f) {
+            magnitude = player->shakeTimer;
+        }
+
+        float max = SHAKE_DISTANCE * magnitude;
+        float min = -SHAKE_DISTANCE * magnitude;
+        player->lookTransform.position.x += randomInRangef(min, max);
+        player->lookTransform.position.y += randomInRangef(min, max);
+        player->lookTransform.position.z += randomInRangef(min, max);
 
         if (player->shakeTimer < 0.0f){
             player->shakeTimer = 0.0f;
