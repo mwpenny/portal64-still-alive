@@ -13,7 +13,7 @@ struct RumblePakWave gPlayerDieRumbleWave = {
 };
 
 unsigned char gPlayerClosePortalRumbleData[] = {
-    0xFF, 0xEE,
+    0xAA, 0x99,
 };
 
 struct RumblePakWave gPlayerClosePortalRumble = {

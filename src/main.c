@@ -233,7 +233,7 @@ static void gameProc(void* arg) {
     setViMode(0);
     osViBlack(1);
     
-    levelLoadWithCallbacks(3);
+    levelLoadWithCallbacks(INTRO_MENU);
     gCurrentTestSubject = 0;
     cutsceneRunnerReset();
     controllersInit();

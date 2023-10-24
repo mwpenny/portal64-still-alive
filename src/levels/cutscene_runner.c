@@ -12,12 +12,12 @@
 #include <math.h>
 
 unsigned char gPortalOpenRumbleData[] = {
-    0xFF, 0xE9, 0x99,
+    0xFA, 0xA9,
 };
 
 struct RumblePakWave gPortalOpenRumbleWave = {
     .samples = gPortalOpenRumbleData,
-    .sampleCount = 12,
+    .sampleCount = 8,
     .samplesPerTick = 1 << 5,
 };
 
@@ -139,6 +139,38 @@ void cutsceneQueueSound(int soundId, float volume, int channel, int subtitleId) 
 float cutsceneRunnerConvertPlaybackSpeed(s8 asInt) {
     return asInt * (1.0f / 127.0f);
 }
+
+unsigned char gCutsceneRumbleSoftData[] = {
+    0xAA, 0x90,
+};
+
+unsigned char gCutsceneRumbleMediumData[] = {
+    0xAA, 0xA9, 0x90,
+};
+
+unsigned char gCutsceneRumbleHardData[] = {
+    0xFF, 0xAA, 0xAA, 0x99
+};
+
+#define CUTSCENE_RUMBLE_CLIP_COUNT   3
+
+struct RumblePakWave gCutsceneRumbleWaves[CUTSCENE_RUMBLE_CLIP_COUNT] = {
+    {
+        .samples = gCutsceneRumbleSoftData,
+        .sampleCount = 6,
+        .samplesPerTick = 1 << 5,
+    },
+    {
+        .samples = gCutsceneRumbleMediumData,
+        .sampleCount = 10,
+        .samplesPerTick = 1 << 5,
+    },
+    {
+        .samples = gCutsceneRumbleHardData,
+        .sampleCount = 16,
+        .samplesPerTick = 1 << 5,
+    },
+};
 
 void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
     struct CutsceneStep* step = &runner->currentCutscene->steps[runner->currentStep];
@@ -273,6 +305,9 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             break;
         case CutsceneStepKillPlayer:
             playerKill(&gScene.player, step->killPlayer.isWater);
+            break;
+        case CutsceneStepRumble:
+            rumblePakClipPlay(&gCutsceneRumbleWaves[step->rumble.rumbleLevel]);
             break;
         default:
     }
