@@ -34,6 +34,8 @@ cutscenes:
     - play_animation tilt tilt
   START_1:
     - q_sound 07_PART2_ENTRY_1 CH_GLADOS PORTAL_07_PART2_ENTRY_1
+    - delay 1
+    - rumble 0
     - wait_for_signal weeeee
     - q_sound 07_PART2_SUCCESS_1 CH_GLADOS PORTAL_07_PART2_SUCCESS_1
   portal_loop:

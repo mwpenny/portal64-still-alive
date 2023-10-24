@@ -232,6 +232,11 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
         result.showPrompt = {
             sk_definition_writer.raw(step.args[1]),
         }
+    elseif step.command == "rumble" then
+        result.type = sk_definition_writer.raw('CutsceneStepRumble')
+        result.rumble = {
+            tonumber(step.args[1]),
+        }
     else
         error("Unrecognized cutscene step " .. step.command)
         result.type = sk_definition_writer.raw('CutsceneStepTypeNoop')

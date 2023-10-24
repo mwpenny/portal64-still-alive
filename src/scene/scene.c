@@ -602,6 +602,10 @@ void sceneUpdate(struct Scene* scene) {
 
     scene->decorCount = decorWriteIndex;
 
+    for (int i = 0; i < scene->clockCount; ++i) {
+        clockUpdate(&scene->clocks[i]);
+    }
+
     for (int i = 0; i < scene->securityCameraCount; ++i) {
         securityCameraUpdate(&scene->securityCameras[i]);
     }

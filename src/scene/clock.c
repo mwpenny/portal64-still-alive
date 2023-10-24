@@ -7,6 +7,7 @@
 #include "../levels/cutscene_runner.h"
 #include "../build/assets/models/signage/clock_digits.h"
 #include "../util/memory.h"
+#include "../util/time.h"
 
 #include "../build/assets/models/dynamic_model_list.h"
 
@@ -80,13 +81,7 @@ void clockRenderRender(void* data, struct DynamicRenderDataList* renderList, str
         return;
     }
 
-    float time = 0.0f;
-
-    if (clock->cutsceneIndex != -1) {
-        time = cutsceneEstimateTimeLeft(&gCurrentLevel->cutscenes[clock->cutsceneIndex]);
-    }
-
-    clockSetTime(time);    
+    clockSetTime(clock->timeLeft);    
 
     transformToMatrixL(&clock->transform, matrix, SCENE_SCALE);
 
@@ -117,7 +112,7 @@ void clockInit(struct Clock* clock, struct ClockDefinition* definition) {
     clock->transform.rotation = definition->rotation;
     clock->transform.scale = gOneVec;
     clock->roomIndex = definition->roomIndex;
-    clock->cutsceneIndex = definition->cutsceneIndex;
+    clock->timeLeft = definition->duration;
 
     int dynamicId = dynamicSceneAdd(clock, clockRenderRender, &clock->transform.position, 0.8f);
     dynamicSceneSetRoomFlags(dynamicId, ROOM_FLAG_FROM_INDEX(clock->roomIndex));
@@ -126,5 +121,11 @@ void clockInit(struct Clock* clock, struct ClockDefinition* definition) {
 }
 
 void clockUpdate(struct Clock* clock) {
-    
+    if (clock->timeLeft > 0.0f) {
+        clock->timeLeft -= FIXED_DELTA_TIME;
+
+        if (clock->timeLeft < 0.0f) {
+            clock->timeLeft = 0.0f;
+        }
+    }
 }

@@ -230,7 +230,7 @@ for _, clock_element in pairs(sk_scene.nodes_for_type('@clock')) do
         position,
         rotation,
         room_index,
-        trigger.find_cutscene_index(clock_element.arguments[1]),
+        tonumber(clock_element.arguments[1]),
     })
 end
 

@@ -21,6 +21,8 @@ cutscenes:
     - q_sound SOUNDS_00_PART1_ENTRY_7 CH_GLADOS PORTAL_00_PART1_ENTRY_7
     - delay 7
     - show_prompt CutscenePromptTypeNone
+    - delay 22.75
+    - rumble 1
     - wait_for_channel CH_GLADOS
     - open_portal portal_room 0
     - open_portal room_exit 1

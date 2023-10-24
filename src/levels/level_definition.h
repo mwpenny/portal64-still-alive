@@ -287,7 +287,7 @@ struct ClockDefinition {
     struct Vector3 position;
     struct Quaternion rotation;
     short roomIndex;
-    short cutsceneIndex;
+    float duration;
 };
 
 struct SecurityCameraDefinition {
