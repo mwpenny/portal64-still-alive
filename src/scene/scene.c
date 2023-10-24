@@ -127,7 +127,6 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_1) {
         playerGivePortalGun(&scene->player, PlayerHasSecondPortalGun);
     }
-        playerGivePortalGun(&scene->player, PlayerHasSecondPortalGun);
 
     portalInit(&scene->portals[0], 0);
     portalInit(&scene->portals[1], PortalFlagsOddParity);
