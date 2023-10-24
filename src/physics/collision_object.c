@@ -5,6 +5,8 @@
 #include "collision_scene.h"
 #include "../math/mathf.h"
 #include "mesh_collider.h"
+#include "../player/player_rumble_clips.h"
+
 // 0x807572ac
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers) {
     object->collider = collider;
@@ -108,6 +110,16 @@ void collisionObjectHandleSweptCollision(struct CollisionObject* object, struct 
     if (velocityDot < 0.0f) {
         vector3AddScaled(&object->body->velocity, normal, (1 + restitution) * -velocityDot, &object->body->velocity);
         vector3AddScaled(&object->body->transform.position, normal, -0.01f, &object->body->transform.position);
+
+        // I don't love that player specific code
+        // is in the general collision code but 
+        // that is how it is for now
+        // a better general solution may be to allow any
+        // object to determine if it had any impacts
+        // and respond dynamically
+        if (object->body->flags & RigidBodyIsPlayer) {
+            playerHandleLandingRumble(-velocityDot);
+        }
     }
 }
 
