@@ -227,7 +227,7 @@ That will generate the rom at `/build/portal64.z64`
 
 ## Current New Sounds TODO List
 - [ ] Box collision sounds
-- [ ] Ambient background loop
+- [x] Ambient background loop
 - [x] Unstationary scaffolding moving sound
 
 ## Current Bug TODO List (Hardware Verified) (High->Low priority)
