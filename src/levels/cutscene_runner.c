@@ -44,6 +44,7 @@ ALSndId gCutsceneCurrentSound[CH_COUNT];
 
 float gCutsceneChannelPitch[CH_COUNT] = {
     [CH_GLADOS] = 0.5f,
+    [CH_MUSIC] = 0.5f,
 };
 
 void cutsceneRunnerCancel(struct CutsceneRunner* runner);
@@ -455,20 +456,29 @@ float cutsceneSoundQueueTime(int channel) {
 
 void cutscenesUpdateSounds() {
     for (int i = 0; i < CH_COUNT; ++i) {
+        int soundType = SoundTypeNone;
+        int subtitleType = SubtitleTypeNone; 
+        if (i == CH_GLADOS){
+            soundType = SoundTypeAll;
+            subtitleType = SubtitleTypeCloseCaption; 
+        }else if (i == CH_MUSIC){
+            soundType = SoundTypeMusic;
+        }
+
         if (!soundPlayerIsPlaying(gCutsceneCurrentSound[i])) {
             if (gCutsceneSoundQueues[i]) {
                 struct QueuedSound* curr = gCutsceneSoundQueues[i];
 
-                gCutsceneCurrentSound[i] = soundPlayerPlay(curr->soundId, curr->volume, gCutsceneChannelPitch[i], NULL, NULL, SoundTypeAll);
-                hudShowSubtitle(&gScene.hud, curr->subtitleId, SubtitleTypeCloseCaption);
+                gCutsceneCurrentSound[i] = soundPlayerPlay(curr->soundId, curr->volume, gCutsceneChannelPitch[i], NULL, NULL, soundType);
+                hudShowSubtitle(&gScene.hud, curr->subtitleId, subtitleType);
 
                 gCutsceneSoundQueues[i] = curr->next;
 
                 curr->next = gCutsceneNextFreeSound;
                 gCutsceneNextFreeSound = curr;
             } else {
-                if (gCutsceneCurrentSound[i] != SOUND_ID_NONE) {
-                    soundPlayerPlay(soundsIntercom[1], 1.0f, gCutsceneChannelPitch[i], NULL, NULL, SoundTypeAll);
+                if (gCutsceneCurrentSound[i] != SOUND_ID_NONE && i == CH_GLADOS) {
+                    soundPlayerPlay(soundsIntercom[1], 1.0f, gCutsceneChannelPitch[i], NULL, NULL, soundType);
                     hudResolveSubtitle(&gScene.hud);
                 }
 
@@ -646,7 +656,7 @@ void cutsceneSerializeRead(struct Serializer* serializer) {
 }
 
 void cutsceneQueueSoundInChannel(int soundId, float volume, int channel, int subtitleId) {
-    if (!gCutsceneSoundQueues[channel] && !soundPlayerIsPlaying(gCutsceneCurrentSound[channel])) {
+    if (!gCutsceneSoundQueues[channel] && !soundPlayerIsPlaying(gCutsceneCurrentSound[channel]) && channel == CH_GLADOS) {
         cutsceneQueueSound(soundsIntercom[0], volume, channel, subtitleId);
     }
 
@@ -656,7 +666,7 @@ void cutsceneQueueSoundInChannel(int soundId, float volume, int channel, int sub
 int cutsceneIsSoundQueued(){
     int soundQueued = 0;
     for (int i = 0; i < CH_COUNT; ++i) {
-        if(gCutsceneSoundQueues[i] != NULL || gCutsceneCurrentSound[i] != SOUND_ID_NONE){
+        if((gCutsceneSoundQueues[i] != NULL || gCutsceneCurrentSound[i] != SOUND_ID_NONE) && (i == CH_GLADOS)){
             soundQueued = 1;
             break;
         }

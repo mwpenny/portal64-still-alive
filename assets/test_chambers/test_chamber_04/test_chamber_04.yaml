@@ -3,6 +3,8 @@ cutscenes:
     - q_sound SOUNDS_04_PART1_SUCCESS_1 CH_GLADOS PORTAL_04_PART1_SUCCESS_1
   INTRO_CUTSCENE:
     - q_sound SOUNDS_04_PART1_ENTRY_1 CH_GLADOS PORTAL_04_PART1_ENTRY_1
+    - wait_for_channel CH_GLADOS
+    - q_sound PORTAL_PROCEDURAL_JIGGLE_BONE CH_MUSIC SubtitleKeyNone
   DROWN_PLAYER:
     - kill_player water
   OPEN_PORTAL:
