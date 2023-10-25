@@ -698,6 +698,10 @@ void collisionSceneCollideDynamicPairs(struct CollisionScene* collisionScene, st
 }
 
 int collisionSceneObjectIsTouchingPortal(struct CollisionObject* object, int portalIndex) {
+    if (!gCollisionScene.portalTransforms[portalIndex]) {
+        return 0;
+    }
+    
     struct Simplex simplex;
     struct Vector3 direction;
     quatMultVector(&gCollisionScene.portalTransforms[portalIndex]->rotation, &gRight, &direction);
