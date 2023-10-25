@@ -49,11 +49,11 @@ RUN apt update -y && \
     wget
 
 RUN mkdir /opt/blender
-RUN wget -P /opt/blender https://download.blender.org/release/Blender3.0/blender-3.0.0-linux-x64.tar.xz
+RUN wget -P /opt/blender https://download.blender.org/release/Blender3.6/blender-3.6.1-linux-x64.tar.xz
 
-RUN tar -xf /opt/blender/blender-3.0.0-linux-x64.tar.xz -C /opt/blender
-RUN rm /opt/blender/blender-3.0.0-linux-x64.tar.xz
+RUN tar -xf /opt/blender/blender-3.6.1-linux-x64.tar.xz -C /opt/blender
+RUN rm /opt/blender/blender-3.6.1-linux-x64.tar.xz
 
-ENV BLENDER_3_0 /opt/blender/blender-3.0.0-linux-x64/blender
+ENV BLENDER_3_6 /opt/blender/blender-3.6.1-linux-x64/blender
 
 RUN pip install vpk

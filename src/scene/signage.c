@@ -38,16 +38,16 @@ void signageSetSmallDigit(Vtx* vertices, int nextDigit, int currentDigit) {
 }
 
 Vtx* gWarningVertices[] = {
-    props_signage_signage_num00_warn_0_color,
-    props_signage_signage_num00_warn_1_color,
-    props_signage_signage_num00_warn_2_color,
-    props_signage_signage_num00_warn_3_color,
-    props_signage_signage_num00_warn_4_color,
-    props_signage_signage_num00_warn_5_color,
-    props_signage_signage_num00_warn_6_color,
-    props_signage_signage_num00_warn_7_color,
-    props_signage_signage_num00_warn_8_color,
-    props_signage_signage_num00_warn_9_color,
+    props_signage_signage_num00_001_warn_0_color,
+    props_signage_signage_num00_001_warn_1_color,
+    props_signage_signage_num00_001_warn_2_color,
+    props_signage_signage_num00_001_warn_3_color,
+    props_signage_signage_num00_001_warn_4_color,
+    props_signage_signage_num00_001_warn_5_color,
+    props_signage_signage_num00_001_warn_6_color,
+    props_signage_signage_num00_001_warn_7_color,
+    props_signage_signage_num00_001_warn_8_color,
+    props_signage_signage_num00_001_warn_9_color,
 };
 
 enum LevelWarnings {
@@ -113,10 +113,10 @@ void signageCheckIndex(int neededIndex) {
         int oneDigit = neededIndex - tenDigit * 10;
         
         gCurrentSignageIndex = neededIndex;
-        signageSetLargeDigit(props_signage_signage_num00_digit_0_color, oneDigit, prevOneDigit);
-        signageSetLargeDigit(props_signage_signage_num00_digit_10_color, tenDigit, prevTenDigit);
-        signageSetSmallDigit(props_signage_signage_num00_sdigit_0_color, oneDigit, prevOneDigit);
-        signageSetSmallDigit(props_signage_signage_num00_sdigit_10_color, tenDigit, prevTenDigit);
+        signageSetLargeDigit(props_signage_signage_num00_001_digit_0_color, oneDigit, prevOneDigit);
+        signageSetLargeDigit(props_signage_signage_num00_001_digit_10_color, tenDigit, prevTenDigit);
+        signageSetSmallDigit(props_signage_signage_num00_001_sdigit_0_color, oneDigit, prevOneDigit);
+        signageSetSmallDigit(props_signage_signage_num00_001_sdigit_10_color, tenDigit, prevTenDigit);
 
         signageSetWarnings(gLevelWarnings[neededIndex]);
 }
