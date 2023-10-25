@@ -36,7 +36,7 @@ After installing modern sdk you will want to also install
 sudo apt install libnustd
 ```
 
-Next, you will need to download Blender 3.0 or higher. Then set the environment variable `BLENDER_3_0` to be the absolute path where the Blender executable is located on your system.
+Next, you will need to download Blender 3.6.1 or higher. Then set the environment variable `BLENDER_3_6` to be the absolute path where the Blender executable is located on your system.
 
 ```sh
 sudo apt install blender
@@ -45,7 +45,7 @@ sudo apt install blender
 e.g. add this to your ~/.bashrc
 
 ```bash
-export BLENDER_3_0="/usr/bin/blender"
+export BLENDER_3_6="/usr/bin/blender"
 ```
 
 <br />
