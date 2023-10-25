@@ -13,6 +13,8 @@ cutscenes:
     - rumble 2
     - delay 2
     - open_portal first_room_portal 0
+    - wait_for_channel CH_GLADOS
+    - q_sound PORTAL_SELF_ESTEEM_FUND CH_MUSIC SubtitleKeyNone
   OPEN_FIRST_DOOR:
     - set_signal room_0_exit
   SECOND_SUCCESS:

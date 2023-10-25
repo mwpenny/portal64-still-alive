@@ -9,6 +9,7 @@ cutscenes:
     - q_sound SOUNDS_01_PART1_ENTRY_1 CH_GLADOS PORTAL_01_PART1_ENTRY_1
     - q_sound SOUNDS_01_PART1_ENTRY_2 CH_GLADOS PORTAL_01_PART1_ENTRY_2
     - wait_for_channel CH_GLADOS
+    - q_sound PORTAL_TASTE_OF_BLOOD CH_MUSIC SubtitleKeyNone
     - set_signal room_0_entrance
   GET_GUN:
     - close_portal 1
