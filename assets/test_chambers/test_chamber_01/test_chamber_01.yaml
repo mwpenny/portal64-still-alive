@@ -2,6 +2,7 @@ operators:
   []
 cutscenes:
   START:
+    - play_sound AMBIENCE_BASE 0.2 0.5
     - delay 1
     - start_cutscene portal_loop
     - set_signal FIRST_ELEVATOR

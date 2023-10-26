@@ -454,6 +454,10 @@ build/assets/sound/vehicles/tank_turret_loop1.wav: portal_pak_dir
 	@mkdir -p $(@D)
 	sox portal_pak_dir/sound/vehicles/tank_turret_loop1.wav -b 16 $@
 
+build/assets/sound/ambient/atmosphere/ambience_base.wav: portal_pak_dir
+	@mkdir -p $(@D)
+	sox portal_pak_dir/sound/ambient/atmosphere/ambience_base.wav -c 1 -r 22050 $@
+
 build/%.aifc: %.sox portal_pak_dir
 	@mkdir -p $(@D)
 	sox $(<:assets/%.sox=portal_pak_dir/%.wav) $(shell cat $<) $(@:%.aifc=%.wav)
@@ -470,7 +474,7 @@ build/%.aifc: %.msox portal_pak_dir
 	sox $(<:assets/%.msox=portal_pak_dir/%.wav) $(shell cat $<) $(@:%.aifc=%.wav)
 	$(SFZ2N64) -o $@ $(@:%.aifc=%.wav)
 
-build/assets/sound/sounds.sounds build/assets/sound/sounds.sounds.tbl: $(SOUND_CLIPS) build/assets/sound/vehicles/tank_turret_loop1.wav
+build/assets/sound/sounds.sounds build/assets/sound/sounds.sounds.tbl: $(SOUND_CLIPS) build/assets/sound/vehicles/tank_turret_loop1.wav build/assets/sound/ambient/atmosphere/ambience_base.wav
 	@mkdir -p $(@D)
 	$(SFZ2N64) -o $@ $^
 

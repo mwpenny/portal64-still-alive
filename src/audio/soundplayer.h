@@ -39,6 +39,7 @@ void soundPlayerUpdatePosition(ALSndId soundId, struct Vector3* at, struct Vecto
 void soundPlayerAdjustVolume(ALSndId soundId, float newVolume);
 
 int soundPlayerIsPlaying(ALSndId soundId);
+int soundPlayerIsLoopedById(int soundId);
 float soundPlayerTimeLeft(ALSndId soundId);
 
 void soundListenerUpdate(struct Vector3* position, struct Quaternion* rotation, struct Vector3* velocity, int listenerIndex);

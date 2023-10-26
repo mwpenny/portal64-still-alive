@@ -2,6 +2,7 @@ operators:
   []
 cutscenes:
   INTRO_CUTSCENE:
+    - play_sound AMBIENCE_BASE 0.2 0.5
     - set_signal cube_dropper
     - open_portal portal_0 0
     - q_sound SOUNDS_05_PART1_ENTRY_1 CH_GLADOS PORTAL_05_PART1_ENTRY_1

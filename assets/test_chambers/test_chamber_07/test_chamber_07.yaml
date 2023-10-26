@@ -21,6 +21,7 @@ cutscenes:
   DROWN_PLAYER:
     - kill_player water
   START:
+    - play_sound AMBIENCE_BASE 0.2 0.5
     - delay 1
     - start_cutscene portal_loop
     - start_cutscene platform_ferry

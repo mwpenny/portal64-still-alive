@@ -447,6 +447,20 @@ int soundPlayerIsPlaying(ALSndId soundId) {
     return activeSound->estimatedTimeLeft > 0.0f && alSndpGetState(&gSoundPlayer) != AL_STOPPED;
 }
 
+int soundPlayerIsLoopedById(int soundId){
+    struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
+
+    if (!activeSound) {
+        return 0;
+    }
+
+    if (activeSound->flags & SOUND_FLAGS_LOOPING){
+        return 1;
+    }
+
+    return 0;
+}
+
 float soundPlayerTimeLeft(ALSndId soundId) {
     struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
 
