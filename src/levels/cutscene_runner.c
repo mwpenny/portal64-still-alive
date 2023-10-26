@@ -322,7 +322,7 @@ int cutsceneRunnerUpdateCurrentStep(struct CutsceneRunner* runner) {
     struct CutsceneStep* step = &runner->currentCutscene->steps[runner->currentStep];
     switch (step->type) {
         case CutsceneStepTypePlaySound:
-            return !soundPlayerIsPlaying(runner->state.playSound.soundId);
+            return soundPlayerIsLoopedById(runner->state.playSound.soundId) || !soundPlayerIsPlaying(runner->state.playSound.soundId);
         case CutsceneStepTypeWaitForChannel:
         {
             int result = !cutsceneRunnerIsChannelPlaying(step->waitForChannel.channel);
