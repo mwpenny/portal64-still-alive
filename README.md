@@ -211,10 +211,10 @@ That will generate the rom at `/build/portal64.z64`
 <br />
 
 ## Current New Feature TODO List
-- [ ] figure out why portals somtimes are in front of window
 - [ ] optimize static culling
 - [ ] jump animation
 - [ ] pausing while glados is speaking can end her speech early
+- [x] figure out why portals somtimes are in front of window
 - [x] portal hole cutting problems
 - [x] crashed when dying in test chamber 05 when hit by pellet in mid air while touching a portal
 - [x] rumble pak support

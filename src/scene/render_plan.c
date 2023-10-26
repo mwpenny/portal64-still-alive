@@ -25,33 +25,6 @@
 #define ASPECT_SD 1.333333333333333    //  4:3
 #define ASPECT_WIDE 1.777777777777778  // 16:9
 
-void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex) {
-    props->camera = *camera;
-    props->aspectRatio = aspectRatio;
-
-    cameraSetupMatrices(camera, renderState, aspectRatio, &fullscreenViewport, 1, &props->cameraMatrixInfo);
-
-    props->viewport = &fullscreenViewport;
-    props->currentDepth = gSaveData.controls.portalRenderDepth;
-    props->exitPortalIndex = NO_PORTAL;
-    props->fromRoom = roomIndex;
-    props->parentStageIndex = -1;
-
-    props->clippingPortalIndex = -1;
-
-    props->minX = 0;
-    props->minY = 0;
-    props->maxX = SCREEN_WD;
-    props->maxY = SCREEN_HT;
-
-    props->previousProperties = NULL;
-    props->nextProperites[0] = NULL;
-    props->nextProperites[1] = NULL;
-
-    props->portalRenderType = 0;
-    props->visiblerooms = 0;
-}
-
 void renderPropscheckViewportSize(int* min, int* max, int screenSize) {
     if (*max < MIN_VP_WIDTH) {
         *max = MIN_VP_WIDTH;
@@ -108,6 +81,34 @@ Vp* renderPropsBuildViewport(struct RenderProps* props, struct RenderState* rend
     viewport->vp.vtrans[3] = 0;
 
     return viewport;
+}
+
+void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex) {
+    props->camera = *camera;
+    props->aspectRatio = aspectRatio;
+
+    cameraSetupMatrices(camera, renderState, aspectRatio, &fullscreenViewport, 1, &props->cameraMatrixInfo);
+
+    props->currentDepth = gSaveData.controls.portalRenderDepth;
+    props->exitPortalIndex = NO_PORTAL;
+    props->fromRoom = roomIndex;
+    props->parentStageIndex = -1;
+
+    props->clippingPortalIndex = -1;
+
+    props->minX = 0;
+    props->minY = 0;
+    props->maxX = SCREEN_WD;
+    props->maxY = SCREEN_HT;
+
+    props->viewport = renderPropsBuildViewport(props, renderState);
+
+    props->previousProperties = NULL;
+    props->nextProperites[0] = NULL;
+    props->nextProperites[1] = NULL;
+
+    props->portalRenderType = 0;
+    props->visiblerooms = 0;
 }
 
 void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderProps* properties, struct RenderState* renderState);

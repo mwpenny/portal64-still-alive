@@ -1141,7 +1141,7 @@ materials:
       fmt: G_IM_FMT_RGBA
       siz: G_IM_SIZ_32b
       
-    gDPSetRenderMode: G_RM_XLU_SURF
+    gDPSetRenderMode: G_RM_ZB_XLU_SURF
 
     gDPSetCombineMode:
       color: ["0", "0", "0", "TEXEL0"]
@@ -1160,7 +1160,7 @@ materials:
       t:
         shift: 1
       
-    gDPSetRenderMode: G_RM_XLU_SURF
+    gDPSetRenderMode: G_RM_ZB_XLU_SURF
 
     gDPSetCombineMode:
       color: ["1", "PRIMITIVE", "TEXEL0_ALPHA", "PRIMITIVE"]
