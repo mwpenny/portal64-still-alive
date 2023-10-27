@@ -2,7 +2,7 @@ operators:
   []
 cutscenes:
   START:
-    - play_sound AMBIENCE_BASE 0.2 0.5
+    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
     - delay 1
     - start_cutscene portal_loop
     - set_signal FIRST_ELEVATOR

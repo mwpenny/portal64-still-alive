@@ -17,7 +17,7 @@ cutscenes:
     - wait_for_signal horizontal_activiate 2
     - q_sound 03_PART2_PLATFORM_ACTIVATED_1 CH_GLADOS PORTAL_03_PART2_PLATFORM_ACTIVATED_1
   INTRO:
-    - play_sound AMBIENCE_BASE 0.2 0.5
+    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
     - save_checkpoint 0
     - open_portal ground_portal 0
     - q_sound SOUNDS_03_PART1_ENTRY_1 CH_GLADOS PORTAL_03_PART1_ENTRY_1

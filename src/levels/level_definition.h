@@ -69,8 +69,9 @@ enum CutscenePromptType {
 #define CH_NONE    0xFF
 #define CH_GLADOS  0
 #define CH_MUSIC   1
+#define CH_AMBIENT 2
 
-#define CH_COUNT   2
+#define CH_COUNT   3
 
 struct CutsceneStep {
     enum CutsceneStepType type;
