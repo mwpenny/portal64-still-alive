@@ -28,6 +28,10 @@ int worldCheckDoorwayCrossings(struct World* world, struct Vector3* position, in
     for (int i = 0; i < room->doorwayCount; ++i) {
         struct Doorway* doorway = &world->doorways[room->doorwayIndices[i]];
 
+        // extend the door plane a bit further to guarantee objects make contact
+        doorway->quad.edgeALength += 1.0f;
+        doorway->quad.edgeBLength += 1.0f;
+
         int prevSide = (sideMask & (1 << i)) != 0;
         int currSide = planePointDistance(&doorway->quad.plane, position) > 0;
 
