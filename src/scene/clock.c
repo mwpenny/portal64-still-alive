@@ -21,11 +21,11 @@
 
 u8 gCurrentClockDigits[5];
 Vtx* gClockDigits[] = {
-    signage_clock_digits_clock_digits_001_minute_01_color,
-    signage_clock_digits_clock_digits_001_second_10_color,
-    signage_clock_digits_clock_digits_001_second_01_color,
-    signage_clock_digits_clock_digits_001_ms_10_color,
-    signage_clock_digits_clock_digits_001_ms_01_color,
+    signage_clock_digits_clock_digits_minute_01_color,
+    signage_clock_digits_clock_digits_second_10_color,
+    signage_clock_digits_clock_digits_second_01_color,
+    signage_clock_digits_clock_digits_ms_10_color,
+    signage_clock_digits_clock_digits_ms_01_color,
 };
 
 void clockSetDigit(int digitIndex, int currDigit) {
