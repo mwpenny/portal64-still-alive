@@ -33,6 +33,10 @@ for doorway_index, doorway in pairs(sk_scene.nodes_for_type('@doorway')) do
     table.insert(room_doorways[room_a + 1], doorway_index - 1)
     table.insert(room_doorways[room_b + 1], doorway_index - 1)
 
+    quad.corner = quad.corner + (-0.5 * quad.edgeA + -0.5 * quad.edgeB)
+    quad.edgeALength = quad.edgeALength + 1.0
+    quad.edgeBLength = quad.edgeBLength + 1.0
+
     table.insert(doorways, {
         quad,
         room_a,
