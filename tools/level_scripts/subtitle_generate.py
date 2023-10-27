@@ -109,11 +109,25 @@ def make_SubtitleKey_headerlines(keys):
 def make_subtitle_for_language(lang_lines, lang_name):
     lines = []
 
+    idx = 1
+
+    lines.append("\n")
+
+    for value in lang_lines:
+        lines.append(f'char __translation_{lang_name}_{idx}[] = "{value}";\n')
+        idx = idx + 1
+
     lines.append("\n")
     lines.append(f"char* gSubtitle{lang_name}[508] = {'{'}\n")
 
+    # SubtitleKeyNone
+    lines.append('    "",\n')
+
+    idx = 1
+
     for value in lang_lines:
-        lines.append(f'    "{value}",\n')
+        lines.append(f'    __translation_{lang_name}_{idx},\n')
+        idx = idx + 1
 
     lines.append("};\n")
 
@@ -178,6 +192,7 @@ def process_all_closecaption_files(dir, language_names):
     language_list = []
     language_with_values_list = []
     SubtitleKey_generated = False
+    key_order = {}
 
     for langauge_name in language_names:
         filename = f"closecaption_{langauge_name}.txt"

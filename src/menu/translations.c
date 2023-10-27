@@ -5,7 +5,9 @@
 
 #include "../build/src/audio/subtitles.h"
 
+char* gLoadedLanugageBlock = NULL;
 char** gCurrentTranslations = NULL;
+int gCurrentLoadedLanguage = 0;
 
 void translationsLoad(int language) {
     if (NUM_SUBTITLE_LANGUAGES == 0) {
@@ -24,18 +26,23 @@ void translationsLoad(int language) {
     struct SubtitleBlock* block = &SubtitleLanguageBlocks[language];
 
     int blockSize = (int)block->romEnd - (int)block->romStart;
-    char* blockStart = malloc(blockSize);
-    romCopy(block->romStart, blockStart, blockSize);
+    gLoadedLanugageBlock = malloc(blockSize);
+    romCopy(block->romStart, gLoadedLanugageBlock, blockSize);
 
-    gCurrentTranslations = CALC_RAM_POINTER(block->values, blockStart);
+    gCurrentTranslations = CALC_RAM_POINTER(block->values, gLoadedLanugageBlock);
+    gCurrentLoadedLanguage = language;
 
     for (int i = 0; i < NUM_SUBTITLE_MESSAGES; ++i) {
-        gCurrentTranslations[i] = CALC_RAM_POINTER(gCurrentTranslations[i], blockStart);
+        gCurrentTranslations[i] = CALC_RAM_POINTER(gCurrentTranslations[i], gLoadedLanugageBlock);
     }
 }
 
 void translationsReload(int language) {
-    free(gCurrentTranslations);
+    if (language == gCurrentLoadedLanguage) {
+        return;
+    }
+
+    free(gLoadedLanugageBlock);
     translationsLoad(language);
 }
 
