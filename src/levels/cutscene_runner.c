@@ -41,10 +41,15 @@ struct QueuedSound* gCutsceneNextFreeSound;
 
 struct QueuedSound* gCutsceneSoundQueues[CH_COUNT];
 ALSndId gCutsceneCurrentSound[CH_COUNT];
+u16 gCutsceneCurrentSoundId[CH_COUNT];
+u16 gCutsceneCurrentSubtitleId[CH_COUNT];
+float   gCutsceneCurrentVolume[CH_COUNT];
+
 
 float gCutsceneChannelPitch[CH_COUNT] = {
     [CH_GLADOS] = 0.5f,
     [CH_MUSIC] = 0.5f,
+    [CH_AMBIENT] = 0.5f
 };
 
 void cutsceneRunnerCancel(struct CutsceneRunner* runner);
@@ -62,6 +67,9 @@ void cutsceneRunnerReset() {
     for (int i = 0; i < CH_COUNT; ++i) {
         gCutsceneSoundQueues[i] = NULL;
         gCutsceneCurrentSound[i] = SOUND_ID_NONE;
+        gCutsceneCurrentSoundId[i] = SOUND_ID_NONE;
+        gCutsceneCurrentSubtitleId[i] = SubtitleKeyNone;
+        gCutsceneCurrentVolume[i] = 0.0f;
     }
 
     struct CutsceneRunner* current = gRunningCutscenes;
@@ -463,6 +471,8 @@ void cutscenesUpdateSounds() {
             subtitleType = SubtitleTypeCloseCaption; 
         }else if (i == CH_MUSIC){
             soundType = SoundTypeMusic;
+        }else if (i == CH_AMBIENT){
+            soundType = SoundTypeAll;
         }
 
         if (!soundPlayerIsPlaying(gCutsceneCurrentSound[i])) {
@@ -470,7 +480,12 @@ void cutscenesUpdateSounds() {
                 struct QueuedSound* curr = gCutsceneSoundQueues[i];
 
                 gCutsceneCurrentSound[i] = soundPlayerPlay(curr->soundId, curr->volume, gCutsceneChannelPitch[i], NULL, NULL, soundType);
-                hudShowSubtitle(&gScene.hud, curr->subtitleId, subtitleType);
+                gCutsceneCurrentSoundId[i] = curr->soundId;
+                gCutsceneCurrentSubtitleId[i] = curr->subtitleId;
+                gCutsceneCurrentVolume[i] = curr->volume;
+                if (curr->subtitleId != SubtitleKeyNone){
+                    hudShowSubtitle(&gScene.hud, curr->subtitleId, subtitleType);
+                }
 
                 gCutsceneSoundQueues[i] = curr->next;
 
@@ -483,6 +498,9 @@ void cutscenesUpdateSounds() {
                 }
 
                 gCutsceneCurrentSound[i] = SOUND_ID_NONE;
+                gCutsceneCurrentSoundId[i] = SOUND_ID_NONE;
+                gCutsceneCurrentSubtitleId[i] = SubtitleKeyNone;
+                gCutsceneCurrentVolume[i] = 0.0f;
             }
         }
     }
@@ -610,6 +628,20 @@ void cutsceneSerializeWrite(struct Serializer* serializer, SerializeAction actio
     action(serializer, &gTriggeredCutscenes, sizeof(gTriggeredCutscenes));
 
     for (int i = 0; i < CH_COUNT; ++i) {
+        s16 curr = gCutsceneCurrentSound[i];
+        action(serializer, &curr, sizeof(curr));
+
+        u16 currId = gCutsceneCurrentSoundId[i];
+        action(serializer, &currId, sizeof(currId));
+
+        u16 subtitleId = gCutsceneCurrentSubtitleId[i];
+        action(serializer, &subtitleId, sizeof(subtitleId));
+
+        u8 volume = (u8)(clampf(gCutsceneCurrentVolume[i], 0.0f, 1.0f) * 255.0f);
+        action(serializer, &volume, sizeof(volume));
+    }
+
+    for (int i = 0; i < CH_COUNT; ++i) {
         struct QueuedSound* curr = gCutsceneSoundQueues[i];
 
         while (curr) {
@@ -638,6 +670,27 @@ void cutsceneSerializeRead(struct Serializer* serializer) {
     }
 
     serializeRead(serializer, &gTriggeredCutscenes, sizeof (gTriggeredCutscenes));
+
+    for (int i = 0; i < CH_COUNT; ++i) {
+        s16 curr;
+        serializeRead(serializer, &curr, sizeof(curr));
+        gCutsceneCurrentSound[i] = curr;
+
+        u16 currId;
+        serializeRead(serializer, &currId, sizeof(currId));
+        gCutsceneCurrentSoundId[i] = currId;
+
+        u16 subtitleId;
+        serializeRead(serializer, &subtitleId, sizeof(subtitleId));
+        gCutsceneCurrentSubtitleId[i] = subtitleId;
+
+        u8 volume;
+        serializeRead(serializer, &volume, sizeof(volume));
+        gCutsceneCurrentVolume[i] = volume * (1.0f / 255.0f);
+        if (curr != SOUND_ID_NONE){
+            cutsceneQueueSound(gCutsceneCurrentSoundId[i], gCutsceneCurrentVolume[i], i, gCutsceneCurrentSubtitleId[i]);
+        }
+    }
 
     for (int i = 0; i < CH_COUNT; ++i) {
         s16 nextId;
