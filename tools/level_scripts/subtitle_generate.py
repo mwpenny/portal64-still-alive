@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 import os
 import re
+import sys
+
+def dump_lines(sourcefile_path, lines):
+    if not os.path.exists(os.path.dirname(os.path.abspath(sourcefile_path))):
+        os.makedirs(os.path.dirname(os.path.abspath(sourcefile_path)))
+
+    with open(sourcefile_path, "w") as f:
+        f.writelines(lines)
 
 def get_caption_keys_values_language(lines):
     language = "English"
@@ -62,9 +70,16 @@ def make_overall_subtitles_header(all_header_lines, languages_list):
     header_lines.append("#define __SUBTITLES_H__\n")
     header_lines.append("\n")
     header_lines.append(f"#define NUM_SUBTITLE_LANGUAGES {len(languages_list)}\n")
+    header_lines.append(f"#define NUM_SUBTITLE_MESSAGES 508\n")
+    header_lines.append("\n")
+    header_lines.append("struct SubtitleBlock {\n")
+    header_lines.append("    char* romStart;\n")
+    header_lines.append("    char* romEnd;\n")
+    header_lines.append("    char** values;\n")
+    header_lines.append("};\n")
     header_lines.append("\n")
     header_lines.append("extern char* SubtitleLanguages[];\n")
-    header_lines.append("extern char* SubtitleLanguageValues[][508];\n")
+    header_lines.append("extern struct SubtitleBlock SubtitleLanguageBlocks[];\n")
     header_lines.append("\n")
     if len(languages_list) > 0:
         header_lines.extend(all_header_lines)
@@ -77,12 +92,7 @@ def make_overall_subtitles_header(all_header_lines, languages_list):
 
     header_lines.append("#endif")
 
-    headerfile_path = "build/src/audio/subtitles.h"
-    if not os.path.exists(os.path.dirname(os.path.abspath(headerfile_path))):
-        os.makedirs(os.path.dirname(os.path.abspath(headerfile_path)))
-
-    with open(headerfile_path, "w") as f:
-        f.writelines(header_lines)
+    dump_lines("build/src/audio/subtitles.h", header_lines)
 
 def make_SubtitleKey_headerlines(keys):
     header_lines = []
@@ -96,33 +106,37 @@ def make_SubtitleKey_headerlines(keys):
     header_lines.append("\n")
     return header_lines
 
-def make_SubtitleLanguageValues(values_list):
-    sourcefile_lines = []
-    if len(values_list) <= 0:
-        sourcefile_lines.append("\n")
-        sourcefile_lines.append("char* SubtitleLanguageValues[][508] =\n")
-        sourcefile_lines.append("{\n")
-        sourcefile_lines.append("    {\n")
-        for val in range(508):
-            sourcefile_lines.append(f'    "",\n')
-        sourcefile_lines.append("    },\n")
-        sourcefile_lines.append("};\n")
-        sourcefile_lines.append("\n")
-        return sourcefile_lines
-    sourcefile_lines.append("\n")
-    sourcefile_lines.append("char* SubtitleLanguageValues[][508] =\n")
-    sourcefile_lines.append("{\n")
-    for lang in values_list:
-        sourcefile_lines.append("    {\n")
-        sourcefile_lines.append('    "",\n')
-        for value in lang:
-            sourcefile_lines.append(f'    "{value}",\n')
-        sourcefile_lines.append("    },\n")
-    sourcefile_lines.append("};\n")
-    sourcefile_lines.append("\n")
-    return sourcefile_lines
+def make_subtitle_for_language(lang_lines, lang_name):
+    lines = []
 
-def make_overall_subtitles_sourcefile(other_sourcefile_lines, language_list):
+    lines.append("\n")
+    lines.append(f"char* gSubtitle{lang_name}[508] = {'{'}\n")
+
+    for value in lang_lines:
+        lines.append(f'    "{value}",\n')
+
+    lines.append("};\n")
+
+    dump_lines(f"build/src/audio/subtitles_{lang_name}.c", lines)
+
+
+def make_subtitle_ld(languages):
+    lines = []
+
+    for language in languages:
+        language_name = language['name']
+
+        lines.append(f"    BEGIN_SEG(subtitles_{language_name}, 0x04000000)\n")
+        lines.append("    {\n")
+        lines.append(f"       build/src/audio/subtitles_{language_name}.o(.data);\n")
+        lines.append(f"       build/src/audio/subtitles_{language_name}.o(.bss);\n")
+        lines.append("    }\n")
+        lines.append(f"    END_SEG(subtitles_{language_name})\n")
+        lines.append("\n")
+
+    dump_lines('build/subtitles.ld', lines)
+
+def make_overall_subtitles_sourcefile(language_list):
     sourcefile_lines = []
     sourcefile_lines.append('#include "subtitles.h"\n')
 
@@ -136,25 +150,38 @@ def make_overall_subtitles_sourcefile(other_sourcefile_lines, language_list):
             sourcefile_lines.append(f'    "{language.upper()}",\n')
     sourcefile_lines.append("};\n")
     sourcefile_lines.append("\n")
-    sourcefile_lines.extend(other_sourcefile_lines)
-    sourcefile_path = "build/src/audio/subtitles.c"
-    if not os.path.exists(os.path.dirname(os.path.abspath(sourcefile_path))):
-        os.makedirs(os.path.dirname(os.path.abspath(sourcefile_path)))
 
-    with open(sourcefile_path, "w") as f:
-        f.writelines(sourcefile_lines)
+    for language in language_list:
+        sourcefile_lines.append(f"extern char _subtitles_{language}SegmentRomStart[];\n")
+        sourcefile_lines.append(f"extern char _subtitles_{language}SegmentRomEnd[];\n")
+        sourcefile_lines.append(f"extern char* gSubtitle{language}[508];\n")
+        sourcefile_lines.append("\n")
 
-def process_all_closecaption_files(dir):
+    sourcefile_lines.append("struct SubtitleBlock SubtitleLanguageBlocks[] = {\n")
+
+    for language in language_list:
+        sourcefile_lines.append("    {\n")
+        sourcefile_lines.append(f"        _subtitles_{language}SegmentRomStart,\n")
+        sourcefile_lines.append(f"        _subtitles_{language}SegmentRomEnd,\n")
+        sourcefile_lines.append(f"        gSubtitle{language},\n")
+        sourcefile_lines.append("    },\n")
+
+    sourcefile_lines.append("};\n")
+    sourcefile_lines.append("\n")
+
+    dump_lines("build/src/audio/subtitles.c", sourcefile_lines)
+
+def process_all_closecaption_files(dir, language_names):
     values_list = []
     header_lines = []
     sourcefile_lines = []
     language_list = []
+    language_with_values_list = []
     SubtitleKey_generated = False
-    lst = os.listdir(dir)
-    lst.sort()
-    for filename in lst:
-        if "closecaption_" not in filename:
-            continue
+
+    for langauge_name in language_names:
+        filename = f"closecaption_{langauge_name}.txt"
+
         try:  
             filepath = os.path.join(dir, filename)
             lines = []
@@ -174,14 +201,23 @@ def process_all_closecaption_files(dir):
                 header_lines = make_SubtitleKey_headerlines(k)
                 SubtitleKey_generated = True
             language_list.append(l)
+            
+            language_with_values_list.append({
+                'value': v,
+                'name': l,
+            })
             print(filename, " - PASSED")
         except:
             print(filename, " - FAILED")
             continue
-    sourcefile_lines = make_SubtitleLanguageValues(values_list)
+
+    for language in language_with_values_list:
+        make_subtitle_for_language(language['value'], language['name'])
+    make_subtitle_ld(language_with_values_list)
+
     make_overall_subtitles_header(header_lines, language_list)
-    make_overall_subtitles_sourcefile(sourcefile_lines, language_list)
+    make_overall_subtitles_sourcefile(language_list)
 
 
 
-process_all_closecaption_files("resource/")
+process_all_closecaption_files("vpk/Portal/portal/resource", sys.argv[1:])

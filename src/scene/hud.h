@@ -25,7 +25,6 @@ enum HudFlags {
 };
 
 struct Hud {
-    int chosenLanguage;
     enum CutscenePromptType promptType;
     enum SubtitleKey subtitleKey;
     enum SubtitleKey queuedSubtitleKey;

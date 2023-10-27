@@ -8,6 +8,7 @@
 #include "../build/assets/materials/ui.h"
 #include "../build/src/audio/clips.h"
 #include "../build/src/audio/languages.h"
+#include "./translations.h"
 
 #define GAMEPLAY_Y      54
 #define GAMEPLAY_WIDTH  252
@@ -182,6 +183,7 @@ enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
             int temp = (int)((audioOptions->subtitles_language_temp * (1.0f/0xFFFF) * NUM_SUBTITLE_LANGUAGES));
             temp = (int)minf(maxf(0.0, temp), NUM_SUBTITLE_LANGUAGES-1);
             gSaveData.controls.subtitleLanguage = temp;
+            translationsReload(temp);
             audioOptions->subtitlesLanguageDynamicText = menuBuildText(&gDejaVuSansFont, SubtitleLanguages[gSaveData.controls.subtitleLanguage], GAMEPLAY_X + 125, GAMEPLAY_Y + 88);
             break;
         case AudioOptionAudioLanguage:

@@ -1,28 +1,29 @@
 #include <ultra64.h>
 #include <sched.h>
 
+#include "audio/audio.h"
+#include "audio/soundplayer.h"
+#include "controls/controller_actions.h"
+#include "controls/controller.h"
+#include "controls/rumble_pak.h"
 #include "defs.h"
 #include "graphics/graphics.h"
-#include "util/rom.h"
-#include "scene/scene.h"
-#include "menu/main_menu.h"
-#include "util/time.h"
-#include "util/memory.h"
-#include "string.h"
-#include "controls/controller.h"
-#include "controls/controller_actions.h"
-#include "scene/dynamic_scene.h"
-#include "audio/soundplayer.h"
-#include "audio/audio.h"
-#include "scene/portal_surface.h"
-#include "sk64/skelatool_defs.h"
 #include "levels/cutscene_runner.h"
 #include "levels/intro.h"
+#include "menu/main_menu.h"
+#include "menu/translations.h"
 #include "savefile/savefile.h"
+#include "scene/dynamic_scene.h"
+#include "scene/portal_surface.h"
+#include "scene/scene.h"
 #include "sk64/skelatool_animator.h"
+#include "sk64/skelatool_defs.h"
+#include "string.h"
 #include "util/dynamic_asset_loader.h"
+#include "util/memory.h"
 #include "util/profile.h"
-#include "controls/rumble_pak.h"
+#include "util/rom.h"
+#include "util/time.h"
 
 #include "levels/levels.h"
 #include "savefile/checkpoint.h"
@@ -240,6 +241,7 @@ static void gameProc(void* arg) {
     rumblePakClipInit();
     initAudio(fps);
     soundPlayerInit();
+    translationsLoad(gSaveData.controls.subtitleLanguage);
     skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
     gSceneCallbacks->initCallback(gSceneCallbacks->data);
 
@@ -264,6 +266,7 @@ static void gameProc(void* arg) {
                         portalSurfaceRevert(0);
                         portalSurfaceCleanupQueueInit();
                         heapInit(_heapStart, memoryEnd);
+                        translationsLoad(gSaveData.controls.subtitleLanguage);
                         levelLoadWithCallbacks(levelGetQueued());
                         rumblePakClipInit();
                         cutsceneRunnerReset();

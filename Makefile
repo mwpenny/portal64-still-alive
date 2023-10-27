@@ -494,10 +494,33 @@ build/src/decor/decor_object_list.o: build/src/audio/clips.h
 ## Subtitles
 ####################
 
-# TODO pull translations from vpk/Portal/portal/resource once the translations are loaded dynamically
+SUBTITLE_LANGUAGES = english \
+	brazilian \
+    bulgarian \
+    czech \
+    danish \
+    dutch \
+    finnish \
+    french \
+    german \
+    hungarian \
+    italian \
+    latam \
+    norwegian \
+    polish \
+    portuguese \
+    romanian \
+    russian \
+    spanish \
+    swedish \
+    thai \
+    turkish
 
-build/src/audio/subtitles.h build/src/audio/subtitles.c: resource/closecaption_english.txt tools/level_scripts/subtitle_generate.py 
-	@python3 tools/level_scripts/subtitle_generate.py
+SUBTITLE_SOURCES = $(SUBTITLE_LANGUAGES:%=build/src/audio/subtitles_%.c)
+SUBTITLE_OBJECTS = $(SUBTITLE_LANGUAGES:%=build/src/audio/subtitles_%.o)
+
+build/src/audio/subtitles.h build/src/audio/subtitles.c build/subtitles.ld: tools/level_scripts/subtitle_generate.py 
+	python3 tools/level_scripts/subtitle_generate.py $(SUBTITLE_LANGUAGES)
 
 ####################
 ## Linking
@@ -528,10 +551,10 @@ $(CODESEGMENT)_no_debug.o:	$(CODEOBJECTS_NO_DEBUG)
 	$(LD) -o $(CODESEGMENT)_no_debug.o -r $(CODEOBJECTS_NO_DEBUG) $(LDFLAGS)
 
 
-$(CP_LD_SCRIPT)_no_debug.ld: $(LD_SCRIPT) build/levels.ld build/dynamic_models.ld build/anims.ld
+$(CP_LD_SCRIPT)_no_debug.ld: $(LD_SCRIPT) build/levels.ld build/dynamic_models.ld build/anims.ld build/subtitles.ld
 	cpp -P -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_no_debug.o -o $@ $<
 
-$(BASE_TARGET_NAME).z64: $(CODESEGMENT)_no_debug.o $(OBJECTS) $(DATA_OBJECTS) $(CP_LD_SCRIPT)_no_debug.ld
+$(BASE_TARGET_NAME).z64: $(CODESEGMENT)_no_debug.o $(OBJECTS) $(DATA_OBJECTS) $(SUBTITLE_OBJECTS) $(CP_LD_SCRIPT)_no_debug.ld
 	$(LD) -L. -T $(CP_LD_SCRIPT)_no_debug.ld -Map $(BASE_TARGET_NAME)_no_debug.map -o $(BASE_TARGET_NAME).elf
 	$(OBJCOPY) --pad-to=0x100000 --gap-fill=0xFF $(BASE_TARGET_NAME).elf $(BASE_TARGET_NAME).z64 -O binary
 	makemask $(BASE_TARGET_NAME).z64
@@ -546,10 +569,10 @@ endif
 $(CODESEGMENT)_debug.o:	$(CODEOBJECTS_DEBUG)
 	$(LD) -o $(CODESEGMENT)_debug.o -r $(CODEOBJECTS_DEBUG) $(LDFLAGS)
 
-$(CP_LD_SCRIPT)_debug.ld: $(LD_SCRIPT) build/levels.ld build/dynamic_models.ld build/anims.ld
+$(CP_LD_SCRIPT)_debug.ld: $(LD_SCRIPT) build/levels.ld build/dynamic_models.ld build/anims.ld build/subtitles.ld
 	cpp -P -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_debug.o -o $@ $<
 
-$(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(DATA_OBJECTS) $(CP_LD_SCRIPT)_debug.ld
+$(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(DATA_OBJECTS) $(SUBTITLE_OBJECTS) $(CP_LD_SCRIPT)_debug.ld
 	$(LD) -L. -T $(CP_LD_SCRIPT)_debug.ld -Map $(BASE_TARGET_NAME)_debug.map -o $(BASE_TARGET_NAME)_debug.elf
 	$(OBJCOPY) --pad-to=0x100000 --gap-fill=0xFF $(BASE_TARGET_NAME)_debug.elf $(BASE_TARGET_NAME)_debug.z64 -O binary
 	makemask $(BASE_TARGET_NAME)_debug.z64

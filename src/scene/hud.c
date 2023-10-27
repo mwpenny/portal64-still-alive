@@ -7,6 +7,7 @@
 #include "../levels/levels.h"
 #include "./scene.h"
 #include "../savefile/savefile.h"
+#include "../menu/translations.h"
 
 #define HUD_CENTER_WIDTH 6
 #define HUD_CENTER_HEIGHT 8
@@ -48,7 +49,6 @@ void hudInit(struct Hud* hud) {
     hud->subtitleOpacity = 0.0f;
     hud->backgroundOpacity = 0.0f;
     hud->subtitleFadeTime = SUBTITLE_SLOW_FADE_TIME;
-    hud->chosenLanguage = gSaveData.controls.subtitleLanguage;
     hud->flags = 0;
     hud->resolvedPrompts = 0;
     hud->lastPortalIndexShot = -1;
@@ -77,8 +77,6 @@ void hudUpdate(struct Hud* hud) {
             hud->subtitleExpireTimer = 0.0f;
         }
     }
-
-    hud->chosenLanguage = gSaveData.controls.subtitleLanguage;
 
     float targetPromptOpacity = (hud->flags & HudFlagsShowingPrompt) ? 1.0 : 0.0f;
     float targetSubtitleOpacity = ((hud->flags & HudFlagsShowingSubtitle) && (!(hud->flags & HudFlagsSubtitleQueued) || (hud->subtitleExpireTimer > 0.0f))) ? 0.85: 0.0f;
@@ -365,6 +363,6 @@ void hudRender(struct Hud* hud, struct Player* player, struct RenderState* rende
     }
 
     if (hud->subtitleOpacity > 0.0f && (gSaveData.controls.flags & ControlSaveSubtitlesEnabled || gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled) && hud->subtitleKey != SubtitleKeyNone) {
-        controlsRenderSubtitle(SubtitleLanguageValues[hud->chosenLanguage][hud->subtitleKey], hud->subtitleOpacity, hud->backgroundOpacity, renderState, hud->subtitleType);
+        controlsRenderSubtitle(translationsGet(hud->subtitleKey), hud->subtitleOpacity, hud->backgroundOpacity, renderState, hud->subtitleType);
     }
 }

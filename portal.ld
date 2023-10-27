@@ -80,6 +80,7 @@ SECTIONS
 #include "build/levels.ld"
 #include "build/dynamic_models.ld"
 #include "build/anims.ld"
+#include "build/subtitles.ld"
 
    /* Discard everything not specifically mentioned above. */
    /DISCARD/ :
