@@ -203,10 +203,12 @@ portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims
 	@mkdir -p $(@D)
 	convert $< $(shell cat $(@:portal_pak_modified/%.png=assets/%.ims)) $@
 
-build/assets/images/valve.png:
+build/assets/images/valve.png build/assets/images/valve-no-logo.png:
 	@mkdir -p $(@D)
 	ffmpeg -ss 00:00:04 -i vpk/Portal/hl2/media/valve.bik -frames:v 1 -q:v 2 -y build/assets/images/valve-full.png
-	convert build/assets/images/valve-full.png -crop 491x369+265+202 -resize 224x168 build/assets/images/valve.png
+	ffmpeg -ss 00:00:01 -i vpk/Portal/hl2/media/valve.bik -frames:v 1 -q:v 2 -y build/assets/images/valve-full-no-logo.png
+	convert build/assets/images/valve-full.png -crop 491x369+265+202 -resize 160x120 build/assets/images/valve.png
+	convert build/assets/images/valve-full-no-logo.png -crop 492x370+266+202 -resize 160x120 build/assets/images/valve-no-logo.png
 
 ####################
 ## Materials
