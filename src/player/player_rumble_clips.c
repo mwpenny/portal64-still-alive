@@ -55,9 +55,9 @@ struct RumblePakWave gPlayerLandWaves[PLAYER_LANDING_CLIP_COUNT] = {
 };
 
 float gLandRumbleThresholds[PLAYER_LANDING_CLIP_COUNT] = {
-    0.75f * MAX_PORTAL_SPEED,
-    0.5f * MAX_PORTAL_SPEED,
-    0.25f * MAX_PORTAL_SPEED,
+    0.80f * MAX_PORTAL_SPEED,
+    0.60f * MAX_PORTAL_SPEED,
+    0.40f * MAX_PORTAL_SPEED,
 };
 
 void playerHandleLandingRumble(float velocityChange) {
