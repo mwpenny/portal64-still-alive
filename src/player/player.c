@@ -171,7 +171,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
 }
 
-#define PLAYER_SPEED    (150.0f / 50.0f)
+#define PLAYER_SPEED    (150.0f / 64.0f)
 #define PLAYER_ACCEL    (5.875f)
 #define PLAYER_AIR_ACCEL    (5.875f)
 #define PLAYER_STOP_ACCEL    (5.875f)
@@ -698,7 +698,7 @@ void playerUpdate(struct Player* player) {
     }
 
     if (!isDead) {
-        if (fabsf(moveInput.x)+fabsf(moveInput.y) > 1.0f){
+        if (vector2MagSqr(&moveInput) > 1.0f){
             vector2Normalize(&moveInput, &moveInput);
         }
 
