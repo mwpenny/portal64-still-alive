@@ -1,8 +1,8 @@
 #include "font.h"
 
-int fontDetermineKerning(struct Font* font, char first, char second) {
+int fontDetermineKerning(struct Font* font, short first, short second) {
     unsigned index = ((unsigned)first * (unsigned)font->kerningMultiplier + (unsigned)second) & (unsigned)font->kerningMask;
-    int maxIterations = font->maxCollisions;
+    int maxIterations = font->kerningMaxCollisions;
 
     do {
         struct FontKerning* kerning = &font->kerning[index];
@@ -22,6 +22,28 @@ int fontDetermineKerning(struct Font* font, char first, char second) {
     return 0;
 }
 
+struct FontSymbol* fontFindSymbol(struct Font* font, short id) {
+    unsigned index = ((unsigned)id * (unsigned)font->symbolMultiplier) & (unsigned)font->kerningMask;
+    int maxIterations = font->symbolMaxCollisions;
+
+    do {
+        struct FontSymbol* symbol = &font->symbols[index];
+
+        if (symbol->id == 0) {
+            return NULL;
+        }
+
+        if (symbol->id == id) {
+            return symbol;
+        }
+        
+        ++index;
+        --maxIterations;
+    } while (maxIterations >= 0);
+
+    return NULL;
+}
+
 Gfx* fontRender(struct Font* font, char* message, int x, int y, Gfx* dl) {
     int startX = x;
     char prev = 0;
@@ -35,11 +57,12 @@ Gfx* fontRender(struct Font* font, char* message, int x, int y, Gfx* dl) {
             continue;
         }
 
-        if ((unsigned char)curr >= font->symbolCount) {
+        // TODO utf-8 decode
+        struct FontSymbol* symbol = fontFindSymbol(font, (short)curr);
+
+        if (!symbol) {
             continue;
         }
-
-        struct FontSymbol* symbol = &font->symbols[(int)curr];
 
         x += fontDetermineKerning(font, prev, curr);
 
@@ -72,7 +95,10 @@ int fontCountGfx(struct Font* font, char* message) {
             continue;
         }
 
-        if ((unsigned char)curr >= font->symbolCount) {
+        // TODO utf-8 decode
+        struct FontSymbol* symbol = fontFindSymbol(font, (short)curr);
+
+        if (!symbol) {
             continue;
         }
 
@@ -101,11 +127,12 @@ struct Vector2s16 fontMeasure(struct Font* font, char* message) {
             continue;
         }
 
-        if ((unsigned char)curr >= font->symbolCount) {
+        // TODO utf-8 decode
+        struct FontSymbol* symbol = fontFindSymbol(font, (short)curr);
+
+        if (!symbol) {
             continue;
         }
-
-        struct FontSymbol* symbol = &font->symbols[(int)curr];
 
         x += fontDetermineKerning(font, prev, curr);
         x += symbol->xadvance;

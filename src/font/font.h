@@ -6,32 +6,51 @@
 
 struct FontKerning {
     char amount;
-    char first;
-    char second;
+    short first;
+    short second;
 };
 
 struct FontSymbol {
+    short id;
     char x, y;
     char width, height;
     char xoffset, yoffset;
     char xadvance;
+    char textureIndex;
 };
 
 struct Font {
     struct FontKerning* kerning;
     struct FontSymbol* symbols;
+    Gfx* images;
 
     char base;
     char charHeight;
-    unsigned short symbolCount;
+    unsigned short symbolMultiplier;
+    unsigned short symbolMask;
+    unsigned short symbolMaxCollisions;
+
     unsigned short kerningMultiplier;
     unsigned short kerningMask;
-    unsigned short maxCollisions;
+    unsigned short kerningMaxCollisions;
 };
 
-int fontDetermineKerning(struct Font* font, char first, char second);
+struct SymbolLocation {
+    short x;
+    short y;
+    short symbolIndex;
+};
+
 Gfx* fontRender(struct Font* font, char* message, int x, int y, Gfx* dl);
 int fontCountGfx(struct Font* font, char* message);
 struct Vector2s16 fontMeasure(struct Font* font, char* message);
+
+struct FontRenderer {
+    struct SymbolLocation symbols[128];
+    short currentSymbol;
+};
+
+void fontRendererRender(struct FontRenderer* renderer, struct Font* font, char* message, int x, int y, int maxWidth);
+Gfx* fontRendererBuildGfx(struct FontRenderer* renderer, struct Font* font, Gfx* gfx);
 
 #endif

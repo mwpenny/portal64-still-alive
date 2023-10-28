@@ -119,9 +119,9 @@ void optionsMenuRender(struct OptionsMenu* options, struct RenderState* renderSt
     gSPDisplayList(renderState->dl++, options->tabs.tabOutline);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
 
-    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_0_INDEX]);
     renderState->dl = tabsRenderText(&options->tabs, renderState->dl);
-    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 
     switch (options->tabs.selectedTab) {
         case OptionsMenuTabsControlMapping:

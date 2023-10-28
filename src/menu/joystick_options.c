@@ -199,7 +199,7 @@ void joystickOptionsRender(struct JoystickOptions* joystickOptions, struct Rende
 
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
 
-    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_0_INDEX]);
 
     gDPPipeSync(renderState->dl++);
     menuSetRenderColor(renderState, joystickOptions->selectedItem == JoystickOptionInvert, &gSelectionGray, &gColorWhite);
@@ -225,5 +225,5 @@ void joystickOptionsRender(struct JoystickOptions* joystickOptions, struct Rende
     menuSetRenderColor(renderState, joystickOptions->selectedItem == JoystickOptionDeadzone, &gSelectionGray, &gColorWhite);
     gSPDisplayList(renderState->dl++, joystickOptions->joystickDeadzoneText);
 
-    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 }

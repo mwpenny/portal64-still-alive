@@ -407,7 +407,7 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, CONTROLS_X, CONTROLS_Y, CONTROLS_X + CONTROLS_WIDTH, CONTROLS_Y + CONTROLS_HEIGHT);
 
 
-    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_0_INDEX]);
 
     gDPPipeSync(renderState->dl++);
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT);
@@ -437,7 +437,7 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
         renderStateInlineBranch(renderState, controlsMenu->headers[i].headerText);
     }
 
-    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 
     gSPDisplayList(renderState->dl++, ui_material_list[BUTTON_ICONS_INDEX]);
     for (int i = 0; i < ControllerActionCount; ++i) {
@@ -495,7 +495,7 @@ void controlsRenderPrompt(enum ControllerAction action, char* message, float opa
     );
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
 
-    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_0_INDEX]);
     gDPSetEnvColor(renderState->dl++, 232, 206, 80, opacityAsInt);
     renderState->dl = fontRender(
         &gDejaVuSansFont, 
@@ -504,7 +504,7 @@ void controlsRenderPrompt(enum ControllerAction action, char* message, float opa
         textPositionY, 
         renderState->dl
     );
-    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 
     gSPDisplayList(renderState->dl++, ui_material_list[BUTTON_ICONS_INDEX]);
     gDPSetEnvColor(renderState->dl++, 232, 206, 80, opacityAsInt);
@@ -545,7 +545,7 @@ void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOp
     );
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
 
-    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_0_INDEX]);
     if (subtitleType == SubtitleTypeCloseCaption){
         gDPSetEnvColor(renderState->dl++, 255, 140, 155, textOpacityAsInt);
     } else if (subtitleType == SubtitleTypeCaption){
@@ -559,5 +559,5 @@ void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOp
         textPositionY, 
         renderState->dl
     );
-    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 }

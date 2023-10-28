@@ -503,6 +503,7 @@ SUBTITLE_LANGUAGES = english \
     finnish \
     french \
     german \
+	greek \
     hungarian \
     italian \
     latam \
@@ -513,8 +514,8 @@ SUBTITLE_LANGUAGES = english \
     russian \
     spanish \
     swedish \
-    thai \
-    turkish
+    turkish \
+	ukrainian
 
 SUBTITLE_SOURCES = $(SUBTITLE_LANGUAGES:%=build/src/audio/subtitles_%.c)
 SUBTITLE_OBJECTS = $(SUBTITLE_LANGUAGES:%=build/src/audio/subtitles_%.o)

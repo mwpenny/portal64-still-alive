@@ -2,6 +2,19 @@
 import os
 import re
 import sys
+import json
+
+def get_supported_characters():
+    with open('assets/fonts/dejavu_sans_book_8.json', 'r') as f:
+        content = json.loads('\n'.join(f.readlines()))
+
+    result = {' ', '\t', '\n', '\r'}
+    
+    for symbol in content['symbols']:
+        result.update(chr(symbol['id']))
+
+    return result
+
 
 def dump_lines(sourcefile_path, lines):
     if not os.path.exists(os.path.dirname(os.path.abspath(sourcefile_path))):
@@ -133,6 +146,21 @@ def make_subtitle_for_language(lang_lines, lang_name):
 
     dump_lines(f"build/src/audio/subtitles_{lang_name}.c", lines)
 
+def determine_invalid_characters(lang_name, lang_lines, good_characters):
+    used_characters = set()
+
+    for value in lang_lines:
+        used_characters = used_characters | set(value)
+
+    invalid = used_characters - good_characters
+
+    if len(invalid) == 0:
+        return
+    
+    print(f"{lang_name} has {len(invalid)} invalid charcters\n{''.join(sorted(list(invalid)))}")
+
+    return used_characters
+
 
 def make_subtitle_ld(languages):
     lines = []
@@ -189,11 +217,9 @@ def make_overall_subtitles_sourcefile(language_list):
 def process_all_closecaption_files(dir, language_names):
     values_list = []
     header_lines = []
-    sourcefile_lines = []
     language_list = []
     language_with_values_list = []
     SubtitleKey_generated = False
-    key_order = {}
 
     for langauge_name in language_names:
         filename = f"closecaption_{langauge_name}.txt"
@@ -202,7 +228,7 @@ def process_all_closecaption_files(dir, language_names):
             filepath = os.path.join(dir, filename)
             lines = []
             
-            with open(filepath, "r", encoding='cp1252') as f:
+            with open(filepath, "r", encoding='utf-16-le') as f:
                 lines = f.readlines()
             
             new_lines = []
@@ -223,12 +249,22 @@ def process_all_closecaption_files(dir, language_names):
                 'name': l,
             })
             print(filename, " - PASSED")
-        except:
+        except Exception as e:
+            print(e)
             print(filename, " - FAILED")
             continue
 
+    good_characters = get_supported_characters()
+    used_characters = set()
+
     for language in language_with_values_list:
         make_subtitle_for_language(language['value'], language['name'])
+        used_characters = used_characters | determine_invalid_characters(language['name'], language['value'], good_characters)
+
+    print(f"needed characters\n{''.join(sorted(list(good_characters & used_characters)))}")
+    print(f"unused characters\n{''.join(sorted(list(good_characters - used_characters)))}")
+    print(f"invalid characters\n{''.join(sorted(list(used_characters - good_characters)))}")
+
     make_subtitle_ld(language_with_values_list)
 
     make_overall_subtitles_header(header_lines, language_list)

@@ -10,9 +10,69 @@ materials:
 
     sortOrder: 10
 
-  dejavu_sans:
+  dejavu_sans_0:
     gDPSetTile:
-      filename: "../fonts/dejavu_sans.png"
+      filename: "../fonts/dejavu_sans_0.png"
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+    gDPSetCombineMode: 
+      color: ["0", "0", "0", ENVIRONMENT]
+      alpha: [TEXEL0, "0", ENVIRONMENT, "0"]
+    gDPSetRenderMode: G_RM_XLU_SURF
+    gDPSetEnvColor:
+      r: 255
+      g: 255
+      b: 255
+      a: 255
+
+  dejavu_sans_1:
+    gDPSetTile:
+      filename: "../fonts/dejavu_sans_1.png"
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+    gDPSetCombineMode: 
+      color: ["0", "0", "0", ENVIRONMENT]
+      alpha: [TEXEL0, "0", ENVIRONMENT, "0"]
+    gDPSetRenderMode: G_RM_XLU_SURF
+    gDPSetEnvColor:
+      r: 255
+      g: 255
+      b: 255
+      a: 255
+
+  dejavu_sans_2:
+    gDPSetTile:
+      filename: "../fonts/dejavu_sans_2.png"
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+    gDPSetCombineMode: 
+      color: ["0", "0", "0", ENVIRONMENT]
+      alpha: [TEXEL0, "0", ENVIRONMENT, "0"]
+    gDPSetRenderMode: G_RM_XLU_SURF
+    gDPSetEnvColor:
+      r: 255
+      g: 255
+      b: 255
+      a: 255
+
+  dejavu_sans_3:
+    gDPSetTile:
+      filename: "../fonts/dejavu_sans_3.png"
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+    gDPSetCombineMode: 
+      color: ["0", "0", "0", ENVIRONMENT]
+      alpha: [TEXEL0, "0", ENVIRONMENT, "0"]
+    gDPSetRenderMode: G_RM_XLU_SURF
+    gDPSetEnvColor:
+      r: 255
+      g: 255
+      b: 255
+      a: 255
+
+  dejavu_sans_4:
+    gDPSetTile:
+      filename: "../fonts/dejavu_sans_4.png"
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
     gDPSetCombineMode: 

@@ -211,7 +211,7 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
     }
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
 
-    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_0_INDEX]);
 
     gDPPipeSync(renderState->dl++);
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT);
@@ -237,7 +237,7 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
         renderStateInlineBranch(renderState, slot->gameId);
     }
 
-    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 
     gSPDisplayList(renderState->dl++, ui_material_list[IMAGE_COPY_INDEX]);
 

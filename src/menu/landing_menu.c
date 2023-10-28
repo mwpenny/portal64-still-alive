@@ -110,11 +110,11 @@ void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* rend
     gSPDisplayList(renderState->dl++, portal_logo_gfx);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[PORTAL_LOGO_INDEX]);
 
-    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_0_INDEX]);
     for (int i = 0; i < landingMenu->optionCount; ++i) {
         gDPPipeSync(renderState->dl++);
         menuSetRenderColor(renderState, landingMenu->selectedItem == i, &gSelectionGray, &gColorWhite);
         gSPDisplayList(renderState->dl++, landingMenu->optionText[i]);
     }
-    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 }

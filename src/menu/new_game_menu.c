@@ -193,7 +193,7 @@ void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderSt
 
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
 
-    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_INDEX]);
+    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_0_INDEX]);
     gSPDisplayList(renderState->dl++, newGameMenu->newGameText);
 
     gDPPipeSync(renderState->dl++);
@@ -206,7 +206,7 @@ void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderSt
         menuSetRenderColor(renderState, newGameMenu->selectedChapter != newGameMenu->chapterOffset, &gSelectionOrange, &gColorWhite);
         gSPDisplayList(renderState->dl++, newGameMenu->chapter1.chapterText);
         gSPDisplayList(renderState->dl++, newGameMenu->chapter1.testChamberText);
-        gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_INDEX]);
+        gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
     }
 
     graphicsCopyImage(
