@@ -140,6 +140,7 @@ def make_subtitle_ld(languages):
     for language in languages:
         language_name = language['name']
 
+        lines.append(f"    __romPos = (__romPos + 15) & ~0xF;\n")
         lines.append(f"    BEGIN_SEG(subtitles_{language_name}, 0x04000000)\n")
         lines.append("    {\n")
         lines.append(f"       build/src/audio/subtitles_{language_name}.o(.data);\n")
