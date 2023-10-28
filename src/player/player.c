@@ -173,7 +173,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
 
 #define PLAYER_SPEED    (150.0f / 64.0f)
 #define PLAYER_ACCEL    (5.875f)
-#define PLAYER_AIR_ACCEL    (5.875f)
+#define PLAYER_AIR_ACCEL    (1.875f)
 #define PLAYER_STOP_ACCEL    (5.875f)
 #define PLAYER_SLIDE_ACCEL    (40.0f)
 
