@@ -173,7 +173,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
 
 #define PLAYER_SPEED    (150.0f / 64.0f)
 #define PLAYER_ACCEL    (5.875f)
-#define PLAYER_AIR_ACCEL    (5.875f)
+#define PLAYER_AIR_ACCEL    (1.875f)
 #define PLAYER_STOP_ACCEL    (5.875f)
 #define PLAYER_SLIDE_ACCEL    (40.0f)
 
@@ -698,6 +698,10 @@ void playerUpdate(struct Player* player) {
     }
 
     if (!isDead) {
+        if (vector2MagSqr(&moveInput) > 1.0f){
+            vector2Normalize(&moveInput, &moveInput);
+        }
+
         vector3AddScaled(&targetVelocity, &right, PLAYER_SPEED * moveInput.x, &targetVelocity);
         vector3AddScaled(&targetVelocity, &forward, -PLAYER_SPEED * moveInput.y, &targetVelocity);
 
@@ -756,13 +760,6 @@ void playerUpdate(struct Player* player) {
     playerUpdateSpeedSound(player);
 
     if (!(player->flags & PlayerFlagsGrounded)) {
-        if (isFast) {
-            struct Vector3 movementCenter;
-            vector3Scale(&player->body.velocity, &movementCenter, -PLAYER_SPEED / sqrtf(velocitySqrd));
-            targetVelocity.x += player->body.velocity.x + movementCenter.x;
-            targetVelocity.z += player->body.velocity.z + movementCenter.z;
-        }
-
         acceleration = PLAYER_AIR_ACCEL * FIXED_DELTA_TIME;
     } else if (isFast) {
         acceleration = PLAYER_SLIDE_ACCEL * FIXED_DELTA_TIME;
