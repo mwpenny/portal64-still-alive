@@ -51,7 +51,7 @@ def get_caption_keys_values_language(lines):
             keyval= line.split('"   "')
             if len(keyval) != 2:
                 continue
-        if "[english]" in keyval[0]:
+        if "[english]" in keyval[0] or 'commentary' in keyval[0]:
             continue
         key = keyval[0].replace('"', "").replace(".", "_").replace("-", "_").replace('\\', "_").replace('#', "").upper()
         val = keyval[1].replace('"', "").replace("\n", "").replace("\\", "")
@@ -65,13 +65,14 @@ def get_caption_keys_values_language(lines):
     
     return keys, values, language
 
-def make_overall_subtitles_header(all_header_lines, languages_list):
+def make_overall_subtitles_header(all_header_lines, languages_list, message_count, max_message_length):
     header_lines = []
     header_lines.append("#ifndef __SUBTITLES_H__\n")
     header_lines.append("#define __SUBTITLES_H__\n")
     header_lines.append("\n")
     header_lines.append(f"#define NUM_SUBTITLE_LANGUAGES {len(languages_list)}\n")
-    header_lines.append(f"#define NUM_SUBTITLE_MESSAGES 508\n")
+    header_lines.append(f"#define NUM_SUBTITLE_MESSAGES {message_count + 1}\n")
+    header_lines.append(f"#define MAX_SUBTITLE_LENGTH  {max_message_length}\n")
     header_lines.append("\n")
     header_lines.append("struct SubtitleBlock {\n")
     header_lines.append("    char* romStart;\n")
@@ -112,6 +113,8 @@ def make_subtitle_for_language(lang_lines, lang_name):
 
     idx = 1
 
+    lines.append('#include "subtitles.h"')
+    lines.append("\n")
     lines.append("\n")
 
     for value in lang_lines:
@@ -119,7 +122,7 @@ def make_subtitle_for_language(lang_lines, lang_name):
         idx = idx + 1
 
     lines.append("\n")
-    lines.append(f"char* gSubtitle{lang_name}[508] = {'{'}\n")
+    lines.append(f"char* gSubtitle{lang_name}[NUM_SUBTITLE_MESSAGES] = {'{'}\n")
 
     # SubtitleKeyNone
     lines.append('    "",\n')
@@ -185,7 +188,7 @@ def make_overall_subtitles_sourcefile(language_list):
     for language in language_list:
         sourcefile_lines.append(f"extern char _subtitles_{language}SegmentRomStart[];\n")
         sourcefile_lines.append(f"extern char _subtitles_{language}SegmentRomEnd[];\n")
-        sourcefile_lines.append(f"extern char* gSubtitle{language}[508];\n")
+        sourcefile_lines.append(f"extern char* gSubtitle{language}[NUM_SUBTITLE_MESSAGES];\n")
         sourcefile_lines.append("\n")
 
     sourcefile_lines.append("struct SubtitleBlock SubtitleLanguageBlocks[] = {\n")
@@ -245,17 +248,23 @@ def process_all_closecaption_files(dir, language_names):
     good_characters = get_supported_characters()
     used_characters = set()
 
+    max_message_length = 0
+
     for language in language_with_values_list:
         make_subtitle_for_language(language['value'], language['name'])
         used_characters = used_characters | determine_invalid_characters(language['name'], language['value'], good_characters)
 
+        for value in language['value']:
+            max_message_length = max(max_message_length, len(value))
+
     print(f"needed characters\n{''.join(sorted(list(good_characters & used_characters)))}")
     print(f"unused characters\n{''.join(sorted(list(good_characters - used_characters)))}")
     print(f"invalid characters\n{''.join(sorted(list(used_characters - good_characters)))}")
+    print(f"max message length\n{max_message_length}")
 
     make_subtitle_ld(language_with_values_list)
 
-    make_overall_subtitles_header(header_lines, language_list)
+    make_overall_subtitles_header(header_lines, language_list, len(language_with_values_list[0]['value']), max_message_length)
     make_overall_subtitles_sourcefile(language_list)
 
 

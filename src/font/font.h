@@ -51,7 +51,7 @@ struct SymbolLocation {
     char imageIndex;
 };
 
-#define FONT_RENDERER_MAX_SYBMOLS   128
+#define FONT_RENDERER_MAX_SYBMOLS   340
 
 struct FontRenderer {
     struct SymbolLocation symbols[FONT_RENDERER_MAX_SYBMOLS];
