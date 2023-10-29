@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 #include "../math/vector2s16.h"
+#include "../graphics/color.h"
 
 struct FontKerning {
     char amount;
@@ -22,7 +23,6 @@ struct FontSymbol {
 struct Font {
     struct FontKerning* kerning;
     struct FontSymbol* symbols;
-    Gfx* images;
 
     char base;
     char charHeight;
@@ -35,22 +35,33 @@ struct Font {
     unsigned short kerningMaxCollisions;
 };
 
-struct SymbolLocation {
-    short x;
-    short y;
-    short symbolIndex;
-};
-
+// legacy methods for a font that fits into a single page
 Gfx* fontRender(struct Font* font, char* message, int x, int y, Gfx* dl);
 int fontCountGfx(struct Font* font, char* message);
 struct Vector2s16 fontMeasure(struct Font* font, char* message);
 
-struct FontRenderer {
-    struct SymbolLocation symbols[128];
-    short currentSymbol;
+struct SymbolLocation {
+    short x;
+    short y;
+    char sourceX;
+    char sourceY;
+    char width;
+    char height;
+    char canBreak;
+    char imageIndex;
 };
 
-void fontRendererRender(struct FontRenderer* renderer, struct Font* font, char* message, int x, int y, int maxWidth);
-Gfx* fontRendererBuildGfx(struct FontRenderer* renderer, struct Font* font, Gfx* gfx);
+#define FONT_RENDERER_MAX_SYBMOLS   128
+
+struct FontRenderer {
+    struct SymbolLocation symbols[FONT_RENDERER_MAX_SYBMOLS];
+    short currentSymbol;
+    short width;
+    short height;
+    short usedImageIndices;
+};
+
+void fontRendererLayout(struct FontRenderer* renderer, struct Font* font, char* message, int maxWidth);
+Gfx* fontRendererBuildGfx(struct FontRenderer* renderer, struct Font* font, Gfx** fontImages, int x, int y, struct Coloru8* color, Gfx* gfx);
 
 #endif

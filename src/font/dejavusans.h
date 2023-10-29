@@ -4,5 +4,6 @@
 #include "font.h"
 
 extern struct Font gDejaVuSansFont;
+extern Gfx* gDejaVuSansImages[];
 
 #endif

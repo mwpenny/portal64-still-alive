@@ -4,6 +4,7 @@
 #include "../font/font.h"
 #include "../controls/controller.h"
 #include "../audio/soundplayer.h"
+#include "../util/memory.h"
 
 #include "../build/assets/materials/ui.h"
 
@@ -513,7 +514,8 @@ void controlsRenderPrompt(enum ControllerAction action, char* message, float opa
 }
 
 void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOpacity, struct RenderState* renderState, enum SubtitleType subtitleType) {
-    struct Vector2s16 size = fontMeasure(&gDejaVuSansFont, message);
+    struct FontRenderer* fontRender = stackMalloc(sizeof(struct FontRenderer));
+    fontRendererLayout(fontRender, &gDejaVuSansFont, message, SCREEN_WD - (SUBTITLE_SIDE_MARGIN + SUBTITLE_PADDING) * 2);
 
     int textOpacityAsInt = (int)(255 * textOpacity);
 
@@ -532,7 +534,7 @@ void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOp
     }
 
     int textPositionX = (SUBTITLE_SIDE_MARGIN + SUBTITLE_PADDING);
-    int textPositionY = (SCREEN_HT - SUBTITLE_BOTTOM_MARGIN - SUBTITLE_PADDING) - size.y;
+    int textPositionY = (SCREEN_HT - SUBTITLE_BOTTOM_MARGIN - SUBTITLE_PADDING) - fontRender->height;
 
     gSPDisplayList(renderState->dl++, ui_material_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
     gDPSetEnvColor(renderState->dl++, 0, 0, 0, backgroundOpacityAsInt);
@@ -545,19 +547,21 @@ void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOp
     );
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
 
-    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_0_INDEX]);
-    if (subtitleType == SubtitleTypeCloseCaption){
-        gDPSetEnvColor(renderState->dl++, 255, 140, 155, textOpacityAsInt);
-    } else if (subtitleType == SubtitleTypeCaption){
-        gDPSetEnvColor(renderState->dl++, 255, 255, 255, textOpacityAsInt);
+    struct Coloru8 textColor;
+
+    if (subtitleType == SubtitleTypeCloseCaption) {
+        textColor.r = 255;
+        textColor.g = 140;
+        textColor.b = 155;
+    } else if (subtitleType == SubtitleTypeCaption) {
+        textColor = gColorWhite;
     }
-    
-    renderState->dl = fontRender(
-        &gDejaVuSansFont, 
-        message, 
-        textPositionX, 
-        textPositionY, 
-        renderState->dl
-    );
+
+    textColor.a = textOpacityAsInt;
+
+    renderState->dl = fontRendererBuildGfx(fontRender, &gDejaVuSansFont, gDejaVuSansImages, textPositionX, textPositionY, &textColor, renderState->dl);
+
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
+
+    stackMallocFree(fontRender);
 }

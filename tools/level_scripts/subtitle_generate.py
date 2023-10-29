@@ -60,20 +60,8 @@ def get_caption_keys_values_language(lines):
         val = val.replace("<sfx>", "")
         val = re.sub(r'\<len:.+\>','',val)
         val = val.replace("<len>", "")
-        newval = ""
-        last_space = 0
-        addition = 0
-        for i,ch in enumerate(val):
-            if (i%38 == 0) and (i != 0):
-                newval = newval[:last_space+addition] + '\\n' + newval[last_space+addition+1:]
-                addition += 1
-                newval = newval + ch
-            else:
-                if ch == " ":
-                    last_space = i
-                newval = newval + ch
         keys.append(key)
-        values.append(newval)
+        values.append(val)
     
     return keys, values, language
 
@@ -155,7 +143,7 @@ def determine_invalid_characters(lang_name, lang_lines, good_characters):
     invalid = used_characters - good_characters
 
     if len(invalid) == 0:
-        return
+        return used_characters
     
     print(f"{lang_name} has {len(invalid)} invalid charcters\n{''.join(sorted(list(invalid)))}")
 
