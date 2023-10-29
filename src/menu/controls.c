@@ -514,6 +514,11 @@ void controlsRenderPrompt(enum ControllerAction action, char* message, float opa
 }
 
 void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOpacity, struct RenderState* renderState, enum SubtitleType subtitleType) {
+    
+    if ((message != NULL) && (message[0] == '\0')) {
+       return;
+    }
+    
     struct FontRenderer* fontRender = stackMalloc(sizeof(struct FontRenderer));
     fontRendererLayout(fontRender, &gDejaVuSansFont, message, SCREEN_WD - (SUBTITLE_SIDE_MARGIN + SUBTITLE_PADDING) * 2);
 
