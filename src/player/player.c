@@ -927,7 +927,7 @@ void playerUpdate(struct Player* player) {
     }
 
 
-    if (gSaveData.controls.flags & ControlSavePortalFunneling){
+    if ((gSaveData.controls.flags & ControlSavePortalFunneling) && (vector2MagSqr(&moveInput) == 0.0f)){
         playerPortalFunnel(player);
     }
     
