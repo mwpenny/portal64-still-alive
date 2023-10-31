@@ -377,8 +377,7 @@ function Box3.unlerp(box, pos)
     return (pos - box.min) / (box.max - box.min)
 end
 
-
---- Linearly interpolates between the min and max of the box
+--- Returns the box that encloses the two boxes
 --- @function union
 --- @tparam Vector3|Box3 box_or_point
 --- @treturn Box3
@@ -388,6 +387,25 @@ function Box3.union(box, box_or_point)
     end
 
     return box3(box.min:min(box_or_point.min), box.max:max(box_or_point.max))
+end
+
+--- Returns the box that overlaps both a and b
+--- @function intersection
+--- @tparam Box3 b
+--- @treturn Box3
+function Box3.intersection(a, b)
+    local min = a.min:max(b.min)
+    local max = a.max:min(b.max)
+    max = min:max(max)
+    return box3(min, max)
+end
+
+--- Returns the volume of the box
+--- @function volume
+--- @treturn number
+function Box3.volume(box)
+    local side_length = box.max - box.min
+    return side_length.x * side_length.y * side_length.z
 end
 
 function Box3.__tostring(b)

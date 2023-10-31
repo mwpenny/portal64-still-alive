@@ -13,8 +13,22 @@
 
 #define NO_TRANSFORM_INDEX  0xFF
 
+struct StaticContentBox {
+    struct BoundingBoxs16 box;
+    struct Rangeu16 staticRange;
+    short siblingOffset;
+};
+
+struct StaticIndex {
+    struct StaticContentBox* boxIndex;
+    struct StaticContentElement* staticContent;
+    struct BoundingBoxs16* animatedBoxes;
+    struct Rangeu16 animatedRange;
+};
+
 struct StaticContentElement {
     Gfx* displayList;
+    struct Vector3 center;
     u8 materialIndex;
     u8 transformIndex;
 };

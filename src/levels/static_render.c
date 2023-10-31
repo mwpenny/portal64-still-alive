@@ -9,6 +9,35 @@
 
 #include "../build/assets/materials/static.h"
 
+struct StaticContentBox* staticRenderTraverseIndex(struct StaticIndex* index, struct FrustrumCullingInformation* cullingInfo, struct StaticContentBox* box, struct RenderScene* renderScene) {
+    if (isOutsideFrustrum(cullingInfo, &box->box)) {
+        // skip all children
+        return box + box->siblingOffset;
+    }
+
+    for (int i = box->staticRange.min; i < box->staticRange.max; ++i) {
+        renderSceneAdd(
+            renderScene, 
+            index->staticContent[i].displayList, 
+            NULL, 
+            index->staticContent[i].materialIndex, 
+            &index->staticContent[i].center, 
+            NULL
+        );
+    }
+
+    // has children nodes
+    struct StaticContentBox* sibling = box + box->siblingOffset;
+
+    struct StaticContentBox* child = box + 1;
+
+    while (child != sibling) {
+        child = staticRenderTraverseIndex(index, cullingInfo, child, renderScene);
+    }
+
+    return sibling;
+}
+
 void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, Mtx* staticTransforms, struct RenderScene* renderScene) {
     int currentRoom = 0;
 

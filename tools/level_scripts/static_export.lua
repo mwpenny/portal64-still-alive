@@ -36,6 +36,13 @@ local function should_join_mesh(entry)
     return entry.plane ~= nil
 end
 
+local function bb_union_cost(a, b)
+    local union = a:union(b)
+    local intersection = a:intersection(b)
+
+    return union:volume() - a:volume() - b:volume() + intersection:volume()
+end
+
 local function insert_or_merge(static_list, new_entry)
     if not should_join_mesh(new_entry) then
         table.insert(static_list, new_entry)
@@ -104,7 +111,178 @@ local function list_static_nodes(nodes)
     return result;
 end
 
-local function proccessStaticNodes(nodes)
+local function build_static_index(static_nodes, target_ratio)
+    local join_cost = {}
+
+    for i = 1,len(static_nodes) do
+        for j = i+1,len(static_nodes) do
+            table.insert(join_cost, {
+                first_index = i,
+                second_index = j,
+                cost = bb_union_cost(static_nodes[i].mesh_bb, static_nodes[j].mesh_bb),
+            })
+        end
+    end
+    
+    table.sort(join_cost, function(a, b)
+        return a.cost < b.cost
+    end)
+
+    
+    local join_count = math.floor(len(static_nodes) * (1 - target_ratio))
+
+    local join_source = {}
+    local is_joined = {}
+
+    for i = 1,join_count do 
+        local join = join_cost[i]
+        local source = join_source[join.first_index]
+
+        if not source then
+            join_source[join.first_index] = {join.second_index}
+        else
+            table.insert(source, join.second_index)
+        end
+
+        is_joined[join.second_index] = true
+    end
+
+    function collect_joined_indices(index) do
+        local source = join_source[index]
+
+        if not source then
+            return nil
+        end
+
+        local result = {index}
+
+        for _, source_index in pairs(source) do
+            local child_results = collect_joined_indices(source_index)
+
+            if child_results then
+                for _, child_index in pairs(child_results) do
+                    table.insert(result, child_index)
+                end
+            end
+        end
+
+        return result
+    end
+
+    local result = {}
+
+    for index, node in pairs(static_nodes) do
+        if not is_joined[index] then
+            local sources = join_source[index]
+
+            if sources then
+                local children = {}
+                local mesh_bb = node.mesh_bb
+
+                for _, source_index in pairs(sources) do
+                    table.insert(children, static_nodes[source_index])
+                    mesh_bb = mesh_bb:union(static_nodes[source_index].mesh_bb)
+                end
+
+                table.insert({
+                    mesh_bb = mesh_bb,
+                    children = children,
+                })
+            else
+                table.insert(result, static_nodes[index])
+            end
+        end
+    end
+
+    return result
+end
+
+local function serialize_static_index(index)
+    local leaf_nodes = {}
+    local branch_nodes = {}
+
+    local function traverse_static_index(index, mesh_bb)
+        local static_start = len(leaf_nodes)
+
+        -- collect the leaf nodes first
+        for _, child in index do
+            if not child.children then
+                table.insert(leaf_nodes, child)
+            end
+        end
+
+        local static_range = {static_start, len(leaf_nodes)}
+        local total_descendant_count = 0
+
+        -- recursively build the rest of the nodes
+        for _, child in index do
+            if child.children then
+                total_descendant_count = total_descendant_count + traverse_static_index(child.children, child.mesh_bb)
+            end
+        end
+
+        table.insert(branch_nodes, {
+            box = mesh_bb,
+            staticRange = static_range,
+            siblingOffset = total_descendant_count + 1,
+        })
+
+        return total_descendant_count
+    end
+
+    local room_bb = index[1].mesh_bb
+
+    for _, child in pairs(index) do
+        room_bb = room_bb:union(child.mesh_bb)
+    end
+
+    traverse_static_index(index, room_bb)
+
+    return leaf_nodes, branch_nodes
+end
+
+local MAX_STATIC_INDEX_DEPTH = 4
+
+local function build_static_index(room_static_nodes)
+    local animated_nodes = {}
+    local non_moving_nodes = {}
+
+    for _, node in pairs(room_static_nodes) do
+        if node.transform_index then
+            table.insert(animated_nodes, node)
+        else
+            table.insert(non_moving_nodes, node)
+        end
+    end
+
+    local non_moving_nodes = build_static_index(non_moving_nodes, 0.25)
+    local current_depth = 1
+
+    while current_depth < MAX_STATIC_INDEX_DEPTH and #non_moving_nodes > 4 do
+        non_moving_nodes = build_static_index(non_moving_nodes, 0.25)
+        
+        current_depth = current_depth + 1
+    end
+
+    local static_result, branch_index = serialize_static_index(non_moving_nodes)
+
+    local animated_min = #static_result
+
+    for _, animated_node in pairs(animated_nodes) do
+        table.insert(static_result, animated_node)
+    end
+
+    return {
+        static_nodes = static_result,
+        branch_index = branch_index,
+        animated_range = {
+            min = animated_min,
+            max = #static_result,
+        },
+    }
+end
+
+local function process_static_nodes(nodes)
     local result = {}
     local bb_scale = sk_input.settings.fixed_point_scale
 
@@ -143,12 +321,14 @@ local function proccessStaticNodes(nodes)
     return result;
 end
 
-local static_nodes = proccessStaticNodes(sk_scene.nodes_for_type('@static'))
+local static_nodes = process_static_nodes(sk_scene.nodes_for_type('@static'))
 
 local static_content_elements = {}
 
 local room_ranges = {}
 local static_bounding_boxes = {}
+
+local bb_scale_inv = 1 / sk_input.settings.fixed_point_scale
 
 for index, static_node in pairs(static_nodes) do
     if static_node.signal then
@@ -163,6 +343,7 @@ for index, static_node in pairs(static_nodes) do
 
     table.insert(static_content_elements, {
         displayList = static_node.display_list,
+        center = static_node.mesh_bb:lerp(0.5) * bb_scale_inv,
         materialIndex = static_node.material_index,
         transformIndex = static_node.transform_index and (static_node.transform_index - 1) or sk_definition_writer.raw('NO_TRANSFORM_INDEX'),
     })
