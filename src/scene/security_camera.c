@@ -140,6 +140,9 @@ void securityCameraInit(struct SecurityCamera* securityCamera, struct SecurityCa
 }
 
 void securityCameraUpdate(struct SecurityCamera* securityCamera) {
+    if (securityCamera->collisionObject.flags & COLLISION_OBJECT_PLAYER_STANDING) {
+        securityCamera->collisionObject.flags &= ~COLLISION_OBJECT_PLAYER_STANDING;
+    }
     if (decorObjectUpdateFizzler(&securityCamera->collisionObject, &securityCamera->fizzleTime) == FizzleCheckResultEnd) {
         dynamicSceneRemove(securityCamera->dynamicId);
         collisionSceneRemoveDynamicObject(&securityCamera->collisionObject);
