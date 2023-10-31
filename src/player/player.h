@@ -11,7 +11,7 @@
 #include "../sk64/skelatool_armature.h"
 #include "../physics/point_constraint.h"
 
-#define PLAYER_GRABBING_THROUGH_NOTHING -1
+#define PLAYER_GRABBING_THROUGH_NOTHING 0
 
 #define PLAYER_HEAD_HEIGHT              1.0f
 

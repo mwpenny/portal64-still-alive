@@ -939,8 +939,9 @@ int sceneOpenPortalFromHit(struct Scene* scene, struct Ray* ray, struct RaycastH
 
 int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex, int fromPlayer, int just_checking) {
     struct RaycastHit hit;
+    short numPortalsPassed;
 
-    if (!collisionSceneRaycast(&gCollisionScene, roomIndex, ray, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, 1000000.0f, 0, &hit)) {
+    if (!collisionSceneRaycast(&gCollisionScene, roomIndex, ray, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, 1000000.0f, 0, &hit, &numPortalsPassed)) {
         return 0;
     }
 

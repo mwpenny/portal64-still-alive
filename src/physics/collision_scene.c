@@ -423,7 +423,7 @@ int collisionSceneRaycastOnlyDynamic(struct CollisionScene* scene, struct Ray* r
     return hit->distance != maxDistance;
 }
 
-int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, int collisionLayers, float maxDistance, int passThroughPortals, struct RaycastHit* hit) {
+int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, int collisionLayers, float maxDistance, int passThroughPortals, struct RaycastHit* hit, short* numPortalsPassed) {
     hit->distance = maxDistance;
     hit->throughPortal = NULL;
     hit->roomIndex = roomIndex;
@@ -458,6 +458,12 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
         collisionSceneIsPortalOpen()) {
         for (int i = 0; i < 2; ++i) {
             if (collisionSceneIsTouchingSinglePortal(&hit->at, &hit->normal, gCollisionScene.portalTransforms[i], i)) {
+                if (i == 0){
+                    *numPortalsPassed += 1;
+                }else{
+                    *numPortalsPassed -= 1;
+                }
+
                 struct Transform portalTransform;
                 collisionSceneGetPortalTransform(i, &portalTransform);
 
@@ -468,7 +474,7 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
 
                 struct RaycastHit newHit;
 
-                int result = collisionSceneRaycast(scene, gCollisionScene.portalRooms[1 - i], &newRay, collisionLayers, maxDistance - hit->distance, 0, &newHit);
+                int result = collisionSceneRaycast(scene, gCollisionScene.portalRooms[1 - i], &newRay, collisionLayers, maxDistance - hit->distance, passThroughPortals, &newHit, numPortalsPassed);
 
                 if (result) {
                     newHit.distance += hit->distance;

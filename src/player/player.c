@@ -234,16 +234,18 @@ void playerHandleCollision(struct Player* player) {
 }
 
 void playerApplyPortalGrab(struct Player* player, int portalIndex) {
-    if (player->grabbingThroughPortal == PLAYER_GRABBING_THROUGH_NOTHING) {
-        player->grabbingThroughPortal = portalIndex;
-    } else if (player->grabbingThroughPortal != portalIndex) {
-        player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
+    if (portalIndex){
+        player->grabbingThroughPortal -= 1;
+    }else{
+        player->grabbingThroughPortal += 1;
     }
 }
 
 void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) {
     if (grabbing && grabbing->flags & COLLISION_OBJECT_PLAYER_STANDING){
         player->grabConstraint.object = NULL;
+        contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
+        player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
     }
     else if (grabbing && !player->grabConstraint.object) {
         pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 1.0f);
@@ -253,6 +255,7 @@ void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) 
         player->grabConstraint.object = NULL;
         contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
         hudResolvePrompt(&gScene.hud, CutscenePromptTypeDrop);
+        player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
     } else if (grabbing != player->grabConstraint.object) {
         pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 1.0f);
     }
@@ -290,7 +293,7 @@ int playerIsGrabbing(struct Player* player) {
     return player->grabConstraint.object != NULL;
 }
 
-int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPastObject) {
+int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPastObject, short* numPortalsPassed) {
     struct Ray ray;
 
     ray.origin = player->lookTransform.position;
@@ -303,11 +306,11 @@ int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPa
     if (checkPastObject){
         short prevCollisionLayers = player->grabConstraint.object->collisionLayers;
         player->grabConstraint.object->collisionLayers = 0;
-        result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit);
+        result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit, numPortalsPassed);
         player->grabConstraint.object->collisionLayers = prevCollisionLayers;
     }
     else{
-        result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit);
+        result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit, numPortalsPassed);
     }
 
     player->collisionObject.collisionLayers = PLAYER_COLLISION_LAYERS;
@@ -325,19 +328,15 @@ void playerUpdateGrabbedObject(struct Player* player) {
             playerSetGrabbing(player, NULL);
         } else {
             struct RaycastHit hit;
+            short numPortalsPassed = 0;
 
-            if (playerRaycastGrab(player, &hit, 0)) {
+            if (playerRaycastGrab(player, &hit, 0, &numPortalsPassed)) {
                 hit.object->flags |= COLLISION_OBJECT_INTERACTED;
 
-                if (hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable)) {
+                if (hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable) && !(hit.object->flags & COLLISION_OBJECT_PLAYER_STANDING)) {
                     playerSetGrabbing(player, hit.object);
                     player->flags |= PlayerJustSelect;
-
-                    if (hit.throughPortal) {
-                        player->grabbingThroughPortal = hit.throughPortal == gCollisionScene.portalTransforms[0] ? 0 : 1;
-                    } else {
-                        player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
-                    }
+                    player->grabbingThroughPortal = numPortalsPassed;
                 }
                 else if ((hit.object->body)){
                     player->flags |= PlayerJustSelect;
@@ -355,6 +354,18 @@ void playerUpdateGrabbedObject(struct Player* player) {
 
     if (player->grabConstraint.object && (player->grabConstraint.object->body->flags & RigidBodyFlagsGrabbable) == 0) {
         playerSetGrabbing(player, NULL);
+    }
+
+    // if the object is being held through a portal and can no longer be seen, drop it.
+    if (player->grabConstraint.object && player->grabbingThroughPortal){
+        struct RaycastHit testhit;
+        short testnumPortalsPassed = 0;
+        if (playerRaycastGrab(player, &testhit, 0, &testnumPortalsPassed)){
+            if ((testnumPortalsPassed != player->grabbingThroughPortal) && (testhit.object != player->grabConstraint.object)){
+                playerSetGrabbing(player, NULL);
+                return;
+            }
+        }
     }
 
     if (player->grabConstraint.object) {
@@ -380,7 +391,8 @@ void playerUpdateGrabbedObject(struct Player* player) {
         // try to determine how far away to set the grab dist
         struct RaycastHit hit;
         struct Vector3 temp_grab_dist = gGrabDistance;
-        if (playerRaycastGrab(player, &hit, 1)){
+        short unused = 0;
+        if (playerRaycastGrab(player, &hit, 1, &unused)){
             float dist = hit.distance;
             temp_grab_dist.z = maxf(((-1.0f*fabsf(dist))+0.2f), gGrabDistance.z);
             temp_grab_dist.z = minf(temp_grab_dist.z, -0.2f);
@@ -401,12 +413,14 @@ void playerUpdateGrabbedObject(struct Player* player) {
             }
 
             struct Transform pointTransform;
-            collisionSceneGetPortalTransform(player->grabbingThroughPortal, &pointTransform);
+            collisionSceneGetPortalTransform(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform);
 
-            transformPoint(&pointTransform, &grabPoint, &grabPoint);
-            struct Quaternion finalRotation;
-            quatMultiply(&pointTransform.rotation, &grabRotation, &finalRotation);
-            grabRotation = finalRotation;
+            for (int i = 0; i < abs(player->grabbingThroughPortal); ++i) {
+                transformPoint(&pointTransform, &grabPoint, &grabPoint);
+                struct Quaternion finalRotation;
+                quatMultiply(&pointTransform.rotation, &grabRotation, &finalRotation);
+                grabRotation = finalRotation;
+            }
         }
 
         pointConstraintUpdateTarget(&player->grabConstraint, &grabPoint, &grabRotation);

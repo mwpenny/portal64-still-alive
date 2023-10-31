@@ -212,8 +212,9 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
         }
 
         struct RaycastHit hit;
+        short numPortalsPassed;
 
-        if (collisionSceneRaycast(&gCollisionScene, projectile->roomIndex, &projectile->positionDirection, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, PORTAL_PROJECTILE_SPEED * FIXED_DELTA_TIME + 0.1f, 0, &hit)) {
+        if (collisionSceneRaycast(&gCollisionScene, projectile->roomIndex, &projectile->positionDirection, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, PORTAL_PROJECTILE_SPEED * FIXED_DELTA_TIME + 0.1f, 0, &hit, &numPortalsPassed)) {
             if (!sceneOpenPortalFromHit(
                 &gScene,
                 &projectile->positionDirection,
@@ -247,8 +248,9 @@ void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray
     struct PortalGunProjectile* projectile = &portalGun->projectiles[portalIndex];
 
     struct RaycastHit hit;
+    short numPortalsPassed;
 
-    if (!collisionSceneRaycast(&gCollisionScene, roomIndex, ray, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, 1000000.0f, 0, &hit)) {
+    if (!collisionSceneRaycast(&gCollisionScene, roomIndex, ray, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, 1000000.0f, 0, &hit, &numPortalsPassed)) {
         vector3AddScaled(&ray->origin, &ray->dir, NO_HIT_DISTANCE, &hit.at);
         hit.distance = NO_HIT_DISTANCE;
         hit.normal = gZeroVec;
