@@ -64,6 +64,18 @@ local function insert_or_merge(static_list, new_entry)
     table.insert(static_list, new_entry)
 end
 
+local function bb_list(bb) 
+    return {
+        bb.min.x,
+        bb.min.y,
+        bb.min.z,
+
+        bb.max.x,
+        bb.max.y,
+        bb.max.z,
+    }
+end
+
 local function list_static_nodes(nodes)
     local result = {}
     local bb_scale = sk_input.settings.fixed_point_scale
@@ -111,11 +123,11 @@ local function list_static_nodes(nodes)
     return result;
 end
 
-local function build_static_index(static_nodes, target_ratio)
+local function build_static_bvh_step(static_nodes, target_ratio)
     local join_cost = {}
 
-    for i = 1,len(static_nodes) do
-        for j = i+1,len(static_nodes) do
+    for i = 1,#static_nodes do
+        for j = i+1,#static_nodes do
             table.insert(join_cost, {
                 first_index = i,
                 second_index = j,
@@ -127,9 +139,8 @@ local function build_static_index(static_nodes, target_ratio)
     table.sort(join_cost, function(a, b)
         return a.cost < b.cost
     end)
-
     
-    local join_count = math.floor(len(static_nodes) * (1 - target_ratio))
+    local join_count = math.floor(#static_nodes * (1 - target_ratio))
 
     local join_source = {}
     local is_joined = {}
@@ -147,7 +158,7 @@ local function build_static_index(static_nodes, target_ratio)
         is_joined[join.second_index] = true
     end
 
-    function collect_joined_indices(index) do
+    local function collect_joined_indices(index)
         local source = join_source[index]
 
         if not source then
@@ -173,7 +184,7 @@ local function build_static_index(static_nodes, target_ratio)
 
     for index, node in pairs(static_nodes) do
         if not is_joined[index] then
-            local sources = join_source[index]
+            local sources = collect_joined_indices(index)
 
             if sources then
                 local children = {}
@@ -184,7 +195,7 @@ local function build_static_index(static_nodes, target_ratio)
                     mesh_bb = mesh_bb:union(static_nodes[source_index].mesh_bb)
                 end
 
-                table.insert({
+                table.insert(result, {
                     mesh_bb = mesh_bb,
                     children = children,
                 })
@@ -202,32 +213,36 @@ local function serialize_static_index(index)
     local branch_nodes = {}
 
     local function traverse_static_index(index, mesh_bb)
-        local static_start = len(leaf_nodes)
+        local static_start = #leaf_nodes
 
         -- collect the leaf nodes first
-        for _, child in index do
+        for _, child in pairs(index) do
             if not child.children then
                 table.insert(leaf_nodes, child)
             end
         end
 
-        local static_range = {static_start, len(leaf_nodes)}
+        local static_range = {min = static_start, max = #leaf_nodes}
         local total_descendant_count = 0
 
+        local branch_node = {
+            box = bb_list(mesh_bb),
+            staticRange = static_range,
+            siblingOffset = 0,
+        }
+
+        table.insert(branch_nodes, branch_node)
+
         -- recursively build the rest of the nodes
-        for _, child in index do
+        for _, child in pairs(index) do
             if child.children then
                 total_descendant_count = total_descendant_count + traverse_static_index(child.children, child.mesh_bb)
             end
         end
 
-        table.insert(branch_nodes, {
-            box = mesh_bb,
-            staticRange = static_range,
-            siblingOffset = total_descendant_count + 1,
-        })
+        branch_node.siblingOffset = total_descendant_count + 1
 
-        return total_descendant_count
+        return total_descendant_count + 1
     end
 
     local room_bb = index[1].mesh_bb
@@ -255,11 +270,11 @@ local function build_static_index(room_static_nodes)
         end
     end
 
-    local non_moving_nodes = build_static_index(non_moving_nodes, 0.25)
+    local non_moving_nodes = build_static_bvh_step(non_moving_nodes, 0.25)
     local current_depth = 1
 
     while current_depth < MAX_STATIC_INDEX_DEPTH and #non_moving_nodes > 4 do
-        non_moving_nodes = build_static_index(non_moving_nodes, 0.25)
+        non_moving_nodes = build_static_bvh_step(non_moving_nodes, 0.25)
         
         current_depth = current_depth + 1
     end
@@ -318,10 +333,58 @@ local function process_static_nodes(nodes)
         return a.room_index < b.room_index
     end)
 
-    return result;
+    local last_boundary = 1
+    local room_bvh_list = {}
+
+    local final_static_list = {}
+
+    for room_index = 0,room_export.room_count-1 do
+        local next_boundary = last_boundary
+
+        while next_boundary <= #result and result[next_boundary].room_index == room_index do
+            next_boundary = next_boundary + 1
+        end
+
+        local room_bvh = build_static_index({table.unpack(result, last_boundary, next_boundary - 1)})
+
+        local animated_boxes = {}
+
+        for i = room_bvh.animated_range.min+1, room_bvh.animated_range.max do
+            table.insert(animated_boxes, bb_list(room_bvh.static_nodes[i].mesh_bb))
+        end
+
+        sk_definition_writer.add_definition('animated_boxes', 'struct BoundingBoxs16[]', '_geo', animated_boxes);
+
+        room_bvh.animated_range.min = room_bvh.animated_range.min + #final_static_list
+        room_bvh.animated_range.max = room_bvh.animated_range.max + #final_static_list
+
+        for _, branch_node in pairs(room_bvh.branch_index) do
+            branch_node.staticRange.min = branch_node.staticRange.min + #final_static_list
+            branch_node.staticRange.max = branch_node.staticRange.max + #final_static_list
+        end
+
+        sk_definition_writer.add_definition('bvh', 'struct StaticContentBox[]', '_geo', room_bvh.branch_index);
+
+        table.insert(room_bvh_list, {
+            boxIndex = sk_definition_writer.reference_to(room_bvh.branch_index, 1),
+            animatedBoxes = sk_definition_writer.reference_to(animated_boxes, 1),
+            animatedRange = room_bvh.animated_range,
+            boxCount = #room_bvh.branch_index,
+        })
+
+        for _, node in pairs(room_bvh.static_nodes) do
+            table.insert(final_static_list, node)
+        end
+
+        last_boundary = next_boundary
+    end
+
+    sk_definition_writer.add_definition('room_bvh', 'struct StaticIndex[]', '_geo', room_bvh_list);
+
+    return final_static_list, room_bvh_list;
 end
 
-local static_nodes = process_static_nodes(sk_scene.nodes_for_type('@static'))
+local static_nodes, room_bvh_list = process_static_nodes(sk_scene.nodes_for_type('@static'))
 
 local static_content_elements = {}
 
@@ -347,15 +410,7 @@ for index, static_node in pairs(static_nodes) do
         materialIndex = static_node.material_index,
         transformIndex = static_node.transform_index and (static_node.transform_index - 1) or sk_definition_writer.raw('NO_TRANSFORM_INDEX'),
     })
-    table.insert(static_bounding_boxes, {
-        static_node.mesh_bb.min.x,
-        static_node.mesh_bb.min.y,
-        static_node.mesh_bb.min.z,
-
-        static_node.mesh_bb.max.x,
-        static_node.mesh_bb.max.y,
-        static_node.mesh_bb.max.z,
-    })
+    table.insert(static_bounding_boxes, bb_list(static_node.mesh_bb))
 
     good_index = index - 1
 
@@ -396,4 +451,5 @@ return {
     room_ranges = room_ranges,
     signal_ranges = signal_ranges,
     signal_indices = signal_indices,
+    room_bvh_list = room_bvh_list,
 }

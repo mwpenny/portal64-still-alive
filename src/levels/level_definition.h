@@ -21,9 +21,9 @@ struct StaticContentBox {
 
 struct StaticIndex {
     struct StaticContentBox* boxIndex;
-    struct StaticContentElement* staticContent;
     struct BoundingBoxs16* animatedBoxes;
     struct Rangeu16 animatedRange;
+    short boxCount;
 };
 
 struct StaticContentElement {
@@ -315,6 +315,7 @@ struct SecurityCameraDefinition {
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement *staticContent;
+    struct StaticIndex* roomBvhList;
     struct Rangeu16 *signalToStaticRanges;
     u16 *signalToStaticIndices;
     struct Rangeu16 *roomStaticMapping;

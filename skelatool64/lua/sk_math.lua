@@ -259,6 +259,13 @@ function Vector3.max(a, b)
     return vector3(math.max(a.x, b.x), math.max(a.y, b.y), math.max(a.z, b.z))
 end
 
+--- Returns a copy of this vector
+--- @function max
+--- @treturn Vector3
+function Vector3.copy(vector)
+    return vector3(vector.x, vector.y, vector.z)
+end
+
 --- Get the dot product between two vectors
 --- @function dot
 --- @tparam Vector3 b
@@ -406,6 +413,13 @@ end
 function Box3.volume(box)
     local side_length = box.max - box.min
     return side_length.x * side_length.y * side_length.z
+end
+
+--- Returns a deep copy of the box
+--- @function copy
+--- @treturn Box3
+function Box3.copy(box)
+    return box3(box.min:copy(), box.max:copy())
 end
 
 function Box3.__tostring(b)

@@ -16,6 +16,7 @@ sk_definition_writer.add_definition("level", "struct LevelDefinition", "_geo", {
     collisionQuadCount = #collision_export.collision_objects,
     staticContent = sk_definition_writer.reference_to(static_export.static_content_elements, 1),
     staticContentCount = #static_export.static_content_elements,
+    roomBvhList = sk_definition_writer.reference_to(static_export.room_bvh_list, 1),
     signalToStaticRanges = sk_definition_writer.reference_to(static_export.signal_ranges, 1),
     signalToStaticIndices = sk_definition_writer.reference_to(static_export.signal_indices, 1),
     signalToStaticCount = #static_export.signal_ranges,
