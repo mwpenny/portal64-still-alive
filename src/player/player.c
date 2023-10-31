@@ -293,7 +293,7 @@ int playerIsGrabbing(struct Player* player) {
     return player->grabConstraint.object != NULL;
 }
 
-int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPastObject, short* numPortalsPassed) {
+int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPastObject) {
     struct Ray ray;
 
     ray.origin = player->lookTransform.position;
@@ -306,11 +306,11 @@ int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPa
     if (checkPastObject){
         short prevCollisionLayers = player->grabConstraint.object->collisionLayers;
         player->grabConstraint.object->collisionLayers = 0;
-        result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit, numPortalsPassed);
+        result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit);
         player->grabConstraint.object->collisionLayers = prevCollisionLayers;
     }
     else{
-        result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit, numPortalsPassed);
+        result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit);
     }
 
     player->collisionObject.collisionLayers = PLAYER_COLLISION_LAYERS;
@@ -328,15 +328,14 @@ void playerUpdateGrabbedObject(struct Player* player) {
             playerSetGrabbing(player, NULL);
         } else {
             struct RaycastHit hit;
-            short numPortalsPassed = 0;
 
-            if (playerRaycastGrab(player, &hit, 0, &numPortalsPassed)) {
+            if (playerRaycastGrab(player, &hit, 0)) {
                 hit.object->flags |= COLLISION_OBJECT_INTERACTED;
 
                 if (hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable) && !(hit.object->flags & COLLISION_OBJECT_PLAYER_STANDING)) {
                     playerSetGrabbing(player, hit.object);
                     player->flags |= PlayerJustSelect;
-                    player->grabbingThroughPortal = numPortalsPassed;
+                    player->grabbingThroughPortal = hit.numPortalsPassed;
                 }
                 else if ((hit.object->body)){
                     player->flags |= PlayerJustSelect;
@@ -359,9 +358,8 @@ void playerUpdateGrabbedObject(struct Player* player) {
     // if the object is being held through a portal and can no longer be seen, drop it.
     if (player->grabConstraint.object && player->grabbingThroughPortal){
         struct RaycastHit testhit;
-        short testnumPortalsPassed = 0;
-        if (playerRaycastGrab(player, &testhit, 0, &testnumPortalsPassed)){
-            if ((testnumPortalsPassed != player->grabbingThroughPortal) && (testhit.object != player->grabConstraint.object)){
+        if (playerRaycastGrab(player, &testhit, 0)){
+            if ((testhit.numPortalsPassed != player->grabbingThroughPortal) && (testhit.object != player->grabConstraint.object)){
                 playerSetGrabbing(player, NULL);
                 return;
             }
@@ -391,8 +389,8 @@ void playerUpdateGrabbedObject(struct Player* player) {
         // try to determine how far away to set the grab dist
         struct RaycastHit hit;
         struct Vector3 temp_grab_dist = gGrabDistance;
-        short unused = 0;
-        if (playerRaycastGrab(player, &hit, 1, &unused)){
+
+        if (playerRaycastGrab(player, &hit, 1)){
             float dist = hit.distance;
             temp_grab_dist.z = maxf(((-1.0f*fabsf(dist))+0.2f), gGrabDistance.z);
             temp_grab_dist.z = minf(temp_grab_dist.z, -0.2f);

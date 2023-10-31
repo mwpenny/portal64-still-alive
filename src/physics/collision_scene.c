@@ -423,10 +423,11 @@ int collisionSceneRaycastOnlyDynamic(struct CollisionScene* scene, struct Ray* r
     return hit->distance != maxDistance;
 }
 
-int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, int collisionLayers, float maxDistance, int passThroughPortals, struct RaycastHit* hit, short* numPortalsPassed) {
+int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, int collisionLayers, float maxDistance, int passThroughPortals, struct RaycastHit* hit) {
     hit->distance = maxDistance;
     hit->throughPortal = NULL;
     hit->roomIndex = roomIndex;
+    hit->numPortalsPassed = 0;
 
     int roomsToCheck = 5;
 
@@ -458,10 +459,11 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
         collisionSceneIsPortalOpen()) {
         for (int i = 0; i < 2; ++i) {
             if (collisionSceneIsTouchingSinglePortal(&hit->at, &hit->normal, gCollisionScene.portalTransforms[i], i)) {
+                short numPortalsPassed;
                 if (i == 0){
-                    *numPortalsPassed += 1;
+                    numPortalsPassed = 1;
                 }else{
-                    *numPortalsPassed -= 1;
+                    numPortalsPassed = -1;
                 }
 
                 struct Transform portalTransform;
@@ -474,11 +476,12 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
 
                 struct RaycastHit newHit;
 
-                int result = collisionSceneRaycast(scene, gCollisionScene.portalRooms[1 - i], &newRay, collisionLayers, maxDistance - hit->distance, passThroughPortals, &newHit, numPortalsPassed);
+                int result = collisionSceneRaycast(scene, gCollisionScene.portalRooms[1 - i], &newRay, collisionLayers, maxDistance - hit->distance, passThroughPortals, &newHit);
 
                 if (result) {
                     newHit.distance += hit->distance;
                     newHit.throughPortal = gCollisionScene.portalTransforms[i];
+                    newHit.numPortalsPassed += numPortalsPassed;
                     *hit = newHit;
                 }
 
