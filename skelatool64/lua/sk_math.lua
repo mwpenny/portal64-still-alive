@@ -415,6 +415,14 @@ function Box3.volume(box)
     return side_length.x * side_length.y * side_length.z
 end
 
+--- Returns the area of the box
+--- @function area
+--- @treturn number
+function Box3.area(box)
+    local side_length = box.max - box.min
+    return (side_length.x * side_length.y + side_length.y * side_length.z + side_length.z * side_length.x) * 2
+end
+
 --- Returns a deep copy of the box
 --- @function copy
 --- @treturn Box3

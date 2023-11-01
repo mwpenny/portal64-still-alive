@@ -40,7 +40,7 @@ local function bb_union_cost(a, b)
     local union = a:union(b)
     local intersection = a:intersection(b)
 
-    return union:volume() - a:volume() - b:volume() + intersection:volume()
+    return union:area() - a:area() - b:area() + intersection:area()
 end
 
 local function insert_or_merge(static_list, new_entry)
@@ -140,22 +140,29 @@ local function build_static_bvh_step(static_nodes, target_ratio)
         return a.cost < b.cost
     end)
     
-    local join_count = math.floor(#static_nodes * (1 - target_ratio))
+    local target_join_count = math.floor(#static_nodes * (1 - target_ratio))
 
     local join_source = {}
     local is_joined = {}
+    local current_join_count = 1
 
-    for i = 1,join_count do 
-        local join = join_cost[i]
-        local source = join_source[join.first_index]
+    for _, join in pairs(join_cost) do
+        if not is_joined[join.second_index] then
+            local source = join_source[join.first_index]
 
-        if not source then
-            join_source[join.first_index] = {join.second_index}
-        else
-            table.insert(source, join.second_index)
+            if not source then
+                join_source[join.first_index] = {join.second_index}
+            else
+                table.insert(source, join.second_index)
+            end
+
+            is_joined[join.second_index] = true
+            current_join_count = current_join_count + 1
+
+            if current_join_count >= target_join_count then
+                break
+            end
         end
-
-        is_joined[join.second_index] = true
     end
 
     local function collect_joined_indices(index)
@@ -174,6 +181,8 @@ local function build_static_bvh_step(static_nodes, target_ratio)
                 for _, child_index in pairs(child_results) do
                     table.insert(result, child_index)
                 end
+            else 
+                table.insert(result, source_index)
             end
         end
 
@@ -206,6 +215,19 @@ local function build_static_bvh_step(static_nodes, target_ratio)
     end
 
     return result
+end
+
+local function debug_print_index(index, indent)
+    for key, node in pairs(index) do
+        if type(node) ~= 'table' then
+            print(indent .. key .. ' not table ' .. tostring(node))
+        elseif node.children then
+            print(indent .. key .. ' branch')
+            debug_print_index(node.children, '    ' .. indent)
+        else
+            print(indent .. key .. ' leaf ' .. tostring(node))
+        end
+    end
 end
 
 local function serialize_static_index(index)
@@ -345,7 +367,8 @@ local function process_static_nodes(nodes)
             next_boundary = next_boundary + 1
         end
 
-        local room_bvh = build_static_index({table.unpack(result, last_boundary, next_boundary - 1)})
+        local room_elements = {table.unpack(result, last_boundary, next_boundary - 1)}
+        local room_bvh = build_static_index(room_elements)
 
         local animated_boxes = {}
 
