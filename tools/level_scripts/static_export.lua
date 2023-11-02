@@ -123,109 +123,19 @@ local function list_static_nodes(nodes)
     return result;
 end
 
-local function build_static_bvh_step(static_nodes, target_ratio)
-    local join_cost = {}
-
-    for i = 1,#static_nodes do
-        for j = i+1,#static_nodes do
-            table.insert(join_cost, {
-                first_index = i,
-                second_index = j,
-                cost = bb_union_cost(static_nodes[i].mesh_bb, static_nodes[j].mesh_bb),
-            })
-        end
-    end
-    
-    table.sort(join_cost, function(a, b)
-        return a.cost < b.cost
-    end)
-    
-    local target_join_count = math.floor(#static_nodes * (1 - target_ratio))
-
-    local join_source = {}
-    local is_joined = {}
-    local current_join_count = 1
-
-    for _, join in pairs(join_cost) do
-        if not is_joined[join.second_index] then
-            local source = join_source[join.first_index]
-
-            if not source then
-                join_source[join.first_index] = {join.second_index}
-            else
-                table.insert(source, join.second_index)
-            end
-
-            is_joined[join.second_index] = true
-            current_join_count = current_join_count + 1
-
-            if current_join_count >= target_join_count then
-                break
-            end
-        end
-    end
-
-    local function collect_joined_indices(index)
-        local source = join_source[index]
-
-        if not source then
-            return nil
-        end
-
-        local result = {index}
-
-        for _, source_index in pairs(source) do
-            local child_results = collect_joined_indices(source_index)
-
-            if child_results then
-                for _, child_index in pairs(child_results) do
-                    table.insert(result, child_index)
-                end
-            else 
-                table.insert(result, source_index)
-            end
-        end
-
-        return result
-    end
-
-    local result = {}
-
-    for index, node in pairs(static_nodes) do
-        if not is_joined[index] then
-            local sources = collect_joined_indices(index)
-
-            if sources then
-                local children = {}
-                local mesh_bb = node.mesh_bb
-
-                for _, source_index in pairs(sources) do
-                    table.insert(children, static_nodes[source_index])
-                    mesh_bb = mesh_bb:union(static_nodes[source_index].mesh_bb)
-                end
-
-                table.insert(result, {
-                    mesh_bb = mesh_bb,
-                    children = children,
-                })
-            else
-                table.insert(result, static_nodes[index])
-            end
-        end
-    end
-
-    return result
-end
-
 local function debug_print_index(index, indent)
+    if indent == '' then
+        print('tree begin')
+    end
+
     for key, node in pairs(index) do
         if type(node) ~= 'table' then
             print(indent .. key .. ' not table ' .. tostring(node))
         elseif node.children then
-            print(indent .. key .. ' branch')
+            print(indent .. key .. ' branch ' .. tostring(node.mesh_bb))
             debug_print_index(node.children, '    ' .. indent)
         else
-            print(indent .. key .. ' leaf ' .. tostring(node))
+            print(indent .. key .. ' leaf ' .. tostring(node.mesh_bb))
         end
     end
 end
@@ -278,6 +188,67 @@ local function serialize_static_index(index)
     return leaf_nodes, branch_nodes
 end
 
+local axis_index_to_name = {'x', 'y', 'z'}
+
+local function bb_center(bb, axis_name) 
+    return (bb.min[axis_name] + bb.max[axis_name]) * 0.5
+end
+
+local function build_bvh_recursive(nodes, axis, fail_count) 
+    if #nodes <= 1 or fail_count == 3 then
+        return nodes
+    end
+
+    local axis_name = axis_index_to_name[axis]
+
+    local center_min = bb_center(nodes[1].mesh_bb, axis_name)
+    local center_max = center_min
+
+    local total_bb = nodes[1].mesh_bb
+
+    for _, node in pairs(nodes) do
+        local node_center = bb_center(node.mesh_bb, axis_name)
+
+        center_min = math.min(center_min, node_center)
+        center_max = math.max(center_max, node_center)
+
+        total_bb = total_bb:union(node.mesh_bb)
+    end
+
+    local left = {}
+    local right = {}
+
+    local center = (center_min + center_max) * 0.5
+
+    for _, node in pairs(nodes) do
+        if bb_center(node.mesh_bb, axis_name) < center then
+            table.insert(left, node)
+        else
+            table.insert(right, node)
+        end
+    end
+
+    local next_axis = axis + 1
+
+    if next_axis == 4 then
+        next_axis = 1
+    end
+
+    if #left == 0 then
+        return build_bvh_recursive(right, next_axis, fail_count + 1)
+    elseif #right == 0 then
+        return build_bvh_recursive(left, next_axis, fail_count + 1)
+    end
+
+    return {{
+        children = {
+            table.unpack(build_bvh_recursive(left, next_axis, 0)),
+            table.unpack(build_bvh_recursive(right, next_axis, 0)),
+        },
+        mesh_bb = total_bb,
+    }}
+end
+
 local MAX_STATIC_INDEX_DEPTH = 4
 
 local function build_static_index(room_static_nodes)
@@ -292,14 +263,7 @@ local function build_static_index(room_static_nodes)
         end
     end
 
-    local non_moving_nodes = build_static_bvh_step(non_moving_nodes, 0.25)
-    local current_depth = 1
-
-    while current_depth < MAX_STATIC_INDEX_DEPTH and #non_moving_nodes > 4 do
-        non_moving_nodes = build_static_bvh_step(non_moving_nodes, 0.25)
-        
-        current_depth = current_depth + 1
-    end
+    local non_moving_nodes = build_bvh_recursive(non_moving_nodes, 1, 0)
 
     local static_result, branch_index = serialize_static_index(non_moving_nodes)
 
