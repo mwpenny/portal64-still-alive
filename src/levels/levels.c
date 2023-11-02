@@ -45,7 +45,6 @@ struct LevelDefinition* levelFixPointers(struct LevelDefinition* from, int point
 
     result->staticContent = ADJUST_POINTER_POS(result->staticContent, pointerOffset);
     result->roomStaticMapping = ADJUST_POINTER_POS(result->roomStaticMapping, pointerOffset);
-    result->staticBoundingBoxes = ADJUST_POINTER_POS(result->staticBoundingBoxes, pointerOffset);
     result->signalToStaticRanges = ADJUST_POINTER_POS(result->signalToStaticRanges, pointerOffset);
     result->signalToStaticIndices = ADJUST_POINTER_POS(result->signalToStaticIndices, pointerOffset);
     result->portalSurfaces = ADJUST_POINTER_POS(result->portalSurfaces, pointerOffset);
@@ -72,6 +71,7 @@ struct LevelDefinition* levelFixPointers(struct LevelDefinition* from, int point
     }
 
     result->locations = ADJUST_POINTER_POS(result->locations, pointerOffset);
+    result->roomBvhList = ADJUST_POINTER_POS(result->roomBvhList, pointerOffset);
     result->world.rooms = ADJUST_POINTER_POS(result->world.rooms, pointerOffset);
     result->world.doorways = ADJUST_POINTER_POS(result->world.doorways, pointerOffset);
 
@@ -79,6 +79,9 @@ struct LevelDefinition* levelFixPointers(struct LevelDefinition* from, int point
         result->world.rooms[i].quadIndices = ADJUST_POINTER_POS(result->world.rooms[i].quadIndices, pointerOffset);
         result->world.rooms[i].cellContents = ADJUST_POINTER_POS(result->world.rooms[i].cellContents, pointerOffset);
         result->world.rooms[i].doorwayIndices = ADJUST_POINTER_POS(result->world.rooms[i].doorwayIndices, pointerOffset);
+
+        result->roomBvhList[i].boxIndex = ADJUST_POINTER_POS(result->roomBvhList[i].boxIndex, pointerOffset);
+        result->roomBvhList[i].animatedBoxes = ADJUST_POINTER_POS(result->roomBvhList[i].animatedBoxes, pointerOffset);
     }
 
     result->doors = ADJUST_POINTER_POS(result->doors, pointerOffset);

@@ -9,7 +9,13 @@
 
 #include "../build/assets/materials/static.h"
 
-void staticRenderTraverseIndex(struct StaticContentBox* box, struct StaticContentBox* boxEnd, struct StaticContentElement* staticContent, struct FrustrumCullingInformation* cullingInfo, struct RenderScene* renderScene) {
+void staticRenderTraverseIndex(
+    struct StaticContentBox* box, 
+    struct StaticContentBox* boxEnd, 
+    struct StaticContentElement* staticContent, 
+    struct FrustrumCullingInformation* cullingInfo, 
+    struct RenderScene* renderScene
+) {
     while (box < boxEnd) {
         if (isOutsideFrustrum(cullingInfo, &box->box)) {
             // skip all children
@@ -39,55 +45,49 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, M
 
     while (visibleRooms) {
         if (0x1 & visibleRooms) {
-            struct Rangeu16 staticRange = gCurrentLevel->roomStaticMapping[currentRoom];
+            struct StaticIndex* roomIndex = &gCurrentLevel->roomBvhList[currentRoom];
+    
+            staticRenderTraverseIndex(roomIndex->boxIndex, roomIndex->boxIndex + roomIndex->boxCount, gCurrentLevel->staticContent, cullingInfo, renderScene);
 
-            for (int i = staticRange.min; i < staticRange.max; ++i) {
-                struct BoundingBoxs16* box = &gCurrentLevel->staticBoundingBoxes[i];
+            struct BoundingBoxs16* animatedBox = roomIndex->animatedBoxes;
 
-                Mtx* matrix = NULL;
+            for (int i = roomIndex->animatedRange.min; i < roomIndex->animatedRange.max; ++i, ++animatedBox) {
+                struct StaticContentElement* staticElement = &gCurrentLevel->staticContent[i];
 
-                int transformIndex = gCurrentLevel->staticContent[i].transformIndex;
+                Mtx* matrix = &staticTransforms[staticElement->transformIndex];
+
+                short* mtxAsShorts = (short*)matrix;
+
+                int x = mtxAsShorts[12];
+                int y = mtxAsShorts[13];
+                int z = mtxAsShorts[14];
+
+                struct BoundingBoxs16 shiftedBox;
+                shiftedBox.minX = animatedBox->minX + x;
+                shiftedBox.minY = animatedBox->minY + y;
+                shiftedBox.minZ = animatedBox->minZ + z;
+
+                shiftedBox.maxX = animatedBox->maxX + x;
+                shiftedBox.maxY = animatedBox->maxY + y;
+                shiftedBox.maxZ = animatedBox->maxZ + z;
+
+                if (isOutsideFrustrum(cullingInfo, &shiftedBox)) {
+                    continue;
+                }
 
                 struct Vector3 boxCenter;
+                boxCenter.x = (float)(shiftedBox.minX + shiftedBox.maxX) * (0.5f / SCENE_SCALE);
+                boxCenter.y = (float)(shiftedBox.minY + shiftedBox.maxY) * (0.5f / SCENE_SCALE);
+                boxCenter.z = (float)(shiftedBox.minZ + shiftedBox.maxZ) * (0.5f / SCENE_SCALE);
 
-                if (transformIndex == NO_TRANSFORM_INDEX) {
-                    if (isOutsideFrustrum(cullingInfo, box)) {
-                        continue;
-                    }
-
-                    boxCenter.x = (float)((box->minX + box->maxX) * (0.5f / SCENE_SCALE));
-                    boxCenter.y = (float)(box->minY + box->maxY) * (0.5f / SCENE_SCALE);
-                    boxCenter.z = (float)(box->minZ + box->maxZ) * (0.5f / SCENE_SCALE);
-                } else {
-                    matrix = &staticTransforms[transformIndex];
-
-                    short* mtxAsShorts = (short*)matrix;
-
-                    boxCenter = gZeroVec;
-
-                    int x = mtxAsShorts[12];
-                    int y = mtxAsShorts[13];
-                    int z = mtxAsShorts[14];
-
-                    struct BoundingBoxs16 shiftedBox;
-                    shiftedBox.minX = box->minX + x;
-                    shiftedBox.minY = box->minY + y;
-                    shiftedBox.minZ = box->minZ + z;
-
-                    shiftedBox.maxX = box->maxX + x;
-                    shiftedBox.maxY = box->maxY + y;
-                    shiftedBox.maxZ = box->maxZ + z;
-
-                    if (isOutsideFrustrum(cullingInfo, &shiftedBox)) {
-                        continue;
-                    }
-
-                    boxCenter.x = (float)(shiftedBox.minX + shiftedBox.maxX) * (0.5f / SCENE_SCALE);
-                    boxCenter.y = (float)(shiftedBox.minY + shiftedBox.maxY) * (0.5f / SCENE_SCALE);
-                    boxCenter.z = (float)(shiftedBox.minZ + shiftedBox.maxZ) * (0.5f / SCENE_SCALE);
-                }
-                
-                renderSceneAdd(renderScene, gCurrentLevel->staticContent[i].displayList, matrix, gCurrentLevel->staticContent[i].materialIndex, &boxCenter, NULL);
+                renderSceneAdd(
+                    renderScene, 
+                    staticElement->displayList, 
+                    matrix, 
+                    staticElement->materialIndex, 
+                    &boxCenter, 
+                    NULL
+                );
             }
         }
 

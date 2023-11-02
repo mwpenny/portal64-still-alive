@@ -319,7 +319,6 @@ struct LevelDefinition {
     struct Rangeu16 *signalToStaticRanges;
     u16 *signalToStaticIndices;
     struct Rangeu16 *roomStaticMapping;
-    struct BoundingBoxs16* staticBoundingBoxes;
     struct PortalSurface* portalSurfaces;
     // maps index of a collisionQuads to indices in portalSurfaces
     struct PortalSurfaceMappingRange* portalSurfaceMappingRange;

@@ -20,7 +20,6 @@ sk_definition_writer.add_definition("level", "struct LevelDefinition", "_geo", {
     signalToStaticRanges = sk_definition_writer.reference_to(static_export.signal_ranges, 1),
     signalToStaticIndices = sk_definition_writer.reference_to(static_export.signal_indices, 1),
     signalToStaticCount = #static_export.signal_ranges,
-    staticBoundingBoxes = sk_definition_writer.reference_to(static_export.static_bounding_boxes, 1),
     roomStaticMapping = sk_definition_writer.reference_to(static_export.room_ranges, 1),
     portalSurfaces = sk_definition_writer.reference_to(portal_surfaces.portal_surfaces, 1),
     portalSurfaceCount = #portal_surfaces.portal_surfaces,

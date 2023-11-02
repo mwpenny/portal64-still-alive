@@ -412,7 +412,6 @@ local static_nodes, room_bvh_list = process_static_nodes(sk_scene.nodes_for_type
 local static_content_elements = {}
 
 local room_ranges = {}
-local static_bounding_boxes = {}
 
 local bb_scale_inv = 1 / sk_input.settings.fixed_point_scale
 
@@ -433,7 +432,6 @@ for index, static_node in pairs(static_nodes) do
         materialIndex = static_node.material_index,
         transformIndex = static_node.transform_index and (static_node.transform_index - 1) or sk_definition_writer.raw('NO_TRANSFORM_INDEX'),
     })
-    table.insert(static_bounding_boxes, bb_list(static_node.mesh_bb))
 
     good_index = index - 1
 
@@ -451,7 +449,6 @@ end
 
 sk_definition_writer.add_definition("static", "struct StaticContentElement[]", "_geo", static_content_elements)
 sk_definition_writer.add_definition("room_mapping", "struct Rangeu16[]", "_geo", room_ranges)
-sk_definition_writer.add_definition('bounding_boxes', 'struct BoundingBoxs16[]', '_geo', static_bounding_boxes)
 
 local signal_indices = {}
 local signal_ranges = {}
@@ -470,7 +467,6 @@ sk_definition_writer.add_definition('signal_indices', 'u16[]', '_geo', signal_in
 return {
     static_nodes = static_nodes,
     static_content_elements = static_content_elements,
-    static_bounding_boxes = static_bounding_boxes,
     room_ranges = room_ranges,
     signal_ranges = signal_ranges,
     signal_indices = signal_indices,
