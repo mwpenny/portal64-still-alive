@@ -124,6 +124,8 @@ local function list_static_nodes(nodes)
 end
 
 local function debug_print_index(index, indent)
+    indent = indent or ''
+
     if indent == '' then
         print('tree begin')
     end
@@ -135,7 +137,7 @@ local function debug_print_index(index, indent)
             print(indent .. key .. ' branch ' .. tostring(node.mesh_bb))
             debug_print_index(node.children, '    ' .. indent)
         else
-            print(indent .. key .. ' leaf ' .. tostring(node.mesh_bb))
+            print(indent .. key .. ' leaf ' .. tostring(node.node.name))
         end
     end
 end
@@ -194,56 +196,63 @@ local function bb_center(bb, axis_name)
     return (bb.min[axis_name] + bb.max[axis_name]) * 0.5
 end
 
-local function build_bvh_recursive(nodes, axis, fail_count) 
-    if #nodes <= 1 or fail_count == 3 then
+local function build_bvh_recursive(nodes) 
+    if #nodes <= 1 then
         return nodes
     end
 
-    local axis_name = axis_index_to_name[axis]
+    local split_halfs = {}
+    local split_score = #nodes + 1
 
-    local center_min = bb_center(nodes[1].mesh_bb, axis_name)
-    local center_max = center_min
+    for _, axis_name in pairs(axis_index_to_name) do
+        local center_min = bb_center(nodes[1].mesh_bb, axis_name)
+        local center_max = center_min
+    
+        for _, node in pairs(nodes) do
+            local node_center = bb_center(node.mesh_bb, axis_name)
+    
+            center_min = math.min(center_min, node_center)
+            center_max = math.max(center_max, node_center)
+        end
+    
+        local left = {}
+        local right = {}
+    
+        local center = (center_min + center_max) * 0.5
+    
+        for _, node in pairs(nodes) do
+            if bb_center(node.mesh_bb, axis_name) < center then
+                table.insert(left, node)
+            else
+                table.insert(right, node)
+            end
+        end
 
-    local total_bb = nodes[1].mesh_bb
+        local score = math.abs(#left - #right)
 
-    for _, node in pairs(nodes) do
-        local node_center = bb_center(node.mesh_bb, axis_name)
-
-        center_min = math.min(center_min, node_center)
-        center_max = math.max(center_max, node_center)
-
-        total_bb = total_bb:union(node.mesh_bb)
-    end
-
-    local left = {}
-    local right = {}
-
-    local center = (center_min + center_max) * 0.5
-
-    for _, node in pairs(nodes) do
-        if bb_center(node.mesh_bb, axis_name) < center then
-            table.insert(left, node)
-        else
-            table.insert(right, node)
+        if score < split_score then
+            split_score = score
+            split_halfs = {left, right}
         end
     end
 
-    local next_axis = axis + 1
-
-    if next_axis == 4 then
-        next_axis = 1
+    local total_bb = nodes[1].mesh_bb
+    
+    for _, node in pairs(nodes) do
+        total_bb = total_bb:union(node.mesh_bb)
     end
 
-    if #left == 0 then
-        return build_bvh_recursive(right, next_axis, fail_count + 1)
-    elseif #right == 0 then
-        return build_bvh_recursive(left, next_axis, fail_count + 1)
+    if split_score == #nodes then
+        return {{
+            children = {table.unpack(split_halfs[1]), table.unpack(split_halfs[2])},
+            mesh_bb = total_bb,
+        }}
     end
 
     return {{
         children = {
-            table.unpack(build_bvh_recursive(left, next_axis, 0)),
-            table.unpack(build_bvh_recursive(right, next_axis, 0)),
+            table.unpack(build_bvh_recursive(split_halfs[1])),
+            table.unpack(build_bvh_recursive(split_halfs[2])),
         },
         mesh_bb = total_bb,
     }}
@@ -263,7 +272,7 @@ local function build_static_index(room_static_nodes)
         end
     end
 
-    local non_moving_nodes = build_bvh_recursive(non_moving_nodes, 1, 0)
+    local non_moving_nodes = build_bvh_recursive(non_moving_nodes)
 
     local static_result, branch_index = serialize_static_index(non_moving_nodes)
 
