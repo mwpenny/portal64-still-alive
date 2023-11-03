@@ -333,6 +333,7 @@ build/src/menu/new_game_menu.o: build/src/audio/clips.h build/assets/materials/u
 build/src/menu/options_menu.o: build/assets/materials/ui.h
 build/src/menu/save_game_menu.o: build/src/audio/clips.h
 build/src/scene/scene_animator.o: build/src/audio/clips.h
+build/src/menu/cheat_codes.o: build/src/audio/clips.h
 build/src/levels/intro.o: build/src/audio/clips.h build/assets/materials/images.h
 build/src/menu/savefile_list.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/font/dejavusans_images.o: build/assets/materials/ui.h

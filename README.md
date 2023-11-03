@@ -211,6 +211,8 @@ That will generate the rom at `/build/portal64.z64`
 <br />
 
 ## Current New Feature TODO List
+- [ ] add translations to menus
+- [ ] check if display list is long enough 
 - [ ] pausing while glados is speaking can end her speech early
 - [x] jump animation
 - [x] optimize static culling

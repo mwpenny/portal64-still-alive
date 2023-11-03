@@ -8,6 +8,7 @@
 
 #include "../build/assets/materials/ui.h"
 #include "../build/src/audio/clips.h"
+#include "cheat_codes.h"
 
 #define PORTAL_LOGO_X   30
 #define PORTAL_LOGO_Y   74
@@ -71,22 +72,36 @@ void landingMenuInit(struct LandingMenu* landingMenu, struct LandingMenuOption* 
 }
 
 struct LandingMenuOption* landingMenuUpdate(struct LandingMenu* landingMenu) {
-    if ((controllerGetDirectionDown(0) & ControllerDirectionUp) != 0) {
+    enum ControllerDirection dir = controllerGetDirectionDown(0);
+
+    if (dir & ControllerDirectionUp) {
         if (landingMenu->selectedItem > 0) {
             --landingMenu->selectedItem;
         } else { 
             landingMenu->selectedItem = landingMenu->optionCount - 1;
         }
         soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+
+        cheatCodeEnterDirection(CheatCodeDirUp);
     }
 
-    if ((controllerGetDirectionDown(0) & ControllerDirectionDown) != 0) {
+    if (dir & ControllerDirectionDown) {
         if (landingMenu->selectedItem + 1 < landingMenu->optionCount) {
             ++landingMenu->selectedItem;
         } else {
             landingMenu->selectedItem = 0;
         }
         soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+
+        cheatCodeEnterDirection(CheatCodeDirDown);
+    }
+
+    if (dir & ControllerDirectionLeft) {
+        cheatCodeEnterDirection(CheatCodeDirLeft);
+    }
+
+    if (dir & ControllerDirectionRight) {
+        cheatCodeEnterDirection(CheatCodeDirRight);
     }
 
     if (controllerGetButtonDown(0, A_BUTTON)) {

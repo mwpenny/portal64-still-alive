@@ -50,8 +50,6 @@ Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 #define LEVEL_INDEX_WITH_GUN_0  2
 #define LEVEL_INDEX_WITH_GUN_1  8
 
-#define FADE_IN_
-
 void sceneUpdateListeners(struct Scene* scene);
 
 void sceneInitDynamicColliders(struct Scene* scene) {
