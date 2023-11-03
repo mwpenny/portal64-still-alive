@@ -7,6 +7,15 @@ struct Coloru8 gSelectionGray = {201, 201, 201, 255};
 struct Coloru8 gBorderHighlight = {193, 193, 193, 255};
 struct Coloru8 gBorderDark = {86, 86, 86, 255};
 
+struct PrerenderedText* menuBuildPrerenderedText(struct Font* font, char* message, int x, int y) {
+    struct FontRenderer* renderer = stackMalloc(sizeof(struct FontRenderer));
+    fontRendererLayout(renderer, font, message, SCREEN_WD);
+    struct PrerenderedText* result = prerenderedTextNew(renderer);
+    fontRendererFillPrerender(renderer, result, x, y, NULL);
+    stackMallocFree(renderer);
+    return result;
+}
+
 Gfx* menuBuildText(struct Font* font, char* message, int x, int y) {
     Gfx* result = malloc(sizeof(Gfx) * (fontCountGfx(font, message) + 1));
     Gfx* dl = result;

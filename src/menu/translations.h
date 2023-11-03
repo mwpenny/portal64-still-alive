@@ -3,6 +3,7 @@
 
 void translationsLoad(int language);
 void translationsReload(int language);
+int translationsCurrentLanguage();
 
 char* translationsGet(int message);
 

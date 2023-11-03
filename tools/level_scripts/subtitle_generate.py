@@ -4,6 +4,15 @@ import re
 import sys
 import json
 
+hl_gameui_whitelist = {
+    "GAMEUI_GAMEMENU_RESUMEGAME",
+    "GAMEUI_SAVEGAME",
+    "GAMEUI_LOADGAME",
+    "GAMEUI_NEWGAME",
+    "GAMEUI_OPTIONS",
+    "GAMEUI_GAMEMENU_QUIT",
+}
+
 def get_supported_characters():
     with open('assets/fonts/dejavu_sans_book_8.json', 'r') as f:
         content = json.loads('\n'.join(f.readlines()))
@@ -46,7 +55,7 @@ def get_caption_keys_values_language(lines):
             continue
         if ("{" in line) or ("}" in line) :
             continue
-        keyval= line.split('"\t"')
+        keyval= re.split('"\t+"', line)
         if len(keyval) != 2:
             keyval= line.split('"   "')
             if len(keyval) != 2:
@@ -108,17 +117,17 @@ def make_SubtitleKey_headerlines(keys):
     header_lines.append("\n")
     return header_lines
 
-def make_subtitle_for_language(lang_lines, lang_name):
+def make_subtitle_for_language(lang_lines, lang_name, keys):
     lines = []
 
-    idx = 1
+    idx = 0
 
     lines.append('#include "subtitles.h"')
     lines.append("\n")
     lines.append("\n")
 
     for value in lang_lines:
-        lines.append(f'char __translation_{lang_name}_{idx}[] = "{value}";\n')
+        lines.append(f'char __translation_{lang_name}_{keys[idx]}[] = "{value}";\n')
         idx = idx + 1
 
     lines.append("\n")
@@ -127,10 +136,10 @@ def make_subtitle_for_language(lang_lines, lang_name):
     # SubtitleKeyNone
     lines.append('    "",\n')
 
-    idx = 1
+    idx = 0
 
     for value in lang_lines:
-        lines.append(f'    __translation_{lang_name}_{idx},\n')
+        lines.append(f'    __translation_{lang_name}_{keys[idx]},\n')
         idx = idx + 1
 
     lines.append("};\n")
@@ -205,34 +214,59 @@ def make_overall_subtitles_sourcefile(language_list):
 
     dump_lines("build/src/audio/subtitles.c", sourcefile_lines)
 
+def read_translation_file(filepath):
+    lines = []
+    
+    with open(filepath, "r", encoding='utf-16-le') as f:
+        lines = f.readlines()
+    
+    new_lines = []
+    for line in lines:
+        line = line.replace("\x00", "")
+        if "\n" != line:
+            new_lines.append(line)
+
+    return get_caption_keys_values_language(new_lines)
+
+def filter_whitelist(keys, values, whitelist):
+    result_keys = []
+    result = []
+
+    for index in range(len(keys)):
+        if keys[index] in whitelist:
+            result_keys.append(keys[index])
+            result.append(values[index])
+
+    return result_keys, result
+
 def process_all_closecaption_files(dir, language_names):
     values_list = []
     header_lines = []
     language_list = []
     language_with_values_list = []
     SubtitleKey_generated = False
+    keys = None
 
     for langauge_name in language_names:
         filename = f"closecaption_{langauge_name}.txt"
 
         try:  
             filepath = os.path.join(dir, filename)
-            lines = []
-            
-            with open(filepath, "r", encoding='utf-16-le') as f:
-                lines = f.readlines()
-            
-            new_lines = []
-            for line in lines:
-                line = line.replace("\x00", "")
-                if "\n" != line:
-                    new_lines.append(line)
 
-            k,v,l = get_caption_keys_values_language(new_lines)
+            k,v,l = read_translation_file(filepath)
+
+            gamepad_k, gamepad_v, _ = read_translation_file(f"vpk/Portal/hl2/resource/gameui_{langauge_name}.txt")
+
+            gamepad_k, gamepad_v = filter_whitelist(gamepad_k, gamepad_v, hl_gameui_whitelist)
+
+            k = k + gamepad_k
+            v = v + gamepad_v
+
             values_list.append(v)
             if not SubtitleKey_generated:
                 header_lines = make_SubtitleKey_headerlines(k)
                 SubtitleKey_generated = True
+                keys = k
             language_list.append(l)
             
             language_with_values_list.append({
@@ -251,7 +285,7 @@ def process_all_closecaption_files(dir, language_names):
     max_message_length = 0
 
     for language in language_with_values_list:
-        make_subtitle_for_language(language['value'], language['name'])
+        make_subtitle_for_language(language['value'], language['name'], keys)
         used_characters = used_characters | determine_invalid_characters(language['name'], language['value'], good_characters)
 
         for value in language['value']:

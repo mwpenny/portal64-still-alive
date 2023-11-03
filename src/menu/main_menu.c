@@ -11,11 +11,12 @@
 
 #include "../build/assets/test_chambers/test_chamber_00/test_chamber_00.h"
 #include "../build/src/audio/clips.h"
+#include "../build/src/audio/subtitles.h"
 
 struct LandingMenuOption gMainMenuOptions[] = {
-    {"NEW GAME", GameMenuStateNewGame},
-    {"LOAD GAME", GameMenuStateLoadGame},
-    {"OPTIONS", GameMenuStateOptions},
+    {GAMEUI_NEWGAME, GameMenuStateNewGame},
+    {GAMEUI_LOADGAME, GameMenuStateLoadGame},
+    {GAMEUI_OPTIONS, GameMenuStateOptions},
 };
 
 void mainMenuReadCamera(struct GameMenu* gameMenu) {

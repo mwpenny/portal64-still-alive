@@ -1,4 +1,5 @@
 #include "font.h"
+#include "../util/memory.h"
 
 #define TEXTURE_IMAGE_INDEX_TO_MASK(index) (1 << (index))
 
@@ -266,7 +267,32 @@ void fontRendererLayout(struct FontRenderer* renderer, struct Font* font, char* 
     renderer->height = y + font->charHeight;
 }
 
-Gfx* fontRendererBuildGfx(struct FontRenderer* renderer, struct Font* font, Gfx** fontImages, int x, int y, struct Coloru8* color, Gfx* gfx) {
+Gfx* fontRendererBuildSingleGfx(struct FontRenderer* renderer, int imageIndex, int x, int y, Gfx* gfx) {
+    for (int i = 0; i < renderer->currentSymbol; ++i) {
+        struct SymbolLocation* target = &renderer->symbols[i];
+
+        if (target->imageIndex != imageIndex) {
+            continue;
+        }
+
+        int finalX = target->x + x;
+        int finalY = target->y + y;
+
+        gSPTextureRectangle(
+            gfx++, 
+            finalX << 2, finalY << 2,
+            (finalX + target->width) << 2,
+            (finalY + target->height) << 2,
+            G_TX_RENDERTILE,
+            target->sourceX << 5, target->sourceY << 5,
+            0x400, 0x400
+        );
+    }
+
+    return gfx;
+}
+
+Gfx* fontRendererBuildGfx(struct FontRenderer* renderer, Gfx** fontImages, int x, int y, struct Coloru8* color, Gfx* gfx) {
     int imageMask = renderer->usedImageIndices;
     int imageIndex = 0;
 
@@ -278,6 +304,36 @@ Gfx* fontRendererBuildGfx(struct FontRenderer* renderer, struct Font* font, Gfx*
                 gDPSetEnvColor(gfx++, color->r, color->g, color->b, color->a);
             }
 
+            gfx = fontRendererBuildSingleGfx(renderer, imageIndex, x, y, gfx);
+        }
+
+        imageMask >>= 1;
+        ++imageIndex;
+    }
+
+    return gfx;
+}
+
+void fontRendererInitPrerender(struct FontRenderer* renderer, struct PrerenderedText* prerender) {
+    int imageIndex = 0;
+    int imageMask = renderer->usedImageIndices;
+
+    while (imageMask) {
+        imageMask >>= 1;
+        ++imageIndex;
+    }
+
+    prerender->displayLists = malloc(sizeof(Gfx*) * imageIndex);
+
+    prerender->usedImageIndices = renderer->usedImageIndices;
+
+    imageMask = renderer->usedImageIndices;
+    imageIndex = 0;
+
+    while (imageMask) {
+        if (imageMask & 0x1) {
+            int symbolCount = 0;
+
             for (int i = 0; i < renderer->currentSymbol; ++i) {
                 struct SymbolLocation* target = &renderer->symbols[i];
 
@@ -285,24 +341,137 @@ Gfx* fontRendererBuildGfx(struct FontRenderer* renderer, struct Font* font, Gfx*
                     continue;
                 }
 
-                int finalX = target->x + x;
-                int finalY = target->y + y;
+                ++symbolCount;
+            }
 
-                gSPTextureRectangle(
-                    gfx++, 
-                    finalX << 2, finalY << 2,
-                    (finalX + target->width) << 2,
-                    (finalY + target->height) << 2,
-                    G_TX_RENDERTILE,
-                    target->sourceX << 5, target->sourceY << 5,
-                    0x400, 0x400
-                );
+            if (symbolCount) {
+                // 3 gfx per symbol, + 2 for color change + 1 for end display list
+                prerender->displayLists[imageIndex] = malloc(sizeof(Gfx) * (symbolCount * 3 + 3));
+            } else {
+                prerender->displayLists[imageIndex] = NULL;
             }
         }
 
         imageMask >>= 1;
         ++imageIndex;
     }
+}
+
+struct PrerenderedText* prerenderedTextNew(struct FontRenderer* renderer) {
+    struct PrerenderedText* result = malloc(sizeof(struct PrerenderedText*));
+    fontRendererInitPrerender(renderer, result);
+    return result;
+}
+
+void prerenderedTextCleanup(struct PrerenderedText* prerender) {
+    int imageIndex = 0;
+    int imageMask = prerender->usedImageIndices;
+
+    while (imageMask) {
+        free(prerender->displayLists[imageIndex]);
+
+        imageMask >>= 1;
+        ++imageIndex;
+    }
+
+    free(prerender->displayLists);
+}
+
+
+void prerenderedTextFree(struct PrerenderedText* prerender) {
+    prerenderedTextCleanup(prerender);
+    free(prerender);
+}
+
+void prerenderedTextRecolor(struct PrerenderedText* prerender, struct Coloru8* color) {
+    int imageIndex = 0;
+    int imageMask = prerender->usedImageIndices;
+
+    while (imageMask) {
+        if (imageMask & 0x1) {
+            Gfx* gfx = prerender->displayLists[imageIndex];
+
+            if (color) {
+                gDPPipeSync(gfx++);
+                gDPSetEnvColor(gfx++, color->r, color->g, color->b, color->a);
+            } else {
+                gDPNoOp(gfx++);
+                gDPNoOp(gfx++);
+            }
+
+            osWritebackDCache(prerender->displayLists[imageIndex], sizeof(Gfx) * 2);
+        }
+
+        imageMask >>= 1;
+        ++imageIndex;
+    }
+}
+
+void fontRendererFillPrerender(struct FontRenderer* renderer, struct PrerenderedText* prerender, int x, int y, struct Coloru8* color) {
+    int imageIndex = 0;
+    int imageMask = renderer->usedImageIndices & prerender->usedImageIndices;
+
+    while (imageMask) {
+        if (imageMask & 0x1) {
+            Gfx* gfx = prerender->displayLists[imageIndex];
+
+            if (color) {
+                gDPPipeSync(gfx++);
+                gDPSetEnvColor(gfx++, color->r, color->g, color->b, color->a);
+            } else {
+                gDPNoOp(gfx++);
+                gDPNoOp(gfx++);
+            }
+            gfx = fontRendererBuildSingleGfx(renderer, imageIndex, x, y, gfx);
+            gSPEndDisplayList(gfx++);
+
+            osWritebackDCache(prerender->displayLists[imageIndex], (int)gfx - (int)prerender->displayLists[imageIndex]);
+        }
+
+        imageMask >>= 1;
+        ++imageIndex;
+    }
+}
+
+struct PrerenderedTextBatch* prerenderedBatchStart() {
+    struct PrerenderedTextBatch* result = stackMalloc(sizeof(struct PrerenderedTextBatch));
+    result->textCount = 0;
+    result->usedImageIndices = 0;
+    return result;
+}
+
+void prerenderedBatchAdd(struct PrerenderedTextBatch* batch, struct PrerenderedText* text, struct Coloru8* color) {
+    if (batch->textCount >= MAX_PRERENDERED_STRINGS) {
+        return;
+    }
+    prerenderedTextRecolor(text, color);
+    batch->text[batch->textCount] = text;
+    ++batch->textCount;
+    batch->usedImageIndices |= text->usedImageIndices;
+}
+
+Gfx* prerenderedBatchFinish(struct PrerenderedTextBatch* batch, Gfx** fontImages, Gfx* gfx) {
+    int imageIndex = 0;
+    int imageMask = batch->usedImageIndices;
+    int maskCheck = 1;
+
+    while (imageMask) {
+        if (imageMask & 0x1) {
+            gSPDisplayList(gfx++, fontImages[imageIndex]);
+
+            for (int i = 0; i < batch->textCount; ++i) {
+                if (batch->text[i]->usedImageIndices & maskCheck) {
+                    gSPDisplayList(gfx++, batch->text[i]->displayLists[imageIndex]);
+                }
+            }
+        }
+
+        imageMask >>= 1;
+        maskCheck <<= 1;
+        ++imageIndex;
+    }
+
+    stackMallocFree(batch);
 
     return gfx;
 }

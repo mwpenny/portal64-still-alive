@@ -8,8 +8,7 @@
 #include "../build/assets/materials/ui.h"
 #include "../scene/render_plan.h"
 #include "../controls/controller.h"
-
-#include "../build/assets/test_chambers/test_chamber_00/test_chamber_00.h"
+#include "./translations.h"
 
 void gameMenuInit(struct GameMenu* gameMenu, struct LandingMenuOption* options, int optionCount, int darkenBackground) {
     landingMenuInit(&gameMenu->landingMenu, options, optionCount, darkenBackground);
@@ -20,6 +19,14 @@ void gameMenuInit(struct GameMenu* gameMenu, struct LandingMenuOption* options, 
     optionsMenuInit(&gameMenu->optionsMenu);
 
     gameMenu->state = GameMenuStateLanding;
+    gameMenu->currentRenderedLanguage = translationsCurrentLanguage();
+}
+
+void gameMenuRebuildText(struct GameMenu* gameMenu) {
+    if (gameMenu->currentRenderedLanguage != translationsCurrentLanguage()) {
+        landingMenuRebuildText(&gameMenu->landingMenu);
+        gameMenu->currentRenderedLanguage = translationsCurrentLanguage();
+    }
 }
 
 enum GameMenuState gameMenuDirectionToState(enum MenuDirection direction, enum GameMenuState currentState) {

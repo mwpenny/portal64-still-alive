@@ -34,15 +34,17 @@
 #include "../controls/rumble_pak.h"
 #include "../player/player_rumble_clips.h"
 
+#include "../build/src/audio/subtitles.h"
+
 extern struct GameMenu gGameMenu;
 
 struct LandingMenuOption gPauseMenuOptions[] = {
-    {"RESUME", GameMenuStateResumeGame},
-    {"SAVE GAME", GameMenuStateSaveGame},
-    {"LOAD GAME", GameMenuStateLoadGame},
-    {"NEW GAME", GameMenuStateNewGame},
-    {"OPTIONS", GameMenuStateOptions},
-    {"QUIT", GameMenuStateQuit},
+    {GAMEUI_GAMEMENU_RESUMEGAME, GameMenuStateResumeGame},
+    {GAMEUI_SAVEGAME, GameMenuStateSaveGame},
+    {GAMEUI_LOADGAME, GameMenuStateLoadGame},
+    {GAMEUI_NEWGAME, GameMenuStateNewGame},
+    {GAMEUI_OPTIONS, GameMenuStateOptions},
+    {GAMEUI_GAMEMENU_QUIT, GameMenuStateQuit},
 };
 
 Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);

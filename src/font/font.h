@@ -62,6 +62,31 @@ struct FontRenderer {
 };
 
 void fontRendererLayout(struct FontRenderer* renderer, struct Font* font, char* message, int maxWidth);
-Gfx* fontRendererBuildGfx(struct FontRenderer* renderer, struct Font* font, Gfx** fontImages, int x, int y, struct Coloru8* color, Gfx* gfx);
+Gfx* fontRendererBuildGfx(struct FontRenderer* renderer, Gfx** fontImages, int x, int y, struct Coloru8* color, Gfx* gfx);
+
+struct PrerenderedText {
+    Gfx** displayLists;
+    short usedImageIndices;
+};
+
+void fontRendererInitPrerender(struct FontRenderer* renderer, struct PrerenderedText* prerender);
+struct PrerenderedText* prerenderedTextNew(struct FontRenderer* renderer);
+void prerenderedTextCleanup(struct PrerenderedText* prerender);
+void prerenderedTextFree(struct PrerenderedText* prerender);
+void prerenderedTextRecolor(struct PrerenderedText* prerender, struct Coloru8* color);
+
+void fontRendererFillPrerender(struct FontRenderer* renderer, struct PrerenderedText* prerender, int x, int y, struct Coloru8* color);
+
+#define MAX_PRERENDERED_STRINGS     32
+
+struct PrerenderedTextBatch {
+    struct PrerenderedText* text[MAX_PRERENDERED_STRINGS];
+    unsigned short textCount;
+    short usedImageIndices;
+};
+
+struct PrerenderedTextBatch* prerenderedBatchStart();
+void prerenderedBatchAdd(struct PrerenderedTextBatch* batch, struct PrerenderedText* text, struct Coloru8* color);
+Gfx* prerenderedBatchFinish(struct PrerenderedTextBatch* batch, Gfx** fontImages, Gfx* gfx);
 
 #endif

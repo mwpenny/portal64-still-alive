@@ -562,7 +562,7 @@ void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOp
 
     textColor.a = textOpacityAsInt;
 
-    renderState->dl = fontRendererBuildGfx(fontRender, &gDejaVuSansFont, gDejaVuSansImages, textPositionX, textPositionY, &textColor, renderState->dl);
+    renderState->dl = fontRendererBuildGfx(fontRender, gDejaVuSansImages, textPositionX, textPositionY, &textColor, renderState->dl);
 
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 

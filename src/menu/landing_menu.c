@@ -9,6 +9,7 @@
 #include "../build/assets/materials/ui.h"
 #include "../build/src/audio/clips.h"
 #include "cheat_codes.h"
+#include "./translations.h"
 
 #define PORTAL_LOGO_X   30
 #define PORTAL_LOGO_Y   74
@@ -53,22 +54,31 @@ Gfx portal_logo_gfx[] = {
     gsSPEndDisplayList(),
 };
 
-void landingMenuInit(struct LandingMenu* landingMenu, struct LandingMenuOption* options, int optionCount, int darkenBackground) {    
-    landingMenu->optionText = malloc(sizeof(Gfx*) * optionCount);
-
+void landingMenuInitText(struct LandingMenu* landingMenu) {
     int y = 132;
 
-    int stride = optionCount > 4 ? 12 : 16;
+    int stride = landingMenu->optionCount > 4 ? 12 : 16;
 
-    for (int i = 0; i < optionCount; ++i) {
-        landingMenu->optionText[i] = menuBuildText(&gDejaVuSansFont, options[i].message, 30, y);
+    for (int i = 0; i < landingMenu->optionCount; ++i) {
+        landingMenu->optionText[i] = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(landingMenu->options[i].messageId), 30, y);
         y += stride;
     }
+}
 
+void landingMenuInit(struct LandingMenu* landingMenu, struct LandingMenuOption* options, int optionCount, int darkenBackground) {    
+    landingMenu->optionText = malloc(sizeof(struct PrerenderedText*) * optionCount);
     landingMenu->options = options;
     landingMenu->selectedItem = 0;
     landingMenu->optionCount = optionCount;
     landingMenu->darkenBackground = darkenBackground;
+    landingMenuInitText(landingMenu);
+}
+
+void landingMenuRebuildText(struct LandingMenu* landingMenu) {
+    for (int i = 0; i < landingMenu->optionCount; ++i) {
+        prerenderedTextFree(landingMenu->optionText[i]);
+    }
+    landingMenuInitText(landingMenu);
 }
 
 struct LandingMenuOption* landingMenuUpdate(struct LandingMenu* landingMenu) {
@@ -125,11 +135,11 @@ void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* rend
     gSPDisplayList(renderState->dl++, portal_logo_gfx);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[PORTAL_LOGO_INDEX]);
 
-    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_0_INDEX]);
+    struct PrerenderedTextBatch* batch = prerenderedBatchStart();
     for (int i = 0; i < landingMenu->optionCount; ++i) {
-        gDPPipeSync(renderState->dl++);
-        menuSetRenderColor(renderState, landingMenu->selectedItem == i, &gSelectionGray, &gColorWhite);
-        gSPDisplayList(renderState->dl++, landingMenu->optionText[i]);
+        prerenderedBatchAdd(batch, landingMenu->optionText[i], landingMenu->selectedItem == i ? &gSelectionGray: &gColorWhite);
     }
+    renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
+
 }

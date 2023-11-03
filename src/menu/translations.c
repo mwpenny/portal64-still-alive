@@ -46,6 +46,10 @@ void translationsReload(int language) {
     translationsLoad(language);
 }
 
+int translationsCurrentLanguage() {
+    return gCurrentLoadedLanguage;
+}
+
 char* translationsGet(int message) {
     if (message < 0 || message >= NUM_SUBTITLE_MESSAGES || !gCurrentTranslations) {
         return "";

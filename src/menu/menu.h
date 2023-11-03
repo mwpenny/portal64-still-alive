@@ -45,6 +45,8 @@ extern struct Coloru8 gBorderHighlight;
 extern struct Coloru8 gBorderDark;
 
 Gfx* menuBuildText(struct Font* font, char* message, int x, int y);
+struct PrerenderedText* menuBuildPrerenderedText(struct Font* font, char* message, int x, int y);
+
 Gfx* menuBuildBorder(int x, int y, int width, int height);
 Gfx* menuBuildHorizontalLine(int x, int y, int width);
 Gfx* menuRerenderSolidBorder(int x, int y, int w, int h, int nx, int ny, int nw, int nh, Gfx* dl);

@@ -28,9 +28,11 @@ struct GameMenu {
     struct LoadGameMenu loadGameMenu;
     struct SaveGameMenu saveGameMenu;
     struct OptionsMenu optionsMenu;
+    short currentRenderedLanguage;
 };
 
 void gameMenuInit(struct GameMenu* gameMenu, struct LandingMenuOption* options, int optionCount, int darkenBackground);
+void gameMenuRebuildText(struct GameMenu* gameMenu);
 void gameMenuUpdate(struct GameMenu* gameMenu);
 void gameMenuRender(struct GameMenu* gameMenu, struct RenderState* renderState, struct GraphicsTask* task);
 
