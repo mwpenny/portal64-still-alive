@@ -500,6 +500,11 @@ struct SKAnimationClip* gPlayerRunEClips[] = {
     &player_chell_Armature_rune_portalgun_clip,
 };
 
+struct SKAnimationClip* gPlayerJumpClips[] = {
+    &player_chell_Armature_standing_jump_clip,
+    &player_chell_Armature_standing_jump_portalgun_clip,
+};
+
 struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* blendLerp, float* startTime, struct Vector3* forwardDir, struct Vector3* rightDir) {
     float horzSpeed = player->body.velocity.x * player->body.velocity.x + player->body.velocity.z * player->body.velocity.z;
 
@@ -507,6 +512,12 @@ struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* bl
 
     if (player->flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
         clipOffset = 1;
+    }
+
+    if (!(player->flags & PlayerFlagsGrounded)) {
+        *blendLerp = 0.0f;
+        *startTime = 0.0f;
+        return gPlayerJumpClips[clipOffset];
     }
 
     if (horzSpeed < 0.0001f) {
