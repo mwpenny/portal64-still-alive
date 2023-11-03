@@ -741,31 +741,13 @@ void playerUpdate(struct Player* player) {
 
         //look straight forward
         if (controllerActionGet(ControllerActionLookForward)){
-            struct Vector3 lookingForward;
-            vector3Negate(&gForward, &lookingForward);
-            quatMultVector(&player->lookTransform.rotation, &lookingForward, &lookingForward);
-            if (fabsf(lookingForward.y) < 0.999f) {
-                lookingForward.y = 0;
-                quatLook(&lookingForward, &gUp, &player->lookTransform.rotation);
-            }
+            struct Vector3 forwardNegate;
+            vector3Negate(&forward, &forwardNegate);
+            quatLook(&forwardNegate, &gUp, &player->lookTransform.rotation);
         }
         //look behind
         if (controllerActionGet(ControllerActionLookBackward)){
-            struct Vector3 lookingForward;
-            vector3Negate(&gForward, &lookingForward);
-            quatMultVector(&player->lookTransform.rotation, &lookingForward, &lookingForward);
-            if (fabsf(lookingForward.y) < 0.999f) {
-                lookingForward.y = 0;
-                quatLook(&lookingForward, &gUp, &player->lookTransform.rotation);
-                //look directly behind
-                struct Quaternion behindRotation;
-                behindRotation.x=(player->lookTransform.rotation.z);
-                behindRotation.y=player->lookTransform.rotation.w;
-                behindRotation.z=(-1.0f*player->lookTransform.rotation.x);
-                behindRotation.w=(-1.0f*player->lookTransform.rotation.y);
-
-                player->lookTransform.rotation = behindRotation;
-            }
+            quatLook(&forward, &gUp, &player->lookTransform.rotation);
         }
     }
 
@@ -970,7 +952,6 @@ void playerUpdate(struct Player* player) {
             player->currentFoot = !player->currentFoot;
         }
     }
-
 }
 
 void playerApplyCameraTransform(struct Player* player, struct Transform* cameraTransform) {
