@@ -20,11 +20,11 @@
 void joystickOptionsInit(struct JoystickOptions* joystickOptions) {
     joystickOptions->selectedItem = JoystickOptionInvert;
 
-    joystickOptions->invertControls = menuBuildCheckbox(&gDejaVuSansFont, "Invert Camera Pitch", JOYSTICK_X + 8, JOYSTICK_Y + 8);
+    joystickOptions->invertControls = menuBuildCheckbox(&gDejaVuSansFont, "Invert Camera Pitch", JOYSTICK_X + 8, JOYSTICK_Y + 8, 0);
 
-    joystickOptions->invertControlsYaw = menuBuildCheckbox(&gDejaVuSansFont, "Invert Camera Yaw", JOYSTICK_X + 8, JOYSTICK_Y + 28);
+    joystickOptions->invertControlsYaw = menuBuildCheckbox(&gDejaVuSansFont, "Invert Camera Yaw", JOYSTICK_X + 8, JOYSTICK_Y + 28, 0);
 
-    joystickOptions->tankControls = menuBuildCheckbox(&gDejaVuSansFont, "Tank Controls", JOYSTICK_X + 8, JOYSTICK_Y + 48);
+    joystickOptions->tankControls = menuBuildCheckbox(&gDejaVuSansFont, "Tank Controls", JOYSTICK_X + 8, JOYSTICK_Y + 48, 0);
 
     joystickOptions->lookSensitivityText = menuBuildText(&gDejaVuSansFont, "Look Sensitivity", JOYSTICK_X + 8, JOYSTICK_Y + 68);
     joystickOptions->lookSensitivity = menuBuildSlider(JOYSTICK_X + 120, JOYSTICK_Y + 68, 120, SCROLL_TICKS);

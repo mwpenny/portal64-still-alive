@@ -25,6 +25,7 @@ void gameMenuInit(struct GameMenu* gameMenu, struct LandingMenuOption* options, 
 void gameMenuRebuildText(struct GameMenu* gameMenu) {
     if (gameMenu->currentRenderedLanguage != translationsCurrentLanguage()) {
         landingMenuRebuildText(&gameMenu->landingMenu);
+        optionsMenuRebuildText(&gameMenu->optionsMenu);
         gameMenu->currentRenderedLanguage = translationsCurrentLanguage();
     }
 }

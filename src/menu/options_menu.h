@@ -31,6 +31,7 @@ struct OptionsMenu {
 };
 
 void optionsMenuInit(struct OptionsMenu* options);
+void optionsMenuRebuildText(struct OptionsMenu* options);
 enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options);
 void optionsMenuRender(struct OptionsMenu* options, struct RenderState* renderState, struct GraphicsTask* task);
 

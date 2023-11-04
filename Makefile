@@ -497,25 +497,25 @@ build/src/decor/decor_object_list.o: build/src/audio/clips.h
 ## Subtitles
 ####################
 
-SUBTITLE_LANGUAGES = english \
-	brazilian \
+SUBTITLE_LANGUAGES = brazilian \
     bulgarian \
     czech \
     danish \
-    dutch \
-    finnish \
-    french \
     german \
-	greek \
-    hungarian \
-    italian \
-    latam \
-    norwegian \
-    polish \
-    portuguese \
-    romanian \
-    russian \
+	english \
     spanish \
+	greek \
+    french \
+    italian \
+    polish \
+    latam \
+    hungarian \
+    dutch \
+    norwegian \
+    portuguese \
+    russian \
+    romanian \
+    finnish \
     swedish \
     turkish \
 	ukrainian

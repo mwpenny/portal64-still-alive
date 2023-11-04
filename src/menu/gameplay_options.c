@@ -59,11 +59,11 @@ void gameplayOptionsHandleSlider(unsigned short* settingValue, float* sliderValu
 void gameplayOptionsInit(struct GameplayOptions* gameplayOptions) {
     gameplayOptions->selectedItem = GameplayOptionWideScreen;
     
-    gameplayOptions->wideScreen = menuBuildCheckbox(&gDejaVuSansFont, "Wide Screen", GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
-    gameplayOptions->interlacedMode = menuBuildCheckbox(&gDejaVuSansFont, "Interlaced Video", GAMEPLAY_X + 8, GAMEPLAY_Y + 28);
+    gameplayOptions->wideScreen = menuBuildCheckbox(&gDejaVuSansFont, "Wide Screen", GAMEPLAY_X + 8, GAMEPLAY_Y + 8, 0);
+    gameplayOptions->interlacedMode = menuBuildCheckbox(&gDejaVuSansFont, "Interlaced Video", GAMEPLAY_X + 8, GAMEPLAY_Y + 28, 0);
     
-    gameplayOptions->movingPortals = menuBuildCheckbox(&gDejaVuSansFont, "Movable Portals", GAMEPLAY_X + 8, GAMEPLAY_Y + 48);
-    gameplayOptions->portalFunnel = menuBuildCheckbox(&gDejaVuSansFont, "Portal Funneling", GAMEPLAY_X + 8, GAMEPLAY_Y + 68);
+    gameplayOptions->movingPortals = menuBuildCheckbox(&gDejaVuSansFont, "Movable Portals", GAMEPLAY_X + 8, GAMEPLAY_Y + 48, 0);
+    gameplayOptions->portalFunnel = menuBuildCheckbox(&gDejaVuSansFont, "Portal Funneling", GAMEPLAY_X + 8, GAMEPLAY_Y + 68, 0);
 
     gameplayOptions->portalRenderDepthText = menuBuildText(&gDejaVuSansFont, "Portal Render Depth", GAMEPLAY_X + 8, GAMEPLAY_Y + 88);
     gameplayOptions->portalRenderDepth = menuBuildSlider(GAMEPLAY_X + 126, GAMEPLAY_Y + 88, 126, SCROLL_TICKS);

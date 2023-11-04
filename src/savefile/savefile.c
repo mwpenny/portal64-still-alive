@@ -4,6 +4,7 @@
 #include "controls/controller.h"
 
 #include "../controls/controller_actions.h"
+#include "../build/src/audio/subtitles.h"
 
 struct SaveData __attribute__((aligned(8))) gSaveData;
 int gCurrentTestSubject = -1;
@@ -97,7 +98,7 @@ void savefileNew() {
     gSaveData.controls.acceleration = 0x4000;
     gSaveData.controls.deadzone = 0x4000;
     gSaveData.controls.portalRenderDepth = 2;
-    gSaveData.controls.subtitleLanguage = 0;
+    gSaveData.controls.subtitleLanguage = LANGUAGE_ENGLISH;
 
     gSaveData.audio.soundVolume = 0xFFFF;
     gSaveData.audio.musicVolume = 0x8000;

@@ -54,6 +54,10 @@ void optionsMenuInit(struct OptionsMenu* options) {
     gameplayOptionsInit(&options->gameplayOptions);
 }
 
+void optionsMenuRebuildText(struct OptionsMenu* options) {
+    audioOptionsRebuildtext(&options->audioOptions);
+}
+
 enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options) {
     enum MenuDirection menuDirection = MenuDirectionStay;
 

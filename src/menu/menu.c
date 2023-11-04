@@ -181,9 +181,7 @@ void menuSetRenderColor(struct RenderState* renderState, int isSelected, struct 
     }
 }
 
-#define CHECKBOX_SIZE   12
-
-struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, int y) {
+struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, int y, int shouldUsePrerendered) {
     struct MenuCheckbox result;
 
     result.x = x;
@@ -199,7 +197,11 @@ struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, i
     dl = menuRenderOutline(x, y, CHECKBOX_SIZE, CHECKBOX_SIZE, 1, dl);
     gSPEndDisplayList(dl++);
 
-    result.text = menuBuildText(font, message, x + CHECKBOX_SIZE + 6, y);
+    if (shouldUsePrerendered) {
+        result.prerenderedText = menuBuildPrerenderedText(font, message, x + CHECKBOX_SIZE + 6, y);
+    } else {
+        result.text = menuBuildText(font, message, x + CHECKBOX_SIZE + 6, y);
+    }
 
     result.checked = 0;
 

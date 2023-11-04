@@ -3,6 +3,7 @@ import os
 import re
 import sys
 import json
+from os.path import exists
 
 hl_gameui_whitelist = {
     "GAMEUI_GAMEMENU_RESUMEGAME",
@@ -11,6 +12,35 @@ hl_gameui_whitelist = {
     "GAMEUI_NEWGAME",
     "GAMEUI_OPTIONS",
     "GAMEUI_GAMEMENU_QUIT",
+
+    "GAMEUI_SOUNDEFFECTVOLUME",
+    "GAMEUI_MUSICVOLUME",
+    "GAMEUI_SUBTITLESANDSOUNDEFFECTS",
+}
+
+language_translations = {
+	'brazilian': 'Brasileiro',
+    'bulgarian': 'Български език',
+    'czech': 'Čeština',
+    'danish': 'Dansk',
+    'german': 'Deutsch',
+    'english': 'English',
+    'spanish': 'Español',
+	'greek': 'Ελληνικά',
+    'french': 'Français',
+    'italian': 'Italiano',
+    'polish': 'Język polski',
+    'latam': 'Latam',
+    'hungarian': 'Magyar nyelv',
+    'dutch': 'Nederlands',
+    'norwegian': 'Norsk',
+    'portuguese': 'Português',
+    'russian': 'Русский язык',
+    'romanian': 'Românește',
+    'finnish': 'Suomi',
+    'swedish': 'Svenska',
+    'turkish': 'Türkçe',
+	'ukrainian': 'Українська мова',
 }
 
 def get_supported_characters():
@@ -92,6 +122,13 @@ def make_overall_subtitles_header(all_header_lines, languages_list, message_coun
     header_lines.append("extern char* SubtitleLanguages[];\n")
     header_lines.append("extern struct SubtitleBlock SubtitleLanguageBlocks[];\n")
     header_lines.append("\n")
+
+    for idx, language in enumerate(languages_list):
+        header_lines.append(f"#define LANGUAGE_{language.upper()} {idx}\n")
+
+    header_lines.append("\n")
+
+
     if len(languages_list) > 0:
         header_lines.extend(all_header_lines)
     else:
@@ -120,15 +157,12 @@ def make_SubtitleKey_headerlines(keys):
 def make_subtitle_for_language(lang_lines, lang_name, keys):
     lines = []
 
-    idx = 0
-
     lines.append('#include "subtitles.h"')
     lines.append("\n")
     lines.append("\n")
 
-    for value in lang_lines:
+    for idx, value in enumerate(lang_lines):
         lines.append(f'char __translation_{lang_name}_{keys[idx]}[] = "{value}";\n')
-        idx = idx + 1
 
     lines.append("\n")
     lines.append(f"char* gSubtitle{lang_name}[NUM_SUBTITLE_MESSAGES] = {'{'}\n")
@@ -136,11 +170,8 @@ def make_subtitle_for_language(lang_lines, lang_name, keys):
     # SubtitleKeyNone
     lines.append('    "",\n')
 
-    idx = 0
-
-    for value in lang_lines:
+    for idx, value in enumerate(lang_lines):
         lines.append(f'    __translation_{lang_name}_{keys[idx]},\n')
-        idx = idx + 1
 
     lines.append("};\n")
 
@@ -190,7 +221,7 @@ def make_overall_subtitles_sourcefile(language_list):
         sourcefile_lines.append(f'    "",\n')
     else:
         for language in language_list:
-            sourcefile_lines.append(f'    "{language.upper()}",\n')
+            sourcefile_lines.append(f'    "{language_translations[language]}",\n')
     sourcefile_lines.append("};\n")
     sourcefile_lines.append("\n")
 
@@ -215,6 +246,9 @@ def make_overall_subtitles_sourcefile(language_list):
     dump_lines("build/src/audio/subtitles.c", sourcefile_lines)
 
 def read_translation_file(filepath):
+    if not exists(filepath):
+        return [], [], ''
+
     lines = []
     
     with open(filepath, "r", encoding='utf-16-le') as f:
@@ -244,8 +278,8 @@ def process_all_closecaption_files(dir, language_names):
     header_lines = []
     language_list = []
     language_with_values_list = []
-    SubtitleKey_generated = False
-    keys = None
+    key_order = None
+    default_values = None
 
     for langauge_name in language_names:
         filename = f"closecaption_{langauge_name}.txt"
@@ -259,14 +293,31 @@ def process_all_closecaption_files(dir, language_names):
 
             gamepad_k, gamepad_v = filter_whitelist(gamepad_k, gamepad_v, hl_gameui_whitelist)
 
-            k = k + gamepad_k
-            v = v + gamepad_v
+            extra_k, extra_v, _ = read_translation_file(f"assets/translations/extra_{langauge_name}.txt")
+
+            k = k + gamepad_k + extra_k
+            v = v + gamepad_v + extra_v
+
+            if not key_order:
+                header_lines = make_SubtitleKey_headerlines(k)
+                key_order = k
+                default_values = v
+            else:
+                index_mapping = {}
+                for idx, x in enumerate(k):
+                    index_mapping[x] = idx
+
+                new_values = []
+
+                for idx, key in enumerate(key_order):
+                    if key in index_mapping:
+                        new_values.append(v[index_mapping[key]])
+                    else:
+                        new_values.append(default_values[idx])
+
+                v = new_values
 
             values_list.append(v)
-            if not SubtitleKey_generated:
-                header_lines = make_SubtitleKey_headerlines(k)
-                SubtitleKey_generated = True
-                keys = k
             language_list.append(l)
             
             language_with_values_list.append({
@@ -277,6 +328,7 @@ def process_all_closecaption_files(dir, language_names):
         except Exception as e:
             print(e)
             print(filename, " - FAILED")
+            raise
             continue
 
     good_characters = get_supported_characters()
@@ -285,7 +337,7 @@ def process_all_closecaption_files(dir, language_names):
     max_message_length = 0
 
     for language in language_with_values_list:
-        make_subtitle_for_language(language['value'], language['name'], keys)
+        make_subtitle_for_language(language['value'], language['name'], key_order)
         used_characters = used_characters | determine_invalid_characters(language['name'], language['value'], good_characters)
 
         for value in language['value']:

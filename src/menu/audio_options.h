@@ -20,19 +20,20 @@ struct AudioOptions {
     struct MenuCheckbox subtitlesEnabled;
     struct MenuCheckbox allSubtitlesEnabled;
     struct MenuSlider subtitlesLanguage;
-    Gfx* gameVolumeText;
-    Gfx* musicVolumeText;
-    Gfx* subtitlesLanguageText;
-    Gfx* subtitlesLanguageDynamicText;
+    struct PrerenderedText* gameVolumeText;
+    struct PrerenderedText* musicVolumeText;
+    struct PrerenderedText* subtitlesLanguageText;
+    struct PrerenderedText* subtitlesLanguageDynamicText;
     unsigned short subtitles_language_temp;
     struct MenuSlider audioLanguage;
-    Gfx* audioLanguageText;
-    Gfx* audioLanguageDynamicText;
+    struct PrerenderedText* audioLanguageText;
+    struct PrerenderedText* audioLanguageDynamicText;
     unsigned short audio_language_temp;
     short selectedItem;
 };
 
 void audioOptionsInit(struct AudioOptions* audioOptions);
+void audioOptionsRebuildtext(struct AudioOptions* audioOptions);
 enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions);
 void audioOptionsRender(struct AudioOptions* audioOptions, struct RenderState* renderState, struct GraphicsTask* task);
 

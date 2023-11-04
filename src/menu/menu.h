@@ -6,6 +6,8 @@
 #include "../graphics/color.h"
 #include "../graphics/graphics.h"
 
+#define CHECKBOX_SIZE   12
+
 struct MenuButton {
     Gfx* outline;
     Gfx* text;
@@ -15,7 +17,10 @@ struct MenuButton {
 
 struct MenuCheckbox {
     Gfx* outline;
-    Gfx* text;
+    union {
+        Gfx* text;
+        struct PrerenderedText* prerenderedText;
+    };
     Gfx* checkedIndicator;
     short x, y;
     short checked;
@@ -56,7 +61,7 @@ Gfx* menuBuildOutline(int x, int y, int width, int height, int invert);
 struct MenuButton menuBuildButton(struct Font* font, char* message, int x, int y, int width, int height);
 void menuSetRenderColor(struct RenderState* renderState, int isSelected, struct Coloru8* selected, struct Coloru8* defaultColor);
 
-struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, int y);
+struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, int y, int shouldUsePrerendered);
 Gfx* menuCheckboxRender(struct MenuCheckbox* checkbox, Gfx* dl);
 
 struct MenuSlider menuBuildSlider(int x, int y, int w, int tickCount);
