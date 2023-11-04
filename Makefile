@@ -523,7 +523,7 @@ SUBTITLE_LANGUAGES = brazilian \
 SUBTITLE_SOURCES = $(SUBTITLE_LANGUAGES:%=build/src/audio/subtitles_%.c)
 SUBTITLE_OBJECTS = $(SUBTITLE_LANGUAGES:%=build/src/audio/subtitles_%.o)
 
-build/src/audio/subtitles.h build/src/audio/subtitles.c build/subtitles.ld $(SUBTITLE_SOURCES): tools/level_scripts/subtitle_generate.py 
+build/src/audio/subtitles.h build/src/audio/subtitles.c build/subtitles.ld $(SUBTITLE_SOURCES): tools/level_scripts/subtitle_generate.py vpk/Portal/hl2/resource/gameui_english.txt
 	python3 tools/level_scripts/subtitle_generate.py $(SUBTITLE_LANGUAGES)
 
 ####################
