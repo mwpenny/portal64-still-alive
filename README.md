@@ -96,19 +96,8 @@ sudo apt install nodejs
 
 <br />
 
-You will need to add at least one of the following files from where Portal is installed to the folder `resource/`. You can add multiple languages if desired.
-
-```
-hl2/resource/gameui_english.txt
-hl2/resource/gameui_<your desired language 1>.txt
-hl2/resource/gameui_<your desired language 2>.txt
-
-portal/resource/closecaption_english.txt
-portal/resource/closecaption_<your desired language 1>.txt
-portal/resource/closecaption_<your desired language 2>.txt
-```
-
-You then need to add the following files from where Portal is installed to the folder `vpk/` OR create a symbolic link to the `Portal` folder there. (see [vpk/add_vpk_here.md](./vpk/add_vpk_here.md) for more details!)
+You then need to add the following files from where Portal is installed to the folder `vpk/` OR create a symbolic link to the `Portal` folder there (see [vpk/add_vpk_here.md](./vpk/add_vpk_here.md) for more details!).
+You can add multiple languages if desired.
 
 ```
 Portal/portal/portal_pak_000.vpk  
@@ -131,6 +120,14 @@ Portal/hl2/hl2_misc_003.vpk
 Portal/hl2/hl2_misc_dir.vpk
 
 Portal/hl2/media/valve.bik
+
+Portal/hl2/resource/gameui_english.txt
+Portal/hl2/resource/gameui_<your desired language 1>.txt
+Portal/hl2/resource/gameui_<your desired language 2>.txt
+
+Portal/portal/resource/closecaption_english.txt
+Portal/portal/resource/closecaption_<your desired language 1>.txt
+Portal/portal/resource/closecaption_<your desired language 2>.txt
 ```
 
 Finally, run `make` to build the project.
