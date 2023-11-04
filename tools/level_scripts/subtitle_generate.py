@@ -281,19 +281,19 @@ def process_all_closecaption_files(dir, language_names):
     key_order = None
     default_values = None
 
-    for langauge_name in language_names:
-        filename = f"closecaption_{langauge_name}.txt"
+    for language_name in language_names:
+        filename = f"closecaption_{language_name}.txt"
 
         try:  
             filepath = os.path.join(dir, filename)
 
             k,v,l = read_translation_file(filepath)
 
-            gamepad_k, gamepad_v, _ = read_translation_file(f"vpk/Portal/hl2/resource/gameui_{langauge_name}.txt")
+            gamepad_k, gamepad_v, _ = read_translation_file(f"vpk/Portal/hl2/resource/gameui_{language_name}.txt")
 
             gamepad_k, gamepad_v = filter_whitelist(gamepad_k, gamepad_v, hl_gameui_whitelist)
 
-            extra_k, extra_v, _ = read_translation_file(f"assets/translations/extra_{langauge_name}.txt")
+            extra_k, extra_v, _ = read_translation_file(f"assets/translations/extra_{language_name}.txt")
 
             k = k + gamepad_k + extra_k
             v = v + gamepad_v + extra_v
