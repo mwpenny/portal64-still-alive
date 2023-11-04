@@ -244,6 +244,8 @@ static void gameProc(void* arg) {
     translationsLoad(gSaveData.controls.subtitleLanguage);
     skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
     gSceneCallbacks->initCallback(gSceneCallbacks->data);
+    // this prevents the intro from crashing
+    gGameMenu.currentRenderedLanguage = gSaveData.controls.subtitleLanguage;
 
     while (1) {
         OSScMsg *msg = NULL;
