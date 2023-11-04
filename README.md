@@ -161,7 +161,7 @@ Also you can build with all audio languages integrated with this shortcut:
 make all_languages
 ```
 
-This requires additional *.vpk files copied to the folder `vpk/`:
+This requires additional *.vpk files copied to the root of folder `vpk/` (since the original Portal keeps only one language at the same time, you have to copy these files!):
 
 - German:
 ```
