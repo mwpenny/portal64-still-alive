@@ -280,6 +280,14 @@ static void gameProc(void* arg) {
                     break;
                 }
 
+                if (translationsCurrentLanguage() != gGameMenu.currentRenderedLanguage) {
+                    if (pendingGFX == 0) {
+                        gameMenuRebuildText(&gGameMenu);
+                    }
+
+                    break;
+                }
+
                 if (pendingGFX < 2 && drawingEnabled) {
                     u64 renderStart = profileStart();
                     graphicsCreateTask(&gGraphicsTasks[drawBufferIndex], gSceneCallbacks->graphicsCallback, gSceneCallbacks->data);

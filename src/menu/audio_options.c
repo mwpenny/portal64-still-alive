@@ -9,9 +9,6 @@
 #include "../build/src/audio/clips.h"
 #include "../build/src/audio/languages.h"
 #include "./translations.h"
-#include "./game_menu.h"
-
-extern struct GameMenu gGameMenu;
 
 #define GAMEPLAY_Y      54
 #define GAMEPLAY_WIDTH  252

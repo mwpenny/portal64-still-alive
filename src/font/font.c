@@ -350,6 +350,8 @@ void fontRendererInitPrerender(struct FontRenderer* renderer, struct Prerendered
             } else {
                 prerender->displayLists[imageIndex] = NULL;
             }
+        } else {
+            prerender->displayLists[imageIndex] = NULL;
         }
 
         imageMask >>= 1;
