@@ -3,6 +3,7 @@
 
 #include "./menu.h"
 #include "../graphics/graphics.h"
+#include "menu_builder.h"
 
 enum AudioOption {
     AudioOptionGameVolume,
@@ -15,13 +16,11 @@ enum AudioOption {
 };
 
 struct AudioOptions {
-    struct MenuSlider gameVolume;
-    struct MenuSlider musicVolume;
+    struct MenuBuilder menuBuilder;
+
     struct MenuCheckbox subtitlesEnabled;
     struct MenuCheckbox allSubtitlesEnabled;
     struct MenuSlider subtitlesLanguage;
-    struct PrerenderedText* gameVolumeText;
-    struct PrerenderedText* musicVolumeText;
     struct PrerenderedText* subtitlesLanguageText;
     struct PrerenderedText* subtitlesLanguageDynamicText;
     unsigned short subtitles_language_temp;

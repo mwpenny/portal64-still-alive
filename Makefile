@@ -232,7 +232,7 @@ build/assets/materials/hud.h build/assets/materials/hud_mat.c: assets/materials/
 
 src/levels/level_def_gen.h: build/assets/materials/static.h
 
-build/src/scene/hud.o: build/assets/materials/hud.h
+build/src/scene/hud.o: build/assets/materials/hud.h build/src/audio/subtitles.h
 
 build/src/scene/elevator.o: build/assets/models/props/round_elevator_collision.h \
 	build/assets/models/props/round_elevator.h \

@@ -84,8 +84,6 @@ void audioOptionsHandleSlider(short selectedItem, unsigned short* settingValue, 
 }
 
 void audioOptionsRenderText(struct AudioOptions* audioOptions) {
-    audioOptions->gameVolumeText = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(GAMEUI_SOUNDEFFECTVOLUME), GAMEPLAY_X + 8, GAMEPLAY_Y + 8);
-    audioOptions->musicVolumeText = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(GAMEUI_MUSICVOLUME), GAMEPLAY_X + 8, GAMEPLAY_Y + 28);
     audioOptions->subtitlesEnabled.prerenderedText = menuBuildPrerenderedText(
         &gDejaVuSansFont, 
         translationsGet(GAMEUI_SUBTITLESANDSOUNDEFFECTS), 
@@ -104,15 +102,84 @@ void audioOptionsRenderText(struct AudioOptions* audioOptions) {
     audioOptions->audioLanguageDynamicText = menuBuildPrerenderedText(&gDejaVuSansFont, AudioLanguages[gSaveData.audio.audioLanguage], GAMEPLAY_X + 125, GAMEPLAY_Y + 124);
 }
 
+struct MenuElementParams gAudioMenuParams[] = {
+    {
+        .type = MenuElementTypeText,
+        .x = GAMEPLAY_X + 8, 
+        .y = GAMEPLAY_Y + 8,
+        .params = {
+            .text = {
+                .font = &gDejaVuSansFont,
+                .messageId = GAMEUI_SOUNDEFFECTVOLUME,
+            },
+        },
+        .selectionIndex = AudioOptionGameVolume,
+    },
+    {
+        .type = MenuElementTypeSlider,
+        .x = GAMEPLAY_X + 120, 
+        .y = GAMEPLAY_Y + 8,
+        .params = {
+            .slider = {
+                .width = 120,
+                .numberOfTicks = 9,
+                .discrete = 0,
+            },
+        },
+        .selectionIndex = AudioOptionGameVolume,
+    },
+    {
+        .type = MenuElementTypeText,
+        .x = GAMEPLAY_X + 8, 
+        .y = GAMEPLAY_Y + 28,
+        .params = {
+            .text = {
+                .font = &gDejaVuSansFont,
+                .messageId = GAMEUI_MUSICVOLUME,
+            },
+        },
+        .selectionIndex = AudioOptionMusicVolume,
+    },
+    {
+        .type = MenuElementTypeSlider,
+        .x = GAMEPLAY_X + 120, 
+        .y = GAMEPLAY_Y + 28,
+        .params = {
+            .slider = {
+                .width = 120,
+                .numberOfTicks = 9,
+                .discrete = 0,
+            },
+        },
+        .selectionIndex = AudioOptionMusicVolume,
+    },
+};
+
+void audioOptionsActoin(void* data, int selection, struct MenuAction* action) {
+    switch (selection) {
+        case AudioOptionGameVolume:
+            gSaveData.audio.soundVolume = (int)(0xFFFF * action->state.fSlider.value);
+            soundPlayerGameVolumeUpdate();
+            break;
+        case AudioOptionMusicVolume:
+            gSaveData.audio.musicVolume = (int)(0xFFFF * action->state.fSlider.value);
+            soundPlayerGameVolumeUpdate();
+            break;
+    }
+}
+
 void audioOptionsInit(struct AudioOptions* audioOptions) {
+    menuBuilderInit(
+        &audioOptions->menuBuilder,
+        gAudioMenuParams,
+        sizeof(gAudioMenuParams) / sizeof(*gAudioMenuParams),
+        AudioOptionCount,
+        audioOptionsActoin,
+        audioOptions
+    );
+
     audioOptions->selectedItem = AudioOptionGameVolume;
     int temp;
-
-    audioOptions->gameVolume = menuBuildSlider(GAMEPLAY_X + 120, GAMEPLAY_Y + 8, 120, SCROLL_TICKS_VOLUME);
-    audioOptions->gameVolume.value = (float)gSaveData.audio.soundVolume/0xFFFF;
-
-    audioOptions->musicVolume = menuBuildSlider(GAMEPLAY_X + 120, GAMEPLAY_Y + 28, 120, SCROLL_TICKS_VOLUME);
-    audioOptions->musicVolume.value = (float)gSaveData.audio.musicVolume/0xFFFF;
 
     audioOptions->subtitlesEnabled = menuBuildCheckbox(&gDejaVuSansFont, translationsGet(GAMEUI_SUBTITLESANDSOUNDEFFECTS), GAMEPLAY_X + 8, GAMEPLAY_Y + 48, 1);
     audioOptions->subtitlesEnabled.checked = (gSaveData.controls.flags & ControlSaveSubtitlesEnabled) != 0;
@@ -139,8 +206,6 @@ void audioOptionsInit(struct AudioOptions* audioOptions) {
 }
 
 void audioOptionsRebuildtext(struct AudioOptions* audioOptions) {
-    prerenderedTextFree(audioOptions->gameVolumeText);
-    prerenderedTextFree(audioOptions->musicVolumeText);
     prerenderedTextFree(audioOptions->subtitlesEnabled.prerenderedText);
     prerenderedTextFree(audioOptions->allSubtitlesEnabled.prerenderedText);
     prerenderedTextFree(audioOptions->subtitlesLanguageText);
@@ -149,6 +214,8 @@ void audioOptionsRebuildtext(struct AudioOptions* audioOptions) {
     prerenderedTextFree(audioOptions->audioLanguageDynamicText);
 
     audioOptionsRenderText(audioOptions);
+
+    menuBuilderRebuildText(&audioOptions->menuBuilder);
 }
 
 enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
@@ -177,14 +244,6 @@ enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
     }
 
     switch (audioOptions->selectedItem) {
-        case AudioOptionGameVolume:
-            audioOptionsHandleSlider(audioOptions->selectedItem, &gSaveData.audio.soundVolume, &audioOptions->gameVolume.value);
-            soundPlayerGameVolumeUpdate();
-            break;
-        case AudioOptionMusicVolume:
-            audioOptionsHandleSlider(audioOptions->selectedItem, &gSaveData.audio.musicVolume, &audioOptions->musicVolume.value);
-            soundPlayerGameVolumeUpdate();
-            break;
         case AudioOptionSubtitlesEnabled:
             if (controllerGetButtonDown(0, A_BUTTON)) {
                 audioOptions->subtitlesEnabled.checked = !audioOptions->subtitlesEnabled.checked;
@@ -258,12 +317,6 @@ enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
 void audioOptionsRender(struct AudioOptions* audioOptions, struct RenderState* renderState, struct GraphicsTask* task) {
     gSPDisplayList(renderState->dl++, ui_material_list[SOLID_ENV_INDEX]);
 
-    gSPDisplayList(renderState->dl++, audioOptions->gameVolume.back);
-    renderState->dl = menuSliderRender(&audioOptions->gameVolume, renderState->dl);
-
-    gSPDisplayList(renderState->dl++, audioOptions->musicVolume.back);
-    renderState->dl = menuSliderRender(&audioOptions->musicVolume, renderState->dl);
-
     gSPDisplayList(renderState->dl++, audioOptions->subtitlesEnabled.outline);
     renderState->dl = menuCheckboxRender(&audioOptions->subtitlesEnabled, renderState->dl);
 
@@ -280,8 +333,6 @@ void audioOptionsRender(struct AudioOptions* audioOptions, struct RenderState* r
 
     struct PrerenderedTextBatch* batch = prerenderedBatchStart();
 
-    prerenderedBatchAdd(batch, audioOptions->gameVolumeText, audioOptions->selectedItem == AudioOptionGameVolume ? &gSelectionGray : &gColorWhite);
-    prerenderedBatchAdd(batch, audioOptions->musicVolumeText, audioOptions->selectedItem == AudioOptionMusicVolume ? &gSelectionGray : &gColorWhite);
     prerenderedBatchAdd(batch, audioOptions->subtitlesEnabled.prerenderedText, audioOptions->selectedItem == AudioOptionSubtitlesEnabled ? &gSelectionGray : &gColorWhite);
     prerenderedBatchAdd(batch, audioOptions->allSubtitlesEnabled.prerenderedText, audioOptions->selectedItem == AudioOptionAllSubtitlesEnabled ? &gSelectionGray : &gColorWhite);
     prerenderedBatchAdd(batch, audioOptions->subtitlesLanguageText, audioOptions->selectedItem == AudioOptionSubtitlesLanguage ? &gSelectionGray : &gColorWhite);
@@ -292,4 +343,6 @@ void audioOptionsRender(struct AudioOptions* audioOptions, struct RenderState* r
     renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
 
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
+
+    menuBuilderRender(&audioOptions->menuBuilder, renderState);
 }
