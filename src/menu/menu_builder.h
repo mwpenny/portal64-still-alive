@@ -55,6 +55,7 @@ struct MenuElementParams {
         struct {
             struct Font* font;
             short messageId;
+            char* message;
         } text;
         struct {
             struct Font* font;
@@ -98,5 +99,9 @@ void menuBuilderInit(
 enum MenuDirection menuBuilderUpdate(struct MenuBuilder* menuBuilder);
 void menuBuilderRebuildText(struct MenuBuilder* menuBuilder);
 void menuBuilderRender(struct MenuBuilder* menuBuilder, struct RenderState* renderState);
+
+void menuBuilderSetCheckbox(struct MenuBuilderElement* element, int value);
+void menuBuilderSetFSlider(struct MenuBuilderElement* element, float value);
+void menuBuilderSetISlider(struct MenuBuilderElement* element, int value);
 
 #endif

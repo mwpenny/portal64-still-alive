@@ -497,12 +497,12 @@ build/src/decor/decor_object_list.o: build/src/audio/clips.h
 ## Subtitles
 ####################
 
-SUBTITLE_LANGUAGES = brazilian \
+SUBTITLE_LANGUAGES = english \
+	brazilian \
     bulgarian \
     czech \
     danish \
     german \
-	english \
     spanish \
 	greek \
     french \
@@ -523,7 +523,7 @@ SUBTITLE_LANGUAGES = brazilian \
 SUBTITLE_SOURCES = $(SUBTITLE_LANGUAGES:%=build/src/audio/subtitles_%.c)
 SUBTITLE_OBJECTS = $(SUBTITLE_LANGUAGES:%=build/src/audio/subtitles_%.o)
 
-build/src/audio/subtitles.h build/src/audio/subtitles.c build/subtitles.ld $(SUBTITLE_SOURCES): vpk/Portal/portal/resource/closecaption_english.txt vpk/Portal/hl2/resource/gameui_english.txt tools/level_scripts/subtitle_generate.py
+build/src/audio/subtitles.h build/src/audio/subtitles.c build/subtitles.ld $(SUBTITLE_SOURCES): vpk/Portal/portal/resource/closecaption_english.txt vpk/Portal/hl2/resource/gameui_english.txt tools/level_scripts/subtitle_generate.py assets/translations/extra_english.txt
 	python3 tools/level_scripts/subtitle_generate.py $(SUBTITLE_LANGUAGES)
 
 ####################

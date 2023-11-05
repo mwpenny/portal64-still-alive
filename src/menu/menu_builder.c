@@ -12,9 +12,15 @@
 #include "../build/src/audio/clips.h"
 
 void textMenuItemInit(struct MenuBuilderElement* element) {
+    char* message = element->params->params.text.message;
+
+    if (!message) {
+        message = translationsGet(element->params->params.text.messageId);
+    }
+
     element->data = menuBuildPrerenderedText(
         element->params->params.text.font, 
-        translationsGet(element->params->params.text.messageId),
+        message,
         element->params->x,
         element->params->y
     );
@@ -53,6 +59,7 @@ enum MenuDirection checkboxMenuItemUpdate(struct MenuBuilderElement* element, Me
         action.type = MenuElementTypeCheckbox;
         action.state.checkbox.isChecked = checkbox->checked;
         actionCallback(data, element->selectionIndex, &action);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     return MenuDirectionStay;
@@ -109,13 +116,13 @@ enum MenuDirection sliderMenuItemUpdate(struct MenuBuilderElement* element, Menu
         int controllerDir = controllerGetDirectionDown(0);
 
         int numTicks = element->params->params.slider.numberOfTicks;
-        int currentValue = (int)floorf(slider->value * numTicks);
+        int currentValue = (int)floorf(slider->value * (numTicks - 1));
         int newValue = currentValue;
 
         if (controllerDir & ControllerDirectionRight) {
-            ++numTicks;
+            ++newValue;
         } else if (controllerDir & ControllerDirectionLeft) {
-            --numTicks;
+            --newValue;
         }
 
         if (newValue < 0) {
@@ -132,7 +139,11 @@ enum MenuDirection sliderMenuItemUpdate(struct MenuBuilderElement* element, Menu
             slider->value = newValue;
         }
 
-        slider->value = (float)newValue / (float)numTicks;
+        if (numTicks > 1) {
+            slider->value = (float)newValue / (float)(numTicks - 1);
+        } else {
+            slider->value = 0.0f;
+        }
     } else {
         OSContPad* pad = controllersGetControllerData(0);
         float newValue = slider->value + pad->stick_x * SCROLL_MULTIPLIER;
@@ -260,4 +271,33 @@ void menuBuilderRender(struct MenuBuilder* menuBuilder, struct RenderState* rend
     }
     renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
+}
+
+void menuBuilderSetCheckbox(struct MenuBuilderElement* element, int value) {
+    if (element->params->type != MenuElementTypeCheckbox) {
+        return;
+    }
+
+    struct MenuCheckbox* checkbox = (struct MenuCheckbox*)element->data;
+    checkbox->checked = value;
+}
+
+void menuBuilderSetFSlider(struct MenuBuilderElement* element, float value) {
+    if (element->params->type != MenuElementTypeSlider || element->params->params.slider.discrete) {
+        return;
+    }
+
+    struct MenuSlider* slider = (struct MenuSlider*)element->data;
+    slider->value = value;
+}
+
+void menuBuilderSetISlider(struct MenuBuilderElement* element, int value) {
+    if (element->params->type != MenuElementTypeSlider || 
+        !element->params->params.slider.discrete || 
+        element->params->params.slider.numberOfTicks <= 1) {
+        return;
+    }
+
+    struct MenuSlider* slider = (struct MenuSlider*)element->data;
+    slider->value = (float)value / (float)(element->params->params.slider.numberOfTicks - 1);
 }
