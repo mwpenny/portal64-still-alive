@@ -147,7 +147,7 @@ struct MenuElementParams gAudioMenuParams[] = {
         .params = {
             .text = {
                 .font = &gDejaVuSansFont,
-                .messageId = AUDIO_TEXT_LANGUAGE,
+                .messageId = AUDIO_AUDIO_LANGUAGE,
             },
         },
         .selectionIndex = AudioOptionAudioLanguage,
