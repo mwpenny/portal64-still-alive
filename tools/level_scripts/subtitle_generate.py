@@ -12,6 +12,10 @@ hl_gameui_whitelist = {
     "GAMEUI_NEWGAME",
     "GAMEUI_OPTIONS",
     "GAMEUI_GAMEMENU_QUIT",
+    "GAMEUI_VIDEO",
+    "GAMEUI_AUDIO",
+    "GAMEUI_PORTAL",
+    "GAMEUI_JOYSTICK",
 
     "GAMEUI_SOUNDEFFECTVOLUME",
     "GAMEUI_MUSICVOLUME",
@@ -85,7 +89,7 @@ def get_caption_keys_values_language(lines):
             continue
         if ("{" in line) or ("}" in line) :
             continue
-        keyval= re.split('"\t+"', line)
+        keyval= re.split('"\\s+"', line)
         if len(keyval) != 2:
             keyval= line.split('"   "')
             if len(keyval) != 2:

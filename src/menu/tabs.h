@@ -5,7 +5,7 @@
 #include "../font/font.h"
 
 struct Tab {
-    char* message;
+    short messageId;
 };
 
 struct TabRenderData {
@@ -31,5 +31,6 @@ struct Tabs {
 void tabsInit(struct Tabs* tabs, struct Tab* tabList, int tabCount, struct Font* font, int x, int y, int width, int height);
 void tabsSetSelectedTab(struct Tabs* tabs, int index);
 void tabsRenderText(struct Tabs* tabs, struct PrerenderedTextBatch* batch);
+void tabsRebuildText(struct Tabs* tabs);
 
 #endif

@@ -69,6 +69,7 @@ struct PrerenderedText {
     short usedImageIndices;
     short x;
     short y;
+    short width;
 };
 
 void fontRendererInitPrerender(struct FontRenderer* renderer, struct PrerenderedText* prerender);

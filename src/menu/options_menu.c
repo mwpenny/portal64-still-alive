@@ -9,23 +9,24 @@
 
 #include "../controls/controller.h"
 #include "../build/src/audio/clips.h"
+#include "../build/src/audio/subtitles.h"
 
 
 struct Tab gOptionTabs[] = {
     {
-        .message = "Controls",
+        .messageId = OPTIONS_CONTROLS,
     },
     {
-        .message = "Joystick",
+        .messageId = GAMEUI_JOYSTICK,
     },
     {
-        .message = "Audio",
+        .messageId = GAMEUI_AUDIO,
     },
     {
-        .message = "Video",
+        .messageId = GAMEUI_VIDEO,
     },
     {
-        .message = "Gameplay",
+        .messageId = GAMEUI_PORTAL,
     },
 };
 
@@ -59,6 +60,7 @@ void optionsMenuInit(struct OptionsMenu* options) {
 
 void optionsMenuRebuildText(struct OptionsMenu* options) {
     audioOptionsRebuildtext(&options->audioOptions);
+    tabsRebuildText(&options->tabs);
 }
 
 enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options) {

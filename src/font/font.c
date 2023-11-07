@@ -383,6 +383,10 @@ void prerenderedTextCleanup(struct PrerenderedText* prerender) {
 
 
 void prerenderedTextFree(struct PrerenderedText* prerender) {
+    if (!prerender) {
+        return;
+    }
+
     prerenderedTextCleanup(prerender);
     free(prerender);
 }
@@ -457,6 +461,7 @@ void fontRendererFillPrerender(struct FontRenderer* renderer, struct Prerendered
 
     prerender->x = x;
     prerender->y = y;
+    prerender->width = renderer->width;
 
     while (imageMask) {
         if (imageMask & 0x1) {

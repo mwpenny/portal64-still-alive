@@ -1,6 +1,7 @@
 #include "tabs.h"
 
 #include "../util/memory.h"
+#include "./translations.h"
 #include "./menu.h"
 
 #define LEFT_TEXT_PADDING  4
@@ -83,23 +84,38 @@ void tabsInit(struct Tabs* tabs, struct Tab* tabList, int tabCount, struct Font*
 
     tabs->tabRenderData = malloc(sizeof(struct TabRenderData) * tabCount);
 
-    int currentX = x;
-
     for (int i = 0; i < tabCount; ++i) {
-        struct Vector2s16 textSize = fontMeasure(font, tabList[i].message);
-        tabs->tabRenderData[i].text = menuBuildPrerenderedText(font, tabList[i].message, currentX + LEFT_TEXT_PADDING, y + TOP_TEXT_PADDING);
-        tabs->tabRenderData[i].width = textSize.x + LEFT_TEXT_PADDING + RIGHT_TEXT_PADDING;
-        tabs->tabRenderData[i].x = currentX;
-
-        currentX += tabs->tabRenderData[i].width;
+        tabs->tabRenderData[i].text = NULL;
     }
 
-    tabs->selectedTab = -1;
-    tabsSetSelectedTab(tabs, 0);
+    tabs->selectedTab = 0;
+    tabsRebuildText(tabs);
 }
 
 void tabsRenderText(struct Tabs* tabs, struct PrerenderedTextBatch* batch) {
     for (int i = 0; i < tabs->tabCount; ++i) {
         prerenderedBatchAdd(batch, tabs->tabRenderData[i].text, i == tabs->selectedTab ? &gColorWhite : &gSelectionGray);
     }
+}
+
+void tabsRebuildText(struct Tabs* tabs) {
+    int currentX = tabs->x;
+
+    for (int i = 0; i < tabs->tabCount; ++i) {
+        prerenderedTextFree(tabs->tabRenderData[i].text);
+        tabs->tabRenderData[i].text = menuBuildPrerenderedText(
+            tabs->font, 
+            translationsGet(tabs->tabs[i].messageId), 
+            currentX + LEFT_TEXT_PADDING, 
+            tabs->y + TOP_TEXT_PADDING
+        );
+        tabs->tabRenderData[i].width = tabs->tabRenderData[i].text->width + LEFT_TEXT_PADDING + RIGHT_TEXT_PADDING;
+        tabs->tabRenderData[i].x = currentX;
+
+        currentX += tabs->tabRenderData[i].width;
+    }
+
+    int selectedTab = tabs->selectedTab;
+    tabs->selectedTab = -1;
+    tabsSetSelectedTab(tabs, selectedTab);
 }
