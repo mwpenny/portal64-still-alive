@@ -13,6 +13,7 @@ enum OptionsMenuTabs {
     OptionsMenuTabsControlMapping,
     OptionsMenuTabsControlJoystick,
     OptionsMenuTabsAudio,
+    OptionsMenuTabsVideo,
     OptionsMenuTabsGameplay,
 
     OptionsMenuTabsCount,

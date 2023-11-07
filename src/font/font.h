@@ -67,12 +67,15 @@ Gfx* fontRendererBuildGfx(struct FontRenderer* renderer, Gfx** fontImages, int x
 struct PrerenderedText {
     Gfx** displayLists;
     short usedImageIndices;
+    short x;
+    short y;
 };
 
 void fontRendererInitPrerender(struct FontRenderer* renderer, struct PrerenderedText* prerender);
 struct PrerenderedText* prerenderedTextNew(struct FontRenderer* renderer);
 void prerenderedTextCleanup(struct PrerenderedText* prerender);
 void prerenderedTextFree(struct PrerenderedText* prerender);
+void prerenderedTextRelocate(struct PrerenderedText* prerender, int x, int y);
 void prerenderedTextRecolor(struct PrerenderedText* prerender, struct Coloru8* color);
 
 void fontRendererFillPrerender(struct FontRenderer* renderer, struct PrerenderedText* prerender, int x, int y, struct Coloru8* color);

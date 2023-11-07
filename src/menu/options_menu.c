@@ -22,6 +22,9 @@ struct Tab gOptionTabs[] = {
         .message = "Audio",
     },
     {
+        .message = "Video",
+    },
+    {
         .message = "Gameplay",
     },
 };
@@ -59,32 +62,27 @@ void optionsMenuRebuildText(struct OptionsMenu* options) {
 }
 
 enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options) {
-    enum MenuDirection menuDirection = MenuDirectionStay;
-
-    if(menuDirection == MenuDirectionStay)
-    {
-        switch (options->tabs.selectedTab) {
-            case OptionsMenuTabsControlMapping:
-                menuDirection = controlsMenuUpdate(&options->controlsMenu);
-                break;
-            case OptionsMenuTabsControlJoystick:
-                menuDirection = joystickOptionsUpdate(&options->joystickOptions);
-                break;
-            case OptionsMenuTabsAudio:
-                menuDirection = audioOptionsUpdate(&options->audioOptions);
-                break;
-            case OptionsMenuTabsGameplay:
-                menuDirection = gameplayOptionsUpdate(&options->gameplayOptions);
-                break;
-        }
+    switch (options->tabs.selectedTab) {
+        case OptionsMenuTabsControlMapping:
+            controlsMenuUpdate(&options->controlsMenu);
+            break;
+        case OptionsMenuTabsControlJoystick:
+            joystickOptionsUpdate(&options->joystickOptions);
+            break;
+        case OptionsMenuTabsAudio:
+            audioOptionsUpdate(&options->audioOptions);
+            break;
+        case OptionsMenuTabsGameplay:
+            gameplayOptionsUpdate(&options->gameplayOptions);
+            break;
     }
 
-    if (menuDirection == MenuDirectionUp) {
+    if (controllerGetButtonDown(0, B_BUTTON)) {
         savefileSave();
         return MenuDirectionUp;
     }
 
-    if (menuDirection == MenuDirectionLeft) {
+    if (controllerGetButtonDown(0, Z_TRIG | L_TRIG)) {
         if (options->tabs.selectedTab == 0) {
             tabsSetSelectedTab(&options->tabs, OptionsMenuTabsCount - 1);
         } else {
@@ -95,7 +93,7 @@ enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options) {
         soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
-    if (menuDirection == MenuDirectionRight) {
+    if (controllerGetButtonDown(0, R_TRIG)) {
         if (options->tabs.selectedTab == OptionsMenuTabsCount - 1) {
             tabsSetSelectedTab(&options->tabs, 0);
         } else {
@@ -119,13 +117,28 @@ void optionsMenuRender(struct OptionsMenu* options, struct RenderState* renderSt
     gSPDisplayList(renderState->dl++, options->menuOutline);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[ROUNDED_CORNERS_INDEX]);
 
+    gDPSetScissor(renderState->dl++, 
+        G_SC_NON_INTERLACE, 
+        MENU_LEFT + OPTIONS_PADDING, 
+        0,
+        MENU_LEFT + MENU_WIDTH - OPTIONS_PADDING, 
+        SCREEN_HT
+    );
+
     gSPDisplayList(renderState->dl++, ui_material_list[SOLID_ENV_INDEX]);
     gSPDisplayList(renderState->dl++, options->tabs.tabOutline);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
 
-    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_0_INDEX]);
-    renderState->dl = tabsRenderText(&options->tabs, renderState->dl);
+    struct PrerenderedTextBatch* batch = prerenderedBatchStart();
+    tabsRenderText(&options->tabs, batch);
+    renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
+
+    gDPSetScissor(renderState->dl++, 
+        G_SC_NON_INTERLACE, 
+        0, 0,
+        SCREEN_WD, SCREEN_HT
+    );
 
     switch (options->tabs.selectedTab) {
         case OptionsMenuTabsControlMapping:

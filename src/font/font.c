@@ -326,6 +326,8 @@ void fontRendererInitPrerender(struct FontRenderer* renderer, struct Prerendered
     prerender->displayLists = malloc(sizeof(Gfx*) * imageIndex);
 
     prerender->usedImageIndices = renderer->usedImageIndices;
+    prerender->x = 0;
+    prerender->y = 0;
 
     imageMask = renderer->usedImageIndices;
     imageIndex = 0;
@@ -385,6 +387,46 @@ void prerenderedTextFree(struct PrerenderedText* prerender) {
     free(prerender);
 }
 
+void prerenderShiftSingleSymbol(Gfx* gfx, int xOffset, int yOffset) {
+    int x = _SHIFTR(gfx->words.w0, 12, 12) + xOffset;
+    int y = _SHIFTL(gfx->words.w0, 0, 12) + yOffset;
+
+    gfx->words.w0 = _SHIFTL(G_TEXRECT, 24, 8) | _SHIFTL(x, 12, 12) | _SHIFTL(y, 0, 12);
+
+    x = _SHIFTR(gfx->words.w1, 12, 12) + xOffset;
+    y = _SHIFTL(gfx->words.w1, 0, 12) + yOffset;
+
+    gfx->words.w1 = _SHIFTL(G_TX_RENDERTILE, 24, 3) | _SHIFTL(x, 12, 12) | _SHIFTL(y, 0, 12);
+}
+
+void prerenderedTextRelocate(struct PrerenderedText* prerender, int x, int y) {
+    int imageIndex = 0;
+    int imageMask = prerender->usedImageIndices;
+
+    int xOffset = (x - prerender->x) << 2;
+    int yOffset = (y - prerender->y) << 2;
+
+    while (imageMask) {
+        if (imageMask & 0x1) {
+            Gfx* gfx = prerender->displayLists[imageIndex];
+            // skip color
+            gfx += 2;
+
+            while (_SHIFTR(gfx->words.w0, 24, 8) != G_ENDDL) {
+                prerenderShiftSingleSymbol(gfx, xOffset, yOffset);
+                gfx += 3;
+            }
+
+            osWritebackDCache(prerender->displayLists[imageIndex], (int)gfx - (int)prerender->displayLists[imageIndex]);
+        }
+
+        imageMask >>= 1;
+        ++imageIndex;
+    }
+    prerender->x = x;
+    prerender->y = y;
+}
+
 void prerenderedTextRecolor(struct PrerenderedText* prerender, struct Coloru8* color) {
     int imageIndex = 0;
     int imageMask = prerender->usedImageIndices;
@@ -412,6 +454,9 @@ void prerenderedTextRecolor(struct PrerenderedText* prerender, struct Coloru8* c
 void fontRendererFillPrerender(struct FontRenderer* renderer, struct PrerenderedText* prerender, int x, int y, struct Coloru8* color) {
     int imageIndex = 0;
     int imageMask = renderer->usedImageIndices & prerender->usedImageIndices;
+
+    prerender->x = x;
+    prerender->y = y;
 
     while (imageMask) {
         if (imageMask & 0x1) {
