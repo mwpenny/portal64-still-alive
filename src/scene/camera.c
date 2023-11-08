@@ -5,7 +5,9 @@
 #include "../graphics/graphics.h"
 #include "../math/mathf.h"
 
-int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox) {
+enum FrustrumResult isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox) {
+    enum FrustrumResult result = FrustrumResultInside;
+
     for (int i = 0; i < frustrum->usedClippingPlaneCount; ++i) {
         struct Vector3 closestPoint;
 
@@ -16,11 +18,24 @@ int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Boundi
         closestPoint.z = normal->z < 0.0f ? boundingBox->minZ : boundingBox->maxZ;
 
         if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.00001f) {
-            return 1;
+            return FrustrumResultOutisde;
+        }
+
+        if (result == FrustrumResultBoth) {
+            continue;
+        }
+
+        // now check if it is fully contained
+        closestPoint.x = normal->x > 0.0f ? boundingBox->minX : boundingBox->maxX;
+        closestPoint.y = normal->y > 0.0f ? boundingBox->minY : boundingBox->maxY;
+        closestPoint.z = normal->z > 0.0f ? boundingBox->minZ : boundingBox->maxZ;
+        
+        if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.00001f) {
+            result = FrustrumResultBoth;
         }
     }
 
-    return 0;
+    return result;
 }
 
 int isSphereOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Vector3* scaledCenter, float scaledRadius) {

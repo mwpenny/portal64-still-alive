@@ -352,7 +352,7 @@ int renderShouldRenderOtherPortal(struct Scene* scene, int visiblePortal, struct
     portalBox.maxY = (s16)(portal->collisionObject.boundingBox.max.y * SCENE_SCALE);
     portalBox.maxZ = (s16)(portal->collisionObject.boundingBox.max.z * SCENE_SCALE);
 
-    if (isOutsideFrustrum(&properties->cameraMatrixInfo.cullingInformation, &portalBox)) {
+    if (isOutsideFrustrum(&properties->cameraMatrixInfo.cullingInformation, &portalBox) == FrustrumResultOutisde) {
         return 0;
     }
 

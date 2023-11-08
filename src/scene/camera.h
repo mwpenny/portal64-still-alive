@@ -33,7 +33,13 @@ struct CameraMatrixInfo {
     struct FrustrumCullingInformation cullingInformation;
 };
 
-int isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox);
+enum FrustrumResult {
+    FrustrumResultOutisde,
+    FrustrumResultInside,
+    FrustrumResultBoth,
+};
+
+enum FrustrumResult isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox);
 int isSphereOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Vector3* scaledCenter, float scaledRadius);
 int isQuadOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct CollisionQuad* quad);
 

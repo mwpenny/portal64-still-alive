@@ -16,11 +16,19 @@ void staticRenderTraverseIndex(
     struct FrustrumCullingInformation* cullingInfo, 
     struct RenderScene* renderScene
 ) {
+    struct StaticContentBox* fullyVisibleEnd = box;    
+
     while (box < boxEnd) {
-        if (isOutsideFrustrum(cullingInfo, &box->box)) {
-            // skip all children
-            box = box + box->siblingOffset;
-            continue;
+        if (box >= fullyVisibleEnd) {
+            enum FrustrumResult cullResult = isOutsideFrustrum(cullingInfo, &box->box);
+
+            if (cullResult == FrustrumResultOutisde) {
+                // skip all children
+                box = box + box->siblingOffset;
+                continue;
+            } else if (cullResult == FrustrumResultInside) {
+                fullyVisibleEnd = box + box->siblingOffset;
+            }
         }
 
         for (int i = box->staticRange.min; i < box->staticRange.max; ++i) {
@@ -71,7 +79,7 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, M
                 shiftedBox.maxY = animatedBox->maxY + y;
                 shiftedBox.maxZ = animatedBox->maxZ + z;
 
-                if (isOutsideFrustrum(cullingInfo, &shiftedBox)) {
+                if (isOutsideFrustrum(cullingInfo, &shiftedBox) == FrustrumResultOutisde) {
                     continue;
                 }
 
