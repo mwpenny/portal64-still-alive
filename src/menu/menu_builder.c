@@ -22,7 +22,8 @@ void textMenuItemInit(struct MenuBuilderElement* element) {
         element->params->params.text.font, 
         message,
         element->params->x,
-        element->params->y
+        element->params->y,
+        SCREEN_WD
     );
 }
 
@@ -73,7 +74,8 @@ void checkboxMenuItemRebuildText(struct MenuBuilderElement* element) {
         element->params->params.checkbox.font, 
         translationsGet(element->params->params.checkbox.messageId),
         element->params->x + CHECKBOX_SIZE + 6,
-        element->params->y
+        element->params->y,
+        SCREEN_WD
     );
 }
 

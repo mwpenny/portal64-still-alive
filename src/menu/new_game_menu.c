@@ -1,5 +1,9 @@
 #include "new_game_menu.h"
 
+#include <string.h>
+
+#include "./translations.h"
+
 #include "../font/font.h"
 #include "../font/dejavusans.h"
 
@@ -11,24 +15,25 @@
 #include "../build/assets/materials/ui.h"
 #include "../build/assets/materials/images.h"
 #include "../build/src/audio/clips.h"
+#include "../build/src/audio/subtitles.h"
 
 #include "../levels/levels.h"
 #include "../savefile/savefile.h"
 #include "../controls/controller.h"
 
 struct Chapter gChapters[] = {
-    {"CHAPTER 1", "Testchamber 00", images_chapter1_rgba_16b, 0},
-    {"CHAPTER 2", "Testchamber 04", images_chapter2_rgba_16b, 2},
-    {"CHAPTER 3", "Testchamber 08", images_chapter3_rgba_16b, 4},
-    {"CHAPTER 4", "Testchamber 10", images_chapter4_rgba_16b, 6},
-    {"CHAPTER 5", "Testchamber 13", images_chapter5_rgba_16b, -1},
-    {"CHAPTER 6", "Testchamber 14", images_chapter6_rgba_16b, -1},
-    {"CHAPTER 7", "Testchamber 15", images_chapter7_rgba_16b, -1},
-    {"CHAPTER 8", "Testchamber 16", images_chapter8_rgba_16b, -1},
-    {"CHAPTER 9", "Testchamber 17", images_chapter9_rgba_16b, -1},
-    {"CHAPTER 10", "Testchamber 18", images_chapter10_rgba_16b, -1},
-    {"CHAPTER 11", "Testchamber 19", images_chapter11_rgba_16b, -1},
-    {NULL, NULL, NULL},
+    {images_chapter1_rgba_16b, 0, 0},
+    {images_chapter2_rgba_16b, 2, 4},
+    {images_chapter3_rgba_16b, 4, 8},
+    {images_chapter4_rgba_16b, 6, 10},
+    {images_chapter5_rgba_16b, -1, 13},
+    {images_chapter6_rgba_16b, -1, 14},
+    {images_chapter7_rgba_16b, -1, 15},
+    {images_chapter8_rgba_16b, -1, 16},
+    {images_chapter9_rgba_16b, -1, 17},
+    {images_chapter10_rgba_16b, -1, 18},
+    {images_chapter11_rgba_16b, -1, 19},
+    {NULL, -1, 0},
 };
 
 #define MAX_CHAPTER_COUNT   ((sizeof(gChapters) / sizeof(*gChapters)) - 1)
@@ -44,8 +49,8 @@ struct Chapter* chapterFindForChamber(int chamberIndex) {
 }
 
 void chapterMenuInit(struct ChapterMenu* chapterMenu, int x, int y) {
-    chapterMenu->chapterText = malloc(sizeof(Gfx) * GFX_ENTRIES_PER_IMAGE * 10 + GFX_ENTRIES_PER_END_DL);
-    chapterMenu->testChamberText = malloc(sizeof(Gfx) * GFX_ENTRIES_PER_IMAGE * 14 + GFX_ENTRIES_PER_END_DL);
+    chapterMenu->chapterText = NULL;
+    chapterMenu->testChamberText = NULL;
     chapterMenu->border = menuBuildSolidBorder(
         x, y + 27, 
         92, 58,
@@ -57,46 +62,44 @@ void chapterMenuInit(struct ChapterMenu* chapterMenu, int x, int y) {
 
     zeroMemory(chapterMenu->imageBuffer, CHAPTER_IMAGE_SIZE);
 
-    Gfx* dl = chapterMenu->chapterText;
-    gSPEndDisplayList(dl++);
-
-    dl = chapterMenu->testChamberText;
-    gSPEndDisplayList(dl++);
-
     chapterMenu->chapter = NULL;
 
     chapterMenu->x = x;
     chapterMenu->y = y;
 }
 
-void chapterMenuSetChapter(struct ChapterMenu* chapterMenu, struct Chapter* chapter) {
-    Gfx* dl;
-    
-    if (chapter->chapter) {
-        dl = fontRender(
-            &gDejaVuSansFont, 
-            chapter->chapter, 
-            chapterMenu->x, 
-            chapterMenu->y, 
-            chapterMenu->chapterText
-        );
-        gSPEndDisplayList(dl++);
-    }
+void chapterMenuSetChapter(struct ChapterMenu* chapterMenu, struct Chapter* chapter, int chapterIndex) {
+    menuFreePrerenderedDeferred(chapterMenu->chapterText);
+    menuFreePrerenderedDeferred(chapterMenu->testChamberText);
 
-    if (chapter->testChamber) {
-        dl = fontRender(
-            &gDejaVuSansFont, 
-            chapter->testChamber, 
-            chapterMenu->x, 
-            chapterMenu->y + 14, 
-            chapterMenu->testChamberText
-        );
-        gSPEndDisplayList(dl++);
-    }
+    char chapterText[64];
+    sprintf(chapterText, "%s %d", translationsGet(GAMEUI_CHAPTER), chapterIndex + 1);
+    chapterMenu->chapterText = menuBuildPrerenderedText(&gDejaVuSansFont, chapterText, chapterMenu->x, chapterMenu->y, SCREEN_WD);
+
+    strcpy(chapterText, translationsGet(PORTAL_CHAPTER1_TITLE));
+    int len = strlen(chapterText);
+
+    // this is dumb, but it works
+    chapterText[len - 1] += chapterIndex % 10;
+    chapterText[len - 2] += chapterIndex / 10;
+
+    chapterMenu->testChamberText = menuBuildPrerenderedText(&gDejaVuSansFont, chapterText, chapterMenu->x, chapterMenu->y + 14, 100);
 
     if (chapter->imageData) {
         romCopy(chapter->imageData, chapterMenu->imageBuffer, CHAPTER_IMAGE_SIZE);
     }
+
+    int x = chapterMenu->x;
+    int y = chapterMenu->testChamberText->y + chapterMenu->testChamberText->height;
+
+    Gfx* gfx = menuRerenderSolidBorder(
+        x, y + 4, 
+        92, 58,
+        x + 5, y + 9,
+        CHAPTER_IMAGE_WIDTH, CHAPTER_IMAGE_HEIGHT,
+        chapterMenu->border
+    );
+    gSPEndDisplayList(gfx);
 
     chapterMenu->chapter = chapter;
 }
@@ -107,15 +110,15 @@ void chapterMenuSetChapter(struct ChapterMenu* chapterMenu, struct Chapter* chap
 void newGameInit(struct NewGameMenu* newGameMenu) {
     newGameMenu->menuOutline = menuBuildBorder(NEW_GAME_LEFT, NEW_GAME_TOP, SCREEN_WD - NEW_GAME_LEFT * 2, SCREEN_HT - NEW_GAME_TOP * 2);
 
-    newGameMenu->newGameText = menuBuildText(&gDejaVuSansFont, "NEW GAME", 48, 48);
+    newGameMenu->newGameText = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(GAMEUI_NEWGAME), 48, 48, SCREEN_WD);
     
     newGameMenu->topLine = menuBuildHorizontalLine(52, 64, 214);
 
     chapterMenuInit(&newGameMenu->chapter0, 55, 76);
     chapterMenuInit(&newGameMenu->chapter1, 163, 76);
 
-    chapterMenuSetChapter(&newGameMenu->chapter0, &gChapters[0]);
-    chapterMenuSetChapter(&newGameMenu->chapter1, &gChapters[1]);
+    chapterMenuSetChapter(&newGameMenu->chapter0, &gChapters[0], 0);
+    chapterMenuSetChapter(&newGameMenu->chapter1, &gChapters[1], 1);
 
     newGameMenu->chapterOffset = 0;
     newGameMenu->selectedChapter = 0;    
@@ -125,8 +128,16 @@ void newGameInit(struct NewGameMenu* newGameMenu) {
         newGameMenu->chapterCount < MAX_CHAPTER_COUNT && 
             gChapters[newGameMenu->chapterCount].testChamberNumber <= gSaveData.header.chapterProgress; 
         ++newGameMenu->chapterCount) {
-
+        // do nothing
     }
+}
+
+void newGameRebuildText(struct NewGameMenu* newGameMenu) {
+    chapterMenuSetChapter(&newGameMenu->chapter0, &gChapters[newGameMenu->chapterOffset], newGameMenu->chapterOffset);
+    chapterMenuSetChapter(&newGameMenu->chapter1, &gChapters[newGameMenu->chapterOffset + 1], newGameMenu->chapterOffset + 1);
+
+    prerenderedTextFree(newGameMenu->newGameText);
+    newGameMenu->newGameText = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(GAMEUI_NEWGAME), 48, 48, SCREEN_WD);
 }
 
 enum MenuDirection newGameUpdate(struct NewGameMenu* newGameMenu) {
@@ -158,8 +169,8 @@ enum MenuDirection newGameUpdate(struct NewGameMenu* newGameMenu) {
     if (nextChapterOffset != newGameMenu->chapterOffset) {
         newGameMenu->chapterOffset = nextChapterOffset;
 
-        chapterMenuSetChapter(&newGameMenu->chapter0, &gChapters[newGameMenu->chapterOffset]);
-        chapterMenuSetChapter(&newGameMenu->chapter1, &gChapters[newGameMenu->chapterOffset + 1]);
+        chapterMenuSetChapter(&newGameMenu->chapter0, &gChapters[newGameMenu->chapterOffset], newGameMenu->chapterOffset);
+        chapterMenuSetChapter(&newGameMenu->chapter1, &gChapters[newGameMenu->chapterOffset + 1], newGameMenu->chapterOffset + 1);
     }
 
     return MenuDirectionStay;
@@ -193,28 +204,28 @@ void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderSt
 
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
 
-    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_0_INDEX]);
-    gSPDisplayList(renderState->dl++, newGameMenu->newGameText);
+    struct PrerenderedTextBatch* batch = prerenderedBatchStart();
 
-    gDPPipeSync(renderState->dl++);
-    menuSetRenderColor(renderState, newGameMenu->selectedChapter == newGameMenu->chapterOffset, &gSelectionOrange, &gColorWhite);
-    gSPDisplayList(renderState->dl++, newGameMenu->chapter0.chapterText);
-    gSPDisplayList(renderState->dl++, newGameMenu->chapter0.testChamberText);
+    prerenderedBatchAdd(batch, newGameMenu->newGameText, NULL);
+
+    prerenderedBatchAdd(batch, newGameMenu->chapter0.chapterText, newGameMenu->selectedChapter == newGameMenu->chapterOffset ? &gSelectionOrange : &gColorWhite);
+    prerenderedBatchAdd(batch, newGameMenu->chapter0.testChamberText, newGameMenu->selectedChapter == newGameMenu->chapterOffset ? &gSelectionOrange : &gColorWhite);
 
     if (showSecondChapter) {
-        gDPPipeSync(renderState->dl++);
-        menuSetRenderColor(renderState, newGameMenu->selectedChapter != newGameMenu->chapterOffset, &gSelectionOrange, &gColorWhite);
-        gSPDisplayList(renderState->dl++, newGameMenu->chapter1.chapterText);
-        gSPDisplayList(renderState->dl++, newGameMenu->chapter1.testChamberText);
-        gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
+        prerenderedBatchAdd(batch, newGameMenu->chapter1.chapterText, newGameMenu->selectedChapter != newGameMenu->chapterOffset ? &gSelectionOrange : &gColorWhite);
+        prerenderedBatchAdd(batch, newGameMenu->chapter1.testChamberText, newGameMenu->selectedChapter != newGameMenu->chapterOffset ? &gSelectionOrange : &gColorWhite);
     }
+
+    renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
+
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 
     graphicsCopyImage(
         renderState, newGameMenu->chapter0.imageBuffer, 
         84, 48, 
         0, 0, 
         newGameMenu->chapter0.x + 5,
-        newGameMenu->chapter0.y + 32,
+        newGameMenu->chapter0.testChamberText->y + newGameMenu->chapter0.testChamberText->height + 9,
         84, 48,
         gColorWhite
     );
@@ -225,7 +236,7 @@ void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderSt
             84, 48, 
             0, 0, 
             newGameMenu->chapter1.x + 5,
-            newGameMenu->chapter1.y + 32,
+            newGameMenu->chapter1.testChamberText->y + newGameMenu->chapter1.testChamberText->height + 9,
             84, 48,
             gColorWhite
         );

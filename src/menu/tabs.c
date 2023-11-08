@@ -107,7 +107,8 @@ void tabsRebuildText(struct Tabs* tabs) {
             tabs->font, 
             translationsGet(tabs->tabs[i].messageId), 
             currentX + LEFT_TEXT_PADDING, 
-            tabs->y + TOP_TEXT_PADDING
+            tabs->y + TOP_TEXT_PADDING,
+            SCREEN_WD
         );
         tabs->tabRenderData[i].width = tabs->tabRenderData[i].text->width + LEFT_TEXT_PADDING + RIGHT_TEXT_PADDING;
         tabs->tabRenderData[i].x = currentX;

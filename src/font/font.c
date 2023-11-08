@@ -462,6 +462,7 @@ void fontRendererFillPrerender(struct FontRenderer* renderer, struct Prerendered
     prerender->x = x;
     prerender->y = y;
     prerender->width = renderer->width;
+    prerender->height = renderer->height;
 
     while (imageMask) {
         if (imageMask & 0x1) {

@@ -16,10 +16,14 @@ hl_gameui_whitelist = {
     "GAMEUI_AUDIO",
     "GAMEUI_PORTAL",
     "GAMEUI_JOYSTICK",
-
+    "GAMEUI_CHAPTER",
     "GAMEUI_SOUNDEFFECTVOLUME",
     "GAMEUI_MUSICVOLUME",
     "GAMEUI_SUBTITLESANDSOUNDEFFECTS",
+}
+
+portal_whitelist = {
+    "PORTAL_CHAPTER1_TITLE",
 }
 
 language_translations = {
@@ -294,13 +298,15 @@ def process_all_closecaption_files(dir, language_names):
             k,v,l = read_translation_file(filepath)
 
             gamepad_k, gamepad_v, _ = read_translation_file(f"vpk/Portal/hl2/resource/gameui_{language_name}.txt")
-
             gamepad_k, gamepad_v = filter_whitelist(gamepad_k, gamepad_v, hl_gameui_whitelist)
+
+            portal_k, portal_v, _ = read_translation_file(f"vpk/Portal/portal/resource/portal_{language_name}.txt")
+            portal_k, portal_v = filter_whitelist(portal_k, portal_v, portal_whitelist)
 
             extra_k, extra_v, _ = read_translation_file(f"assets/translations/extra_{language_name}.txt")
 
-            k = k + gamepad_k + extra_k
-            v = v + gamepad_v + extra_v
+            k = k + gamepad_k + portal_k + extra_k
+            v = v + gamepad_v + portal_v + extra_v
 
             if not key_order:
                 header_lines = make_SubtitleKey_headerlines(k)

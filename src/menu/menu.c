@@ -7,9 +7,9 @@ struct Coloru8 gSelectionGray = {201, 201, 201, 255};
 struct Coloru8 gBorderHighlight = {193, 193, 193, 255};
 struct Coloru8 gBorderDark = {86, 86, 86, 255};
 
-struct PrerenderedText* menuBuildPrerenderedText(struct Font* font, char* message, int x, int y) {
+struct PrerenderedText* menuBuildPrerenderedText(struct Font* font, char* message, int x, int y, int maxWidth) {
     struct FontRenderer* renderer = stackMalloc(sizeof(struct FontRenderer));
-    fontRendererLayout(renderer, font, message, SCREEN_WD);
+    fontRendererLayout(renderer, font, message, maxWidth);
     struct PrerenderedText* result = prerenderedTextNew(renderer);
     fontRendererFillPrerender(renderer, result, x, y, NULL);
     stackMallocFree(renderer);
@@ -198,7 +198,7 @@ struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, i
     gSPEndDisplayList(dl++);
 
     if (shouldUsePrerendered) {
-        result.prerenderedText = menuBuildPrerenderedText(font, message, x + CHECKBOX_SIZE + 6, y);
+        result.prerenderedText = menuBuildPrerenderedText(font, message, x + CHECKBOX_SIZE + 6, y, SCREEN_WD);
     } else {
         result.text = menuBuildText(font, message, x + CHECKBOX_SIZE + 6, y);
     }
@@ -294,4 +294,63 @@ Gfx* menuSliderRender(struct MenuSlider* slider, Gfx* dl) {
     dl = menuRenderOutline(sliderPos - (SLIDER_WIDTH / 2), slider->y, SLIDER_WIDTH, SLIDER_HEIGHT, 0, dl);
 
     return dl;
+}
+
+#define MAX_DEFERRED_RELEASE_SIZE   16
+#define RELEASE_DEFER_COUNT         2
+#define NEXT_ENTRY(curr)        ((curr) + 1 == MAX_DEFERRED_RELEASE_SIZE ? 0 : (curr) + 1)
+
+struct PrerenderedTextReleaseQueue {
+    struct PrerenderedText* queue[MAX_DEFERRED_RELEASE_SIZE];
+    u8 entryDelay[MAX_DEFERRED_RELEASE_SIZE];
+    short insertPos;
+    short readPos;
+};
+
+struct PrerenderedTextReleaseQueue gDeferredPTRelease;
+
+void menuFreePrerenderedDeferred(struct PrerenderedText* text) {
+    if (!text) {
+        return;
+    }
+
+    if (gDeferredPTRelease.insertPos == gDeferredPTRelease.readPos && gDeferredPTRelease.entryDelay[gDeferredPTRelease.readPos] != 0) {
+        // queue full, we just leak memory now
+        return;
+    }
+
+    gDeferredPTRelease.queue[gDeferredPTRelease.insertPos] = text;
+    gDeferredPTRelease.entryDelay[gDeferredPTRelease.insertPos] = RELEASE_DEFER_COUNT;
+    gDeferredPTRelease.insertPos = NEXT_ENTRY(gDeferredPTRelease.insertPos);
+}
+
+void menuTickDeferredQueue() {
+    int curr = gDeferredPTRelease.readPos;
+
+    if (gDeferredPTRelease.entryDelay[curr] == 0) {
+        return;
+    }
+
+    do {
+        --gDeferredPTRelease.entryDelay[curr];
+
+        int next = NEXT_ENTRY(curr);
+
+        if (gDeferredPTRelease.entryDelay[curr] == 0) {
+            prerenderedTextFree(gDeferredPTRelease.queue[curr]);
+            gDeferredPTRelease.queue[curr] = NULL;
+            gDeferredPTRelease.readPos = next;
+        }
+
+        curr = next;
+    } while (curr != gDeferredPTRelease.insertPos);
+}
+
+void menuResetDeferredQueue() {
+    for (int i = 0; i < MAX_DEFERRED_RELEASE_SIZE; ++i) {
+        gDeferredPTRelease.queue[i] = NULL;
+        gDeferredPTRelease.entryDelay[i] = 0;
+    }
+    gDeferredPTRelease.insertPos = 0;
+    gDeferredPTRelease.readPos = 0;
 }

@@ -70,6 +70,7 @@ struct PrerenderedText {
     short x;
     short y;
     short width;
+    short height;
 };
 
 void fontRendererInitPrerender(struct FontRenderer* renderer, struct PrerenderedText* prerender);

@@ -60,7 +60,7 @@ void landingMenuInitText(struct LandingMenu* landingMenu) {
     int stride = landingMenu->optionCount > 4 ? 12 : 16;
 
     for (int i = 0; i < landingMenu->optionCount; ++i) {
-        landingMenu->optionText[i] = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(landingMenu->options[i].messageId), 30, y);
+        landingMenu->optionText[i] = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(landingMenu->options[i].messageId), 30, y, SCREEN_WD);
         y += stride;
     }
 }

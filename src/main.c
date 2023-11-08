@@ -273,6 +273,7 @@ static void gameProc(void* arg) {
                         rumblePakClipInit();
                         cutsceneRunnerReset();
                         dynamicAssetsReset();
+                        menuResetDeferredQueue();
                         // if a portal fire button is being held
                         // don't fire portals until it is released
                         controllerActionMuteActive();
@@ -322,6 +323,7 @@ static void gameProc(void* arg) {
             case (OS_SC_DONE_MSG):
                 --pendingGFX;
                 portalSurfaceCheckCleanupQueue();
+                menuTickDeferredQueue();
 
                 if (gScene.checkpointState == SceneCheckpointStatePendingRender) {
                     gScene.checkpointState = SceneCheckpointStateReady;

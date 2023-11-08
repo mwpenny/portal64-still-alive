@@ -50,7 +50,7 @@ extern struct Coloru8 gBorderHighlight;
 extern struct Coloru8 gBorderDark;
 
 Gfx* menuBuildText(struct Font* font, char* message, int x, int y);
-struct PrerenderedText* menuBuildPrerenderedText(struct Font* font, char* message, int x, int y);
+struct PrerenderedText* menuBuildPrerenderedText(struct Font* font, char* message, int x, int y, int maxWidth);
 
 Gfx* menuBuildBorder(int x, int y, int width, int height);
 Gfx* menuBuildHorizontalLine(int x, int y, int width);
@@ -66,5 +66,9 @@ Gfx* menuCheckboxRender(struct MenuCheckbox* checkbox, Gfx* dl);
 
 struct MenuSlider menuBuildSlider(int x, int y, int w, int tickCount);
 Gfx* menuSliderRender(struct MenuSlider* slider, Gfx* dl);
+
+void menuFreePrerenderedDeferred(struct PrerenderedText* text);
+void menuTickDeferredQueue();
+void menuResetDeferredQueue();
 
 #endif
