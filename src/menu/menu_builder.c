@@ -119,7 +119,7 @@ enum MenuDirection sliderMenuItemUpdate(struct MenuBuilderElement* element, Menu
         int currentValue = (int)floorf(slider->value * (numTicks - 1));
         int newValue = currentValue;
 
-        if (controllerDir & ControllerDirectionRight) {
+        if ((controllerDir & ControllerDirectionRight) || controllerGetButtonDown(0, A_BUTTON)) {
             ++newValue;
         } else if (controllerDir & ControllerDirectionLeft) {
             --newValue;
@@ -127,8 +127,12 @@ enum MenuDirection sliderMenuItemUpdate(struct MenuBuilderElement* element, Menu
 
         if (newValue < 0) {
             newValue = 0;
-        } else if (newValue >= numTicks) {
-            newValue = numTicks - 1;
+        } else if (newValue > numTicks - 1) {
+            if (controllerGetButtonDown(0, A_BUTTON)) {
+                newValue = 0;
+            } else {
+                newValue = numTicks - 1;
+            }
         }
 
         if (newValue != currentValue) {
@@ -152,6 +156,34 @@ enum MenuDirection sliderMenuItemUpdate(struct MenuBuilderElement* element, Menu
             newValue = 1.0f;
         } else if (newValue < 0.0f) {
             newValue = 0.0f;
+        }
+
+        int numTicks = element->params->params.slider.numberOfTicks;
+
+        if (controllerGetButtonDown(0, R_JPAD | A_BUTTON)) {
+            int currentValue = (int)floorf(newValue * (numTicks - 1));
+
+            currentValue = currentValue + 1;
+
+            if (currentValue > numTicks - 1) {
+                if (controllerGetButtonDown(0, A_BUTTON)) {
+                    currentValue = 0;
+                } else {
+                    currentValue = numTicks - 1;
+                }
+            }
+
+            newValue = (float)currentValue / (float)(numTicks - 1);
+        } else if (controllerGetButtonDown(0, L_JPAD)) {
+            int currentValue = (int)ceilf(newValue * (numTicks - 1));
+
+            currentValue = currentValue - 1;
+
+            if (currentValue < 0) {
+                currentValue = 0;
+            }
+
+            newValue = (float)currentValue / (float)(numTicks - 1);
         }
 
         if (newValue != slider->value) {
