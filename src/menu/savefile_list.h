@@ -2,6 +2,7 @@
 #define __MENU_SAVEFILE_LIST_H__
 
 #include "./menu.h"
+#include "../font/font.h"
 #include "../graphics/graphics.h"
 #include "../savefile/savefile.h"
 #include "./new_game_menu.h"
@@ -14,9 +15,9 @@ struct SavefileInfo {
 };
 
 struct SavefileListSlot {
-    Gfx* testChamberText;
+    struct PrerenderedText* testChamberText;
     Gfx* border;
-    Gfx* gameId;
+    struct PrerenderedText* gameId;
     short x, y;
     short slotIndex;
     void* imageData;
@@ -26,7 +27,7 @@ struct SavefileListSlot {
 
 struct SavefileListMenu {
     Gfx* menuOutline;
-    Gfx* savefileListTitleText;
+    struct PrerenderedText* savefileListTitleText;
     struct SavefileInfo savefileInfo[MAX_SAVE_SLOTS];
     struct SavefileListSlot slots[MAX_VISIBLE_SLOTS];
     short numberOfSaves;

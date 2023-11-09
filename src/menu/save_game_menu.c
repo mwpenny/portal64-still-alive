@@ -5,8 +5,10 @@
 #include "../controls/controller.h"
 #include "../util/memory.h"
 #include "../audio/soundplayer.h"
+#include "./translations.h"
 
 #include "../build/src/audio/clips.h"
+#include "../build/src/audio/subtitles.h"
 
 void saveGameMenuInit(struct SaveGameMenu* saveGame, struct SavefileListMenu* savefileList) {
     saveGame->savefileList = savefileList;
@@ -36,7 +38,7 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
 
     if (includeNew && freeSlot != SAVEFILE_NO_SLOT) {
         savefileInfo[numberOfSaves].slotIndex = freeSlot;
-        savefileInfo[numberOfSaves].savefileName = "NEW SAVE";
+        savefileInfo[numberOfSaves].savefileName = translationsGet(GAMEUI_NEWSAVEGAME);
         savefileInfo[numberOfSaves].testchamberIndex = levelGetChamberNumber(gCurrentLevelIndex, gScene.player.body.currentRoom);
         savefileInfo[numberOfSaves].screenshot = gScreenGrabBuffer;
 
@@ -47,7 +49,7 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
         ++numberOfSaves;
     }
 
-    savefileUseList(saveGame->savefileList, "SAVE GAME", savefileInfo, numberOfSaves);
+    savefileUseList(saveGame->savefileList, translationsGet(GAMEUI_SAVEGAME), savefileInfo, numberOfSaves);
 
     if (startSelection == -1) {
         saveGame->savefileList->selectedSave = numberOfSaves - 1;

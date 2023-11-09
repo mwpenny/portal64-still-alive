@@ -5,8 +5,10 @@
 #include "../levels/levels.h"
 #include "../util/memory.h"
 #include "../audio/soundplayer.h"
+#include "./translations.h"
 
 #include "../build/src/audio/clips.h"
+#include "../build/src/audio/subtitles.h"
 
 void loadGameMenuInit(struct LoadGameMenu* loadGame, struct SavefileListMenu* savefileList) {
     loadGame->savefileList = savefileList;
@@ -21,11 +23,11 @@ void loadGamePopulate(struct LoadGameMenu* loadGame) {
     for (int i = 0; i < numberOfSaves; ++i) {
         savefileInfo[i].slotIndex = saveSlots[i].saveSlot;
         savefileInfo[i].testchamberIndex = saveSlots[i].testChamber;
-        savefileInfo[i].savefileName = saveSlots[i].saveSlot == 0 ? "AUTO" : NULL;
+        savefileInfo[i].savefileName = saveSlots[i].saveSlot == 0 ? translationsGet(GAMEUI_AUTOSAVE) : NULL;
         savefileInfo[i].screenshot = (u16*)SCREEN_SHOT_SRAM(saveSlots[i].saveSlot);
     }
 
-    savefileUseList(loadGame->savefileList, "LOAD GAME", savefileInfo, numberOfSaves);
+    savefileUseList(loadGame->savefileList, translationsGet(GAMEUI_LOADGAME), savefileInfo, numberOfSaves);
 }
 
 enum MenuDirection loadGameUpdate(struct LoadGameMenu* loadGame) {

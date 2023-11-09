@@ -327,11 +327,12 @@ build/src/menu/game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h 
 build/src/menu/gameplay_options.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/menu/joystick_options.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/menu/landing_menu.o: build/assets/materials/ui.h build/src/audio/clips.h
-build/src/menu/load_game.o: build/assets/materials/ui.h build/src/audio/clips.h
+build/src/menu/load_game.o: build/assets/materials/ui.h build/src/audio/clips.h build/src/audio/subtitles.h
 build/src/menu/main_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
 build/src/menu/new_game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/src/audio/subtitles.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
 build/src/menu/options_menu.o: build/assets/materials/ui.h build/src/audio/clips.h build/src/audio/subtitles.h
-build/src/menu/save_game_menu.o: build/src/audio/clips.h
+build/src/menu/save_game_menu.o: build/src/audio/clips.h build/src/audio/subtitles.h
+build/src/menu/text_manipulation.o: build/src/audio/subtitles.h
 build/src/scene/scene_animator.o: build/src/audio/clips.h
 build/src/menu/cheat_codes.o: build/src/audio/clips.h
 build/src/levels/intro.o: build/src/audio/clips.h build/assets/materials/images.h

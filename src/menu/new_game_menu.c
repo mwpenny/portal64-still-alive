@@ -11,6 +11,7 @@
 #include "../util/memory.h"
 #include "../util/rom.h"
 #include "../audio/soundplayer.h"
+#include "./text_manipulation.h"
 
 #include "../build/assets/materials/ui.h"
 #include "../build/assets/materials/images.h"
@@ -76,12 +77,7 @@ void chapterMenuSetChapter(struct ChapterMenu* chapterMenu, struct Chapter* chap
     sprintf(chapterText, "%s %d", translationsGet(GAMEUI_CHAPTER), chapterIndex + 1);
     chapterMenu->chapterText = menuBuildPrerenderedText(&gDejaVuSansFont, chapterText, chapterMenu->x, chapterMenu->y, SCREEN_WD);
 
-    strcpy(chapterText, translationsGet(PORTAL_CHAPTER1_TITLE));
-    int len = strlen(chapterText);
-
-    // this is dumb, but it works
-    chapterText[len - 1] += chapterIndex % 10;
-    chapterText[len - 2] += chapterIndex / 10;
+    textManipTestChamberMessage(chapterText, gChapters[chapterIndex].testChamberDisplayNumber);
 
     chapterMenu->testChamberText = menuBuildPrerenderedText(&gDejaVuSansFont, chapterText, chapterMenu->x, chapterMenu->y + 14, 100);
 
