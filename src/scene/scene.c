@@ -96,6 +96,7 @@ void sceneInit(struct Scene* scene) {
     }
 
     gGameMenu.state = GameMenuStateResumeGame;
+    scene->ignorePortalGun = 0;
 }
 
 void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
@@ -353,6 +354,14 @@ void sceneCheckPortals(struct Scene* scene) {
     int fireBlue = controllerActionGet(ControllerActionOpenPortal0);
     int fireOrange = controllerActionGet(ControllerActionOpenPortal1);
 
+    // this prevents the firing of portals after unpausing
+    if (scene->ignorePortalGun && (fireBlue || fireOrange)) {
+        fireBlue = 0;
+        fireOrange = 0;
+    } else {
+        scene->ignorePortalGun = 0;
+    }
+
     int hasBlue = (scene->player.flags & PlayerHasFirstPortalGun) != 0;
     int hasOrange = (scene->player.flags & PlayerHasSecondPortalGun) != 0;
     if (scene->continuouslyAttemptingPortalOpen){
@@ -544,10 +553,11 @@ void sceneUpdate(struct Scene* scene) {
     
     OSTime frameStart = osGetTime();
     scene->lastFrameTime = frameStart - scene->lastFrameStart;
-
+    
     if (gGameMenu.state != GameMenuStateResumeGame) {
-        if (gGameMenu.state == GameMenuStateLanding && (controllerGetButtonUp(0, B_BUTTON) || controllerGetButtonDown(0, START_BUTTON))) {
+        if (gGameMenu.state == GameMenuStateLanding && (controllerGetButtonDown(0, B_BUTTON) || controllerActionGet(ControllerActionPause))) {
             gGameMenu.state = GameMenuStateResumeGame;
+            scene->ignorePortalGun = 1;
             savefileSave();
         }
 
