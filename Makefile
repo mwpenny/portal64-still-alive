@@ -524,7 +524,7 @@ SUBTITLE_LANGUAGES = english \
 SUBTITLE_SOURCES = $(SUBTITLE_LANGUAGES:%=build/src/audio/subtitles_%.c)
 SUBTITLE_OBJECTS = $(SUBTITLE_LANGUAGES:%=build/src/audio/subtitles_%.o)
 
-build/src/audio/subtitles.h build/src/audio/subtitles.c build/subtitles.ld $(SUBTITLE_SOURCES): vpk/Portal/portal/resource/closecaption_english.txt vpk/Portal/hl2/resource/gameui_english.txt tools/level_scripts/subtitle_generate.py assets/translations/extra_english.txt
+build/src/audio/subtitles.h build/src/audio/subtitles.c build/subtitles.ld $(SUBTITLE_SOURCES): vpk/Portal/portal/resource/closecaption_english.txt vpk/Portal/hl2/resource/gameui_english.txt vpk/Portal/hl2/resource/valve_english.txt assets/translations/extra_english.txt tools/level_scripts/subtitle_generate.py
 	python3 tools/level_scripts/subtitle_generate.py $(SUBTITLE_LANGUAGES)
 
 ####################
