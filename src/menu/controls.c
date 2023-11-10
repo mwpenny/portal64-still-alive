@@ -128,7 +128,7 @@ struct ControlActionDataRow gControllerDataRows[] = {
     {VALVE_SECONDARY_ATTACK, -1, ControllerActionOpenPortal1},
     {VALVE_USE_ITEMS, -1, ControllerActionUseItem},
 
-    {VALVE_PAUSE_GAME, -1, ControllerActionPause},
+    {VALVE_PAUSE_GAME, VALVE_MISCELLANEOUS_TITLE, ControllerActionPause},
 
     {VALVE_LOOK_STRAIGHT_AHEAD, VALVE_MISCELLANEOUS_KEYBOARD_KEYS_TITLE, ControllerActionLookForward},
     {VALVE_LOOK_STRAIGHT_BACK, -1, ControllerActionLookBackward},
