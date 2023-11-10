@@ -27,6 +27,20 @@ hl_gameui_whitelist = {
 
 portal_whitelist = {
     "PORTAL_CHAPTER1_TITLE",
+    "VALVE_PRIMARY_ATTACK",
+    "VALVE_SECONDARY_ATTACK",
+}
+
+valve_whitelist = {
+    "VALVE_JUMP",
+    "VALVE_DUCK",
+    "VALVE_USE_ITEMS",
+    "VALVE_COMBAT_TITLE",
+    "VALVE_MOVEMENT_TITLE",
+    "VALVE_MISCELLANEOUS_TITLE",
+    "VALVE_PAUSE_GAME",
+    "VALVE_LOOK_STRAIGHT_AHEAD",
+    "VALVE_MISCELLANEOUS_KEYBOARD_KEYS_TITLE",
 }
 
 language_translations = {
@@ -306,10 +320,13 @@ def process_all_closecaption_files(dir, language_names):
             portal_k, portal_v, _ = read_translation_file(f"vpk/Portal/portal/resource/portal_{language_name}.txt")
             portal_k, portal_v = filter_whitelist(portal_k, portal_v, portal_whitelist)
 
+            valve_k, valve_v, _ = read_translation_file(f"vpk/Portal/hl2/resource/valve_{language_name}.txt")
+            valve_k, valve_v = filter_whitelist(valve_k, valve_v, valve_whitelist)
+
             extra_k, extra_v, _ = read_translation_file(f"assets/translations/extra_{language_name}.txt")
 
-            k = k + gamepad_k + portal_k + extra_k
-            v = v + gamepad_v + portal_v + extra_v
+            k = k + gamepad_k + portal_k + valve_k + extra_k
+            v = v + gamepad_v + portal_v + valve_v + extra_v
 
             if not key_order:
                 header_lines = make_SubtitleKey_headerlines(k)

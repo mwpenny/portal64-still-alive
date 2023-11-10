@@ -367,6 +367,69 @@ struct PrerenderedText* prerenderedTextNew(struct FontRenderer* renderer) {
     return result;
 }
 
+struct PrerenderedText* prerenderedTextCopy(struct PrerenderedText* text) {
+    struct PrerenderedText* result = malloc(sizeof(struct PrerenderedText));
+
+    int imageIndex = 0;
+    int imageMask = text->usedImageIndices;
+
+    while (imageMask) {
+        imageMask >>= 1;
+        ++imageIndex;
+    }
+
+    result->displayLists = malloc(sizeof(Gfx*) * imageIndex);
+    result->usedImageIndices = text->usedImageIndices;
+    result->x = text->x;
+    result->y = text->y;
+    result->width = text->width;
+    result->height = text->height;
+
+    imageIndex = 0;
+    imageMask = text->usedImageIndices;
+
+    while (imageMask) {
+        if (imageMask & 0x1) {
+            Gfx* src = text->displayLists[imageIndex];
+
+            src += 2;
+            while (_SHIFTR(src->words.w0, 24, 8) != G_ENDDL) {
+                // copy image
+                src += 3;
+            }
+            ++src;
+
+            int size = (src - text->displayLists[imageIndex]) * sizeof(Gfx);
+
+            result->displayLists[imageIndex] = malloc(size);
+
+            Gfx* dest = result->displayLists[imageIndex];
+            src = text->displayLists[imageIndex];
+            // copy color 
+            *dest++ = *src++;
+            *dest++ = *src++;
+
+            while (_SHIFTR(src->words.w0, 24, 8) != G_ENDDL) {
+                // copy image
+                *dest++ = *src++;
+                *dest++ = *src++;
+                *dest++ = *src++;
+            }
+
+            // copy end
+            *dest++ = *src++;
+
+            osWritebackDCache(result->displayLists[imageIndex], size);
+        } else {
+            result->displayLists[imageIndex] = NULL;
+        }
+
+        imageMask >>= 1;
+        ++imageIndex;
+    }
+    return result;
+}
+
 void prerenderedTextCleanup(struct PrerenderedText* prerender) {
     int imageIndex = 0;
     int imageMask = prerender->usedImageIndices;

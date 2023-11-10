@@ -296,7 +296,7 @@ Gfx* menuSliderRender(struct MenuSlider* slider, Gfx* dl) {
     return dl;
 }
 
-#define MAX_DEFERRED_RELEASE_SIZE   16
+#define MAX_DEFERRED_RELEASE_SIZE   20
 #define RELEASE_DEFER_COUNT         2
 #define NEXT_ENTRY(curr)        ((curr) + 1 == MAX_DEFERRED_RELEASE_SIZE ? 0 : (curr) + 1)
 

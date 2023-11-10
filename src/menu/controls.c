@@ -5,10 +5,12 @@
 #include "../controls/controller.h"
 #include "../audio/soundplayer.h"
 #include "../util/memory.h"
+#include "./translations.h"
 
 #include "../build/assets/materials/ui.h"
 
 #include "../build/src/audio/clips.h"
+#include "../build/src/audio/subtitles.h"
 
 #define CONTROL_ROW_HEIGHT  14
 
@@ -111,25 +113,25 @@ char gControllerActionToDirectionIcon[] = {
 };
 
 struct ControlActionDataRow {
-    char* name;
+    short nameId;
+    short headerId;
     enum ControllerAction action;
-    char* header;
 };
 
 struct ControlActionDataRow gControllerDataRows[] = {
-    {"Move", ControllerActionMove, "Movement"},
-    {"Look", ControllerActionRotate, NULL},
-    {"Jump", ControllerActionJump, NULL},
-    {"Duck", ControllerActionDuck, NULL},
+    {VALVE_MOVE, VALVE_MOVEMENT_TITLE, ControllerActionMove},
+    {VALVE_LOOK, -1, ControllerActionRotate},
+    {VALVE_JUMP, -1, ControllerActionJump},
+    {VALVE_DUCK, -1, ControllerActionDuck},
 
-    {"Fire blue portal", ControllerActionOpenPortal0, "Combat"},
-    {"Fire red portal", ControllerActionOpenPortal1, NULL},
-    {"Use item", ControllerActionUseItem, NULL},
+    {VALVE_PRIMARY_ATTACK, VALVE_COMBAT_TITLE, ControllerActionOpenPortal0},
+    {VALVE_SECONDARY_ATTACK, -1, ControllerActionOpenPortal1},
+    {VALVE_USE_ITEMS, -1, ControllerActionUseItem},
 
-    {"Pause", ControllerActionPause, "Misc"},
+    {VALVE_PAUSE_GAME, -1, ControllerActionPause},
 
-    {"Look forward", ControllerActionLookForward, "Misc Movement"},
-    {"Look backward", ControllerActionLookBackward, NULL},
+    {VALVE_LOOK_STRAIGHT_AHEAD, VALVE_MISCELLANEOUS_KEYBOARD_KEYS_TITLE, ControllerActionLookForward},
+    {VALVE_LOOK_STRAIGHT_BACK, -1, ControllerActionLookBackward},
 };
 
 int controlsMeasureIcons(enum ControllerAction action) {
@@ -192,14 +194,24 @@ Gfx* controlsRenderIcons(Gfx* dl, enum ControllerAction action, int x, int y) {
 }
 
 void controlsLayoutRow(struct ControlsMenuRow* row, struct ControlActionDataRow* data, int x, int y) {
-    fontRender(&gDejaVuSansFont, data->name, x + ROW_PADDING, y, row->actionText);
+    struct PrerenderedText* copy = prerenderedTextCopy(row->actionText);
+    menuFreePrerenderedDeferred(row->actionText);
+    row->actionText = copy;
+    prerenderedTextRelocate(row->actionText, x + ROW_PADDING, y);
     Gfx* dl = controlsRenderIcons(row->sourceIcons, data->action, CONTROLS_X + CONTROLS_WIDTH - ROW_PADDING * 2, y);
     gSPEndDisplayList(dl++);
     row->y = y;
 }
 
+void controlsLayoutHeader(struct ControlsMenuHeader* header, int x, int y) {
+    struct PrerenderedText* copy = prerenderedTextCopy(header->headerText);
+    menuFreePrerenderedDeferred(header->headerText);
+    header->headerText = copy;
+    prerenderedTextRelocate(header->headerText, x, y);
+}
+
 void controlsInitRow(struct ControlsMenuRow* row, struct ControlActionDataRow* data) {
-    row->actionText = menuBuildText(&gDejaVuSansFont, data->name, 0, 0);
+    row->actionText = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(data->nameId), 0, 0, SCREEN_WD);
 
     Gfx* dl = row->sourceIcons;
     for (int i = 0; i < SOURCE_ICON_COUNT; ++i) {
@@ -207,12 +219,8 @@ void controlsInitRow(struct ControlsMenuRow* row, struct ControlActionDataRow* d
     }
 }
 
-void controlsLayoutHeader(struct ControlsMenuHeader* header, char* message, int x, int y) {
-    header->headerText = menuBuildText(&gDejaVuSansFont, message, x + HEADER_PADDING, y);
-}
-
-void controlsInitHeader(struct ControlsMenuHeader* header, char* message) {
-    header->headerText = menuBuildText(&gDejaVuSansFont, message, 0, 0);
+void controlsInitHeader(struct ControlsMenuHeader* header, int message) {
+    header->headerText = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(message), 0, 0, SCREEN_WD);
 }
 
 void controlsLayout(struct ControlsMenu* controlsMenu) {
@@ -222,9 +230,9 @@ void controlsLayout(struct ControlsMenu* controlsMenu) {
     Gfx* headerSeparators = controlsMenu->headerSeparators;
 
     for (int i = 0; i < ControllerActionCount; ++i) {
-        if (gControllerDataRows[i].header && currentHeader < MAX_CONTROLS_SECTIONS) {
+        if (gControllerDataRows[i].headerId != -1 && currentHeader < MAX_CONTROLS_SECTIONS) {
             y += TOP_PADDING;
-            controlsLayoutHeader(&controlsMenu->headers[currentHeader], gControllerDataRows[i].header, CONTROLS_X, y);
+            controlsLayoutHeader(&controlsMenu->headers[currentHeader], CONTROLS_X + 2, y);
             y += CONTROL_ROW_HEIGHT;
 
             if (y > CONTROLS_Y + 1 && y < CONTROLS_Y + CONTROLS_HEIGHT - 1) {
@@ -242,14 +250,14 @@ void controlsLayout(struct ControlsMenu* controlsMenu) {
     gSPEndDisplayList(headerSeparators++);
 }
 
-void controlsMenuInit(struct ControlsMenu* controlsMenu) {
+void controlsMenuInitText(struct ControlsMenu* controlsMenu) {
     int currentHeader = 0;
 
     for (int i = 0; i < ControllerActionCount; ++i) {
         controlsInitRow(&controlsMenu->actionRows[i], &gControllerDataRows[i]);
 
-        if (gControllerDataRows[i].header && currentHeader < MAX_CONTROLS_SECTIONS) {
-            controlsInitHeader(&controlsMenu->headers[currentHeader], gControllerDataRows[i].header);
+        if (gControllerDataRows[i].headerId != -1 && currentHeader < MAX_CONTROLS_SECTIONS) {
+            controlsInitHeader(&controlsMenu->headers[currentHeader], gControllerDataRows[i].headerId);
             ++currentHeader;
         }
     }
@@ -257,6 +265,10 @@ void controlsMenuInit(struct ControlsMenu* controlsMenu) {
     for (; currentHeader < MAX_CONTROLS_SECTIONS; ++currentHeader) {
         controlsMenu->headers[currentHeader].headerText = NULL;
     }
+}
+
+void controlsMenuInit(struct ControlsMenu* controlsMenu) {
+    controlsMenuInitText(controlsMenu);
 
     controlsMenu->selectedRow = 0;
     controlsMenu->scrollOffset = 0;
@@ -272,6 +284,19 @@ void controlsMenuInit(struct ControlsMenu* controlsMenu) {
     );
 
     controlsMenu->scrollOutline = menuBuildOutline(CONTROLS_X, CONTROLS_Y, CONTROLS_WIDTH, CONTROLS_HEIGHT, 1);
+}
+
+void controlsRebuildtext(struct ControlsMenu* controlsMenu) {
+    for (int i = 0; i < ControllerActionCount; ++i) {
+        prerenderedTextFree(controlsMenu->actionRows[i].actionText);
+    }
+
+    for (int i = 0; i < MAX_CONTROLS_SECTIONS; ++i) {
+        prerenderedTextFree(controlsMenu->headers[i].headerText);
+    }
+
+    controlsMenuInitText(controlsMenu);
+    controlsLayout(controlsMenu);
 }
 
 enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
@@ -315,7 +340,7 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
         int topY = selectedAction->y;
         int bottomY = topY + CONTROL_ROW_HEIGHT + TOP_PADDING;
 
-        if (gControllerDataRows[controlsMenu->selectedRow].header) {
+        if (gControllerDataRows[controlsMenu->selectedRow].headerId != -1) {
             topY -= CONTROL_ROW_HEIGHT + TOP_PADDING + SEPARATOR_SPACE;
         }
 
@@ -418,25 +443,19 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
     gDPSetEnvColor(renderState->dl++, gColorWhite.r, gColorWhite.g, gColorWhite.b, gColorWhite.a);    
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, CONTROLS_X, CONTROLS_Y, CONTROLS_X + CONTROLS_WIDTH, CONTROLS_Y + CONTROLS_HEIGHT);
 
+    struct PrerenderedTextBatch* batch = prerenderedBatchStart();
+
     for (int i = 0; i < ControllerActionCount; ++i) {
-        if (controlsMenu->selectedRow == i) {
-            gDPPipeSync(renderState->dl++);
-            gDPSetEnvColor(renderState->dl++, 0, 0, 0, 255);
-        }
-
-        renderStateInlineBranch(renderState, controlsMenu->actionRows[i].actionText);
-
-        if (controlsMenu->selectedRow == i) {
-            gDPPipeSync(renderState->dl++);
-            gDPSetEnvColor(renderState->dl++, 255, 255, 255, 255);
-        }
+        prerenderedBatchAdd(batch, controlsMenu->actionRows[i].actionText, controlsMenu->selectedRow == i ? &gColorBlack : &gColorWhite);
     }
     for (int i = 0; i < MAX_CONTROLS_SECTIONS; ++i) {
         if (!controlsMenu->headers[i].headerText) {
             break;
         }
-        renderStateInlineBranch(renderState, controlsMenu->headers[i].headerText);
+        prerenderedBatchAdd(batch, controlsMenu->headers[i].headerText, &gColorWhite);
     }
+
+    renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
 
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 

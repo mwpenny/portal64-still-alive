@@ -75,6 +75,7 @@ struct PrerenderedText {
 
 void fontRendererInitPrerender(struct FontRenderer* renderer, struct PrerenderedText* prerender);
 struct PrerenderedText* prerenderedTextNew(struct FontRenderer* renderer);
+struct PrerenderedText* prerenderedTextCopy(struct PrerenderedText* text);
 void prerenderedTextCleanup(struct PrerenderedText* prerender);
 void prerenderedTextFree(struct PrerenderedText* prerender);
 void prerenderedTextRelocate(struct PrerenderedText* prerender, int x, int y);
