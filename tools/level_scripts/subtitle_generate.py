@@ -8,6 +8,7 @@ from os.path import exists
 hl_gameui_whitelist = {
     "GAMEUI_AUDIO",
     "GAMEUI_AUTOSAVE",
+    "GAMEUI_CAPTIONING",
     "GAMEUI_CHAPTER",
     "GAMEUI_GAMEMENU_QUIT",
     "GAMEUI_GAMEMENU_RESUMEGAME",
@@ -21,9 +22,11 @@ hl_gameui_whitelist = {
     "GAMEUI_PORTAL",
     "GAMEUI_SAVEGAME",
     "GAMEUI_SOUNDEFFECTVOLUME",
+    "GAMEUI_SUBTITLES",
     "GAMEUI_SUBTITLESANDSOUNDEFFECTS",
     "GAMEUI_USEDEFAULTS",
     "GAMEUI_VIDEO",
+    "GAMEUI_ASPECTWIDE",
 }
 
 portal_whitelist = {
@@ -116,10 +119,17 @@ def get_caption_keys_values_language(lines):
             keyval= line.split('"   "')
             if len(keyval) != 2:
                 continue
+
+        if "[$WIN32]" in keyval[1]:
+            continue
         if "[english]" in keyval[0] or 'commentary' in keyval[0]:
             continue
+
+        if "[$X360]" in keyval[1]:
+            keyval[1] = keyval[1].replace("[$X360]", "")
+
         key = keyval[0].replace('"', "").replace(".", "_").replace("-", "_").replace('\\', "_").replace('#', "").upper()
-        val = keyval[1].replace('"', "").replace("\n", "").replace("\\", "")
+        val = keyval[1].replace('"', "").replace("\n", "").replace("\\", "").strip()
         val = re.sub(r'\<clr.+\>','',val)
         val = re.sub(r'\<norepeat.+\>','',val)
         val = val.replace("<sfx>", "")

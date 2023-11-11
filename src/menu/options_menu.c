@@ -55,12 +55,14 @@ void optionsMenuInit(struct OptionsMenu* options) {
     controlsMenuInit(&options->controlsMenu);
     joystickOptionsInit(&options->joystickOptions);
     audioOptionsInit(&options->audioOptions);
+    videoOptionsInit(&options->videoOptions);
     gameplayOptionsInit(&options->gameplayOptions);
 }
 
 void optionsMenuRebuildText(struct OptionsMenu* options) {
     controlsRebuildtext(&options->controlsMenu);
     audioOptionsRebuildtext(&options->audioOptions);
+    videoOptionsRebuildtext(&options->videoOptions);
     tabsRebuildText(&options->tabs);
 }
 
@@ -74,6 +76,9 @@ enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options) {
             break;
         case OptionsMenuTabsAudio:
             audioOptionsUpdate(&options->audioOptions);
+            break;
+        case OptionsMenuTabsVideo:
+            videoOptionsUpdate(&options->videoOptions);
             break;
         case OptionsMenuTabsGameplay:
             gameplayOptionsUpdate(&options->gameplayOptions);
@@ -152,6 +157,9 @@ void optionsMenuRender(struct OptionsMenu* options, struct RenderState* renderSt
             break;
         case OptionsMenuTabsAudio:
             audioOptionsRender(&options->audioOptions, renderState, task);
+            break;
+        case OptionsMenuTabsVideo:
+            videoOptionsRender(&options->videoOptions, renderState, task);
             break;
         case OptionsMenuTabsGameplay:
             gameplayOptionsRender(&options->gameplayOptions, renderState, task);

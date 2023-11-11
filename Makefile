@@ -358,6 +358,7 @@ build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/mat
 build/src/util/dynamic_asset_data.o: build/assets/models/dynamic_model_list_data.h
 build/src/util/dynamic_asset_loader.o: build/assets/models/dynamic_model_list.h build/assets/models/dynamic_animated_model_list.h
 build/src/menu/audio_options.o: build/src/audio/subtitles.h
+build/src/menu/video_options.o: build/src/audio/subtitles.h
 build/src/scene/scene.o: build/src/audio/subtitles.h
 build/src/menu/main_menu.o: build/src/audio/subtitles.h
 

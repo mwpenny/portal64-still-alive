@@ -5,8 +5,6 @@
 #include "../font/dejavusans.h"
 #include "../audio/soundplayer.h"
 #include "../build/src/audio/subtitles.h"
-#include "../build/assets/materials/ui.h"
-#include "../build/src/audio/clips.h"
 #include "../build/src/audio/languages.h"
 #include "./translations.h"
 
@@ -73,7 +71,7 @@ struct MenuElementParams gAudioMenuParams[] = {
         .params = {
             .checkbox = {
                 .font = &gDejaVuSansFont,
-                .messageId = GAMEUI_SUBTITLESANDSOUNDEFFECTS,
+                .messageId = GAMEUI_SUBTITLES,
             },
         },
         .selectionIndex = AudioOptionSubtitlesEnabled,
@@ -85,7 +83,7 @@ struct MenuElementParams gAudioMenuParams[] = {
         .params = {
             .checkbox = {
                 .font = &gDejaVuSansFont,
-                .messageId = AUDIO_ALL_CAPTIONS,
+                .messageId = GAMEUI_SUBTITLESANDSOUNDEFFECTS,
             }
         },
         .selectionIndex = AudioOptionAllSubtitlesEnabled,
@@ -222,10 +220,6 @@ void audioOptionsActoin(void* data, int selection, struct MenuAction* action) {
 }
 
 void audioOptionsInit(struct AudioOptions* audioOptions) {
-    if (gSaveData.controls.subtitleLanguage < 0 || gSaveData.controls.subtitleLanguage >= NUM_SUBTITLE_LANGUAGES) {
-        gSaveData.controls.subtitleLanguage = 0;
-    }
-
     if (gSaveData.audio.audioLanguage < 0 || gSaveData.audio.audioLanguage >= NUM_AUDIO_LANGUAGES) {
         gSaveData.audio.audioLanguage = 0;
     }
@@ -244,11 +238,6 @@ void audioOptionsInit(struct AudioOptions* audioOptions) {
 
     menuBuilderSetFSlider(&audioOptions->menuBuilder.elements[AUDIO_VOLUME_VALUE_INDEX], gSaveData.audio.soundVolume / (float)(0xFFFF));
     menuBuilderSetFSlider(&audioOptions->menuBuilder.elements[MUSIC_VOLUME_VALUE_INDEX], gSaveData.audio.musicVolume / (float)(0xFFFF));
-
-    menuBuilderSetCheckbox(&audioOptions->menuBuilder.elements[ALL_SUBTITLES_CHECKBOX_INDEX], (gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled) != 0);
-    menuBuilderSetCheckbox(&audioOptions->menuBuilder.elements[SUBTITLES_CHECKBOX_INDEX], (gSaveData.controls.flags & ControlSaveSubtitlesEnabled) != 0);
-
-    menuBuilderSetISlider(&audioOptions->menuBuilder.elements[TEXT_LANGUAGE_VALUE_INDEX], gSaveData.controls.subtitleLanguage);
     menuBuilderSetISlider(&audioOptions->menuBuilder.elements[AUDIO_LANGUAGE_VALUE_INDEX], gSaveData.audio.audioLanguage);
 }
 

@@ -8,6 +8,7 @@
 #include "./audio_options.h"
 #include "./joystick_options.h"
 #include "./gameplay_options.h"
+#include "./video_options.h"
 
 enum OptionsMenuTabs {
     OptionsMenuTabsControlMapping,
@@ -28,6 +29,7 @@ struct OptionsMenu {
     struct ControlsMenu controlsMenu;
     struct JoystickOptions joystickOptions;
     struct AudioOptions audioOptions;
+    struct VideoOptions videoOptions;
     struct GameplayOptions gameplayOptions;
 };
 
