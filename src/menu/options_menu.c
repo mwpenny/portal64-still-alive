@@ -61,6 +61,7 @@ void optionsMenuInit(struct OptionsMenu* options) {
 
 void optionsMenuRebuildText(struct OptionsMenu* options) {
     controlsRebuildtext(&options->controlsMenu);
+    joystickOptionsRebuildText(&options->joystickOptions);
     audioOptionsRebuildtext(&options->audioOptions);
     videoOptionsRebuildtext(&options->videoOptions);
     gameplayOptionsRebuildText(&options->gameplayOptions);

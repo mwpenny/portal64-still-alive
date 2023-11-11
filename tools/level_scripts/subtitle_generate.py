@@ -6,6 +6,7 @@ import json
 from os.path import exists
 
 hl_gameui_whitelist = {
+    "GAMEUI_ASPECTWIDE",
     "GAMEUI_AUDIO",
     "GAMEUI_AUTOSAVE",
     "GAMEUI_CAPTIONING",
@@ -13,6 +14,7 @@ hl_gameui_whitelist = {
     "GAMEUI_GAMEMENU_QUIT",
     "GAMEUI_GAMEMENU_RESUMEGAME",
     "GAMEUI_JOYSTICK",
+    "GAMEUI_JOYSTICKINVERTED",
     "GAMEUI_LOADGAME",
     "GAMEUI_MUSICVOLUME",
     "GAMEUI_NEWGAME",
@@ -28,7 +30,6 @@ hl_gameui_whitelist = {
     "GAMEUI_SUBTITLESANDSOUNDEFFECTS",
     "GAMEUI_USEDEFAULTS",
     "GAMEUI_VIDEO",
-    "GAMEUI_ASPECTWIDE",
 }
 
 portal_whitelist = {
