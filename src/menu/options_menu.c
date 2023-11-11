@@ -63,6 +63,7 @@ void optionsMenuRebuildText(struct OptionsMenu* options) {
     controlsRebuildtext(&options->controlsMenu);
     audioOptionsRebuildtext(&options->audioOptions);
     videoOptionsRebuildtext(&options->videoOptions);
+    gameplayOptionsRebuildText(&options->gameplayOptions);
     tabsRebuildText(&options->tabs);
 }
 

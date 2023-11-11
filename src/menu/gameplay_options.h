@@ -3,10 +3,9 @@
 
 #include "./menu.h"
 #include "../graphics/graphics.h"
+#include "./menu_builder.h"
 
 enum GameplayOption {
-    GameplayOptionWideScreen,
-    GameplayOptionInterlacedMode,
     GameplayOptionMovingPortals,
     GameplayOptionPortalFunneling,
     GameplayOptionPortalRenderDepth,
@@ -15,17 +14,11 @@ enum GameplayOption {
 };
 
 struct GameplayOptions {
-    struct MenuCheckbox wideScreen;
-    struct MenuCheckbox interlacedMode;
-    struct MenuCheckbox movingPortals;
-    struct MenuCheckbox portalFunnel;
-    struct MenuSlider portalRenderDepth;
-    Gfx* portalRenderDepthText;
-    short selectedItem;
-    unsigned short render_depth;
+    struct MenuBuilder menuBuilder;
 };
 
 void gameplayOptionsInit(struct GameplayOptions* gameplayOptions);
+void gameplayOptionsRebuildText(struct GameplayOptions* gameplayOptions);
 enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions);
 void gameplayOptionsRender(struct GameplayOptions* gameplayOptions, struct RenderState* renderState, struct GraphicsTask* task);
 

@@ -116,6 +116,7 @@ struct MenuElementParams gVideoMenuParams[] = {
 #define INTERLACED_INDEX 1
 #define SUBTITLES_INDEX 3
 #define CAPTIONS_INDEX 4
+#define LANGUAGE_SLIDER_INDEX 5
 #define LANGUAGE_TEXT_INDEX 7
 
 void videoOptionsAction(void* data, int selection, struct MenuAction* action) {
@@ -186,7 +187,7 @@ void videoOptionsInit(struct VideoOptions* videoOptions) {
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[CAPTIONS_INDEX], (gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled) != 0);
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[SUBTITLES_INDEX], (gSaveData.controls.flags & ControlSaveSubtitlesEnabled) != 0);
 
-    menuBuilderSetISlider(&videoOptions->menuBuilder.elements[LANGUAGE_TEXT_INDEX], gSaveData.controls.subtitleLanguage);
+    menuBuilderSetISlider(&videoOptions->menuBuilder.elements[LANGUAGE_SLIDER_INDEX], gSaveData.controls.subtitleLanguage);
 }
 
 void videoOptionsRebuildtext(struct VideoOptions* videoOptions) {

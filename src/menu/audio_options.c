@@ -28,11 +28,11 @@ struct MenuElementParams gAudioMenuParams[] = {
     },
     {
         .type = MenuElementTypeSlider,
-        .x = GAMEPLAY_X + 120, 
-        .y = GAMEPLAY_Y + 8,
+        .x = GAMEPLAY_X + 8, 
+        .y = GAMEPLAY_Y + 24,
         .params = {
             .slider = {
-                .width = 120,
+                .width = 232,
                 .numberOfTicks = 9,
                 .discrete = 0,
             },
@@ -42,7 +42,7 @@ struct MenuElementParams gAudioMenuParams[] = {
     {
         .type = MenuElementTypeText,
         .x = GAMEPLAY_X + 8, 
-        .y = GAMEPLAY_Y + 28,
+        .y = GAMEPLAY_Y + 44,
         .params = {
             .text = {
                 .font = &gDejaVuSansFont,
@@ -53,11 +53,11 @@ struct MenuElementParams gAudioMenuParams[] = {
     },
     {
         .type = MenuElementTypeSlider,
-        .x = GAMEPLAY_X + 120, 
-        .y = GAMEPLAY_Y + 28,
+        .x = GAMEPLAY_X + 8, 
+        .y = GAMEPLAY_Y + 60,
         .params = {
             .slider = {
-                .width = 120,
+                .width = 232,
                 .numberOfTicks = 9,
                 .discrete = 0,
             },
@@ -65,70 +65,9 @@ struct MenuElementParams gAudioMenuParams[] = {
         .selectionIndex = AudioOptionMusicVolume,
     },
     {
-        .type = MenuElementTypeCheckbox,
-        .x = GAMEPLAY_X + 8, 
-        .y = GAMEPLAY_Y + 48,
-        .params = {
-            .checkbox = {
-                .font = &gDejaVuSansFont,
-                .messageId = GAMEUI_SUBTITLES,
-            },
-        },
-        .selectionIndex = AudioOptionSubtitlesEnabled,
-    },
-    {
-        .type = MenuElementTypeCheckbox,
-        .x = GAMEPLAY_X + 8, 
-        .y = GAMEPLAY_Y + 68,
-        .params = {
-            .checkbox = {
-                .font = &gDejaVuSansFont,
-                .messageId = GAMEUI_SUBTITLESANDSOUNDEFFECTS,
-            }
-        },
-        .selectionIndex = AudioOptionAllSubtitlesEnabled,
-    },
-    {
         .type = MenuElementTypeSlider,
         .x = GAMEPLAY_X + 8, 
-        .y = GAMEPLAY_Y + 104,
-        .params = {
-            .slider = {
-                .width = 232,
-                .numberOfTicks = NUM_SUBTITLE_LANGUAGES,
-                .discrete = 1,
-            },
-        },
-        .selectionIndex = AudioOptionSubtitlesLanguage,
-    },
-    {
-        .type = MenuElementTypeText,
-        .x = GAMEPLAY_X + 8, 
-        .y = GAMEPLAY_Y + 88,
-        .params = {
-            .text = {
-                .font = &gDejaVuSansFont,
-                .messageId = AUDIO_TEXT_LANGUAGE,
-            },
-        },
-        .selectionIndex = AudioOptionSubtitlesLanguage,
-    },
-    {
-        .type = MenuElementTypeText,
-        .x = GAMEPLAY_X + 125, 
-        .y = GAMEPLAY_Y + 88,
-        .params = {
-            .text = {
-                .font = &gDejaVuSansFont,
-                .message = "",
-            },
-        },
-        .selectionIndex = AudioOptionSubtitlesLanguage,
-    },
-    {
-        .type = MenuElementTypeSlider,
-        .x = GAMEPLAY_X + 8, 
-        .y = GAMEPLAY_Y + 140,
+        .y = GAMEPLAY_Y + 96,
         .params = {
             .slider = {
                 .width = 232,
@@ -141,7 +80,7 @@ struct MenuElementParams gAudioMenuParams[] = {
     {
         .type = MenuElementTypeText,
         .x = GAMEPLAY_X + 8, 
-        .y = GAMEPLAY_Y + 124,
+        .y = GAMEPLAY_Y + 80,
         .params = {
             .text = {
                 .font = &gDejaVuSansFont,
@@ -153,7 +92,7 @@ struct MenuElementParams gAudioMenuParams[] = {
     {
         .type = MenuElementTypeText,
         .x = GAMEPLAY_X + 125, 
-        .y = GAMEPLAY_Y + 124,
+        .y = GAMEPLAY_Y + 80,
         .params = {
             .text = {
                 .font = &gDejaVuSansFont,
@@ -167,13 +106,8 @@ struct MenuElementParams gAudioMenuParams[] = {
 #define AUDIO_VOLUME_VALUE_INDEX   1
 #define MUSIC_VOLUME_VALUE_INDEX   3
 
-#define SUBTITLES_CHECKBOX_INDEX   4
-#define ALL_SUBTITLES_CHECKBOX_INDEX   5
-
-#define TEXT_LANGUAGE_VALUE_INDEX 6
-#define TEXT_LANGUAGE_TEXT_INDEX 8
-#define AUDIO_LANGUAGE_VALUE_INDEX 9
-#define AUDIO_LANGUAGE_TEXT_INDEX 11
+#define AUDIO_LANGUAGE_VALUE_INDEX 4
+#define AUDIO_LANGUAGE_TEXT_INDEX 6
 
 void audioOptionsActoin(void* data, int selection, struct MenuAction* action) {
     struct AudioOptions* audioOptions = (struct AudioOptions*)data;
@@ -187,31 +121,6 @@ void audioOptionsActoin(void* data, int selection, struct MenuAction* action) {
             gSaveData.audio.musicVolume = (int)(0xFFFF * action->state.fSlider.value);
             soundPlayerGameVolumeUpdate();
             break;
-        case AudioOptionSubtitlesEnabled:
-            if (action->state.checkbox.isChecked) {
-                gSaveData.controls.flags |= ControlSaveSubtitlesEnabled;
-                gSaveData.controls.flags &= ~ControlSaveAllSubtitlesEnabled;
-                struct MenuCheckbox* allSubtitles = (struct MenuCheckbox*)audioOptions->menuBuilder.elements[ALL_SUBTITLES_CHECKBOX_INDEX].data;
-                allSubtitles->checked = 0;
-            } else {
-                gSaveData.controls.flags &= ~ControlSaveSubtitlesEnabled;
-            }
-            break;
-        case AudioOptionAllSubtitlesEnabled:
-            if (action->state.checkbox.isChecked) {
-                gSaveData.controls.flags |= ControlSaveAllSubtitlesEnabled;
-                gSaveData.controls.flags &= ~ControlSaveSubtitlesEnabled;
-                struct MenuCheckbox* subtitles = (struct MenuCheckbox*)audioOptions->menuBuilder.elements[SUBTITLES_CHECKBOX_INDEX].data;
-                subtitles->checked = 0;
-            } else {
-                gSaveData.controls.flags &= ~ControlSaveAllSubtitlesEnabled;
-            }
-            break;
-        case AudioOptionSubtitlesLanguage:
-            gSaveData.controls.subtitleLanguage = action->state.iSlider.value;
-            gAudioMenuParams[TEXT_LANGUAGE_TEXT_INDEX].params.text.message = SubtitleLanguages[gSaveData.controls.subtitleLanguage];
-            translationsReload(gSaveData.controls.subtitleLanguage);
-            break;
         case AudioOptionAudioLanguage:
             gSaveData.audio.audioLanguage = action->state.iSlider.value;
             audioOptions->menuBuilder.elements[AUDIO_LANGUAGE_TEXT_INDEX].data = menuBuildPrerenderedText(&gDejaVuSansFont, AudioLanguages[gSaveData.audio.audioLanguage], GAMEPLAY_X + 125, GAMEPLAY_Y + 124, SCREEN_WD);
@@ -224,7 +133,6 @@ void audioOptionsInit(struct AudioOptions* audioOptions) {
         gSaveData.audio.audioLanguage = 0;
     }
 
-    gAudioMenuParams[TEXT_LANGUAGE_TEXT_INDEX].params.text.message = SubtitleLanguages[gSaveData.controls.subtitleLanguage];
     gAudioMenuParams[AUDIO_LANGUAGE_TEXT_INDEX].params.text.message = AudioLanguages[gSaveData.audio.audioLanguage];
 
     menuBuilderInit(

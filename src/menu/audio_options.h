@@ -8,9 +8,6 @@
 enum AudioOption {
     AudioOptionGameVolume,
     AudioOptionMusicVolume,
-    AudioOptionSubtitlesEnabled,
-    AudioOptionAllSubtitlesEnabled,
-    AudioOptionSubtitlesLanguage,
     AudioOptionAudioLanguage,
     AudioOptionCount,
 };
