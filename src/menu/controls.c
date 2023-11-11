@@ -27,9 +27,8 @@
 
 #define SEPARATOR_SPACE     3
 
-#define USE_DEFAULTS_X      190
+#define USE_DEFAULTS_X      286
 #define USE_DEFAULTS_Y      186
-#define USE_DEFAULTS_WIDTH  96
 #define USE_DEFAULTS_HEIGHT 16
 
 struct ControllerIcon {
@@ -278,9 +277,10 @@ void controlsMenuInit(struct ControlsMenu* controlsMenu) {
 
     controlsMenu->useDefaults = menuBuildButton(
         &gDejaVuSansFont, 
-        "Use Defaults", 
+        translationsGet(GAMEUI_USEDEFAULTS),
         USE_DEFAULTS_X, USE_DEFAULTS_Y,
-        USE_DEFAULTS_WIDTH, USE_DEFAULTS_HEIGHT
+        USE_DEFAULTS_HEIGHT,
+        1
     );
 
     controlsMenu->scrollOutline = menuBuildOutline(CONTROLS_X, CONTROLS_Y, CONTROLS_WIDTH, CONTROLS_HEIGHT, 1);
@@ -297,6 +297,7 @@ void controlsRebuildtext(struct ControlsMenu* controlsMenu) {
 
     controlsMenuInitText(controlsMenu);
     controlsLayout(controlsMenu);
+    menuRebuildButtonText(&controlsMenu->useDefaults, &gDejaVuSansFont, translationsGet(GAMEUI_USEDEFAULTS), 1);
 }
 
 enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
@@ -419,9 +420,9 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
         gDPSetEnvColor(renderState->dl++, gSelectionOrange.r, gSelectionOrange.g, gSelectionOrange.b, gSelectionOrange.a);
         gDPFillRectangle(
             renderState->dl++, 
-            USE_DEFAULTS_X, 
+            controlsMenu->useDefaults.x, 
             USE_DEFAULTS_Y, 
-            USE_DEFAULTS_X + USE_DEFAULTS_WIDTH,
+            controlsMenu->useDefaults.x + controlsMenu->useDefaults.w,
             USE_DEFAULTS_Y + USE_DEFAULTS_HEIGHT
         );
     }
@@ -437,13 +438,13 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
 
     gDPPipeSync(renderState->dl++);
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT);
-    menuSetRenderColor(renderState, controlsMenu->selectedRow == ControllerActionCount, &gColorBlack, &gColorWhite);
-    gSPDisplayList(renderState->dl++, controlsMenu->useDefaults.text);
-    gDPPipeSync(renderState->dl++);
-    gDPSetEnvColor(renderState->dl++, gColorWhite.r, gColorWhite.g, gColorWhite.b, gColorWhite.a);    
+    struct PrerenderedTextBatch* batch = prerenderedBatchStart();
+    prerenderedBatchAdd(batch, controlsMenu->useDefaults.text, controlsMenu->selectedRow == ControllerActionCount ? &gColorBlack : &gColorWhite);
+    renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
+
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, CONTROLS_X, CONTROLS_Y, CONTROLS_X + CONTROLS_WIDTH, CONTROLS_Y + CONTROLS_HEIGHT);
 
-    struct PrerenderedTextBatch* batch = prerenderedBatchStart();
+    batch = prerenderedBatchStart();
 
     for (int i = 0; i < ControllerActionCount; ++i) {
         prerenderedBatchAdd(batch, controlsMenu->actionRows[i].actionText, controlsMenu->selectedRow == i ? &gColorBlack : &gColorWhite);

@@ -158,10 +158,23 @@ Gfx* menuBuildOutline(int x, int y, int width, int height, int invert) {
     return result;
 }
 
-struct MenuButton menuBuildButton(struct Font* font, char* message, int x, int y, int width, int height) {
+#define BUTTON_LEFT_PADDING 4
+#define BUTTON_RIGHT_PADDING 9
+
+#define BUTTON_TOP_PADDING 2
+
+struct MenuButton menuBuildButton(struct Font* font, char* message, int x, int y, int height, int rightAlign) {
     struct MenuButton result;
 
-    result.text = menuBuildText(font, message, x + 4, y + 2);
+    result.text = menuBuildPrerenderedText(font, message, x + BUTTON_LEFT_PADDING, y + BUTTON_TOP_PADDING, SCREEN_HT);
+
+    int width = result.text->width + BUTTON_LEFT_PADDING + BUTTON_RIGHT_PADDING;
+
+    if (rightAlign) {
+        x -= width;
+        prerenderedTextRelocate(result.text, x + BUTTON_LEFT_PADDING, y + BUTTON_TOP_PADDING);
+    }
+
     result.outline = menuBuildOutline(x, y, width, height, 0);
 
     result.x = x;
@@ -171,6 +184,23 @@ struct MenuButton menuBuildButton(struct Font* font, char* message, int x, int y
     result.h = height;
 
     return result;
+}
+
+void menuRebuildButtonText(struct MenuButton* button, struct Font* font, char* message, int rightAlign) {
+    menuFreePrerenderedDeferred(button->text);
+
+    button->text = menuBuildPrerenderedText(font, message, button->x + BUTTON_LEFT_PADDING, button->y + BUTTON_TOP_PADDING, SCREEN_HT);
+
+    int newWidth = button->text->width + BUTTON_LEFT_PADDING + BUTTON_RIGHT_PADDING;
+
+    if (rightAlign) {
+        button->x -= newWidth - button->w;
+        prerenderedTextRelocate(button->text, button->x + BUTTON_LEFT_PADDING, button->y + BUTTON_TOP_PADDING);
+    }
+
+    button->w = newWidth;
+
+    menuRenderOutline(button->x, button->y, button->w, button->h, 0, button->outline);
 }
 
 void menuSetRenderColor(struct RenderState* renderState, int isSelected, struct Coloru8* selected, struct Coloru8* defaultColor) {

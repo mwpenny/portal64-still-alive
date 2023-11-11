@@ -10,7 +10,7 @@
 
 struct MenuButton {
     Gfx* outline;
-    Gfx* text;
+    struct PrerenderedText* text;
     short x, y;
     short w, h;
 };
@@ -58,8 +58,9 @@ Gfx* menuRerenderSolidBorder(int x, int y, int w, int h, int nx, int ny, int nw,
 Gfx* menuBuildSolidBorder(int x, int y, int w, int h, int nx, int ny, int nw, int nh);
 Gfx* menuBuildOutline(int x, int y, int width, int height, int invert);
 
-struct MenuButton menuBuildButton(struct Font* font, char* message, int x, int y, int width, int height);
+struct MenuButton menuBuildButton(struct Font* font, char* message, int x, int y, int height, int rightAlign);
 void menuSetRenderColor(struct RenderState* renderState, int isSelected, struct Coloru8* selected, struct Coloru8* defaultColor);
+void menuRebuildButtonText(struct MenuButton* button, struct Font* font, char* message, int rightAlign);
 
 struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, int y, int shouldUsePrerendered);
 Gfx* menuCheckboxRender(struct MenuCheckbox* checkbox, Gfx* dl);
