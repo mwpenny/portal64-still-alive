@@ -198,7 +198,6 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             break;
         case CutsceneStepTypeQueueSound:
         {
-            step->queueSound.soundId = mapLocaleSound(step->queueSound.soundId); 
             cutsceneQueueSoundInChannel(step->queueSound.soundId, step->queueSound.volume * (1.0f / 255.0f), step->queueSound.channel, step->queueSound.subtitleId);
             break;
         }
@@ -709,6 +708,8 @@ void cutsceneSerializeRead(struct Serializer* serializer) {
 }
 
 void cutsceneQueueSoundInChannel(int soundId, float volume, int channel, int subtitleId) {
+    soundId = mapLocaleSound(soundId);
+    
     if (!gCutsceneSoundQueues[channel] && !soundPlayerIsPlaying(gCutsceneCurrentSound[channel]) && channel == CH_GLADOS) {
         cutsceneQueueSound(soundsIntercom[0], volume, channel, subtitleId);
     }
