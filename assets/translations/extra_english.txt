@@ -1,20 +1,20 @@
-﻿"lang"
+"lang"
 {
 "Language"	"english"
 "Tokens"
 {
-"Audio_Text_Language"	"Text Language"
-"Audio_Audio_Language"	"Audio Language"
-"Options_Controls"	"Buttons"
+"Audio_Text_Language"	"Text language"
+"Audio_Audio_Language"	"Audio language"
+"Options_Controls"	"Controls"
 "Valve_Move"	"Move"
 "Valve_Look"	"Look"
 "Valve_Look_Straight_Back"	"Look straight back"
-"GameUI_Interlaced"	"Interlaced Video"
-"GameUI_MovingPortals"	"Moving Portals"
-"GameUI_TankControls"	"Tank Controls"
+"GameUI_Interlaced"	"Interlaced video"
+"GameUI_MovingPortals"	"Moving portals"
+"GameUI_TankControls"	"Tank controls"
 "GameUI_Deadzone"	"Deadzone"
 "GameUI_Acceleration"	"Acceleration"
 "GameUI_Sensitivity"	"Sensitivity"
-"HINT_MOVE"	"MOVE"
+"HINT_MOVE"	"TO MOVE"
 }
 }

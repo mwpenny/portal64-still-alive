@@ -1,0 +1,20 @@
+"lang"
+{
+"Language"	"german"
+"Tokens"
+{
+"Audio_Text_Language"	"Textsprache"
+"Audio_Audio_Language"	"Audiosprache"
+"Options_Controls"	"Steuerung"
+"Valve_Move"	"Bewegen"
+"Valve_Look"	"Umsehen"
+"Valve_Look_Straight_Back"	"Gerade nach hinten sehen"
+"GameUI_Interlaced"	"Interlaced-Modus"
+"GameUI_MovingPortals"	"Bewegende Portale"
+"GameUI_TankControls"	"Panzersteuerung"
+"GameUI_Deadzone"	"Totzone"
+"GameUI_Acceleration"	"Beschleunigung"
+"GameUI_Sensitivity"	"Empfindlichkeit"
+"HINT_MOVE"	"BEWEGEN"
+}
+}
