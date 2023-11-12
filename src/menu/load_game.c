@@ -30,7 +30,7 @@ void loadGamePopulate(struct LoadGameMenu* loadGame) {
     savefileUseList(loadGame->savefileList, translationsGet(GAMEUI_LOADGAME), savefileInfo, numberOfSaves);
 }
 
-enum MenuDirection loadGameUpdate(struct LoadGameMenu* loadGame) {
+enum InputCapture loadGameUpdate(struct LoadGameMenu* loadGame) {
     if (controllerGetButtonDown(0, A_BUTTON) && loadGame->savefileList->numberOfSaves) {
         Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
         int testChamber;

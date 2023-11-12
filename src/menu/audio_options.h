@@ -18,7 +18,7 @@ struct AudioOptions {
 
 void audioOptionsInit(struct AudioOptions* audioOptions);
 void audioOptionsRebuildtext(struct AudioOptions* audioOptions);
-enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions);
+enum InputCapture audioOptionsUpdate(struct AudioOptions* audioOptions);
 void audioOptionsRender(struct AudioOptions* audioOptions, struct RenderState* renderState, struct GraphicsTask* task);
 
 #endif

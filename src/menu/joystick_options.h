@@ -21,7 +21,7 @@ struct JoystickOptions {
 
 void joystickOptionsInit(struct JoystickOptions* joystickOptions);
 void joystickOptionsRebuildText(struct JoystickOptions* joystickOptions);
-enum MenuDirection joystickOptionsUpdate(struct JoystickOptions* joystickOptions);
+enum InputCapture joystickOptionsUpdate(struct JoystickOptions* joystickOptions);
 void joystickOptionsRender(struct JoystickOptions* joystickOptions, struct RenderState* renderState, struct GraphicsTask* task);
 
 #endif

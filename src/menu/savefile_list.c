@@ -147,9 +147,9 @@ void savefileUseList(struct SavefileListMenu* savefileList, char* title, struct 
     savefileListMenuSetScroll(savefileList, 0);
 }
 
-enum MenuDirection savefileListUpdate(struct SavefileListMenu* savefileList) {
+enum InputCapture savefileListUpdate(struct SavefileListMenu* savefileList) {
     if (controllerGetButtonDown(0, B_BUTTON)) {
-        return MenuDirectionUp;
+        return InputCaptureExit;
     }
 
     int controllerDir = controllerGetDirectionDown(0);
@@ -182,7 +182,7 @@ enum MenuDirection savefileListUpdate(struct SavefileListMenu* savefileList) {
         savefileListMenuSetScroll(savefileList, savefileList->scrollOffset + CONTENT_Y - selectTop);
     }
 
-    return MenuDirectionStay;
+    return InputCapturePass;
 }
 
 void savefileListRender(struct SavefileListMenu* savefileList, struct RenderState* renderState, struct GraphicsTask* task) {

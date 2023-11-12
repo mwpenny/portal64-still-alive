@@ -112,7 +112,7 @@ void gameplayOptionsRebuildText(struct GameplayOptions* gameplayOptions) {
     menuBuilderRebuildText(&gameplayOptions->menuBuilder);
 }
 
-enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions) {
+enum InputCapture gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions) {
     return menuBuilderUpdate(&gameplayOptions->menuBuilder);
 }
 

@@ -68,28 +68,34 @@ void optionsMenuRebuildText(struct OptionsMenu* options) {
     tabsRebuildText(&options->tabs);
 }
 
-enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options) {
+enum InputCapture optionsMenuUpdate(struct OptionsMenu* options) {
+    enum InputCapture result = InputCapturePass;
+
     switch (options->tabs.selectedTab) {
         case OptionsMenuTabsControlMapping:
-            controlsMenuUpdate(&options->controlsMenu);
+            result = controlsMenuUpdate(&options->controlsMenu);
             break;
         case OptionsMenuTabsControlJoystick:
-            joystickOptionsUpdate(&options->joystickOptions);
+            result = joystickOptionsUpdate(&options->joystickOptions);
             break;
         case OptionsMenuTabsAudio:
-            audioOptionsUpdate(&options->audioOptions);
+            result = audioOptionsUpdate(&options->audioOptions);
             break;
         case OptionsMenuTabsVideo:
-            videoOptionsUpdate(&options->videoOptions);
+            result = videoOptionsUpdate(&options->videoOptions);
             break;
         case OptionsMenuTabsGameplay:
-            gameplayOptionsUpdate(&options->gameplayOptions);
+            result = gameplayOptionsUpdate(&options->gameplayOptions);
             break;
+    }
+
+    if (result != InputCapturePass) {
+        return result;
     }
 
     if (controllerGetButtonDown(0, B_BUTTON)) {
         savefileSave();
-        return MenuDirectionUp;
+        return InputCaptureExit;
     }
 
     if (controllerGetButtonDown(0, Z_TRIG | L_TRIG)) {
@@ -113,7 +119,7 @@ enum MenuDirection optionsMenuUpdate(struct OptionsMenu* options) {
 
     }
 
-    return MenuDirectionStay;
+    return InputCapturePass;
 }
 
 void optionsMenuRender(struct OptionsMenu* options, struct RenderState* renderState, struct GraphicsTask* task) {

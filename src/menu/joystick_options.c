@@ -172,7 +172,7 @@ void joystickOptionsRebuildText(struct JoystickOptions* joystickOptions) {
     menuBuilderRebuildText(&joystickOptions->menuBuilder);
 }
 
-enum MenuDirection joystickOptionsUpdate(struct JoystickOptions* joystickOptions) {
+enum InputCapture joystickOptionsUpdate(struct JoystickOptions* joystickOptions) {
     return menuBuilderUpdate(&joystickOptions->menuBuilder);
 }
 

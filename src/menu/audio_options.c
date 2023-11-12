@@ -109,7 +109,7 @@ struct MenuElementParams gAudioMenuParams[] = {
 #define AUDIO_LANGUAGE_VALUE_INDEX 4
 #define AUDIO_LANGUAGE_TEXT_INDEX 6
 
-void audioOptionsActoin(void* data, int selection, struct MenuAction* action) {
+void audioOptionsAction(void* data, int selection, struct MenuAction* action) {
     struct AudioOptions* audioOptions = (struct AudioOptions*)data;
 
     switch (selection) {
@@ -123,7 +123,7 @@ void audioOptionsActoin(void* data, int selection, struct MenuAction* action) {
             break;
         case AudioOptionAudioLanguage:
             gSaveData.audio.audioLanguage = action->state.iSlider.value;
-            audioOptions->menuBuilder.elements[AUDIO_LANGUAGE_TEXT_INDEX].data = menuBuildPrerenderedText(&gDejaVuSansFont, AudioLanguages[gSaveData.audio.audioLanguage], GAMEPLAY_X + 125, GAMEPLAY_Y + 124, SCREEN_WD);
+            audioOptions->menuBuilder.elements[AUDIO_LANGUAGE_TEXT_INDEX].data = menuBuildPrerenderedText(&gDejaVuSansFont, AudioLanguages[gSaveData.audio.audioLanguage], GAMEPLAY_X + 125, GAMEPLAY_Y + 80, SCREEN_WD);
             break;
     }
 }
@@ -140,7 +140,7 @@ void audioOptionsInit(struct AudioOptions* audioOptions) {
         gAudioMenuParams,
         sizeof(gAudioMenuParams) / sizeof(*gAudioMenuParams),
         AudioOptionCount,
-        audioOptionsActoin,
+        audioOptionsAction,
         audioOptions
     );
 
@@ -153,7 +153,7 @@ void audioOptionsRebuildtext(struct AudioOptions* audioOptions) {
     menuBuilderRebuildText(&audioOptions->menuBuilder);
 }
 
-enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
+enum InputCapture audioOptionsUpdate(struct AudioOptions* audioOptions) {
     return menuBuilderUpdate(&audioOptions->menuBuilder);
 }
 

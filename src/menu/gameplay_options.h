@@ -19,7 +19,7 @@ struct GameplayOptions {
 
 void gameplayOptionsInit(struct GameplayOptions* gameplayOptions);
 void gameplayOptionsRebuildText(struct GameplayOptions* gameplayOptions);
-enum MenuDirection gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions);
+enum InputCapture gameplayOptionsUpdate(struct GameplayOptions* gameplayOptions);
 void gameplayOptionsRender(struct GameplayOptions* gameplayOptions, struct RenderState* renderState, struct GraphicsTask* task);
 
 #endif

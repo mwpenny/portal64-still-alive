@@ -300,7 +300,7 @@ void controlsRebuildtext(struct ControlsMenu* controlsMenu) {
     menuRebuildButtonText(&controlsMenu->useDefaults, &gDejaVuSansFont, translationsGet(GAMEUI_USEDEFAULTS), 1);
 }
 
-enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
+enum InputCapture controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
     if (controlsMenu->waitingForAction != ControllerActionNone) {
         struct ControllerSourceWithController source = controllerReadAnySource();
 
@@ -313,7 +313,7 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
             soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         }
 
-        return MenuDirectionStay;
+        return InputCaptureGrab;
     }
 
     int controllerDir = controllerGetDirectionDown(0);
@@ -370,19 +370,7 @@ enum MenuDirection controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
         soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
-    if (controllerGetButtonDown(0, B_BUTTON)) {
-        return MenuDirectionUp;
-    }
-
-    if ((controllerDir & ControllerDirectionLeft || controllerGetButtonDown(0, L_TRIG) || controllerGetButtonDown(0, Z_TRIG)) && !(controlsMenu->waitingForAction)) {
-        return MenuDirectionLeft;
-    }
-
-    if ((controllerDir & ControllerDirectionRight || controllerGetButtonDown(0, R_TRIG) ) && !(controlsMenu->waitingForAction)) {
-        return MenuDirectionRight;
-    }
-
-    return MenuDirectionStay;
+    return InputCapturePass;
 }
 
 void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* renderState, struct GraphicsTask* task) {

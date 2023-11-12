@@ -50,7 +50,7 @@ void checkboxMenuItemInit(struct MenuBuilderElement* element) {
     element->data = checkbox;
 }
 
-enum MenuDirection checkboxMenuItemUpdate(struct MenuBuilderElement* element, MenuActionCalback actionCallback, void* data) {
+enum InputCapture checkboxMenuItemUpdate(struct MenuBuilderElement* element, MenuActionCalback actionCallback, void* data) {
     if (controllerGetButtonDown(0, A_BUTTON)) {
         struct MenuCheckbox* checkbox = (struct MenuCheckbox*)element->data;
 
@@ -60,10 +60,10 @@ enum MenuDirection checkboxMenuItemUpdate(struct MenuBuilderElement* element, Me
         action.type = MenuElementTypeCheckbox;
         action.state.checkbox.isChecked = checkbox->checked;
         actionCallback(data, element->selectionIndex, &action);
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll); 
     }
 
-    return MenuDirectionStay;
+    return InputCapturePass;
 }
 
 void checkboxMenuItemRebuildText(struct MenuBuilderElement* element) {
@@ -111,12 +111,11 @@ void sliderMenuItemInit(struct MenuBuilderElement* element) {
 #define FULL_SCROLL_TIME    2.0f
 #define SCROLL_MULTIPLIER   (1.0f * FIXED_DELTA_TIME / (80 * FULL_SCROLL_TIME))
 
-enum MenuDirection sliderMenuItemUpdate(struct MenuBuilderElement* element, MenuActionCalback actionCallback, void* data) {
+enum InputCapture sliderMenuItemUpdate(struct MenuBuilderElement* element, MenuActionCalback actionCallback, void* data) {
     struct MenuSlider* slider = (struct MenuSlider*)element->data;
-
+    int controllerDir = controllerGetDirectionDown(0);
+    
     if (element->params->params.slider.discrete) {
-        int controllerDir = controllerGetDirectionDown(0);
-
         int numTicks = element->params->params.slider.numberOfTicks;
         int currentValue = (int)floorf(slider->value * (numTicks - 1));
         int newValue = currentValue;
@@ -196,8 +195,11 @@ enum MenuDirection sliderMenuItemUpdate(struct MenuBuilderElement* element, Menu
             slider->value = newValue;
         }
     }
+    
+    if (controllerGetButtonDown(0, L_JPAD | R_JPAD | A_BUTTON) || (element->params->params.slider.discrete && ((controllerDir & ControllerDirectionLeft) || (controllerDir & ControllerDirectionRight))))
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll); 
 
-    return MenuDirectionStay;
+    return InputCapturePass;
 }
 
 void sliderMenuItemRender(struct MenuBuilderElement* element, int selection, int materialIndex, struct PrerenderedTextBatch* textBatch, struct RenderState* renderState) {
@@ -236,9 +238,9 @@ void menuBuilderInit(
     }
 }
 
-enum MenuDirection menuBuilderUpdate(struct MenuBuilder* menuBuilder) {
+enum InputCapture menuBuilderUpdate(struct MenuBuilder* menuBuilder) {
     if (controllerGetButtonDown(0, B_BUTTON)) {
-        return MenuDirectionUp;
+        return InputCaptureExit;
     }
 
     int controllerDir = controllerGetDirectionDown(0);
@@ -265,22 +267,15 @@ enum MenuDirection menuBuilderUpdate(struct MenuBuilder* menuBuilder) {
         struct MenuBuilderElement* element = &menuBuilder->elements[i];
 
         if (element->callbacks->update && element->selectionIndex == menuBuilder->selection) {
-            enum MenuDirection direction = element->callbacks->update(element, menuBuilder->actionCallback, menuBuilder->data);
+            enum InputCapture direction = element->callbacks->update(element, menuBuilder->actionCallback, menuBuilder->data);
 
-            if (direction != MenuDirectionStay) {
+            if (direction != InputCapturePass) {
                 return direction;
             }
         }
     }
-
-    if (controllerGetButtonDown(0, L_TRIG) || controllerGetButtonDown(0, Z_TRIG)) {
-        return MenuDirectionLeft;
-    }
-    if (controllerGetButtonDown(0, R_TRIG)) {
-        return MenuDirectionRight;
-    }
     
-    return MenuDirectionStay;
+    return InputCapturePass;
 }
 
 void menuBuilderRebuildText(struct MenuBuilder* menuBuilder) {

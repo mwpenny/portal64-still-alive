@@ -58,7 +58,7 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
     }
 }
 
-enum MenuDirection saveGameUpdate(struct SaveGameMenu* saveGame) {
+enum InputCapture saveGameUpdate(struct SaveGameMenu* saveGame) {
     if (controllerGetButtonDown(0, A_BUTTON) && saveGame->savefileList->numberOfSaves) {
         Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
         if (checkpointSaveInto(&gScene, save)) {

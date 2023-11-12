@@ -291,13 +291,14 @@ def make_overall_subtitles_sourcefile(language_list):
 
     dump_lines("build/src/audio/subtitles.c", sourcefile_lines)
 
-def read_translation_file(filepath):
+def read_translation_file(filepath, encoding='utf-16-le'):
     if not exists(filepath):
+        print(f"not found {filepath}")
         return [], [], ''
 
     lines = []
     
-    with open(filepath, "r", encoding='utf-16-le') as f:
+    with open(filepath, "r", encoding=encoding) as f:
         lines = f.readlines()
     
     new_lines = []
@@ -347,7 +348,7 @@ def process_all_closecaption_files(dir, language_names):
             valve_k, valve_v, _ = read_translation_file(f"vpk/Portal/hl2/resource/valve_{language_name}.txt")
             valve_k, valve_v = filter_whitelist(valve_k, valve_v, valve_whitelist)
 
-            extra_k, extra_v, _ = read_translation_file(f"assets/translations/extra_{language_name}.txt")
+            extra_k, extra_v, _ = read_translation_file(f"assets/translations/extra_{language_name}.txt", encoding='utf-8')
 
             k = k + gamepad_k + portal_k + valve_k + extra_k
             v = v + gamepad_v + portal_v + valve_v + extra_v

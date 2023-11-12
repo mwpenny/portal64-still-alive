@@ -35,7 +35,7 @@ struct MenuAction {
 typedef void (*MenuActionCalback)(void* data, int selection, struct MenuAction* action);
 
 typedef void (*MenuItemInit)(struct MenuBuilderElement* element);
-typedef enum MenuDirection (*MenuItemUpdate)(struct MenuBuilderElement* element, MenuActionCalback actionCallback, void* data);
+typedef enum InputCapture (*MenuItemUpdate)(struct MenuBuilderElement* element, MenuActionCalback actionCallback, void* data);
 typedef void (*MenuItemRebuildText)(struct MenuBuilderElement* element);
 typedef void (*MenuItemRender)(struct MenuBuilderElement* element, int selection, int materialIndex, struct PrerenderedTextBatch* textBatch, struct RenderState* renderState);
 
@@ -96,7 +96,7 @@ void menuBuilderInit(
     MenuActionCalback actionCallback, 
     void* data
 );
-enum MenuDirection menuBuilderUpdate(struct MenuBuilder* menuBuilder);
+enum InputCapture menuBuilderUpdate(struct MenuBuilder* menuBuilder);
 void menuBuilderRebuildText(struct MenuBuilder* menuBuilder);
 void menuBuilderRender(struct MenuBuilder* menuBuilder, struct RenderState* renderState);
 

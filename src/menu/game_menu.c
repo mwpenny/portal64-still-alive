@@ -31,8 +31,8 @@ void gameMenuRebuildText(struct GameMenu* gameMenu) {
     }
 }
 
-enum GameMenuState gameMenuDirectionToState(enum MenuDirection direction, enum GameMenuState currentState) {
-    if (direction == MenuDirectionUp) {
+enum GameMenuState gameInputCaptureToState(enum InputCapture direction, enum GameMenuState currentState) {
+    if (direction == InputCaptureExit) {
         return GameMenuStateLanding;
     }
 
@@ -54,16 +54,16 @@ void gameMenuUpdate(struct GameMenu* gameMenu) {
             break;
         }
         case GameMenuStateNewGame:
-            gameMenu->state = gameMenuDirectionToState(newGameUpdate(&gameMenu->newGameMenu), gameMenu->state);
+            gameMenu->state = gameInputCaptureToState(newGameUpdate(&gameMenu->newGameMenu), gameMenu->state);
             break;
         case GameMenuStateLoadGame:
-            gameMenu->state = gameMenuDirectionToState(loadGameUpdate(&gameMenu->loadGameMenu), gameMenu->state);
+            gameMenu->state = gameInputCaptureToState(loadGameUpdate(&gameMenu->loadGameMenu), gameMenu->state);
             break;
         case GameMenuStateSaveGame:
-            gameMenu->state = gameMenuDirectionToState(saveGameUpdate(&gameMenu->saveGameMenu), gameMenu->state);
+            gameMenu->state = gameInputCaptureToState(saveGameUpdate(&gameMenu->saveGameMenu), gameMenu->state);
             break;
         case GameMenuStateOptions:
-            gameMenu->state = gameMenuDirectionToState(optionsMenuUpdate(&gameMenu->optionsMenu), gameMenu->state);
+            gameMenu->state = gameInputCaptureToState(optionsMenuUpdate(&gameMenu->optionsMenu), gameMenu->state);
             break;
         default:
             break;
