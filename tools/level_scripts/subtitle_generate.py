@@ -36,6 +36,13 @@ portal_whitelist = {
     "PORTAL_CHAPTER1_TITLE",
     "VALVE_PRIMARY_ATTACK",
     "VALVE_SECONDARY_ATTACK",
+    "HINT_GET_PORTAL_1",
+    "HINT_GET_PORTAL_2",
+    "HINT_USE_ITEMS",
+    "HINT_DROP_ITEMS",
+    "HINT_USE_SWITCHES",
+    "HINT_DUCK",
+    "HINT_JUMP",
 }
 
 valve_whitelist = {
@@ -308,7 +315,10 @@ def filter_whitelist(keys, values, whitelist):
     for index in range(len(keys)):
         if keys[index] in whitelist:
             result_keys.append(keys[index])
-            result.append(values[index])
+            value = values[index]
+            if "HINT_" in keys[index]:
+                value = re.sub('%[^%]*%', '', value).strip()
+            result.append(value)
 
     return result_keys, result
 
