@@ -111,7 +111,7 @@ function generateLanguagesSourceFile() {
     sourcefile += 'char* AudioLanguages[] = \n{\n';
     
     for (let language of languages) {
-        sourcefile += '\t"' + language_names[language].toUpperCase() + '",\n';
+        sourcefile += '\t"' + language_names[language] + '",\n';
     }
 
     sourcefile += '};\n';
