@@ -157,14 +157,14 @@ u8 gPromptActions[] = {
 
 char* gPromptText[] = {
     NULL,
-    "TO PLACE THE ORANGE PORTAL",
-    "TO PLACE THE BLUE PORTAL",
-    "TO PICKUP AN OBJECT",
-    "TO DROP AN OBJECT",
-    "TO USE",
-    "TO CROUCH",
-    "TO MOVE",
-    "TO JUMP",
+    translationsGet(HINT_GET_PORTAL_2),
+    translationsGet(HINT_GET_PORTAL_1),
+    translationsGet(HINT_USE_ITEMS),
+    translationsGet(HINT_DROP_ITEMS),
+    translationsGet(HINT_USE_SWITCHES),
+    translationsGet(HINT_DUCK),
+    translationsGet(HINT_MOVE),
+    translationsGet(HINT_JUMP),
 };
 
 void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType) {
