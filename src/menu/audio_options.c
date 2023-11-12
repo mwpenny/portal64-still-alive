@@ -123,7 +123,7 @@ void audioOptionsAction(void* data, int selection, struct MenuAction* action) {
             break;
         case AudioOptionAudioLanguage:
             gSaveData.audio.audioLanguage = action->state.iSlider.value;
-            audioOptions->menuBuilder.elements[AUDIO_LANGUAGE_TEXT_INDEX].data = menuBuildPrerenderedText(&gDejaVuSansFont, AudioLanguages[gSaveData.audio.audioLanguage], GAMEPLAY_X + 125, GAMEPLAY_Y + 124, SCREEN_WD);
+            audioOptions->menuBuilder.elements[AUDIO_LANGUAGE_TEXT_INDEX].data = menuBuildPrerenderedText(&gDejaVuSansFont, AudioLanguages[gSaveData.audio.audioLanguage], GAMEPLAY_X + 125, GAMEPLAY_Y + 80, SCREEN_WD);
             break;
     }
 }
