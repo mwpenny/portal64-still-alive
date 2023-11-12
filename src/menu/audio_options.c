@@ -109,7 +109,7 @@ struct MenuElementParams gAudioMenuParams[] = {
 #define AUDIO_LANGUAGE_VALUE_INDEX 4
 #define AUDIO_LANGUAGE_TEXT_INDEX 6
 
-void audioOptionsActoin(void* data, int selection, struct MenuAction* action) {
+void audioOptionsAction(void* data, int selection, struct MenuAction* action) {
     struct AudioOptions* audioOptions = (struct AudioOptions*)data;
 
     switch (selection) {
@@ -140,7 +140,7 @@ void audioOptionsInit(struct AudioOptions* audioOptions) {
         gAudioMenuParams,
         sizeof(gAudioMenuParams) / sizeof(*gAudioMenuParams),
         AudioOptionCount,
-        audioOptionsActoin,
+        audioOptionsAction,
         audioOptions
     );
 
