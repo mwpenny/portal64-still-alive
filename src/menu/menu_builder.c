@@ -60,7 +60,7 @@ enum MenuDirection checkboxMenuItemUpdate(struct MenuBuilderElement* element, Me
         action.type = MenuElementTypeCheckbox;
         action.state.checkbox.isChecked = checkbox->checked;
         actionCallback(data, element->selectionIndex, &action);
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll); 
     }
 
     return MenuDirectionStay;
@@ -113,10 +113,9 @@ void sliderMenuItemInit(struct MenuBuilderElement* element) {
 
 enum MenuDirection sliderMenuItemUpdate(struct MenuBuilderElement* element, MenuActionCalback actionCallback, void* data) {
     struct MenuSlider* slider = (struct MenuSlider*)element->data;
-
+    int controllerDir = controllerGetDirectionDown(0);
+    
     if (element->params->params.slider.discrete) {
-        int controllerDir = controllerGetDirectionDown(0);
-
         int numTicks = element->params->params.slider.numberOfTicks;
         int currentValue = (int)floorf(slider->value * (numTicks - 1));
         int newValue = currentValue;
@@ -196,6 +195,9 @@ enum MenuDirection sliderMenuItemUpdate(struct MenuBuilderElement* element, Menu
             slider->value = newValue;
         }
     }
+    
+    if (controllerGetButtonDown(0, L_JPAD | R_JPAD | A_BUTTON) || (element->params->params.slider.discrete && ((controllerDir & ControllerDirectionLeft) || (controllerDir & ControllerDirectionRight))))
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll); 
 
     return MenuDirectionStay;
 }
