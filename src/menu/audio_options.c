@@ -153,7 +153,7 @@ void audioOptionsRebuildtext(struct AudioOptions* audioOptions) {
     menuBuilderRebuildText(&audioOptions->menuBuilder);
 }
 
-enum MenuDirection audioOptionsUpdate(struct AudioOptions* audioOptions) {
+enum InputCapture audioOptionsUpdate(struct AudioOptions* audioOptions) {
     return menuBuilderUpdate(&audioOptions->menuBuilder);
 }
 

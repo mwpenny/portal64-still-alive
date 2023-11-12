@@ -136,9 +136,9 @@ void newGameRebuildText(struct NewGameMenu* newGameMenu) {
     newGameMenu->newGameText = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(GAMEUI_NEWGAME), 48, 48, SCREEN_WD);
 }
 
-enum MenuDirection newGameUpdate(struct NewGameMenu* newGameMenu) {
+enum InputCapture newGameUpdate(struct NewGameMenu* newGameMenu) {
     if (controllerGetButtonDown(0, B_BUTTON)) {
-        return MenuDirectionUp;
+        return InputCaptureExit;
     }
 
     if (controllerGetButtonDown(0, A_BUTTON) && gChapters[newGameMenu->selectedChapter].testChamberNumber >= 0) {
@@ -169,7 +169,7 @@ enum MenuDirection newGameUpdate(struct NewGameMenu* newGameMenu) {
         chapterMenuSetChapter(&newGameMenu->chapter1, &gChapters[newGameMenu->chapterOffset + 1], newGameMenu->chapterOffset + 1);
     }
 
-    return MenuDirectionStay;
+    return InputCapturePass;
 }
 
 void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderState, struct GraphicsTask* task) {

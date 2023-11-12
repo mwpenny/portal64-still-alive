@@ -33,11 +33,10 @@ struct MenuSlider {
     short w;
 };
 
-enum MenuDirection {
-    MenuDirectionStay,
-    MenuDirectionUp,
-    MenuDirectionRight,
-    MenuDirectionLeft,
+enum InputCapture {
+    InputCapturePass,
+    InputCaptureGrab,
+    InputCaptureExit,
 };
 
 #define GFX_ENTRIES_PER_IMAGE   3

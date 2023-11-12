@@ -194,7 +194,7 @@ void videoOptionsRebuildtext(struct VideoOptions* videoOptions) {
     menuBuilderRebuildText(&videoOptions->menuBuilder);
 }
 
-enum MenuDirection videoOptionsUpdate(struct VideoOptions* videoOptions) {
+enum InputCapture videoOptionsUpdate(struct VideoOptions* videoOptions) {
     return menuBuilderUpdate(&videoOptions->menuBuilder);
 }
 

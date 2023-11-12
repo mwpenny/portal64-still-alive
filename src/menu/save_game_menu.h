@@ -9,7 +9,7 @@ struct SaveGameMenu {
 
 void saveGameMenuInit(struct SaveGameMenu* saveGame, struct SavefileListMenu* savefileList);
 void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew);
-enum MenuDirection saveGameUpdate(struct SaveGameMenu* saveGame);
+enum InputCapture saveGameUpdate(struct SaveGameMenu* saveGame);
 void saveGameRender(struct SaveGameMenu* saveGame, struct RenderState* renderState, struct GraphicsTask* task);
 
 #endif
