@@ -490,8 +490,12 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
 
 
 void controlsRenderPrompt(enum ControllerAction action, char* message, float opacity, struct RenderState* renderState) {
-    struct Vector2s16 size = fontMeasure(&gDejaVuSansFont, message);
-
+    if (message == NULL || (message != NULL && message[0] == '\0'))
+        return;
+    
+    struct FontRenderer* fontRender = stackMalloc(sizeof(struct FontRenderer));
+    fontRendererLayout(fontRender, &gDejaVuSansFont, message, SCREEN_WD - (CONTROL_PROMPT_RIGHT_MARGIN + (CONTROL_PROMPT_PADDING * 2)));
+    
     int iconsWidth = controlsMeasureIcons(action);
 
     int opacityAsInt = (int)(255 * opacity);
@@ -502,9 +506,9 @@ void controlsRenderPrompt(enum ControllerAction action, char* message, float opa
         opacityAsInt = 0;
     }
 
-    int textPositionX = (SCREEN_WD - CONTROL_PROMPT_RIGHT_MARGIN - CONTROL_PROMPT_PADDING) - size.x;
-    int textPositionY = (SCREEN_HT - CONTROL_PROMPT_BOTTOM_MARGIN - CONTROL_PROMPT_PADDING) - size.y;
-
+    int textPositionX = (SCREEN_WD - CONTROL_PROMPT_RIGHT_MARGIN - CONTROL_PROMPT_PADDING) - fontRender->width;
+    int textPositionY = (SCREEN_HT - CONTROL_PROMPT_BOTTOM_MARGIN - CONTROL_PROMPT_PADDING) - fontRender->height;
+    
     gSPDisplayList(renderState->dl++, ui_material_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
     gDPSetEnvColor(renderState->dl++, 0, 0, 0, opacityAsInt / 3);
     gDPFillRectangle(
@@ -516,26 +520,28 @@ void controlsRenderPrompt(enum ControllerAction action, char* message, float opa
     );
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
 
-    gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_0_INDEX]);
-    gDPSetEnvColor(renderState->dl++, 232, 206, 80, opacityAsInt);
-    renderState->dl = fontRender(
-        &gDejaVuSansFont, 
-        message, 
-        textPositionX, 
-        textPositionY, 
-        renderState->dl
-    );
+    struct Coloru8 textColor;
+    
+    textColor.r = 232;
+    textColor.g = 206;
+    textColor.b = 80;
+    textColor.a = opacityAsInt;
+        
+    renderState->dl = fontRendererBuildGfx(fontRender, gDejaVuSansImages, textPositionX, textPositionY, &textColor, renderState->dl);
+    
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 
     gSPDisplayList(renderState->dl++, ui_material_list[BUTTON_ICONS_INDEX]);
     gDPSetEnvColor(renderState->dl++, 232, 206, 80, opacityAsInt);
     renderState->dl = controlsRenderIcons(renderState->dl, action, textPositionX - CONTROL_PROMPT_PADDING, textPositionY);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[BUTTON_ICONS_INDEX]);
+    
+    stackMallocFree(fontRender);
 }
 
 void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOpacity, struct RenderState* renderState, enum SubtitleType subtitleType) {
     if (message == NULL || (message != NULL && message[0] == '\0'))
-       return;
+        return;
     
     struct FontRenderer* fontRender = stackMalloc(sizeof(struct FontRenderer));
     fontRendererLayout(fontRender, &gDejaVuSansFont, message, SCREEN_WD - (SUBTITLE_SIDE_MARGIN + SUBTITLE_PADDING) * 2);
