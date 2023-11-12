@@ -20,7 +20,7 @@ struct VideoOptions {
 
 void videoOptionsInit(struct VideoOptions* videoOptions);
 void videoOptionsRebuildtext(struct VideoOptions* videoOptions);
-enum MenuDirection videoOptionsUpdate(struct VideoOptions* videoOptions);
+enum InputCapture videoOptionsUpdate(struct VideoOptions* videoOptions);
 void videoOptionsRender(struct VideoOptions* videoOptions, struct RenderState* renderState, struct GraphicsTask* task);
 
 

@@ -44,7 +44,7 @@ struct NewGameMenu {
 
 void newGameInit(struct NewGameMenu* newGameMenu);
 void newGameRebuildText(struct NewGameMenu* newGameMenu);
-enum MenuDirection newGameUpdate(struct NewGameMenu* newGameMenu);
+enum InputCapture newGameUpdate(struct NewGameMenu* newGameMenu);
 void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderState, struct GraphicsTask* task);
 
 #endif

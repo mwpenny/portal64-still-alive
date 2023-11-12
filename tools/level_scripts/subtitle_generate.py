@@ -286,6 +286,7 @@ def make_overall_subtitles_sourcefile(language_list):
 
 def read_translation_file(filepath):
     if not exists(filepath):
+        print(f"not found {filepath}")
         return [], [], ''
 
     lines = []
