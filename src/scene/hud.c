@@ -155,16 +155,16 @@ u8 gPromptActions[] = {
     ControllerActionJump,
 };
 
-char* gPromptText[] = {
+int gPromptText[] = {
     NULL,
-    translationsGet(HINT_GET_PORTAL_2),
-    translationsGet(HINT_GET_PORTAL_1),
-    translationsGet(HINT_USE_ITEMS),
-    translationsGet(HINT_DROP_ITEMS),
-    translationsGet(HINT_USE_SWITCHES),
-    translationsGet(HINT_DUCK),
-    translationsGet(HINT_MOVE),
-    translationsGet(HINT_JUMP),
+    HINT_GET_PORTAL_2,
+    HINT_GET_PORTAL_1,
+    HINT_USE_ITEMS,
+    HINT_DROP_ITEMS,
+    HINT_USE_SWITCHES,
+    HINT_DUCK,
+    HINT_MOVE,
+    HINT_JUMP,
 };
 
 void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType) {
@@ -359,7 +359,7 @@ void hudRender(struct Hud* hud, struct Player* player, struct RenderState* rende
     }
 
     if (hud->promptOpacity > 0.0f && hud->promptType != CutscenePromptTypeNone) {
-        controlsRenderPrompt(gPromptActions[hud->promptType], gPromptText[hud->promptType], hud->promptOpacity, renderState);
+        controlsRenderPrompt(gPromptActions[hud->promptType], translationsGet(gPromptText[hud->promptType]), hud->promptOpacity, renderState);
     }
 
     if (hud->subtitleOpacity > 0.0f && (gSaveData.controls.flags & ControlSaveSubtitlesEnabled || gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled) && hud->subtitleKey != SubtitleKeyNone) {
