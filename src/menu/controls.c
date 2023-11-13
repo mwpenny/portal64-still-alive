@@ -210,7 +210,7 @@ void controlsLayoutHeader(struct ControlsMenuHeader* header, int x, int y) {
 }
 
 void controlsInitRow(struct ControlsMenuRow* row, struct ControlActionDataRow* data) {
-    row->actionText = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(data->nameId), 0, 0, SCREEN_WD);
+    row->actionText = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(data->nameId), 0, 0, 200);
 
     Gfx* dl = row->sourceIcons;
     for (int i = 0; i < SOURCE_ICON_COUNT; ++i) {
@@ -242,8 +242,8 @@ void controlsLayout(struct ControlsMenu* controlsMenu) {
         }
 
         controlsLayoutRow(&controlsMenu->actionRows[i], &gControllerDataRows[i], CONTROLS_X, y);
-
-        y += CONTROL_ROW_HEIGHT;
+        
+        y += controlsMenu->actionRows[i].actionText->height + 2;
     }
 
     gSPEndDisplayList(headerSeparators++);
@@ -339,7 +339,7 @@ enum InputCapture controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
         struct ControlsMenuRow* selectedAction = &controlsMenu->actionRows[controlsMenu->selectedRow];
         int newScroll = controlsMenu->scrollOffset;
         int topY = selectedAction->y;
-        int bottomY = topY + CONTROL_ROW_HEIGHT + TOP_PADDING;
+        int bottomY = topY + selectedAction->actionText->height + 2 + TOP_PADDING;
 
         if (gControllerDataRows[controlsMenu->selectedRow].headerId != -1) {
             topY -= CONTROL_ROW_HEIGHT + TOP_PADDING + SEPARATOR_SPACE;
@@ -399,7 +399,7 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
             CONTROLS_X + ROW_PADDING, 
             selectedAction->y, 
             CONTROLS_X + CONTROLS_WIDTH - ROW_PADDING * 2, 
-            selectedAction->y + CONTROL_ROW_HEIGHT - 2
+            selectedAction->y + selectedAction->actionText->height
         );
     }
 
