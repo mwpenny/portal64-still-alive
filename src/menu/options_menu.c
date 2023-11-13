@@ -89,13 +89,11 @@ enum InputCapture optionsMenuUpdate(struct OptionsMenu* options) {
             break;
     }
 
-    if (result != InputCapturePass) {
-        return result;
-    }
-
-    if (controllerGetButtonDown(0, B_BUTTON)) {
+    if (result == InputCaptureExit || controllerGetButtonDown(0, B_BUTTON)) {
         savefileSave();
         return InputCaptureExit;
+    } else if (result != InputCapturePass) {
+        return result;
     }
 
     if (controllerGetButtonDown(0, Z_TRIG | L_TRIG)) {
