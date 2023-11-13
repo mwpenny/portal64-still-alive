@@ -16,5 +16,6 @@
 "GameUI_Acceleration"	"Ускорение"
 "GameUI_Sensitivity"	"Чувствителност"
 "HINT_MOVE"	"ДА СЕ ДВИЖИ"
+"GameUI_Joystick_N64"	"Геймпад"
 }
 }

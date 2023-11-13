@@ -16,5 +16,6 @@
 "GameUI_Acceleration"	"Gyorsulás"
 "GameUI_Sensitivity"	"Érzékenység"
 "HINT_MOVE"	"MOZOGNI"
+"GameUI_Joystick_N64"	"Joystick"
 }
 }
