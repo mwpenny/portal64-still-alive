@@ -17,7 +17,7 @@ struct Tab gOptionTabs[] = {
         .messageId = OPTIONS_CONTROLS,
     },
     {
-        .messageId = GameUI_JOYSTICK_N64,
+        .messageId = GAMEUI_JOYSTICK_N64,
     },
     {
         .messageId = GAMEUI_AUDIO,
