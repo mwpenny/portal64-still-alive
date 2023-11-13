@@ -15,6 +15,6 @@
 "GameUI_Deadzone"	"Deadzone"
 "GameUI_Acceleration"	"Acceleration"
 "GameUI_Sensitivity"	"Sensitivity"
-"HINT_MOVE"	"MOVE"
+"HINT_MOVE"	"TO MOVE"
 }
 }

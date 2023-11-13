@@ -155,16 +155,16 @@ u8 gPromptActions[] = {
     ControllerActionJump,
 };
 
-char* gPromptText[] = {
+int gPromptText[] = {
     NULL,
-    "TO PLACE THE ORANGE PORTAL",
-    "TO PLACE THE BLUE PORTAL",
-    "TO PICKUP AN OBJECT",
-    "TO DROP AN OBJECT",
-    "TO USE",
-    "TO CROUCH",
-    "TO MOVE",
-    "TO JUMP",
+    HINT_GET_PORTAL_2,
+    HINT_GET_PORTAL_1,
+    HINT_USE_ITEMS,
+    HINT_DROP_ITEMS,
+    HINT_USE_SWITCHES,
+    HINT_DUCK,
+    HINT_MOVE,
+    HINT_JUMP,
 };
 
 void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType) {
@@ -359,7 +359,7 @@ void hudRender(struct Hud* hud, struct Player* player, struct RenderState* rende
     }
 
     if (hud->promptOpacity > 0.0f && hud->promptType != CutscenePromptTypeNone) {
-        controlsRenderPrompt(gPromptActions[hud->promptType], gPromptText[hud->promptType], hud->promptOpacity, renderState);
+        controlsRenderPrompt(gPromptActions[hud->promptType], translationsGet(gPromptText[hud->promptType]), hud->promptOpacity, renderState);
     }
 
     if (hud->subtitleOpacity > 0.0f && (gSaveData.controls.flags & ControlSaveSubtitlesEnabled || gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled) && hud->subtitleKey != SubtitleKeyNone) {
