@@ -1,0 +1,20 @@
+"lang"
+{
+"Language"	"bulgarian"
+"Tokens"
+{
+"Audio_Text_Language"	"Език на текста"
+"Audio_Audio_Language"	"Аудио език"
+"Options_Controls"	"Контроли"
+"Valve_Move"	"Движа"
+"Valve_Look"	"Гледам"
+"Valve_Look_Straight_Back"	"Погледни право назад"
+"GameUI_Interlaced"	"Преплетено видео"
+"GameUI_MovingPortals"	"Подвижни портали"
+"GameUI_TankControls"	"Управление на резервоара"
+"GameUI_Deadzone"	"Мъртва зона"
+"GameUI_Acceleration"	"Ускорение"
+"GameUI_Sensitivity"	"Чувствителност"
+"HINT_MOVE"	"ДА СЕ ДВИЖИ"
+}
+}

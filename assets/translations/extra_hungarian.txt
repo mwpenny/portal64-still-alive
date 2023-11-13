@@ -1,0 +1,20 @@
+"lang"
+{
+"Language"	"hungarian"
+"Tokens"
+{
+"Audio_Text_Language"	"Szöveg nyelve"
+"Audio_Audio_Language"	"Hang nyelve"
+"Options_Controls"	"Vezérlők"
+"Valve_Move"	"Mozog"
+"Valve_Look"	"Néz"
+"Valve_Look_Straight_Back"	"Nézz egyenesen hátra"
+"GameUI_Interlaced"	"Váltottsoros videó"
+"GameUI_MovingPortals"	"Portálok mozgatása"
+"GameUI_TankControls"	"Tartályvezérlők"
+"GameUI_Deadzone"	"Holt zóna"
+"GameUI_Acceleration"	"Gyorsulás"
+"GameUI_Sensitivity"	"Érzékenység"
+"HINT_MOVE"	"MOZOGNI"
+}
+}

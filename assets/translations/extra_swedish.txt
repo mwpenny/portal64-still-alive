@@ -1,0 +1,20 @@
+"lang"
+{
+"Language"	"swedish"
+"Tokens"
+{
+"Audio_Text_Language"	"Textspråk"
+"Audio_Audio_Language"	"Ljudspråk"
+"Options_Controls"	"Kontroller"
+"Valve_Move"	"Flytta"
+"Valve_Look"	"Se"
+"Valve_Look_Straight_Back"	"Titta rakt bakåt"
+"GameUI_Interlaced"	"Interlaced video"
+"GameUI_MovingPortals"	"Flytta portaler"
+"GameUI_TankControls"	"Tankkontroller"
+"GameUI_Deadzone"	"Dödzon"
+"GameUI_Acceleration"	"Acceleration"
+"GameUI_Sensitivity"	"Känslighet"
+"HINT_MOVE"	"ATT FLYTTA"
+}
+}

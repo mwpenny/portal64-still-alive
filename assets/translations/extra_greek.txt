@@ -1,0 +1,20 @@
+"lang"
+{
+"Language"	"greek"
+"Tokens"
+{
+"Audio_Text_Language"	"Γλώσσα κειμένου"
+"Audio_Audio_Language"	"Γλώσσα ήχου"
+"Options_Controls"	"Έλεγχοι"
+"Valve_Move"	"Κίνηση"
+"Valve_Look"	"Κοίτα"
+"Valve_Look_Straight_Back"	"Κοιτάξτε ευθεία πίσω"
+"GameUI_Interlaced"	"Πεπλεγμένο βίντεο"
+"GameUI_MovingPortals"	"Μετακινούμενες πύλες"
+"GameUI_TankControls"	"Χειριστήρια δεξαμενής"
+"GameUI_Deadzone"	"Νεκρή ζώνη"
+"GameUI_Acceleration"	"Επιτάχυνση"
+"GameUI_Sensitivity"	"Ευαισθησία"
+"HINT_MOVE"	"ΝΑ ΜΕΤΑΚΙΝΗΣΩ"
+}
+}

@@ -1,0 +1,20 @@
+"lang"
+{
+"Language"	"ukrainian"
+"Tokens"
+{
+"Audio_Text_Language"	"Мова тексту"
+"Audio_Audio_Language"	"Мова аудіо"
+"Options_Controls"	"Елементи керування"
+"Valve_Move"	"Рухатися"
+"Valve_Look"	"Подивіться"
+"Valve_Look_Straight_Back"	"Подивіться прямо назад"
+"GameUI_Interlaced"	"Переплетене відео"
+"GameUI_MovingPortals"	"Рухомі портали"
+"GameUI_TankControls"	"Органи керування танком"
+"GameUI_Deadzone"	"Мертва зона"
+"GameUI_Acceleration"	"Прискорення"
+"GameUI_Sensitivity"	"Чутливість"
+"HINT_MOVE"	"РУХАТИСЬ"
+}
+}

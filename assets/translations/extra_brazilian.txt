@@ -1,0 +1,20 @@
+"lang"
+{
+"Language"	"brazilian"
+"Tokens"
+{
+"Audio_Text_Language"	"Idioma do texto"
+"Audio_Audio_Language"	"Idioma de áudio"
+"Options_Controls"	"Controles"
+"Valve_Move"	"Mover"
+"Valve_Look"	"Olhar"
+"Valve_Look_Straight_Back"	"Olhe diretamente para trás"
+"GameUI_Interlaced"	"Vídeo entrelaçado"
+"GameUI_MovingPortals"	"Movendo portais"
+"GameUI_TankControls"	"Controles do tanque"
+"GameUI_Deadzone"	"Zona morta"
+"GameUI_Acceleration"	"Aceleração"
+"GameUI_Sensitivity"	"Sensibilidade"
+"HINT_MOVE"	"MOVER"
+}
+}

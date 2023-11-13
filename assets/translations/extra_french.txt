@@ -1,0 +1,20 @@
+"lang"
+{
+"Language"	"french"
+"Tokens"
+{
+"Audio_Text_Language"	"Langue du texte"
+"Audio_Audio_Language"	"Langue audio"
+"Options_Controls"	"Contrôles"
+"Valve_Move"	"Se déplacer"
+"Valve_Look"	"Regarder"
+"Valve_Look_Straight_Back"	"Regarde droit en arrière"
+"GameUI_Interlaced"	"Vidéo entrelacée"
+"GameUI_MovingPortals"	"Portails mobiles"
+"GameUI_TankControls"	"Contrôles des tank"
+"GameUI_Deadzone"	"Zone morte"
+"GameUI_Acceleration"	"Accélération"
+"GameUI_Sensitivity"	"Sensibilité"
+"HINT_MOVE"	"BOUGER"
+}
+}

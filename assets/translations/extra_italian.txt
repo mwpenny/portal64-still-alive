@@ -1,0 +1,20 @@
+"lang"
+{
+"Language"	"italian"
+"Tokens"
+{
+"Audio_Text_Language"	"Linguaggio del testo"
+"Audio_Audio_Language"	"Lingua dell'audio"
+"Options_Controls"	"Controlli"
+"Valve_Move"	"Mossa"
+"Valve_Look"	"Aspetto"
+"Valve_Look_Straight_Back"	"Guarda dritto indietro"
+"GameUI_Interlaced"	"Video interlacciato"
+"GameUI_MovingPortals"	"Portali in movimento"
+"GameUI_TankControls"	"Controlli del carro armato"
+"GameUI_Deadzone"	"Zona morta"
+"GameUI_Acceleration"	"Accelerazione"
+"GameUI_Sensitivity"	"Sensibilità"
+"HINT_MOVE"	"SPOSTARE"
+}
+}

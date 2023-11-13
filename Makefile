@@ -506,11 +506,11 @@ SUBTITLE_LANGUAGES = english \
     danish \
     german \
     spanish \
+    latam \
 	greek \
     french \
     italian \
     polish \
-    latam \
     hungarian \
     dutch \
     norwegian \

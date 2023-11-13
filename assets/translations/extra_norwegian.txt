@@ -1,0 +1,20 @@
+"lang"
+{
+"Language"	"norwegian"
+"Tokens"
+{
+"Audio_Text_Language"	"Tekstspråk"
+"Audio_Audio_Language"	"Lydspråk"
+"Options_Controls"	"Kontroller"
+"Valve_Move"	"Bevege seg"
+"Valve_Look"	"Se"
+"Valve_Look_Straight_Back"	"Se rett tilbake"
+"GameUI_Interlaced"	"Interlaced video"
+"GameUI_MovingPortals"	"Flytting av portaler"
+"GameUI_TankControls"	"Tankkontroller"
+"GameUI_Deadzone"	"Dødsone"
+"GameUI_Acceleration"	"Akselerasjon"
+"GameUI_Sensitivity"	"Følsomhet"
+"HINT_MOVE"	"Å FLYTTE"
+}
+}

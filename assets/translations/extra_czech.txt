@@ -1,0 +1,20 @@
+"lang"
+{
+"Language"	"czech"
+"Tokens"
+{
+"Audio_Text_Language"	"Jazyk textu"
+"Audio_Audio_Language"	"Jazyk zvuku"
+"Options_Controls"	"Řízení"
+"Valve_Move"	"Přestěhovat"
+"Valve_Look"	"Dívej se"
+"Valve_Look_Straight_Back"	"Podívejte se přímo dozadu"
+"GameUI_Interlaced"	"Prokládané video"
+"GameUI_MovingPortals"	"Pohyblivé portály"
+"GameUI_TankControls"	"Ovládání nádrže"
+"GameUI_Deadzone"	"Mrtvá zóna"
+"GameUI_Acceleration"	"Akcelerace"
+"GameUI_Sensitivity"	"Citlivost"
+"HINT_MOVE"	"POHYBOVAT SE"
+}
+}

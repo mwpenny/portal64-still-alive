@@ -1,0 +1,20 @@
+"lang"
+{
+"Language"	"polish"
+"Tokens"
+{
+"Audio_Text_Language"	"Język tekstu"
+"Audio_Audio_Language"	"Język dźwięku"
+"Options_Controls"	"Sterownica"
+"Valve_Move"	"Przenosić"
+"Valve_Look"	"Patrzeć"
+"Valve_Look_Straight_Back"	"Spójrz prosto wstecz"
+"GameUI_Interlaced"	"Wideo z przeplotem"
+"GameUI_MovingPortals"	"Ruchome portale"
+"GameUI_TankControls"	"Sterowanie zbiornikiem"
+"GameUI_Deadzone"	"Martwa strefa"
+"GameUI_Acceleration"	"Przyśpieszenie"
+"GameUI_Sensitivity"	"Wrażliwość"
+"HINT_MOVE"	"PRZENIEŚĆ"
+}
+}

@@ -1,0 +1,20 @@
+"lang"
+{
+"Language"	"romanian"
+"Tokens"
+{
+"Audio_Text_Language"	"Limba textului"
+"Audio_Audio_Language"	"Limba audio"
+"Options_Controls"	"Controale"
+"Valve_Move"	"Mișcare"
+"Valve_Look"	"Uite"
+"Valve_Look_Straight_Back"	"Privește drept înapoi"
+"GameUI_Interlaced"	"Video intercalat"
+"GameUI_MovingPortals"	"Mutarea portalurilor"
+"GameUI_TankControls"	"Comenzi tanc"
+"GameUI_Deadzone"	"Zonă moartă"
+"GameUI_Acceleration"	"Accelerare"
+"GameUI_Sensitivity"	"Sensibilitate"
+"HINT_MOVE"	"A MUTA"
+}
+}
