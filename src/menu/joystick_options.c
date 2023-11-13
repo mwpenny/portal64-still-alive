@@ -138,13 +138,13 @@ void joystickOptionsAction(void* data, int selection, struct MenuAction* action)
             }
             break;
         case JoystickOptionSensitivity:
-            gSaveData.controls.sensitivity = (short)(action->state.fSlider.value * 0xFFFF);
+            gSaveData.controls.sensitivity = (short)(action->state.fSlider.value * 0xFFFF + 0.5f);
             break;
         case JoystickOptionAcceleration:
-            gSaveData.controls.acceleration = (short)(action->state.fSlider.value * 0xFFFF);
+            gSaveData.controls.acceleration = (short)(action->state.fSlider.value * 0xFFFF + 0.5f);
             break;
         case JoystickOptionDeadzone:
-            gSaveData.controls.deadzone = (short)(action->state.fSlider.value * 0xFFFF);
+            gSaveData.controls.deadzone = (short)(action->state.fSlider.value * 0xFFFF + 0.5f);
             controllerSetDeadzone(action->state.fSlider.value * MAX_DEADZONE);
             break;
     }

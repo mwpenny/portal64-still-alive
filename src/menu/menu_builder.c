@@ -111,6 +111,8 @@ void sliderMenuItemInit(struct MenuBuilderElement* element) {
 #define FULL_SCROLL_TIME    2.0f
 #define SCROLL_MULTIPLIER   (1.0f * FIXED_DELTA_TIME / (80 * FULL_SCROLL_TIME))
 
+#define NEXT_TICK_TOLERANCE 0.001f
+
 enum InputCapture sliderMenuItemUpdate(struct MenuBuilderElement* element, MenuActionCalback actionCallback, void* data) {
     struct MenuSlider* slider = (struct MenuSlider*)element->data;
     int controllerDir = controllerGetDirectionDown(0);
@@ -162,7 +164,7 @@ enum InputCapture sliderMenuItemUpdate(struct MenuBuilderElement* element, MenuA
         int numTicks = element->params->params.slider.numberOfTicks;
 
         if (controllerGetButtonDown(0, R_JPAD | A_BUTTON)) {
-            int currentValue = (int)floorf(newValue * (numTicks - 1));
+            int currentValue = (int)floorf(newValue * (numTicks - 1) + NEXT_TICK_TOLERANCE);
 
             currentValue = currentValue + 1;
 
@@ -176,7 +178,7 @@ enum InputCapture sliderMenuItemUpdate(struct MenuBuilderElement* element, MenuA
 
             newValue = (float)currentValue / (float)(numTicks - 1);
         } else if (controllerGetButtonDown(0, L_JPAD)) {
-            int currentValue = (int)ceilf(newValue * (numTicks - 1));
+            int currentValue = (int)ceilf(newValue * (numTicks - 1) - NEXT_TICK_TOLERANCE);
 
             currentValue = currentValue - 1;
 
