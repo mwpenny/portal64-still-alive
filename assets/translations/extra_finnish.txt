@@ -16,5 +16,6 @@
 "GameUI_Acceleration"	"Kiihtyvyys"
 "GameUI_Sensitivity"	"Herkkyys"
 "HINT_MOVE"	"LIIKKUA"
+"GameUI_Joystick_N64"	"Gamepad-ohjain"
 }
 }

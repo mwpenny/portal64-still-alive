@@ -16,5 +16,6 @@
 "GameUI_Acceleration"	"Acceleration"
 "GameUI_Sensitivity"	"Känslighet"
 "HINT_MOVE"	"ATT FLYTTA"
+"GameUI_Joystick_N64"	"Spelkontroll"
 }
 }

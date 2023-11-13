@@ -16,5 +16,6 @@
 "GameUI_Acceleration"	"Hızlanma"
 "GameUI_Sensitivity"	"Duyarlılık"
 "HINT_MOVE"	"TAŞIMAK"
+"GameUI_Joystick_N64"	"Oyun Kumandası"
 }
 }

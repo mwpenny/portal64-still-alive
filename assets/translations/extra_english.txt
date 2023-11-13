@@ -16,5 +16,6 @@
 "GameUI_Acceleration"	"Acceleration"
 "GameUI_Sensitivity"	"Sensitivity"
 "HINT_MOVE"	"TO MOVE"
+"GameUI_Joystick_N64"	"Joystick"
 }
 }
