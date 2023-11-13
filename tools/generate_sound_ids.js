@@ -12,7 +12,7 @@ let outputLanguagesHeader = '';
 let allSounds = [];
 let languages = [];
 let languages_codes = ["EN", "FR", "DE", "RU", "ES"];
-let language_names = {"EN": "English", "FR": "French", "DE": "German", "RU": "Russian", "ES": "Spanish"};
+let language_names = {"EN": "English", "FR": "Français", "DE": "Deutsch", "RU": "Русский язык", "ES": "Español"};
 let lookup = [];
 languages.push("EN"); // Always included by default
 
