@@ -15,7 +15,7 @@
 .word  0x00000000               /* Unknown */
 .word  0x00000000               /* Unknown */
 .ascii "                    "   /* Internal ROM name (Max 20 characters) */
-.word  0x00000000               /* Unknown */
+.word  0x01000000               /* Advanced_Homebrew_ROM_Header (controller config) */
 /* Game ID (EXAMPLE: NSME) Begins here */
 .word  0x0000004E                /* Cartridge Type (N)*/
 .ascii "ED"                     /* Cartridge ID (SM)*/
