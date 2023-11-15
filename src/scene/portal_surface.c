@@ -167,6 +167,18 @@ void portalSurfaceInverse(struct PortalSurface* surface, struct Vector2s16* inpu
 int portalSurfaceIsInside(struct PortalSurface* surface, struct Transform* portalAt) {
     int intersectionCount = 0;
 
+    struct Vector3 portalForward;
+    quatMultVector(&portalAt->rotation, &gForward, &portalForward);
+
+    struct Vector3 surfaceNormal;
+    vector3Cross(&surface->up, &surface->right, &surfaceNormal);
+
+    float normal = fabsf(vector3Dot(&portalForward, &surfaceNormal));
+
+    if (normal < 0.7f) {
+        return 0;
+    }
+
     struct Vector2s16 portalPosition;
     portalSurface2DPoint(surface, &portalAt->position, &portalPosition);
 
