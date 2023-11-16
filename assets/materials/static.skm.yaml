@@ -185,9 +185,9 @@ materials:
       filename: ../../portal_pak_modified/materials/metal/metalwall_bts_006a.png
       siz: G_IM_SIZ_16b
       s:
-        wrap: false
+        wrap: true
       t:
-        wrap: false
+        wrap: true
 
     gSPGeometryMode:
       set: [G_LIGHTING, G_TEXTURE_GEN, G_TEXTURE_GEN_LINEAR, G_SHADE]

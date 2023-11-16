@@ -5,21 +5,67 @@ materials:
       g: 255
       b: 255
     gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
     gDPSetCombineMode: 
       color: ["PRIMITIVE", "0", "SHADE", "0"]
     gDPSetRenderMode: G_RM_OPA_SURF
+    gDPSetCycleType: G_CYC_1CYCLE
+
 
   portal_gun_metal:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalwall_bts_006a.png
+      siz: G_IM_SIZ_16b
+      s:
+        wrap: true
+      t:
+        wrap: true
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_TEXTURE_GEN, G_SHADE, G_CULL_BACK]
+    
+    gDPSetCombineMode:
+      - color: ["PRIMITIVE", "0", "SHADE", "0"]
+      - color: ["TEXEL1", "0", "PRIMITIVE_ALPHA", "COMBINED"]
+    gDPSetCycleType: G_CYC_2CYCLE
+
+    gSPTexture:
+      sc: 1984
+      tc: 1984
+
     gDPSetPrimColor:
       r: 32
       g: 32
       b: 32
+      a: 96
+
+    gDPSetRenderMode: [G_RM_PASS, G_RM_OPA_SURF]
+
+  portal_gun_glass:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalwall_bts_006a.png
+      siz: G_IM_SIZ_16b
+      s:
+        wrap: true
+      t:
+        wrap: true
+
+    gDPSetPrimColor:
+      r: 128
+      g: 128
+      b: 128
+      a: 128
+
     gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
+      set: [G_LIGHTING, G_TEXTURE_GEN, G_SHADE]
+      clear: [G_CULL_BACK]
+
     gDPSetCombineMode: 
-      color: ["PRIMITIVE", "0", "SHADE", "0"]
-    gDPSetRenderMode: G_RM_OPA_SURF
+      color: ["PRIMITIVE", "0", "SHADE", "TEXEL0"]
+      alpha: ["0", "0", "0", "PRIMITIVE"]
+
+    gDPSetRenderMode: G_RM_XLU_SURF
+    gDPSetCycleType: G_CYC_1CYCLE
 
   button_base:
     gDPSetTile:

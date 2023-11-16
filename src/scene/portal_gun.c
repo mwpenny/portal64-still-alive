@@ -114,6 +114,8 @@ void portalBallRender(struct PortalGunProjectile* projectile, struct RenderState
     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
 }
 
+extern LookAt gLookAt;
+
 void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera, int portalGunVisible) {
     struct MaterialState materialState;
     materialStateInit(&materialState, DEFAULT_INDEX);
@@ -143,7 +145,9 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
 
     cameraModifyProjectionViewForPortalGun(fromCamera, renderState, PORTAL_GUN_NEAR_PLANE * SCENE_SCALE, (float)SCREEN_WD / (float)SCREEN_HT);
 
-    transformToMatrixL(&portalGun->rigidBody.transform, matrix, SCENE_SCALE);
+    gSPLookAt(renderState->dl++, &gLookAt);
+    
+    transformToMatrixL(&portalGun->rigidBody.transform, matrix, 512);
     gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
     gSPDisplayList(renderState->dl++, portal_gun_v_portalgun_model_gfx);
     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);

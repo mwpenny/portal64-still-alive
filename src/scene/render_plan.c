@@ -523,11 +523,11 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* 
         struct Vector3 cameraForward;
         quatMultVector(&current->camera.transform.rotation, &gForward, &cameraForward);
         vector3Negate(&cameraForward, &cameraForward);
-        vector3ToVector3u8(&cameraForward, (struct Vector3u8*)&gLookAt.l[0].l.dir);
+        vector3ToVector3u8(&cameraForward, (struct Vector3u8*)&lookAt->l[0].l.dir);
 
         quatMultVector(&current->camera.transform.rotation, &gUp, &cameraForward);
         vector3Negate(&cameraForward, &cameraForward);
-        vector3ToVector3u8(&cameraForward, (struct Vector3u8*)&gLookAt.l[1].l.dir);
+        vector3ToVector3u8(&cameraForward, (struct Vector3u8*)&lookAt->l[1].l.dir);
         gSPLookAt(renderState->dl++, lookAt);
 
         int portalIndex = (current->portalRenderType & PORTAL_RENDER_TYPE_SECOND_CLOSER) ? 1 : 0;
