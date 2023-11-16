@@ -43,7 +43,6 @@ enum ControlSaveFlags {
     ControlSavePortalFunneling = (1 << 7),
     ControlSaveMoveablePortals = (1 << 8),
     ControlSaveWideScreen = (1 << 9),
-    ControlSaveInterlacedMode = (1 << 10),
 };
 
 struct ControlSaveState {

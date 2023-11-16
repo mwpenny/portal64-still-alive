@@ -93,7 +93,6 @@ void savefileNew() {
     controllerSetDefaultSource();
     gSaveData.controls.flags = 0;
     gSaveData.controls.flags |= ControlSavePortalFunneling;
-    gSaveData.controls.flags |= ControlSaveInterlacedMode;
     gSaveData.controls.sensitivity = 0x4000;
     gSaveData.controls.acceleration = 0x4000;
     gSaveData.controls.deadzone = 0x4000;

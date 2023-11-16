@@ -152,10 +152,8 @@ void levelLoadWithCallbacks(int levelIndex) {
     }
 }
 
-int updateSchedulerModeAndGetFPS() {
+int updateSchedulerModeAndGetFPS(int interlacedMode) {
     int fps = 60;
-    
-    int interlacedMode = (gSaveData.controls.flags & ControlSaveInterlacedMode) != 0 ? 1 : 0;
     
     schedulerMode = interlacedMode ? OS_VI_NTSC_LPF1 : OS_VI_NTSC_LPN1;
     
@@ -174,9 +172,8 @@ int updateSchedulerModeAndGetFPS() {
     return fps;
 }
 
-void setViMode(int reload) {
-    if (reload)
-        updateSchedulerModeAndGetFPS();
+int setViMode(int interlacedMode) {
+    int fps = updateSchedulerModeAndGetFPS(interlacedMode);
     
     osViSetMode(&osViModeTable[schedulerMode]);
     
@@ -184,11 +181,12 @@ void setViMode(int reload) {
 		OS_VI_GAMMA_DITHER_OFF |
 		OS_VI_DIVOT_OFF |
 		OS_VI_DITHER_FILTER_OFF);
+
+    return fps;
 }
 
 static void gameProc(void* arg) {
-    schedulerMode = OS_VI_NTSC_LPF1;
-    int fps = 60;
+    int fps = updateSchedulerModeAndGetFPS(1);
 
     osCreateScheduler(
         &scheduler,
@@ -198,10 +196,16 @@ static void gameProc(void* arg) {
         1
     );
 
+    osViSetSpecialFeatures(OS_VI_GAMMA_OFF |
+		OS_VI_GAMMA_DITHER_OFF |
+		OS_VI_DIVOT_OFF |
+		OS_VI_DITHER_FILTER_OFF);
+
     schedulerCommandQueue = osScGetCmdQ(&scheduler);
 
     osCreateMesgQueue(&gfxFrameMsgQ, gfxFrameMsgBuf, MAX_FRAME_BUFFER_MESGS);
     osScAddClient(&scheduler, &gfxClient, &gfxFrameMsgQ);
+    osViBlack(1);
 
     u32 pendingGFX = 0;
     u32 drawBufferIndex = 0;
@@ -229,10 +233,6 @@ static void gameProc(void* arg) {
     portalSurfaceCleanupQueueInit();
     
     savefileLoad();
-    
-    fps = updateSchedulerModeAndGetFPS();
-    setViMode(0);
-    osViBlack(1);
     
     levelLoadWithCallbacks(INTRO_MENU);
     gCurrentTestSubject = 0;

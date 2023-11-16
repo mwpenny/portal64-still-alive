@@ -119,6 +119,8 @@ struct MenuElementParams gVideoMenuParams[] = {
 #define LANGUAGE_SLIDER_INDEX 5
 #define LANGUAGE_TEXT_INDEX 7
 
+char gIsInterlacedEnabled = 1;
+
 void videoOptionsAction(void* data, int selection, struct MenuAction* action) {
     struct VideoOptions* videoOptions = (struct VideoOptions*)data;
 
@@ -131,13 +133,8 @@ void videoOptionsAction(void* data, int selection, struct MenuAction* action) {
             }
             break;
         case VideoOptionInterlaced:
-            if (action->state.checkbox.isChecked) {
-                gSaveData.controls.flags |= ControlSaveInterlacedMode;
-            } else {
-                gSaveData.controls.flags &= ~ControlSaveInterlacedMode;
-            }
-
-            setViMode(1);
+            gIsInterlacedEnabled = action->state.checkbox.isChecked;
+            setViMode(action->state.checkbox.isChecked);
             break;
         case VideoOptionSubtitles:
             if (action->state.checkbox.isChecked) {
@@ -182,7 +179,7 @@ void videoOptionsInit(struct VideoOptions* videoOptions) {
     );
 
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[WIDESCREEN_INDEX], (gSaveData.controls.flags & ControlSaveWideScreen) != 0);
-    menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[INTERLACED_INDEX], (gSaveData.controls.flags & ControlSaveInterlacedMode) != 0);
+    menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[INTERLACED_INDEX], gIsInterlacedEnabled);
 
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[CAPTIONS_INDEX], (gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled) != 0);
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[SUBTITLES_INDEX], (gSaveData.controls.flags & ControlSaveSubtitlesEnabled) != 0);
