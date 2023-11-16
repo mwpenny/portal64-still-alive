@@ -7,7 +7,7 @@ A demake *(remake for an older platform)* of Portal for the Nintendo 64.
 
 Latest current progress video on Youtube:
 
-[![I fixed the portal gun, added particle effects, and more | Portal 64 0.12.0](https://img.youtube.com/vi/r4KGm7ixcqI/0.jpg)](https://www.youtube.com/watch?v=r4KGm7ixcqI)
+[![How I optimized Portal to run on the Nintendo 64](https://img.youtube.com/vi/r4KGm7ixcqI/0.jpg)](https://www.youtube.com/watch?v=r4KGm7ixcqI)
 
 ## Overview
 
