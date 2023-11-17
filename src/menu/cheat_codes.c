@@ -3,6 +3,7 @@
 #include "../build/src/audio/clips.h"
 #include "../audio/soundplayer.h"
 #include "../scene/scene.h"
+#include "../build/src/audio/clips.h"
 
 struct CheatCodePattern gCheatCodes[CheatCodeCount] = {
     [CheatCodeUnlockGun] = {
@@ -11,7 +12,7 @@ struct CheatCodePattern gCheatCodes[CheatCodeCount] = {
     },
     [CheatCodeHighJump] = {
         {'u', 'd', 'u', 'd', 'u', 'd', 'r', 'r'},
-        SOUND_ID_NONE,
+        SOUNDS_BUTTONCLICKRELEASE,
     },
 };
 
