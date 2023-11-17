@@ -9,6 +9,10 @@ struct CheatCodePattern gCheatCodes[CheatCodeCount] = {
         {'u', 'u', 'd', 'd', 'l', 'r', 'l', 'r'},
         SOUNDS_01_PART1_GET_PORTAL_GUN_1,
     },
+    [CheatCodeHighJump] = {
+        {'u', 'd', 'u', 'd', 'u', 'd', 'r', 'r'},
+        SOUND_ID_NONE,
+    },
 };
 
 unsigned char gCheatProgress[CheatCodeCount];
@@ -23,6 +27,9 @@ void cheatCodeApply(enum CheatCode cheat) {
     switch (cheat) {
         case CheatCodeUnlockGun:
             playerGivePortalGun(&gScene.player, PlayerHasFirstPortalGun | PlayerHasSecondPortalGun);
+            break;
+        case CheatCodeHighJump:
+            playerSetJumpImpulse(&gScene.player, 6.5f);
             break;
         case CheatCodeCount:
             break;
