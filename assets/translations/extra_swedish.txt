@@ -7,15 +7,15 @@
 "Audio_Audio_Language"	"Ljudspråk"
 "Options_Controls"	"Kontroller"
 "Valve_Move"	"Flytta"
-"Valve_Look"	"Se"
+"Valve_Look"	"Titta"
 "Valve_Look_Straight_Back"	"Titta rakt bakåt"
 "GameUI_Interlaced"	"Interlaced video"
 "GameUI_MovingPortals"	"Flytta portaler"
 "GameUI_TankControls"	"Tankkontroller"
-"GameUI_Deadzone"	"Dödzon"
+"GameUI_Deadzone"	"Dödszon"
 "GameUI_Acceleration"	"Acceleration"
 "GameUI_Sensitivity"	"Känslighet"
 "HINT_MOVE"	"ATT FLYTTA"
-"GameUI_Joystick_N64"	"Spelkontroll"
+"GameUI_Joystick_N64"	"Styrspak"
 }
 }
