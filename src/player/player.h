@@ -75,6 +75,6 @@ int playerIsGrabbing(struct Player* player);
 
 void playerSerialize(struct Serializer* serializer, SerializeAction action, struct Player* player);
 void playerDeserialize(struct Serializer* serializer, struct Player* player);
-void playerSetJumpImpulse(struct Player* player, float newJumpImpulse);
+void playerToggleJumpImpulse(struct Player* player, float newJumpImpulse);
 
 #endif

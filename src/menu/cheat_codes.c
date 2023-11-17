@@ -29,7 +29,7 @@ void cheatCodeApply(enum CheatCode cheat) {
             playerGivePortalGun(&gScene.player, PlayerHasFirstPortalGun | PlayerHasSecondPortalGun);
             break;
         case CheatCodeHighJump:
-            playerSetJumpImpulse(&gScene.player, 6.5f);
+            playerToggleJumpImpulse(&gScene.player, 6.5f);
             break;
         case CheatCodeCount:
             break;

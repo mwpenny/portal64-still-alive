@@ -961,6 +961,10 @@ void playerApplyCameraTransform(struct Player* player, struct Transform* cameraT
     }
 }
 
-void playerSetJumpImpulse(struct Player* player, float newJumpImpulse){
-    player->jumpImpulse = newJumpImpulse;
+void playerToggleJumpImpulse(struct Player* player, float newJumpImpulse){
+    if (player->jumpImpulse == JUMP_IMPULSE){
+        player->jumpImpulse = newJumpImpulse;
+    }else{
+        player->jumpImpulse = JUMP_IMPULSE;
+    }
 }
