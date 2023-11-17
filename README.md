@@ -7,11 +7,18 @@ A demake *(remake for an older platform)* of Portal for the Nintendo 64.
 
 Latest current progress video on Youtube:
 
-[![I fixed the portal gun, added particle effects, and more | Portal 64 0.12.0](https://img.youtube.com/vi/sAkSHzR-P7M/0.jpg)](https://www.youtube.com/watch?v=sAkSHzR-P7M)
+[![How I optimized Portal to run on the Nintendo 64](https://img.youtube.com/vi/r4KGm7ixcqI/0.jpg)](https://www.youtube.com/watch?v=r4KGm7ixcqI)
 
 ## Overview
 
-This project aims to reproduce Valve's original Portal, playable on the N64. [Releases](https://github.com/lambertjamesd/portal64/releases) of this game are fully playable N64 ROM's that can either be played through an emulator or on a physical N64 game cartridge. Please follow specific release instructions to get ROM running on your target hardware.  Because this demake has been in development for many years, it has made significant progress in both gameplay systems and fidelity including: 
+This project aims to reproduce Valve's original Portal, playable on the N64. 
+
+[Releases](https://github.com/lambertjamesd/portal64/releases) of this game are fully playable N64 ROM's that can either be played through an emulator or on a physical N64 game cartridge. 
+
+Please follow specific release instructions to get ROM running on your target hardware.
+
+Because this demake has been in development for many years, it has made significant progress in both gameplay systems and fidelity including: 
+
 - Twelve+ test chambers completed
 - Fully functioning portals, and gun
 - Fully functioning physics engine
@@ -216,7 +223,7 @@ That will generate the rom at `/build/portal64.z64`
 <br />
 
 ## Current New Feature TODO List
-- [ ] add translations to menus
+- [X] add translations to menus
 - [ ] check if display list is long enough 
 - [ ] pausing while glados is speaking can end her speech early
 - [x] jump animation
