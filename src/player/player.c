@@ -40,6 +40,20 @@
 #define FUNNEL_MIN_DOWN_VEL -2.25f
 #define FUNNEL_MAX_HORZ_VEL 7.0f
 
+#define PLAYER_SPEED    (150.0f / 64.0f)
+#define PLAYER_ACCEL    (5.875f)
+#define PLAYER_AIR_ACCEL    (1.875f)
+#define PLAYER_STOP_ACCEL    (5.875f)
+#define PLAYER_SLIDE_ACCEL    (40.0f)
+
+#define MIN_ROTATE_RATE (M_PI * 0.5f)
+#define MAX_ROTATE_RATE (M_PI * 3.5f)
+
+#define MIN_ROTATE_RATE_DELTA (M_PI * 0.06125f)
+#define MAX_ROTATE_RATE_DELTA MAX_ROTATE_RATE
+
+#define JUMP_IMPULSE   2.7f
+
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
 
@@ -142,6 +156,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->shakeTimer = 0.0f;
     player->currentFoot = 0;
     player->passedThroughPortal = 0;
+    player->jumpImpulse = JUMP_IMPULSE;
 
     if (gCurrentLevelIndex == 0){
         player->flags &= ~PlayerHasFirstPortalGun;
@@ -170,20 +185,6 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
 
     dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
 }
-
-#define PLAYER_SPEED    (150.0f / 64.0f)
-#define PLAYER_ACCEL    (5.875f)
-#define PLAYER_AIR_ACCEL    (1.875f)
-#define PLAYER_STOP_ACCEL    (5.875f)
-#define PLAYER_SLIDE_ACCEL    (40.0f)
-
-#define MIN_ROTATE_RATE (M_PI * 0.5f)
-#define MAX_ROTATE_RATE (M_PI * 3.5f)
-
-#define MIN_ROTATE_RATE_DELTA (M_PI * 0.06125f)
-#define MAX_ROTATE_RATE_DELTA MAX_ROTATE_RATE
-
-#define JUMP_IMPULSE   2.7f
 
 void playerHandleCollision(struct Player* player) {
     for (struct ContactManifold* contact = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);
@@ -687,7 +688,7 @@ void playerUpdate(struct Player* player) {
     int isDead = playerIsDead(player);
 
     if (!isDead && (player->flags & PlayerFlagsGrounded) && controllerActionGet(ControllerActionJump)) {
-        player->body.velocity.y += JUMP_IMPULSE;
+        player->body.velocity.y += player->jumpImpulse;
         if (!vector3IsZero(&player->lastAnchorToVelocity) && player->anchoredTo != NULL){
             player->body.velocity.x += player->lastAnchorToVelocity.x;
             player->body.velocity.z += player->lastAnchorToVelocity.z;
@@ -957,5 +958,13 @@ void playerApplyCameraTransform(struct Player* player, struct Transform* cameraT
     
     if (player->flags & PlayerIsDead) {
         cameraTransform->position.y += DEAD_OFFSET;
+    }
+}
+
+void playerToggleJumpImpulse(struct Player* player, float newJumpImpulse){
+    if (player->jumpImpulse == JUMP_IMPULSE){
+        player->jumpImpulse = newJumpImpulse;
+    }else{
+        player->jumpImpulse = JUMP_IMPULSE;
     }
 }
