@@ -12,7 +12,7 @@
 "GameUI_Interlaced"	"Interlaced video"
 "GameUI_MovingPortals"	"Flytning af portaler"
 "GameUI_TankControls"	"Tank kontrol"
-"GameUI_Deadzone"	"Dødszone"
+"GameUI_Deadzone"	"Dødsone"
 "GameUI_Acceleration"	"Acceleration"
 "GameUI_Sensitivity"	"Følsomhed"
 "HINT_MOVE"	"AT FLYTTE"

@@ -3,7 +3,7 @@
 "Language"	"dutch"
 "Tokens"
 {
-"Audio_Text_Language"	"Tekst taal"
+"Audio_Text_Language"	"Teksttaal"
 "Audio_Audio_Language"	"Audiotaal"
 "Options_Controls"	"Controles"
 "Valve_Move"	"Beweging"
