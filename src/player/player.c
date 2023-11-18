@@ -459,6 +459,10 @@ void playerUpdateSpeedSound(struct Player* player) {
 }
 
 void playerKill(struct Player* player, int isUnderwater) {
+    if (player->flags & PlayerIsInvincible){
+        return;
+    }
+
     if (isUnderwater) {
         player->flags |= PlayerIsUnderwater;
         player->drownTimer = DROWN_TIME;
@@ -966,5 +970,13 @@ void playerToggleJumpImpulse(struct Player* player, float newJumpImpulse){
         player->jumpImpulse = newJumpImpulse;
     }else{
         player->jumpImpulse = JUMP_IMPULSE;
+    }
+}
+
+void playerToggleInvincibility(struct Player* player){
+    if (player->flags & PlayerIsInvincible){
+        player->flags &= ~PlayerIsInvincible;
+    }else{
+        player->flags |= PlayerIsInvincible;
     }
 }

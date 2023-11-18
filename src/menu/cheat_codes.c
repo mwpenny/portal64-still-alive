@@ -14,6 +14,10 @@ struct CheatCodePattern gCheatCodes[CheatCodeCount] = {
         {'u', 'd', 'u', 'd', 'u', 'd', 'r', 'r'},
         SOUNDS_BUTTONCLICKRELEASE,
     },
+    [CheatCodeInvincibility] = {
+        {'u', 'd', 'u', 'd', 'u', 'd', 'l', 'l'},
+        SOUNDS_BUTTONCLICKRELEASE,
+    },
 };
 
 unsigned char gCheatProgress[CheatCodeCount];
@@ -31,6 +35,9 @@ void cheatCodeApply(enum CheatCode cheat) {
             break;
         case CheatCodeHighJump:
             playerToggleJumpImpulse(&gScene.player, 6.5f);
+            break;
+        case CheatCodeInvincibility:
+            playerToggleInvincibility(&gScene.player);
             break;
         case CheatCodeCount:
             break;
