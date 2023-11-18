@@ -3,7 +3,7 @@
 "Language"	"italian"
 "Tokens"
 {
-"Audio_Text_Language"	"Linguaggio del testo"
+"Audio_Text_Language"	"Lingua del testo"
 "Audio_Audio_Language"	"Lingua dell'audio"
 "Options_Controls"	"Controlli"
 "Valve_Move"	"Muoversi"
