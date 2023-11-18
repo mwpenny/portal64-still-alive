@@ -6,11 +6,31 @@ materials:
       b: 255
     gSPGeometryMode:
       set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+      clear: [G_ZBUFFER]
     gDPSetCombineMode: 
       color: ["PRIMITIVE", "0", "SHADE", "0"]
     gDPSetRenderMode: G_RM_OPA_SURF
     gDPSetCycleType: G_CYC_1CYCLE
 
+  portal_gun_flare:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/sprites/grav_flare.png
+      fmt: G_IM_FMT_RGBA
+      siz: G_IM_SIZ_32b
+      s:
+        mirror: true
+      t:
+        mirror: true
+      tmem: 256
+
+    gDPSetRenderMode: G_RM_XLU_SURF
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gDPSetCombineMode:
+      color: ["TEXEL0", "0", "ENVIRONMENT", "0"]
+      alpha: ["0", "0", "0", "TEXEL0"]
+    gSPGeometryMode:
+      clear: [G_CULL_BACK, G_CULL_FRONT, G_TEXTURE_GEN, G_SHADE, G_LIGHTING]
 
   portal_gun_metal:
     gDPSetTile:
@@ -23,6 +43,7 @@ materials:
 
     gSPGeometryMode:
       set: [G_LIGHTING, G_TEXTURE_GEN, G_SHADE, G_CULL_BACK]
+      clear: [G_ZBUFFER]
     
     gDPSetCombineMode:
       - color: ["PRIMITIVE", "0", "SHADE", "0"]
@@ -58,7 +79,7 @@ materials:
 
     gSPGeometryMode:
       set: [G_LIGHTING, G_TEXTURE_GEN, G_SHADE]
-      clear: [G_CULL_BACK]
+      clear: [G_CULL_BACK, G_ZBUFFER]
 
     gDPSetCombineMode: 
       color: ["PRIMITIVE", "0", "SHADE", "TEXEL0"]
@@ -66,6 +87,23 @@ materials:
 
     gDPSetRenderMode: G_RM_XLU_SURF
     gDPSetCycleType: G_CYC_1CYCLE
+
+  portal_gun_shell:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/weapons/v_models/v_portalgun/v_portalgun.png
+      fmt: G_IM_FMT_RGBA
+      siz: G_IM_SIZ_16b
+      s:
+        wrap: false
+      t:
+        wrap: false
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+      clear: [G_TEXTURE_GEN, G_ZBUFFER]
+    gDPSetCombineMode: 
+      color: ["SHADE", "0", "TEXEL0", "0"]
+
+    gDPSetRenderMode: G_RM_OPA_SURF
 
   button_base:
     gDPSetTile:

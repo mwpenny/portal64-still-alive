@@ -308,7 +308,13 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     // contactSolverDebugDraw(&gContactSolver, renderState);
 
-    portalGunRenderReal(&scene->portalGun, renderState, &scene->camera, scene->portalGun.portalGunVisible);
+    portalGunRenderReal(
+        &scene->portalGun, 
+        renderState, 
+        &scene->camera, 
+        scene->portalGun.portalGunVisible, 
+        scene->hud.lastPortalIndexShot
+    );
 
     gDPPipeSync(renderState->dl++);
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);

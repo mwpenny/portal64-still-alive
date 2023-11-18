@@ -18,9 +18,9 @@
 
 #define PORTAL_GUN_MOI          0.00395833375f
 
-struct Vector3 gPortalGunOffset = {0.120957, -0.113587, -0.20916};
+struct Vector3 gPortalGunOffset = {0.100957, -0.093587, -0.20916};
 struct Vector3 gPortalGunShootOffset = {0.120957, -0.113587, -0.08};
-struct Vector3 gPortalGunForward = {0.1f, -0.1f, 1.0f};
+struct Vector3 gPortalGunForward = {0.0f, -0.0f, 1.0f};
 struct Vector3 gPortalGunShootForward = {0.3f, -0.25f, 1.0f};
 struct Vector3 gPortalGunUp = {0.0f, 1.0f, 0.0f};
 
@@ -116,7 +116,7 @@ void portalBallRender(struct PortalGunProjectile* projectile, struct RenderState
 
 extern LookAt gLookAt;
 
-void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera, int portalGunVisible) {
+void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera, int portalGunVisible, int lastFiredIndex) {
     struct MaterialState materialState;
     materialStateInit(&materialState, DEFAULT_INDEX);
     
@@ -146,11 +146,21 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
     cameraModifyProjectionViewForPortalGun(fromCamera, renderState, PORTAL_GUN_NEAR_PLANE * SCENE_SCALE, (float)SCREEN_WD / (float)SCREEN_HT);
 
     gSPLookAt(renderState->dl++, &gLookAt);
+    gDPPipeSync(renderState->dl++);
+
+    if (lastFiredIndex >= 0 && lastFiredIndex <= 1) {
+        struct Coloru8 color = gProjectileColor[lastFiredIndex];
+        gDPSetEnvColor(renderState->dl++, color.r, color.g, color.b, 255);
+    } else {
+        gDPSetEnvColor(renderState->dl++, 255, 255, 255, 255);
+    }
     
     transformToMatrixL(&portalGun->rigidBody.transform, matrix, 512);
     gSPMatrix(renderState->dl++, matrix, G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
     gSPDisplayList(renderState->dl++, portal_gun_v_portalgun_model_gfx);
     gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
+
+    gSPDisplayList(renderState->dl++, static_default);
 }
 
 #define NO_HIT_DISTANCE             20.0f
