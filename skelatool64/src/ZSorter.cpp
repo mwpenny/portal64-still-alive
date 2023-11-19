@@ -1,5 +1,7 @@
 #include "ZSorter.h"
 
+#include <vector>
+
 struct SingleFace {
     aiFace* face;
     std::pair<Bone*, Bone*> bonePair;
@@ -124,31 +126,41 @@ RenderChunk renderChunksRebuildFromFaces(const aiScene* scene, std::vector<Singl
 
     newAiMesh->mNumBones = 0;
 
-    if (start->bonePair.first) {
-        newAiMesh->mNumBones = boneHeirarchy.GetBoneCount();
+    newAiMesh->mNumBones = source->mMesh->mNumBones;
 
+    if (newAiMesh->mNumBones) {
         newAiMesh->mBones = new aiBone*[newAiMesh->mNumBones];
 
         for (unsigned i = 0; i < newAiMesh->mNumBones; ++i) {
             aiBone* bone = new aiBone;
+            aiBone* srcBone = source->mMesh->mBones[i];
 
-            bone->mArmature = NULL;
-            bone->mName = start->bonePair.first->GetName();
-            bone->mNode = NULL;
+            bone->mArmature = srcBone->mArmature;
+            bone->mName = srcBone->mName;
+            bone->mNode = srcBone->mNode;
+            bone->mOffsetMatrix = srcBone->mOffsetMatrix;
 
-            if (start->bonePair.first->GetName() == boneHeirarchy.BoneByIndex(i)->GetName()) {
-                bone->mNode = scene->mRootNode->FindNode(start->bonePair.first->GetName().c_str());
-                bone->mOffsetMatrix = (settings.CreateCollisionTransform() * aiBuildOffsetMatrix(bone->mNode)).Inverse();
+            std::vector<unsigned> attachedIndices;
 
-                bone->mNumWeights = newAiMesh->mNumVertices;
-                bone->mWeights = new aiVertexWeight[newAiMesh->mNumVertices];
+            std::set<unsigned> includedBefore;
+            for (unsigned weightIndex = 0; weightIndex < srcBone->mNumWeights; ++weightIndex) {
+                includedBefore.insert(srcBone->mWeights[weightIndex].mVertexId);
+            }
 
-                for (unsigned index = 0; index < newAiMesh->mNumVertices; ++index) {
-                    bone->mWeights[index].mVertexId = index;
-                    bone->mWeights[index].mWeight = 1.0f;
+            for (unsigned vertexIndex = 0; vertexIndex < newAiMesh->mNumVertices; ++vertexIndex) {
+                unsigned sourceIndex = mesh.sourceIndex[vertexIndex];
+
+                if (includedBefore.find(sourceIndex) != includedBefore.end()) {
+                    attachedIndices.push_back(vertexIndex);
                 }
-            } else {
-                bone->mNumWeights = 0;
+            }
+
+            bone->mNumWeights = attachedIndices.size();
+            bone->mWeights = new aiVertexWeight[attachedIndices.size()];
+
+            for (unsigned weightIndex = 0; weightIndex < attachedIndices.size(); ++weightIndex) {
+                bone->mWeights[weightIndex].mVertexId = attachedIndices[weightIndex];
+                bone->mWeights[weightIndex].mWeight = 1.0f;
             }
 
             newAiMesh->mBones[i] = bone;

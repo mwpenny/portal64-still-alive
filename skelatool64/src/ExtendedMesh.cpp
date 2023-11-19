@@ -48,6 +48,27 @@ aiMesh* copyMesh(aiMesh* mesh) {
         }
     }
 
+    result->mNumBones = mesh->mNumBones;
+    result->mBones = new aiBone*[mesh->mNumBones];
+
+    for (unsigned i = 0; i < mesh->mNumBones; ++i) {
+        aiBone* newBone = new aiBone;
+        aiBone* oldBone = mesh->mBones[i];
+        newBone->mArmature = oldBone->mArmature;
+        newBone->mName = oldBone->mName;
+        newBone->mNode = oldBone->mNode;
+        newBone->mNumWeights = oldBone->mNumWeights;
+        newBone->mOffsetMatrix = oldBone->mOffsetMatrix;
+
+        newBone->mWeights = new aiVertexWeight[oldBone->mNumWeights];
+
+        for (unsigned weightIndex = 0; weightIndex < oldBone->mNumWeights; ++weightIndex) {
+            newBone->mWeights[weightIndex] = oldBone->mWeights[weightIndex];
+        }
+
+        result->mBones[i] = newBone;
+    }
+
     result->mName = mesh->mName;
 
     return result;
@@ -234,8 +255,6 @@ std::shared_ptr<ExtendedMesh> ExtendedMesh::Transform(const aiMatrix4x4& transfo
     aiMatrix3x3 inverseRotation = rotationOnly;
     inverseRotation.Inverse();
 
-
-
     for (unsigned i = 0; i < result->mMesh->mNumVertices; ++i) {
         result->mMesh->mVertices[i] = transform * result->mMesh->mVertices[i];
 
@@ -248,6 +267,10 @@ std::shared_ptr<ExtendedMesh> ExtendedMesh::Transform(const aiMatrix4x4& transfo
             result->mPointInverseTransform[i] = result->mPointInverseTransform[i] * inverseTransform;
             result->mNormalInverseTransform[i] = result->mNormalInverseTransform[i] * inverseRotation;
         }
+    }
+
+    for (unsigned i = 0; i < result->mMesh->mNumBones; ++i) {
+        result->mMesh->mBones[i]->mOffsetMatrix = result->mMesh->mBones[i]->mOffsetMatrix * inverseTransform;
     }
     
     result->RecalcBB();

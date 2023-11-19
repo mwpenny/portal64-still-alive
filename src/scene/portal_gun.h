@@ -12,6 +12,7 @@
 #include "../effects/portal_trail.h"
 #include "../scene/camera.h"
 #include "../sk64/skelatool_armature.h"
+#include "../sk64/skelatool_animator.h"
 
 struct PortalGunProjectile {
     struct Ray positionDirection;
@@ -30,6 +31,7 @@ struct PortalGunProjectile {
 
 struct PortalGun {
     struct SKArmature armature;
+    struct SKAnimator animator;
     int portalGunVisible;
     float shootAnimationTimer;
     float shootTotalAnimationTimer;

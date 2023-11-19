@@ -22,12 +22,13 @@
 
 struct Transform gGunTransform = {
     {0.0f, 0.0f, 0.0f},
-    {0.0f, 0.0f, 0.0f, 1.0f},
+    {0.0f, 1.0f, 0.0f, 0.0f},
     {1.0f, 1.0f, 1.0f},
 };
 
 void portalGunInit(struct PortalGun* portalGun, struct Transform* at){
     skArmatureInit(&portalGun->armature, &portal_gun_v_portalgun_armature);
+    skAnimatorInit(&portalGun->animator, portal_gun_v_portalgun_armature.numberOfBones);
     portalGun->portalGunVisible = 0;
     portalGun->shootAnimationTimer = 0.0;
     portalGun->shootTotalAnimationTimer = 0.0;
@@ -37,6 +38,8 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at){
 
     portalTrailInit(&portalGun->projectiles[0].trail);
     portalTrailInit(&portalGun->projectiles[1].trail);
+
+    skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_pickup_clip, 0.0f, SKAnimatorFlagsLoop);
 }
 
 #define PORTAL_PROJECTILE_RADIUS    0.15f
@@ -120,7 +123,7 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
     }
 
     u16 perspectiveNormalize;
-    guPerspective(&matrix[1], &perspectiveNormalize, fromCamera->fov, getAspect(), 0.05f * SCENE_SCALE, 2.0f * SCENE_SCALE, 1.0f);
+    guPerspective(&matrix[1], &perspectiveNormalize, fromCamera->fov, getAspect(), 0.05f * SCENE_SCALE, 4.0f * SCENE_SCALE, 1.0f);
     gSPMatrix(renderState->dl++, &matrix[1], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
 
     gSPLookAt(renderState->dl++, &gLookAt);
@@ -149,6 +152,7 @@ void portalGunUpdatePosition(struct PortalGun* portalGun, struct Player* player)
 }
 
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
+    skAnimatorUpdate(&portalGun->animator, portalGun->armature.pose, FIXED_DELTA_TIME);
     portalGunUpdatePosition(portalGun, player);
 
     if (player->flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
