@@ -158,7 +158,7 @@ MeshDefinitionResults MeshDefinitionGenerator::GenerateDefinitionsWithResults(co
     }
 
     if (mSettings.mSortDirection.SquareLength() > 0.0) {
-        renderChunks = renderChunksSortByZ(renderChunks, mSettings.mSortDirection, mSettings.mVertexCacheSize, fileDefinition.GetBoneHierarchy());
+        renderChunks = renderChunksSortByZ(scene, renderChunks, mSettings, fileDefinition.GetBoneHierarchy());
     } else {
         orderRenderChunks(renderChunks, mSettings);
     }
