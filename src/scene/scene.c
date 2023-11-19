@@ -375,7 +375,7 @@ void sceneCheckPortals(struct Scene* scene) {
     }
 
     if (fireOrange && !fireBlue && hasOrange && !playerIsGrabbing(&scene->player) && !portalGunIsFiring(&scene->portalGun)) {
-        portalGunFire(&scene->portalGun, 0, &raycastRay, &playerUp, scene->player.body.currentRoom);
+        portalGunFire(&scene->portalGun, 0, &raycastRay, &scene->player.lookTransform, &playerUp, scene->player.body.currentRoom);
         scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 0);
         soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
@@ -384,7 +384,7 @@ void sceneCheckPortals(struct Scene* scene) {
     }
 
     if (((fireBlue && !fireOrange) || (!hasOrange && fireOrange)) && hasBlue && !playerIsGrabbing(&scene->player) && !portalGunIsFiring(&scene->portalGun)) {
-        portalGunFire(&scene->portalGun, 1, &raycastRay, &playerUp, scene->player.body.currentRoom);
+        portalGunFire(&scene->portalGun, 1, &raycastRay, &scene->player.lookTransform, &playerUp, scene->player.body.currentRoom);
         scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 1);
         soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);

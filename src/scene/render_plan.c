@@ -113,7 +113,7 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
 
 void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderProps* properties, struct RenderState* renderState);
 
-inline static float getAspect()
+float getAspect()
 {
     return (gSaveData.controls.flags & ControlSaveWideScreen) != 0 ? ASPECT_WIDE : ASPECT_SD;
 }

@@ -293,6 +293,7 @@ DYNAMIC_ANIMATED_MODEL_LIST = assets/models/pedestal.blend \
 
 ANIM_LIST = build/assets/models/pedestal_anim.o \
 	build/assets/models/player/chell_anim.o \
+	build/assets/models/portal_gun/v_portalgun_anim.o \
 	build/assets/models/props/box_dropper_anim.o \
 	build/assets/models/props/combine_ball_catcher_anim.o \
 	build/assets/models/props/combine_ball_launcher_anim.o \

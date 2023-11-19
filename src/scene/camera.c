@@ -85,13 +85,7 @@ void cameraBuildViewMatrix(struct Camera* camera, float matrix[4][4]) {
 }
 
 void cameraBuildProjectionMatrix(struct Camera* camera, float matrix[4][4], u16* perspectiveNormalize, float aspectRatio) {
-    float planeScalar = 1.0f;
-
-    if (camera->transform.position.y > camera->farPlane * 0.5f) {
-        planeScalar = 2.0f * camera->transform.position.y / camera->farPlane;
-    }
-
-    guPerspectiveF(matrix, perspectiveNormalize, camera->fov, aspectRatio, camera->nearPlane * planeScalar, camera->farPlane * planeScalar, 1.0f);
+    guPerspectiveF(matrix, perspectiveNormalize, camera->fov, aspectRatio, camera->nearPlane, camera->farPlane, 1.0f);
 }
 
 void cameraExtractClippingPlane(float viewPersp[4][4], struct Plane* output, int axis, float direction) {

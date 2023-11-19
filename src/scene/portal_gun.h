@@ -11,6 +11,7 @@
 #include "../util/time.h"
 #include "../effects/portal_trail.h"
 #include "../scene/camera.h"
+#include "../sk64/skelatool_armature.h"
 
 struct PortalGunProjectile {
     struct Ray positionDirection;
@@ -28,7 +29,7 @@ struct PortalGunProjectile {
 };
 
 struct PortalGun {
-    struct RigidBody rigidBody;
+    struct SKArmature armature;
     int portalGunVisible;
     float shootAnimationTimer;
     float shootTotalAnimationTimer;
@@ -41,7 +42,7 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at);
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player);
 void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera, int portalGunVisible, int lastFiredIndex);
 
-void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray, struct Vector3* playerUp, int roomIndex);
+void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray, struct Transform* lookTransform, struct Vector3* playerUp, int roomIndex);
 void portalGunFireWorld(struct PortalGun* portalGun, int portalIndex, struct Vector3* from, struct Vector3* to, int roomIndex);
 int portalGunIsFiring(struct PortalGun* portalGun);
 
