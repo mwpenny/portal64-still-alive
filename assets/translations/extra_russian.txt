@@ -8,7 +8,7 @@
 "Options_Controls"	"Управление"
 "Valve_Move"	"Движение"
 "Valve_Look"	"Обзор"
-"Valve_Look_Straight_Back"	"Посмотреть назад"
+"Valve_Look_Straight_Back"	"Смотреть назад"
 "GameUI_Interlaced"	"Чересстрочное видео"
 "GameUI_MovingPortals"	"Движущиеся порталы"
 "GameUI_TankControls"	"Танковое управление"
