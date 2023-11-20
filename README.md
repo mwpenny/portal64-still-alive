@@ -202,7 +202,9 @@ portal/portal_sound_vo_spanish_dir.vpk
 
 ## Build with Docker
 
-Using the docker image the only setup step you need is to populating the vpk folder. After that you can build the docker image using
+Using the docker image the only setup step you need is to populating the vpk folder - you need to COPY all needed *.vpk files, a symlink does not work for Docker builds!
+
+After that you can build the docker image using
 
 Build the Docker image.
 
