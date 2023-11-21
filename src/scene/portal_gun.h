@@ -32,6 +32,7 @@ struct PortalGunProjectile {
 struct PortalGun {
     struct SKArmature armature;
     struct SKAnimator animator;
+    struct Quaternion rotation;
     int portalGunVisible;
     float shootAnimationTimer;
     float shootTotalAnimationTimer;

@@ -103,7 +103,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     signalsInit(1);
     rumblePakSetPaused(0);
 
-    cameraInit(&scene->camera, 70.0f, DEFAULT_NEAR_PLANE * SCENE_SCALE, DEFAULT_FAR_PLANE * SCENE_SCALE);
+    cameraInit(&scene->camera, DEFAULT_CAMERA_FOV, DEFAULT_NEAR_PLANE * SCENE_SCALE, DEFAULT_FAR_PLANE * SCENE_SCALE);
 
     struct Location* startLocation = levelGetLocation(gCurrentLevel->startLocation);
     struct Location combinedLocation;

@@ -7,6 +7,8 @@
 #define DEFAULT_FAR_PLANE       30.0f
 #define DEFAULT_NEAR_PLANE      0.125f
 
+#define DEFAULT_CAMERA_FOV      60.0f
+
 #define MAX_PORTAL_STEPS    6
 
 struct RenderProps {

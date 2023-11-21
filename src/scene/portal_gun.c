@@ -7,10 +7,14 @@
 #include "../levels/material_state.h"
 
 #include "../effects/effect_definitions.h"
+#include "./render_plan.h"
 
 #include "../../build/assets/models/grav_flare.h"
 #include "../../build/assets/models/portal_gun/v_portalgun.h"
 #include "../../build/assets/materials/static.h"
+
+// the portal gun is rendered with a different field of view than the scene
+#define FIRST_PERSON_POV_FOV    42.45f
 
 #define PORTAL_GUN_RECOIL_TIME (0.22f)
 
@@ -38,8 +42,6 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at){
 
     portalTrailInit(&portalGun->projectiles[0].trail);
     portalTrailInit(&portalGun->projectiles[1].trail);
-
-    skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_pickup_clip, 0.0f, SKAnimatorFlagsLoop);
 }
 
 #define PORTAL_PROJECTILE_RADIUS    0.15f
@@ -123,7 +125,7 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
     }
 
     u16 perspectiveNormalize;
-    guPerspective(&matrix[1], &perspectiveNormalize, fromCamera->fov, getAspect(), 0.05f * SCENE_SCALE, 4.0f * SCENE_SCALE, 1.0f);
+    guPerspective(&matrix[1], &perspectiveNormalize, FIRST_PERSON_POV_FOV, getAspect(), 0.05f * SCENE_SCALE, 4.0f * SCENE_SCALE, 1.0f);
     gSPMatrix(renderState->dl++, &matrix[1], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
 
     gSPLookAt(renderState->dl++, &gLookAt);
@@ -148,7 +150,7 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
 #define MAX_PROJECTILE_DISTANCE     100.0f
 
 void portalGunUpdatePosition(struct PortalGun* portalGun, struct Player* player) {
-
+    portalGun->rotation = player->lookTransform.rotation;
 }
 
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
@@ -219,7 +221,7 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
     }
 }
 
-struct Vector3 gPortalGunExit = {0.0f, 0.0f, 0.154008};
+struct Vector3 gPortalGunExit = {0.0f, 97.0f, 0.0f};
 
 void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray, struct Transform* lookTransform, struct Vector3* playerUp, int roomIndex) {
     struct PortalGunProjectile* projectile = &portalGun->projectiles[portalIndex];
@@ -242,12 +244,19 @@ void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray
     projectile->distance = 0.0f;
     projectile->maxDistance = hit.distance;
 
-    transformPoint(lookTransform, &gPortalGunExit, &projectile->effectOffset);
+    skCalculateBonePosition(&portalGun->armature, PORTAL_GUN_V_PORTALGUN_BODY_BONE, &gPortalGunExit, &projectile->effectOffset);
+
+    projectile->effectOffset.x *= -(DEFAULT_CAMERA_FOV / (FIRST_PERSON_POV_FOV * PORTAL_GUN_SCALE));
+    projectile->effectOffset.y *= (DEFAULT_CAMERA_FOV / (FIRST_PERSON_POV_FOV * PORTAL_GUN_SCALE));
+    projectile->effectOffset.z *= -1.0f / PORTAL_GUN_SCALE;
+
+    quatMultVector(&portalGun->rotation, &projectile->effectOffset, &projectile->effectOffset);
 
     struct Vector3 fireFrom;
     vector3Add(&projectile->effectOffset, &ray->origin, &fireFrom);
 
     portalTrailPlay(&projectile->trail, &fireFrom, &hit.at);
+    skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_fire1_clip, 0.0f, 0);
 }
 
 
