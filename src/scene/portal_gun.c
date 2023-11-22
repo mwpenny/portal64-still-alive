@@ -167,6 +167,18 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
 #define MAX_PROJECTILE_DISTANCE     100.0f
 
 void portalGunUpdatePosition(struct PortalGun* portalGun, struct Player* player) {
+    if (player->passedThroughPortal) {
+        int portalIndex = player->passedThroughPortal - 1;
+
+        struct Transform* transform = collisionSceneTransformToPortal(portalIndex);
+
+        if (transform) {
+            struct Quaternion newRotation;
+            quatMultiply(&transform->rotation, &portalGun->rotation, &newRotation);
+            portalGun->rotation = newRotation;
+        }
+    }
+
     quatLerp(&portalGun->rotation, &player->lookTransform.rotation, 0.45f, &portalGun->rotation);
 }
 
