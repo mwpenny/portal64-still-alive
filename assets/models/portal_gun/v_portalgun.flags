@@ -1,1 +1,1 @@
---fixed-point-scale 512 -m assets/materials/objects.skm.yaml --sort-dir 0.029977,0.118112,0.030978 --model
+--fixed-point-scale 512 -m assets/materials/objects.skm.yaml --sort-dir 0,1,0 --model

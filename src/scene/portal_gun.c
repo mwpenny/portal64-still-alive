@@ -24,6 +24,8 @@
 
 #define PORTAL_GUN_SCALE        512.0f
 
+struct Quaternion gFlipAroundY = {0.0f, 1.0f, 0.0f, 0.0f};
+
 struct Transform gGunTransform = {
     {0.0f, 0.0f, 0.0f},
     {0.0f, 1.0f, 0.0f, 0.0f},
@@ -42,6 +44,8 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at, int isFres
 
     portalTrailInit(&portalGun->projectiles[0].trail);
     portalTrailInit(&portalGun->projectiles[1].trail);
+
+    portalGun->rotation = at->rotation;
 
     if (isFreshStart) {
         skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_draw_clip, 0.0f, 0);
@@ -143,6 +147,13 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
     } else {
         gDPSetEnvColor(renderState->dl++, 128, 128, 128, 255);
     }
+
+    struct Quaternion relativeRotation;
+    struct Quaternion inverseCameraRotation;
+    quatConjugate(&fromCamera->transform.rotation, &inverseCameraRotation);
+    quatMultiply(&inverseCameraRotation, &portalGun->rotation, &relativeRotation);
+
+    quatMultiply(&relativeRotation, &gFlipAroundY, &gGunTransform.rotation);
     
     transformToMatrixL(&gGunTransform, &matrix[0], PORTAL_GUN_SCALE);
     gSPMatrix(renderState->dl++, &matrix[0], G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
@@ -156,7 +167,7 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
 #define MAX_PROJECTILE_DISTANCE     100.0f
 
 void portalGunUpdatePosition(struct PortalGun* portalGun, struct Player* player) {
-    portalGun->rotation = player->lookTransform.rotation;
+    quatLerp(&portalGun->rotation, &player->lookTransform.rotation, 0.45f, &portalGun->rotation);
 }
 
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
