@@ -11,7 +11,7 @@
 #include "../build/assets/materials/ui.h"
 #include "../controls/controller.h"
 #include "../font/font.h"
-#include "../font/dejavusans.h"
+#include "../font/liberation_mono.h"
 
 #define FADE_IN_TIME  1.0f
 
@@ -53,10 +53,10 @@ void creditsRender(void* data, struct RenderState* renderState, struct GraphicsT
     gSPDisplayList(renderState->dl++, ui_material_list[DEFAULT_UI_INDEX]);
 
     struct FontRenderer* renderer = stackMalloc(sizeof(struct FontRenderer));
-    fontRendererLayout(renderer, &gDejaVuSansFont, "Thank you for playing.\nThe rest of the game is still in development.\nFollow the project on YouTube.\nSupport the project on Patreon.", SCREEN_WD);
+    fontRendererLayout(renderer, &gLiberationMonoFont, "Thank you for playing.\nThe rest of the game is still in development.\nFollow the project on YouTube.\nSupport the project on Patreon.", SCREEN_WD);
     renderState->dl = fontRendererBuildGfx(
         renderer, 
-        gDejaVuSansImages, 
+        gLiberationMonoImages, 
         (SCREEN_WD - renderer->width) >> 1, 
         (SCREEN_HT - renderer->height) >> 1, 
         &color, 

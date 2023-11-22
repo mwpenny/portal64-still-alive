@@ -340,6 +340,7 @@ build/src/levels/intro.o: build/src/audio/clips.h build/assets/materials/images.
 build/src/levels/credits.o: build/src/audio/clips.h build/assets/materials/ui.h
 build/src/menu/savefile_list.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/font/dejavusans_images.o: build/assets/materials/ui.h
+build/src/font/liberation_mono_images.o: build/assets/materials/ui.h
 build/src/player/player.o: build/assets/models/player/chell.h build/assets/materials/static.h build/src/audio/subtitles.h
 build/src/scene/ball_catcher.o: build/assets/models/props/combine_ball_catcher.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
 build/src/scene/ball_launcher.o: build/assets/models/props/combine_ball_launcher.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
