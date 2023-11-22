@@ -155,6 +155,18 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
 
     quatMultiply(&relativeRotation, &gFlipAroundY, &gGunTransform.rotation);
     
+    LookAt* lookAt = renderStateRequestLookAt(renderState);
+    *lookAt = gLookAt;
+
+    struct Vector3 lookDirection;
+    quatMultVector(&inverseCameraRotation, &gForward, &lookDirection);
+    vector3ToVector3u8(&lookDirection, (struct Vector3u8*)&lookAt->l[0].l.dir);
+
+    quatMultVector(&inverseCameraRotation, &gUp, &lookDirection);
+    vector3ToVector3u8(&lookDirection, (struct Vector3u8*)&lookAt->l[1].l.dir);
+
+    gSPLookAt(renderState->dl++, lookAt);
+    
     transformToMatrixL(&gGunTransform, &matrix[0], PORTAL_GUN_SCALE);
     gSPMatrix(renderState->dl++, &matrix[0], G_MTX_MODELVIEW | G_MTX_PUSH | G_MTX_MUL);
     skRenderObject(&portalGun->armature, NULL, renderState);
