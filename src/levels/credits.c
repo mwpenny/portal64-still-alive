@@ -53,12 +53,12 @@ void creditsRender(void* data, struct RenderState* renderState, struct GraphicsT
     gSPDisplayList(renderState->dl++, ui_material_list[DEFAULT_UI_INDEX]);
 
     struct FontRenderer* renderer = stackMalloc(sizeof(struct FontRenderer));
-    fontRendererLayout(renderer, &gLiberationMonoFont, "THANK YOU FOR PARTICIPATING\nIN THIS\nENRICHMENT CENTER ACTIVITY!!\n\nIt is still in development.\nFollow the project on YouTube.\nSupport the project on Patreon.", SCREEN_WD);
+    fontRendererLayout(renderer, &gLiberationMonoFont, "THANK YOU FOR PARTICIPATING\nIN THIS\nENRICHMENT CENTER ACTIVITY!!\n\nIt is still in development.", SCREEN_WD);
     renderState->dl = fontRendererBuildGfx(
         renderer, 
         gLiberationMonoImages, 
         35, 
-        48, 
+        36, 
         &color, 
         renderState->dl
     );
@@ -98,6 +98,39 @@ void creditsRender(void* data, struct RenderState* renderState, struct GraphicsT
         &color, 
         renderState->dl
     );
+
+    fontRendererLayout(renderer, &gLiberationMonoFont, "Subscribe", SCREEN_WD);
+    renderState->dl = fontRendererBuildGfx(
+        renderer, 
+        gLiberationMonoImages, 
+        70, 
+        120, 
+        &color, 
+        renderState->dl
+    );
+
+
+    fontRendererLayout(renderer, &gLiberationMonoFont, "Support", SCREEN_WD);
+    renderState->dl = fontRendererBuildGfx(
+        renderer, 
+        gLiberationMonoImages, 
+        182, 
+        120, 
+        &color, 
+        renderState->dl
+    );
+
+    gSPDisplayList(renderState->dl++, ui_material_list[YOUTUBE_QR_INDEX]);
+    gSPTextureRectangle(renderState->dl++, 70 << 2, 138 << 2, (70 + 64) << 2, (138 + 64) << 2, G_TX_RENDERTILE, 0, 0, 1 << 9, 1 << 9);
+
+    gSPDisplayList(renderState->dl++, ui_material_list[PATREON_QR_INDEX]);
+    gSPTextureRectangle(renderState->dl++, 182 << 2, 138 << 2, (182 + 64) << 2, (138 + 64) << 2, G_TX_RENDERTILE, 0, 0, 1 << 9, 1 << 9);
+
+    gSPDisplayList(renderState->dl++, ui_material_list[CREDITS_ICONS_INDEX]);
+    gSPTextureRectangle(renderState->dl++, 30 << 2, 130 << 2, (30 + 32) << 2, (130 + 32) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
+
+    gSPDisplayList(renderState->dl++, ui_material_list[CREDITS_ICONS_INDEX]);
+    gSPTextureRectangle(renderState->dl++, 148 << 2, 130 << 2, (148 + 32) << 2, (130 + 32) << 2, G_TX_RENDERTILE, 32 << 5, 0, 1 << 10, 1 << 10);
 
     stackMallocFree(renderer);
 }
