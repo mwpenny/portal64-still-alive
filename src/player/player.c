@@ -247,16 +247,17 @@ void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) 
         player->grabConstraint.object = NULL;
         contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
         player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
-    }
-    else if (grabbing && !player->grabConstraint.object) {
+    } else if (grabbing && !player->grabConstraint.object) {
         pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 1.0f);
         contactSolverAddPointConstraint(&gContactSolver, &player->grabConstraint);
         hudResolvePrompt(&gScene.hud, CutscenePromptTypePickup);
+        portalGunPickup(&gScene.portalGun);
     } else if (!grabbing && player->grabConstraint.object) {
         player->grabConstraint.object = NULL;
         contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
         hudResolvePrompt(&gScene.hud, CutscenePromptTypeDrop);
         player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
+        portalGunRelease(&gScene.portalGun);
     } else if (grabbing != player->grabConstraint.object) {
         pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 1.0f);
     }

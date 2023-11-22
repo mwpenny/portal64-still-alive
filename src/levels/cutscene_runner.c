@@ -286,6 +286,8 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 playerGivePortalGun(&gScene.player, PlayerHasSecondPortalGun);
             }
 
+            portalGunDraw(&gScene.portalGun);
+
             break;
         case CutsceneStepTypePointPedestal:
             for (unsigned i = 0; i < gScene.pedestalCount; ++i) {

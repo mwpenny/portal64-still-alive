@@ -114,7 +114,9 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     playerInit(&scene->player, &combinedLocation, &startVelocity);
 
-    portalGunInit(&scene->portalGun, &scene->player.lookTransform);
+    struct Vector3* startPosition = &levelRelativeTransform()->position;
+
+    portalGunInit(&scene->portalGun, &scene->player.lookTransform, startPosition->x == 0.0f && startPosition->y == 1.0f && startPosition->z == 0.0f);
 
     scene->camera.transform.rotation = scene->player.lookTransform.rotation;
     scene->camera.transform.position = scene->player.lookTransform.position;
@@ -434,9 +436,11 @@ void sceneCheckPortals(struct Scene* scene) {
             didClose |= sceneClosePortal(scene, 1);
         }
         scene->player.body.flags &= ~RigidBodyFizzled;
+        scene->hud.lastPortalIndexShot = -1;
 
         if (didClose) {
             rumblePakClipPlay(&gPlayerClosePortalRumble);
+            portalGunFizzle(&scene->portalGun);
         }
     }
 

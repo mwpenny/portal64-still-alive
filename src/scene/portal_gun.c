@@ -30,7 +30,7 @@ struct Transform gGunTransform = {
     {1.0f, 1.0f, 1.0f},
 };
 
-void portalGunInit(struct PortalGun* portalGun, struct Transform* at){
+void portalGunInit(struct PortalGun* portalGun, struct Transform* at, int isFreshStart){
     skArmatureInit(&portalGun->armature, &portal_gun_v_portalgun_armature);
     skAnimatorInit(&portalGun->animator, portal_gun_v_portalgun_armature.numberOfBones);
     portalGun->portalGunVisible = 0;
@@ -42,6 +42,12 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at){
 
     portalTrailInit(&portalGun->projectiles[0].trail);
     portalTrailInit(&portalGun->projectiles[1].trail);
+
+    if (isFreshStart) {
+        skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_draw_clip, 0.0f, 0);
+    } else {
+        skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_idle_clip, 0.0f, 0);
+    } 
 }
 
 #define PORTAL_PROJECTILE_RADIUS    0.15f
@@ -281,4 +287,20 @@ int portalGunIsFiring(struct PortalGun* portalGun){
         return 1;
     }
     return 0;
+}
+
+void portalGunDraw(struct PortalGun* portalGun) {
+    skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_draw_clip, 0.0f, 0);
+}
+
+void portalGunFizzle(struct PortalGun* portalGun) {
+    skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_fizzle_clip, 0.0f, 0);
+}
+
+void portalGunPickup(struct PortalGun* portalGun) {
+    skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_pickup_clip, 0.0f, 0);
+}
+
+void portalGunRelease(struct PortalGun* portalGun) {
+    skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_release_clip, 0.0f, 0);
 }

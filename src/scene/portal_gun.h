@@ -40,7 +40,7 @@ struct PortalGun {
     struct PortalGunProjectile projectiles[2];
 };
 
-void portalGunInit(struct PortalGun* portalGun, struct Transform* at);
+void portalGunInit(struct PortalGun* portalGun, struct Transform* at, int isFreshStart);
 // void portalGunDummyRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState);
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player);
 void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera, int portalGunVisible, int lastFiredIndex);
@@ -48,5 +48,11 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
 void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray, struct Transform* lookTransform, struct Vector3* playerUp, int roomIndex);
 void portalGunFireWorld(struct PortalGun* portalGun, int portalIndex, struct Vector3* from, struct Vector3* to, int roomIndex);
 int portalGunIsFiring(struct PortalGun* portalGun);
+
+void portalGunDraw(struct PortalGun* portalGun);
+void portalGunFizzle(struct PortalGun* portalGun);
+
+void portalGunPickup(struct PortalGun* portalGun);
+void portalGunRelease(struct PortalGun* portalGun);
 
 #endif
