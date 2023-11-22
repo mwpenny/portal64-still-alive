@@ -20,7 +20,7 @@
 void creditsInit(struct Credits* credits) {
     credits->time = 0.0f;
 
-    soundPlayerPlay(SOUNDS_PORTAL_STILL_ALIVE, 1.0f, 0.5f, NULL, NULL, SoundTypeMusic);
+    soundPlayerPlay(SOUNDS_LOOPING_RADIO_MIX, 0.5f, 1.0f, NULL, NULL, SoundTypeMusic);
 }
 
 void creditsUpdate(struct Credits* credits) {
@@ -53,12 +53,48 @@ void creditsRender(void* data, struct RenderState* renderState, struct GraphicsT
     gSPDisplayList(renderState->dl++, ui_material_list[DEFAULT_UI_INDEX]);
 
     struct FontRenderer* renderer = stackMalloc(sizeof(struct FontRenderer));
-    fontRendererLayout(renderer, &gLiberationMonoFont, "Thank you for playing.\nThe rest of the game is still in development.\nFollow the project on YouTube.\nSupport the project on Patreon.", SCREEN_WD);
+    fontRendererLayout(renderer, &gLiberationMonoFont, "THANK YOU FOR PARTICIPATING\nIN THIS\nENRICHMENT CENTER ACTIVITY!!\n\nIt is still in development.\nFollow the project on YouTube.\nSupport the project on Patreon.", SCREEN_WD);
     renderState->dl = fontRendererBuildGfx(
         renderer, 
         gLiberationMonoImages, 
-        (SCREEN_WD - renderer->width) >> 1, 
-        (SCREEN_HT - renderer->height) >> 1, 
+        35, 
+        48, 
+        &color, 
+        renderState->dl
+    );
+
+    fontRendererLayout(renderer, &gLiberationMonoFont, "-----------------------------------------", SCREEN_WD);
+    renderState->dl = fontRendererBuildGfx(
+        renderer, 
+        gLiberationMonoImages, 
+        14, 
+        12, 
+        &color, 
+        renderState->dl
+    );
+    renderState->dl = fontRendererBuildGfx(
+        renderer, 
+        gLiberationMonoImages, 
+        14, 
+        SCREEN_HT - 24, 
+        &color, 
+        renderState->dl
+    );
+
+    fontRendererLayout(renderer, &gLiberationMonoFont, "|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|", SCREEN_WD);
+    renderState->dl = fontRendererBuildGfx(
+        renderer, 
+        gLiberationMonoImages, 
+        14, 
+        24, 
+        &color, 
+        renderState->dl
+    );
+    renderState->dl = fontRendererBuildGfx(
+        renderer, 
+        gLiberationMonoImages, 
+        294, 
+        24, 
         &color, 
         renderState->dl
     );
