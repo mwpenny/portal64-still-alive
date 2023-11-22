@@ -10,6 +10,7 @@
 #include "graphics/graphics.h"
 #include "levels/cutscene_runner.h"
 #include "levels/intro.h"
+#include "levels/credits.h"
 #include "menu/main_menu.h"
 #include "menu/translations.h"
 #include "savefile/savefile.h"
@@ -100,6 +101,7 @@ static void initProc(void* arg) {
 struct Scene gScene;
 struct GameMenu gGameMenu;
 struct Intro gIntro;
+struct Credits gCredits;
 
 extern OSMesgQueue dmaMessageQ;
 
@@ -138,10 +140,19 @@ struct SceneCallbacks gIntroCallbacks = {
     .updateCallback = (UpdateCallback)&introUpdate,
 };
 
+struct SceneCallbacks gCreditsCallbacks = {
+    .data = &gCredits,
+    .initCallback = (InitCallback)&creditsInit,
+    .graphicsCallback = (GraphicsCallback)&creditsRender,
+    .updateCallback = (UpdateCallback)&creditsUpdate,
+};
+
 struct SceneCallbacks* gSceneCallbacks = &gTestChamberCallbacks;
 
 void levelLoadWithCallbacks(int levelIndex) {
-    if (levelIndex == INTRO_MENU) {
+    if (levelIndex == CREDITS_MENU) {
+        gSceneCallbacks = &gCreditsCallbacks;
+    } else if (levelIndex == INTRO_MENU) {
         gSceneCallbacks = &gIntroCallbacks;
     } else if (levelIndex == MAIN_MENU) {
         levelLoad(0);

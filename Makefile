@@ -337,6 +337,7 @@ build/src/menu/text_manipulation.o: build/src/audio/subtitles.h
 build/src/scene/scene_animator.o: build/src/audio/clips.h
 build/src/menu/cheat_codes.o: build/src/audio/clips.h
 build/src/levels/intro.o: build/src/audio/clips.h build/assets/materials/images.h
+build/src/levels/credits.o: build/src/audio/clips.h build/assets/materials/ui.h
 build/src/menu/savefile_list.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/font/dejavusans_images.o: build/assets/materials/ui.h
 build/src/player/player.o: build/assets/models/player/chell.h build/assets/materials/static.h build/src/audio/subtitles.h

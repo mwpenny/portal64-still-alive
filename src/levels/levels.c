@@ -136,7 +136,7 @@ void levelQueueLoad(int index, struct Transform* relativeExitTransform, struct V
         gQueuedLevel = gCurrentLevelIndex + 1;
 
         if (gQueuedLevel == LEVEL_COUNT) {
-            gQueuedLevel = MAIN_MENU;
+            gQueuedLevel = CREDITS_MENU;
         }
     } else {
         gQueuedLevel = index;
