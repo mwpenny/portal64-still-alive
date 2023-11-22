@@ -125,10 +125,13 @@ void levelLoad(int index) {
 
     gCurrentLevel = levelFixPointers(metadata->levelDefinition, (char*)memory - metadata->segmentStart);
     gCurrentLevelIndex = index;
-    gQueuedLevel = NO_QUEUED_LEVEL;
 
     collisionSceneInit(&gCollisionScene, gCurrentLevel->collisionQuads, gCurrentLevel->collisionQuadCount, &gCurrentLevel->world);
     soundPlayerResume();
+}
+
+void levelClearQueuedLevel() {
+    gQueuedLevel = NO_QUEUED_LEVEL;
 }
 
 void levelQueueLoad(int index, struct Transform* relativeExitTransform, struct Vector3* relativeVelocity) {

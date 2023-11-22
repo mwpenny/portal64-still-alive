@@ -161,6 +161,8 @@ void levelLoadWithCallbacks(int levelIndex) {
         levelLoad(levelIndex);
         gSceneCallbacks = &gTestChamberCallbacks;
     }
+
+    levelClearQueuedLevel();
 }
 
 int updateSchedulerModeAndGetFPS(int interlacedMode) {
