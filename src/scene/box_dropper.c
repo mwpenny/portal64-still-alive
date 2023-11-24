@@ -128,7 +128,7 @@ void boxDropperUpdate(struct BoxDropper* dropper) {
 
     if (dropper->flags & BoxDropperFlagsCubeIsActive) {
         if (!decorObjectUpdate(&dropper->activeCube)) {
-            decorObjectClenaup(&dropper->activeCube);
+            decorObjectCleanup(&dropper->activeCube);
             dropper->flags &= ~BoxDropperFlagsCubeIsActive;
         }
     }
