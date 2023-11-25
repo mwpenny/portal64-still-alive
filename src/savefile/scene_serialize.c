@@ -80,7 +80,8 @@ void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene)
             existingSurface, 
             portalSurfaceIndex, 
             &transform,
-            0
+            0,
+            portalIndex
         );
 
         serializeRead(serializer, &portal->transformIndex, sizeof(portal->transformIndex));

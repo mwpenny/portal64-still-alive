@@ -102,9 +102,9 @@ void portalCalculateBB(struct Transform* portalTransform, struct Box3D* bb) {
     box3DExtendDirection(bb, &nextDir, bb);
 }
 
-int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt, int just_checking) {
+int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt, int just_checking, int portalIndex) {
     // determine if portal is on surface
-    if (!portalSurfaceIsInside(surface, portalAt)) {
+    if (!portalSurfaceIsInside(surface, portalAt, portalIndex)) {
         return 0;
     }
     if (just_checking){

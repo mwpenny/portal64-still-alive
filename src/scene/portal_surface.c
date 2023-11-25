@@ -164,16 +164,20 @@ void portalSurfaceInverse(struct PortalSurface* surface, struct Vector2s16* inpu
     vector3AddScaled(output, &surface->right, (float)input->x / FIXED_POINT_SCALAR, output);
 }
 
-int portalSurfaceIsInside(struct PortalSurface* surface, struct Transform* portalAt) {
+int portalSurfaceIsInside(struct PortalSurface* surface, struct Transform* portalAt, int portalIndex) {
     int intersectionCount = 0;
 
     struct Vector3 portalForward;
     quatMultVector(&portalAt->rotation, &gForward, &portalForward);
 
     struct Vector3 surfaceNormal;
-    vector3Cross(&surface->up, &surface->right, &surfaceNormal);
+    vector3Cross(&surface->right, &surface->up, &surfaceNormal);
 
-    float normal = fabsf(vector3Dot(&portalForward, &surfaceNormal));
+    float normal = vector3Dot(&portalForward, &surfaceNormal);
+
+    if (portalIndex == 0) {
+        normal = -normal;
+    }
 
     if (normal < 0.7f) {
         return 0;

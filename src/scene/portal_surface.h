@@ -59,7 +59,7 @@ void portalSurfaceCleanupQueueInit();
 void portalSurfacePreSwap(int portalToMove);
 int portalSurfaceStaticIndexForReplacement(int portalIndex);
 
-int portalSurfaceIsInside(struct PortalSurface* surface, struct Transform* portalAt);
+int portalSurfaceIsInside(struct PortalSurface* surface, struct Transform* portalAt, int portalIndex);
 
 int portalSurfaceGenerate(struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt, int portalIndex, struct Transform* otherPortalAt, struct PortalSurface* newSurface);
 
