@@ -19,7 +19,6 @@ ALSndPlayer gSoundPlayer;
 #define SOUND_FLAGS_LOOPING     (1 << 1)
 #define SOUND_HAS_STARTED       (1 << 2)
 #define SOUND_FLAGS_PAUSED      (1 << 3)
-#define SOUND_FLAGS_PRIORITY    (1 << 4)
 
 #define SPEED_OF_SOUND          343.2f
 
