@@ -7,6 +7,7 @@ cutscenes:
     - start_cutscene portal_loop
     - set_signal FIRST_ELEVATOR
   INTRO_CUTSCENE:
+    - activate_signage 2
     - q_sound SOUNDS_01_PART1_ENTRY_1 CH_GLADOS PORTAL_01_PART1_ENTRY_1
     - q_sound SOUNDS_01_PART1_ENTRY_2 CH_GLADOS PORTAL_01_PART1_ENTRY_2
     - wait_for_channel CH_GLADOS
@@ -27,6 +28,7 @@ cutscenes:
     - q_sound 01_PART1_GET_PORTAL_GUN_7 CH_GLADOS PORTAL_01_PART1_GET_PORTAL_GUN_7
     - q_sound 01_PART1_GET_PORTAL_GUN_8 CH_GLADOS PORTAL_01_PART1_GET_PORTAL_GUN_8
   MIND_THE_GAP:
+    - activate_signage 3
     - open_portal portal_gap 0
     - q_sound SOUNDS_01_PART2_ENTRY_1 CH_GLADOS PORTAL_01_PART2_ENTRY_1
   FINISH_03:

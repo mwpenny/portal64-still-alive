@@ -24,6 +24,8 @@ cutscenes:
     - show_prompt CutscenePromptTypeNone
     - delay 22.75
     - rumble 1
+    - delay 5
+    - activate_signage 0
     - wait_for_channel CH_GLADOS
     - open_portal portal_room 0
     - open_portal room_exit 1
@@ -36,6 +38,8 @@ cutscenes:
     - q_sound SOUNDS_00_PART1_SUCCESS_1 CH_GLADOS PORTAL_00_PART1_SUCCESS_1
     - q_sound SOUNDS_00_PART1_SUCCESS_2 CH_GLADOS PORTAL_00_PART1_SUCCESS_2
     - q_sound SOUNDS_00_PART1_SUCCESS_3 CH_GLADOS PORTAL_00_PART1_SUCCESS_3
+  SECOND_SIGNAGE:
+    - activate_signage 1
   START_SECOND_ROOM:
     - start_cutscene SECOND_ROOM_INSTRUCTIONS
     - open_portal stationary_portal 1

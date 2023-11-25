@@ -319,6 +319,13 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         case CutsceneStepRumble:
             rumblePakClipPlay(&gCutsceneRumbleWaves[step->rumble.rumbleLevel]);
             break;
+        case CutsceneStepActivateSignage:
+            for (int i = 0; i < gScene.signageCount; ++i) {
+                if (gScene.signage[i].testChamberNumber == step->activateSignage.testChamberIndex) {
+                    signageActivate(&gScene.signage[i]);
+                }
+            }
+            break;
         default:
     }
 }

@@ -29,11 +29,15 @@ cutscenes:
     - q_sound 07_PART1_ENTRY_1 CH_GLADOS PORTAL_07_PART1_ENTRY_1
     - q_sound 07_PART1_ENTRY_2 CH_GLADOS PORTAL_07_PART1_ENTRY_2
     - q_sound 07_PART1_ENTRY_3 CH_GLADOS PORTAL_07_PART1_ENTRY_3
+    - delay 2
+    - activate_signage 11
   TILT:
     - delay 4
     - set_signal cube_dropper
     - play_animation tilt tilt
   START_1:
+    - activate_signage 12
+    - delay 2
     - q_sound 07_PART2_ENTRY_1 CH_GLADOS PORTAL_07_PART2_ENTRY_1
     - delay 1
     - rumble 0

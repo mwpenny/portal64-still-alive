@@ -8,9 +8,11 @@ struct Signage {
     struct Transform transform;
     short roomIndex;
     short testChamberNumber;
-    float flickerChance;
+    short currentFrame;
 };
 
 void signageInit(struct Signage* signage, struct SignageDefinition* definition);
+void signageUpdate(struct Signage* signage);
+void signageActivate(struct Signage* signage);
 
 #endif

@@ -8,6 +8,7 @@ cutscenes:
     - play_animation piston_top piston_top_0
     - play_animation piston_bottom piston_bottom_0
   FIRST_ROOM:
+    - activate_signage 10
     - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
     - q_sound SOUNDS_06_PART1_ENTRY_1 CH_GLADOS PORTAL_06_PART1_ENTRY_1
     - delay 2

@@ -2,6 +2,7 @@ cutscenes:
   SUCCESS:
     - q_sound SOUNDS_04_PART1_SUCCESS_1 CH_GLADOS PORTAL_04_PART1_SUCCESS_1
   INTRO_CUTSCENE:
+    - activate_signage 8
     - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
     - q_sound SOUNDS_04_PART1_ENTRY_1 CH_GLADOS PORTAL_04_PART1_ENTRY_1
     - wait_for_channel CH_GLADOS

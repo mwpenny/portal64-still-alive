@@ -237,6 +237,11 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
         result.rumble = {
             tonumber(step.args[1]),
         }
+    elseif step.command == "activate_signage" then
+        result.type = sk_definition_writer.raw('CutsceneStepActivateSignage')
+        result.activateSignage = {
+            tonumber(step.args[1]),
+        }
     else
         error("Unrecognized cutscene step " .. step.command)
         result.type = sk_definition_writer.raw('CutsceneStepTypeNoop')

@@ -2,6 +2,7 @@ operators:
   []
 cutscenes:
   INTRO_CUTSCENE:
+    - activate_signage 9
     - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
     - set_signal cube_dropper
     - open_portal portal_0 0

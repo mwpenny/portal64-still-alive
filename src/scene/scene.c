@@ -710,6 +710,10 @@ void sceneUpdate(struct Scene* scene) {
         pedestalUpdate(&scene->pedestals[i]);
     }
 
+    for (int i = 0; i < scene->signageCount; ++i) {
+        signageUpdate(&scene->signage[i]);
+    }
+
     for (int i = 0; i < scene->boxDropperCount; ++i) {
         boxDropperUpdate(&scene->boxDroppers[i]);
     }

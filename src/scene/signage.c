@@ -13,14 +13,51 @@
                                                             
 #include <stdlib.h>   
 
-short gCurrentSignageIndex = -1;
-short gCurrentSignageOn = 0;
-
-enum SignState {
-    SignStateOff,
-    SignStateUnlit,
-    SignStateLit,
+struct SignStateFrame {
+    u8 backlightColor:2;
+    u8 lcdColor:2;
+    u8 warningOffColor:2;
+    u8 warningOnColor:2;
 };
+
+struct SignStateFrame gSignageFrames[] = {
+    // off
+    {.backlightColor = 0, .lcdColor = 0, .warningOffColor = 0, .warningOnColor = 0},
+    // backlight half on
+    {.backlightColor = 1, .lcdColor = 1, .warningOffColor = 1, .warningOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 1, .warningOffColor = 1, .warningOnColor = 1},
+    // lcd on
+    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
+    // backlight full on
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
+    // backlight flicker
+    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
+    // backlight full back on
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
+    // warning on
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+};
+
+#define SIGNAGE_FRAME_COUNT (sizeof(gSignageFrames) / sizeof(*gSignageFrames))
+
+short gCurrentSignageIndex = -1;
+struct SignStateFrame gCurrentSignageFrame = {3, 3, 3, 3};
 
 void signageSetLargeDigit(Vtx* vertices, int nextDigit, int currentDigit) {
     int uOffset = (nextDigit - currentDigit) * (14 << 5);
@@ -86,24 +123,35 @@ short gLevelWarnings[] = {
     LevelWarningsCubeDispense | LevelWarningsCubeHit | LevelWarningsSpeedyIn | LevelWarningsSpeedyOut,
 };
 
-static struct Coloru8 gSignageOnColor = {0, 0, 0, 255};
-static struct Coloru8 gSignageDisabledColor = {212, 212, 212, 255};
-static struct Coloru8 gSignageDisabledUnlitColor = {40, 40, 40, 255};
-static struct Coloru8 gSignageOffColor = {46, 47, 49, 255};
+static struct Coloru8 gBacklightColors[] = {
+    {46, 47, 49, 49},
+    {132, 135, 140, 145},
+    {242, 245, 247, 255},
+};
 
-void signageSetWarnings(int warningMask, enum SignState signState) {
+static struct Coloru8 gLCDBlackColors[] = {
+    {46, 47, 49, 49},
+    {132, 135, 140, 145},
+    {0, 0, 0, 255},
+};
+
+static struct Coloru8 gWarningOffColors[] = {
+    {46, 47, 49, 49},
+    {132, 135, 140, 145},
+    {40, 40, 40, 255},
+    {212, 212, 212, 255},
+};
+
+static struct Coloru8 gWarningOnColors[] = {
+    {46, 47, 49, 49},
+    {132, 135, 140, 145},
+    {212, 212, 212, 255},
+    {0, 0, 0, 255},
+};
+
+void signageSetWarnings(int warningMask, struct SignStateFrame signState) {
     for (int i = 0; i < 10; ++i) {
-        struct Coloru8 useColor;
-        
-        if (signState == SignStateOff) {
-            useColor = gSignageOffColor;
-        } else if ((1 << i) & warningMask) {
-            useColor = gSignageOnColor;
-        } else if (signState == SignStateUnlit) {
-            useColor = gSignageDisabledUnlitColor;
-        } else {
-            useColor = gSignageDisabledColor;
-        }
+        struct Coloru8 useColor = (1 << i) & warningMask ? gWarningOnColors[signState.warningOnColor] : gWarningOffColors[signState.warningOffColor];
 
         for (int vIndex = 0; vIndex < 4; ++vIndex) {
             ((Vtx*)K0_TO_K1(gWarningVertices[i]))[vIndex].v.cn[0] = useColor.r;
@@ -114,8 +162,8 @@ void signageSetWarnings(int warningMask, enum SignState signState) {
     }
 }
 
-void signageCheckIndex(int neededIndex, enum SignState signState) {
-    if (gCurrentSignageIndex == neededIndex && gCurrentSignageOn == signState) {
+void signageCheckIndex(int neededIndex, struct SignStateFrame signState) {
+    if (gCurrentSignageIndex == neededIndex && *((u8*)&gCurrentSignageFrame) == *((u8*)&signState)) {
         return;
     }
 
@@ -130,7 +178,7 @@ void signageCheckIndex(int neededIndex, enum SignState signState) {
     int oneDigit = neededIndex - tenDigit * 10;
     
     gCurrentSignageIndex = neededIndex;
-    gCurrentSignageOn = signState;
+    gCurrentSignageFrame = signState;
     signageSetLargeDigit(props_signage_signage_num00_digit_0_color, oneDigit, prevOneDigit);
     signageSetLargeDigit(props_signage_signage_num00_digit_10_color, tenDigit, prevTenDigit);
     signageSetSmallDigit(props_signage_signage_num00_sdigit_0_color, oneDigit, prevOneDigit);
@@ -142,9 +190,15 @@ void signageCheckIndex(int neededIndex, enum SignState signState) {
 void signageRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Signage* signage = (struct Signage*)data;
 
-    int signOn = ((int)gTimePassed) % 3;
+    int frameIndex = signage->currentFrame;
 
-    signageCheckIndex(signage->testChamberNumber, signOn);
+    if (frameIndex == -1) {
+        frameIndex = 0;
+    }
+
+    struct SignStateFrame frame = gSignageFrames[frameIndex];
+
+    signageCheckIndex(signage->testChamberNumber, frame);
 
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
@@ -154,16 +208,12 @@ void signageRender(void* data, struct DynamicRenderDataList* renderList, struct 
 
     Gfx* model = renderStateAllocateDLChunk(renderState, 4);
     Gfx* dl = model;
-    if (signOn == SignStateOff) {
-        gDPSetPrimColor(dl++, 255, 255, 46, 47, 49, 49);
-        gDPSetEnvColor(dl++, 46, 47, 49, 255);
-    } else if (signOn == SignStateUnlit) {
-        gDPSetPrimColor(dl++, 255, 255, 46, 47, 49, 49);
-        gDPSetEnvColor(dl++, 0, 0, 0, 255);
-    } else {
-        gDPSetPrimColor(dl++, 255, 255, 242, 245, 247, 255);
-        gDPSetEnvColor(dl++, 0, 0, 0, 255);
-    }
+
+    struct Coloru8 backlightColor = gBacklightColors[frame.backlightColor];
+    struct Coloru8 lcdColor = gLCDBlackColors[frame.lcdColor];
+
+    gDPSetPrimColor(dl++, 255, 255, backlightColor.r, backlightColor.g, backlightColor.b, backlightColor.a);
+    gDPSetEnvColor(dl++, lcdColor.r, lcdColor.g, lcdColor.b, lcdColor.a);
     gSPDisplayList(dl++, props_signage_model_gfx);
     gSPEndDisplayList(dl++);
 
@@ -185,9 +235,20 @@ void signageInit(struct Signage* signage, struct SignageDefinition* definition) 
     signage->transform.scale = gOneVec;
     signage->roomIndex = definition->roomIndex;
     signage->testChamberNumber = definition->testChamberNumber;
-    signage->flickerChance = 1.0;
+    signage->currentFrame = -1;
 
     int dynamicId = dynamicSceneAdd(signage, signageRender, &signage->transform.position, 1.7f);
 
     dynamicSceneSetRoomFlags(dynamicId, ROOM_FLAG_FROM_INDEX(definition->roomIndex));
+}
+
+
+void signageUpdate(struct Signage* signage) {
+    if (signage->currentFrame >= 0 && signage->currentFrame + 1 < SIGNAGE_FRAME_COUNT) {
+        ++signage->currentFrame;
+    }
+}
+
+void signageActivate(struct Signage* signage) {
+    signage->currentFrame = 0;
 }
