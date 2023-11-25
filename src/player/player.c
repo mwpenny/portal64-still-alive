@@ -900,7 +900,7 @@ void playerUpdate(struct Player* player) {
 
     float pitchSign = signf(player->pitchVelocity);
 
-    if (!didPassThroughPortal && lookingForward.y * pitchSign > newLookingForward.y * pitchSign) {
+    if (!didPassThroughPortal && lookingForward.y * pitchSign > newLookingForward.y * pitchSign && lookingForward.y * pitchSign > 0.0f) {
         struct Vector3 newForward = gZeroVec;
         newForward.y = pitchSign;
         struct Vector3 newUp;
