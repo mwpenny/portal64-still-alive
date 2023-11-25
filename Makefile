@@ -254,7 +254,6 @@ MODEL_LIST = assets/models/player/chell.blend \
 	assets/models/props/round_elevator_interior.blend \
 	assets/models/props/round_elevator_collision.blend \
 	assets/models/props/signage.blend \
-	assets/models/props/signage_off.blend \
 	assets/models/portal/portal_blue.blend \
 	assets/models/portal/portal_blue_filled.blend \
 	assets/models/portal/portal_blue_face.blend \

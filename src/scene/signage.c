@@ -4,16 +4,23 @@
 #include "../levels/levels.h"
 #include "../defs.h"
 #include "../graphics/color.h"
+#include "../util/time.h"
 
 #include "../build/assets/models/props/signage.h"
-#include "../build/assets/models/props/signage_off.h"
 #include "../build/assets/models/props/cylinder_test.h"
 #include "../../build/assets/materials/static.h"
 
                                                             
 #include <stdlib.h>   
 
-int gCurrentSignageIndex = -1;
+short gCurrentSignageIndex = -1;
+short gCurrentSignageOn = 0;
+
+enum SignState {
+    SignStateOff,
+    SignStateUnlit,
+    SignStateLit,
+};
 
 void signageSetLargeDigit(Vtx* vertices, int nextDigit, int currentDigit) {
     int uOffset = (nextDigit - currentDigit) * (14 << 5);
@@ -80,55 +87,64 @@ short gLevelWarnings[] = {
 };
 
 static struct Coloru8 gSignageOnColor = {0, 0, 0, 255};
-static struct Coloru8 gSignageOffColor = {212, 212, 212, 255};
+static struct Coloru8 gSignageDisabledColor = {212, 212, 212, 255};
+static struct Coloru8 gSignageDisabledUnlitColor = {40, 40, 40, 255};
+static struct Coloru8 gSignageOffColor = {46, 47, 49, 255};
 
-void signageSetWarnings(int warningMask) {
+void signageSetWarnings(int warningMask, enum SignState signState) {
     for (int i = 0; i < 10; ++i) {
-        struct Coloru8 useColor = ((1 << i) & warningMask) ? gSignageOnColor : gSignageOffColor;
+        struct Coloru8 useColor;
+        
+        if (signState == SignStateOff) {
+            useColor = gSignageOffColor;
+        } else if ((1 << i) & warningMask) {
+            useColor = gSignageOnColor;
+        } else if (signState == SignStateUnlit) {
+            useColor = gSignageDisabledUnlitColor;
+        } else {
+            useColor = gSignageDisabledColor;
+        }
 
         for (int vIndex = 0; vIndex < 4; ++vIndex) {
             ((Vtx*)K0_TO_K1(gWarningVertices[i]))[vIndex].v.cn[0] = useColor.r;
             ((Vtx*)K0_TO_K1(gWarningVertices[i]))[vIndex].v.cn[1] = useColor.g;
             ((Vtx*)K0_TO_K1(gWarningVertices[i]))[vIndex].v.cn[2] = useColor.b;
             ((Vtx*)K0_TO_K1(gWarningVertices[i]))[vIndex].v.cn[3] = useColor.a;
-
         }
-        
     }
 }
 
-void signageCheckIndex(int neededIndex) {
-        if (gCurrentSignageIndex == neededIndex) {
-            return;
-        }
+void signageCheckIndex(int neededIndex, enum SignState signState) {
+    if (gCurrentSignageIndex == neededIndex && gCurrentSignageOn == signState) {
+        return;
+    }
 
-        if (gCurrentSignageIndex == -1) {
-            gCurrentSignageIndex = 0;
-        }
+    if (gCurrentSignageIndex == -1) {
+        gCurrentSignageIndex = 0;
+    }
 
-        int prevTenDigit = gCurrentSignageIndex / 10;
-        int prevOneDigit = gCurrentSignageIndex - prevTenDigit * 10; 
+    int prevTenDigit = gCurrentSignageIndex / 10;
+    int prevOneDigit = gCurrentSignageIndex - prevTenDigit * 10; 
 
-        int tenDigit = neededIndex / 10;
-        int oneDigit = neededIndex - tenDigit * 10;
-        
-        gCurrentSignageIndex = neededIndex;
-        signageSetLargeDigit(props_signage_signage_num00_digit_0_color, oneDigit, prevOneDigit);
-        signageSetLargeDigit(props_signage_signage_num00_digit_10_color, tenDigit, prevTenDigit);
-        signageSetSmallDigit(props_signage_signage_num00_sdigit_0_color, oneDigit, prevOneDigit);
-        signageSetSmallDigit(props_signage_signage_num00_sdigit_10_color, tenDigit, prevTenDigit);
+    int tenDigit = neededIndex / 10;
+    int oneDigit = neededIndex - tenDigit * 10;
+    
+    gCurrentSignageIndex = neededIndex;
+    gCurrentSignageOn = signState;
+    signageSetLargeDigit(props_signage_signage_num00_digit_0_color, oneDigit, prevOneDigit);
+    signageSetLargeDigit(props_signage_signage_num00_digit_10_color, tenDigit, prevTenDigit);
+    signageSetSmallDigit(props_signage_signage_num00_sdigit_0_color, oneDigit, prevOneDigit);
+    signageSetSmallDigit(props_signage_signage_num00_sdigit_10_color, tenDigit, prevTenDigit);
 
-        signageSetWarnings(gLevelWarnings[neededIndex]);
+    signageSetWarnings(gLevelWarnings[neededIndex], signState);
 }
 
 void signageRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Signage* signage = (struct Signage*)data;
 
-    float n = ((float)rand()/RAND_MAX)*(float)(1.0); 
-    int signOn = 1;
-    if (n <= signage->flickerChance){signOn = 0;}
-    if (signage->flickerChance > 0.0001){signage->flickerChance = signage->flickerChance*0.97;}
-    if (signOn){signageCheckIndex(signage->testChamberNumber);}
+    int signOn = ((int)gTimePassed) % 3;
+
+    signageCheckIndex(signage->testChamberNumber, signOn);
 
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
@@ -136,32 +152,31 @@ void signageRender(void* data, struct DynamicRenderDataList* renderList, struct 
         return;
     }
 
+    Gfx* model = renderStateAllocateDLChunk(renderState, 4);
+    Gfx* dl = model;
+    if (signOn == SignStateOff) {
+        gDPSetPrimColor(dl++, 255, 255, 46, 47, 49, 49);
+        gDPSetEnvColor(dl++, 46, 47, 49, 255);
+    } else if (signOn == SignStateUnlit) {
+        gDPSetPrimColor(dl++, 255, 255, 46, 47, 49, 49);
+        gDPSetEnvColor(dl++, 0, 0, 0, 255);
+    } else {
+        gDPSetPrimColor(dl++, 255, 255, 242, 245, 247, 255);
+        gDPSetEnvColor(dl++, 0, 0, 0, 255);
+    }
+    gSPDisplayList(dl++, props_signage_model_gfx);
+    gSPEndDisplayList(dl++);
+
     transformToMatrixL(&signage->transform, matrix, SCENE_SCALE);
 
-    
-    if (signOn){
-        dynamicRenderListAddData(
-            renderList,
-            props_signage_model_gfx,
-            matrix,
-            DEFAULT_INDEX,
-            &signage->transform.position,
-            NULL
-        );
-    }
-    else{
-        dynamicRenderListAddData(
-            renderList,
-            props_signage_off_model_gfx,
-            matrix,
-            DEFAULT_INDEX,
-            &signage->transform.position,
-            NULL
-        );
-    }
-
-
-
+    dynamicRenderListAddData(
+        renderList,
+        model,
+        matrix,
+        DEFAULT_INDEX,
+        &signage->transform.position,
+        NULL
+    );
 }
 
 void signageInit(struct Signage* signage, struct SignageDefinition* definition) {
