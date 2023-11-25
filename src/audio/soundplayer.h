@@ -22,6 +22,7 @@ enum SoundType{
     SoundTypeNone,
     SoundTypeMusic,
     SoundTypeAll,
+    SoundTypeVoice,
 };
 
 void soundPlayerInit();

@@ -19,6 +19,7 @@ ALSndPlayer gSoundPlayer;
 #define SOUND_FLAGS_LOOPING     (1 << 1)
 #define SOUND_HAS_STARTED       (1 << 2)
 #define SOUND_FLAGS_PAUSED      (1 << 3)
+#define SOUND_FLAGS_PRIORITY    (1 << 4)
 
 #define SPEED_OF_SOUND          343.2f
 
@@ -198,7 +199,6 @@ float soundPlayerEstimateLength(ALSound* sound, float speed) {
 }
 
 ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType type) {
-
     if (gActiveSoundCount >= MAX_ACTIVE_SOUNDS || soundClipId < 0 || soundClipId >= gSoundClipArray->soundCount) {
         return SOUND_ID_NONE;
     }
@@ -245,8 +245,6 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
         sound->flags |= SOUND_FLAGS_LOOPING;
     }
 
-    
-
     alSndpSetSound(&gSoundPlayer, result);
     alSndpSetVol(&gSoundPlayer, (short)(32767 * newVolume));
     alSndpSetPitch(&gSoundPlayer, pitch);
@@ -254,8 +252,6 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     alSndpPlay(&gSoundPlayer);
 
     ++gActiveSoundCount;
-
-    
 
     return result;
 }
@@ -311,9 +307,13 @@ void soundPlayerGameVolumeUpdate() {
     }
 }
 
+#define SOUND_DAMPING_LEVEL 0.5f
+
 void soundPlayerUpdate() {
     int index = 0;
     int writeIndex = 0;
+    int isVoiceActive = 0;
+    static float soundDamping = 1.0f;
 
     while (index < gActiveSoundCount) {
         struct ActiveSound* sound = &gActiveSounds[index];
@@ -322,6 +322,10 @@ void soundPlayerUpdate() {
             ++writeIndex;
             ++index;
             continue;
+        }
+
+        if (sound->soundType == SoundTypeVoice) {
+            isVoiceActive = 1;
         }
 
         sound->estimatedTimeLeft -= FIXED_DELTA_TIME;
@@ -344,6 +348,11 @@ void soundPlayerUpdate() {
                 int panning;
 
                 soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &panning, &pitch);
+
+                if (sound->soundType != SoundTypeVoice) {
+                    volume *= soundDamping;
+                }
+
                 alSndpSetVol(&gSoundPlayer, (short)(32767 * volume));
                 alSndpSetPan(&gSoundPlayer, panning);
                 alSndpSetPitch(&gSoundPlayer, sound->basePitch * pitch);
@@ -359,6 +368,8 @@ void soundPlayerUpdate() {
             gActiveSounds[writeIndex] = gActiveSounds[index];
         }
     }
+
+    soundDamping = mathfMoveTowards(soundDamping, isVoiceActive ? SOUND_DAMPING_LEVEL : 1.0f, FIXED_DELTA_TIME);
 
     gActiveSoundCount = writeIndex;
 }

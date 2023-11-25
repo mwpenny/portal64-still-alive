@@ -468,7 +468,7 @@ void cutscenesUpdateSounds() {
         int soundType = SoundTypeNone;
         int subtitleType = SubtitleTypeNone; 
         if (i == CH_GLADOS){
-            soundType = SoundTypeAll;
+            soundType = SoundTypeVoice;
             subtitleType = SubtitleTypeCloseCaption; 
         }else if (i == CH_MUSIC){
             soundType = SoundTypeMusic;
