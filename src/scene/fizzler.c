@@ -5,6 +5,7 @@
 #include "../scene/dynamic_scene.h"
 #include "../physics/collision_scene.h"
 #include "../util/dynamic_asset_loader.h"
+#include "../math/mathf.h"
 
 #include "../../build/assets/models/dynamic_model_list.h"
 
@@ -66,7 +67,7 @@ void fizzlerRender(void* data, struct DynamicRenderDataList* renderList, struct 
 
 void fizzlerSpawnParticle(struct Fizzler* fizzler, int particleIndex) {
     int x = (particleIndex & 0x1) ? -fizzler->maxExtent : fizzler->maxExtent;
-    int y = guRandom() % (fizzler->maxVerticalExtent * 2) - fizzler->maxVerticalExtent;
+    int y = randomInRange(-fizzler->maxVerticalExtent, fizzler->maxVerticalExtent);
 
     int xSize = (particleIndex & 0x1) ? (FIZZLER_PARTICLE_LENGTH_FIXED / 2) : -(FIZZLER_PARTICLE_LENGTH_FIXED / 2);
 
