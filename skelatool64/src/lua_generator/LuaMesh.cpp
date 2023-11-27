@@ -6,6 +6,7 @@
 
 #include "../definition_generator/MeshDefinitionGenerator.h"
 #include "../definition_generator/MaterialGenerator.h"
+#include "../materials/RenderMode.h"
 #include "./LuaBasicTypes.h"
 #include "./LuaScene.h"
 #include "../MeshWriter.h"
@@ -281,6 +282,29 @@ void toLua(lua_State* L, Material* material) {
         lua_seti(L, -2, i + 1);
     }
     lua_setfield(L, -2, "tiles");
+
+    if (material->mState.hasRenderMode) {
+        lua_createtable(L, 0, 0);
+        switch (material->mState.cycle2RenderMode.GetZMode()) {
+            case ZMODE_OPA:
+                lua_pushstring(L, "ZMODE_OPA");
+                lua_setfield(L, -2, "zMode");
+                break;
+            case ZMODE_INTER:
+                lua_pushstring(L, "ZMODE_INTER");
+                lua_setfield(L, -2, "zMode");
+                break;
+            case ZMODE_XLU:
+                lua_pushstring(L, "ZMODE_XLU");
+                lua_setfield(L, -2, "zMode");
+                break;
+            case ZMODE_DEC:
+                lua_pushstring(L, "ZMODE_DEC");
+                lua_setfield(L, -2, "zMode");
+                break;
+        }
+        lua_setfield(L, -2, "renderMode");
+    }
 
     lua_pushlightuserdata(L, material);
     lua_setfield(L, -2, "ptr");

@@ -44,6 +44,25 @@ int luaTransformFromPosRotationScale(lua_State* L) {
 }
 
 /***
+ @function from_pos
+ @tparam sk_math.Vector3 pos
+ @treturn Transform
+ */
+int luaTransformFromPos(lua_State* L) {
+    if (lua_gettop(L) > 1) {
+        lua_settop(L, 1);
+    }
+
+    aiVector3D pos;
+
+    fromLua(L, pos);
+
+    aiMatrix4x4 fullTransform(aiVector3D(1.0f, 1.0f, 1.0f), aiQuaternion(), pos);
+    toLua(L, fullTransform);
+    return 1;
+}
+
+/***
  @function from_pos_rot_scale
  @tparam {...number} data
  @treturn Transform
@@ -250,6 +269,9 @@ int buildTransformModule(lua_State* L) {
 
     lua_pushcfunction(L, luaTransformFromPosRotationScale);
     lua_setfield(L, -2, "from_pos_rot_scale");
+
+    lua_pushcfunction(L, luaTransformFromPos);
+    lua_setfield(L, -2, "from_pos");
 
     lua_pushcfunction(L, luaTransformFromArray);
     lua_setfield(L, -2, "from_array");
