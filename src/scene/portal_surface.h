@@ -27,6 +27,7 @@ struct PortalSurface {
     u8 edgeCount;
     u8 vertexCount;
     u8 shouldCleanup;
+    u8 hasDecals;
 
     struct Vector3 right;
     struct Vector3 up;

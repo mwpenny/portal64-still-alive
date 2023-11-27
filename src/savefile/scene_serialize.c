@@ -51,6 +51,8 @@ void sceneSerializePortals(struct Serializer* serializer, SerializeAction action
     }
 }
 
+#define PORTAL_FLAGS_TO_DESERIALIZE    (PortalFlagsPlayerPortal | PortalFlagsZOffset)
+
 void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene) {
     for (int portalIndex = 0; portalIndex < 2; ++portalIndex) {
         char flags;
@@ -98,11 +100,8 @@ void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene)
         collisionSceneSetPortal(portalIndex, &portal->rigidBody.transform, roomIndex, colliderIndex);
         collisionObjectUpdateBB(&portal->collisionObject);
 
-        if (flags & PortalFlagsPlayerPortal) {
-            portal->flags |= PortalFlagsPlayerPortal;
-        } else {
-            portal->flags &= ~PortalFlagsPlayerPortal;
-        }
+        portal->flags &= ~PORTAL_FLAGS_TO_DESERIALIZE;
+        portal->flags |= PORTAL_FLAGS_TO_DESERIALIZE & flags;
 
         portal->opacity = 0.0f;
     }

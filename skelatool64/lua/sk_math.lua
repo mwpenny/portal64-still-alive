@@ -316,7 +316,7 @@ function Box3.nearest_point_in_box(box, point)
     return Vector3.min(box.max, point):max(box.min)
 end
 
---- Returns the point inside or on the box that is nearest to the given point
+--- Returns true of the two bounding boxes have some volume in common
 --- @function overlaps
 --- @tparam Vector3|Box3 box_or_point
 --- @treturn boolean

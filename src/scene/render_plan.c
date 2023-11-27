@@ -563,13 +563,15 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* 
                         faceModel = portal_portal_orange_face_model_gfx;
                         portalModel = portal_portal_orange_model_gfx;
                     }
-
-                    // render the portal cover with a slightly offset z
-                    // so it doesn't z fight with the surface it is attached to
-                    Vp* vpWithOffset = renderStateRequestViewport(renderState);
-                    *vpWithOffset = *current->viewport;
-                    vpWithOffset->vp.vtrans[2] -= 1;
-                    gSPViewport(renderState->dl++, vpWithOffset);
+                    
+                    if (portal->flags & PortalFlagsZOffset) {
+                        // render the portal cover with a slightly offset z
+                        // so it doesn't z fight with the surface it is attached to
+                        Vp* vpWithOffset = renderStateRequestViewport(renderState);
+                        *vpWithOffset = *current->viewport;
+                        vpWithOffset->vp.vtrans[2] -= 2;
+                        gSPViewport(renderState->dl++, vpWithOffset);
+                    }
                     gSPDisplayList(renderState->dl++, faceModel);
                     gSPViewport(renderState->dl++, current->viewport);
                     if (current->previousProperties == NULL && portalIndex == renderPlan->clippedPortalIndex && renderPlan->nearPolygonCount) {

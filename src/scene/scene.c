@@ -860,6 +860,12 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                 portal->flags &= ~PortalFlagsPlayerPortal;
             }
 
+            if (existingSurface->hasDecals) {
+                portal->flags |= PortalFlagsZOffset;
+            } else {
+                portal->flags &= ~PortalFlagsZOffset;
+            }
+
             if (collisionSceneIsPortalOpen()) {
                 // the second portal is fully transparent right away
                 portal->opacity = 0.0f;

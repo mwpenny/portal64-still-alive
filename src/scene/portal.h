@@ -17,6 +17,7 @@
 enum PortalFlags {
     PortalFlagsOddParity = (1 << 0),
     PortalFlagsPlayerPortal = (1 << 2),
+    PortalFlagsZOffset = (1 << 3),
 };
 
 struct Portal {

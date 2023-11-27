@@ -58,7 +58,7 @@ local function get_edge_index(edges, edge_key)
     return 0xFF
 end
 
-local function calculate_portal_single_surface(mesh, mesh_display_list)
+local function calculate_portal_single_surface(mesh, mesh_display_list, has_decals)
     local origin = mesh.bb:lerp(0.5)
 
     local right, up, normal = calculate_surface_basis(mesh)
@@ -129,6 +129,7 @@ local function calculate_portal_single_surface(mesh, mesh_display_list)
         edgeCount = #edges,
         vertexCount = #vertices,
         shouldCleanup = 0,
+        hasDecals = has_decals,
 
         right = right,
         up = up,
@@ -142,7 +143,7 @@ end
 for _, surface in pairs(static_export.static_nodes) do
     if surface.accept_portals then
         table.insert(static_to_portable_surface_mapping, #portal_surfaces)
-        table.insert(portal_surfaces, calculate_portal_single_surface(surface.mesh, surface.display_list))
+        table.insert(portal_surfaces, calculate_portal_single_surface(surface.mesh, surface.display_list, surface.has_decals))
     else
         table.insert(static_to_portable_surface_mapping, -1)
     end

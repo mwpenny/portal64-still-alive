@@ -33,7 +33,7 @@ local function is_coplanar(mesh, plane)
 end
 
 local function should_join_mesh(entry)
-    return entry.plane ~= nil
+    return entry.should_join_mesh
 end
 
 local function bb_union_cost(a, b)
@@ -76,6 +76,28 @@ local function bb_list(bb)
     }
 end
 
+local function check_for_decals(portal_surface, all_static_ndes)
+    if not portal_surface.accept_portals then
+        return false
+    end
+
+    local box_with_padding = sk_math.box3(portal_surface.original_bb.min - 0.1, portal_surface.original_bb.max + 0.1)
+
+    for _, other in pairs(all_static_ndes) do
+        local material = other.chunk.mesh.material
+
+        if material.renderMode and 
+            material.renderMode.zMode == "ZMODE_DEC" and 
+            portal_surface.transform_index == other.transform_index and
+            is_coplanar(other.chunk.mesh, portal_surface.plane) and 
+            box_with_padding:overlaps(other.original_bb) then
+            return true
+        end
+    end
+    
+    return false
+end
+
 local function list_static_nodes(nodes)
     local result = {}
     local bb_scale = sk_input.settings.fixed_point_scale
@@ -100,10 +122,11 @@ local function list_static_nodes(nodes)
             end
 
             local plane = sk_math.plane3_with_point(chunkV.mesh.normals[1], chunkV.mesh.vertices[1])
-            local accept_portals =chunkV.mesh.material and portalable_surfaces[chunkV.mesh.material.name] and not sk_scene.find_flag_argument(v.arguments, "no_portals")
+            local should_join_mesh = true
+            local accept_portals = chunkV.mesh.material and portalable_surfaces[chunkV.mesh.material.name] and not sk_scene.find_flag_argument(v.arguments, "no_portals")
 
             if transform_index or signal or accept_portals or not is_coplanar(chunkV.mesh, plane) then
-                plane = nil
+                should_join_mesh = false
             end
     
             insert_or_merge(result, {
@@ -113,11 +136,17 @@ local function list_static_nodes(nodes)
                 transform_index = transform_index,
                 room_index = room_export.node_nearest_room_index(v.node) or 0,
                 accept_portals = accept_portals,
+                has_decals = false,
                 signal = signal,
                 original_bb = original_bb,
                 plane = plane,
+                should_join_mesh = should_join_mesh,
             })
         end
+    end
+
+    for _, node in pairs(result) do
+        node.has_decals = check_for_decals(node, result)
     end
 
     return result;
@@ -320,6 +349,7 @@ local function process_static_nodes(nodes)
             transform_index = source_node.transform_index,
             room_index = source_node.room_index,
             accept_portals = source_node.accept_portals,
+            has_decals = source_node.has_decals,
             signal = source_node.signal,
         })
     end
