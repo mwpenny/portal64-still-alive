@@ -32,7 +32,7 @@ Because this demake has been in development for many years, it has made signific
 
 This is a community driven project that welcomes any and all game testers and or [Contributors](./CONTRIBUTING.md). 
 
-Updates are constantly being made to the game, so we recommend checking out the author's [YouTube Channel](https://www.youtube.com/@happycoder1989) for the latest updates.
+Updates are constantly being made to the game, so we recommend checking out the author's [YouTube Channel](https://www.youtube.com/@james.lambert) for the latest updates.
 
 ## How to build
 
