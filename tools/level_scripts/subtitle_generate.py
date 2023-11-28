@@ -56,6 +56,7 @@ valve_whitelist = {
     "VALVE_MISCELLANEOUS_KEYBOARD_KEYS_TITLE",
 }
 
+#include only languages the font supports
 language_translations = {
 	'brazilian': 'Brasileiro',
     'bulgarian': 'Български език',
@@ -400,6 +401,17 @@ def process_all_closecaption_files(dir, language_names):
     make_overall_subtitles_header(header_lines, language_list, len(language_with_values_list[0]['value']), max_message_length)
     make_overall_subtitles_sourcefile(language_list)
 
+dir = "vpk/Portal/portal/resource"
 
+#actually available supported languages
+available_languages_list = []
 
-process_all_closecaption_files("vpk/Portal/portal/resource", sys.argv[1:])
+lst = os.listdir(dir)
+lst.sort()
+for filename in lst:
+    for language in language_translations:
+        if language in filename:
+            if language not in available_languages_list:
+                available_languages_list.append(language)
+
+process_all_closecaption_files(dir, available_languages_list)
