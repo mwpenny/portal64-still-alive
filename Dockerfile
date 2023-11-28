@@ -4,6 +4,7 @@ WORKDIR /usr/src/app
 
 ENV N64_LIBGCCDIR /opt/crashsdk/lib/gcc/mips64-elf/12.2.0
 ENV PATH /opt/crashsdk/bin:$PATH
+ENV PATH /root/.local/bin:$PATH
 ENV ROOT /etc/n64
 
 RUN apt update -y && \
@@ -57,4 +58,5 @@ RUN rm /opt/blender/blender-3.6.1-linux-x64.tar.xz
 
 ENV BLENDER_3_6 /opt/blender/blender-3.6.1-linux-x64/blender
 
+RUN pipx ensurepath
 RUN pipx install vpk
