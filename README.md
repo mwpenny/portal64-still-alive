@@ -58,10 +58,19 @@ export BLENDER_3_6="/usr/bin/blender"
 
 <br />
 
-You will need to install Python `vpk`
+You will need to install Python `vpk`:
+
+Up to Ubuntu 22.04:
 
 ```sh
 pip install vpk
+```
+
+From Ubuntu 23.04 on you need to do instead:
+
+```sh
+pipx ensurepath
+pipx install vpk
 ```
 
 <br />
@@ -219,6 +228,15 @@ Then build the rom using
 ```sh
 make -f Makefile.docker
 ```
+
+You can also use the language options, e.g.:
+
+```sh
+make -f Makefile.docker spanish_audio
+make -f Makefile.docker german_audio
+make -f Makefile.docker
+```
+
 
 That will generate the rom at `/build/portal64.z64`
 
