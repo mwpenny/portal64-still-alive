@@ -41,12 +41,14 @@ int collisionCapsuleMinkowsiSum(void* data, struct Basis* basis, struct Vector3*
 
     float directionY = vector3Dot(&basis->y, direction);
 
-    if (directionY > SQRT_2) {
-        vector3Scale(&basis->y, output, capsule->radius);
-        return 0xFF;
-    } else if (directionY < -SQRT_2) {
-        vector3Scale(&basis->y, output, -capsule->radius - capsule->extendDownward);
-        return 0xFF00;
+    if (directionY * directionY > 0.5f * vector3MagSqrd(direction)) {
+        if (directionY > 0.0f) {
+            vector3Scale(&basis->y, output, capsule->radius);
+            return 0xFF;
+        } else {
+            vector3Scale(&basis->y, output, -capsule->radius - capsule->extendDownward);
+            return 0xFF00;
+        }
     } else {
         struct Vector2 horizontalBasis;
 
