@@ -118,14 +118,7 @@ void newGameInit(struct NewGameMenu* newGameMenu) {
 
     newGameMenu->chapterOffset = 0;
     newGameMenu->selectedChapter = 0;    
-
-    for (
-        newGameMenu->chapterCount = 1; 
-        newGameMenu->chapterCount < MAX_CHAPTER_COUNT && 
-            gChapters[newGameMenu->chapterCount].testChamberNumber <= gSaveData.header.chapterProgress; 
-        ++newGameMenu->chapterCount) {
-        // do nothing
-    }
+    newGameMenu->chapterCount = 1; 
 }
 
 void newGameRebuildText(struct NewGameMenu* newGameMenu) {
@@ -137,6 +130,12 @@ void newGameRebuildText(struct NewGameMenu* newGameMenu) {
 }
 
 enum InputCapture newGameUpdate(struct NewGameMenu* newGameMenu) {
+    // this is done on update so if the unlock menu cheat is used it shows up right away
+    while (newGameMenu->chapterCount < MAX_CHAPTER_COUNT && 
+            gChapters[newGameMenu->chapterCount].testChamberNumber <= gSaveData.header.chapterProgress) {
+        ++newGameMenu->chapterCount;
+    }
+
     if (controllerGetButtonDown(0, B_BUTTON)) {
         return InputCaptureExit;
     }

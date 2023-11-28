@@ -291,6 +291,13 @@ int savefileOldestSlot() {
     return result;
 }
 
+void savefileMarkChapterProgress(int chamberNumber) {
+    if (chamberNumber > gSaveData.header.chapterProgress) {
+        gSaveData.header.chapterProgress = chamberNumber;
+        savefileSave();
+    }
+}
+
 int savefileFirstFreeSlot() {
     for (int i = 1; i < MAX_SAVE_SLOTS; ++i) {
         if (gSaveData.saveSlotMetadata[i].testChamber == NO_TEST_CHAMBER) {

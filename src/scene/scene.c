@@ -90,10 +90,7 @@ void sceneInit(struct Scene* scene) {
         checkpointLoadLast(scene);
     }
 
-    if (gCurrentLevelIndex > gSaveData.header.chapterProgress) {
-        gSaveData.header.chapterProgress = gCurrentLevelIndex;
-        savefileSave();
-    }
+    savefileMarkChapterProgress(gCurrentLevelIndex);
 
     gGameMenu.state = GameMenuStateResumeGame;
     scene->ignorePortalGun = 0;

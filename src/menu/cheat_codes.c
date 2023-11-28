@@ -4,6 +4,7 @@
 #include "../audio/soundplayer.h"
 #include "../scene/scene.h"
 #include "../build/src/audio/clips.h"
+#include "../savefile/savefile.h"
 
 struct CheatCodePattern gCheatCodes[CheatCodeCount] = {
     [CheatCodeUnlockGun] = {
@@ -16,6 +17,10 @@ struct CheatCodePattern gCheatCodes[CheatCodeCount] = {
     },
     [CheatCodeInvincibility] = {
         {'u', 'd', 'u', 'd', 'u', 'd', 'l', 'l'},
+        SOUNDS_BUTTONCLICKRELEASE,
+    },
+    [CheatCodeAllLevels] = {
+        {'u', 'r', 'd', 'l', 'u', 'r', 'd', 'l'},
         SOUNDS_BUTTONCLICKRELEASE,
     },
 };
@@ -39,6 +44,9 @@ void cheatCodeApply(enum CheatCode cheat) {
             break;
         case CheatCodeInvincibility:
             playerToggleInvincibility(&gScene.player);
+            break;
+        case CheatCodeAllLevels:
+            savefileMarkChapterProgress(7);
             break;
         case CheatCodeCount:
             break;
