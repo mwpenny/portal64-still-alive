@@ -129,13 +129,13 @@ def get_caption_keys_values_language(lines):
             if len(keyval) != 2:
                 continue
 
-        if "[$WIN32]" in keyval[1]:
+        if "[$X360]" in keyval[1]:
             continue
         if "[english]" in keyval[0] or 'commentary' in keyval[0]:
             continue
 
-        if "[$X360]" in keyval[1]:
-            keyval[1] = keyval[1].replace("[$X360]", "")
+        if "[$WIN32]" in keyval[1]:
+            keyval[1] = keyval[1].replace("[$WIN32]", "")
 
         key = keyval[0].replace('"', "").replace(".", "_").replace("-", "_").replace('\\', "_").replace('#', "").upper()
         val = keyval[1].replace('"', "").replace("\n", "").replace("\\", "").strip()
