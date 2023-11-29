@@ -44,16 +44,16 @@ After installing modern sdk you will want to also install
 sudo apt install libnustd
 ```
 
-Next, you will need to install the latest version of Blender 3.6 LTS (please don't use e.g. 4.x, only 3.6.x will work correctly). Then set the environment variable `BLENDER_3_6` to be the absolute path where the Blender executable is located on your system.
+Next, you will need to install the latest version of Blender 3.6 LTS (please don't use e.g. 4.x, only 3.6.x will work correctly). Then set the environment variable `BLENDER_3_6` to be the absolute path where the Blender 3.6 executable is located on your system.
 
 ```sh
 sudo snap install blender --channel=3.6lts/stable --classic
 ```
 
-e.g. add this to your ~/.bashrc
+e.g. add this to your ~/.bashrc if you used snap (or you can use `$(which blender)` to find the path of Blender 3.6)
 
 ```bash
-export BLENDER_3_6="/usr/bin/blender"
+export BLENDER_3_6="/snap/bin/blender"
 ```
 
 <br />
