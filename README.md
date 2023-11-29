@@ -245,8 +245,8 @@ That will generate the rom at `/build/portal64.z64`
 ## Current New Feature TODO List
 - [ ] test chamber 10 without jumping
 - [ ] check if display list is long enough 
-- [ ] check collider flags when filtering contacts
 - [ ] pausing while glados is speaking can end her speech early
+- [x] check collider flags when filtering contacts
 - [x] gun flicker between levels
 - [x] fizzler player sound effect
 - [x] clear z buffer instead of partitioning it

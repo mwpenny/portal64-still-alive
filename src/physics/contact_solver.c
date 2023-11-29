@@ -25,6 +25,11 @@ struct ContactSolver gContactSolver;
 void contactSolverCleanupManifold(struct ContactManifold* manifold) {
 	int writeIndex = 0;
 
+	if (!(manifold->shapeA->collisionLayers & manifold->shapeB->collisionLayers)) {
+		manifold->contactCount = 0;
+		return;
+	}
+
 	for (int readIndex = 0; readIndex < manifold->contactCount; ++readIndex) {
 		struct ContactPoint* contactPoint = &manifold->contacts[readIndex];
 		struct Vector3 offset;
