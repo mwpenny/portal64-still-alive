@@ -131,3 +131,23 @@ void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callba
 
     osSendMesg(schedulerCommandQueue, (OSMesg)scTask, OS_MESG_BLOCK);
 }
+
+void graphicsTaskClearZBuffer(struct GraphicsTask* task, int minX, int minY, int maxX, int maxY) {
+    if (minX >= maxX || minY >= maxY) {
+        return;
+    }
+
+    gDPPipeSync(task->renderState.dl++);
+    gDPSetCycleType(task->renderState.dl++, G_CYC_FILL);
+    gDPSetRenderMode(task->renderState.dl++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetColorImage(task->renderState.dl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WD, osVirtualToPhysical(zbuffer));
+    gDPSetFillColor(task->renderState.dl++, (GPACK_ZDZ(G_MAXFBZ,0) << 16 | GPACK_ZDZ(G_MAXFBZ,0)));
+    gDPFillRectangle(task->renderState.dl++, minX, minY, maxX - 1, maxY - 1);
+    
+    gDPPipeSync(task->renderState.dl++);
+    gDPSetColorImage(task->renderState.dl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WD, osVirtualToPhysical(task->framebuffer));
+
+    gDPPipeSync(task->renderState.dl++);
+    gDPSetCycleType(task->renderState.dl++, G_CYC_1CYCLE);
+    gDPSetRenderMode(task->renderState.dl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+}

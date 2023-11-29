@@ -6,8 +6,8 @@
 #include "../savefile/savefile.h"
 
 unsigned char gDefaultControllerSettings[ControllerActionSourceCount] = {
-    [ControllerActionSourceAButton] = ControllerActionOpenPortal1,
-    [ControllerActionSourceBButton] = ControllerActionOpenPortal0,
+    [ControllerActionSourceAButton] = ControllerActionOpenPortal0,
+    [ControllerActionSourceBButton] = ControllerActionOpenPortal1,
     [ControllerActionSourceCUpButton] = ControllerActionMove,
     [ControllerActionSourceCRightButton] = ControllerActionNone,
     [ControllerActionSourceCDownButton] = ControllerActionNone,

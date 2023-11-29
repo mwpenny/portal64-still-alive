@@ -243,9 +243,14 @@ That will generate the rom at `/build/portal64.z64`
 <br />
 
 ## Current New Feature TODO List
-- [X] add translations to menus
+- [ ] fizzler player sound effect
+- [ ] gun flicker between levels
+- [ ] test chamber 10 without jumping
 - [ ] check if display list is long enough 
+- [ ] check collider flags when filtering contacts
 - [ ] pausing while glados is speaking can end her speech early
+- [x] clear z buffer instead of partitioning it
+- [X] add translations to menus
 - [x] jump animation
 - [x] optimize static culling
 - [x] figure out why portals sometimes are in front of window

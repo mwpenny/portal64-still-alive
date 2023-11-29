@@ -34,4 +34,6 @@ typedef void (*GraphicsCallback)(void* data, struct RenderState* renderState, st
 u16* graphicsLayoutScreenBuffers(u16* memoryEnd);
 void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callback, void* data);
 
+void graphicsTaskClearZBuffer(struct GraphicsTask* task, int minX, int minY, int maxX, int maxY);
+
 #endif

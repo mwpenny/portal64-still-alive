@@ -303,7 +303,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     Mtx* staticMatrices = sceneAnimatorBuildTransforms(&scene->animator, renderState);
 
     renderPlanBuild(&renderPlan, scene, renderState);
-    renderPlanExecute(&renderPlan, scene, staticMatrices, renderState);
+    renderPlanExecute(&renderPlan, scene, staticMatrices, renderState, task);
 
     // contactSolverDebugDraw(&gContactSolver, renderState);
 

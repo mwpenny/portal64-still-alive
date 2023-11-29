@@ -3,6 +3,7 @@
 
 #include "./scene.h"
 #include "../graphics/screen_clipper.h"
+#include "../graphics/graphics.h"
 
 #define DEFAULT_FAR_PLANE       30.0f
 #define DEFAULT_NEAR_PLANE      0.125f
@@ -19,14 +20,13 @@ struct RenderProps {
 
     Vp* viewport;
 
-    float maxZOverlap;
-
     u8 currentDepth;
     u8 exitPortalIndex;
     s8 clippingPortalIndex;
     u8 portalRenderType;
 
     s8 parentStageIndex;
+    s8 shouldClearZBuffer;
 
     u16 fromRoom;
 
@@ -51,6 +51,6 @@ struct RenderPlan {
 
 void renderPlanBuild(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderState* renderState);
 
-void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* staticTransforms, struct RenderState* renderState);
+void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* staticTransforms, struct RenderState* renderState, struct GraphicsTask* task);
 
 #endif
