@@ -60,15 +60,8 @@ export BLENDER_3_6="/usr/bin/blender"
 
 You will need to install Python `vpk`:
 
-Up to Ubuntu 22.04:
-
 ```sh
-pip install vpk
-```
-
-From Ubuntu 23.04 on you need to do instead:
-
-```sh
+sudo apt install pipx
 pipx ensurepath
 pipx install vpk
 ```
