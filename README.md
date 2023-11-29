@@ -104,11 +104,11 @@ sudo apt install nodejs
 ```
 
 <br />
-Clone the Portal64 repo or downloade the zip.
+Clone the Portal64 repo or download the zip.
 
 ```sh
 sudo apt install git
-sudo apt upgrade
+sudo apt update
 git clone https://github.com/lambertjamesd/portal64.git
 cd portal64
 ```
