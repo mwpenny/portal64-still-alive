@@ -108,7 +108,7 @@ void portalBallRender(struct PortalGunProjectile* projectile, struct RenderState
 extern LookAt gLookAt;
 extern float getAspect();
 
-void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera, int portalGunVisible, int lastFiredIndex) {
+void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera, int lastFiredIndex) {
     struct MaterialState materialState;
     materialStateInit(&materialState, DEFAULT_INDEX);
     
@@ -124,7 +124,7 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
         portalBallRender(projectile, renderState, &materialState, &fromCamera->transform, i);
     }
 
-    if (!portalGunVisible) {
+    if (!portalGun->portalGunVisible) {
         return;
     }
 

@@ -35,6 +35,7 @@
 #include "../player/player_rumble_clips.h"
 
 #include "../build/src/audio/subtitles.h"
+#include "../build/src/audio/clips.h"
 
 extern struct GameMenu gGameMenu;
 
@@ -122,10 +123,12 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_0) {
         playerGivePortalGun(&scene->player, PlayerHasFirstPortalGun);
+        scene->portalGun.portalGunVisible = 1;
     }
 
     if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_1) {
         playerGivePortalGun(&scene->player, PlayerHasSecondPortalGun);
+        scene->portalGun.portalGunVisible = 1;
     }
 
     portalInit(&scene->portals[0], 0);
@@ -311,7 +314,6 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
         &scene->portalGun, 
         renderState, 
         &scene->camera, 
-        scene->portalGun.portalGunVisible, 
         scene->hud.lastPortalIndexShot
     );
 
@@ -438,6 +440,7 @@ void sceneCheckPortals(struct Scene* scene) {
         if (didClose) {
             rumblePakClipPlay(&gPlayerClosePortalRumble);
             portalGunFizzle(&scene->portalGun);
+            soundPlayerPlay(SOUNDS_PORTAL_FIZZLE2, 0.6f, 1.0f, NULL, NULL, SoundTypeAll);
         }
     }
 
