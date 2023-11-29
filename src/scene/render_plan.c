@@ -19,7 +19,9 @@
 #include "../build/assets/models/portal/portal_orange.h"
 #include "../build/assets/models/portal/portal_orange_face.h"
 
-#define PORTAL_AREA_CLEAR_THRESHOLD (100 * 50)
+// if a portal takes up a small portion of the screen it is worth to clear
+// the zbuffer after drawing the contents instead of 
+#define PORTAL_AREA_CLEAR_THRESHOLD (100 * 100)
 #define MIN_VP_WIDTH 64
 #define CAMERA_CLIPPING_RADIUS  0.2f
 #define PORTAL_CLIPPING_OFFSET  0.1f
