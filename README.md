@@ -148,6 +148,10 @@ Portal/hl2/resource/valve_<your desired language 2>.txt
 Portal/portal/resource/closecaption_english.txt
 Portal/portal/resource/closecaption_<your desired language 1>.txt
 Portal/portal/resource/closecaption_<your desired language 2>.txt
+
+Portal/portal/resource/portal_english.txt
+Portal/portal/resource/portal_<your desired language 1>.txt
+Portal/portal/resource/portal_<your desired language 2>.txt
 ```
 
 Finally, run `make` to build the project.
