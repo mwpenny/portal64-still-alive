@@ -285,7 +285,7 @@ void toLua(lua_State* L, Material* material) {
 
     if (material->mState.hasRenderMode) {
         lua_createtable(L, 0, 0);
-        switch (material->mState.cycle2RenderMode.GetZMode()) {
+        switch (material->mState.cycle1RenderMode.GetZMode() | material->mState.cycle2RenderMode.GetZMode()) {
             case ZMODE_OPA:
                 lua_pushstring(L, "ZMODE_OPA");
                 lua_setfield(L, -2, "zMode");
