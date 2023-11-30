@@ -67,7 +67,7 @@ void savefileListSlotInit(struct SavefileListSlot* savefileListSlot, int x, int 
 
     savefileListSlot->x = x;
     savefileListSlot->y = y;
-    savefileListSlot->imageData = malloc(THUMBANIL_IMAGE_SIZE);
+    savefileListSlot->imageData = malloc(THUMBNAIL_IMAGE_SIZE);
     savefileListSlot->slotIndex = -1;
 }
 

@@ -156,7 +156,7 @@ void savefileSave() {
 
 void savefileSaveGame(Checkpoint checkpoint, u16* screenshot, int testChamberIndex, int subjectNumber, int slotIndex) {
     savefileSramSave((void*)SAVE_SLOT_SRAM_ADDRESS(slotIndex), checkpoint, MAX_CHECKPOINT_SIZE);
-    savefileSramSave((void*)SCREEN_SHOT_SRAM(slotIndex), screenshot, THUMBANIL_IMAGE_SIZE);
+    savefileSramSave((void*)SCREEN_SHOT_SRAM(slotIndex), screenshot, THUMBNAIL_IMAGE_SIZE);
 
     unsigned char prevSortOrder = gSaveData.saveSlotMetadata[slotIndex].saveSlotOrder;
 
@@ -316,9 +316,9 @@ void savefileLoadGame(int slot, Checkpoint checkpoint, int* testChamberIndex, in
 
 void savefileLoadScreenshot(u16* target, u16* location) {
     if ((int)location >= SRAM_START_ADDR && (int)location <= (SRAM_START_ADDR + SRAM_SIZE)) {
-        savefileSramLoad(location, target, THUMBANIL_IMAGE_SIZE);
+        savefileSramLoad(location, target, THUMBNAIL_IMAGE_SIZE);
     } else {
-        memCopy(target, location, THUMBANIL_IMAGE_SIZE);
+        memCopy(target, location, THUMBNAIL_IMAGE_SIZE);
     }
 }
 
