@@ -79,7 +79,7 @@ sudo apt install vtf2png sfz2n64 mpg123 sox imagemagick unzip ffmpeg
 
 <br />
 
-Install lua5.4 (remove other perhaps installed versions first, skelatool64 needs to be build with luac 5.4!)
+Install lua5.4 (You may need to remove other installed versions first, skelatool64 needs to be built with luac 5.4!)
 
 ```sh
 sudo apt install lua5.4 liblua5.4-dev liblua5.4-0
@@ -104,6 +104,13 @@ sudo apt install nodejs
 ```
 
 <br />
+Clone the Portal64 repo or download the zip.
+
+```sh
+sudo apt install git
+git clone https://github.com/lambertjamesd/portal64.git
+cd portal64
+```
 
 You then need to add the following files from where Portal is installed to the folder `vpk/` OR create a symbolic link to the `Portal` folder there (see [vpk/add_vpk_here.md](./vpk/add_vpk_here.md) for more details!).
 You can add multiple languages if desired.
