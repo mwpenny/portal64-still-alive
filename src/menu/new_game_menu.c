@@ -39,16 +39,6 @@ struct Chapter gChapters[] = {
 
 #define MAX_CHAPTER_COUNT   ((sizeof(gChapters) / sizeof(*gChapters)) - 1)
 
-struct Chapter* chapterFindForChamber(int chamberIndex) {
-    for (int i = 1; i < MAX_CHAPTER_COUNT; ++i) {
-        if (gChapters[i].testChamberLevelIndex > chamberIndex) {
-            return &gChapters[i - 1];
-        }
-    }
-
-    return &gChapters[MAX_CHAPTER_COUNT - 1];
-}
-
 void chapterMenuInit(struct ChapterMenu* chapterMenu, int x, int y) {
     chapterMenu->chapterText = NULL;
     chapterMenu->testChamberText = NULL;

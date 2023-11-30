@@ -32,7 +32,7 @@ int levelQuadIndex(struct CollisionObject* pointer);
 
 int getChamberDisplayNumberFromLevelIndex(int levelIndex, int roomIndex);
 void levelClearQueuedLevel();
-int getLevelIndexFromChamberDisplayNumber(int chamberIndex);
+int getLevelIndexFromChamberDisplayNumber(int chamberNumber);
 
 struct Location* levelGetLocation(short index);
 

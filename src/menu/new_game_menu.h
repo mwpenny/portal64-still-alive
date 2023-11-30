@@ -25,8 +25,6 @@ struct ChapterMenu {
     int y;
 };
 
-struct Chapter* chapterFindForChamber(int chamberIndex);
-
 void chapterMenuInit(struct ChapterMenu* chapterMenu, int x, int y);
 
 struct NewGameMenu {

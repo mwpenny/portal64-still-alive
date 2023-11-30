@@ -22,7 +22,7 @@ void loadGamePopulate(struct LoadGameMenu* loadGame) {
 
     for (int i = 0; i < numberOfSaves; ++i) {
         savefileInfo[i].slotIndex = saveSlots[i].saveSlot;
-        savefileInfo[i].testchamberIndex = saveSlots[i].testChamber;
+        savefileInfo[i].testchamberDisplayNumber = saveSlots[i].testChamber;
         savefileInfo[i].savefileName = saveSlots[i].saveSlot == 0 ? translationsGet(GAMEUI_AUTOSAVE) : NULL;
         savefileInfo[i].screenshot = (u16*)SCREEN_SHOT_SRAM(saveSlots[i].saveSlot);
     }

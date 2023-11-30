@@ -25,7 +25,7 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
 
     for (int i = 0; i < numberOfSaves; ++i) {
         savefileInfo[i].slotIndex = saveSlots[i].saveSlot;
-        savefileInfo[i].testchamberIndex = saveSlots[i].testChamber;
+        savefileInfo[i].testchamberDisplayNumber = saveSlots[i].testChamber;
         savefileInfo[i].savefileName = NULL;
         savefileInfo[i].screenshot = (u16*)SCREEN_SHOT_SRAM(saveSlots[i].saveSlot);
 
@@ -39,7 +39,7 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
     if (includeNew && freeSlot != SAVEFILE_NO_SLOT) {
         savefileInfo[numberOfSaves].slotIndex = freeSlot;
         savefileInfo[numberOfSaves].savefileName = translationsGet(GAMEUI_NEWSAVEGAME);
-        savefileInfo[numberOfSaves].testchamberIndex = getChamberDisplayNumberFromLevelIndex(gCurrentLevelIndex, gScene.player.body.currentRoom);
+        savefileInfo[numberOfSaves].testchamberDisplayNumber = getChamberDisplayNumberFromLevelIndex(gCurrentLevelIndex, gScene.player.body.currentRoom);
         savefileInfo[numberOfSaves].screenshot = gScreenGrabBuffer;
 
         if (suggestedSlot == 0) {

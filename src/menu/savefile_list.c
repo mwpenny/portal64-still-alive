@@ -32,7 +32,7 @@ void savefileListSlotUseInfo(struct SavefileListSlot* savefileListSlot, struct S
     }
 
     char message[64];
-    textManipTestChamberMessage(message, savefileInfo->testchamberIndex);
+    textManipTestChamberMessage(message, savefileInfo->testchamberDisplayNumber);
     savefileListSlot->testChamberText = menuBuildPrerenderedText(&gDejaVuSansFont, message, x + BORDER_WIDTH + 8, y, 120);
 
     if (savefileInfo->savefileName) {
