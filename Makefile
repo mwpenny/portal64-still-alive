@@ -66,10 +66,10 @@ LDFLAGS =	-L/usr/lib/n64 $(N64LIB)  -L$(N64_LIBGCCDIR) -lgcc
 
 default:	english_audio
 
-english_audio: portal_pak_dir
+english_audio: build/src/audio/subtitles.h portal_pak_dir
 	@$(MAKE) buildgame
 
-all_languages: portal_pak_dir german_audio french_audio russian_audio spanish_audio
+all_languages: build/src/audio/subtitles.h portal_pak_dir german_audio french_audio russian_audio spanish_audio
 	@$(MAKE) buildgame
 
 german_audio: vpk/portal_sound_vo_german_dir.vpk vpk/portal_sound_vo_german_000.vpk portal_pak_dir
@@ -501,35 +501,17 @@ build/src/decor/decor_object_list.o: build/src/audio/clips.h
 ## Subtitles
 ####################
 
-SUBTITLE_LANGUAGES = english \
-	brazilian \
-    bulgarian \
-    czech \
-    danish \
-    german \
-    spanish \
-    latam \
-	greek \
-    french \
-    italian \
-    polish \
-    hungarian \
-    dutch \
-    norwegian \
-    portuguese \
-    russian \
-    romanian \
-    finnish \
-    swedish \
-    turkish \
-	ukrainian
+SUBTITLE_SOURCES = $(shell find build/src/audio/ -type f -name 'subtitles_*.c')
+SUBTITLE_OBJECTS = $(patsubst %.c, %.o, $(SUBTITLE_SOURCES))
+	
+build/src/audio/subtitles_%.o: build/src/audio/subtitles_%.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -MM $^ -MF "$(@:.o=.d)" -MT"$@"
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-SUBTITLE_SOURCES = $(SUBTITLE_LANGUAGES:%=build/src/audio/subtitles_%.c)
-SUBTITLE_OBJECTS = $(SUBTITLE_LANGUAGES:%=build/src/audio/subtitles_%.o)
-
-build/src/audio/subtitles.h build/src/audio/subtitles.c build/subtitles.ld $(SUBTITLE_SOURCES): vpk/Portal/portal/resource/closecaption_english.txt vpk/Portal/hl2/resource/gameui_english.txt vpk/Portal/hl2/resource/valve_english.txt assets/translations/extra_english.txt tools/level_scripts/subtitle_generate.py
-	python3 tools/level_scripts/subtitle_generate.py $(SUBTITLE_LANGUAGES)
-
+build/src/audio/subtitles.h build/src/audio/subtitles.c build/subtitles.ld: vpk/Portal/portal/resource/closecaption_english.txt vpk/Portal/hl2/resource/gameui_english.txt vpk/Portal/hl2/resource/valve_english.txt assets/translations/extra_english.txt tools/level_scripts/subtitle_generate.py
+	python3 tools/level_scripts/subtitle_generate.py
+	
 ####################
 ## Linking
 ####################

@@ -56,19 +56,20 @@ valve_whitelist = {
     "VALVE_MISCELLANEOUS_KEYBOARD_KEYS_TITLE",
 }
 
-language_translations = {
-	'brazilian': 'Brasileiro',
+#include only languages the font supports (ingame lists display in this defined order)
+language_translations = {	
+    'english': 'English',
+    'brazilian': 'Brasileiro',
     'bulgarian': 'Български език',
     'czech': 'Čeština',
     'danish': 'Dansk',
     'german': 'Deutsch',
-    'english': 'English',
     'spanish': 'Español',
-	'greek': 'Ελληνικά',
+    'latam': 'Español americana',
+    'greek': 'Ελληνικά',
     'french': 'Français',
     'italian': 'Italiano',
     'polish': 'Język polski',
-    'latam': 'Español americana',
     'hungarian': 'Magyar nyelv',
     'dutch': 'Nederlands',
     'norwegian': 'Norsk',
@@ -78,7 +79,7 @@ language_translations = {
     'finnish': 'Suomi',
     'swedish': 'Svenska',
     'turkish': 'Türkçe',
-	'ukrainian': 'Українська мова',
+    'ukrainian': 'Українська мова',
 }
 
 def get_supported_characters():
@@ -400,6 +401,22 @@ def process_all_closecaption_files(dir, language_names):
     make_overall_subtitles_header(header_lines, language_list, len(language_with_values_list[0]['value']), max_message_length)
     make_overall_subtitles_sourcefile(language_list)
 
+dir = "vpk/Portal/portal/resource"
 
+#actually available supported languages
+available_languages_list = []
+ordered_language_list = []
 
-process_all_closecaption_files("vpk/Portal/portal/resource", sys.argv[1:])
+lst = os.listdir(dir)
+lst.sort()
+for filename in lst:
+    for language in language_translations:
+        if language in filename:
+            if language not in available_languages_list:
+                available_languages_list.append(language)
+
+for language in language_translations:
+    if language in available_languages_list:
+        ordered_language_list.append(language)
+
+process_all_closecaption_files(dir, ordered_language_list)
