@@ -154,7 +154,7 @@ void savefileSave() {
 
 #define SAVE_SLOT_SRAM_ADDRESS(index) (SRAM_ADDR + (1 + (index)) * SAVE_SLOT_SIZE)
 
-void savefileSaveGame(Checkpoint checkpoint, u16* screenshot, int testChamberIndex, int subjectNumber, int slotIndex) {
+void savefileSaveGame(Checkpoint checkpoint, u16* screenshot, int testChamberDisplayNumber, int subjectNumber, int slotIndex) {
     savefileSramSave((void*)SAVE_SLOT_SRAM_ADDRESS(slotIndex), checkpoint, MAX_CHECKPOINT_SIZE);
     savefileSramSave((void*)SCREEN_SHOT_SRAM(slotIndex), screenshot, THUMBNAIL_IMAGE_SIZE);
 
@@ -167,7 +167,7 @@ void savefileSaveGame(Checkpoint checkpoint, u16* screenshot, int testChamberInd
         }
     }
 
-    gSaveData.saveSlotMetadata[slotIndex].testChamber = testChamberIndex;
+    gSaveData.saveSlotMetadata[slotIndex].testChamber = testChamberDisplayNumber;
     gSaveData.saveSlotMetadata[slotIndex].testSubjectNumber = subjectNumber;
     gSaveData.saveSlotMetadata[slotIndex].saveSlotOrder = 0;
 
@@ -291,9 +291,10 @@ int savefileOldestSlot() {
     return result;
 }
 
-void savefileMarkChapterProgress(int chamberNumber) {
-    if (chamberNumber > gSaveData.header.chapterProgress) {
-        gSaveData.header.chapterProgress = chamberNumber;
+void savefileMarkChapterProgress(int levelIndex) {
+	//int chamberNumer = getChamberDisplayNumberFromLevelIndex(levelIndex);//todo correct?
+    if (levelIndex > gSaveData.header.chapterProgressLevelIndex) {
+        gSaveData.header.chapterProgressLevelIndex = levelIndex;
         savefileSave();
     }
 }

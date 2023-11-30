@@ -11,8 +11,8 @@
 
 struct Chapter {
     void* imageData;
-    short testChamberNumber;
-    short testChamberDisplayNumber;
+    short testChamberLevelIndex;
+    short testChamberDisplayNumber; // chamberNumber
 };
 
 struct ChapterMenu {
@@ -34,8 +34,8 @@ struct NewGameMenu {
     struct PrerenderedText* newGameText;
     Gfx* topLine;
 
-    struct ChapterMenu chapter0;
-    struct ChapterMenu chapter1;
+    struct ChapterMenu displayedChapter0_left;
+    struct ChapterMenu displayedChapter1_right;
 
     short selectedChapter;
     short chapterOffset;

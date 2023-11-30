@@ -28,7 +28,7 @@
 
 struct SaveHeader {
     unsigned header;
-    unsigned char chapterProgress;
+    unsigned char chapterProgressLevelIndex;
     unsigned char flags;
     unsigned char nextTestSubject;
 };

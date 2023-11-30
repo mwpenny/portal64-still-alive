@@ -38,7 +38,7 @@ enum InputCapture loadGameUpdate(struct LoadGameMenu* loadGame) {
         savefileLoadGame(savefileGetSlot(loadGame->savefileList), save, &testChamber, &testSubject);
         gCurrentTestSubject = testSubject;
         
-        levelQueueLoad(getLevelIndexFromChamberNumber(testChamber), NULL, NULL);
+        levelQueueLoad(getLevelIndexFromChamberDisplayNumber(testChamber), NULL, NULL);
         checkpointUse(save);
 
         stackMallocFree(save);
