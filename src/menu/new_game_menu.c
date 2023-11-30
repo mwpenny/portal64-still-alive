@@ -123,7 +123,7 @@ enum InputCapture newGameUpdate(struct NewGameMenu* newGameMenu) {
     // this is done on update so if the unlock menu cheat is used it shows up right away
     while (newGameMenu->chapterCount < MAX_CHAPTER_COUNT && 
             gChapters[newGameMenu->chapterCount].testChamberLevelIndex <= gSaveData.header.chapterProgressLevelIndex &&
-			gChapters[newGameMenu->chapterCount].testChamberLevelIndex > 0) {
+            gChapters[newGameMenu->chapterCount].testChamberLevelIndex > 0) {
         ++newGameMenu->chapterCount;
     }
 

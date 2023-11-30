@@ -292,7 +292,6 @@ int savefileOldestSlot() {
 }
 
 void savefileMarkChapterProgress(int levelIndex) {
-	//int chamberNumer = getChamberDisplayNumberFromLevelIndex(levelIndex);//todo correct?
     if (levelIndex > gSaveData.header.chapterProgressLevelIndex) {
         gSaveData.header.chapterProgressLevelIndex = levelIndex;
         savefileSave();

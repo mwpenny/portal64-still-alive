@@ -12,7 +12,7 @@
 struct Chapter {
     void* imageData;
     short testChamberLevelIndex;
-    short testChamberDisplayNumber; // chamberNumber
+    short testChamberDisplayNumber;
 };
 
 struct ChapterMenu {
