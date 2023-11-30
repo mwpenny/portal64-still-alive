@@ -132,7 +132,8 @@ void newGameRebuildText(struct NewGameMenu* newGameMenu) {
 enum InputCapture newGameUpdate(struct NewGameMenu* newGameMenu) {
     // this is done on update so if the unlock menu cheat is used it shows up right away
     while (newGameMenu->chapterCount < MAX_CHAPTER_COUNT && 
-            gChapters[newGameMenu->chapterCount].testChamberLevelIndex <= gSaveData.header.chapterProgressLevelIndex) {
+            gChapters[newGameMenu->chapterCount].testChamberLevelIndex <= gSaveData.header.chapterProgressLevelIndex &&
+			gChapters[newGameMenu->chapterCount].testChamberLevelIndex > 0) {
         ++newGameMenu->chapterCount;
     }
 
@@ -189,7 +190,7 @@ void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderSt
     menuSetRenderColor(renderState, newGameMenu->selectedChapter == newGameMenu->chapterOffset, &gSelectionOrange, &gColorBlack);
     gSPDisplayList(renderState->dl++, newGameMenu->displayedChapter0_left.border);
 
-    int showSecondChapter = newGameMenu->displayedChapter1_right.chapter->imageData && newGameMenu->displayedChapter1_right.chapter->testChamberLevelIndex <= gSaveData.header.chapterProgressLevelIndex;
+    int showSecondChapter = newGameMenu->displayedChapter1_right.chapter->imageData && newGameMenu->displayedChapter1_right.chapter->testChamberLevelIndex <= gSaveData.header.chapterProgressLevelIndex && newGameMenu->displayedChapter1_right.chapter->testChamberLevelIndex > 0;
 
     if (showSecondChapter) {
         gDPPipeSync(renderState->dl++);
