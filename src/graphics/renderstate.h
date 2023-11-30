@@ -32,4 +32,6 @@ int renderStateMaxDLCount(struct RenderState* renderState);
 
 void renderStateInlineBranch(struct RenderState* renderState, Gfx* dl);
 
+float renderStateMemoryUsage(struct RenderState* renderState);
+
 #endif

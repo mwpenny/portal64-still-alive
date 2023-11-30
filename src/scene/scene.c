@@ -273,15 +273,20 @@ void sceneRenderPerformanceMetrics(struct Scene* scene, struct RenderState* rend
         return;
     }
 
+    float memoryUsage = renderStateMemoryUsage(renderState);
+
     gDPSetCycleType(renderState->dl++, G_CYC_1CYCLE);
     gDPSetFillColor(renderState->dl++, (GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1)));
     gDPSetCombineMode(renderState->dl++, SOLID_COLOR, SOLID_COLOR);
     gDPSetEnvColor(renderState->dl++, 32, 32, 32, 255);
-    gSPTextureRectangle(renderState->dl++, 32 << 2, 32 << 2, (32 + 256) << 2, (32 + 16) << 2, 0, 0, 0, 1, 1);
+    gSPTextureRectangle(renderState->dl++, 32 << 2, 32 << 2, (32 + 256) << 2, (32 + 8) << 2, 0, 0, 0, 1, 1);
+    gSPTextureRectangle(renderState->dl++, 32 << 2, 44 << 2, (32 + 256) << 2, (44 + 8) << 2, 0, 0, 0, 1, 1);
     gDPPipeSync(renderState->dl++);
     gDPSetEnvColor(renderState->dl++, 32, 255, 32, 255);
-    gSPTextureRectangle(renderState->dl++, 33 << 2, 33 << 2, (32 + 254 * scene->cpuTime / scene->lastFrameTime) << 2, (32 + 14) << 2, 0, 0, 0, 1, 1);
+    gSPTextureRectangle(renderState->dl++, 33 << 2, 33 << 2, (32 + 254 * scene->cpuTime / scene->lastFrameTime) << 2, (32 + 6) << 2, 0, 0, 0, 1, 1);
+    gSPTextureRectangle(renderState->dl++, 33 << 2, 45 << 2, (int)(32 + 254 * memoryUsage * 4.0f), (44 + 6) << 2, 0, 0, 0, 1, 1);
     gDPPipeSync(renderState->dl++);
+
 }
 
 LookAt gLookAt = gdSPDefLookAt(127, 0, 0, 0, 127, 0);

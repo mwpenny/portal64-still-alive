@@ -87,3 +87,10 @@ void renderStateInlineBranch(struct RenderState* renderState, Gfx* dl) {
         *renderState->dl++ = *dl++;
     }
 }
+
+float renderStateMemoryUsage(struct RenderState* renderState) {
+    int dlCount = renderState->dl - renderState->glist;
+    int memoryChunkCount = &renderState->glist[MAX_DL_LENGTH + MAX_RENDER_STATE_MEMORY_CHUNKS] - renderState->currentMemoryChunk;
+
+    return (float)(dlCount + memoryChunkCount) / (MAX_DL_LENGTH + MAX_RENDER_STATE_MEMORY_CHUNKS);
+}
