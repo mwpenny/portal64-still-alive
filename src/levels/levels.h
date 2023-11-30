@@ -30,9 +30,9 @@ Gfx* levelMaterialRevert(int index);
 
 int levelQuadIndex(struct CollisionObject* pointer);
 
-int levelGetChamberNumber(int levelIndex, int roomIndex);
+int getChamberNumberFromLevelIndex(int levelIndex, int roomIndex);
 void levelClearQueuedLevel();
-int chamberNumberGetLevel(int chamberIndex);
+int getLevelIndexFromChamberNumber(int chamberIndex);
 
 struct Location* levelGetLocation(short index);
 
