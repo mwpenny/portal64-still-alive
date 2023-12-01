@@ -41,8 +41,9 @@
 #define FUNNEL_MAX_HORZ_VEL 7.0f
 
 #define PLAYER_SPEED    (150.0f / 64.0f)
-#define PLAYER_ACCEL    (5.875f)
-#define PLAYER_AIR_ACCEL    (1.875f)
+#define PLAYER_ACCEL    (20.0f)
+#define PLAYER_AIR_ACCEL    (5.875f)
+#define PLAYER_FAST_AIR_ACCEL    (2.0f)
 #define PLAYER_STOP_ACCEL    (5.875f)
 #define PLAYER_SLIDE_ACCEL    (40.0f)
 
@@ -766,12 +767,24 @@ void playerUpdate(struct Player* player) {
     float velocityDot = vector3Dot(&player->body.velocity, &targetVelocity);
     int isAccelerating = velocityDot > 0.0f;
     float acceleration = 0.0f;
-    float velocitySqrd = vector3MagSqrd(&player->body.velocity);
-    int isFast = velocitySqrd >= PLAYER_SPEED * PLAYER_SPEED;
+    float horizontalVelocitySqrd = player->body.velocity.x * player->body.velocity.x + player->body.velocity.z * player->body.velocity.z;
+    int isFast = horizontalVelocitySqrd >= PLAYER_SPEED * PLAYER_SPEED;
     playerUpdateSpeedSound(player);
 
     if (!(player->flags & PlayerFlagsGrounded)) {
-        acceleration = PLAYER_AIR_ACCEL * FIXED_DELTA_TIME;
+        if (isFast) {
+            struct Vector2 movementCenter;
+            movementCenter.x = player->body.velocity.x;
+            movementCenter.y = player->body.velocity.z;
+            float horizontalVelocity = sqrtf(horizontalVelocitySqrd);
+            vector2Scale(&movementCenter, (horizontalVelocity - PLAYER_SPEED) / horizontalVelocity, &movementCenter);
+            targetVelocity.x += movementCenter.x;
+            targetVelocity.z += movementCenter.y;
+
+            acceleration = PLAYER_FAST_AIR_ACCEL * FIXED_DELTA_TIME;
+        } else {
+            acceleration = PLAYER_AIR_ACCEL * FIXED_DELTA_TIME;
+        }
     } else if (isFast) {
         acceleration = PLAYER_SLIDE_ACCEL * FIXED_DELTA_TIME;
     } else if (isAccelerating) {
@@ -799,12 +812,13 @@ void playerUpdate(struct Player* player) {
         transformPoint(&player->anchoredTo->transform, &player->relativeAnchor, &newAnchor);
         vector3Add(&player->body.transform.position, &newAnchor, &player->body.transform.position);
         vector3Sub(&player->body.transform.position, &player->lastAnchorPoint, &player->body.transform.position);
+    } else {
+        player->lastAnchorToPosition = gZeroVec;
     }
 
     if (!vector3IsZero(&player->lastAnchorToPosition) && player->anchoredTo){
         vector3Sub(&player->anchoredTo->transform.position, &player->lastAnchorToPosition, &player->lastAnchorToVelocity);
-    }
-    else if (!(player->anchoredTo) && (player->flags & PlayerFlagsGrounded)){
+    } else if (!(player->anchoredTo) && (player->flags & PlayerFlagsGrounded)){
         player->lastAnchorToVelocity = gZeroVec;
     }
 
