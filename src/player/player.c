@@ -760,8 +760,8 @@ void playerUpdate(struct Player* player) {
 
     targetVelocity.y = player->body.velocity.y;
     if (!vector3IsZero(&player->lastAnchorToVelocity) && !(player->flags & PlayerFlagsGrounded) && !(player->anchoredTo)){
-        targetVelocity.x += player->lastAnchorToVelocity.x/FIXED_DELTA_TIME;
-        targetVelocity.z += player->lastAnchorToVelocity.z/FIXED_DELTA_TIME;
+        targetVelocity.x += player->lastAnchorToVelocity.x;
+        targetVelocity.z += player->lastAnchorToVelocity.z;
     }
 
     float velocityDot = vector3Dot(&player->body.velocity, &targetVelocity);
@@ -818,6 +818,7 @@ void playerUpdate(struct Player* player) {
 
     if (!vector3IsZero(&player->lastAnchorToPosition) && player->anchoredTo){
         vector3Sub(&player->anchoredTo->transform.position, &player->lastAnchorToPosition, &player->lastAnchorToVelocity);
+        vector3Scale(&player->lastAnchorToVelocity, &player->lastAnchorToVelocity, 1.0f / FIXED_DELTA_TIME);
     } else if (!(player->anchoredTo) && (player->flags & PlayerFlagsGrounded)){
         player->lastAnchorToVelocity = gZeroVec;
     }
