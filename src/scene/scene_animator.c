@@ -32,13 +32,13 @@ void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo
 
     sceneAnimator->boneCount = 0;
 
-    sceneAnimator->transforms = malloc(sizeof(struct Transform) * sceneAnimator->boneCount);
-
-    struct Transform* pose = sceneAnimator->transforms;
-
     for (int i = 0; i < animatorCount; ++i) {
         sceneAnimator->boneCount += animationInfo[i].armature.numberOfBones;
     }
+
+    sceneAnimator->transforms = malloc(sizeof(struct Transform) * sceneAnimator->boneCount);
+
+    struct Transform* pose = sceneAnimator->transforms;
 
     for (int i = 0; i < animatorCount; ++i) {
         skArmatureInitWithPose(&sceneAnimator->armatures[i], &animationInfo[i].armature, pose);

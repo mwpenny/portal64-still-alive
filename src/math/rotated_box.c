@@ -13,9 +13,9 @@ void rotatedBoxTransform(struct Transform* transform, struct BoundingBoxs16* inp
     output->sides[1].y = input->maxY - input->minY;
     output->sides[1].z = 0.0f;
 
-    output->sides[1].x = 0.0f;
-    output->sides[1].y = 0.0f;
-    output->sides[1].z = input->maxZ - input->minZ;
+    output->sides[2].x = 0.0f;
+    output->sides[2].y = 0.0f;
+    output->sides[2].z = input->maxZ - input->minZ;
 
     transformPoint(transform, &output->origin, &output->origin);
     for (int axis = 0; axis < 3; ++axis) {

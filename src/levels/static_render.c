@@ -67,7 +67,7 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, M
 
                 rotatedBoxTransform(&staticTransforms[staticElement->transformIndex], animatedBox, &rotatedBox);
 
-                if (isRotatedBoxOutsideFrustrum(cullingInfo, &rotatedBox) == FrustrumResultOutisde) {
+                if (isRotatedBoxOutsideFrustrum(cullingInfo, &rotatedBox)) {
                     continue;
                 }
 

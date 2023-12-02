@@ -117,8 +117,7 @@ local function list_static_nodes(nodes)
                 local parent_pos = bone.full_transformation:decompose()
                 chunkV.mesh = chunkV.mesh:transform(bone.full_transformation:inverse())
             
-                original_bb.min = original_bb.min - parent_pos
-                original_bb.max = original_bb.max - parent_pos
+                original_bb = chunkV.mesh.bb
             end
 
             local plane = sk_math.plane3_with_point(chunkV.mesh.normals[1], chunkV.mesh.vertices[1])
