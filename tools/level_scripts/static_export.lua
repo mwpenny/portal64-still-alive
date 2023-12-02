@@ -20,7 +20,7 @@ local portalable_surfaces = {
 
 local signal_elements = {}
 
-local coplanar_tolerance = 0.1
+local coplanar_tolerance = 0.01
 
 local function is_coplanar(mesh, plane)
     for _, vertex in pairs(mesh.vertices) do

@@ -64,7 +64,7 @@ unsigned screenClipperClipBoundary(struct ScreenClipper* clipper, struct Vector4
     float posReference = direction < 0 ? -pos : pos;
     int wasInside = oppositeSide ? (posReference > wReference) : (posReference < wReference);
 
-    for (unsigned i = 0; i < pointCount; ++i) {
+    for (unsigned i = 0; i < pointCount && outputPointCount < MAX_NEAR_POLYGON_SIZE; ++i) {
         struct Vector4* current = &input[i];
 
         pos = VECTOR3_AS_ARRAY(current)[axis];
@@ -79,7 +79,7 @@ unsigned screenClipperClipBoundary(struct ScreenClipper* clipper, struct Vector4
             ++outputPointCount;
         }
 
-        if (isInside) {
+        if (isInside && outputPointCount < MAX_NEAR_POLYGON_SIZE) {
             output[outputPointCount] = input[i];
             ++outputPointCount;
         }
@@ -102,8 +102,8 @@ void screenClipperBoundingPoints(struct ScreenClipper* clipper, struct Vector3* 
         return;
     }
 
-    struct Vector4 clipBuffer[16];
-    struct Vector4 clipBufferSwap[16];
+    struct Vector4 clipBuffer[MAX_NEAR_POLYGON_SIZE];
+    struct Vector4 clipBufferSwap[MAX_NEAR_POLYGON_SIZE];
 
     for (unsigned i = 0; i < pointCount; ++i) {
         matrixVec3Mul(clipper->pointTransform, &input[i], &clipBuffer[i]);
