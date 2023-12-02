@@ -5,13 +5,19 @@
 #include "util/rom.h"
 
 void skArmatureInit(struct SKArmature* object, struct SKArmatureDefinition* definition) {
+    unsigned transformSize = sizeof(Mtx) * definition->numberOfBones;
+    skArmatureInitWithPose(object, definition, malloc(transformSize));
+}
+
+void skArmatureInitWithPose(struct SKArmature* object, struct SKArmatureDefinition* definition, struct Transform* usePose) {
     object->displayList = definition->displayList;
     object->numberOfBones = definition->numberOfBones;
     object->numberOfAttachments = definition->numberOfAttachments;
+    object->pose = usePose;
+    object->boneParentIndex = definition->boneParentIndex;
 
     unsigned transformSize = sizeof(Mtx) * definition->numberOfBones;
-
-    object->pose = malloc(transformSize);
+    
     if (definition->pose) {
         if (IS_KSEG0(definition->pose)) {
             memCopy(object->pose, definition->pose, transformSize);
@@ -19,7 +25,6 @@ void skArmatureInit(struct SKArmature* object, struct SKArmatureDefinition* defi
             romCopy((void*)definition->pose, (void*)object->pose, transformSize);
         }
     }
-    object->boneParentIndex = definition->boneParentIndex;
 }
 
 void skCleanupObject(struct SKArmature* object) {

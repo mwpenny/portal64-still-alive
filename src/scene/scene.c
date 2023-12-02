@@ -311,7 +311,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     Mtx* staticMatrices = sceneAnimatorBuildTransforms(&scene->animator, renderState);
 
     renderPlanBuild(&renderPlan, scene, renderState);
-    renderPlanExecute(&renderPlan, scene, staticMatrices, renderState, task);
+    renderPlanExecute(&renderPlan, scene, staticMatrices, scene->animator.transforms, renderState, task);
 
     // contactSolverDebugDraw(&gContactSolver, renderState);
 

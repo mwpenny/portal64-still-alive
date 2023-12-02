@@ -10,6 +10,7 @@
 #include "graphics/renderstate.h"
 #include "../physics/collision_quad.h"
 #include "../math/boxs16.h"
+#include "../math/rotated_box.h"
 
 #define MAX_CLIPPING_PLANE_COUNT    6
 
@@ -40,6 +41,7 @@ enum FrustrumResult {
 };
 
 enum FrustrumResult isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox);
+int isRotatedBoxOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct RotatedBox* rotatedBox);
 int isSphereOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Vector3* scaledCenter, float scaledRadius);
 int isQuadOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct CollisionQuad* quad);
 

@@ -93,7 +93,7 @@ void mainMenuRender(struct GameMenu* gameMenu, struct RenderState* renderState, 
     Mtx* staticMatrices = sceneAnimatorBuildTransforms(&gScene.animator, renderState);
 
     renderPlanBuild(&renderPlan, &gScene, renderState);
-    renderPlanExecute(&renderPlan, &gScene, staticMatrices, renderState, task);
+    renderPlanExecute(&renderPlan, &gScene, staticMatrices, gScene.animator.transforms, renderState, task);
 
     gameMenuRender(gameMenu, renderState, task);
 }

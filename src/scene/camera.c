@@ -38,6 +38,26 @@ enum FrustrumResult isOutsideFrustrum(struct FrustrumCullingInformation* frustru
     return result;
 }
 
+int isRotatedBoxOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct RotatedBox* rotatedBox) {
+    for (int i = 0; i < frustrum->usedClippingPlaneCount; ++i) {
+        struct Vector3 closestPoint = rotatedBox->origin;
+
+        struct Vector3* normal = &frustrum->clippingPlanes[i].normal;
+
+        for (int axis = 0; axis < 3; ++axis) {
+            if (VECTOR3_AS_ARRAY(normal)[axis] > 0.0f) {
+                vector3Add(&closestPoint, &rotatedBox->sides[axis], &closestPoint);
+            }
+        }
+
+        if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.00001f) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 int isSphereOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Vector3* scaledCenter, float scaledRadius) {
     for (int i = 0; i < frustrum->usedClippingPlaneCount; ++i) {
         if (planePointDistance(&frustrum->clippingPlanes[i], scaledCenter) < -scaledRadius) {

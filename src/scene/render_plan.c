@@ -500,7 +500,7 @@ void renderPlanBuild(struct RenderPlan* renderPlan, struct Scene* scene, struct 
 
 extern LookAt gLookAt;
 
-void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* staticTransforms, struct RenderState* renderState, struct GraphicsTask* task) {
+void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* staticMatrices, struct Transform* staticTransforms, struct RenderState* renderState, struct GraphicsTask* task) {
     struct DynamicRenderDataList* dynamicList = dynamicRenderListNew(renderState, MAX_DYNAMIC_SCENE_OBJECTS);
 
     for (int i = 0; i < renderPlan->stageCount; ++i) {
@@ -618,6 +618,7 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* 
             current->visiblerooms, 
             dynamicList, 
             stageIndex, 
+            staticMatrices,
             staticTransforms, 
             renderState
         );

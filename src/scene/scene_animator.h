@@ -24,6 +24,7 @@ struct SceneAnimator {
     struct SKAnimator* animators;
     struct AnimationInfo* animationInfo;
     struct SceneAnimatorState* state;
+    struct Transform* transforms;
     short animatorCount;
     short boneCount;
 };

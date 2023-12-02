@@ -5,6 +5,7 @@
 #include "defs.h"
 #include "../graphics/render_scene.h"
 #include "../math/mathf.h"
+#include "../math/rotated_box.h"
 #include "../scene/signals.h"
 
 #include "../build/assets/materials/static.h"
@@ -46,7 +47,7 @@ void staticRenderTraverseIndex(
     }
 }
 
-void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, Mtx* staticTransforms, struct RenderScene* renderScene) {
+void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, Mtx* staticMatrices, struct Transform* staticTransforms, struct RenderScene* renderScene) {
     int currentRoom = 0;
 
     u64 visibleRooms = renderScene->visibleRooms;
@@ -62,38 +63,20 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, M
             for (int i = roomIndex->animatedRange.min; i < roomIndex->animatedRange.max; ++i, ++animatedBox) {
                 struct StaticContentElement* staticElement = &gCurrentLevel->staticContent[i];
 
-                Mtx* matrix = &staticTransforms[staticElement->transformIndex];
+                struct RotatedBox rotatedBox;
 
-                short* mtxAsShorts = (short*)matrix;
+                rotatedBoxTransform(&staticTransforms[staticElement->transformIndex], animatedBox, &rotatedBox);
 
-                int x = mtxAsShorts[12];
-                int y = mtxAsShorts[13];
-                int z = mtxAsShorts[14];
-
-                struct BoundingBoxs16 shiftedBox;
-                shiftedBox.minX = animatedBox->minX + x;
-                shiftedBox.minY = animatedBox->minY + y;
-                shiftedBox.minZ = animatedBox->minZ + z;
-
-                shiftedBox.maxX = animatedBox->maxX + x;
-                shiftedBox.maxY = animatedBox->maxY + y;
-                shiftedBox.maxZ = animatedBox->maxZ + z;
-
-                if (isOutsideFrustrum(cullingInfo, &shiftedBox) == FrustrumResultOutisde) {
+                if (isRotatedBoxOutsideFrustrum(cullingInfo, &rotatedBox) == FrustrumResultOutisde) {
                     continue;
                 }
-
-                struct Vector3 boxCenter;
-                boxCenter.x = (float)(shiftedBox.minX + shiftedBox.maxX) * (0.5f / SCENE_SCALE);
-                boxCenter.y = (float)(shiftedBox.minY + shiftedBox.maxY) * (0.5f / SCENE_SCALE);
-                boxCenter.z = (float)(shiftedBox.minZ + shiftedBox.maxZ) * (0.5f / SCENE_SCALE);
 
                 renderSceneAdd(
                     renderScene, 
                     staticElement->displayList, 
-                    matrix, 
+                    &staticMatrices[staticElement->transformIndex], 
                     staticElement->materialIndex, 
-                    &boxCenter, 
+                    &rotatedBox.origin, 
                     NULL
                 );
             }
@@ -143,14 +126,14 @@ int staticRenderIsRoomVisible(u64 visibleRooms, u16 roomIndex) {
     return (visibleRooms & (1LL << roomIndex)) != 0;
 }
 
-void staticRender(struct Transform* cameraTransform, struct FrustrumCullingInformation* cullingInfo, u64 visibleRooms, struct DynamicRenderDataList* dynamicList, int stageIndex, Mtx* staticTransforms, struct RenderState* renderState) {
+void staticRender(struct Transform* cameraTransform, struct FrustrumCullingInformation* cullingInfo, u64 visibleRooms, struct DynamicRenderDataList* dynamicList, int stageIndex, Mtx* staticMatrices, struct Transform* staticTransforms, struct RenderState* renderState) {
     if (!gCurrentLevel) {
         return;
     }
 
     struct RenderScene* renderScene = renderSceneNew(cameraTransform, renderState, MAX_RENDER_COUNT, visibleRooms);
 
-    staticRenderPopulateRooms(cullingInfo, staticTransforms, renderScene);
+    staticRenderPopulateRooms(cullingInfo, staticMatrices, staticTransforms, renderScene);
     dynamicRenderPopulateRenderScene(dynamicList, stageIndex, renderScene, cameraTransform, cullingInfo, visibleRooms);
     renderSceneGenerate(renderScene, renderState);
 
