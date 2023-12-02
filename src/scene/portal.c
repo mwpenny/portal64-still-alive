@@ -16,6 +16,7 @@
 #include "../build/assets/models/portal/portal_blue_filled.h"
 #include "../build/assets/models/portal/portal_blue_face.h"
 #include "../build/assets/models/portal/portal_collider.h"
+#include "../build/assets/models/portal/portal_collider_vertical.h"
 #include "../build/assets/models/portal/portal_orange.h"
 #include "../build/assets/models/portal/portal_orange_face.h"
 #include "../build/assets/models/portal/portal_orange_filled.h"
@@ -23,6 +24,13 @@
 struct ColliderTypeData gPortalColliderType = {
     CollisionShapeTypeMesh,
     &portal_portal_collider_collider,
+    0.0f, 0.6f,
+    &gMeshColliderCallbacks
+};
+
+struct ColliderTypeData gPortalColliderVerticalType = {
+    CollisionShapeTypeMesh,
+    &portal_portal_collider_vertical_collider,
     0.0f, 0.6f,
     &gMeshColliderCallbacks
 };
@@ -46,7 +54,7 @@ struct Vector3 gPortalOutline[PORTAL_LOOP_SIZE] = {
 #define PORTAL_GROW_TIME            0.3f
 
 void portalInit(struct Portal* portal, enum PortalFlags flags) {
-    collisionObjectInit(&portal->collisionObject, &gPortalColliderType, &portal->rigidBody, 1.0f, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_TANGIBLE);
+    collisionObjectInit(&portal->collisionObject, &gPortalColliderVerticalType, &portal->rigidBody, 1.0f, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_TANGIBLE);
     rigidBodyMarkKinematic(&portal->rigidBody);
     portal->flags = flags;
     portal->opacity = 1.0f;
@@ -130,6 +138,15 @@ int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, 
     portal->portalSurfaceIndex = surfaceIndex;
     
     portalSurfaceInverse(surface, &correctPosition, &portalAt->position);
+
+    struct Vector3 gPortalUp;
+    quatMultVector(&portalAt->rotation, &gUp, &gPortalUp);
+
+    if (gPortalUp.y > 0.8f) {
+        portal->collisionObject.collider = &gPortalColliderVerticalType;
+    } else {
+        portal->collisionObject.collider = &gPortalColliderType;
+    }
 
     return 1;
 }
