@@ -276,5 +276,5 @@ That will generate the rom at `/build/portal64.z64`
 ## Current Bug TODO List (Hardware Verified) (High->Low priority)
 ----------------------- v8
 - [ ] Two wall portals next to eachother can be used to clip any object out of any level by pushing it into corner, then dropping. 
-- [ ] Passing into a ceiling portal can sometimes mess with the player rotation
+- [x] Passing into a ceiling portal can sometimes mess with the player rotation
 - [x] player can clip through back of elevator by jumping and strafeing at the back corners while inside.
