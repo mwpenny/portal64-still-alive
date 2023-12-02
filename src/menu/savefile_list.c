@@ -32,7 +32,7 @@ void savefileListSlotUseInfo(struct SavefileListSlot* savefileListSlot, struct S
     }
 
     char message[64];
-    textManipTestChamberMessage(message, savefileInfo->testchamberIndex);
+    textManipTestChamberMessage(message, savefileInfo->testchamberDisplayNumber);
     savefileListSlot->testChamberText = menuBuildPrerenderedText(&gDejaVuSansFont, message, x + BORDER_WIDTH + 8, y, 120);
 
     if (savefileInfo->savefileName) {
@@ -67,7 +67,7 @@ void savefileListSlotInit(struct SavefileListSlot* savefileListSlot, int x, int 
 
     savefileListSlot->x = x;
     savefileListSlot->y = y;
-    savefileListSlot->imageData = malloc(THUMBANIL_IMAGE_SIZE);
+    savefileListSlot->imageData = malloc(THUMBNAIL_IMAGE_SIZE);
     savefileListSlot->slotIndex = -1;
 }
 

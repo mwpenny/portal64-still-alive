@@ -25,7 +25,7 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
 
     for (int i = 0; i < numberOfSaves; ++i) {
         savefileInfo[i].slotIndex = saveSlots[i].saveSlot;
-        savefileInfo[i].testchamberIndex = saveSlots[i].testChamber;
+        savefileInfo[i].testchamberDisplayNumber = saveSlots[i].testChamber;
         savefileInfo[i].savefileName = NULL;
         savefileInfo[i].screenshot = (u16*)SCREEN_SHOT_SRAM(saveSlots[i].saveSlot);
 
@@ -39,7 +39,7 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
     if (includeNew && freeSlot != SAVEFILE_NO_SLOT) {
         savefileInfo[numberOfSaves].slotIndex = freeSlot;
         savefileInfo[numberOfSaves].savefileName = translationsGet(GAMEUI_NEWSAVEGAME);
-        savefileInfo[numberOfSaves].testchamberIndex = levelGetChamberNumber(gCurrentLevelIndex, gScene.player.body.currentRoom);
+        savefileInfo[numberOfSaves].testchamberDisplayNumber = getChamberDisplayNumberFromLevelIndex(gCurrentLevelIndex, gScene.player.body.currentRoom);
         savefileInfo[numberOfSaves].screenshot = gScreenGrabBuffer;
 
         if (suggestedSlot == 0) {
@@ -62,7 +62,7 @@ enum InputCapture saveGameUpdate(struct SaveGameMenu* saveGame) {
     if (controllerGetButtonDown(0, A_BUTTON) && saveGame->savefileList->numberOfSaves) {
         Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
         if (checkpointSaveInto(&gScene, save)) {
-            savefileSaveGame(save, gScreenGrabBuffer, levelGetChamberNumber(gCurrentLevelIndex, gScene.player.body.currentRoom), gCurrentTestSubject, savefileGetSlot(saveGame->savefileList));
+            savefileSaveGame(save, gScreenGrabBuffer, getChamberDisplayNumberFromLevelIndex(gCurrentLevelIndex, gScene.player.body.currentRoom), gCurrentTestSubject, savefileGetSlot(saveGame->savefileList));
             saveGamePopulate(saveGame, 0);
             soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         }else{

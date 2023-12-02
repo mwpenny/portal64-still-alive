@@ -52,7 +52,7 @@ void checkpointSave(struct Scene* scene) {
     savefileGrabScreenshot();
     gHasCheckpoint = checkpointSaveInto(scene, gCheckpoint);
     // slot 0 is the autosave slot
-    savefileSaveGame(gCheckpoint, gScreenGrabBuffer, levelGetChamberNumber(gCurrentLevelIndex, gScene.player.body.currentRoom), gCurrentTestSubject, 0);
+    savefileSaveGame(gCheckpoint, gScreenGrabBuffer, getChamberDisplayNumberFromLevelIndex(gCurrentLevelIndex, gScene.player.body.currentRoom), gCurrentTestSubject, 0);
 }
 
 void checkpointLoadLast(struct Scene* scene) {
