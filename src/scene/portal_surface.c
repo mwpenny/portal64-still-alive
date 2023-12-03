@@ -306,14 +306,17 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
                 continue;
             }
 
+            struct Vector2s16 edgeDir;
+            vector2s16Sub(&b, &a, &edgeDir);
+
             struct Vector2s16 offset;
-            int distance = portalMax.x - edgeMin.x;
+            int distance = edgeDir.y >= 0 ? portalMax.x - edgeMin.x : PORTAL_SURFACE_OVERLAP;
             offset.x = -distance;
             offset.y = 0;
 
             int distanceCheck = edgeMax.x - portalMin.x;
 
-            if (distanceCheck < distance) {
+            if (distanceCheck < distance && edgeDir.y <= 0) {
                 distance = distanceCheck;
                 offset.x = distance;
                 offset.y = 0;
@@ -321,7 +324,7 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
 
             distanceCheck = portalMax.y - edgeMin.y;
 
-            if (distanceCheck < distance) {
+            if (distanceCheck < distance && edgeDir.x <= 0) {
                 distance = distanceCheck;
                 offset.x = 0;
                 offset.y = -distance;
@@ -329,7 +332,7 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
 
             distanceCheck = edgeMax.y - portalMin.y;
 
-            if (distanceCheck < distance) {
+            if (distanceCheck < distance && edgeDir.x >= 0) {
                 distance = distanceCheck;
                 offset.x = 0;
                 offset.y = distance;
