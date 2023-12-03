@@ -45,7 +45,7 @@ int isRotatedBoxOutsideFrustrum(struct FrustrumCullingInformation* frustrum, str
         struct Vector3* normal = &frustrum->clippingPlanes[i].normal;
 
         for (int axis = 0; axis < 3; ++axis) {
-            if (VECTOR3_AS_ARRAY(normal)[axis] > 0.0f) {
+            if (vector3Dot(&rotatedBox->sides[axis], normal) > 0.0f) {
                 vector3Add(&closestPoint, &rotatedBox->sides[axis], &closestPoint);
             }
         }

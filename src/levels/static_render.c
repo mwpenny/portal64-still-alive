@@ -71,12 +71,15 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, M
                     continue;
                 }
 
+                struct Vector3 center;
+                vector3Scale(&rotatedBox.origin, &center, 1.0f / SCENE_SCALE);
+
                 renderSceneAdd(
                     renderScene, 
                     staticElement->displayList, 
                     &staticMatrices[staticElement->transformIndex], 
                     staticElement->materialIndex, 
-                    &rotatedBox.origin, 
+                    &center, 
                     NULL
                 );
             }
