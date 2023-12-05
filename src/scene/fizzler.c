@@ -216,4 +216,6 @@ void fizzlerUpdate(struct Fizzler* fizzler) {
             fizzler->oldestParticleIndex = 0;
         }
     }
+
+    osWritebackDCache(fizzler->modelVertices, sizeof(Vtx) * maxVertex);
 }
