@@ -247,7 +247,7 @@ static void gameProc(void* arg) {
     
     savefileLoad();
     
-    levelLoadWithCallbacks(1);
+    levelLoadWithCallbacks(INTRO_MENU);
     gCurrentTestSubject = 0;
     cutsceneRunnerReset();
     controllersInit();
