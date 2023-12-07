@@ -16,16 +16,6 @@ struct PrerenderedText* menuBuildPrerenderedText(struct Font* font, char* messag
     return result;
 }
 
-Gfx* menuBuildText(struct Font* font, char* message, int x, int y) {
-    Gfx* result = malloc(sizeof(Gfx) * (fontCountGfx(font, message) + 1));
-    Gfx* dl = result;
-
-    dl = fontRender(font, message, x, y, dl);
-    gSPEndDisplayList(dl++);
-
-    return result;
-}
-
 Gfx* menuBuildBorder(int x, int y, int width, int height) {
     Gfx* result = malloc(sizeof(Gfx) * 7 * 3 + 1);
     Gfx* dl = result;
@@ -211,7 +201,7 @@ void menuSetRenderColor(struct RenderState* renderState, int isSelected, struct 
     }
 }
 
-struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, int y, int shouldUsePrerendered) {
+struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, int y) {
     struct MenuCheckbox result;
 
     result.x = x;
@@ -227,12 +217,7 @@ struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, i
     dl = menuRenderOutline(x, y, CHECKBOX_SIZE, CHECKBOX_SIZE, 1, dl);
     gSPEndDisplayList(dl++);
 
-    if (shouldUsePrerendered) {
-        result.prerenderedText = menuBuildPrerenderedText(font, message, x + CHECKBOX_SIZE + 6, y, SCREEN_WD);
-    } else {
-        result.text = menuBuildText(font, message, x + CHECKBOX_SIZE + 6, y);
-    }
-
+    result.prerenderedText = menuBuildPrerenderedText(font, message, x + CHECKBOX_SIZE + 6, y, SCREEN_WD);
     result.checked = 0;
 
     return result;

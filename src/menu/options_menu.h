@@ -22,7 +22,6 @@ enum OptionsMenuTabs {
 
 struct OptionsMenu {
     Gfx* menuOutline;
-    Gfx* optionsText;
 
     struct Tabs tabs;
 

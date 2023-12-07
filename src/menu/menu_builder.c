@@ -44,8 +44,7 @@ void checkboxMenuItemInit(struct MenuBuilderElement* element) {
         element->params->params.checkbox.font,
         translationsGet(element->params->params.checkbox.messageId),
         element->params->x,
-        element->params->y,
-        1
+        element->params->y
     );
     element->data = checkbox;
 }

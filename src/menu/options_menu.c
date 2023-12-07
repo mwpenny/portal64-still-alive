@@ -41,8 +41,6 @@ struct Tab gOptionTabs[] = {
 void optionsMenuInit(struct OptionsMenu* options) {
     options->menuOutline = menuBuildBorder(MENU_LEFT, MENU_TOP, MENU_WIDTH, MENU_HEIGHT);
 
-    options->optionsText = menuBuildText(&gDejaVuSansFont, "OPTIONS", 48, 48);
-
     tabsInit(
         &options->tabs, 
         gOptionTabs, 

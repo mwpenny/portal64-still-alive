@@ -17,10 +17,7 @@ struct MenuButton {
 
 struct MenuCheckbox {
     Gfx* outline;
-    union {
-        Gfx* text;
-        struct PrerenderedText* prerenderedText;
-    };
+    struct PrerenderedText* prerenderedText;
     Gfx* checkedIndicator;
     short x, y;
     short checked;
@@ -48,7 +45,6 @@ extern struct Coloru8 gSelectionGray;
 extern struct Coloru8 gBorderHighlight;
 extern struct Coloru8 gBorderDark;
 
-Gfx* menuBuildText(struct Font* font, char* message, int x, int y);
 struct PrerenderedText* menuBuildPrerenderedText(struct Font* font, char* message, int x, int y, int maxWidth);
 
 Gfx* menuBuildBorder(int x, int y, int width, int height);
@@ -61,7 +57,7 @@ struct MenuButton menuBuildButton(struct Font* font, char* message, int x, int y
 void menuSetRenderColor(struct RenderState* renderState, int isSelected, struct Coloru8* selected, struct Coloru8* defaultColor);
 void menuRebuildButtonText(struct MenuButton* button, struct Font* font, char* message, int rightAlign);
 
-struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, int y, int shouldUsePrerendered);
+struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, int y);
 Gfx* menuCheckboxRender(struct MenuCheckbox* checkbox, Gfx* dl);
 
 struct MenuSlider menuBuildSlider(int x, int y, int w, int tickCount);
