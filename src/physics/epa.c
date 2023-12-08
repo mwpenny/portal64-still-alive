@@ -570,7 +570,7 @@ int epaSolveSwept(struct Simplex* startingSimplex, void* objectA, MinkowsiSum ob
         vector3Scale(&raycastDir, &planePos, distance);
         float moveOffset = vector3DistSqrd(bStart, bEnd);
         
-        if (distance * distance > moveOffset + 0.1f) {
+        if (distance * distance >= moveOffset + 0.01f) {
             goto error;
         }
 
