@@ -182,6 +182,7 @@ int updateSchedulerModeAndGetFPS(int interlacedMode) {
 		schedulerMode = HIGH_RES ? (interlacedMode ? OS_VI_MPAL_HPF1 : OS_VI_MPAL_HPN1) : (interlacedMode ? OS_VI_MPAL_LPF1 : OS_VI_MPAL_LPN1);
 		break;
     }
+
     return fps;
 }
 
@@ -253,6 +254,7 @@ static void gameProc(void* arg) {
     controllersInit();
     rumblePakClipInit();
     initAudio(fps);
+    timeSetFrameRate(fps);
     soundPlayerInit();
     translationsLoad(gSaveData.controls.subtitleLanguage);
     skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
