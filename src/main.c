@@ -328,15 +328,15 @@ static void gameProc(void* arg) {
                     profileEnd(updateStart, 0);
                     drawingEnabled = 1;
                 }
+
+                if (controllerGetButtonDown(0, R_JPAD)) {
+                    profileTask(&scheduler, &gameThread, &gGraphicsTasks[drawBufferIndex ^ 1].task.list);
+                }
                 timeUpdateDelta();
                 soundPlayerUpdate();
                 controllersSavePreviousState();
 
                 profileReport();
-
-                if (controllerGetButton(0, R_JPAD)) {
-                    profileTask(&scheduler, &gameThread, &gGraphicsTasks[drawBufferIndex ^ 1].task.list);
-                }
 
                 break;
 

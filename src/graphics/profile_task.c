@@ -9,21 +9,18 @@
 #define RSP_DONE_MSG    667
 #define RDP_DONE_MSG    668
 
-void profileGfxSwap(Gfx* a, Gfx* b, int count) {
-    while (count) {
-        Gfx tmp = *a;
-        *a = *b;
-        *b = tmp;
-        ++a;
-        ++b;
-        --count;
-    }
+#define SAMPLES_PER_STEP    10
 
-    osWritebackDCache(a - count, sizeof(Gfx) * count);
-    osWritebackDCache(b - count, sizeof(Gfx) * count);
+void copyGfx(Gfx* from, Gfx* to, int count) {
+    Gfx* max = from + count;
+
+    while (from < max) {
+        *to++ = *from++;
+    }
 }
 
 OSTime profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
+    // block scheduler thread
     osSetThreadPri(currentThread, RSP_PROFILE_PRIORITY);
 
     // wait for DP to be available
@@ -34,46 +31,65 @@ OSTime profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
 
     osCreateMesgQueue(&messageQueue, messages, 4);
 
+    // take over event queues
     osSetEventMesg(OS_EVENT_SP, &messageQueue, (OSMesg)RSP_DONE_MSG);
     osSetEventMesg(OS_EVENT_DP, &messageQueue, (OSMesg)RDP_DONE_MSG);   
     osViSetEvent(&messageQueue, (OSMesg)VIDEO_MSG, 1);
 
     Gfx* curr = (Gfx*)task->t.data_ptr;
+
+    Gfx* end = curr;
+
+    while (end[1].words.w0 != _SHIFTL(G_RDPFULLSYNC, 24, 8)) {
+        ++end;
+    }
+
+    int total = end - curr;
+
     Gfx tmp[3];
-    Gfx* dl = tmp;
 
-    gDPPipeSync(dl++);
-    gDPFullSync(dl++);
-    gSPEndDisplayList(dl++);
+    while (curr <= end) {
+        for (int sample = 0; sample < SAMPLES_PER_STEP; ++sample) {
+            // wait for DP to be available
+            while (IO_READ(DPC_STATUS_REG) & (DPC_STATUS_DMA_BUSY | DPC_STATUS_END_VALID | DPC_STATUS_START_VALID));
 
-    while (curr[1].words.w0 != _SHIFTL(G_RDPFULLSYNC, 24, 8)) {
-        OSTime start = osGetTime();
-        osSpTaskStart(task);
-        OSMesg recv;
+            copyGfx(curr, tmp, 3);
 
-        profileGfxSwap(tmp, curr, 3);
+            Gfx* dl = curr;
+            gDPPipeSync(dl++);
+            gDPFullSync(dl++);
+            gSPEndDisplayList(dl++);
 
-        do {
-            (void)osRecvMesg(&messageQueue, &recv, OS_MESG_BLOCK);
-        } while ((int)recv != RDP_DONE_MSG);
+            // not very precise, but it seems to work
+            osWritebackDCacheAll();
 
-        OSTime result = osGetTime() - start;
+            OSTime start = osGetTime();
+            osSpTaskStart(task);
+            OSMesg recv;
 
-        u64 us = OS_CYCLES_TO_USEC(result);
+            do {
+                (void)osRecvMesg(&messageQueue, &recv, OS_MESG_BLOCK);
+            } while ((int)recv != RDP_DONE_MSG);
 
-        profileGfxSwap(tmp, curr, 3);
+            OSTime result = osGetTime() - start;
 
-        char message[64];
-        sprintf(
-            message, 
-            "0x%08x 0x%08x%08x ms %d.%d", 
-            (int)curr - (int)task->t.data_ptr, 
-            curr->words.w0,
-            curr->words.w1,
-            (int)(us / 1000), 
-            (int)(us % 1000)
-        );
-        // gdbSendMessage(GDBDataTypeText, message, messageLen);
+            u64 us = OS_CYCLES_TO_NSEC(result);
+
+            copyGfx(tmp, curr, 3);
+
+            char message[64];
+            int messageLen = sprintf(
+                message, 
+                "%d/%d 0x%08x%08x ms %d.%d", 
+                curr - (Gfx*)task->t.data_ptr, 
+                total,
+                curr->words.w0,
+                curr->words.w1,
+                (int)(us / 1000000), 
+                (int)(us % 1000000)
+            );
+            gdbSendMessage(GDBDataTypeText, message, messageLen);
+        }
 
         ++curr;
     }
