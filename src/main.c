@@ -25,6 +25,7 @@
 #include "util/profile.h"
 #include "util/rom.h"
 #include "util/time.h"
+#include "graphics/profile_task.h"
 
 #include "levels/levels.h"
 #include "savefile/checkpoint.h"
@@ -332,6 +333,10 @@ static void gameProc(void* arg) {
                 controllersSavePreviousState();
 
                 profileReport();
+
+                if (controllerGetButton(0, R_JPAD)) {
+                    profileTask(&scheduler, &gameThread, &gGraphicsTasks[drawBufferIndex ^ 1].task.list);
+                }
 
                 break;
 
