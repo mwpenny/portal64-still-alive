@@ -359,6 +359,7 @@ build/src/scene/security_camera.o: build/src/audio/clips.h build/assets/models/p
 build/src/scene/signage.o: $(MODEL_HEADERS)
 build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
 build/src/util/dynamic_asset_data.o: build/assets/models/dynamic_model_list_data.h
+build/src/util/dynamic_animated_asset_data.o: build/assets/models/dynamic_animated_model_list_data.h
 build/src/util/dynamic_asset_loader.o: build/assets/models/dynamic_model_list.h build/assets/models/dynamic_animated_model_list.h
 build/src/menu/audio_options.o: build/src/audio/subtitles.h
 build/src/menu/video_options.o: build/src/audio/subtitles.h
