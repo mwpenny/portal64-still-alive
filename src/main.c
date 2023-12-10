@@ -330,7 +330,9 @@ static void gameProc(void* arg) {
                 }
 
                 if (controllerGetButtonDown(0, R_JPAD)) {
-                    profileTask(&scheduler, &gameThread, &gGraphicsTasks[drawBufferIndex ^ 1].task.list);
+                    struct GraphicsTask* task = &gGraphicsTasks[drawBufferIndex];
+                    zeroMemory(task->framebuffer, sizeof(u16) * SCREEN_WD * SCREEN_HT);
+                    profileTask(&scheduler, &gameThread, &task->task.list);
                 }
                 timeUpdateDelta();
                 soundPlayerUpdate();

@@ -75,8 +75,13 @@ OSTime profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
 
             u64 us = OS_CYCLES_TO_NSEC(result);
 
+            // wait for DP to be available
+            while (IO_READ(DPC_STATUS_REG) & (DPC_STATUS_DMA_BUSY | DPC_STATUS_END_VALID | DPC_STATUS_START_VALID));
+
             copyGfx(tmp, curr, 3);
 
+            osWritebackDCacheAll();
+            
             char message[64];
             int messageLen = sprintf(
                 message, 
