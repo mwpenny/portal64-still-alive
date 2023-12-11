@@ -19,5 +19,5 @@
 .word  0x01000000               /* Unused officially / Advanced homebrew ROM header controller config */
 .word  0x0000004E               /* Cartridge Type (N; cart)*/
 .ascii "ED"                     /* Cartridge ID (ED) / Advanced homebrew ROM header magic value */
-.byte  0x45                     /* Region (E; North America)*/
+.byte  0x41                     /* Region (A; All)*/
 .byte  0x32                     /* Version / Advanced homebrew ROM header misc. (region-free + 256K SRAM) */
