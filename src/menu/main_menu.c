@@ -43,6 +43,11 @@ void mainMenuInit(struct GameMenu* gameMenu) {
     gScene.camera.fov = 56.0f;
 
     mainMenuPlayAmbientSound();
+
+    for (int i = 0; i < gScene.clockCount; ++i) {
+        // this shows the pause time for the main menu
+        gScene.clocks[i].timeLeft = -1.0f;
+    }
 }
 
 void mainMenuUpdate(struct GameMenu* gameMenu) {
