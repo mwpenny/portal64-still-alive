@@ -19,8 +19,10 @@
 
 #define DIGIT_WIDTH     512
 
-u8 gCurrentClockDigits[5];
+u8 gCurrentClockDigits[7];
 Vtx* gClockDigits[] = {
+    signage_clock_digits_clock_digits_hour_01_color,
+    signage_clock_digits_clock_digits_minute_10_color,
     signage_clock_digits_clock_digits_minute_01_color,
     signage_clock_digits_clock_digits_second_10_color,
     signage_clock_digits_clock_digits_second_01_color,
@@ -45,31 +47,34 @@ void clockSetDigit(int digitIndex, int currDigit) {
 }
 
 void clockSetTime(float timeInSeconds) {
+    clockSetDigit(0, 0);
+    clockSetDigit(1, 0);
+
     float minutes = floor(timeInSeconds * (1.0f / 60.0f));
 
-    clockSetDigit(0, (int)minutes);
+    clockSetDigit(2, (int)minutes);
 
     timeInSeconds -= minutes *= 60.0f;
 
     float tenSeconds = floor(timeInSeconds * 0.1f);
 
-    clockSetDigit(1, (int)tenSeconds);
+    clockSetDigit(3, (int)tenSeconds);
 
     timeInSeconds -= tenSeconds * 10.0f;
 
     float seconds = floor(timeInSeconds);
 
-    clockSetDigit(2, (int)seconds);
+    clockSetDigit(4, (int)seconds);
 
     timeInSeconds -= seconds;
 
     float tenthsOfSecond = floor(timeInSeconds * 10.0f);
 
-    clockSetDigit(3, (int)tenthsOfSecond);
+    clockSetDigit(5, (int)tenthsOfSecond);
 
     timeInSeconds -= tenthsOfSecond * 0.1f;
 
-    clockSetDigit(4, (int)floor(timeInSeconds * 100.0f));
+    clockSetDigit(6, (int)floor(timeInSeconds * 100.0f));
 }
 
 void clockRenderRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
@@ -81,7 +86,18 @@ void clockRenderRender(void* data, struct DynamicRenderDataList* renderList, str
         return;
     }
 
-    clockSetTime(clock->timeLeft);    
+    // main menu clock time
+    if (clock->timeLeft == -1.0f) {
+        clockSetDigit(0, 1);
+        clockSetDigit(1, 5);
+        clockSetDigit(2, 9);
+        clockSetDigit(3, 5);
+        clockSetDigit(4, 0);
+        clockSetDigit(5, 0);
+        clockSetDigit(6, 0);
+    } else {
+        clockSetTime(clock->timeLeft);    
+    }
 
     transformToMatrixL(&clock->transform, matrix, SCENE_SCALE);
 

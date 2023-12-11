@@ -25,6 +25,7 @@
 #include "util/profile.h"
 #include "util/rom.h"
 #include "util/time.h"
+#include "graphics/profile_task.h"
 
 #include "levels/levels.h"
 #include "savefile/checkpoint.h"
@@ -283,6 +284,7 @@ static void gameProc(void* arg) {
                         portalSurfaceRevert(0);
                         portalSurfaceCleanupQueueInit();
                         heapInit(_heapStart, memoryEnd);
+                        profileClearAddressMap();
                         translationsLoad(gSaveData.controls.subtitleLanguage);
                         levelLoadWithCallbacks(levelGetQueued());
                         rumblePakClipInit();
@@ -327,6 +329,14 @@ static void gameProc(void* arg) {
                     profileEnd(updateStart, 0);
                     drawingEnabled = 1;
                 }
+
+#if PORTAL64_WITH_RSP_PROFILER
+                if (controllerGetButtonDown(2, START_BUTTON)) {
+                    struct GraphicsTask* task = &gGraphicsTasks[drawBufferIndex];
+                    zeroMemory(task->framebuffer, sizeof(u16) * SCREEN_WD * SCREEN_HT);
+                    profileTask(&scheduler, &gameThread, &task->task.list);
+                }
+#endif
                 timeUpdateDelta();
                 soundPlayerUpdate();
                 controllersSavePreviousState();
