@@ -212,7 +212,8 @@ DisplayList::DisplayList(std::string name):
 }
 
 void DisplayList::AddCommand(std::unique_ptr<DisplayListCommand> command) {
-    mDataChunk->Add(std::move(command->GenerateCommand()));
+    auto generatedCommand = command->GenerateCommand();
+    mDataChunk->Add(std::move(generatedCommand));
 }
 
 StructureDataChunk& DisplayList::GetDataChunk() {

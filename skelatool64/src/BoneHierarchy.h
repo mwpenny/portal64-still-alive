@@ -36,7 +36,7 @@ public:
     const std::string& GetName();
     Bone* GetParent();
 
-    std::unique_ptr<DataChunk> GenerateRestPosiitonData();
+    std::unique_ptr<DataChunk> GenerateRestPositionData();
 
     static Bone* FindCommonAncestor(Bone* a, Bone* b);
     /**
@@ -72,7 +72,7 @@ public:
     bool HasData() const;
     unsigned int GetBoneCount() const;
 
-    void GenerateRestPosiitonData(CFileDefinition& fileDef, const std::string& variableName);
+    void GenerateRestPositionData(CFileDefinition& fileDef, const std::string& variableName);
 private:
     std::vector<std::unique_ptr<Bone>> mBones;
     std::map<std::string, Bone*> mBoneByName;
