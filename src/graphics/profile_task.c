@@ -111,3 +111,27 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
     osViSetEvent(&scheduler->interruptQ, (OSMesg)VIDEO_MSG, 1);
     osSetThreadPri(currentThread, GAME_PRIORITY);
 }
+
+void profileMapAddress(void* original, void* ramAddress) {
+#ifdef PORTAL64_WITH_DEBUGGER
+    char message[64];
+    int messageLen = sprintf(
+        message, 
+        "addr 0x%08x -> 0x%08x", 
+        (int)original, 
+        (int)ramAddress
+    );
+    gdbSendMessage(GDBDataTypeText, message, messageLen);
+#endif
+}
+
+void profileClearAddressMap() {
+#ifdef PORTAL64_WITH_DEBUGGER
+    char message[64];
+    int messageLen = sprintf(
+        message, 
+        "addr clearall"
+    );
+    gdbSendMessage(GDBDataTypeText, message, messageLen);
+#endif
+}

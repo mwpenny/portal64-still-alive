@@ -284,6 +284,7 @@ static void gameProc(void* arg) {
                         portalSurfaceRevert(0);
                         portalSurfaceCleanupQueueInit();
                         heapInit(_heapStart, memoryEnd);
+                        profileClearAddressMap();
                         translationsLoad(gSaveData.controls.subtitleLanguage);
                         levelLoadWithCallbacks(levelGetQueued());
                         rumblePakClipInit();

@@ -5,5 +5,7 @@
 #include <sched.h>
 
 void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task);
+void profileMapAddress(void* original, void* ramAddress);
+void profileClearAddressMap();
 
 #endif
