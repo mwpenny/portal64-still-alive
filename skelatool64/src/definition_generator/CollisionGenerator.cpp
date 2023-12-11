@@ -83,8 +83,9 @@ std::shared_ptr<CollisionGeneratorOutput> generateCollision(const aiScene* scene
             if (namedEntry != "") {
                 fileDefinition.AddMacro(fileDefinition.GetMacroName(namedEntry + "_COLLISION_INDEX"), std::to_string(output->quads.size()));
             }
-
-            collidersChunk->Add(std::move(collider.Generate()));
+            
+            auto generatedCollider = collider.Generate();
+            collidersChunk->Add(std::move(generatedCollider));
 
             std::unique_ptr<StructureDataChunk> colliderType(new StructureDataChunk());
             colliderType->AddPrimitive<const char*>("CollisionShapeTypeQuad");

@@ -266,7 +266,7 @@ AnimationResults generateAnimationForScene(const aiScene* scene, CFileDefinition
 
     std::string bonesName = fileDefinition.GetUniqueName("default_bones");
     std::string boneParentName = fileDefinition.GetUniqueName("bone_parent");
-    bones.GenerateRestPosiitonData(fileDefinition, bonesName);
+    bones.GenerateRestPositionData(fileDefinition, bonesName);
     std::string boneCountName = bonesName + "_COUNT";
     std::transform(boneCountName.begin(), boneCountName.end(), boneCountName.begin(), ::toupper);
     fileDefinition.AddMacro(boneCountName, std::to_string(bones.GetBoneCount()));

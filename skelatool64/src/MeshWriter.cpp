@@ -15,8 +15,8 @@ void useTexture(std::set<std::shared_ptr<TextureDefinition>>& usedTextures, std:
     }
 
     usedTextures.insert(texture);
-
-    fileDefinition.AddDefinition(std::move(texture->GenerateDefinition(fileDefinition.GetUniqueName(texture->Name()), fileSuffix)));
+    auto textureDefinition = texture->GenerateDefinition(fileDefinition.GetUniqueName(texture->Name()), fileSuffix);
+    fileDefinition.AddDefinition(std::move(textureDefinition));
 
     std::shared_ptr<PalleteDefinition> pallete = texture->GetPallete();
     if (!pallete || usedPalletes.find(pallete) != usedPalletes.end()) {
@@ -24,7 +24,8 @@ void useTexture(std::set<std::shared_ptr<TextureDefinition>>& usedTextures, std:
     }
 
     usedPalletes.insert(pallete);
-    fileDefinition.AddDefinition(std::move(pallete->GenerateDefinition(fileDefinition.GetUniqueName(pallete->Name()), fileSuffix)));
+    auto palleteDefinition = pallete->GenerateDefinition(fileDefinition.GetUniqueName(pallete->Name()), fileSuffix);
+    fileDefinition.AddDefinition(std::move(palleteDefinition));
 }
 
 void MaterialCollector::UseMaterial(const std::string& material, DisplayListSettings& settings) {

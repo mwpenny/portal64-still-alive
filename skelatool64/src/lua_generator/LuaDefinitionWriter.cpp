@@ -20,7 +20,8 @@ std::unique_ptr<DataChunk> buildMacroChunk(lua_State* L) {
     
     lua_pushnil(L);  /* first key */
     while (lua_next(L, args) != 0) {
-        result->Add(std::move(buildDataChunk(L)));
+        auto dataChunk = buildDataChunk(L);
+        result->Add(std::move(dataChunk));
         lua_pop(L, 1);
     }
     lua_pop(L, 1);
@@ -39,7 +40,8 @@ std::unique_ptr<DataChunk> buildStructureChunk(lua_State* L) {
     while (lua_next(L, topStart) != 0) {
         int keyType = lua_type(L, -2);
         if (keyType == LUA_TNUMBER) {
-            result->Add(std::move(buildDataChunk(L)));
+            auto dataChunk = buildDataChunk(L);
+            result->Add(std::move(dataChunk));
         } else if (keyType == LUA_TSTRING) {
             namedEntries.push_back(std::pair<std::string, std::unique_ptr<DataChunk>>(
                 lua_tostring(L, -2),

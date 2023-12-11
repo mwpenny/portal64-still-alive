@@ -359,6 +359,7 @@ build/src/scene/security_camera.o: build/src/audio/clips.h build/assets/models/p
 build/src/scene/signage.o: $(MODEL_HEADERS)
 build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
 build/src/util/dynamic_asset_data.o: build/assets/models/dynamic_model_list_data.h
+build/src/util/dynamic_animated_asset_data.o: build/assets/models/dynamic_animated_model_list_data.h
 build/src/util/dynamic_asset_loader.o: build/assets/models/dynamic_model_list.h build/assets/models/dynamic_animated_model_list.h
 build/src/menu/audio_options.o: build/src/audio/subtitles.h
 build/src/menu/video_options.o: build/src/audio/subtitles.h
@@ -569,10 +570,11 @@ $(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(DATA_OBJECTS)
 	makemask $(BASE_TARGET_NAME)_debug.z64
 
 clean:
+	rm -rf skelatool64/build
 	rm -rf build
 	rm -rf portal_pak_dir
 	rm -rf portal_pak_modified
-	rm -rf assets/locales/
+	rm -rf assets/locales
 
 clean-src:
 	rm -rf build/src

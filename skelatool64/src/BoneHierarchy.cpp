@@ -28,7 +28,7 @@ Bone* Bone::GetParent() {
     return mParent;
 }
 
-std::unique_ptr<DataChunk> Bone::GenerateRestPosiitonData() {
+std::unique_ptr<DataChunk> Bone::GenerateRestPositionData() {
     std::unique_ptr<StructureDataChunk> result(new StructureDataChunk());
 
     result->Add(std::unique_ptr<DataChunk>(new StructureDataChunk(mRestPosition)));
@@ -190,13 +190,14 @@ Bone* BoneHierarchy::BoneForName(std::string name) {
     }
 }
 
-void BoneHierarchy::GenerateRestPosiitonData(CFileDefinition& fileDef, const std::string& variableName) {
+void BoneHierarchy::GenerateRestPositionData(CFileDefinition& fileDef, const std::string& variableName) {
     if (mBones.size() == 0) return;
 
     std::unique_ptr<StructureDataChunk> transformData(new StructureDataChunk());
 
     for (unsigned int boneIndex = 0; boneIndex < mBones.size(); ++boneIndex) {
-        transformData->Add(std::move(mBones[boneIndex]->GenerateRestPosiitonData()));
+        auto restPositionData = mBones[boneIndex]->GenerateRestPositionData();
+        transformData->Add(std::move(restPositionData));
 
         std::string boneName = fileDef.GetUniqueName(mBones[boneIndex]->GetName() + "_BONE");
         std::transform(boneName.begin(), boneName.end(), boneName.begin(), ::toupper);
