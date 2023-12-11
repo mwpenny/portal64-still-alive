@@ -8,14 +8,13 @@
 # --------------------------------------------------------------------
 include /usr/include/n64/make/PRdefs
 
-
 SKELATOOL64:=skelatool64/skeletool64
 VTF2PNG:=vtf2png
 SFZ2N64:=sfz2n64
 
 $(SKELATOOL64):
 	skelatool64/setup_dependencies.sh
-	make -C skelatool64
+	@$(MAKE) -C skelatool64
 
 OPTIMIZER		:= -Os
 LCDEFS			:= -DDEBUG -g -Isrc/ -I/usr/include/n64/nustd -Werror -Wall
@@ -67,6 +66,7 @@ LDFLAGS =	-L/usr/lib/n64 $(N64LIB)  -L$(N64_LIBGCCDIR) -lgcc
 default:	english_audio
 
 english_audio: build/src/audio/subtitles.h portal_pak_dir
+	@$(MAKE) -C skelatool64
 	@$(MAKE) buildgame
 
 all_languages: build/src/audio/subtitles.h portal_pak_dir german_audio french_audio russian_audio spanish_audio
@@ -571,6 +571,7 @@ $(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(DATA_OBJECTS)
 
 clean:
 	rm -rf skelatool64/build
+	rm -rf skelatool64/skeletool64
 	rm -rf build
 	rm -rf portal_pak_dir
 	rm -rf portal_pak_modified
