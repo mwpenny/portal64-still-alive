@@ -2,7 +2,11 @@
 
 #include "../defs.h"
 
+
+#ifdef PORTAL64_WITH_DEBUGGER
 #include "../debugger/serial.h"
+#endif
+
 #include <string.h>
 
 #define VIDEO_MSG       666
@@ -19,7 +23,7 @@ void copyGfx(Gfx* from, Gfx* to, int count) {
     }
 }
 
-OSTime profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
+void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
     // block scheduler thread
     osSetThreadPri(currentThread, RSP_PROFILE_PRIORITY);
 
@@ -82,6 +86,7 @@ OSTime profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
 
             osWritebackDCacheAll();
             
+#ifdef PORTAL64_WITH_DEBUGGER
             char message[64];
             int messageLen = sprintf(
                 message, 
@@ -94,6 +99,7 @@ OSTime profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
                 (int)(us % 1000000)
             );
             gdbSendMessage(GDBDataTypeText, message, messageLen);
+#endif
         }
 
         ++curr;
@@ -104,6 +110,4 @@ OSTime profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
     osSetEventMesg(OS_EVENT_DP, &scheduler->interruptQ, (OSMesg)RDP_DONE_MSG);   
     osViSetEvent(&scheduler->interruptQ, (OSMesg)VIDEO_MSG, 1);
     osSetThreadPri(currentThread, GAME_PRIORITY);
-
-    return 0;
 }

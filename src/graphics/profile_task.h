@@ -4,6 +4,6 @@
 #include <ultra64.h>
 #include <sched.h>
 
-OSTime profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task);
+void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task);
 
 #endif

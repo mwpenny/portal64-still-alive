@@ -329,11 +329,13 @@ static void gameProc(void* arg) {
                     drawingEnabled = 1;
                 }
 
-                if (controllerGetButtonDown(0, R_JPAD)) {
+#if PORTAL64_WITH_RSP_PROFILER
+                if (controllerGetButtonDown(2, START_BUTTON)) {
                     struct GraphicsTask* task = &gGraphicsTasks[drawBufferIndex];
                     zeroMemory(task->framebuffer, sizeof(u16) * SCREEN_WD * SCREEN_HT);
                     profileTask(&scheduler, &gameThread, &task->task.list);
                 }
+#endif
                 timeUpdateDelta();
                 soundPlayerUpdate();
                 controllersSavePreviousState();
