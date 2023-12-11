@@ -48,7 +48,9 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
         ++end;
     }
 
+#ifdef PORTAL64_WITH_DEBUGGER
     int total = end - curr;
+#endif
 
     Gfx tmp[3];
 
@@ -67,7 +69,9 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
             // not very precise, but it seems to work
             osWritebackDCacheAll();
 
+#ifdef PORTAL64_WITH_DEBUGGER
             OSTime start = osGetTime();
+#endif
             osSpTaskStart(task);
             OSMesg recv;
 
@@ -75,9 +79,11 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
                 (void)osRecvMesg(&messageQueue, &recv, OS_MESG_BLOCK);
             } while ((int)recv != RDP_DONE_MSG);
 
+#ifdef PORTAL64_WITH_DEBUGGER
             OSTime result = osGetTime() - start;
 
             u64 us = OS_CYCLES_TO_NSEC(result);
+#endif
 
             // wait for DP to be available
             while (IO_READ(DPC_STATUS_REG) & (DPC_STATUS_DMA_BUSY | DPC_STATUS_END_VALID | DPC_STATUS_START_VALID));
