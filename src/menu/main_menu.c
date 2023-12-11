@@ -43,10 +43,6 @@ void mainMenuInit(struct GameMenu* gameMenu) {
     gScene.camera.fov = 56.0f;
 
     mainMenuPlayAmbientSound();
-
-    for (int i = 0; i < gScene.signageCount; ++i) {
-        signageActivate(&gScene.signage[i]);
-    }
 }
 
 void mainMenuUpdate(struct GameMenu* gameMenu) {
@@ -66,6 +62,12 @@ void mainMenuUpdate(struct GameMenu* gameMenu) {
     gameMenuUpdate(gameMenu);
     
     mainMenuPlayAmbientSound();
+
+    if (gScene.animator.animators[0].currentTime > 5.0f) {
+        for (int i = 0; i < gScene.signageCount; ++i) {
+            signageActivate(&gScene.signage[i]);
+        }
+    }
 
     for (int i = 0; i < gScene.signageCount; ++i) {
         signageUpdate(&gScene.signage[i]);
