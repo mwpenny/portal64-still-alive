@@ -571,11 +571,11 @@ $(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(DATA_OBJECTS)
 
 clean:
 	rm -rf skelatool64/build
-	rm -rf skelatool64/skeletool64
 	rm -rf build
 	rm -rf portal_pak_dir
 	rm -rf portal_pak_modified
 	rm -rf assets/locales
+	rm -f skelatool64/skeletool64
 
 clean-src:
 	rm -rf build/src
