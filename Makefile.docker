@@ -1,37 +1,32 @@
 all:
-	docker run -v $$PWD:/usr/src/app -it portal64 make
+	docker run --rm -v $$PWD:/usr/src/app -it portal64 make
 
 image:
 	docker build -t portal64 .
 
 convert_all_png:
-	docker run -v $$PWD:/usr/src/app -it portal64 make convert_all_png
+	docker run --rm -v $$PWD:/usr/src/app -it portal64 make convert_all_png
 
 bash:
-	docker run -v $$PWD:/usr/src/app -it portal64 bash
+	docker run --rm -v $$PWD:/usr/src/app -it portal64 bash
 
 clean:
-	sudo rm -rf skelatool64/build
-	sudo rm -rf build
-	sudo rm -rf portal_pak_dir
-	sudo rm -rf portal_pak_modified
-	sudo rm -rf assets/locales/
-	sudo rm -f skelatool64/skeletool64
+	sudo make clean
 	
 english_audio:
-	docker run -v $$PWD:/usr/src/app -it portal64 make english_audio
+	docker run --rm -v $$PWD:/usr/src/app -it portal64 make english_audio
 
 all_languages:
-	docker run -v $$PWD:/usr/src/app -it portal64 make all_languages
+	docker run --rm -v $$PWD:/usr/src/app -it portal64 make all_languages
 
 german_audio:
-	docker run -v $$PWD:/usr/src/app -it portal64 make german_audio
+	docker run --rm -v $$PWD:/usr/src/app -it portal64 make german_audio
 
 french_audio:
-	docker run -v $$PWD:/usr/src/app -it portal64 make french_audio
+	docker run --rm -v $$PWD:/usr/src/app -it portal64 make french_audio
 
 russian_audio:
-	docker run -v $$PWD:/usr/src/app -it portal64 make russian_audio
+	docker run --rm -v $$PWD:/usr/src/app -it portal64 make russian_audio
 
 spanish_audio:
-	docker run -v $$PWD:/usr/src/app -it portal64 make spanish_audio
+	docker run --rm -v $$PWD:/usr/src/app -it portal64 make spanish_audio
