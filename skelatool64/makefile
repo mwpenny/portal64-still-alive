@@ -34,6 +34,7 @@ skeletool64: $(OBJ_FILES) $(LUA_OBJ_FILES)
 clean:
 	rm -rf build/
 	rm -f skeletool64
+	rm -f CImg_*
 
 init:
 	
