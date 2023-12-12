@@ -570,12 +570,11 @@ $(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(DATA_OBJECTS)
 	makemask $(BASE_TARGET_NAME)_debug.z64
 
 clean:
-	rm -rf skelatool64/build
 	rm -rf build
 	rm -rf portal_pak_dir
 	rm -rf portal_pak_modified
 	rm -rf assets/locales
-	rm -f skelatool64/skeletool64
+	@$(MAKE) -C skelatool64 clean
 
 clean-src:
 	rm -rf build/src
