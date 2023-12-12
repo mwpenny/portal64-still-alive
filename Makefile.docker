@@ -11,10 +11,12 @@ bash:
 	docker run -v $$PWD:/usr/src/app -it portal64 bash
 
 clean:
+	sudo rm -rf skelatool64/build
 	sudo rm -rf build
 	sudo rm -rf portal_pak_dir
 	sudo rm -rf portal_pak_modified
 	sudo rm -rf assets/locales/
+	sudo rm -f skelatool64/skeletool64
 	
 english_audio:
 	docker run -v $$PWD:/usr/src/app -it portal64 make english_audio
