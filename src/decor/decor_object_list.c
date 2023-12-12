@@ -122,7 +122,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
             NULL,  
         },
         0.0f, 
-        1.0f,
+        1.3f,
         PROPS_LIGHT_RAIL_ENDCAP_DYNAMIC_MODEL,
         .materialIndex = LIGHT_RAIL_ENDCAP_INDEX,
         .soundClipId = -1,

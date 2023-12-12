@@ -35,11 +35,6 @@ struct Font {
     unsigned short kerningMaxCollisions;
 };
 
-// legacy methods for a font that fits into a single page
-Gfx* fontRender(struct Font* font, char* message, int x, int y, Gfx* dl);
-int fontCountGfx(struct Font* font, char* message);
-struct Vector2s16 fontMeasure(struct Font* font, char* message);
-
 struct SymbolLocation {
     short x;
     short y;

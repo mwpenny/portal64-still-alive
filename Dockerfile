@@ -7,14 +7,16 @@ ENV PATH /opt/crashsdk/bin:$PATH
 ENV PATH /root/.local/bin:$PATH
 ENV ROOT /etc/n64
 
-RUN apt update -y && \
-    DEBIAN_FRONTEND=noninteractive apt install -y \
+RUN apt-get update -y
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    apt-utils 2>/dev/null
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     ca-certificates
 RUN echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" | tee /etc/apt/sources.list.d/lambertjamesd.list && \
     echo "deb [trusted=yes] https://crashoveride95.github.io/apt/ ./" | tee /etc/apt/sources.list.d/n64sdk.list
-RUN apt update -y && \ 
+RUN apt-get update -y && \ 
     dpkg --add-architecture i386 && \
-    DEBIAN_FRONTEND=noninteractive apt install -y \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
     binutils-mips-n64 \
     gcc-mips-n64 \
     n64sdk \
@@ -58,5 +60,5 @@ RUN rm /opt/blender/blender-3.6.1-linux-x64.tar.xz
 
 ENV BLENDER_3_6 /opt/blender/blender-3.6.1-linux-x64/blender
 
-RUN pipx ensurepath
+RUN pipx ensurepath --force
 RUN pipx install vpk

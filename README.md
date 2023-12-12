@@ -68,6 +68,13 @@ pipx install vpk
 
 <br />
 
+Clone the Portal64 repo or download the zip.
+
+```sh
+sudo apt install git
+git clone https://github.com/lambertjamesd/portal64.git
+cd portal64
+```
 Setup and install dependencies for `skeletool64`
 
 ```sh
@@ -104,13 +111,6 @@ sudo apt install nodejs
 ```
 
 <br />
-Clone the Portal64 repo or download the zip.
-
-```sh
-sudo apt install git
-git clone https://github.com/lambertjamesd/portal64.git
-cd portal64
-```
 
 You then need to add the following files from where Portal is installed to the folder `vpk/` OR create a symbolic link to the `Portal` folder there (see [vpk/add_vpk_here.md](./vpk/add_vpk_here.md) for more details!).
 You can add multiple languages if desired.

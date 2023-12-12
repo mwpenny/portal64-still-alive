@@ -65,14 +65,16 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, M
 
                 struct RotatedBox rotatedBox;
 
-                rotatedBoxTransform(&staticTransforms[staticElement->transformIndex], animatedBox, &rotatedBox);
+                struct Transform* transform = &staticTransforms[staticElement->transformIndex];
+
+                rotatedBoxTransform(transform, animatedBox, &rotatedBox);
 
                 if (isRotatedBoxOutsideFrustrum(cullingInfo, &rotatedBox)) {
                     continue;
                 }
 
                 struct Vector3 center;
-                vector3Scale(&rotatedBox.origin, &center, 1.0f / SCENE_SCALE);
+                vector3AddScaled(&staticElement->center, &transform->position, 1.0f / SCENE_SCALE, &center);
 
                 renderSceneAdd(
                     renderScene, 

@@ -24,3 +24,6 @@ tools/vtf2png
 skelatool64/*.zip*
 
 src/controls/controller-data.h
+
+
+log.txt

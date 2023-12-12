@@ -54,11 +54,13 @@ void MaterialGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinitio
     }
 
     for (auto& texture : textures) {
-        fileDefinition.AddDefinition(std::move(texture->GenerateDefinition(fileDefinition.GetUniqueName(texture->Name()), "_mat")));
+        auto textureDefinition = texture->GenerateDefinition(fileDefinition.GetUniqueName(texture->Name()), "_mat");
+        fileDefinition.AddDefinition(std::move(textureDefinition));
     }
 
     for (auto& pallete : palletes) {
-        fileDefinition.AddDefinition(std::move(pallete->GenerateDefinition(fileDefinition.GetUniqueName(pallete->Name()), "_mat")));
+        auto palleteDefinition = pallete->GenerateDefinition(fileDefinition.GetUniqueName(pallete->Name()), "_mat");
+        fileDefinition.AddDefinition(std::move(palleteDefinition));
     }
     
     int index = 0;

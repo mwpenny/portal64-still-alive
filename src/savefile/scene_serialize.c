@@ -525,5 +525,6 @@ void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
 
     if (scene->player.flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
         scene->portalGun.portalGunVisible = 1;
+        scene->portalGun.rotation = scene->player.lookTransform.rotation;
     }
 }

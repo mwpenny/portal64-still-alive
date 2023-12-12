@@ -272,7 +272,8 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
 
     for (iteration = 0; iteration < MAX_POS_ADJUST_ITERATIONS; ++iteration) {
         int minOverlap = PORTAL_SURFACE_OVERLAP;
-        struct Vector2s16 minOverlapOffset;
+        int minIsOutside = 0;
+        struct Vector2s16 minOverlapOffset = {{{0, 0}}};
 
         struct Vector2s16 portalMin;
         portalMin.x = output->x - halfSize.x;
@@ -310,38 +311,47 @@ int portalSurfaceAdjustPosition(struct PortalSurface* surface, struct Transform*
             vector2s16Sub(&b, &a, &edgeDir);
 
             struct Vector2s16 offset;
-            int distance = edgeDir.y >= 0 ? portalMax.x - edgeMin.x : PORTAL_SURFACE_OVERLAP;
+            int distance = portalMax.x - edgeMin.x;
+            int isOutside = edgeDir.y < 0;
             offset.x = -distance;
             offset.y = 0;
 
             int distanceCheck = edgeMax.x - portalMin.x;
 
-            if (distanceCheck < distance && edgeDir.y <= 0) {
+            if (distanceCheck < distance) {
                 distance = distanceCheck;
                 offset.x = distance;
                 offset.y = 0;
+                isOutside = edgeDir.y > 0;
             }
 
             distanceCheck = portalMax.y - edgeMin.y;
 
-            if (distanceCheck < distance && edgeDir.x <= 0) {
+            if (distanceCheck < distance) {
                 distance = distanceCheck;
                 offset.x = 0;
                 offset.y = -distance;
+                isOutside = edgeDir.x > 0;
             }
 
             distanceCheck = edgeMax.y - portalMin.y;
 
-            if (distanceCheck < distance && edgeDir.x >= 0) {
+            if (distanceCheck < distance) {
                 distance = distanceCheck;
                 offset.x = 0;
                 offset.y = distance;
+                isOutside = edgeDir.x < 0;
             }
 
             if (distance < minOverlap) {
                 minOverlap = distance;
+                minIsOutside = isOutside;
                 minOverlapOffset = offset;
             }
+        }
+
+        if (minIsOutside) {
+            return 0;
         }
 
         if (minOverlap == PORTAL_SURFACE_OVERLAP) {

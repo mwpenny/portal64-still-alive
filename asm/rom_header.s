@@ -14,10 +14,10 @@
 .word  0x00000000               /* Checksum 2 (OVERWRITTEN BY MAKEMASK)*/
 .word  0x00000000               /* Unknown */
 .word  0x00000000               /* Unknown */
-.ascii "                    "   /* Internal ROM name (Max 20 characters) */
-.word  0x01000000               /* Advanced_Homebrew_ROM_Header (controller config) */
-/* Game ID (EXAMPLE: NSME) Begins here */
-.word  0x0000004E                /* Cartridge Type (N)*/
-.ascii "ED"                     /* Cartridge ID (SM)*/
-.ascii " "			/* Region (E)*/
-.byte  0x30			/* Version */
+.ascii "Portal 64           "   /* Internal ROM name (Max 20 characters) */
+
+.word  0x01000000               /* Unused officially / Advanced homebrew ROM header controller config */
+.word  0x0000004E               /* Cartridge Type (N; cart)*/
+.ascii "ED"                     /* Cartridge ID (ED) / Advanced homebrew ROM header magic value */
+.byte  0x41                     /* Region (A; All)*/
+.byte  0x32                     /* Version / Advanced homebrew ROM header misc. (region-free + 256K SRAM) */

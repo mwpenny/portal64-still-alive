@@ -8,14 +8,13 @@
 # --------------------------------------------------------------------
 include /usr/include/n64/make/PRdefs
 
-
 SKELATOOL64:=skelatool64/skeletool64
 VTF2PNG:=vtf2png
 SFZ2N64:=sfz2n64
 
 $(SKELATOOL64):
 	skelatool64/setup_dependencies.sh
-	make -C skelatool64
+	@$(MAKE) -C skelatool64
 
 OPTIMIZER		:= -Os
 LCDEFS			:= -DDEBUG -g -Isrc/ -I/usr/include/n64/nustd -Werror -Wall
@@ -67,6 +66,7 @@ LDFLAGS =	-L/usr/lib/n64 $(N64LIB)  -L$(N64_LIBGCCDIR) -lgcc
 default:	english_audio
 
 english_audio: build/src/audio/subtitles.h portal_pak_dir
+	@$(MAKE) -C skelatool64
 	@$(MAKE) buildgame
 
 all_languages: build/src/audio/subtitles.h portal_pak_dir german_audio french_audio russian_audio spanish_audio
@@ -359,6 +359,7 @@ build/src/scene/security_camera.o: build/src/audio/clips.h build/assets/models/p
 build/src/scene/signage.o: $(MODEL_HEADERS)
 build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
 build/src/util/dynamic_asset_data.o: build/assets/models/dynamic_model_list_data.h
+build/src/util/dynamic_animated_asset_data.o: build/assets/models/dynamic_animated_model_list_data.h
 build/src/util/dynamic_asset_loader.o: build/assets/models/dynamic_model_list.h build/assets/models/dynamic_animated_model_list.h
 build/src/menu/audio_options.o: build/src/audio/subtitles.h
 build/src/menu/video_options.o: build/src/audio/subtitles.h
@@ -572,7 +573,8 @@ clean:
 	rm -rf build
 	rm -rf portal_pak_dir
 	rm -rf portal_pak_modified
-	rm -rf assets/locales/
+	rm -rf assets/locales
+	@$(MAKE) -C skelatool64 clean
 
 clean-src:
 	rm -rf build/src

@@ -601,17 +601,20 @@ void generateMaterial(CFileDefinition& fileDef, const MaterialState& from, const
     generateEnumMacro((int)from.alphaCompare, (int)to.alphaCompare, "gsDPSetAlphaCompare", gAlphaCompareNames, output);
     generateEnumMacro((int)from.depthSource, (int)to.depthSource, "gsDPSetDepthSource", gDepthSourceNames, output);
 
-    std::unique_ptr<DataChunk> geometryModes = std::move(generateGeometryModes(from, to));
+    auto generatedGeometryModes = generateGeometryModes(from, to);
+    std::unique_ptr<DataChunk> geometryModes = std::move(generatedGeometryModes);
     if (geometryModes) {
         output.Add(std::move(geometryModes));
     }
 
-    std::unique_ptr<DataChunk> combineMode = std::move(generateCombineMode(from, to));
+    auto generatedCombineMode = generateCombineMode(from, to);
+    std::unique_ptr<DataChunk> combineMode = std::move(generatedCombineMode);
     if (combineMode) {
         output.Add(std::move(combineMode));
     }
 
-    std::unique_ptr<DataChunk> renderMode = std::move(generateRenderMode(from, to));
+    auto generatedRenderMode = generateRenderMode(from, to);
+    std::unique_ptr<DataChunk> renderMode = std::move(generatedRenderMode);
     if (renderMode) {
         output.Add(std::move(renderMode));
     }

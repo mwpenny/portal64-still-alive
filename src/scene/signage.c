@@ -250,5 +250,7 @@ void signageUpdate(struct Signage* signage) {
 }
 
 void signageActivate(struct Signage* signage) {
-    signage->currentFrame = 0;
+    if (signage->currentFrame == -1) {
+        signage->currentFrame = 0;
+    }
 }
