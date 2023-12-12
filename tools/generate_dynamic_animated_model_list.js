@@ -43,6 +43,7 @@ function generateMetadata(outputLocation, headerLocation) {
         &${generateArmatureName(outputLocation, headerLocation)},
         ${generateClipsName(outputLocation, headerLocation)},
         ${generateClipCountName(outputLocation, headerLocation)},
+        "${segmentName}", 
     },`;
 }
 

@@ -31,6 +31,7 @@ function generateMetadata(outputLocation, headerLocation) {
         _${segmentName}_geoSegmentRomEnd,
         _${segmentName}_geoSegmentStart,
         ${generateModelName(outputLocation, headerLocation)},
+        "${segmentName}",
     },`;
 }
 

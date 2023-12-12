@@ -93,7 +93,7 @@ Gfx* dynamicAssetLoadModel(struct DynamicAssetModel* model, u32* pointerOffset) 
         *pointerOffset = 0;
     }
 
-    profileMapAddress(model->model, result);
+    profileMapAddress(result, model->name);
 
     return result;
 }
@@ -118,7 +118,7 @@ void dynamicAssetLoadAnimatedModel(struct DynamicAnimatedAssetModel* model, stru
 
     result->clipCount = model->clipCount;
 
-    profileMapAddress(result->armature->displayList, result->armature->displayList);
+    profileMapAddress(result->armature->displayList, model->name);
 }
 
 void dynamicAssetModelPreload(int index) {

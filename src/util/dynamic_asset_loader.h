@@ -11,6 +11,7 @@ struct DynamicAssetModel {
     void* addressEnd;
     void* segmentStart;
     Gfx* model;
+    char* name;
 };
 
 struct DynamicAnimatedAssetModel {
@@ -20,6 +21,7 @@ struct DynamicAnimatedAssetModel {
     struct SKArmatureDefinition* armature;
     struct SKAnimationClip** clips;
     short clipCount;
+    char* name;
 };
 
 struct SKArmatureWithAnimations {

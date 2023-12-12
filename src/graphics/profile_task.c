@@ -23,9 +23,65 @@ void copyGfx(Gfx* from, Gfx* to, int count) {
     }
 }
 
+#define MOVE_WORD_IDX(gfx)  _SHIFTR((gfx)->words.w0, 16, 8)
+#define MOVE_WORD_OFS(gfx)  _SHIFTR((gfx)->words.w0, 0, 16)
+#define MOVE_WORD_DATA(gfx) ((gfx)->words.w1)
+
+void printDisplayList(Gfx* dl, int depth, int* segments) {
+    #ifdef PORTAL64_WITH_DEBUGGER
+    if (depth > 20) {
+        return;
+    }
+
+    for (int i = 0; i < 1000; ++i) {
+        char message[64];
+        int messageLen = sprintf(
+            message, 
+            "dl d %d 0x%08x%08x", 
+            depth,
+            dl->words.w0,
+            dl->words.w1
+        );
+        gdbSendMessage(GDBDataTypeText, message, messageLen);
+
+        int command = _SHIFTR(dl->words.w0, 24, 8);
+
+        if (command == G_DL) {
+            int address = dl->words.w1;
+            int segment = _SHIFTR(address, 24, 4);
+            printDisplayList((Gfx*)(segments[segment] + (address & 0xFFFFFF)), depth + 1, segments);
+        }
+
+        if (command == G_MOVEWORD) {
+            int index = MOVE_WORD_IDX(dl);
+            int offset = MOVE_WORD_OFS(dl);
+            int data = MOVE_WORD_DATA(dl);
+
+            if (index == G_MW_SEGMENT) {
+                segments[(offset >> 2) & 0xF] = data;
+            }
+        }
+
+        if (command == G_ENDDL) {
+            return;
+        }
+
+        ++dl;
+    }
+    #endif
+}
+
 void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
     // block scheduler thread
     osSetThreadPri(currentThread, RSP_PROFILE_PRIORITY);
+
+    int segments[16];
+
+    for (int i = 0; i < 16; ++i) {
+        segments[i] = 0;
+    }
+    
+    printDisplayList((Gfx*)task->t.data_ptr, 0, segments);
 
     // wait for DP to be available
     while (IO_READ(DPC_STATUS_REG) & (DPC_STATUS_DMA_BUSY | DPC_STATUS_END_VALID | DPC_STATUS_START_VALID));
@@ -44,7 +100,7 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
 
     Gfx* end = curr;
 
-    while (end[1].words.w0 != _SHIFTL(G_RDPFULLSYNC, 24, 8)) {
+    while (_SHIFTR(end[1].words.w0, 24, 8) != G_RDPFULLSYNC) {
         ++end;
     }
 
@@ -118,14 +174,14 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
     osSetThreadPri(currentThread, GAME_PRIORITY);
 }
 
-void profileMapAddress(void* original, void* ramAddress) {
+void profileMapAddress(void* ramAddress, const char* name) {
 #ifdef PORTAL64_WITH_DEBUGGER
     char message[64];
     int messageLen = sprintf(
         message, 
-        "addr 0x%08x -> 0x%08x", 
-        (int)original, 
-        (int)ramAddress
+        "addr 0x%08x -> %s", 
+        (int)ramAddress, 
+        name
     );
     gdbSendMessage(GDBDataTypeText, message, messageLen);
 #endif
