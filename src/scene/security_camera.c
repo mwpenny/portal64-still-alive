@@ -66,7 +66,7 @@ void securityCameraLookAt(struct SecurityCamera* camera, struct Vector3* target)
         return;
     }
 
-    pitch.x = sqrtf(offset.x * offset.x + offset.z * offset.z) * invMag;
+    pitch.x = -sqrtf(offset.x * offset.x + offset.z * offset.z) * invMag;
 
     struct Quaternion relativeRotation;
     quatAxisComplex(&gForward, &pitch, &targetPose);
