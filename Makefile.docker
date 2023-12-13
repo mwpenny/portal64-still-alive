@@ -11,7 +11,11 @@ bash:
 	docker run --rm -v $$PWD:/usr/src/app -e PORTAL64_WITH_DEBUGGER -e PORTAL64_WITH_GFX_VALIDATOR -it portal64 bash
 
 clean:
-	sudo make clean
+	sudo rm -rf build
+	sudo rm -rf portal_pak_dir
+	sudo rm -rf portal_pak_modified
+	sudo rm -rf assets/locales
+	sudo @$(MAKE) -C skelatool64 clean
 	
 english_audio:
 	docker run --rm -v $$PWD:/usr/src/app -e PORTAL64_WITH_DEBUGGER -e PORTAL64_WITH_GFX_VALIDATOR -it portal64 make english_audio
