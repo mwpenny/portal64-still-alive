@@ -24,6 +24,10 @@ ifeq ($(PORTAL64_WITH_DEBUGGER),1)
 LCDEFS += -DPORTAL64_WITH_DEBUGGER
 endif
 
+ifeq ($(PORTAL64_WITH_RSP_PROFILER),1)
+LCDEFS += -DPORTAL64_WITH_RSP_PROFILER
+endif
+
 BASE_TARGET_NAME = build/portal
 
 LD_SCRIPT	= portal.ld
@@ -536,7 +540,7 @@ CODEOBJECTS_NO_DEBUG = $(CODEOBJECTS)
 DATA_OBJECTS = build/assets/materials/images_mat.o
 
 ifeq ($(PORTAL64_WITH_DEBUGGER),1)
-CODEOBJECTS_NO_DEBUG += build/debugger/debugger_stub.o build/debugger/serial.o 
+CODEOBJECTS_NO_DEBUG += build/debugger/debugger_stub.o build/debugger/serial_stub.o 
 endif
 
 $(CODESEGMENT)_no_debug.o:	$(CODEOBJECTS_NO_DEBUG)

@@ -333,8 +333,7 @@ static void gameProc(void* arg) {
 #if PORTAL64_WITH_RSP_PROFILER
                 if (controllerGetButtonDown(2, START_BUTTON)) {
                     struct GraphicsTask* task = &gGraphicsTasks[drawBufferIndex];
-                    zeroMemory(task->framebuffer, sizeof(u16) * SCREEN_WD * SCREEN_HT);
-                    profileTask(&scheduler, &gameThread, &task->task.list);
+                    profileTask(&scheduler, &gameThread, &task->task.list, task->framebuffer);
                 }
 #endif
                 timeUpdateDelta();

@@ -8,6 +8,8 @@
 #endif
 
 #include <string.h>
+#include "../graphics/graphics.h"
+#include "../util/memory.h"
 
 #define VIDEO_MSG       666
 #define RSP_DONE_MSG    667
@@ -49,7 +51,7 @@ void printDisplayList(Gfx* dl, int depth, int* segments) {
         if (command == G_DL) {
             int address = dl->words.w1;
             int segment = _SHIFTR(address, 24, 4);
-            printDisplayList((Gfx*)(segments[segment] + (address & 0xFFFFFF)), depth + 1, segments);
+            printDisplayList((Gfx*)PHYS_TO_K0((segments[segment] + (address & 0xFFFFFF))), depth + 1, segments);
         }
 
         if (command == G_MOVEWORD) {
@@ -71,7 +73,7 @@ void printDisplayList(Gfx* dl, int depth, int* segments) {
     #endif
 }
 
-void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
+void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task, u16* framebuffer) {
     // block scheduler thread
     osSetThreadPri(currentThread, RSP_PROFILE_PRIORITY);
 
@@ -85,6 +87,8 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task) {
 
     // wait for DP to be available
     while (IO_READ(DPC_STATUS_REG) & (DPC_STATUS_DMA_BUSY | DPC_STATUS_END_VALID | DPC_STATUS_START_VALID));
+
+    zeroMemory(framebuffer, sizeof(u16) * SCREEN_WD * SCREEN_HT);
 
     OSMesgQueue messageQueue;
     OSMesg messages[4];
