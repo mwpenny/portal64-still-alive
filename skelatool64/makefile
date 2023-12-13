@@ -34,7 +34,10 @@ skeletool64: $(OBJ_FILES) $(LUA_OBJ_FILES)
 clean:
 	rm -rf build/
 	rm -f skeletool64
-	rm -f CImg_*
+	rm -f *.zip*
+	rm -rf CImg-*
+	rm -rf cimg
+	@$(MAKE) -C yaml-cpp clean
 
 init:
 	

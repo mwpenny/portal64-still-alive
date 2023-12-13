@@ -69,11 +69,12 @@ LDFLAGS =	-L/usr/lib/n64 $(N64LIB)  -L$(N64_LIBGCCDIR) -lgcc
 
 default:	english_audio
 
-english_audio: build/src/audio/subtitles.h portal_pak_dir
+english_audio: build/src/audio/subtitles.h portal_pak_dir $(SKELATOOL64)
 	@$(MAKE) -C skelatool64
 	@$(MAKE) buildgame
 
-all_languages: build/src/audio/subtitles.h portal_pak_dir german_audio french_audio russian_audio spanish_audio
+all_languages: build/src/audio/subtitles.h portal_pak_dir german_audio french_audio russian_audio spanish_audio $(SKELATOOL64)
+	@$(MAKE) -C skelatool64
 	@$(MAKE) buildgame
 
 german_audio: vpk/portal_sound_vo_german_dir.vpk vpk/portal_sound_vo_german_000.vpk portal_pak_dir
