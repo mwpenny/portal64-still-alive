@@ -9,8 +9,9 @@ git clone https://github.com/jbeder/yaml-cpp.git
 cmake -S yaml-cpp -B yaml-cpp
 make -C yaml-cpp
 
-wget http://cimg.eu/files/CImg_3.1.3.zip
-unzip CImg_3.1.3.zip
+wget -O CImg_3.1.3.zip http://cimg.eu/files/CImg_3.1.3.zip
+unzip -o CImg_3.1.3.zip
+rm -rf cimg
 mv CImg-3.1.3 cimg
 
 popd
