@@ -329,9 +329,9 @@ static void gameProc(void* arg) {
                     profileEnd(updateStart, 0);
                     drawingEnabled = 1;
                 }
-
+    
 #if PORTAL64_WITH_RSP_PROFILER
-                if (controllerGetButtonDown(2, START_BUTTON)) {
+                if (controllerGetButtonDown(2, R_JPAD)) {
                     struct GraphicsTask* task = &gGraphicsTasks[drawBufferIndex];
                     profileTask(&scheduler, &gameThread, &task->task.list, task->framebuffer);
                 }
