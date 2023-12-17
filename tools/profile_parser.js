@@ -203,6 +203,10 @@ function calculateAverage(batch) {
     combinedCommands.sort((a, b) => b.elapsedTime - a.elapsedTime);
 
     batch.combinedCommands = combinedCommands;
+
+    if (fs.existsSync(`log_images/step_${batch.index}.bmp`)) {
+        console.log(`log_images/step_${batch.index}.bmp`);
+    }
 }
 
 profileBatches.forEach(calculateAverage);

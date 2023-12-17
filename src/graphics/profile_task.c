@@ -168,6 +168,10 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task, u16*
 #endif
         }
 
+        // char message[32];
+        // sprintf(message, "step_%d", curr - (Gfx*)task->t.data_ptr);
+        // gdbSendImage(message, SCREEN_WD, SCREEN_HT, G_IM_FMT_RGBA, G_IM_SIZ_16b, framebuffer);
+
         ++curr;
     }
 
