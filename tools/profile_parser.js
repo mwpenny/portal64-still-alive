@@ -67,7 +67,8 @@ function checkDisplayList(line) {
     const current = displayListStack[depth];
 
     if (!current) {
-        throw new Error('malformed display list');
+        console.log('malformed display list');
+        return;
     }
 
     const command = {
@@ -165,6 +166,15 @@ for (const line of lines) {
     checkDisplayList(line);
 }
 
+const imageCost = [];
+
+const SCREEN_WD = 320;
+const SCREEN_HT = 240;
+
+for (let i = 0; i < SCREEN_WD * SCREEN_HT; ++i) {
+    imageCost.push(0);
+}
+
 function calculateAverage(batch) {
     const combinedCommands = [];
     
@@ -188,6 +198,12 @@ function calculateAverage(batch) {
         if (current) {
             current.startTime /= current.total;
         }
+
+        if (fs.existsSync(`log_images/step_${i}.bmp`)) {
+            const data = fs.readFileSync(`log_images/step_${i}.bmp`);
+            current.imageData = data.subarray(14 + 12);
+            console.log(`log_images/step_${i}.bmp`);
+        }
     }
     
     for (let i = 0; i + 1 < combinedCommands.length; ++i) {
@@ -195,6 +211,36 @@ function calculateAverage(batch) {
         const next = combinedCommands[i + 1];
     
         current.elapsedTime = next.startTime - current.startTime;
+
+        let pixelDiffCount = 0;
+
+        if (current.imageData && next.imageData) {
+            for (let idx = 0; idx < SCREEN_HT * SCREEN_WD; idx += 3) {
+                if (current.imageData[idx + 0] != next.imageData[idx + 0] ||
+                    current.imageData[idx + 1] != next.imageData[idx + 1] ||
+                    current.imageData[idx + 2] != next.imageData[idx + 2]) {
+                    ++pixelDiffCount;
+                }
+            }
+
+            if (pixelDiffCount == 0) {
+                continue;
+            }
+
+            const pixelCost = current.elapsedTime / pixelDiffCount;
+
+            for (let y = 0; y < SCREEN_HT; ++y) {
+                for (let x = 0; x < SCREEN_WD; ++x) {
+                    const idx = (x + y * SCREEN_WD) * 3;
+
+                    if (current.imageData[idx + 0] != next.imageData[idx + 0] ||
+                        current.imageData[idx + 1] != next.imageData[idx + 1] ||
+                        current.imageData[idx + 2] != next.imageData[idx + 2]) {
+                            imageCost[x + y * SCREEN_WD] += pixelCost;
+                    }
+                }
+            }
+        }
     }
     
     // the last command is always a pipe sync we dont care about
@@ -203,10 +249,6 @@ function calculateAverage(batch) {
     combinedCommands.sort((a, b) => b.elapsedTime - a.elapsedTime);
 
     batch.combinedCommands = combinedCommands;
-
-    if (fs.existsSync(`log_images/step_${batch.index}.bmp`)) {
-        console.log(`log_images/step_${batch.index}.bmp`);
-    }
 }
 
 profileBatches.forEach(calculateAverage);
@@ -246,3 +288,38 @@ for (const batch of profileBatches) {
     }
     console.log('end of batch');
 }
+
+const maxCost = imageCost.reduce((a, b) => Math.max(a, b), 0);
+
+const headerSize = 14;
+const dataSize = SCREEN_WD * SCREEN_HT * 3;
+
+const dibHeaderSize = 12;
+
+const buffer = Buffer.alloc(headerSize + dibHeaderSize + dataSize);
+
+buffer[0] = 0x42;
+buffer[1] = 0x4D;
+
+buffer.writeUInt32LE(buffer.length, 2);
+buffer.writeUInt16LE(0, 6);
+buffer.writeUInt16LE(0, 8);
+buffer.writeUInt32LE(headerSize + dibHeaderSize, 10);
+
+buffer.writeUInt32LE(12, 14);
+buffer.writeUInt16LE(SCREEN_WD, 18);
+buffer.writeUInt16LE(SCREEN_HT, 20);
+buffer.writeUInt16LE(1, 22);
+buffer.writeUInt16LE(24, 24);
+
+for (let idx = 0; idx < SCREEN_WD * SCREEN_HT; ++idx) {
+    const outIdx = headerSize + dibHeaderSize + idx * 3;
+
+    const value = Math.floor(255 * imageCost[idx] / maxCost + 0.5);
+
+    buffer[outIdx + 2] = value;
+    buffer[outIdx + 1] = value;
+    buffer[outIdx + 0] = value;
+}
+
+fs.writeFileSync('log_images/pixel_cost.bmp', buffer);
