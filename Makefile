@@ -39,7 +39,7 @@ ASMFILES    =	$(shell find asm/ -type f -name '*.s')
 
 ASMOBJECTS  =	$(patsubst %.s, build/%.o, $(ASMFILES))
 
-CODEFILES = $(shell find src/ -type f -name '*.c')
+CODEFILES = $(shell find src/ -type f -name '*.c' | sort)
 
 ifeq ($(PORTAL64_WITH_GFX_VALIDATOR),1)
 LCDEFS += -DPORTAL64_WITH_GFX_VALIDATOR
