@@ -75,7 +75,7 @@ sudo apt install git
 git clone https://github.com/lambertjamesd/portal64.git
 cd portal64
 ```
-Setup and install dependencies for `skeletool64`
+Setup and install dependencies for `skelatool64`
 
 ```sh
 echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" \
