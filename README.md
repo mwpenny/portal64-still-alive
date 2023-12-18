@@ -75,7 +75,7 @@ sudo apt install git
 git clone https://github.com/lambertjamesd/portal64.git
 cd portal64
 ```
-Setup and install dependencies for `skeletool64`
+Setup and install dependencies for `skelatool64`
 
 ```sh
 echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" \
@@ -162,10 +162,16 @@ make clean
 
 # Build (default build with english audio)
 make
+```
+In case you have any trouble with the ROM running on hardware try padding the ROM.
+```
+make fix-nowine
+```
+You can also try the old way of paddinng the ROM, but you don't need both.
 
-# In case you have any trouble with ROM running on hardware try
-# wine install required to run properly
-sudo apt install wine
+This method requires you to install wine to run properly. https://wiki.winehq.org/Ubuntu
+
+```
 make fix
 ```
 
@@ -215,9 +221,19 @@ portal/portal_sound_vo_spanish_dir.vpk
 
 ## Build with Docker
 
-Using the docker image the only setup step you need is to populating the vpk folder - you need to COPY all needed *.vpk files, a symlink does not work for Docker builds!
+Clone the Portal64 repo or download the zip.
+
+```sh
+sudo apt install git
+git clone https://github.com/lambertjamesd/portal64.git
+cd portal64
+```
+
+You need to populate the vpk folder - you need to COPY all needed *.vpk files, a symlink does not work for Docker builds!
+
 
 After that you can build the docker image using
+
 
 Build the Docker image.
 
