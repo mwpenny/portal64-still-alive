@@ -5,6 +5,7 @@ echo "deb [trusted=yes] https://crashoveride95.github.io/apt/ ./" | sudo tee /et
 echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" | sudo tee /etc/apt/sources.list.d/lambertjamesd.list
 
 # Update system package lists
+sudo dpkg --add-architecture i386
 sudo apt update
 
 # Install various packages
