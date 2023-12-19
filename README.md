@@ -164,7 +164,7 @@ make fix-nowine
 ```
 You can also try the old way of paddinng the ROM, but you don't need both.
 
-This method requires you to install wine to run properly. https://wiki.winehq.org/Ubuntu
+This method requires you to install wine to run properly. [WINE](https://wiki.winehq.org/Ubuntu)
 
 ```
 make fix
