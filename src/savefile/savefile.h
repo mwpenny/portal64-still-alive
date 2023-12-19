@@ -90,6 +90,8 @@ extern int gCurrentTestSubject;
 void savefileLoad();
 void savefileSave();
 
+void savefileDeleteGame(int slotIndex);
+
 void savefileSaveGame(Checkpoint checkpoint, u16* screenshot, int testChamberIndex, int subjectNumber, int slotIndex);
 int savefileListSaves(struct SaveSlotInfo* slots, int includeAuto);
 int savefileNextTestSubject();

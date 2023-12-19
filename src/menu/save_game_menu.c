@@ -59,16 +59,35 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
 }
 
 enum InputCapture saveGameUpdate(struct SaveGameMenu* saveGame) {
-    if (controllerGetButtonDown(0, A_BUTTON) && saveGame->savefileList->numberOfSaves) {
-        Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
-        if (checkpointSaveInto(&gScene, save)) {
-            savefileSaveGame(save, gScreenGrabBuffer, getChamberDisplayNumberFromLevelIndex(gCurrentLevelIndex, gScene.player.body.currentRoom), gCurrentTestSubject, savefileGetSlot(saveGame->savefileList));
-            saveGamePopulate(saveGame, 0);
-            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
-        }else{
-            soundPlayerPlay(SOUNDS_WPN_DENYSELECT, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+    if (saveGame->savefileList->numberOfSaves) {
+        if (controllerGetButtonDown(0, A_BUTTON)) {
+            Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
+            if (checkpointSaveInto(&gScene, save)) {
+                savefileSaveGame(save, gScreenGrabBuffer, getChamberDisplayNumberFromLevelIndex(gCurrentLevelIndex, gScene.player.body.currentRoom), gCurrentTestSubject, savefileGetSlot(saveGame->savefileList));
+                saveGamePopulate(saveGame, 1);
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+            } else {
+                soundPlayerPlay(SOUNDS_WPN_DENYSELECT, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+            }
+            stackMallocFree(save);
+        } else if (controllerGetButtonDown(0, Z_TRIG)) {
+            int selectedSlotIndex = savefileGetSlot(saveGame->savefileList);
+            if (selectedSlotIndex == savefileFirstFreeSlot()) {
+                // Disallow deleting "new save" entry
+                soundPlayerPlay(SOUNDS_WPN_DENYSELECT, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+            } else {
+                short selectedListIndex = saveGame->savefileList->selectedSave;
+                savefileDeleteGame(selectedSlotIndex);
+                saveGamePopulate(saveGame, 1);
+
+                if (selectedListIndex >= saveGame->savefileList->numberOfSaves) {
+                    --selectedListIndex;
+                }
+                saveGame->savefileList->selectedSave = selectedListIndex;
+
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+            }
         }
-        stackMallocFree(save);
     }
 
     return savefileListUpdate(saveGame->savefileList);

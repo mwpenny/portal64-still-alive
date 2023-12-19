@@ -31,19 +31,34 @@ void loadGamePopulate(struct LoadGameMenu* loadGame) {
 }
 
 enum InputCapture loadGameUpdate(struct LoadGameMenu* loadGame) {
-    if (controllerGetButtonDown(0, A_BUTTON) && loadGame->savefileList->numberOfSaves) {
-        Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
-        int testChamber;
-        int testSubject;
-        savefileLoadGame(savefileGetSlot(loadGame->savefileList), save, &testChamber, &testSubject);
-        gCurrentTestSubject = testSubject;
-        
-        levelQueueLoad(getLevelIndexFromChamberDisplayNumber(testChamber), NULL, NULL);
-        checkpointUse(save);
+    if (loadGame->savefileList->numberOfSaves) {
+        if (controllerGetButtonDown(0, A_BUTTON)) {
+            Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
+            int testChamber;
+            int testSubject;
+            savefileLoadGame(savefileGetSlot(loadGame->savefileList), save, &testChamber, &testSubject);
+            gCurrentTestSubject = testSubject;
 
-        stackMallocFree(save);
+            levelQueueLoad(getLevelIndexFromChamberDisplayNumber(testChamber), NULL, NULL);
+            checkpointUse(save);
 
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+            stackMallocFree(save);
+
+            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        } else if (controllerGetButtonDown(0, Z_TRIG)) {
+            short selectedSaveIndex = loadGame->savefileList->selectedSave;
+            struct SavefileInfo* selectedSave = &loadGame->savefileList->savefileInfo[selectedSaveIndex];
+
+            savefileDeleteGame(selectedSave->slotIndex);
+            loadGamePopulate(loadGame);
+
+            if (selectedSaveIndex >= loadGame->savefileList->numberOfSaves) {
+                --selectedSaveIndex;
+            }
+            loadGame->savefileList->selectedSave = selectedSaveIndex;
+
+            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        }
     }
 
     return savefileListUpdate(loadGame->savefileList);
