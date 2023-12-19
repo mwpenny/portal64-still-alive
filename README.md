@@ -40,9 +40,13 @@ Clone the Portal64 repo or download the zip.
 
 ```sh
 sudo apt install git
+```
+
+```sh
 git clone https://github.com/lambertjamesd/portal64.git
 cd portal64
 ```
+
 Setup and install dependencies. 
 The following commands allow the scripts to run on the system, then it runs the setup.
 
