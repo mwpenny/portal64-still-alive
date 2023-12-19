@@ -81,7 +81,13 @@ Setup and install dependencies for `skelatool64`
 echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" \
     | sudo tee /etc/apt/sources.list.d/lambertjamesd.list
 sudo apt update
-sudo apt install vtf2png sfz2n64 mpg123 sox imagemagick unzip ffmpeg
+sudo apt install vtf2png sfz2n64 mpg123 sox imagemagick unzip
+``
+```
+Install ffmpeg 4.3.1
+```
+sudo snap install ffmpeg  # version 4.3.1
+
 ```
 
 <br />
@@ -91,17 +97,6 @@ Install lua5.4 (You may need to remove other installed versions first, skelatool
 ```sh
 sudo apt install lua5.4 liblua5.4-dev liblua5.4-0
 ```
-
-<br />
-
-Setup and build skelatool64 (the version included in this portal64 repo!)
-
-```sh
-cd skelatool64
-./setup_dependencies.sh
-make
-```
-
 <br />
 
 You will need to install nodejs. You can use apt for this
@@ -169,7 +164,7 @@ make fix-nowine
 ```
 You can also try the old way of paddinng the ROM, but you don't need both.
 
-This method requires you to install wine to run properly. https://wiki.winehq.org/Ubuntu
+This method requires you to install wine to run properly. [WINE](https://wiki.winehq.org/Ubuntu)
 
 ```
 make fix
