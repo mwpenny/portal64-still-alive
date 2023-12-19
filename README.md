@@ -55,7 +55,7 @@ sudo chmod +x setup.sh
 ./setup.sh
 
 ```
-Alternatively, you could just follow the manual setup instructions [here](documentation/manual_setup.md]).
+Alternatively, you could just follow the manual setup instructions [here](./documentation/manual_setup.md).
 
 
 
