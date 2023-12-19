@@ -39,10 +39,7 @@ Updates are constantly being made to the game, so we recommend checking out the 
 Clone the Portal64 repo or download the zip.
 
 ```sh
-sudo apt install git
-```
-
-```sh
+sudo apt install git -y
 git clone https://github.com/lambertjamesd/portal64.git
 cd portal64
 ```
