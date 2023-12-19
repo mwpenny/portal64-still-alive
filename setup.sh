@@ -7,11 +7,6 @@ echo "deb [trusted=yes] https://lambertjamesd.github.io/apt/ ./" | sudo tee /etc
 # Update system package lists
 sudo apt update
 
-# Install git and clone a repository
-sudo apt install git -y
-git clone https://github.com/lambertjamesd/portal64.git
-cd portal64
-
 # Install various packages
 sudo apt install binutils-mips-n64 gcc-mips-n64 git imagemagick liblua5.4-0 liblua5.4-dev libnustd lua5.4 makemask mpg123 newlib-mips-n64 nodejs n64sdk root-compatibility-environment sfz2n64 sox unzip vtf2png -y
 
