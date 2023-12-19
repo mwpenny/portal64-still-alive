@@ -112,12 +112,15 @@ make clean
 # Build (default build with english audio)
 make
 
+```
 You can also prepare to build the ROM with additional audio languages, like this (multiple commands per build possible):
-
 ```
 make french_audio
+
 make german_audio
+
 make russian_audio
+
 make spanish_audio
 ```
 You still have run `make` after this.
