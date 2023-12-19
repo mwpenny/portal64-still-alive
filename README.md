@@ -55,9 +55,12 @@ sudo chmod +x setup.sh
 ./setup.sh
 
 ```
-You can also follow the manual setup instructions [here](https://github.com/lambertjamesd/portal64])
+Alternatively, you could just follow the manual setup instructions [here](documentation/manual_setup.md]).
 
-You then need to add the following files from where Portal is installed to the folder `vpk/` OR create a symbolic link to the `Portal` folder there (see [vpk/add_vpk_here.md](./vpk/add_vpk_here.md) for more details!).
+
+
+After setup, You need to add the following files from where Portal is installed to the folder `vpk/` OR create a symbolic link to the `Portal` folder there (see [vpk/add_vpk_here.md](./vpk/add_vpk_here.md) for more details!).
+
 You can add multiple languages if desired.
 
 ```
