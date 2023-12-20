@@ -608,11 +608,4 @@ clean-assets:
 	rm -f $(BASE_TARGET_NAME).z64
 	rm -f $(BASE_TARGET_NAME)_debug.z64
 
-fix:
-	wine tools/romfix64.exe $(BASE_TARGET_NAME).z64
-
-fix-nowine:
-	chmod +x tools/romfix64.sh
-	sh tools/romfix64.sh $(BASE_TARGET_NAME).z64
-
 .SECONDARY:
