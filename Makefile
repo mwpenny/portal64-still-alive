@@ -605,5 +605,4 @@ clean-assets:
 	rm -f $(BASE_TARGET_NAME).z64
 	rm -f $(BASE_TARGET_NAME)_debug.z64
 
-
 .SECONDARY:
