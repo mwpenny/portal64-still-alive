@@ -47,7 +47,7 @@ cd portal64
 Setup and install dependencies. 
 The following commands allow the scripts to run on the system, then it runs the setup.
 
-As always it in good practice look over scripts from the internet before running them on your system. 
+As always it is good practice look over scripts from the internet before running them on your system. 
 ```sh
 
 sudo chmod +x skelatool64/setup_dependencies.sh
