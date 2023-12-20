@@ -13,7 +13,11 @@ VTF2PNG:=vtf2png
 SFZ2N64:=sfz2n64
 
 $(SKELATOOL64):
+	chmod +x skelatool64/setup_dependencies.sh
 	skelatool64/setup_dependencies.sh
+
+
+
 	@$(MAKE) -C skelatool64
 
 OPTIMIZER		:= -Os
@@ -555,6 +559,8 @@ $(BASE_TARGET_NAME).z64: $(CODESEGMENT)_no_debug.o $(OBJECTS) $(DATA_OBJECTS) $(
 	$(LD) -L. -T $(CP_LD_SCRIPT)_no_debug.ld -Map $(BASE_TARGET_NAME)_no_debug.map -o $(BASE_TARGET_NAME).elf
 	$(OBJCOPY) --pad-to=0x100000 --gap-fill=0xFF $(BASE_TARGET_NAME).elf $(BASE_TARGET_NAME).z64 -O binary
 	makemask $(BASE_TARGET_NAME).z64
+	chmod +x tools/romfix64.sh
+	sh tools/romfix64.sh $(BASE_TARGET_NAME).z64
 
 # with debugger
 CODEOBJECTS_DEBUG = $(CODEOBJECTS) 
@@ -573,6 +579,8 @@ $(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(DATA_OBJECTS)
 	$(LD) -L. -T $(CP_LD_SCRIPT)_debug.ld -Map $(BASE_TARGET_NAME)_debug.map -o $(BASE_TARGET_NAME)_debug.elf
 	$(OBJCOPY) --pad-to=0x100000 --gap-fill=0xFF $(BASE_TARGET_NAME)_debug.elf $(BASE_TARGET_NAME)_debug.z64 -O binary
 	makemask $(BASE_TARGET_NAME)_debug.z64
+	chmod +x tools/romfix64.sh
+	sh tools/romfix64.sh $(BASE_TARGET_NAME).z64
 
 clean:
 	rm -rf build
@@ -599,12 +607,5 @@ clean-assets:
 	rm -f $(BASE_TARGET_NAME).elf
 	rm -f $(BASE_TARGET_NAME).z64
 	rm -f $(BASE_TARGET_NAME)_debug.z64
-
-fix:
-	wine tools/romfix64.exe $(BASE_TARGET_NAME).z64
-
-fix-nowine:
-	chmod +x tools/romfix64.sh
-	sh tools/romfix64.sh $(BASE_TARGET_NAME).z64
 
 .SECONDARY:

@@ -157,20 +157,8 @@ make clean
 
 # Build (default build with english audio)
 make
-```
-In case you have any trouble with the ROM running on hardware try padding the ROM.
-```
-make fix-nowine
-```
-You can also try the old way of paddinng the ROM, but you don't need both.
 
-This method requires you to install wine to run properly. [WINE](https://wiki.winehq.org/Ubuntu)
-
-```
-make fix
-```
-
-Alternatively, you can also prepare to build with additional audio languages, like this (multiple commands per build possible):
+You can also prepare to build the ROM with additional audio languages, like this (multiple commands per build possible):
 
 ```
 make french_audio
