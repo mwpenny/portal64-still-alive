@@ -46,5 +46,6 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
 
 void controlsRenderPrompt(enum ControllerAction action, char* message, float opacity, struct RenderState* renderState);
 void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOpacity, struct RenderState* renderState, enum SubtitleType subtitleType);
+void controlsRenderButtonIcon(enum ControllerActionSource source, int x, int y, struct RenderState* renderState);
 
 #endif

@@ -25,9 +25,16 @@ void loadGamePopulate(struct LoadGameMenu* loadGame) {
         savefileInfo[i].testchamberDisplayNumber = saveSlots[i].testChamber;
         savefileInfo[i].savefileName = saveSlots[i].saveSlot == 0 ? translationsGet(GAMEUI_AUTOSAVE) : NULL;
         savefileInfo[i].screenshot = (u16*)SCREEN_SHOT_SRAM(saveSlots[i].saveSlot);
+        savefileInfo[i].isFree = 0;
     }
 
-    savefileUseList(loadGame->savefileList, translationsGet(GAMEUI_LOADGAME), savefileInfo, numberOfSaves);
+    savefileUseList(
+        loadGame->savefileList,
+        translationsGet(GAMEUI_LOADGAME),
+        translationsGet(GAMEUI_LOAD),
+        savefileInfo,
+        numberOfSaves
+    );
 }
 
 enum InputCapture loadGameUpdate(struct LoadGameMenu* loadGame) {

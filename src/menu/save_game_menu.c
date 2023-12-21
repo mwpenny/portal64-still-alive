@@ -28,6 +28,7 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
         savefileInfo[i].testchamberDisplayNumber = saveSlots[i].testChamber;
         savefileInfo[i].savefileName = NULL;
         savefileInfo[i].screenshot = (u16*)SCREEN_SHOT_SRAM(saveSlots[i].saveSlot);
+        savefileInfo[i].isFree = 0;
 
         if (suggestedSlot == saveSlots[i].saveSlot) {
             startSelection = i;
@@ -41,6 +42,7 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
         savefileInfo[numberOfSaves].savefileName = translationsGet(GAMEUI_NEWSAVEGAME);
         savefileInfo[numberOfSaves].testchamberDisplayNumber = getChamberDisplayNumberFromLevelIndex(gCurrentLevelIndex, gScene.player.body.currentRoom);
         savefileInfo[numberOfSaves].screenshot = gScreenGrabBuffer;
+        savefileInfo[numberOfSaves].isFree = 1;
 
         if (suggestedSlot == 0) {
             startSelection = numberOfSaves; 
@@ -49,7 +51,13 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
         ++numberOfSaves;
     }
 
-    savefileUseList(saveGame->savefileList, translationsGet(GAMEUI_SAVEGAME), savefileInfo, numberOfSaves);
+    savefileUseList(
+        saveGame->savefileList,
+        translationsGet(GAMEUI_SAVEGAME),
+        translationsGet(GAMEUI_SAVE),
+        savefileInfo,
+        numberOfSaves
+    );
 
     if (startSelection == -1) {
         saveGame->savefileList->selectedSave = numberOfSaves - 1;
@@ -71,19 +79,19 @@ enum InputCapture saveGameUpdate(struct SaveGameMenu* saveGame) {
             }
             stackMallocFree(save);
         } else if (controllerGetButtonDown(0, Z_TRIG)) {
-            int selectedSlotIndex = savefileGetSlot(saveGame->savefileList);
-            if (selectedSlotIndex == savefileFirstFreeSlot()) {
-                // Disallow deleting "new save" entry
+            short selectedSaveIndex = saveGame->savefileList->selectedSave;
+            struct SavefileInfo* selectedSave = &saveGame->savefileList->savefileInfo[selectedSaveIndex];
+
+            if (selectedSave->isFree) {
                 soundPlayerPlay(SOUNDS_WPN_DENYSELECT, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
             } else {
-                short selectedListIndex = saveGame->savefileList->selectedSave;
-                savefileDeleteGame(selectedSlotIndex);
+                savefileDeleteGame(selectedSave->slotIndex);
                 saveGamePopulate(saveGame, 1);
 
-                if (selectedListIndex >= saveGame->savefileList->numberOfSaves) {
-                    --selectedListIndex;
+                if (selectedSaveIndex >= saveGame->savefileList->numberOfSaves) {
+                    --selectedSaveIndex;
                 }
-                saveGame->savefileList->selectedSave = selectedListIndex;
+                saveGame->savefileList->selectedSave = selectedSaveIndex;
 
                 soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
             }

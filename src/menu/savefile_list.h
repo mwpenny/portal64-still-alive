@@ -12,6 +12,7 @@ struct SavefileInfo {
     short testchamberDisplayNumber;
     char* savefileName;
     u16* screenshot;
+    int isFree;
 };
 
 struct SavefileListSlot {
@@ -28,6 +29,8 @@ struct SavefileListSlot {
 struct SavefileListMenu {
     Gfx* menuOutline;
     struct PrerenderedText* savefileListTitleText;
+    struct PrerenderedText* deleteText;
+    struct PrerenderedText* confirmText;
     struct SavefileInfo savefileInfo[MAX_SAVE_SLOTS];
     struct SavefileListSlot slots[MAX_VISIBLE_SLOTS];
     short numberOfSaves;
@@ -37,7 +40,7 @@ struct SavefileListMenu {
 };
 
 void savefileListMenuInit(struct SavefileListMenu* savefileList);
-void savefileUseList(struct SavefileListMenu* savefileList, char* title, struct SavefileInfo* savefileInfo, int slotCount);
+void savefileUseList(struct SavefileListMenu* savefileList, char* title, char* confirmLabel, struct SavefileInfo* savefileInfo, int slotCount);
 enum InputCapture savefileListUpdate(struct SavefileListMenu* savefileList);
 void savefileListRender(struct SavefileListMenu* savefileList, struct RenderState* renderState, struct GraphicsTask* task);
 int savefileGetSlot(struct SavefileListMenu* savefileList);
