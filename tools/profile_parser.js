@@ -215,7 +215,7 @@ function calculateAverage(batch) {
         let pixelDiffCount = 0;
 
         if (current.imageData && next.imageData) {
-            for (let idx = 0; idx < SCREEN_HT * SCREEN_WD; idx += 3) {
+            for (let idx = 0; idx < SCREEN_HT * SCREEN_WD * 3; idx += 3) {
                 if (current.imageData[idx + 0] != next.imageData[idx + 0] ||
                     current.imageData[idx + 1] != next.imageData[idx + 1] ||
                     current.imageData[idx + 2] != next.imageData[idx + 2]) {
@@ -278,7 +278,7 @@ function formatCommandName(command, batch) {
 }
 
 function formatCommand(command, batch) {
-    return `${command.elapsedTime} ${formatCommandName(command, batch)}`;
+    return `${command.elapsedTime} ${command.index} ${formatCommandName(command, batch)}`;
 }
 
 for (const batch of profileBatches) {    
