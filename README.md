@@ -30,7 +30,7 @@ Because this demake has been in development for many years, it has made signific
 - Eye-Candy (Reflections, ...)
 - Much more!
 
-This is a community driven project that welcomes any and all game testers and or [Contributors](./CONTRIBUTING.md). 
+This is a community driven project that welcomes any and all game testers and or [Contributors](./documentation/contributing.md). 
 
 Updates are constantly being made to the game, so we recommend checking out the author's [YouTube Channel](https://www.youtube.com/@james.lambert) for the latest updates.
 
@@ -44,162 +44,41 @@ git clone https://github.com/lambertjamesd/portal64.git
 cd portal64
 ```
 
-Setup and install dependencies. 
+## Setup and install dependencies. 
+
 The following commands allow the scripts to run on the system, then it runs the setup.
 
-As always it is good practice look over scripts from the internet before running them on your system. 
-```sh
+As always it is good practice look over scripts from the internet before running them on your system.
 
+```sh
 sudo chmod +x skelatool64/setup_dependencies.sh
 sudo chmod +x tools/romfix64.sh
-sudo chmod +x setup.sh
-./setup.sh
-
+sudo chmod +x tools/setup.sh
+./tools/setup.sh
 ```
-Alternatively, you could just follow the manual setup instructions [here](./documentation/manual_setup.md).
+
+Alternative setup methods include [Docker setup](./documentation/docker_setup.md) and [Manual setup](./documentation/manual_setup.md).
+
+Whatever setup you choose, you will still need to add the Portal folder to portal64/`vpk/` OR create a symbolic link to the Portal folder.   
+
+(see [vpk/add_vpk_here.md](./vpk/add_vpk_here.md) for more details!). Symlink does not work for Docker builds.
 
 
-
-After setup, You need to add the following files from where Portal is installed to the folder `vpk/` OR create a symbolic link to the `Portal` folder there (see [vpk/add_vpk_here.md](./vpk/add_vpk_here.md) for more details!).
-
-You can add multiple languages if desired.
-
-```
-Portal/portal/portal_pak_000.vpk  
-Portal/portal/portal_pak_001.vpk  
-Portal/portal/portal_pak_002.vpk  
-Portal/portal/portal_pak_003.vpk  
-Portal/portal/portal_pak_004.vpk
-Portal/portal/portal_pak_005.vpk  
-Portal/portal/portal_pak_dir.vpk
-
-Portal/hl2/hl2_sound_misc_000.vpk
-Portal/hl2/hl2_sound_misc_001.vpk
-Portal/hl2/hl2_sound_misc_002.vpk
-Portal/hl2/hl2_sound_misc_dir.vpk
-
-Portal/hl2/hl2_misc_000.vpk
-Portal/hl2/hl2_misc_001.vpk
-Portal/hl2/hl2_misc_002.vpk
-Portal/hl2/hl2_misc_003.vpk
-Portal/hl2/hl2_misc_dir.vpk
-
-Portal/hl2/media/valve.bik
-
-Portal/hl2/resource/gameui_english.txt
-Portal/hl2/resource/gameui_<your desired language 1>.txt
-Portal/hl2/resource/gameui_<your desired language 2>.txt
-
-Portal/hl2/resource/valve_english.txt
-Portal/hl2/resource/valve_<your desired language 1>.txt
-Portal/hl2/resource/valve_<your desired language 2>.txt
-
-Portal/portal/resource/closecaption_english.txt
-Portal/portal/resource/closecaption_<your desired language 1>.txt
-Portal/portal/resource/closecaption_<your desired language 2>.txt
-
-Portal/portal/resource/portal_english.txt
-Portal/portal/resource/portal_<your desired language 1>.txt
-Portal/portal/resource/portal_<your desired language 2>.txt
-```
+## Build Rom.
 
 Finally, run `make` to build the project.
 
 ```sh
-# Clean out any previous build files
-make clean
-
 # Build (default build with english audio)
 make
-
-```
-You can also prepare to build the ROM with additional audio languages, like this (multiple commands per build possible):
-```
-make french_audio
-
-make german_audio
-
-make russian_audio
-
-make spanish_audio
-```
-You still have run `make` after this.
-
-Also you can build with all audio languages integrated with this shortcut:
-
-```
-make all_languages
 ```
 
-This requires additional *.vpk files copied to the root of folder `vpk/` (since the original Portal keeps only one language at the same time, you have to copy these files!):
-
-- German:
-```
-portal/portal_sound_vo_german_000.vpk
-portal/portal_sound_vo_german_dir.vpk
-```
-
-- French:
-```
-portal/portal_sound_vo_french_000.vpk
-portal/portal_sound_vo_french_dir.vpk
-```
-
-- Russian:
-```
-portal/portal_sound_vo_russian_000.vpk
-portal/portal_sound_vo_russian_dir.vpk
-```
-
-- Spanish:
-```
-portal/portal_sound_vo_spanish_000.vpk
-portal/portal_sound_vo_spanish_dir.vpk
-```
-
-<br/>
-
-## Build with Docker
-
-Clone the Portal64 repo or download the zip.
+If you have issues use `make clean` to clean out any previous build files, remember it also removes any languages you set up so you will need to run those commands again.
 
 ```sh
-sudo apt install git
-git clone https://github.com/lambertjamesd/portal64.git
-cd portal64
+# Clean out any previous build files
+make clean
 ```
-
-You need to populate the vpk folder - you need to COPY all needed *.vpk files, a symlink does not work for Docker builds!
-
-
-After that you can build the docker image using
-
-
-Build the Docker image.
-
-```sh
-make -f Makefile.docker image
-```
-
-<br />
-
-Then build the rom using
-
-```sh
-make -f Makefile.docker
-```
-
-You can also use the language options, e.g.:
-
-```sh
-make -f Makefile.docker spanish_audio
-make -f Makefile.docker german_audio
-make -f Makefile.docker
-```
-
-
-That will generate the rom at `/build/portal64.z64`
-
 <br />
 
 ## Current New Feature TODO List
