@@ -136,6 +136,8 @@ void savefileListMenuInit(struct SavefileListMenu* savefileList) {
             LOAD_GAME_TOP + i * ROW_HEIGHT + FILE_OFFSET_Y
         );
     }
+
+    confirmationDialogInit(&savefileList->confirmationDialog);
 }
 
 void savefileUseList(struct SavefileListMenu* savefileList, char* title, char* confirmLabel, struct SavefileInfo* savefileInfo, int slotCount) {
@@ -186,6 +188,10 @@ void savefileUseList(struct SavefileListMenu* savefileList, char* title, char* c
 }
 
 enum InputCapture savefileListUpdate(struct SavefileListMenu* savefileList) {
+    if (savefileList->confirmationDialog.isShown) {
+        return confirmationDialogUpdate(&savefileList->confirmationDialog);
+    }
+
     if (controllerGetButtonDown(0, B_BUTTON)) {
         return InputCaptureExit;
     }
@@ -364,10 +370,40 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
 
     gSPDisplayList(renderState->dl++, ui_material_revert_list[IMAGE_COPY_INDEX]);
 
+    if (savefileList->confirmationDialog.isShown) {
+        confirmationDialogRender(&savefileList->confirmationDialog, renderState);
+    }
+
     gDPPipeSync(renderState->dl++);
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT);
 }
 
 int savefileGetSlot(struct SavefileListMenu* savefileList) {
     return savefileList->savefileInfo[savefileList->selectedSave].slotIndex;
+}
+
+void savefileListConfirmDeletion(struct SavefileListMenu* savefileList, ConfirmationDialogCallback callback, void* callbackData) {
+    struct ConfirmationDialogParams dialogParams = {
+        translationsGet(GAMEUI_CONFIRMDELETESAVEGAME_TITLE),
+        translationsGet(GAMEUI_CONFIRMDELETESAVEGAME_INFO),
+        translationsGet(GAMEUI_CONFIRMDELETESAVEGAME_OK),
+        translationsGet(GAMEUI_CANCEL),
+        callback,
+        callbackData
+    };
+
+    confirmationDialogShow(&savefileList->confirmationDialog, &dialogParams);
+}
+
+void savefileListConfirmOverwrite(struct SavefileListMenu* savefileList, ConfirmationDialogCallback callback, void* callbackData) {
+    struct ConfirmationDialogParams dialogParams = {
+        translationsGet(GAMEUI_CONFIRMOVERWRITESAVEGAME_TITLE),
+        translationsGet(GAMEUI_CONFIRMOVERWRITESAVEGAME_INFO),
+        translationsGet(GAMEUI_CONFIRMOVERWRITESAVEGAME_OK),
+        translationsGet(GAMEUI_CANCEL),
+        callback,
+        callbackData
+    };
+
+    confirmationDialogShow(&savefileList->confirmationDialog, &dialogParams);
 }

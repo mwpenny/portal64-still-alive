@@ -66,39 +66,83 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
     }
 }
 
+static void saveGameSaveInSelectedSlot(struct SaveGameMenu* saveGame) {
+    Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
+    if (checkpointSaveInto(&gScene, save)) {
+        savefileSaveGame(
+            save,
+            gScreenGrabBuffer,
+            getChamberDisplayNumberFromLevelIndex(gCurrentLevelIndex, gScene.player.body.currentRoom),
+            gCurrentTestSubject,
+            savefileGetSlot(saveGame->savefileList)
+        );
+        saveGamePopulate(saveGame, 1);
+
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+    } else {
+        soundPlayerPlay(SOUNDS_WPN_DENYSELECT, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+    }
+    stackMallocFree(save);
+}
+
+static void saveGameConfirmDeletionClosed(struct SaveGameMenu* saveGame, int isConfirmed) {
+    if (isConfirmed) {
+        short selectedSaveIndex = saveGame->savefileList->selectedSave;
+        struct SavefileInfo* selectedSave = &saveGame->savefileList->savefileInfo[selectedSaveIndex];
+
+        savefileDeleteGame(selectedSave->slotIndex);
+        saveGamePopulate(saveGame, 1);
+
+        if (selectedSaveIndex >= saveGame->savefileList->numberOfSaves) {
+            --selectedSaveIndex;
+        }
+        saveGame->savefileList->selectedSave = selectedSaveIndex;
+    }
+}
+
+static void saveGameConfirmOverwriteClosed(void* saveGame, int isConfirmed) {
+    if (isConfirmed) {
+        saveGameSaveInSelectedSlot(saveGame);
+    }
+}
+
 enum InputCapture saveGameUpdate(struct SaveGameMenu* saveGame) {
+    enum InputCapture capture = savefileListUpdate(saveGame->savefileList);
+    if (capture != InputCapturePass) {
+        return capture;
+    }
+
     if (saveGame->savefileList->numberOfSaves) {
         if (controllerGetButtonDown(0, A_BUTTON)) {
-            Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
-            if (checkpointSaveInto(&gScene, save)) {
-                savefileSaveGame(save, gScreenGrabBuffer, getChamberDisplayNumberFromLevelIndex(gCurrentLevelIndex, gScene.player.body.currentRoom), gCurrentTestSubject, savefileGetSlot(saveGame->savefileList));
-                saveGamePopulate(saveGame, 1);
-                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
-            } else {
-                soundPlayerPlay(SOUNDS_WPN_DENYSELECT, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
-            }
-            stackMallocFree(save);
-        } else if (controllerGetButtonDown(0, Z_TRIG)) {
             short selectedSaveIndex = saveGame->savefileList->selectedSave;
             struct SavefileInfo* selectedSave = &saveGame->savefileList->savefileInfo[selectedSaveIndex];
 
             if (selectedSave->isFree) {
-                soundPlayerPlay(SOUNDS_WPN_DENYSELECT, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+                saveGameSaveInSelectedSlot(saveGame);
             } else {
-                savefileDeleteGame(selectedSave->slotIndex);
-                saveGamePopulate(saveGame, 1);
+                savefileListConfirmOverwrite(
+                    saveGame->savefileList,
+                    (ConfirmationDialogCallback)&saveGameConfirmOverwriteClosed,
+                    saveGame
+                );
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+            }
+        } else if (controllerGetButtonDown(0, Z_TRIG)) {
+            short selectedSaveIndex = saveGame->savefileList->selectedSave;
+            struct SavefileInfo* selectedSave = &saveGame->savefileList->savefileInfo[selectedSaveIndex];
 
-                if (selectedSaveIndex >= saveGame->savefileList->numberOfSaves) {
-                    --selectedSaveIndex;
-                }
-                saveGame->savefileList->selectedSave = selectedSaveIndex;
-
+            if (!selectedSave->isFree) {
+                savefileListConfirmDeletion(
+                    saveGame->savefileList,
+                    (ConfirmationDialogCallback)&saveGameConfirmDeletionClosed,
+                    saveGame
+                );
                 soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
             }
         }
     }
 
-    return savefileListUpdate(saveGame->savefileList);
+    return InputCapturePass;
 }
 
 void saveGameRender(struct SaveGameMenu* saveGame, struct RenderState* renderState, struct GraphicsTask* task) {

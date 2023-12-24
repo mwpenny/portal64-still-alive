@@ -37,7 +37,27 @@ void loadGamePopulate(struct LoadGameMenu* loadGame) {
     );
 }
 
+static void loadGameConfirmDeletionClosed(struct LoadGameMenu* loadGame, int isConfirmed) {
+    if (isConfirmed) {
+        short selectedSaveIndex = loadGame->savefileList->selectedSave;
+        struct SavefileInfo* selectedSave = &loadGame->savefileList->savefileInfo[selectedSaveIndex];
+
+        savefileDeleteGame(selectedSave->slotIndex);
+        loadGamePopulate(loadGame);
+
+        if (selectedSaveIndex >= loadGame->savefileList->numberOfSaves) {
+            --selectedSaveIndex;
+        }
+        loadGame->savefileList->selectedSave = selectedSaveIndex;
+    }
+}
+
 enum InputCapture loadGameUpdate(struct LoadGameMenu* loadGame) {
+    enum InputCapture capture = savefileListUpdate(loadGame->savefileList);
+    if (capture != InputCapturePass) {
+        return capture;
+    }
+
     if (loadGame->savefileList->numberOfSaves) {
         if (controllerGetButtonDown(0, A_BUTTON)) {
             Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
@@ -53,22 +73,16 @@ enum InputCapture loadGameUpdate(struct LoadGameMenu* loadGame) {
 
             soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         } else if (controllerGetButtonDown(0, Z_TRIG)) {
-            short selectedSaveIndex = loadGame->savefileList->selectedSave;
-            struct SavefileInfo* selectedSave = &loadGame->savefileList->savefileInfo[selectedSaveIndex];
-
-            savefileDeleteGame(selectedSave->slotIndex);
-            loadGamePopulate(loadGame);
-
-            if (selectedSaveIndex >= loadGame->savefileList->numberOfSaves) {
-                --selectedSaveIndex;
-            }
-            loadGame->savefileList->selectedSave = selectedSaveIndex;
-
+            savefileListConfirmDeletion(
+                loadGame->savefileList,
+                (ConfirmationDialogCallback)&loadGameConfirmDeletionClosed,
+                loadGame
+            );
             soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         }
     }
 
-    return savefileListUpdate(loadGame->savefileList);
+    return InputCapturePass;
 }
 
 void loadGameRender(struct LoadGameMenu* loadGame, struct RenderState* renderState, struct GraphicsTask* task) {

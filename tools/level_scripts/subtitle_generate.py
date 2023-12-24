@@ -9,8 +9,15 @@ hl_gameui_whitelist = {
     "GAMEUI_ASPECTWIDE",
     "GAMEUI_AUDIO",
     "GAMEUI_AUTOSAVE",
+    "GAMEUI_CANCEL",
     "GAMEUI_CAPTIONING",
     "GAMEUI_CHAPTER",
+    "GAMEUI_CONFIRMDELETESAVEGAME_INFO",
+    "GAMEUI_CONFIRMDELETESAVEGAME_OK",
+    "GAMEUI_CONFIRMDELETESAVEGAME_TITLE",
+    "GAMEUI_CONFIRMOVERWRITESAVEGAME_INFO",
+    "GAMEUI_CONFIRMOVERWRITESAVEGAME_OK",
+    "GAMEUI_CONFIRMOVERWRITESAVEGAME_TITLE",
     "GAMEUI_DELETE",
     "GAMEUI_GAMEMENU_QUIT",
     "GAMEUI_GAMEMENU_RESUMEGAME",
@@ -142,7 +149,7 @@ def get_caption_keys_values_language(lines):
             keyval[1] = keyval[1].replace("[$WIN32]", "")
 
         key = keyval[0].replace('"', "").replace(".", "_").replace("-", "_").replace('\\', "_").replace('#', "").upper()
-        val = keyval[1].replace('"', "").replace("\n", "").replace("\\", "").strip()
+        val = keyval[1].replace('"', "").replace("\n", "").replace("\\n", " ").replace("\\", "").strip()
         val = re.sub(r'\<clr.+\>','',val)
         val = re.sub(r'\<norepeat.+\>','',val)
         val = val.replace("<sfx>", "")
