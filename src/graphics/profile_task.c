@@ -11,6 +11,8 @@
 #include "../graphics/graphics.h"
 #include "../util/memory.h"
 
+extern u16 __attribute__((aligned(64))) zbuffer[SCREEN_HT * SCREEN_WD];
+
 #define VIDEO_MSG       666
 #define RSP_DONE_MSG    667
 #define RDP_DONE_MSG    668
@@ -171,6 +173,9 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task, u16*
         // char message[32];
         // sprintf(message, "step_%d", curr - (Gfx*)task->t.data_ptr);
         // gdbSendImage(message, SCREEN_WD, SCREEN_HT, G_IM_FMT_RGBA, G_IM_SIZ_16b, framebuffer);
+
+        // sprintf(message, "step_zb_%d", curr - (Gfx*)task->t.data_ptr);
+        // gdbSendImage(message, SCREEN_WD, SCREEN_HT, G_IM_FMT_RGBA, G_IM_SIZ_16b, zbuffer);
 
         ++curr;
     }

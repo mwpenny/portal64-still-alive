@@ -176,7 +176,7 @@ for (let i = 0; i < SCREEN_WD * SCREEN_HT; ++i) {
 }
 
 function calculateAverage(batch) {
-    const combinedCommands = [];
+    let combinedCommands = [];
     
     for (const parsedLine of batch.lines) {
         const existing = combinedCommands[parsedLine.index];
@@ -199,7 +199,7 @@ function calculateAverage(batch) {
             current.startTime /= current.total;
         }
 
-        if (fs.existsSync(`log_images/step_${i}.bmp`)) {
+        if (current && fs.existsSync(`log_images/step_${i}.bmp`)) {
             const data = fs.readFileSync(`log_images/step_${i}.bmp`);
             current.imageData = data.subarray(14 + 12);
             console.log(`log_images/step_${i}.bmp`);
@@ -209,6 +209,10 @@ function calculateAverage(batch) {
     for (let i = 0; i + 1 < combinedCommands.length; ++i) {
         const current = combinedCommands[i];
         const next = combinedCommands[i + 1];
+
+        if (!current || !next) {
+            continue;
+        }
     
         current.elapsedTime = next.startTime - current.startTime;
 
@@ -247,6 +251,8 @@ function calculateAverage(batch) {
     combinedCommands.pop();
     
     combinedCommands.sort((a, b) => b.elapsedTime - a.elapsedTime);
+
+    combinedCommands = combinedCommands.filter(Boolean);
 
     batch.combinedCommands = combinedCommands;
 }
