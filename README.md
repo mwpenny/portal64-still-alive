@@ -13,9 +13,9 @@ Latest current progress video on Youtube:
 
 This project aims to reproduce Valve's original Portal, playable on the N64. 
 
-[Releases](https://github.com/lambertjamesd/portal64/releases) of this game are fully playable N64 ROM's that can either be played through an emulator or on a physical N64 game cartridge. 
+[Releases](https://github.com/lambertjamesd/portal64/releases) of this game are released in the form of a .bps patch, and produce a fully playable N64 ROM that can either be played through an emulator or on a physical N64 game cartridge. 
 
-Please follow specific release instructions to get ROM running on your target hardware.
+Please follow specific release instructions to get the ROM running on your target hardware.
 
 Because this demake has been in development for over a year, it has made significant progress in both gameplay systems and fidelity including: 
 
