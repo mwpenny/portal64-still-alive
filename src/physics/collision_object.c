@@ -80,7 +80,11 @@ struct ContactManifold* collisionObjectCollideWithQuad(struct CollisionObject* o
         &result
     );
 
-    
+    // quads with a thickness of 0 are one sided
+    if (quad->thickness == 0.0f && vector3Dot(&result.normal, &quad->plane.normal) < 0.0f) {
+        return SweptCollideResultMiss;
+    }
+
     if (shouldCheckPortals) {
         int touchingPortals = collisionSceneIsTouchingPortal(&result.contactA, &result.normal);
         if (touchingPortals) {
