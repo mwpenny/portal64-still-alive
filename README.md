@@ -17,7 +17,7 @@ This project aims to reproduce Valve's original Portal, playable on the N64.
 
 Please follow specific release instructions to get ROM running on your target hardware.
 
-Because this demake has been in development for many years, it has made significant progress in both gameplay systems and fidelity including: 
+Because this demake has been in development for over a year, it has made significant progress in both gameplay systems and fidelity including: 
 
 - Twelve+ test chambers completed
 - Fully functioning portals, and gun
