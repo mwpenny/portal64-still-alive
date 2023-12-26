@@ -19,6 +19,11 @@
 #define PORTAL_LOGO_O_WIDTH  30
 #define PORTAL_LOGO_HEIGHT 47
 
+#define LANDING_MENU_TEXT_START_X 30
+#define LANDING_MENU_TEXT_START_Y 132
+#define STRIDE_OPTION_1 12
+#define STRIDE_OPTION_2 16
+
 Gfx portal_logo_gfx[] = {
     gsSPTextureRectangle(
         PORTAL_LOGO_X << 2,
@@ -55,12 +60,12 @@ Gfx portal_logo_gfx[] = {
 };
 
 void landingMenuInitText(struct LandingMenu* landingMenu) {
-    int y = 132;
+    int y = LANDING_MENU_TEXT_START_Y;
 
-    int stride = landingMenu->optionCount > 4 ? 12 : 16;
+    int stride = landingMenu->optionCount > 4 ? STRIDE_OPTION_1 : STRIDE_OPTION_2;
 
     for (int i = 0; i < landingMenu->optionCount; ++i) {
-        landingMenu->optionText[i] = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(landingMenu->options[i].messageId), 30, y, SCREEN_WD);
+        landingMenu->optionText[i] = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(landingMenu->options[i].messageId), LANDING_MENU_TEXT_START_X, y, SCREEN_WD);
         y += stride;
     }
 }
@@ -124,7 +129,7 @@ struct LandingMenuOption* landingMenuUpdate(struct LandingMenu* landingMenu) {
 
 void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* renderState, struct GraphicsTask* task) {
     gSPDisplayList(renderState->dl++, ui_material_list[DEFAULT_UI_INDEX]);
-
+	
     if (landingMenu->darkenBackground) {
         gSPDisplayList(renderState->dl++, ui_material_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
         gDPFillRectangle(renderState->dl++, 0, 0, SCREEN_WD, SCREEN_HT);
@@ -134,12 +139,34 @@ void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* rend
     gSPDisplayList(renderState->dl++, ui_material_list[PORTAL_LOGO_INDEX]);
     gSPDisplayList(renderState->dl++, portal_logo_gfx);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[PORTAL_LOGO_INDEX]);
+	
+	int paddingDepthY = 2;
+	int paddingDepthX = 4;
+	int highlightWidth = 120;
+	int stride = landingMenu->optionCount > 4 ? STRIDE_OPTION_1 : STRIDE_OPTION_2;
+	int landingMenuTextY = LANDING_MENU_TEXT_START_Y;
+	if (landingMenu->optionCount > 4){
+		paddingDepthY = 0;
+		highlightWidth = 140;
+	}
 
     struct PrerenderedTextBatch* batch = prerenderedBatchStart();
     for (int i = 0; i < landingMenu->optionCount; ++i) {
-        prerenderedBatchAdd(batch, landingMenu->optionText[i], landingMenu->selectedItem == i ? &gSelectionGray: &gColorWhite);
+        prerenderedBatchAdd(batch, landingMenu->optionText[i], &gColorWhite);
+		
+		if (landingMenu->selectedItem == i ){
+			gSPDisplayList(renderState->dl++, ui_material_list[ORANGE_TRANSPARENT_OVERLAY_INDEX]);
+			gDPFillRectangle(renderState->dl++, 
+			LANDING_MENU_TEXT_START_X - paddingDepthX, 
+			landingMenuTextY - paddingDepthY,
+			highlightWidth + paddingDepthX, 
+			landingMenuTextY + stride - paddingDepthY);
+			
+		gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
+		}
+		landingMenuTextY += stride;
     }
+				
     renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
-
 }

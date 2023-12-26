@@ -209,3 +209,14 @@ materials:
     gDPSetTextureFilter: G_TF_BILERP
     gDPSetTextureLUT: G_TT_NONE
     gDPSetTexturePersp: G_TP_NONE
+
+  orange_transparent_overlay:
+    gDPSetCombineMode: 
+      color: ["0", "0", "0", ENVIRONMENT]
+      alpha: ["0", "0", "0", ENVIRONMENT]
+    gDPSetRenderMode: G_RM_XLU_SURF
+    gDPSetEnvColor:
+      r: 255  
+      g: 156
+      b: 0
+      a: 142
