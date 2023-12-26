@@ -16,10 +16,7 @@ struct PrerenderedText* menuBuildPrerenderedText(struct Font* font, char* messag
     return result;
 }
 
-Gfx* menuBuildBorder(int x, int y, int width, int height) {
-    Gfx* result = malloc(sizeof(Gfx) * 7 * 3 + 1);
-    Gfx* dl = result;
-
+Gfx* menuRerenderBorder(int x, int y, int width, int height, Gfx* dl) {
     gSPTextureRectangle(
         dl++,
         x << 2, y << 2,
@@ -82,6 +79,13 @@ Gfx* menuBuildBorder(int x, int y, int width, int height) {
         4 << 5, 4 << 5,
         0x400, 0x400
     );
+
+    return dl;
+}
+
+Gfx* menuBuildBorder(int x, int y, int width, int height) {
+    Gfx* result = malloc(sizeof(Gfx) * 7 * 3 + 1);
+    Gfx* dl = menuRerenderBorder(x, y, width, height, result);
 
     gSPEndDisplayList(dl++);
 
@@ -191,6 +195,18 @@ void menuRebuildButtonText(struct MenuButton* button, struct Font* font, char* m
     button->w = newWidth;
 
     menuRenderOutline(button->x, button->y, button->w, button->h, 0, button->outline);
+}
+
+void menuRelocateButton(struct MenuButton* button, int x, int y, int rightAlign) {
+    if (rightAlign) {
+        x -= button->w;
+    }
+
+    menuRenderOutline(x, y, button->w, button->h, 0, button->outline);
+    prerenderedTextRelocate(button->text, x + BUTTON_LEFT_PADDING, y + BUTTON_TOP_PADDING);
+
+    button->x = x;
+    button->y = y;
 }
 
 void menuSetRenderColor(struct RenderState* renderState, int isSelected, struct Coloru8* selected, struct Coloru8* defaultColor) {

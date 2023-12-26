@@ -25,28 +25,64 @@ void loadGamePopulate(struct LoadGameMenu* loadGame) {
         savefileInfo[i].testchamberDisplayNumber = saveSlots[i].testChamber;
         savefileInfo[i].savefileName = saveSlots[i].saveSlot == 0 ? translationsGet(GAMEUI_AUTOSAVE) : NULL;
         savefileInfo[i].screenshot = (u16*)SCREEN_SHOT_SRAM(saveSlots[i].saveSlot);
+        savefileInfo[i].isFree = 0;
     }
 
-    savefileUseList(loadGame->savefileList, translationsGet(GAMEUI_LOADGAME), savefileInfo, numberOfSaves);
+    savefileUseList(
+        loadGame->savefileList,
+        translationsGet(GAMEUI_LOADGAME),
+        translationsGet(GAMEUI_LOAD),
+        savefileInfo,
+        numberOfSaves
+    );
+}
+
+static void loadGameConfirmDeletionClosed(struct LoadGameMenu* loadGame, int isConfirmed) {
+    if (isConfirmed) {
+        short selectedSaveIndex = loadGame->savefileList->selectedSave;
+        struct SavefileInfo* selectedSave = &loadGame->savefileList->savefileInfo[selectedSaveIndex];
+
+        savefileDeleteGame(selectedSave->slotIndex);
+        loadGamePopulate(loadGame);
+
+        if (selectedSaveIndex >= loadGame->savefileList->numberOfSaves) {
+            --selectedSaveIndex;
+        }
+        loadGame->savefileList->selectedSave = selectedSaveIndex;
+    }
 }
 
 enum InputCapture loadGameUpdate(struct LoadGameMenu* loadGame) {
-    if (controllerGetButtonDown(0, A_BUTTON) && loadGame->savefileList->numberOfSaves) {
-        Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
-        int testChamber;
-        int testSubject;
-        savefileLoadGame(savefileGetSlot(loadGame->savefileList), save, &testChamber, &testSubject);
-        gCurrentTestSubject = testSubject;
-        
-        levelQueueLoad(getLevelIndexFromChamberDisplayNumber(testChamber), NULL, NULL);
-        checkpointUse(save);
-
-        stackMallocFree(save);
-
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+    enum InputCapture capture = savefileListUpdate(loadGame->savefileList);
+    if (capture != InputCapturePass) {
+        return capture;
     }
 
-    return savefileListUpdate(loadGame->savefileList);
+    if (loadGame->savefileList->numberOfSaves) {
+        if (controllerGetButtonDown(0, A_BUTTON)) {
+            Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
+            int testChamber;
+            int testSubject;
+            savefileLoadGame(savefileGetSlot(loadGame->savefileList), save, &testChamber, &testSubject);
+            gCurrentTestSubject = testSubject;
+
+            levelQueueLoad(getLevelIndexFromChamberDisplayNumber(testChamber), NULL, NULL);
+            checkpointUse(save);
+
+            stackMallocFree(save);
+
+            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        } else if (controllerGetButtonDown(0, Z_TRIG)) {
+            savefileListConfirmDeletion(
+                loadGame->savefileList,
+                (ConfirmationDialogCallback)&loadGameConfirmDeletionClosed,
+                loadGame
+            );
+            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        }
+    }
+
+    return InputCapturePass;
 }
 
 void loadGameRender(struct LoadGameMenu* loadGame, struct RenderState* renderState, struct GraphicsTask* task) {

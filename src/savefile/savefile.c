@@ -85,9 +85,7 @@ void savefileNew() {
     gSaveData.header.flags = 0;
 
     for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
-        gSaveData.saveSlotMetadata[i].testChamber = NO_TEST_CHAMBER;
-        gSaveData.saveSlotMetadata[i].testSubjectNumber = 0xFF;
-        gSaveData.saveSlotMetadata[i].saveSlotOrder = 0xFF;
+        savefileDeleteGame(i);
     }
 
     controllerSetDefaultSource();
@@ -150,6 +148,25 @@ void savefileLoad() {
 
 void savefileSave() {
     savefileSramSave((void*)SRAM_ADDR, &gSaveData, sizeof(gSaveData));
+}
+
+void savefileDeleteGame(int slotIndex) {
+    unsigned char prevSortOrder = gSaveData.saveSlotMetadata[slotIndex].saveSlotOrder;
+
+    // shift existing slot sort orders
+    for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
+        unsigned char currSlotOrder = gSaveData.saveSlotMetadata[i].saveSlotOrder;
+
+        if (currSlotOrder > prevSortOrder && currSlotOrder < 0xFF) {
+            --gSaveData.saveSlotMetadata[i].saveSlotOrder;
+        }
+    }
+
+    gSaveData.saveSlotMetadata[slotIndex].testChamber = NO_TEST_CHAMBER;
+    gSaveData.saveSlotMetadata[slotIndex].testSubjectNumber = 0xFF;
+    gSaveData.saveSlotMetadata[slotIndex].saveSlotOrder = 0xFF;
+
+    savefileSave();
 }
 
 #define SAVE_SLOT_SRAM_ADDRESS(index) (SRAM_ADDR + (1 + (index)) * SAVE_SLOT_SIZE)

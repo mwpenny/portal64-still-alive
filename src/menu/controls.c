@@ -159,7 +159,7 @@ int controlsMeasureIcons(enum ControllerAction action) {
     return result;
 }
 
-Gfx* controlsRenderIcons(Gfx* dl, enum ControllerAction action, int x, int y) {
+Gfx* controlsRenderActionIcons(Gfx* dl, enum ControllerAction action, int x, int y) {
     struct ControllerSourceWithController sources[MAX_SOURCES_PER_ACTION];
 
     int sourceCount = controllerSourcesForAction(action, sources, MAX_SOURCES_PER_ACTION);
@@ -192,12 +192,31 @@ Gfx* controlsRenderIcons(Gfx* dl, enum ControllerAction action, int x, int y) {
     return dl;
 }
 
+void controlsRenderButtonIcon(enum ControllerActionSource source, int x, int y, struct RenderState* renderState) {
+    struct ControllerIcon icon;
+
+    source = controllerSourceMapAction(source);
+    if (!IS_VALID_SOURCE(source)) {
+        return;
+    }
+
+    icon = gControllerButtonIcons[(int)gControllerActionToButtonIcon[(int)source]];
+    gSPTextureRectangle(
+        renderState->dl++,
+        x << 2, y << 2,
+        (x + icon.w) << 2, (y + icon.h) << 2,
+        G_TX_RENDERTILE,
+        icon.x << 5, icon.y << 5,
+        0x400, 0x400
+    );
+}
+
 void controlsLayoutRow(struct ControlsMenuRow* row, struct ControlActionDataRow* data, int x, int y) {
     struct PrerenderedText* copy = prerenderedTextCopy(row->actionText);
     menuFreePrerenderedDeferred(row->actionText);
     row->actionText = copy;
     prerenderedTextRelocate(row->actionText, x + ROW_PADDING, y);
-    Gfx* dl = controlsRenderIcons(row->sourceIcons, data->action, CONTROLS_X + CONTROLS_WIDTH - ROW_PADDING * 2, y);
+    Gfx* dl = controlsRenderActionIcons(row->sourceIcons, data->action, CONTROLS_X + CONTROLS_WIDTH - ROW_PADDING * 2, y);
     gSPEndDisplayList(dl++);
     row->y = y;
 }
@@ -521,7 +540,7 @@ void controlsRenderPrompt(enum ControllerAction action, char* message, float opa
 
     gSPDisplayList(renderState->dl++, ui_material_list[BUTTON_ICONS_INDEX]);
     gDPSetEnvColor(renderState->dl++, 232, 206, 80, opacityAsInt);
-    renderState->dl = controlsRenderIcons(renderState->dl, action, textPositionX - CONTROL_PROMPT_PADDING, textPositionY);
+    renderState->dl = controlsRenderActionIcons(renderState->dl, action, textPositionX - CONTROL_PROMPT_PADDING, textPositionY);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[BUTTON_ICONS_INDEX]);
     
     stackMallocFree(fontRender);

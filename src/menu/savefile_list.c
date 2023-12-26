@@ -6,6 +6,8 @@
 #include "../graphics/image.h"
 #include "../audio/soundplayer.h"
 #include "./text_manipulation.h"
+#include "./controls.h"
+#include "./translations.h"
 #include <string.h>
 
 #include "../build/assets/materials/ui.h"
@@ -72,15 +74,19 @@ void savefileListSlotInit(struct SavefileListSlot* savefileListSlot, int x, int 
 }
 
 #define LOAD_GAME_LEFT       40
-#define LOAD_GAME_TOP        20
+#define LOAD_GAME_TOP        15
 
-#define FILE_OFFSET_X       16
-#define FILE_OFFSET_Y       28
+#define FILE_OFFSET_X        16
+#define FILE_OFFSET_Y        28
+
+#define CONTROLS_HEIGHT      10
+#define CONTROL_TEXT_PADDING 12
+#define CONTROL_TEXT_MARGIN  2
 
 #define CONTENT_X       (LOAD_GAME_LEFT + 8)
 #define CONTENT_Y       (LOAD_GAME_TOP + FILE_OFFSET_Y - 8)
 #define CONTENT_WIDTH   (SCREEN_WD - CONTENT_X * 2)
-#define CONTENT_HEIGHT  (SCREEN_HT - CONTENT_Y - LOAD_GAME_TOP - 8)
+#define CONTENT_HEIGHT  (SCREEN_HT - CONTENT_Y - LOAD_GAME_TOP - CONTROLS_HEIGHT - 8)
 
 #define SCROLLED_ROW_Y(rowIndex, scrollOffset) (LOAD_GAME_TOP + (rowIndex) * ROW_HEIGHT + FILE_OFFSET_Y + (scrollOffset))
 
@@ -117,6 +123,8 @@ void savefileListMenuSetScroll(struct SavefileListMenu* savefileList, int amount
 void savefileListMenuInit(struct SavefileListMenu* savefileList) {
     savefileList->menuOutline = menuBuildBorder(LOAD_GAME_LEFT, LOAD_GAME_TOP, SCREEN_WD - LOAD_GAME_LEFT * 2, SCREEN_HT - LOAD_GAME_TOP * 2);
     savefileList->savefileListTitleText = NULL;
+    savefileList->deleteText = NULL;
+    savefileList->confirmText = NULL;
 
     savefileList->numberOfSaves = 3;
     savefileList->scrollOffset = 0;
@@ -128,14 +136,46 @@ void savefileListMenuInit(struct SavefileListMenu* savefileList) {
             LOAD_GAME_TOP + i * ROW_HEIGHT + FILE_OFFSET_Y
         );
     }
+
+    confirmationDialogInit(&savefileList->confirmationDialog);
 }
 
-void savefileUseList(struct SavefileListMenu* savefileList, char* title, struct SavefileInfo* savefileInfo, int slotCount) {
+void savefileUseList(struct SavefileListMenu* savefileList, char* title, char* confirmLabel, struct SavefileInfo* savefileInfo, int slotCount) {
     if (savefileList->savefileListTitleText) {
         prerenderedTextFree(savefileList->savefileListTitleText);
     }
+    if (savefileList->deleteText) {
+        prerenderedTextFree(savefileList->deleteText);
+    }
+    if (savefileList->confirmText) {
+        prerenderedTextFree(savefileList->confirmText);
+    }
     
-    savefileList->savefileListTitleText = menuBuildPrerenderedText(&gDejaVuSansFont, title, 48, LOAD_GAME_TOP + 4, SCREEN_WD);
+    savefileList->savefileListTitleText = menuBuildPrerenderedText(
+        &gDejaVuSansFont,
+        title,
+        CONTENT_X,
+        LOAD_GAME_TOP + 4,
+        SCREEN_WD
+    );
+    savefileList->deleteText = menuBuildPrerenderedText(&gDejaVuSansFont,
+        translationsGet(GAMEUI_DELETE),
+        CONTENT_X + CONTROL_TEXT_PADDING,
+        CONTENT_Y + CONTENT_HEIGHT + CONTROL_TEXT_MARGIN,
+        120
+    );
+    savefileList->confirmText = menuBuildPrerenderedText(
+        &gDejaVuSansFont,
+        confirmLabel,
+        0,
+        CONTENT_Y + CONTENT_HEIGHT + CONTROL_TEXT_MARGIN,
+        120
+    );
+    prerenderedTextRelocate(
+        savefileList->confirmText,
+        CONTENT_X + CONTENT_WIDTH - savefileList->confirmText->width - 1,
+        savefileList->confirmText->y
+    );
 
     for (int i = 0; i < slotCount; ++i) {
         savefileList->savefileInfo[i] = savefileInfo[i];
@@ -148,6 +188,10 @@ void savefileUseList(struct SavefileListMenu* savefileList, char* title, struct 
 }
 
 enum InputCapture savefileListUpdate(struct SavefileListMenu* savefileList) {
+    if (savefileList->confirmationDialog.isShown) {
+        return confirmationDialogUpdate(&savefileList->confirmationDialog);
+    }
+
     if (controllerGetButtonDown(0, B_BUTTON)) {
         return InputCaptureExit;
     }
@@ -183,6 +227,40 @@ enum InputCapture savefileListUpdate(struct SavefileListMenu* savefileList) {
     }
 
     return InputCapturePass;
+}
+
+static void savefileListRenderControls(struct SavefileListMenu* savefileList, struct RenderState* renderState) {
+    if (savefileList->numberOfSaves == 0) {
+        return;
+    }
+
+    struct SavefileInfo* selectedSave = &savefileList->savefileInfo[savefileList->selectedSave];
+    struct PrerenderedTextBatch* batch = prerenderedBatchStart();
+
+    gSPDisplayList(renderState->dl++, ui_material_list[BUTTON_ICONS_INDEX]);
+
+    if (savefileList->confirmText) {
+        controlsRenderButtonIcon(
+            ControllerActionSourceAButton,
+            savefileList->confirmText->x - CONTROL_TEXT_PADDING - 2,
+            savefileList->confirmText->y,
+            renderState
+        );
+        prerenderedBatchAdd(batch, savefileList->confirmText, NULL);
+    }
+    if (savefileList->deleteText && !selectedSave->isFree) {
+        controlsRenderButtonIcon(
+            ControllerActionSourceZTrig,
+            savefileList->deleteText->x - CONTROL_TEXT_PADDING - 1,
+            savefileList->deleteText->y,
+            renderState
+        );
+        prerenderedBatchAdd(batch, savefileList->deleteText, NULL);
+    }
+
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[BUTTON_ICONS_INDEX]);
+
+    renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
 }
 
 void savefileListRender(struct SavefileListMenu* savefileList, struct RenderState* renderState, struct GraphicsTask* task) {
@@ -229,6 +307,8 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
 
     renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
 
+    savefileListRenderControls(savefileList, renderState);
+
     gDPPipeSync(renderState->dl++);
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, CONTENT_X, CONTENT_Y, CONTENT_X + CONTENT_WIDTH, CONTENT_Y + CONTENT_HEIGHT);
 
@@ -251,6 +331,7 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
     }
 
     renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
+
 
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 
@@ -289,10 +370,40 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
 
     gSPDisplayList(renderState->dl++, ui_material_revert_list[IMAGE_COPY_INDEX]);
 
+    if (savefileList->confirmationDialog.isShown) {
+        confirmationDialogRender(&savefileList->confirmationDialog, renderState);
+    }
+
     gDPPipeSync(renderState->dl++);
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT);
 }
 
 int savefileGetSlot(struct SavefileListMenu* savefileList) {
     return savefileList->savefileInfo[savefileList->selectedSave].slotIndex;
+}
+
+void savefileListConfirmDeletion(struct SavefileListMenu* savefileList, ConfirmationDialogCallback callback, void* callbackData) {
+    struct ConfirmationDialogParams dialogParams = {
+        translationsGet(GAMEUI_CONFIRMDELETESAVEGAME_TITLE),
+        translationsGet(GAMEUI_CONFIRMDELETESAVEGAME_INFO),
+        translationsGet(GAMEUI_CONFIRMDELETESAVEGAME_OK),
+        translationsGet(GAMEUI_CANCEL),
+        callback,
+        callbackData
+    };
+
+    confirmationDialogShow(&savefileList->confirmationDialog, &dialogParams);
+}
+
+void savefileListConfirmOverwrite(struct SavefileListMenu* savefileList, ConfirmationDialogCallback callback, void* callbackData) {
+    struct ConfirmationDialogParams dialogParams = {
+        translationsGet(GAMEUI_CONFIRMOVERWRITESAVEGAME_TITLE),
+        translationsGet(GAMEUI_CONFIRMOVERWRITESAVEGAME_INFO),
+        translationsGet(GAMEUI_CONFIRMOVERWRITESAVEGAME_OK),
+        translationsGet(GAMEUI_CANCEL),
+        callback,
+        callbackData
+    };
+
+    confirmationDialogShow(&savefileList->confirmationDialog, &dialogParams);
 }

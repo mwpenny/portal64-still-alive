@@ -47,6 +47,7 @@ extern struct Coloru8 gBorderDark;
 
 struct PrerenderedText* menuBuildPrerenderedText(struct Font* font, char* message, int x, int y, int maxWidth);
 
+Gfx* menuRerenderBorder(int x, int y, int width, int height, Gfx* dl);
 Gfx* menuBuildBorder(int x, int y, int width, int height);
 Gfx* menuBuildHorizontalLine(int x, int y, int width);
 Gfx* menuRerenderSolidBorder(int x, int y, int w, int h, int nx, int ny, int nw, int nh, Gfx* dl);
@@ -56,6 +57,7 @@ Gfx* menuBuildOutline(int x, int y, int width, int height, int invert);
 struct MenuButton menuBuildButton(struct Font* font, char* message, int x, int y, int height, int rightAlign);
 void menuSetRenderColor(struct RenderState* renderState, int isSelected, struct Coloru8* selected, struct Coloru8* defaultColor);
 void menuRebuildButtonText(struct MenuButton* button, struct Font* font, char* message, int rightAlign);
+void menuRelocateButton(struct MenuButton* button, int x, int y, int rightAlign);
 
 struct MenuCheckbox menuBuildCheckbox(struct Font* font, char* message, int x, int y);
 Gfx* menuCheckboxRender(struct MenuCheckbox* checkbox, Gfx* dl);
