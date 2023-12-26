@@ -8,7 +8,7 @@ Also, using snap to install Docker is not advised `sudo snap install docker` giv
 (also, some may have to run `sudo setfacl -R -m u:$USER:rwx /var/run/docker.sock` first, if Docker wasn't installed from docker.com)
 
 
-Add all desired [languages](./documentation/add_languages.md) for the build process.        
+Add all desired [languages](/vpk/add_vpk_here.md) for the build process.        
 
 After that you can build the docker image using:
 
