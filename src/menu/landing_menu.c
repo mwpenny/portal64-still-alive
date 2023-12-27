@@ -23,6 +23,7 @@
 #define LANDING_MENU_TEXT_START_Y 132
 #define STRIDE_OPTION_1 12
 #define STRIDE_OPTION_2 16
+#define PACKED_MENU_THRESHOLD 4
 
 Gfx portal_logo_gfx[] = {
     gsSPTextureRectangle(
@@ -61,11 +62,14 @@ Gfx portal_logo_gfx[] = {
 
 void landingMenuInitText(struct LandingMenu* landingMenu) {
     int y = LANDING_MENU_TEXT_START_Y;
-
-    int stride = landingMenu->optionCount > 4 ? STRIDE_OPTION_1 : STRIDE_OPTION_2;
+    int stride = getCurrentStrideValue(landingMenu);
 
     for (int i = 0; i < landingMenu->optionCount; ++i) {
-        landingMenu->optionText[i] = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(landingMenu->options[i].messageId), LANDING_MENU_TEXT_START_X, y, SCREEN_WD);
+        landingMenu->optionText[i] = menuBuildPrerenderedText(&gDejaVuSansFont, 
+            translationsGet(landingMenu->options[i].messageId), 
+            LANDING_MENU_TEXT_START_X, 
+            y, 
+            SCREEN_WD);
         y += stride;
     }
 }
@@ -143,9 +147,9 @@ void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* rend
 	int paddingDepthY = 2;
 	int paddingDepthX = 4;
 	int highlightWidth = 120;
-	int stride = landingMenu->optionCount > 4 ? STRIDE_OPTION_1 : STRIDE_OPTION_2;
 	int landingMenuTextY = LANDING_MENU_TEXT_START_Y;
-	if (landingMenu->optionCount > 4){
+    int stride = getCurrentStrideValue(landingMenu);
+	if (landingMenu->optionCount > PACKED_MENU_THRESHOLD){
 		paddingDepthY = 0;
 		highlightWidth = 140;
 	}
@@ -157,16 +161,19 @@ void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* rend
 		if (landingMenu->selectedItem == i ){
 			gSPDisplayList(renderState->dl++, ui_material_list[ORANGE_TRANSPARENT_OVERLAY_INDEX]);
 			gDPFillRectangle(renderState->dl++, 
-			LANDING_MENU_TEXT_START_X - paddingDepthX, 
-			landingMenuTextY - paddingDepthY,
-			highlightWidth + paddingDepthX, 
-			landingMenuTextY + stride - paddingDepthY);
-			
-		gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
+                LANDING_MENU_TEXT_START_X - paddingDepthX, 
+                landingMenuTextY - paddingDepthY,
+                highlightWidth + paddingDepthX, 
+                landingMenuTextY + stride - paddingDepthY);
+		    gSPDisplayList(renderState->dl++, ui_material_revert_list[ORANGE_TRANSPARENT_OVERLAY_INDEX]);
 		}
 		landingMenuTextY += stride;
-    }
-				
+    }		
     renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
+}
+
+int getCurrentStrideValue(struct LandingMenu* landingMenu)
+{
+    return (landingMenu->optionCount > PACKED_MENU_THRESHOLD ? STRIDE_OPTION_1 : STRIDE_OPTION_2);
 }
