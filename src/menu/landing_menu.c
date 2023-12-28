@@ -146,12 +146,12 @@ void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* rend
 	
 	int paddingDepthY = 2;
 	int paddingDepthX = 4;
-	int highlightWidth = 120;
+	int highlightWidth = 160;
 	int landingMenuTextY = LANDING_MENU_TEXT_START_Y;
     int stride = getCurrentStrideValue(landingMenu);
 	if (landingMenu->optionCount > PACKED_MENU_THRESHOLD){
 		paddingDepthY = 0;
-		highlightWidth = 140;
+		highlightWidth = 185;
 	}
 
     struct PrerenderedTextBatch* batch = prerenderedBatchStart();
