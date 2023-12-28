@@ -146,11 +146,16 @@ void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* rend
 
 	int paddingDepthY = 2;
 	int paddingDepthX = 4;
-	int highlightWidth = 160;
 	if (landingMenu->optionCount > PACKED_MENU_THRESHOLD){
 		paddingDepthY = 0;
-		highlightWidth = 185;
 	}
+
+    int maxTextWidth = 0;
+    for (int i = 0; i < landingMenu->optionCount; ++i) {
+        if (landingMenu->optionText[i]->width > maxTextWidth) {
+            maxTextWidth = landingMenu->optionText[i]->width;
+        }
+    }
 
     struct PrerenderedTextBatch* batch = prerenderedBatchStart();
     for (int i = 0; i < landingMenu->optionCount; ++i) {
@@ -161,7 +166,7 @@ void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* rend
 			gDPFillRectangle(renderState->dl++,
                 landingMenu->optionText[i]->x - paddingDepthX,
                 landingMenu->optionText[i]->y - paddingDepthY,
-                highlightWidth + paddingDepthX,
+                landingMenu->optionText[i]->x + maxTextWidth + paddingDepthX,
                 landingMenu->optionText[i]->y + getCurrentStrideValue(landingMenu) - paddingDepthY);
 		    gSPDisplayList(renderState->dl++, ui_material_revert_list[ORANGE_TRANSPARENT_OVERLAY_INDEX]);
 		}
