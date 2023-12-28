@@ -11,6 +11,13 @@
 #include "../build/assets/materials/ui.h"
 #include "../build/src/audio/clips.h"
 
+#include <stdbool.h>
+
+#define MENU_WIDTH 252
+#define TEXTHEIGHT 12
+#define PADDING_X 2
+#define TABWIDTH 232
+
 void textMenuItemInit(struct MenuBuilderElement* element) {
     char* message = element->params->params.text.message;
 
@@ -34,7 +41,20 @@ void textMenuItemRebuildText(struct MenuBuilderElement* element) {
 
 void textMenuItemRender(struct MenuBuilderElement* element, int selection, int materialIndex, struct PrerenderedTextBatch* textBatch, struct RenderState* renderState) {
     if (textBatch) {
-        prerenderedBatchAdd(textBatch, element->data, selection == element->selectionIndex ? &gSelectionGray : &gColorWhite);
+        prerenderedBatchAdd(textBatch, element->data, selection == element->selectionIndex ? &gColorBlack : &gColorWhite);
+        bool isTextPositionedOnFarLeft = (element->params->x < (int)(MENU_WIDTH / 2)) ? true : false;
+
+        if ((selection == element->selectionIndex) && isTextPositionedOnFarLeft){
+            gDPPipeSync(renderState->dl++);
+            gDPSetEnvColor(renderState->dl++, gSelectionOrange.r, gSelectionOrange.g, gSelectionOrange.b, gSelectionOrange.a);
+            gDPFillRectangle(
+                renderState->dl++, 
+                element->params->x - PADDING_X, 
+                element->params->y, 
+                element->params->x + TABWIDTH + PADDING_X, 
+                element->params->y + TEXTHEIGHT
+            );
+        }
     }
 }
 
@@ -78,14 +98,30 @@ void checkboxMenuItemRebuildText(struct MenuBuilderElement* element) {
     );
 }
 
-void checkboxMenuItemRender(struct MenuBuilderElement* element, int selection, int materialIndex, struct PrerenderedTextBatch* textBatch, struct RenderState* renderState) {
+void checkboxMenuItemRender(struct MenuBuilderElement* element, 
+    int selection, 
+    int materialIndex, 
+    struct PrerenderedTextBatch* textBatch, 
+    struct RenderState* renderState) {
     struct MenuCheckbox* checkbox = (struct MenuCheckbox*)element->data;
 
     if (materialIndex == SOLID_ENV_INDEX) {
         gSPDisplayList(renderState->dl++, checkbox->outline);
         renderState->dl = menuCheckboxRender(checkbox, renderState->dl);
     } else if (textBatch) {
-        prerenderedBatchAdd(textBatch, checkbox->prerenderedText, selection == element->selectionIndex ? &gSelectionGray : &gColorWhite);
+        prerenderedBatchAdd(textBatch, checkbox->prerenderedText, selection == element->selectionIndex ? &gColorBlack : &gColorWhite);
+
+        if (selection == element->selectionIndex) {
+            gDPPipeSync(renderState->dl++);
+            gDPSetEnvColor(renderState->dl++, gSelectionOrange.r, gSelectionOrange.g, gSelectionOrange.b, gSelectionOrange.a);
+            gDPFillRectangle(
+                renderState->dl++, 
+                element->params->x + CHECKBOX_SIZE + 4, 
+                element->params->y, 
+                element->params->x + MENU_WIDTH - CHECKBOX_SIZE - 4,
+                element->params->y + CHECKBOX_SIZE
+            );
+        }
     }
 }
 
