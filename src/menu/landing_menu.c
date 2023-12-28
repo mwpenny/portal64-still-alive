@@ -157,19 +157,17 @@ void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* rend
         }
     }
 
+    gSPDisplayList(renderState->dl++, ui_material_list[ORANGE_TRANSPARENT_OVERLAY_INDEX]);
+    gDPFillRectangle(renderState->dl++,
+        landingMenu->optionText[landingMenu->selectedItem]->x - paddingDepthX,
+        landingMenu->optionText[landingMenu->selectedItem]->y - paddingDepthY,
+        landingMenu->optionText[landingMenu->selectedItem]->x + maxTextWidth + paddingDepthX,
+        landingMenu->optionText[landingMenu->selectedItem]->y + getCurrentStrideValue(landingMenu) - paddingDepthY);
+    gSPDisplayList(renderState->dl++, ui_material_revert_list[ORANGE_TRANSPARENT_OVERLAY_INDEX]);
+
     struct PrerenderedTextBatch* batch = prerenderedBatchStart();
     for (int i = 0; i < landingMenu->optionCount; ++i) {
         prerenderedBatchAdd(batch, landingMenu->optionText[i], &gColorWhite);
-
-		if (landingMenu->selectedItem == i ){
-			gSPDisplayList(renderState->dl++, ui_material_list[ORANGE_TRANSPARENT_OVERLAY_INDEX]);
-			gDPFillRectangle(renderState->dl++,
-                landingMenu->optionText[i]->x - paddingDepthX,
-                landingMenu->optionText[i]->y - paddingDepthY,
-                landingMenu->optionText[i]->x + maxTextWidth + paddingDepthX,
-                landingMenu->optionText[i]->y + getCurrentStrideValue(landingMenu) - paddingDepthY);
-		    gSPDisplayList(renderState->dl++, ui_material_revert_list[ORANGE_TRANSPARENT_OVERLAY_INDEX]);
-		}
     }
     renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
