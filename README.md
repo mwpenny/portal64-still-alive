@@ -7,7 +7,13 @@ A demake *(remake for an older platform)* of Portal for the Nintendo 64.
 
 Latest current progress video on Youtube:
 
-[![How I optimized Portal to run on the Nintendo 64](https://img.youtube.com/vi/r4KGm7ixcqI/0.jpg)](https://www.youtube.com/watch?v=r4KGm7ixcqI)
+[![Portal 64: First Slice, is out of beta](https://img.youtube.com/vi/sb3nHlsBBpg/0.jpg)](https://youtu.be/sb3nHlsBBpg)
+
+## Download
+
+You can download the ROM here if you own a copy of Portal for PC
+
+[Rom Patcher](https://lambertjamesd.github.io/RomPatcher.js/index.html)
 
 ## Overview
 
