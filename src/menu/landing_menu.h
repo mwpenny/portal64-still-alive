@@ -22,6 +22,6 @@ void landingMenuInit(struct LandingMenu* landingMenu, struct LandingMenuOption* 
 void landingMenuRebuildText(struct LandingMenu* landingMenu);
 struct LandingMenuOption* landingMenuUpdate(struct LandingMenu* landingMenu);
 void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* renderState, struct GraphicsTask* task);
-
+int getCurrentStrideValue(struct LandingMenu* landingMenu);
 
 #endif
