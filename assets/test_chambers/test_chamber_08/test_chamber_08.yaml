@@ -1,0 +1,10 @@
+cutscenes:
+  INTRO_CUTSCENE:
+    - set_signal launch_ball
+    - wait_for_signal move_platform
+    - label horizontal_loop
+    - play_animation horizontal horizontal_slide
+    - wait_for_animation horizontal
+    - goto horizontal_loop
+operators:
+  - room_exit = room_exit_0 and room_exit_1
