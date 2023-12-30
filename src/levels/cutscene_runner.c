@@ -204,6 +204,9 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         case CutsceneStepTypeDelay:
             runner->state.delay = step->delay;
             break;
+        case CutsceneStepTypeWaitForSignal:
+            runner->state.waitForSignal.currentFrame = step->waitForSignal.forFrames;
+            break;
         case CutsceneStepTypeOpenPortal:
         {
             struct Location* location = &gCurrentLevel->locations[step->openPortal.locationIndex];
@@ -348,7 +351,17 @@ int cutsceneRunnerUpdateCurrentStep(struct CutsceneRunner* runner) {
             runner->state.delay -= FIXED_DELTA_TIME;
             return runner->state.delay <= 0.0f;
         case CutsceneStepTypeWaitForSignal:
-            return signalsRead(step->waitForSignal.signalIndex);
+            if (signalsRead(step->waitForSignal.signalIndex)) {
+                if (runner->state.waitForSignal.currentFrame > 0) {
+                    --runner->state.waitForSignal.currentFrame;
+                } else {
+                    return 1;
+                }
+            } else {
+                runner->state.waitForSignal.currentFrame = step->waitForSignal.forFrames;
+            }
+
+            return 0;
         case CutsceneStepTypeWaitForCutscene:
             return !cutsceneIsRunning(&gCurrentLevel->cutscenes[step->cutscene.cutsceneIndex]);
         case CutsceneStepWaitForAnimation:

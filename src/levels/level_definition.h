@@ -121,6 +121,7 @@ struct CutsceneStep {
         } setSignal;
         struct {
             u16 signalIndex;
+            u8 forFrames;
         } waitForSignal;
         struct {
             u16 fromLocation;

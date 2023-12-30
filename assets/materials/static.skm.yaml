@@ -174,7 +174,7 @@ materials:
 
     gSPGeometryMode:
       set: [G_SHADE]
-      clear: [G_LIGHTING]
+      clear: [G_LIGHTING, G_CULL_BACK]
 
     properties:
       tileSizeS: 0.125

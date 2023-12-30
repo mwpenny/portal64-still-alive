@@ -10,6 +10,9 @@ union CutsceneStepState {
     struct {
         ALSndId soundId;
     } playSound;
+    struct {
+        u8 currentFrame;
+    } waitForSignal;
     float delay;
 }; 
 

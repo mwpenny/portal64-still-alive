@@ -8,15 +8,17 @@
 
 extern struct ColliderTypeData gPlayerColliderData;
 
+#define TRIGGER_TYPE_TO_MASK(type)      (1 << (type))
+
 enum ObjectTriggerType triggerDetermineType(struct CollisionObject* objectEnteringTrigger) {
     if (objectEnteringTrigger->collider == &gPlayerColliderData) {
-        return ObjectTriggerTypePlayer;
+        return TRIGGER_TYPE_TO_MASK(ObjectTriggerTypePlayer);
     }
 
     int decorType = decorIdForObjectDefinition((struct DecorObjectDefinition*)objectEnteringTrigger->collider);
 
     if (decorType == DECOR_TYPE_CUBE || decorType == DECOR_TYPE_CUBE_UNIMPORTANT) {
-        return gScene.player.grabConstraint.object == objectEnteringTrigger ? ObjectTriggerTypeCubeHover : ObjectTriggerTypeCube;
+        return gScene.player.grabConstraint.object == objectEnteringTrigger ? TRIGGER_TYPE_TO_MASK(ObjectTriggerTypeCubeHover) | TRIGGER_TYPE_TO_MASK(ObjectTriggerTypeCube) : TRIGGER_TYPE_TO_MASK(ObjectTriggerTypeCube);
     }
 
     return ObjectTriggerTypeNone;
@@ -41,7 +43,12 @@ void triggerTrigger(void* data, struct CollisionObject* objectEnteringTrigger) {
 
     enum ObjectTriggerType triggerType = triggerDetermineType(objectEnteringTrigger);
 
-    listener->lastTriggerMask |= (1 << triggerType);
+    if (triggerType & listener->usedTriggerMask) {
+        // an object activating a signal should not sleep
+        objectEnteringTrigger->body->sleepFrames = IDLE_SLEEP_FRAMES;
+    }
+
+    listener->lastTriggerMask |= triggerType;
 }
 
 void triggerInit(struct TriggerListener* listener, struct Trigger* trigger, int triggerIndex) {
@@ -69,10 +76,16 @@ void triggerInit(struct TriggerListener* listener, struct Trigger* trigger, int 
     collisionSceneAddDynamicObject(&listener->collisionObject);
 
     listener->lastTriggerMask = 0;
+    listener->usedTriggerMask = 0;
+
+    for (int i = 0; i < trigger->triggerCount; ++i) {
+        struct ObjectTriggerInfo* triggerInfo = &trigger->triggers[i];
+        listener->usedTriggerMask |= 1 << triggerInfo->objectType;
+    }
 }
 
 void triggerListenerUpdate(struct TriggerListener* listener) {
-    if (!listener->lastTriggerMask) {
+    if (!(listener->lastTriggerMask & listener->usedTriggerMask)) {
         return;
     }
 
