@@ -71,6 +71,8 @@ void sceneInitDynamicColliders(struct Scene* scene) {
         collisionObjectInit(&colliders[i], &colliderType[i], &body[i], 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_BLOCK_BALL | COLLISION_LAYERS_STATIC);
         rigidBodyMarkKinematic(&body[i]);
 
+        body[i].flags |= RigidBodyForceVelocity;
+
         body[i].currentRoom = gCurrentLevel->dynamicBoxes[i].roomIndex;
 
         collisionSceneAddDynamicObject(&colliders[i]);
@@ -553,7 +555,15 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
         relativeTransform.rotation = boxDef->rotation;   
         relativeTransform.scale = gOneVec;
 
-        transformConcat(&baseTransform, &relativeTransform, &scene->dynamicColliders[i].body->transform);
+        struct Transform newTransform;
+
+        transformConcat(&baseTransform, &relativeTransform, &newTransform);
+
+        struct Vector3 movement;
+        vector3Sub(&newTransform.position, &scene->dynamicColliders[i].body->transform .position, &movement);
+
+        scene->dynamicColliders[i].body->transform = newTransform;
+        vector3Scale(&movement, &scene->dynamicColliders[i].body->velocity, 1.0f / FIXED_DELTA_TIME);
 
         collisionObjectUpdateBB(&scene->dynamicColliders[i]);
     }

@@ -36,6 +36,7 @@ enum RigidBodyFlags {
 
     RigidBodyFizzled = (1 << 13),
     RigidBodyDisableGravity = (1 << 14),
+    RigidBodyForceVelocity = (1 << 15),
 };
 
 struct RigidBody {
