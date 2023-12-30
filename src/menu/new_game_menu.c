@@ -27,7 +27,7 @@ struct Chapter gChapters[] = {
     {images_chapter2_rgba_16b, 2, 4},
     {images_chapter3_rgba_16b, 4, 8},
     {images_chapter4_rgba_16b, 6, 10},
-    {images_chapter5_rgba_16b, -1, 13},
+    {images_chapter5_rgba_16b, 8, 13},
     {images_chapter6_rgba_16b, -1, 14},
     {images_chapter7_rgba_16b, -1, 15},
     {images_chapter8_rgba_16b, -1, 16},

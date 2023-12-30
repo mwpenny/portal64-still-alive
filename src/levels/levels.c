@@ -255,6 +255,8 @@ int getChamberDisplayNumberFromLevelIndex(int levelIndex, int roomIndex){
                 return 11;
             else
                 return 12;
+        case 8:
+            return 13;
         default:
             return 0;
     }
@@ -283,6 +285,8 @@ int getLevelIndexFromChamberDisplayNumber(int chamberNumber) {
         case 11:
         case 12:
             return 7;
+        case 13:
+            return 8;
         default:
             return 0;
     }
