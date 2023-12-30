@@ -4,18 +4,18 @@
 "Tokens"
 {
 "Audio_Text_Language"	"Langue du texte"
-"Audio_Audio_Language"	"Langue audio"
+"Audio_Audio_Language"	"Langue de l'audio"
 "Options_Controls"	"Contrôles"
 "Valve_Move"	"Se déplacer"
 "Valve_Look"	"Regarder"
-"Valve_Look_Straight_Back"	"Regarde droit en arrière"
-"GameUI_Interlaced"	"Vidéo entrelacée"
+"Valve_Look_Straight_Back"	"Regarder droit derrière"
+"GameUI_Interlaced"	"Entrelacement vidéo"
 "GameUI_MovingPortals"	"Portails mobiles"
-"GameUI_TankControls"	"Contrôles des tank"
+"GameUI_TankControls"	"Commandes de char (Tank controls)"
 "GameUI_Deadzone"	"Zone morte"
 "GameUI_Acceleration"	"Accélération"
 "GameUI_Sensitivity"	"Sensibilité"
 "HINT_MOVE"	"BOUGER"
-"GameUI_Joystick_N64"	"Manette"
+"GameUI_Joystick_N64"	"Joystick"
 }
 }
