@@ -1,0 +1,4 @@
+cutscenes:
+  INTRO:
+    - activate_signage 14
+    - set_signal launch_ball
