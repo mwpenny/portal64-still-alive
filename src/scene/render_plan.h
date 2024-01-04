@@ -5,7 +5,7 @@
 #include "../graphics/screen_clipper.h"
 #include "../graphics/graphics.h"
 
-#define DEFAULT_FAR_PLANE       30.0f
+#define DEFAULT_FAR_PLANE       50.0f
 #define DEFAULT_NEAR_PLANE      0.125f
 
 #define DEFAULT_CAMERA_FOV      60.0f
