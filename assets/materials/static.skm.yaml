@@ -28,6 +28,44 @@ materials:
       - G_RM_PASS
       - G_RM_ZB_OPA_SURF
 
+  concrete_modular_wall001d_lighten:
+    gDPSetTile: 
+      filename: ../../portal_pak_modified/materials/concrete/concrete_modular_wall001d.png
+      siz: G_IM_SIZ_4b
+      twoTone: true
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+    
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode: 
+      - color: [PRIMITIVE, "ENVIRONMENT", TEXEL0, "ENVIRONMENT"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["1", "COMBINED", "SHADE", "COMBINED"]
+        alpha: ["0", "0", "0", "1"]
+    gDPSetRenderMode: 
+      - G_RM_PASS
+      - G_RM_ZB_OPA_SURF
+
+  concrete_modular_wall001d_color_blend:
+    gDPSetTile: 
+      filename: ../../portal_pak_modified/materials/concrete/concrete_modular_wall001d.png
+      siz: G_IM_SIZ_4b
+      twoTone: true
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+    
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode: 
+      - color: [PRIMITIVE, "ENVIRONMENT", TEXEL0, "ENVIRONMENT"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["SHADE", "COMBINED", "SHADE_ALPHA", "COMBINED"]
+        alpha: ["0", "0", "0", "1"]
+    gDPSetRenderMode: 
+      - G_RM_PASS
+      - G_RM_ZB_OPA_SURF
+
     properties:
       tileSizeS: 1
       tileSizeT: 2
@@ -84,6 +122,42 @@ materials:
       siz: G_IM_SIZ_16b
     
     gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+    properties:
+      tileSizeS: 0.5
+      tileSizeT: 0.5
+
+  metalwall048b_lighten:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalwall048b.png
+      siz: G_IM_SIZ_16b
+    
+    gDPSetCombineMode:
+      color: ["1", "COMBINED", "SHADE", "COMBINED"]
+
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+    properties:
+      tileSizeS: 0.5
+      tileSizeT: 0.5
+
+  metalwall048b_color_blend:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalwall048b.png
+      siz: G_IM_SIZ_16b
+    
+    gDPSetCombineMode:
+      - color: ["SHADE", "COMBINED", "SHADE_ALPHA", "COMBINED"]
+
     gDPSetCycleType: G_CYC_1CYCLE
 
     gSPGeometryMode:
