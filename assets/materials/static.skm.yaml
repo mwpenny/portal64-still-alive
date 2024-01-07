@@ -156,7 +156,7 @@ materials:
       siz: G_IM_SIZ_16b
     
     gDPSetCombineMode:
-      - color: ["SHADE", "COMBINED", "SHADE_ALPHA", "COMBINED"]
+      color: ["SHADE", "COMBINED", "SHADE_ALPHA", "COMBINED"]
 
     gDPSetCycleType: G_CYC_1CYCLE
 

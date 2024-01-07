@@ -1,4 +1,27 @@
 cutscenes:
   INTRO:
+    - q_sound 09_PART1_ENTRY_1 CH_GLADOS PORTAL_09_PART1_ENTRY_1
+    - q_sound 09_PART1_ENTRY_2 CH_GLADOS PORTAL_09_PART1_ENTRY_2
+    - wait_for_signal exit_activate
+    - q_sound 09_PART1_SUCCESS_1 CH_GLADOS PORTAL_09_PART1_SUCCESS_1
+    - label piston_loop
+    - play_animation exit_piston piston_move_down
+    - wait_for_signal on_piston
+    - play_animation exit_piston piston_move_down -1
+    - wait_for_signal not_on_piston
+    - goto piston_loop
+  SIGNAGE:
     - activate_signage 14
     - set_signal launch_ball
+    - label pit_loop
+    - play_animation pit_0 pit_0_down
+    - delay 3
+    - play_animation pit_1 pit_1_down
+    - delay 3
+    - play_animation pit_0 pit_0_down -1
+    - delay 3
+    - play_animation pit_1 pit_1_down -1
+    - delay 3
+    - goto pit_loop
+operators:
+  - not_on_piston = not on_piston

@@ -32,9 +32,7 @@ cutscenes:
     - wait_for_signal exit_activate
     - label piston_loop
     - play_animation exit_piston piston_move_down
-    - wait_for_animation exit_piston 0
     - wait_for_signal on_piston
-    - play_animation exit_piston piston_move_up
-    - wait_for_animation exit_piston
+    - play_animation exit_piston piston_move_down -1
     - wait_for_signal not_on_piston
     - goto piston_loop
