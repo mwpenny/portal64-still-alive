@@ -26,7 +26,7 @@ SECTIONS
    BEGIN_SEG(boot, 0x04000000)
    {
       build/asm/rom_header.o(.text);
-      build/boot.6102.o(.data);
+      build/boot.o(.data);
    }
    END_SEG(boot)
 

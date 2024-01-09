@@ -52,7 +52,7 @@ endif
 CODESEGMENT =	build/codesegment
 
 BOOT		=	$(N64_ROOT)/usr/lib/n64/PR/bootcode/boot.6102
-BOOT_OBJ	=	build/boot.6102.o
+BOOT_OBJ	=	build/boot.o
 
 UCODE_RSP	=	$(N64_ROOT)/usr/lib/n64/PR/rspboot.o
 RSP_OBJ		=	build/rspboot.o
