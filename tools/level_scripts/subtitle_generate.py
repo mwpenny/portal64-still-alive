@@ -108,7 +108,7 @@ def dump_lines(sourcefile_path, lines):
     if not os.path.exists(os.path.dirname(os.path.abspath(sourcefile_path))):
         os.makedirs(os.path.dirname(os.path.abspath(sourcefile_path)))
 
-    with open(sourcefile_path, "w") as f:
+    with open(sourcefile_path, "w", encoding="utf-8") as f:
         f.writelines(lines)
 
 def get_caption_keys_values_language(lines):
