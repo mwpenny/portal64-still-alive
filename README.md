@@ -1,29 +1,33 @@
-# Portal64
-![](./assets/images/portal64_readme_logo.gif)
+# Portal64: Still Alive
 
 A demake *(remake for an older platform)* of Portal for the Nintendo 64.
+Originally created by [James Lambert](https://github.com/lambertjamesd).
+
+The original repository was taken down by James at Valve's request, due to the build requirement on Nintendo's proprietary libultra and its consequent inclusion in ROM files.
+
+The [original](https://github.com/mwpenny/portal64/tree/original) branch contains the version history of the original repository. Active development occurs in the [master](https://github.com/mwpenny/portal64/tree/master) branch.
+
+The main goals of this fork are:
+1. Remove proprietary code requirement (see [n64_libraries.md](./documentation/n64_libraries.md))
+2. Finish development of the game
+
+We do what we must because we can.
 
 ![](./assets/images/readme_slideshow.gif)
 
-Latest current progress video on Youtube:
+## Disclaimer
 
-[![Portal 64: First Slice, is out of beta](https://img.youtube.com/vi/sb3nHlsBBpg/0.jpg)](https://youtu.be/sb3nHlsBBpg)
+This project is not affiliated with Nintendo or Valve.
 
-## Download
+This repository contains no material owned by Nintendo. However, Nintendo's tools are currently required to build the game. **No form of compiled ROM will be distributed while this dependency is required** since the built game would contain Nintendo's intellectual property. One goal of this project is to remove the requirement on proprietary code.
 
-You can download the ROM here if you own a copy of Portal for PC
-
-[Rom Patcher](https://lambertjamesd.github.io/RomPatcher.js/index.html)
+Game assets from Portal are sourced from the original game's files, which must be supplied separately at build time. In other words, **this repository cannot be used to compile the game without legally owning Portal and providing its files**. Legal ownership of Portal will be required regardless of tool or library changes.
 
 ## Overview
 
-This project aims to reproduce Valve's original Portal, playable on the N64. 
+This project aims to reproduce Valve's original Portal, playable on the N64.
 
-[Releases](https://github.com/lambertjamesd/portal64/releases) of this game are released in the form of a .bps patch, and produce a fully playable N64 ROM that can either be played through an emulator or on a physical N64 game cartridge. 
-
-Please follow specific release instructions to get the ROM running on your target hardware.
-
-Because this demake has been in development for over a year, it has made significant progress in both gameplay systems and fidelity including: 
+Because this demake has been in development for some time, it has made significant progress in both gameplay systems and fidelity including:
 
 - Twelve+ test chambers completed
 - Fully functioning portals, and gun
@@ -38,19 +42,17 @@ Because this demake has been in development for over a year, it has made signifi
 
 This is a community driven project that welcomes any and all game testers and or [Contributors](./documentation/contributing.md). 
 
-Updates are constantly being made to the game, so we recommend checking out the author's [YouTube Channel](https://www.youtube.com/@james.lambert) for the latest updates.
-
 ## How to build
 
 Clone the Portal64 repo or download the zip.
 
 ```sh
 sudo apt install git -y
-git clone https://github.com/lambertjamesd/portal64.git
+git clone https://github.com/mwpenny/portal64-still-alive.git portal64
 cd portal64
 ```
 
-## Setup and install dependencies. 
+### Setup and install dependencies
 
 The following commands allow the scripts to run on the system, then it runs the setup.
 
@@ -65,12 +67,9 @@ sudo chmod +x tools/setup.sh
 
 Alternative setup methods include [Docker setup](./documentation/docker_setup.md) and [Manual setup](./documentation/manual_setup.md).
 
-Whatever setup you choose, you will still need to add the Portal folder to portal64/`vpk/` OR create a symbolic link to the Portal folder.   
+Whatever setup you choose, you will still need to add the Portal folder to `portal64/vpk/` OR create a symbolic link to the Portal folder. See [vpk/add_vpk_here.md](./vpk/add_vpk_here.md) for more details! Symlinks do not work for Docker builds.
 
-(see [vpk/add_vpk_here.md](./vpk/add_vpk_here.md) for more details!). Symlink does not work for Docker builds.
-
-
-## Build Rom.
+### Build ROM
 
 Finally, run `make` to build the project.
 
@@ -87,7 +86,7 @@ make clean
 ```
 <br />
 
-## Current New Feature TODO List
+## Original New Feature TODO List
 - [ ] check if display list is long enough 
 - [ ] pausing while glados is speaking can end her speech early
 - [x] test chamber 10 without jumping
@@ -109,12 +108,12 @@ make clean
 - [x] Add auto save checkpoints
 - [x] Correct elevator timing
 
-## Current New Sounds TODO List
+## Original New Sounds TODO List
 - [ ] Box collision sounds
 - [x] Ambient background loop
 - [x] Unstationary scaffolding moving sound
 
-## Current Bug TODO List (Hardware Verified) (High->Low priority)
+## Original Bug TODO List (Hardware Verified) (High->Low priority)
 ----------------------- v8
 - [ ] Two wall portals next to eachother can be used to clip any object out of any level by pushing it into corner, then dropping. 
 - [x] Passing into a ceiling portal can sometimes mess with the player rotation
