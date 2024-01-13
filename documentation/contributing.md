@@ -1,7 +1,7 @@
 # Contributing
 
 When contributing to this repository, please first discuss the change you wish to make via issue,
-email, or verify that the new feature or bug fix is a checklist item in a README todo list. 
+email, or verify that the new feature or bug fix is a checklist item in a [Development Progress](./development_progress.md) todo list.
 
 Please note we have a code of conduct, please follow it in all your interactions with the project.
 
@@ -11,7 +11,7 @@ Please note we have a code of conduct, please follow it in all your interactions
 2. Make a feature branch that implements the desired changes.
 3. Changes to code should be tested thoroughly on either N64 emulator or N64 Hardware (Hardware preferred)
 prior to submitting a pull request.
-4. Update the README.md if an item on the TODO checklist is completed by the PR.
+4. Update the [Development Progress](./development_progress.md) if an item on the TODO checklist is completed by the PR.
 5. Including screenshots or videos of new or improved features is welcome and encouraged. Detailed writeup of 
 new or improved features in PR are welcome and encouraged.
 6. Once the PR has been submitted, a repository maintainer will merge or provide feedback promptly.

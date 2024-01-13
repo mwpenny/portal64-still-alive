@@ -9,7 +9,7 @@ The [original](https://github.com/mwpenny/portal64/tree/original) branch contain
 
 The main goals of this fork are:
 1. Remove proprietary code requirement (see [N64 Libraries](./documentation/n64_library_usage.md))
-2. Finish development of the game
+2. Finish development of the game (see [Development Progress](./documentation/development_progress.md))
 
 We do what we must because we can.
 
@@ -84,37 +84,3 @@ If you have issues use `make clean` to clean out any previous build files, remem
 # Clean out any previous build files
 make clean
 ```
-<br />
-
-## Original New Feature TODO List
-- [ ] check if display list is long enough 
-- [ ] pausing while glados is speaking can end her speech early
-- [x] test chamber 10 without jumping
-- [x] check collider flags when filtering contacts
-- [x] gun flicker between levels
-- [x] fizzler player sound effect
-- [x] clear z buffer instead of partitioning it
-- [X] add translations to menus
-- [x] jump animation
-- [x] optimize static culling
-- [x] figure out why portals sometimes are in front of window
-- [x] portal hole cutting problems
-- [x] crashed when dying in test chamber 05 when hit by pellet in mid air while touching a portal
-- [x] rumble pak support
-- [x] valve intro
-- [x] polish up subtitles
-- [x] more sound settings
-- [x] add desk chairs and monitors
-- [x] Add auto save checkpoints
-- [x] Correct elevator timing
-
-## Original New Sounds TODO List
-- [ ] Box collision sounds
-- [x] Ambient background loop
-- [x] Unstationary scaffolding moving sound
-
-## Original Bug TODO List (Hardware Verified) (High->Low priority)
------------------------ v8
-- [ ] Two wall portals next to eachother can be used to clip any object out of any level by pushing it into corner, then dropping. 
-- [x] Passing into a ceiling portal can sometimes mess with the player rotation
-- [x] player can clip through back of elevator by jumping and strafeing at the back corners while inside.
