@@ -8,7 +8,7 @@ The original repository was taken down by James at Valve's request, due to the b
 The [original](https://github.com/mwpenny/portal64/tree/original) branch contains the version history of the original repository. Active development occurs in the [master](https://github.com/mwpenny/portal64/tree/master) branch.
 
 The main goals of this fork are:
-1. Remove proprietary code requirement (see [n64_libraries.md](./documentation/n64_libraries.md))
+1. Remove proprietary code requirement (see [N64 Libraries](./documentation/n64_library_usage.md))
 2. Finish development of the game
 
 We do what we must because we can.
