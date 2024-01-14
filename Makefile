@@ -6,7 +6,7 @@
 #        $Revision: 1.1.1.1 $
 #        $Date: 2002/05/02 03:27:21 $
 # --------------------------------------------------------------------
-include /usr/include/n64/make/PRdefs
+include $(N64_ROOT)/usr/include/n64/make/PRdefs
 
 SKELATOOL64:=skelatool64/skeletool64
 VTF2PNG:=vtf2png
@@ -20,7 +20,7 @@ $(SKELATOOL64):
 	@$(MAKE) -C skelatool64
 
 OPTIMIZER		:= -Os
-LCDEFS			:= -DDEBUG -g -Isrc/ -I/usr/include/n64/nustd -Werror -Wall
+LCDEFS			:= -DDEBUG -g -Isrc/ -I$(N64_ROOT)/usr/include/n64/nustd -Werror -Wall
 N64LIB			:= -lultra_rom -lnustd
 
 ifeq ($(PORTAL64_WITH_DEBUGGER),1)
@@ -51,16 +51,27 @@ endif
 
 CODESEGMENT =	build/codesegment
 
-BOOT		=	/usr/lib/n64/PR/bootcode/boot.6102
-BOOT_OBJ	=	build/boot.6102.o
+BOOT		=	$(N64_ROOT)/usr/lib/n64/PR/bootcode/boot.6102
+BOOT_OBJ	=	build/boot.o
 
-OBJECTS		=	$(ASMOBJECTS) $(BOOT_OBJ)
+UCODE_RSP	=	$(N64_ROOT)/usr/lib/n64/PR/rspboot.o
+RSP_OBJ		=	build/rspboot.o
+
+UCODE_GSP	=	$(N64_ROOT)/usr/lib/n64/PR/gspF3DEX2.fifo.o
+GSP_OBJ		=	build/gspMain.o
+
+UCODE_ASP	=	$(N64_ROOT)/usr/lib/n64/PR/aspMain.o
+ASP_OBJ		=	build/aspMain.o
+
+UCODE_OBJS	=	$(RSP_OBJ) $(GSP_OBJ) $(ASP_OBJ)
+
+OBJECTS		=	$(ASMOBJECTS) $(BOOT_OBJ) $(UCODE_OBJS)
 
 DEPS = $(patsubst %.c, build/%.d, $(CODEFILES)) $(patsubst %.c, build/%.d, $(DATAFILES))
 
 -include $(DEPS)
 
-LCINCS =	-I/usr/include/n64/PR 
+LCINCS =	-I$(N64_ROOT)/usr/include/n64/PR
 LCDEFS +=	-DF3DEX_GBI_2 -DSCENE_SCALE=${SCENE_SCALE}
 #LCDEFS +=	-DF3DEX_GBI_2 -DFOG
 #LCDEFS +=	-DF3DEX_GBI_2 -DFOG -DXBUS
@@ -68,7 +79,7 @@ LCDEFS +=	-DF3DEX_GBI_2 -DSCENE_SCALE=${SCENE_SCALE}
 
 LDIRT  =	$(BASE_TARGET_NAME).elf $(CP_LD_SCRIPT) $(BASE_TARGET_NAME).z64 $(BASE_TARGET_NAME)_no_debug.map $(ASMOBJECTS)
 
-LDFLAGS =	-L/usr/lib/n64 $(N64LIB)  -L$(N64_LIBGCCDIR) -lgcc
+LDFLAGS =	-L$(N64_ROOT)/usr/lib/n64 $(N64LIB)  -L$(N64_LIBGCCDIR) -lgcc
 
 default:	english_audio
 
@@ -532,6 +543,12 @@ build/src/audio/subtitles.h build/src/audio/subtitles.c build/subtitles.ld: vpk/
 
 $(BOOT_OBJ): $(BOOT)
 	$(OBJCOPY) -I binary -B mips -O elf32-bigmips $< $@
+
+$(RSP_OBJ): $(UCODE_RSP)
+$(GSP_OBJ): $(UCODE_GSP)
+$(ASP_OBJ): $(UCODE_ASP)
+$(UCODE_OBJS):
+	cp $< $@
 
 # without debugger
 

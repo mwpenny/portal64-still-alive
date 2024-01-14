@@ -3,12 +3,15 @@
 
 #include <iostream>
 #include <fstream>
-#include <execinfo.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <assimp/postprocess.h>
+
+#ifndef WIN32
+#include <execinfo.h>
+#endif
 
 #include "src/SceneWriter.h"
 #include "src/CommandLineParser.h"
@@ -25,15 +28,16 @@
 #include "src/lua_generator/LuaGenerator.h"
 
 void handler(int sig) {
-  void *array[10];
-  size_t size;
-
-  // get void*'s for all entries on the stack
-  size = backtrace(array, 10);
-
   // print out all the frames to stderr
   fprintf(stderr, "Error: signal %d:\n", sig);
-  backtrace_symbols_fd(array, size, STDERR_FILENO);
+
+#ifndef WIN32
+    // TODO: proper backtraces on Windows
+    void *array[10];
+    size_t size = backtrace(array, 10);
+    backtrace_symbols_fd(array, size, STDERR_FILENO);
+#endif
+
   exit(1);
 }
 

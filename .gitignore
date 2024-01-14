@@ -18,8 +18,8 @@ portal_pak_modified/
 
 resource/closecaption_*
 
-tools/skeletool64
-tools/vtf2png
+tools/skeletool64*
+tools/vtf2png*
 
 skelatool64/*.zip*
 
