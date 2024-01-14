@@ -5,6 +5,7 @@
 #include "../scene/scene.h"
 #include "../build/src/audio/clips.h"
 #include "../savefile/savefile.h"
+#include "../levels/levels.h"
 
 struct CheatCodePattern gCheatCodes[CheatCodeCount] = {
     [CheatCodeUnlockGun] = {
@@ -46,7 +47,7 @@ void cheatCodeApply(enum CheatCode cheat) {
             playerToggleInvincibility(&gScene.player);
             break;
         case CheatCodeAllLevels:
-            savefileMarkChapterProgress(7);
+            savefileMarkChapterProgress(levelCount() - 1);
             break;
         case CheatCodeCount:
             break;
