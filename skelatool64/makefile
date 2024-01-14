@@ -1,5 +1,5 @@
 
-GCC_FLAGS = -Wall -Werror -g -rdynamic -I./yaml-cpp/include 
+GCC_FLAGS = -Wall -Werror -g -rdynamic -I./yaml-cpp/include -DYAML_CPP_STATIC_DEFINE
 
 LINKER_FLAGS = -L./yaml-cpp -lassimp -lyaml-cpp -lpng -ltiff -llua5.4 -ldl
 
