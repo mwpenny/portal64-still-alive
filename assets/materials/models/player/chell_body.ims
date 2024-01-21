@@ -1,0 +1,28 @@
+\(
+    +clone
+    -crop 348x348+879+180
+    -resize 32x32
+    -write portal_pak_modified/materials/models/player/chell_back_logo.png
+    +delete
+\)
+\(
+    +clone
+    -rotate -17
+    -crop 388x766+230+929
+    -resize 32x64
+    -fill '#392821'
+    -draw 'rectangle 0,0 21,2'
+    -draw 'point 22,1'
+    -fill '#8c8a84'
+    -draw 'line 0,1 21,1'
+    -fill '#512818'
+    -draw 'point 22,0'
+    -fill '#5c2e1b'
+    -draw 'point 22,2'
+    -write portal_pak_modified/materials/models/player/chell_pants.png
+    +delete
+\)
+-fill '#914421'
+-draw 'polygon 227,194 197,73 280,38 321,142'
+-crop 273x546+113+39
+-resize 32x64

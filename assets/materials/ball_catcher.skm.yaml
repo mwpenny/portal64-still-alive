@@ -17,7 +17,7 @@ materials:
           wrap: false
         t:
           wrap: false
-      - filename: ./models/props/combine_ball_catcher.png
+      - filename: ../../portal_pak_modified/materials/models/props/combine_ball_launcher.png
         fmt: G_IM_FMT_RGBA
         siz: G_IM_SIZ_16b
         tmem: 384
@@ -53,7 +53,7 @@ materials:
           wrap: false
         t:
           wrap: false
-      - filename: ./models/props/combine_ball_catcher.png
+      - filename: ../../portal_pak_modified/materials/models/props/combine_ball_launcher.png
         fmt: G_IM_FMT_RGBA
         siz: G_IM_SIZ_16b
         tmem: 384
@@ -89,7 +89,7 @@ materials:
           wrap: false
         t:
           wrap: false
-      - filename: ./models/props/combine_ball_catcher.png
+      - filename: ../../portal_pak_modified/materials/models/props/combine_ball_launcher.png
         fmt: G_IM_FMT_RGBA
         siz: G_IM_SIZ_16b
         tmem: 384
@@ -126,7 +126,7 @@ materials:
           wrap: false
         t:
           wrap: false
-      - filename: ./models/props/combine_ball_catcher.png
+      - filename: ../../portal_pak_modified/materials/models/props/combine_ball_launcher.png
         fmt: G_IM_FMT_RGBA
         siz: G_IM_SIZ_16b
         tmem: 384
@@ -163,7 +163,7 @@ materials:
           wrap: false
         t:
           wrap: false
-      - filename: ./models/props/combine_ball_catcher.png
+      - filename: ../../portal_pak_modified/materials/models/props/combine_ball_launcher.png
         fmt: G_IM_FMT_RGBA
         siz: G_IM_SIZ_16b
         tmem: 384
@@ -198,7 +198,7 @@ materials:
           wrap: false
         t:
           wrap: false
-      - filename: ./models/props/combine_ball_catcher.png
+      - filename: ../../portal_pak_modified/materials/models/props/combine_ball_launcher.png
         fmt: G_IM_FMT_RGBA
         siz: G_IM_SIZ_16b
         tmem: 384
@@ -233,7 +233,7 @@ materials:
           wrap: false
         t:
           wrap: false
-      - filename: ./models/props/combine_ball_catcher.png
+      - filename: ../../portal_pak_modified/materials/models/props/combine_ball_launcher.png
         fmt: G_IM_FMT_RGBA
         siz: G_IM_SIZ_16b
         tmem: 384

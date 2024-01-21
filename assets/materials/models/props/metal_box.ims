@@ -1,0 +1,46 @@
+\( -clone 0 -alpha off -fuzz 50% -fuzz 50% -fill '#97a19f' -opaque black -alpha on \)
+\( -clone 0 -fill '#495254' -draw 'rectangle 0,0 512,512' \)
+\(
+    -clone 1 -crop 144x144+15+42 -resize 89x89 -repage +0+0
+    \( -clone 0 -repage +0+0 \)
+    \( -clone 0 -flop -repage +167+0 \)
+    \( -clone 0 -rotate 180 -repage +167+167 \)
+    \( -clone 0 -flip -repage +0+167 \)
+    -delete 0
+\)
+\(
+    -clone 1 -crop 85x53+207+409 -resize 66x41 -rotate 180
+    -fill '#5d6463'
+    -draw 'polygon 0,24 0,41 15,41'
+    -draw 'polygon 70,24 70,41 51,41'
+    \( -clone 0 -repage +95+0 \)
+    \( -clone 0 -rotate 90 -repage +215+95 \)
+    \( -clone 0 -rotate 180 -repage +95+215 \)
+    \( -clone 0 -rotate 270 -repage +0+95 \)
+    -delete 0
+\)
+\( -clone 1 -evaluate set 0 -fill '#5d6463' -draw 'circle 128,128,128,217' -blur 2x4 \)
+\(
+    -clone 0 -crop 4x18+493+352 -resize 8x36
+    \( -clone 0 -repage +124+39 \)
+    \( -clone 0 -rotate 90 -repage +183+124 \)
+    \( -clone 0 -rotate 180 -repage +124+183 \)
+    \( -clone 0 -rotate 270 -repage +39+124 \)
+    -delete 0
+\)
+\( -clone 1 -evaluate set 0 -fill 'rgba(0,0,0,0.5)' -draw 'circle 128,128,128,184' -blur 0x4 \)
+\(
+    -clone 1
+    \( +clone -evaluate set 0 -fill white -draw 'circle 255,240,255,319' \)
+    -alpha off
+    -compose CopyOpacity
+    -composite
+    -crop 166x166+172+157
+    -resize 112x112
+    -repage +72+72
+\)
+-compose Over
+-layers merge
+-crop 128x128+0+0
++repage
+-resize 32x32

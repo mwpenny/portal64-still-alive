@@ -1,7 +1,7 @@
 materials:
   chell_face:
     gDPSetTile: 
-      filename: ./models/player/chell_face.png
+      filename: ../../portal_pak_modified/materials/models/player/chell_face.png
       siz: G_IM_SIZ_16b
       s:
         wrap: false
@@ -16,7 +16,7 @@ materials:
 
   chell_head:
     gDPSetTile: 
-      filename: ./models/player/chell_head.png
+      filename: ../../portal_pak_modified/materials/models/player/chell_head.png
       siz: G_IM_SIZ_16b
       s:
         wrap: false
@@ -31,7 +31,7 @@ materials:
 
   chell_pants:
     gDPSetTile: 
-      filename: ./models/player/chell_pants.png
+      filename: ../../portal_pak_modified/materials/models/player/chell_pants.png
       siz: G_IM_SIZ_16b
       s:
         wrap: false
@@ -46,7 +46,7 @@ materials:
 
   chell_shirt:
     gDPSetTile: 
-      filename: ./models/player/chell_shirt.png
+      filename: ../../portal_pak_modified/materials/models/player/chell_body.png
       siz: G_IM_SIZ_16b
       s:
         wrap: false
@@ -61,7 +61,7 @@ materials:
 
   chell_back_logo:
     gDPSetTile: 
-      filename: ./models/player/chell_back_logo.png
+      filename: ../../portal_pak_modified/materials/models/player/chell_back_logo.png
       siz: G_IM_SIZ_16b
       s:
         wrap: false
@@ -91,7 +91,7 @@ materials:
 
   chell_arm:
     gDPSetTile: 
-      filename: ./models/player/chell_shirt.png
+      filename: ../../portal_pak_modified/materials/models/player/chell_body.png
       siz: G_IM_SIZ_16b
 
     gDPSetCombineMode:
@@ -110,7 +110,7 @@ materials:
 
   chell_leg:
     gDPSetTile: 
-      filename: ./models/player/chell_pants.png
+      filename: ../../portal_pak_modified/materials/models/player/chell_pants.png
       siz: G_IM_SIZ_16b
 
     gDPSetCombineMode:
@@ -129,7 +129,7 @@ materials:
 
   chell_boots_white:
     gDPSetTile: 
-      filename: ./models/player/chell_pants.png
+      filename: ../../portal_pak_modified/materials/models/player/chell_pants.png
       siz: G_IM_SIZ_16b
 
     gDPSetCombineMode:
@@ -148,7 +148,7 @@ materials:
 
   chell_boots_black:
     gDPSetTile: 
-      filename: ./models/player/chell_pants.png
+      filename: ../../portal_pak_modified/materials/models/player/chell_pants.png
       siz: G_IM_SIZ_16b
 
     gDPSetCombineMode:

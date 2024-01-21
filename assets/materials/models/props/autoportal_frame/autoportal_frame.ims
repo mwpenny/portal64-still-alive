@@ -1,0 +1,6 @@
+-alpha off
+    \( -clone 0 -crop 17x16+171+243 -repage +0+0 \)
+    \( -clone 0 -crop 38x16+90+233 -repage +17+0 \)
+    \( -clone 0 -crop 9x16+240+192 -repage +55+0 \)
+    -layers merge
+    -crop 64x16+0+0

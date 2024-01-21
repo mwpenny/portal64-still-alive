@@ -1,0 +1,10 @@
+-alpha off
+    \( -clone 0 -crop 64x32+366+359 -resize 32x16 -repage +0+0 \)
+    \( -clone 0 -crop 52x43+248+158 -fuzz 25% -fill transparent -opaque black -flip -resize 19x15 -repage +0+1 \)
+    -compose Over
+    -layers merge
+    -crop 32x16+0+0
+    -fill 'rgba(107,214,250,0.8)'
+    -draw 'line 16,8 29,8'
+    -fill 'rgba(102,111,109,0.8)'
+    -draw 'line 0,0 32,0'
