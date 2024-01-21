@@ -207,6 +207,14 @@ portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor.png: po
 portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor_on.png: portal_pak_dir/materials/signage/indicator_lights/indicator_lights_corner_floor_on.png
 portal_pak_dir/materials/models/props/round_elevator_sheet_1.png: portal_pak_dir/materials/models/props/round_elevator_sheet_3.png
 
+portal_pak_dir/materials/signage/clock/clock_digits.png: portal_pak_dir/materials/signage/clock/countdown.vtf portal_pak_dir/materials/signage/clock/clock_dots.png
+	for i in $(shell seq 0 9); do \
+		$(VTF2PNG) -f $$((60 - $$i)) portal_pak_dir/materials/signage/clock/countdown.vtf $(@D)/$$i.png; \
+	done
+	convert $(@D)/[0-9].png -crop 64x128+64+0 +append $@
+	convert $@ $(@D)/clock_dots.png -background '#e9fbff' +smush +16 -extent 704x128 $@
+	rm $(@D)/[0-9].png
+
 convert_all_png: $(ALL_PNG_IMAGES)
 
 portal_pak_dir/%_copy_0.png: portal_pak_dir/%.png

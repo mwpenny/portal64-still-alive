@@ -426,7 +426,7 @@ materials:
 
   autoportal_frame:
     gDPSetTile:
-      filename: ./props/autoportal_frame/autoportal_frame.png
+      filename: ../../portal_pak_modified/materials/models/props/autoportal_frame/autoportal_frame.png
       siz: G_IM_SIZ_16b
 
     gDPSetCombineMode: G_CC_DECALRGBA
@@ -435,8 +435,7 @@ materials:
     
   cube:
     gDPSetTile: 
-      filename:
-        ../images/cube.png
+      filename: ../../portal_pak_modified/materials/models/props/metal_box.png
       siz: G_IM_SIZ_16b
       fmt: G_IM_FMT_RGBA
       s:
@@ -450,8 +449,7 @@ materials:
 
   cube_fizzled:
     gDPSetTile: 
-      filename:
-        ../images/cube.png
+      filename: ../../portal_pak_modified/materials/models/props/metal_box.png
       siz: G_IM_SIZ_16b
       fmt: G_IM_FMT_RGBA
       s:
@@ -878,7 +876,7 @@ materials:
           wrap: false
         t:
           wrap: false
-      - filename: ./models/props/combine_ball_catcher.png
+      - filename: ../../portal_pak_modified/materials/models/props/combine_ball_launcher.png
         fmt: G_IM_FMT_RGBA
         siz: G_IM_SIZ_16b
         tmem: 384
@@ -1062,7 +1060,7 @@ materials:
 
   clock_digits:
     gDPSetTile:
-      filename: ./signage/clock_digits.png
+      filename: ../../portal_pak_modified/materials/signage/clock/clock_digits.png
       siz: G_IM_SIZ_4b
       twoTone: true
 

@@ -1,0 +1,54 @@
+\(
+    +clone
+    \(
+        +clone
+        \(
+            +clone
+            -evaluate set 0
+            -fill white
+            -strokewidth 4
+            -stroke '#808080'
+            -draw 'polygon 521,1000 520,919 526,889 541,853 563,831 580,823 607,823 635,833 650,853 657,906 642,958 614,988 584,1000 551,1004'
+        \)
+        -alpha off
+        -compose CopyOpacity
+        -composite
+        -crop 155x210+510+808
+    \)
+    -compose Over
+    -geometry +761+229
+    -composite
+    -crop 265x530+678+65
+    -resize 32x64
+    -write portal_pak_modified/materials/models/player/chell_head.png
+    +delete
+\)
+\(
+    +clone
+    \(
+        +clone
+        -evaluate set 0
+        -fill white
+        -strokewidth 4
+        -stroke '#808080'
+        -draw 'polygon 966,81 974,79 986,90 1004,100 1013,112 1017,135 1013,160 1003,160 988,152 978,141 971,117 962,88'
+    \)
+    -alpha off
+    -compose CopyOpacity
+    -composite
+    -crop 60x90+960+75
+    -background none
+    -rotate 291
+\)
+-compose Over
+-geometry +537+213
+-composite
+-crop 265x530+513+65
+-resize 32x64
+-fill '#6f3532'
+-draw 'point 0,47'
+-fill '#824545'
+-draw 'point 0,48'
+-draw 'point 1,48'
+-fill '#b37474'
+-draw 'point 0,49'
