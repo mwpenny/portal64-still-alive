@@ -1,6 +1,6 @@
 -alpha off
     \( -clone 0 -crop 64x32+366+359 -resize 32x16 -repage +0+0 \)
-    \( -clone 0 -crop 52x43+248+158 -fuzz 25% -fill transparent -opaque black -flip -resize 19x15 -repage +0+1 \)
+    \( -clone 0 -crop 52x43+248+158 -fuzz 25% -transparent black -flip -resize 19x15 -repage +0+1 \)
     -compose Over
     -layers merge
     -crop 32x16+0+0
