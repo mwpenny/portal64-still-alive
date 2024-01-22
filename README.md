@@ -71,7 +71,7 @@ Whatever setup you choose, you will still need to add the Portal folder to `port
 
 ### Build ROM
 
-Finally, run `make` to build the project.
+Finally, run (as non-root) `make` to build the project.
 
 ```sh
 # Build (default build with english audio)
