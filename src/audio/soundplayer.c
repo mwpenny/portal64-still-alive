@@ -106,8 +106,10 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
         return;
     }
 
+    float distanceSqrt = sqrtf(distance);
+    
     // attenuate the volume
-    *volumeOut = *volumeIn / distance;
+    *volumeOut = *volumeIn / distanceSqrt;
 
     // clamp to full volume
     if (*volumeOut > 1.0f) {
@@ -128,7 +130,7 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     struct Vector3 relativeVelocity;
     vector3Sub(velocity, &nearestListener->velocity, &relativeVelocity);
 
-    float invDist = 1.0f / sqrtf(distance);
+    float invDist = 1.0f / distanceSqrt;
 
     float directionalVelocity = -vector3Dot(&offset, &relativeVelocity) * invDist;
 
