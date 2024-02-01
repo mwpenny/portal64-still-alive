@@ -38,9 +38,9 @@ reaches the ball catcher.
 There are various other level objects that can send and receive signals,
 including those that the player cannot directly interact with such as the
 indicator light strips (they are materials). Buttons are special cases and can
-set two possible signals: one for a regular press and another for a press with a
-cube. This is useful for only taking an action once a level is properly solved.
-Note that the exact name structure differs per object.
+set two possible signals: one for a regular press and another for a press with
+an object (i.e., a cube). This is useful for only taking an action once a level
+is properly solved. Note that the exact name structure differs per object.
 See [Level Objects](./level_objects/README.md) for more details.
 
 Objects which can be deactivated will clear their associated signal when that

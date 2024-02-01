@@ -12,18 +12,20 @@ corresponding to a given level.
 
 ### Level layout (Blender file)
 
-A level's `.blend` file specifies its static 3D layout and lighting, as well as
-the dynamic objects contained within (e.g., cubes, doors, elevators, etc.) and
-any animations, such as for moving platforms. These files can be edited in
-[Blender](https://www.blender.org/) as with any other `.blend` file.
-
-Reusable objects are defined in their own `.blend` files located in the
+A level's `.blend` file specifies fundamental 3D elements such as layout and
+collision as well as the objects contained within (e.g., cubes, doors,
+elevators, etc.) and any animations, such as for moving platforms. These files
+can be edited in [Blender](https://www.blender.org/) as with any other `.blend`
+file. Reusable objects are defined in their own `.blend` files located in the
 `assets/models/` directory and then referenced from the level `.blend` files
-which use them. At export time, level object data beyond position, rotation,
+which use them.
+
+At export time, level object data beyond position, rotation,
 etc. is generally not read from `.blend` files. Rather, objects use a naming
 convention which tells the exporter their type and parameters so information
 like the mesh and material data can be looked up elsewhere. This naming
-convention is also what hooks the objects up to code. To learn more, see
+convention is also what hooks the objects up to code. To learn more about what
+can appear in a level and how to configure it, see
 [Level Objects](./level_objects/README.md).
 
 ### Level scripting (YAML file)
