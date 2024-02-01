@@ -31,7 +31,7 @@ can appear in a level and how to configure it, see
 ### Level scripting (YAML file)
 
 The second file that makes up a level is its `.yaml` file. This file contains
-its [cutscene steps](./cutscenes.md) and [signal operators](./signals). At build
+its [cutscene steps](./cutscenes.md) and [signal operators](./signals.md). At build
 time, the data in these files is used to generate corresponding C code. See the
 linked pages for more details.
 
@@ -50,8 +50,8 @@ When exporting a level, only the name of each material is used. The actual
 material information is looked up in the `.skm.yaml` files using the name. This
 means that a level's appearance in Blender will not necessarily match the game.
 However, for convenience, `assets/materials/materials.blend` contains Blender
-versions of the various materials so that it is easier to apply them and also
-get a reasonable visual approximation while editing.
+versions of the various materials with the proper names so that it is easier to
+apply them and also get a reasonable visual approximation while editing.
 
 ## TODO
 
