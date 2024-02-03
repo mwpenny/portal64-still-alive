@@ -47,34 +47,32 @@ void clockSetDigit(int digitIndex, int currDigit) {
 }
 
 void clockSetTime(float timeInSeconds) {
-    clockSetDigit(0, 0);
-    clockSetDigit(1, 0);
-
     float minutes = floor(timeInSeconds * (1.0f / 60.0f));
-
-    clockSetDigit(2, (int)minutes);
-
+    clockSetDigit(0, (int)minutes);
     timeInSeconds -= minutes *= 60.0f;
 
     float tenSeconds = floor(timeInSeconds * 0.1f);
-
-    clockSetDigit(3, (int)tenSeconds);
-
+    clockSetDigit(1, (int)tenSeconds);
     timeInSeconds -= tenSeconds * 10.0f;
 
     float seconds = floor(timeInSeconds);
-
-    clockSetDigit(4, (int)seconds);
-
+    clockSetDigit(2, (int)seconds);
     timeInSeconds -= seconds;
 
     float tenthsOfSecond = floor(timeInSeconds * 10.0f);
-
-    clockSetDigit(5, (int)tenthsOfSecond);
-
+    clockSetDigit(3, (int)tenthsOfSecond);
     timeInSeconds -= tenthsOfSecond * 0.1f;
 
-    clockSetDigit(6, (int)floor(timeInSeconds * 100.0f));
+    float hundredthsOfSecond = floor(timeInSeconds * 100.f);
+    clockSetDigit(4, (int)hundredthsOfSecond);
+    timeInSeconds -= hundredthsOfSecond * 0.01f;
+
+    float thousandthsOfSecond = floor(timeInSeconds * 1000.f);
+    clockSetDigit(5, (int)thousandthsOfSecond);
+    timeInSeconds -= thousandthsOfSecond * 0.001f;
+
+    float tenThousandthsOfSecond = floor(timeInSeconds * 10000.f);
+    clockSetDigit(6, (int)tenThousandthsOfSecond);
 }
 
 void clockRenderRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
