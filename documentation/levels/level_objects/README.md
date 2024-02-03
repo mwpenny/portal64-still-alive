@@ -16,7 +16,7 @@ scripts in `tools/level_scripts/`, initiated by `export_level.lua`. The way the
 level exporter knows how to properly populate these definitions is by using
 object names. Every object in a level's `.blend` file has a name of the form:
 ```
-@type [arg1] [arg2] ... [argN]
+@type [arg...]
 ```
 
 That is, an `@`-prefixed type name followed by 0 or more space-separated
@@ -32,5 +32,10 @@ See the pages below for details on specific level objects.
 
 * [@button](./button.md)
 * [@clock](./clock.md)
+* [@collision](./collision.md)
+* [@door](./door.md)
+* [@doorway](./doorway.md)
+* [@location](./location.md)
+* [@room](./room.md)
 * [@switch](./switch.md)
 * More... (TODO)
