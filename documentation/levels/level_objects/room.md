@@ -6,14 +6,14 @@ culling.
 ## Name structure
 
 ```
-@room index
+@room INDEX
 ```
 
 ## Arguments
 
 | Name    | Description                                  |
 | ------- | -------------------------------------------- |
-| `index` | The index number of the room the box defines |
+| `INDEX` | The index number of the room the box defines |
 
 ## Notes
 

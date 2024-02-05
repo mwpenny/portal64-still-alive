@@ -5,16 +5,16 @@ Static level collision geometry. Must be a quad.
 ## Name structure
 
 ```
-@collision [transparent] [thickness depth] [CL_X...]
+@collision [transparent] [thickness DEPTH] [CL_X...]
 ```
 
 ## Arguments
 
-| Name                       | Description                                                                              |
-| -------------------------- | ---------------------------------------------------------------------------------------- |
-| `transparent` (optional)   | If `transparent` is specified, the `TRANSPARENT` collision layer will be added           |
-| `thickness num` (optional) | If `thickness` is specified, the quad's thickness will be set to `depth`                 |
-| `CL_X` (optional)          | Space-separated list of colllision layer names. Only those prefixed with `CL_` are used. |
+| Name                         | Description                                                                              |
+| ---------------------------- | ---------------------------------------------------------------------------------------- |
+| `transparent` (optional)     | If `transparent` is specified, the `TRANSPARENT` collision layer will be added           |
+| `thickness DEPTH` (optional) | If `thickness` is specified, the quad's thickness will be set to `depth`                 |
+| `CL_X` (optional)            | Space-separated list of colllision layer names. Only those prefixed with `CL_` are used. |
 
 ## Notes
 

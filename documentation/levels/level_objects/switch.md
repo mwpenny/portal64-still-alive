@@ -6,15 +6,15 @@ A button on a cylindrical pedestal which, on press, emits a
 ## Name structure
 
 ```
-@switch press_signal_name duration_seconds
+@switch PRESS_SIGNAL_NAME DURATION_SECONDS
 ```
 
 ## Arguments
 
 | Name                | Description                                                                 |
 | --------------------| --------------------------------------------------------------------------- |
-| `press_signal_name` | The name of the signal to emit while counting down after a press            |
-| `duration_seconds`  | The amount of time in seconds to emit `press_signal_name` for after a press |
+| `PRESS_SIGNAL_NAME` | The name of the signal to emit while counting down after a press            |
+| `DURATION_SECONDS`  | The amount of time in seconds to emit `PRESS_SIGNAL_NAME` for after a press |
 
 ## Notes
 
