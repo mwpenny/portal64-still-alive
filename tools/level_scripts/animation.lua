@@ -49,6 +49,11 @@ for index, armature in pairs(armatures) do
     -- build an index used to attached parts of the scene
     -- to animation nodes later
     for _, node in pairs(armature.armature.nodes) do
+        local _, parent_index = armature.armature:get_parent_bone(node)
+        if parent_index then
+            error("Nested bones are not supported (found in armature '" .. armature.name .. "')")
+        end
+
         table.insert(bones_as_array, node)
         local bone_index = #bones_as_array
         
