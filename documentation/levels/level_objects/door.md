@@ -12,7 +12,7 @@ A sliding door which can open or close in response to a [signal](../signals.md).
 
 | Name                     | Description                                                                        |
 | -------------------------| ---------------------------------------------------------------------------------- |
-| `OPEN_SIGNAL_NAME`       | The name of the signal to which will open the door when set                        |
+| `OPEN_SIGNAL_NAME`       | The name of the signal which will open the door when set                           |
 | `TYPE` (optional)        | The type of door. `02` for vertical sliding hatches, otherwise circular exit door. |
 
 ## Notes

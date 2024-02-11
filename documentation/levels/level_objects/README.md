@@ -30,12 +30,15 @@ easy.
 
 See the pages below for details on specific level objects.
 
+* [@anim](./anim.md)
 * [@button](./button.md)
 * [@clock](./clock.md)
 * [@collision](./collision.md)
 * [@door](./door.md)
 * [@doorway](./doorway.md)
+* [@dynamic_box](./dynamic_box.md)
 * [@location](./location.md)
 * [@room](./room.md)
+* [@static](./static.md)
 * [@switch](./switch.md)
 * More... (TODO)

@@ -12,8 +12,8 @@ Static level collision geometry. Must be a quad.
 
 | Name                         | Description                                                                              |
 | ---------------------------- | ---------------------------------------------------------------------------------------- |
-| `transparent` (optional)     | If `transparent` is specified, the `TRANSPARENT` collision layer will be added           |
-| `thickness DEPTH` (optional) | If `thickness` is specified, the quad's thickness will be set to `depth`                 |
+| `transparent` (optional)     | If specified, the `TRANSPARENT` collision layer will be added                            |
+| `thickness DEPTH` (optional) | If specified, the quad's thickness will be set to `depth`                                |
 | `CL_X` (optional)            | Space-separated list of colllision layer names. Only those prefixed with `CL_` are used. |
 
 ## Notes
@@ -25,21 +25,21 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
 `BLOCK_BALL`. The possible layers and their uses are as follows.
 
 * `STATIC`: Used for portal raycasts, and by:
-    * Doors
+    * [Doors](./door.md)
     * Elevators
 * `TRANSPARENT`: Unused
 * `TANGIBLE`: Used to check grabbing and walking, and by:
     * Ball catchers
     * Ball launchers
-    * [Button](./button.md)s
+    * [Buttons](./button.md)
     * Decor
-    * [Door](./door.md)s (when open)
-    * Dynamic boxes
+    * [Doors](./door.md) (when open)
+    * [Dynamic boxes](./dynamic_box.md)
     * Elevators
     * Player
     * Portals
     * Security cameras
-    * Switches
+    * [Switches](./switch.md)
     * Triggers
 * `GRABBABLE`: Used to check grabbing, and by:
     * Decor
@@ -54,7 +54,7 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
 * `BLOCK_BALL`: Used by:
     * Energy balls
     * Ball launchers
-    * Dynamic boxes
+    * [Dynamic boxes](./dynamic_box.md)
     * Elevators
     * Player
 
