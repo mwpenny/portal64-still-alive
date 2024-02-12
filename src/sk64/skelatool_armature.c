@@ -5,7 +5,7 @@
 #include "util/rom.h"
 
 void skArmatureInit(struct SKArmature* object, struct SKArmatureDefinition* definition) {
-    unsigned transformSize = sizeof(Mtx) * definition->numberOfBones;
+    unsigned transformSize = sizeof(struct Transform) * definition->numberOfBones;
     skArmatureInitWithPose(object, definition, malloc(transformSize));
 }
 
@@ -16,7 +16,7 @@ void skArmatureInitWithPose(struct SKArmature* object, struct SKArmatureDefiniti
     object->pose = usePose;
     object->boneParentIndex = definition->boneParentIndex;
 
-    unsigned transformSize = sizeof(Mtx) * definition->numberOfBones;
+    unsigned transformSize = sizeof(struct Transform) * definition->numberOfBones;
     
     if (definition->pose) {
         if (IS_KSEG0(definition->pose)) {
