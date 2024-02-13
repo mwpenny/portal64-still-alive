@@ -29,8 +29,8 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
     * Elevators
 * `TRANSPARENT`: Unused
 * `TANGIBLE`: Used to check grabbing and walking, and by:
-    * Ball catchers
-    * Ball launchers
+    * [Ball catchers](./ball_catcher.md)
+    * [Ball launchers](./ball_launcher.md)
     * [Buttons](./button.md)
     * Decor
     * [Doors](./door.md) (when open)
@@ -53,7 +53,7 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
     * Fizzlers
 * `BLOCK_BALL`: Used by:
     * Energy balls
-    * Ball launchers
+    * [Ball launchers](./ball_launcher.md)
     * [Dynamic boxes](./dynamic_box.md)
     * Elevators
     * Player

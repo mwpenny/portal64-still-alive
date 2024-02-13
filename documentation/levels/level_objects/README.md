@@ -31,6 +31,8 @@ easy.
 See the pages below for details on specific level objects.
 
 * [@anim](./anim.md)
+* [@ball_catcher](./ball_catcher.md)
+* [@ball_launcher](./ball_launcher.md)
 * [@button](./button.md)
 * [@clock](./clock.md)
 * [@collision](./collision.md)
