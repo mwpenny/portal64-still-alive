@@ -26,7 +26,7 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
 
 * `STATIC`: Used for portal raycasts, and by:
     * [Doors](./door.md)
-    * Elevators
+    * [Elevators](./elevator.md)
 * `TRANSPARENT`: Unused
 * `TANGIBLE`: Used to check grabbing and walking, and by:
     * [Ball catchers](./ball_catcher.md)
@@ -35,7 +35,7 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
     * Decor
     * [Doors](./door.md) (when open)
     * [Dynamic boxes](./dynamic_box.md)
-    * Elevators
+    * [Elevators](./elevator.md)
     * Player
     * Portals
     * Security cameras
@@ -55,7 +55,7 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
     * Energy balls
     * [Ball launchers](./ball_launcher.md)
     * [Dynamic boxes](./dynamic_box.md)
-    * Elevators
+    * [Elevators](./elevator.md)
     * Player
 
 ## TODO
