@@ -141,8 +141,8 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
 
     short result = -1;
 
-    if ((elevator->flags & ElevatorFlagsIsExit) && !cutscenePreventingMovement) {
-        if (inside) {
+    if ((elevator->flags & ElevatorFlagsIsExit)) {
+        if (inside && !cutscenePreventingMovement) {
             elevator->timer -= FIXED_DELTA_TIME;
         }
 
