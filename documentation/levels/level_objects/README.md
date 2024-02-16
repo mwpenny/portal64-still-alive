@@ -41,6 +41,7 @@ See the pages below for details on specific level objects.
 * [@dynamic_box](./dynamic_box.md)
 * [@elevator](./elevator.md)
 * [@location](./location.md)
+* [@pedestal](./pedestal.md)
 * [@room](./room.md)
 * [@signage](./signage.md)
 * [@static](./static.md)
