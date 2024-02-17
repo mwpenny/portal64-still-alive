@@ -32,25 +32,25 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
     * [Ball catchers](./ball_catcher.md)
     * [Ball launchers](./ball_launcher.md)
     * [Buttons](./button.md)
-    * Decor
+    * [Decor](./decor.md) (with collision)
     * [Doors](./door.md) (when open)
     * [Dynamic boxes](./dynamic_box.md)
     * [Elevators](./elevator.md)
     * Player
     * Portals
-    * Security cameras
+    * [Security cameras](./security_camera.md)
     * [Switches](./switch.md)
-    * Triggers
+    * [Triggers](./trigger.md)
 * `GRABBABLE`: Used to check grabbing, and by:
-    * Decor
-    * Security cameras (when detached)
+    * [Decor](./decor.md) (with collision)
+    * [Security cameras](./security_camera.md) (when detached)
 * `FIZZLER`: Used to block portal raycasts, and by:
-    * Decor
-    * Fizzlers
+    * [Decor](./decor.md) (with collision)
+    * [Fizzlers](./fizzler.md)
     * Player
-    * Security cameras
+    * [Security cameras](./security_camera.md)
 * `BLOCK_PORTAL`: Used for portal raycasts, and by:
-    * Fizzlers
+    * [Fizzlers](./fizzler.md)
 * `BLOCK_BALL`: Used by:
     * Energy balls
     * [Ball launchers](./ball_launcher.md)
@@ -61,4 +61,3 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
 ## TODO
 
 * Page on collision detection
-* Link to level object pages when created

@@ -24,7 +24,7 @@ engine uses this to wire up the various emitters and listeners.
 Level objects which send or receive signals have the relevant signal name as
 part of their object name in the level's `.blend` file using the format:
 ```
-@object_type signal_name
+@object_type SIGNAL_NAME
 ```
 
 For example, consider the following object names:
@@ -37,10 +37,8 @@ reaches the ball catcher.
 
 There are various other level objects that can send and receive signals,
 including those that the player cannot directly interact with such as the
-indicator light strips (they are materials). Buttons are special cases and can
-set two possible signals: one for a regular press and another for a press with
-an object (i.e., a cube). This is useful for only taking an action once a level
-is properly solved. Note that the exact name structure differs per object.
+indicator light strips (they are materials). Some other special cases, such as
+buttons, can set multiple signals. The exact name structure differs per object.
 See [Level Objects](./level_objects/README.md) for more details.
 
 Objects which can be deactivated will clear their associated signal when that
@@ -48,22 +46,20 @@ occurs.
 
 ## Triggers
 
-Triggers are 3D volumes in a level that set signals depending on which object
-type intersects with them. Like level objects, this information is defined in
-their object name in the level's `.blend` file. Trigger object names are of the
-form:
+[Triggers](./level_objects/trigger.md) are 3D volumes in a level that set
+signals depending on which object type enters them. Like level objects, this
+information is defined in their object name in the level's `.blend` file.
+Trigger object names are of the form:
 ```
-@trigger PLAYER_CUTSCENE_NAME player_signal_name CUBE_CUTSCENE_NAME cube_signal_name
+@trigger PLAYER_CUTSCENE_NAME PLAYER_SIGNAL_NAME CUBE_CUTSCENE_NAME CUBE_SIGNAL_NAME
 ```
-`player_signal_name` is set/unset when the player enters/leaves the trigger and
-`cube_signal_name` is set/unset when a cube enters/leaves the trigger.
-
-For more information on triggers, see [Triggers](./level_objects/triggers.md).
+`PLAYER_SIGNAL_NAME` is set/unset when the player enters/leaves the trigger and
+`CUBE_SIGNAL_NAME` is set/unset when a cube enters/leaves the trigger.
 
 ## Cutscenes
 
-Cutscenes can set or clear signals using the `set_signal` and `clear_signal`
-steps, respectively. For example:
+[Cutscenes](./cutscenes.md) can set or clear signals using the `set_signal` and
+`clear_signal` steps, respectively. For example:
 ```
 set_signal door_activate
 [...]
@@ -86,8 +82,6 @@ wait_for_signal player_in_trigger 42
 clear_signal door_activate
 [...]
 ```
-
-For more information on cutscenes, see [Cutscenes](./cutscenes.md).
 
 ## Signal operators
 
