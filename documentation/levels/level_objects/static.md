@@ -30,8 +30,9 @@ coodrinates, vertex colors, material information, and UV coordinates. It is not
 used for collision. Instead there are dedicated [static](./collision.md) and
 [dynamic](./dynamic_box.md) collision objects.
 
-Materials specified in Blender are only used for their name, which serves as a
-key to look up their actual data elsewhere
+With the exception of [ambient](./ambient.md) and [point](./point_light.md)
+light bake types, materials specified in Blender are only used for their
+name, which serves as a key to look up their actual data elsewhere
 (see [Level File Formats](../file_formats.md#materials)) and to denote which
 surfaces are portalable. The following material names allow portals to be placed:
 
@@ -43,7 +44,7 @@ This behavior can be overridden by using the `no_portals` argument. To accept
 portals, the geometry must also have a coplanar static collision object or be
 animated by a [bone](./anim.md) that also animates a dynamic collision object.
 
-UV coordinates are only used for materials without the `tileSizeS` and
-`tileSizeT` properties in their YAML definition. Otherwise, the
+A mesh's UV coordinates are only used if its material does not have the
+`tileSizeS` and `tileSizeT` properties in its YAML definition. Otherwise, the
 `uvtransx`/`uvtransy`/`uvtransz`, `uvrotx`/`uvroty`/`uvrotz`, and `uvscale`
 arguments can be specified to manipulate UV maps.

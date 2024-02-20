@@ -46,10 +46,10 @@ occurs.
 
 ## Triggers
 
-[Triggers](./level_objects/trigger.md) are 3D volumes in a level that set
-signals depending on which object type enters them. Like level objects, this
-information is defined in their object name in the level's `.blend` file.
-Trigger object names are of the form:
+[Triggers](./level_objects/trigger.md) are 3D boxes in a level that set signals
+depending on which object type enters them. Like level objects, this information
+is defined in their object name in the level's `.blend` file. Trigger object
+names are of the form:
 ```
 @trigger PLAYER_CUTSCENE_NAME PLAYER_SIGNAL_NAME CUBE_CUTSCENE_NAME CUBE_SIGNAL_NAME
 ```

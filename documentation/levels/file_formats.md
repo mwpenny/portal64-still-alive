@@ -36,14 +36,15 @@ linked pages for more details.
 
 ## Materials
 
-As mentioned above, material data for objects is not read from their `.blend`
-files. This is also true for static level geometry. Instead, all materials are
-defined in `.skm.yaml` files located in the `assets/materials/` directory. These
-YAML files specify textures, colors, as well as other more complex RDP/RSP
-settings. They are currently used at export time to generate display lists using
-libultra. Since one of the goals of this project is to build a
-library-independent abstraction layer, it is currently not a priority to
-document the format of these files.
+As mentioned above, most material data for objects is not read from their
+`.blend` files. This is also largely true for
+[static level geometry](./level_objects/static.md) (see linked page for
+exceptions). Instead, all materials are defined in `.skm.yaml` files located in
+the `assets/materials/` directory. These YAML files specify textures, colors, as
+well as other more complex RDP/RSP settings. They are currently used at export
+time to generate display lists using libultra. Since one of the goals of this
+project is to build a library-independent abstraction layer, it is currently not
+a priority to document the format of these files.
 
 When exporting a level, only the name of each material is used. The actual
 material information is looked up in the `.skm.yaml` files using the name. This

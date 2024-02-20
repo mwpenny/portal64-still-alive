@@ -30,6 +30,7 @@ easy.
 
 See the pages below for details on specific level objects.
 
+* [@ambient](./ambient.md)
 * [@anim](./anim.md)
 * [@ball_catcher](./ball_catcher.md)
 * [@ball_launcher](./ball_launcher.md)
@@ -45,10 +46,10 @@ See the pages below for details on specific level objects.
 * [@fizzler](./fizzler.md)
 * [@location](./location.md)
 * [@pedestal](./pedestal.md)
+* [@point_light](./point_light.md)
 * [@room](./room.md)
 * [@security_camera](./security_camera.md)
 * [@signage](./signage.md)
 * [@static](./static.md)
 * [@switch](./switch.md)
 * [@trigger](./trigger.md)
-* More... (TODO)

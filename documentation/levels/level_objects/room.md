@@ -1,6 +1,6 @@
 # @room
 
-A box which groups objects in a level. Used for broad phase collision and
+A 3D box which groups objects in a level. Used for broad phase collision and
 culling.
 
 ## Name structure
