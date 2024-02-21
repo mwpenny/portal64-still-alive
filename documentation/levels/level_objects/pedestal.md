@@ -12,7 +12,7 @@ player the portal gun.
 ## Notes
 
 Pedestals can be instructed to rotate, fire a portal, or hide by using
-[cutscenes](../cutscenes.md).
+[cutscenes](../cutscenes/README.md).
 
 The player will be given the portal gun when the pedestal becomes hidden. If
 they do not have the portal gun already, they will receive the blue portal gun.

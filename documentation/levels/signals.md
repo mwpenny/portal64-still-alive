@@ -13,7 +13,7 @@ action. The possible listeners are:
 * Cutscenes
 
 Signal information is output into generated level definition C source files at
-build time by the Lua scripts in `tools/level_scripts/`, initiated by
+level export time by the Lua scripts in `tools/level_scripts/`, initiated by
 `export_level.lua`.
 
 The code for sending and receiving signals is in `src/scene/signals.c`. The
@@ -58,8 +58,8 @@ names are of the form:
 
 ## Cutscenes
 
-[Cutscenes](./cutscenes.md) can set or clear signals using the `set_signal` and
-`clear_signal` steps, respectively. For example:
+[Cutscenes](./cutscenes/README.md) can set and clear signals using the
+`set_signal` and `clear_signal` steps, respectively. For example:
 ```
 set_signal door_activate
 [...]
@@ -71,7 +71,7 @@ the above example, in between `set_signal` and `clear_signal`, other signal
 emitters such as buttons would clear the signal when activated.
 
 Cutscenes can also wait for a particular signal to occur using the
-`wait_for_signal` step. A number of frames to wait after the signal is set can
+`wait_for_signal` step. A number of frames the signal must be set for can
 optionally be specified. For example:
 ```
 [...]
@@ -97,10 +97,11 @@ signal_name = signal_c and signal_d
 Only one `not`, `or`, or `and` operator is allowed per entry. If more complex
 combinations are required, operators can use signals defined by previous
 operators. For example:
-```
-door_not_activated = not door_activated
-cube_not_in_room = not cube_in_room
-trapped = door_not_activated and cube_not_in_room
+```yaml
+operators:
+  - door_not_activated = not door_activated
+  - cube_not_in_room = not cube_in_room
+  - trapped = door_not_activated and cube_not_in_room
 ```
 
 Operators can use signals from any source.

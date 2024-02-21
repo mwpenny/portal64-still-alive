@@ -16,7 +16,7 @@ The large, illuminated informational sign at the beginning of each test chamber.
 
 ## Notes
 
-Signage is unlit by default. It can be activated using [cutscenes](../cutscenes.md).
+Signage is unlit by default. It can be activated using [cutscenes](../cutscenes/README.md).
 
 Due to the way they are rendered (by dynamically modifying the model's texture
 coordinates), only one unique sign can be drawn - and therefore on screen - at a

@@ -26,11 +26,15 @@ Bones can be their own independent objects or part of a Blender armature, which
 allows multiple to be transformed by the same animation. Bones must have
 matching armature name arguments and not be nested in order to be animated
 together. This is due to the way animations are serialized at level export time
-and how they are played.
+and how they are played back.
 
-Level animations are triggered in [cutscenes](../cutscenes.md) by specifying an
-armature name and one of its animations to play. An armature can be thought of
-as a single logical level element which is updated independently of others.
+Level animations are triggered in [cutscenes](../cutscenes/README.md) by
+specifying an armature name and one of its animations to play. An armature can
+be thought of as a single logical level element which is updated independently
+of others.
+
+If `player` is used as the armature name, playing an animation will additionally
+take control away from the player and animate their view and body.
 
 The possible values for `SOUND_TYPE_NAME` are:
 * `LightRail`: Horizontal moving platform sound

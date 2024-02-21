@@ -1,7 +1,7 @@
 # @trigger
 
 A 3D box that can set [signals](../signals.md) and start
-[cutscenes](../cutscenes.md) in response to object collision.
+[cutscenes](../cutscenes/README.md) in response to object collision.
 
 ## Name structure
 

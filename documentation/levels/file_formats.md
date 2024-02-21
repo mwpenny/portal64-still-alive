@@ -30,9 +30,9 @@ how to configure it, see [Level Objects](./level_objects/README.md).
 ### Level scripting (YAML file)
 
 The second file that makes up a level is its `.yaml` file. This file contains
-its [cutscene steps](./cutscenes.md) and [signal operators](./signals.md). At build
-time, the data in these files is used to generate corresponding C code. See the
-linked pages for more details.
+its [cutscene steps](./cutscenes/README.md) and [signal operators](./signals.md).
+At level export time, the data in these files is used to generate corresponding
+C code. See the linked pages for more details.
 
 ## Materials
 
