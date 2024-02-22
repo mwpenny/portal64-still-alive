@@ -18,5 +18,5 @@ A sliding door which can open or close in response to a [signal](../signals.md).
 ## Notes
 
 At level export time, if a [doorway](./doorway.md) is found on a door (coplanar
-and at the same position on that plane), the two are linked and the doorway will
-open and close with the door.
+and at the same position on that plane), the two are linked and the game will
+open and close the doorway with the door.

@@ -1,7 +1,7 @@
 # @room
 
-A 3D box which groups objects in a level. Used for broad phase collision and
-culling.
+A 3D box which defines a portion of a level. Used for culling and broad phase
+collision.
 
 ## Name structure
 
@@ -19,8 +19,9 @@ culling.
 
 At level export time, room regions with the same index are merged to define the
 bounds of one logical room. Game objects within a room (including the player)
-know their room index.
+know their room index, which is updated when passing through
+[doorways](./doorway.md).
 
-For performance reasons, only objects in the current room and rooms connected
-via open [doorway](./doorway.md)s are considered for rendering and collision
-detection.
+For performance reasons, only the player's current room and those visible
+through open doorways are considered for rendering, and only objects in the same
+room can collide with each other.
