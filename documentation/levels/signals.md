@@ -104,4 +104,5 @@ operators:
   - trapped = door_not_activated and cube_not_in_room
 ```
 
-Operators can use signals from any source.
+Operators are evaluated from top to bottom to update their corresponding
+signals. Signals from any source can be used.
