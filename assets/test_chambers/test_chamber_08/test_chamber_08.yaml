@@ -23,10 +23,8 @@ cutscenes:
     - set_signal room_exit
 operators:
   - room_exit = room_exit_0 and room_exit_1
-  - side_cube_access = player_in_side and has_cube_side
-  - main_cube_access = player_in_main and has_cube_main
-  - has_cube_any = has_cube_side or has_cube_main
-  - side_cube_access_with_door = room_enter and has_cube_any
-  - direct_cube_access = side_cube_access or main_cube_access
-  - any_cube_access = direct_cube_access or side_cube_access_with_door
+  - side_cube_access_direct = player_in_side and has_cube_side
+  - side_cube_access_door = room_enter and has_cube_side
+  - side_cube_access = side_cube_access_direct or side_cube_access_door
+  - any_cube_access = side_cube_access or has_cube_main
   - trapped = not any_cube_access
