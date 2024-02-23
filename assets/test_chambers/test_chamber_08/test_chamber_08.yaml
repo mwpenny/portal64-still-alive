@@ -20,11 +20,11 @@ cutscenes:
     - q_sound 08_PART1_TRAPPED_1 CH_GLADOS PORTAL_08_PART1_TRAPPED_1
     - q_sound 08_PART1_TRAPPED_2 CH_GLADOS PORTAL_08_PART1_TRAPPED_2
     - wait_for_channel CH_GLADOS
-    - set_signal room_exit
+    - set_signal escape_hatch
 operators:
   - room_exit = room_exit_0 and room_exit_1
-  - side_cube_access_direct = player_in_side and has_cube_side
-  - side_cube_access_door = room_enter and has_cube_side
-  - side_cube_access = side_cube_access_direct or side_cube_access_door
+  - room_exit = room_exit or escape_hatch
+  - side_room_access = player_in_side or room_enter
+  - side_cube_access = side_room_access and has_cube_side
   - any_cube_access = side_cube_access or has_cube_main
   - trapped = not any_cube_access
