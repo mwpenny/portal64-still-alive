@@ -28,9 +28,10 @@ struct Fizzler {
     short maxVerticalExtent;
     short oldestParticleIndex;
     short dynamicId;
+	short cubeSignalIndex;
 };
 
-void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float width, float height, int room);
+void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float width, float height, int room, short cubeSignalIndex);
 void fizzlerUpdate(struct Fizzler* fizzler);
 
 #endif

@@ -6,6 +6,8 @@
 #include "../physics/collision_scene.h"
 #include "../util/dynamic_asset_loader.h"
 #include "../math/mathf.h"
+#include "../decor/decor_object_list.h"
+#include "signals.h"
 
 #include "../../build/assets/models/dynamic_model_list.h"
 
@@ -17,8 +19,15 @@
 #define GFX_PER_PARTICLE(particleCount) ((particleCount) + (((particleCount) + 7) >> 3) + 1)
 
 void fizzlerTrigger(void* data, struct CollisionObject* objectEnteringTrigger) {
+	struct Fizzler* fizzler = (struct Fizzler*)data;
+	
     if (objectEnteringTrigger->body) {
         objectEnteringTrigger->body->flags |= RigidBodyFizzled;
+    }
+	
+	int decorType = decorIdForObjectDefinition((struct DecorObjectDefinition*)objectEnteringTrigger->collider);
+	if (decorType == DECOR_TYPE_CUBE || decorType == DECOR_TYPE_CUBE_UNIMPORTANT) {
+        signalsSend(fizzler->cubeSignalIndex);
     }
 }
 
@@ -120,7 +129,7 @@ void fizzlerSpawnParticle(struct Fizzler* fizzler, int particleIndex) {
     currentVertex->v.cn[0] = 255; currentVertex->v.cn[1] = 255; currentVertex->v.cn[2] = 255; currentVertex->v.cn[3] = 255;
 }
 
-void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float width, float height, int room) {
+void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float width, float height, int room, short cubeSignalIndex) {
     fizzler->collisionBox.sideLength.x = width;
     fizzler->collisionBox.sideLength.y = height;
     fizzler->collisionBox.sideLength.z = 0.25f;
@@ -135,9 +144,12 @@ void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float wid
     rigidBodyMarkKinematic(&fizzler->rigidBody);
 
     fizzler->collisionObject.trigger = fizzlerTrigger;
+    fizzler->collisionObject.data = fizzler;
 
     fizzler->rigidBody.transform = *transform;
     fizzler->rigidBody.currentRoom = room;
+	
+	fizzler->cubeSignalIndex = cubeSignalIndex;
 
     collisionObjectUpdateBB(&fizzler->collisionObject);
     collisionSceneAddDynamicObject(&fizzler->collisionObject);
@@ -216,6 +228,6 @@ void fizzlerUpdate(struct Fizzler* fizzler) {
             fizzler->oldestParticleIndex = 0;
         }
     }
-
+    
     osWritebackDCache(fizzler->modelVertices, sizeof(Vtx) * maxVertex);
 }
