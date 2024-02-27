@@ -1,5 +1,6 @@
 cutscenes:
   INTRO:
+    - start_cutscene CHECK_TRAPPED
     - q_sound 09_PART1_ENTRY_1 CH_GLADOS PORTAL_09_PART1_ENTRY_1
     - q_sound 09_PART1_ENTRY_2 CH_GLADOS PORTAL_09_PART1_ENTRY_2
     - wait_for_signal exit_activate
@@ -23,5 +24,12 @@ cutscenes:
     - play_animation pit_1 pit_1_down -1
     - delay 3
     - goto pit_loop
+  CHECK_TRAPPED:
+    - wait_for_signal cube_on_piston 210
+    - q_sound 08_PART1_TRAPPED_1 CH_GLADOS PORTAL_08_PART1_TRAPPED_1
+    - q_sound 08_PART1_TRAPPED_2 CH_GLADOS PORTAL_08_PART1_TRAPPED_2
+    - wait_for_channel CH_GLADOS
+    - set_signal escape_hatch
 operators:
   - not_on_piston = not on_piston
+  - open_door = open_door or escape_hatch
