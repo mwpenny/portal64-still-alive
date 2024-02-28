@@ -17,6 +17,7 @@ struct Button {
     short dynamicId;
     short signalIndex;
     short cubeSignalIndex;
+    short deactivateSignalIndex;
     struct Vector3 originalPos;
     short flags;
 };
