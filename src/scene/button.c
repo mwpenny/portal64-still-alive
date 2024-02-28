@@ -101,10 +101,9 @@ void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
 void buttonUpdate(struct Button* button) {
     struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, NULL);
     
-    int shouldPress = 0;
-    
     int deactivated = signalsRead(button->deactivateSignalIndex);
     if (!deactivated) {
+        int shouldPress = 0;
         while (manifold) {
             struct CollisionObject* other = manifold->shapeA == &button->collisionObject ? manifold->shapeB : manifold->shapeA;
 
@@ -126,40 +125,39 @@ void buttonUpdate(struct Button* button) {
             button->collisionObject.flags &= ~COLLISION_OBJECT_PLAYER_STANDING;
             shouldPress = 1;
         }
-    }
-    
-    struct Vector3 targetPos = button->originalPos;
-    
-    if (shouldPress) {
-        targetPos.y -= BUTTON_MOVEMENT_AMOUNT;
-        signalsSend(button->signalIndex);
-
-        if (shouldPress == PRESSED_WITH_CUBE) {
-            signalsSend(button->cubeSignalIndex);
-        }
-    }
-
-    //if its actively moving up or down
-    if (targetPos.y != button->rigidBody.transform.position.y) {
-        //actively going down
+        
+        struct Vector3 targetPos = button->originalPos;
+        
         if (shouldPress) {
-            if (!(button->flags & ButtonFlagsBeingPressed)) {
-                soundPlayerPlay(soundsButton, 2.5f, 0.5f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
-                hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_DOWN, SubtitleTypeCaption);
-            }
-            button->flags |= ButtonFlagsBeingPressed;
-        }
-        // actively going up
-        else {
-            if ((button->flags & ButtonFlagsBeingPressed)) {
-                soundPlayerPlay(soundsButtonRelease, 2.5f, 0.4f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
-                hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_UP, SubtitleTypeCaption);
-            }
-            button->flags &= ~ButtonFlagsBeingPressed;
-        }
+            targetPos.y -= BUTTON_MOVEMENT_AMOUNT;
+            signalsSend(button->signalIndex);
 
-        vector3MoveTowards(&button->rigidBody.transform.position, &targetPos, BUTTON_MOVE_VELOCTY * FIXED_DELTA_TIME, &button->rigidBody.transform.position);
-        collisionObjectUpdateBB(&button->collisionObject);
+            if (shouldPress == PRESSED_WITH_CUBE) {
+                signalsSend(button->cubeSignalIndex);
+            }
+        }
+        
+        //if its actively moving up or down
+        if (targetPos.y != button->rigidBody.transform.position.y) {
+            //actively going down
+            if (shouldPress) {
+                if (!(button->flags & ButtonFlagsBeingPressed)) {
+                    soundPlayerPlay(soundsButton, 2.5f, 0.5f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+                    hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_DOWN, SubtitleTypeCaption);
+                }
+                button->flags |= ButtonFlagsBeingPressed;
+            }
+            // actively going up
+            else {
+                if ((button->flags & ButtonFlagsBeingPressed)) {
+                    soundPlayerPlay(soundsButtonRelease, 2.5f, 0.4f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+                    hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_UP, SubtitleTypeCaption);
+                }
+                button->flags &= ~ButtonFlagsBeingPressed;
+            }
+
+            vector3MoveTowards(&button->rigidBody.transform.position, &targetPos, BUTTON_MOVE_VELOCTY * FIXED_DELTA_TIME, &button->rigidBody.transform.position);
+            collisionObjectUpdateBB(&button->collisionObject);
+        }
     }
-    
 }
