@@ -13,7 +13,7 @@ cutscenes:
     - set_signal cube_dropper
     - start_cutscene CHECK_TRAPPED
   CHECK_TRAPPED:
-    - wait_for_signal cube_corridor 210
+    - wait_for_signal cube_corridor 180
     - q_sound 08_PART1_TRAPPED_1 CH_GLADOS PORTAL_08_PART1_TRAPPED_1
     - q_sound 08_PART1_TRAPPED_2 CH_GLADOS PORTAL_08_PART1_TRAPPED_2
     - wait_for_channel CH_GLADOS
@@ -35,5 +35,5 @@ operators:
   - should_open_door = exit_2_0 and exit_2_1
   - should_open_door = should_open_door or bad_person
   - not_in_room = not in_room
-  - double_door = should_open_door and not_in_room
   - exit = exit or escape_hatch
+  - double_door = should_open_door and not_in_room
