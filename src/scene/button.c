@@ -46,6 +46,8 @@ struct ColliderTypeData gButtonCollider = {
 
 #define PRESSED_WITH_CUBE               2
 
+#define CUBE_PRESS_IDLE_FRAMES          2
+
 void buttonRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Button* button = (struct Button*)data;
 
@@ -94,6 +96,8 @@ void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
     button->originalPos = definition->location;
     button->cubeSignalIndex = definition->cubeSignalIndex;
     button->flags = 0;
+    
+    button->pressFrames = CUBE_PRESS_IDLE_FRAMES;
 
     dynamicSceneSetRoomFlags(button->dynamicId, ROOM_FLAG_FROM_INDEX(button->rigidBody.currentRoom));
 }
@@ -105,21 +109,20 @@ void buttonUpdate(struct Button* button) {
     while (manifold) {
         struct CollisionObject* other = manifold->shapeA == &button->collisionObject ? manifold->shapeB : manifold->shapeA;
 
-        if (other->body && other->body->mass > MASS_BUTTON_PRESS_THRESHOLD) {
+        if (other->body && other->body->mass > MASS_BUTTON_PRESS_THRESHOLD && other->body->flags) {
             
             shouldPress = 1;
 
-            if ((other->body->flags & RigidBodyFlagsGrabbable) == RigidBodyFlagsGrabbable && (other->body->sleepFrames <= IDLE_SLEEP_FRAMES - 2)) {
+            if ((other->body->flags & RigidBodyFlagsGrabbable) == RigidBodyFlagsGrabbable && button->pressFrames <= 0) {
                 shouldPress = PRESSED_WITH_CUBE;
             }
-
+            
             break;
         }
 
         manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, manifold);
     }
     
-
     if (button->collisionObject.flags & COLLISION_OBJECT_PLAYER_STANDING) {
         button->collisionObject.flags &= ~COLLISION_OBJECT_PLAYER_STANDING;
         shouldPress = 1;
@@ -128,14 +131,18 @@ void buttonUpdate(struct Button* button) {
     struct Vector3 targetPos = button->originalPos;
     
     if (shouldPress) {
-        
-        
         targetPos.y -= BUTTON_MOVEMENT_AMOUNT;
         signalsSend(button->signalIndex);
 
         if (shouldPress == PRESSED_WITH_CUBE) {
             signalsSend(button->cubeSignalIndex);
         }
+        
+        if (button->pressFrames > 0) {
+            --button->pressFrames;
+        }
+    } else {
+        button->pressFrames = CUBE_PRESS_IDLE_FRAMES;
     }
 
     //if its actively moving up or down
