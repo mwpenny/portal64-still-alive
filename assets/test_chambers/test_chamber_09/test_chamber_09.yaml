@@ -1,6 +1,5 @@
 cutscenes:
   INTRO:
-    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
     - q_sound 09_PART1_ENTRY_1 CH_GLADOS PORTAL_09_PART1_ENTRY_1
     - q_sound 09_PART1_ENTRY_2 CH_GLADOS PORTAL_09_PART1_ENTRY_2
     - wait_for_signal exit_activate
@@ -12,6 +11,7 @@ cutscenes:
     - wait_for_signal not_on_piston
     - goto piston_loop
   SIGNAGE:
+    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
     - activate_signage 14
     - set_signal launch_ball
     - label pit_loop
