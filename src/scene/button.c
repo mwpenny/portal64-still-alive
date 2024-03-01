@@ -97,7 +97,7 @@ void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
     button->originalPos = definition->location;
     button->flags = 0;
     
-    button->pressFrames = CUBE_PRESS_IDLE_FRAMES;
+    button->cubePressFrames = CUBE_PRESS_IDLE_FRAMES;
     
     dynamicSceneSetRoomFlags(button->dynamicId, ROOM_FLAG_FROM_INDEX(button->rigidBody.currentRoom));
 }
@@ -115,7 +115,7 @@ void buttonUpdate(struct Button* button) {
                 
                 shouldPress = 1;
 
-                if ((other->body->flags & RigidBodyFlagsGrabbable) == RigidBodyFlagsGrabbable && button->pressFrames <= 0) {
+                if ((other->body->flags & RigidBodyFlagsGrabbable) == RigidBodyFlagsGrabbable && button->cubePressFrames <= 0) {
                     shouldPress = PRESSED_WITH_CUBE;
                 }
                 
@@ -140,11 +140,11 @@ void buttonUpdate(struct Button* button) {
                 signalsSend(button->cubeSignalIndex);
             }
             
-            if (button->pressFrames > 0) {
-                --button->pressFrames;
+            if (button->cubePressFrames > 0) {
+                --button->cubePressFrames;
             }
         } else {
-            button->pressFrames = CUBE_PRESS_IDLE_FRAMES;
+            button->cubePressFrames = CUBE_PRESS_IDLE_FRAMES;
         }
         
         //if its actively moving up or down

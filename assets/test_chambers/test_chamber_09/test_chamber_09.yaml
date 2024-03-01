@@ -1,8 +1,11 @@
 cutscenes:
   INTRO:
+    - start_cutscene CHECK_CUBE_ON_PISTON
+    - start_cutscene CHECK_CUBE_OFF_BUTTON
     - q_sound 09_PART1_ENTRY_1 CH_GLADOS PORTAL_09_PART1_ENTRY_1
     - q_sound 09_PART1_ENTRY_2 CH_GLADOS PORTAL_09_PART1_ENTRY_2
     - wait_for_signal exit_activate
+    - stop_cutscene CHECK_CUBE_ON_PISTON
     - q_sound 09_PART1_SUCCESS_1 CH_GLADOS PORTAL_09_PART1_SUCCESS_1
     - label piston_loop
     - play_animation exit_piston piston_move_down
@@ -23,5 +26,19 @@ cutscenes:
     - play_animation pit_1 pit_1_down -1
     - delay 3
     - goto pit_loop
+  CHECK_CUBE_ON_PISTON:
+    - wait_for_signal cube_on_piston 210
+    - stop_cutscene CHECK_CUBE_OFF_BUTTON
+    - q_sound 08_PART1_TRAPPED_1 CH_GLADOS PORTAL_08_PART1_TRAPPED_1
+    - q_sound 08_PART1_TRAPPED_2 CH_GLADOS PORTAL_08_PART1_TRAPPED_2
+    - wait_for_channel CH_GLADOS
+    - set_signal escape_hatch
+  CHECK_CUBE_OFF_BUTTON:
+    - wait_for_signal open_door_cube
+    - wait_for_signal not_cube_near_button
+    - set_signal escape_hatch
+    - stop_cutscene CHECK_CUBE_ON_PISTON
 operators:
   - not_on_piston = not on_piston
+  - not_cube_near_button = not cube_near_button
+  - open_door = open_door or escape_hatch
