@@ -19,6 +19,7 @@ struct Button {
     short cubeSignalIndex;
     struct Vector3 originalPos;
     short flags;
+    short cubePressFrames;
 };
 
 void buttonInit(struct Button* button, struct ButtonDefinition* definition);
