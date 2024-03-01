@@ -109,7 +109,7 @@ void buttonUpdate(struct Button* button) {
     while (manifold) {
         struct CollisionObject* other = manifold->shapeA == &button->collisionObject ? manifold->shapeB : manifold->shapeA;
 
-        if (other->body && other->body->mass > MASS_BUTTON_PRESS_THRESHOLD && other->body->flags) {
+        if (other->body && other->body->mass > MASS_BUTTON_PRESS_THRESHOLD) {
             
             shouldPress = 1;
 
