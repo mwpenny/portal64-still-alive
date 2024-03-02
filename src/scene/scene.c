@@ -191,7 +191,8 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
         fizzlerTransform.position = fizzlerDef->position;
         fizzlerTransform.rotation = fizzlerDef->rotation;
         fizzlerTransform.scale = gOneVec;
-        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height, fizzlerDef->roomIndex);
+        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height, 
+		            fizzlerDef->roomIndex, fizzlerDef->cubeSignalIndex);
     }
 
     scene->elevatorCount = gCurrentLevel->elevatorCount;
