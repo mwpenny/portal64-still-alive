@@ -21,5 +21,4 @@ Locations can be referenced in cutscenes. See [Cutscenes](../cutscenes/README.md
 for more information.
 
 Each level must have a location named `start`. This is used to place the player
-when loading levels without a transition from a previous one (e.g., from the
-main menu).
+when loading levels without a transition from a previous one (i.e., from a menu).

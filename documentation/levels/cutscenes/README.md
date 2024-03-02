@@ -43,13 +43,13 @@ after their final step is executed.
 
 See the pages below for details on specific cutscene steps.
 
-* play_sound (TODO)
-* start_sound (TODO)
-* q_sound (TODO)
-* wait_for_channel (TODO)
-* delay (TODO)
-* open_portal (TODO)
-* close_portal (TODO)
+* [play_sound](./play_sound.md)
+* [start_sound](./start_sound.md)
+* [q_sound](./q_sound.md)
+* [wait_for_channel](./wait_for_channel.md)
+* [delay](./delay.md)
+* [open_portal](./open_portal.md)
+* [close_portal](./close_portal.md)
 * set_signal (TODO)
 * clear_signal (TODO)
 * wait_for_signal (TODO)

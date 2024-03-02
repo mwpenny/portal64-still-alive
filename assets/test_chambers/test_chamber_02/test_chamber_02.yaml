@@ -11,6 +11,13 @@ cutscenes:
     - q_sound SOUNDS_02_PART1_SUCCESS_2 CH_GLADOS PORTAL_02_PART1_SUCCESS_2
   DROP_CUBE:
     - set_signal cube_dropper
+    - start_cutscene CHECK_TRAPPED
+  CHECK_TRAPPED:
+    - wait_for_signal cube_corridor 180
+    - q_sound 08_PART1_TRAPPED_1 CH_GLADOS PORTAL_08_PART1_TRAPPED_1
+    - q_sound 08_PART1_TRAPPED_2 CH_GLADOS PORTAL_08_PART1_TRAPPED_2
+    - wait_for_channel CH_GLADOS
+    - set_signal escape_hatch
   SIGNAGE_5:
     - activate_signage 5
   ENTER_BUTTON_ROOM:
@@ -25,6 +32,7 @@ cutscenes:
     - q_sound SOUNDS_02_PART2_SUCCESS_1 CH_GLADOS PORTAL_02_PART2_SUCCESS_1
     - q_sound SOUNDS_02_PART2_SUCCESS_2 CH_GLADOS PORTAL_02_PART2_SUCCESS_2
 operators:
+  - exit = exit or escape_hatch
   - should_open_door = exit_2_0 and exit_2_1
   - should_open_door = should_open_door or bad_person
   - not_in_room = not in_room
