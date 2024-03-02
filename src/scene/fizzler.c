@@ -19,7 +19,7 @@
 #define GFX_PER_PARTICLE(particleCount) ((particleCount) + (((particleCount) + 7) >> 3) + 1)
 
 void fizzlerTrigger(void* data, struct CollisionObject* objectEnteringTrigger) {
-	struct Fizzler* fizzler = (struct Fizzler*)data;
+    struct Fizzler* fizzler = (struct Fizzler*)data;
 	
     if (objectEnteringTrigger->body) {
         objectEnteringTrigger->body->flags |= RigidBodyFizzled;
@@ -151,7 +151,7 @@ void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float wid
     fizzler->rigidBody.transform = *transform;
     fizzler->rigidBody.currentRoom = room;
 	
-	fizzler->cubeSignalIndex = cubeSignalIndex;
+    fizzler->cubeSignalIndex = cubeSignalIndex;
 
     collisionObjectUpdateBB(&fizzler->collisionObject);
     collisionSceneAddDynamicObject(&fizzler->collisionObject);

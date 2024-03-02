@@ -1,6 +1,6 @@
 # Level Signals
 
-Signals are a way to indicate that something has happened in a level. They can
+Signals are a way to indicate that something is happening in a level. They can
 be emitted by:
 * Level objects
 * Triggers
