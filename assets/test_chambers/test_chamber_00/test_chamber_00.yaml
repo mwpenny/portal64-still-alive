@@ -30,6 +30,7 @@ cutscenes:
     - open_portal portal_room 0
     - open_portal room_exit 1
   FIRST_PUZZLE:
+    - start_cutscene CHECK_CUBE_FIZZLE
     - clear_signal room_divider
     - delay 3
     - set_signal cube_dropper
@@ -38,6 +39,15 @@ cutscenes:
     - q_sound SOUNDS_00_PART1_SUCCESS_1 CH_GLADOS PORTAL_00_PART1_SUCCESS_1
     - q_sound SOUNDS_00_PART1_SUCCESS_2 CH_GLADOS PORTAL_00_PART1_SUCCESS_2
     - q_sound SOUNDS_00_PART1_SUCCESS_3 CH_GLADOS PORTAL_00_PART1_SUCCESS_3
+  CHECK_CUBE_FIZZLE:
+    - label cube_fizzle_check_loop
+    - wait_for_signal cube_fizzled
+    - clear_signal cube_dropper
+    - q_sound SOUNDS_GENERIC_CRATE_VAPORIZED_IN_EMANCIPATION_GRID_1 CH_GLADOS PORTAL_GENERIC_CRATE_VAPORIZED_IN_EMANCIPATION_GRID_1
+    - q_sound SOUNDS_GENERIC_CRATE_VAPORIZED_IN_EMANCIPATION_GRID_2 CH_GLADOS PORTAL_GENERIC_CRATE_VAPORIZED_IN_EMANCIPATION_GRID_2
+    - wait_for_channel CH_GLADOS
+    - set_signal cube_dropper
+    - goto cube_fizzle_check_loop
   SECOND_SIGNAGE:
     - activate_signage 1
   START_SECOND_ROOM:

@@ -17,7 +17,7 @@ for _, dropper in pairs(sk_scene.nodes_for_type('@box_dropper')) do
     table.insert(box_droppers, {
         position,
         room_index,
-        signals.signal_index_for_name(dropper.arguments[1] or ''),
+        signals.signal_index_for_name(dropper.arguments[1]),
     })
 end
 
@@ -33,9 +33,9 @@ for _, button in pairs(sk_scene.nodes_for_type('@button')) do
     table.insert(buttons, {
         position,
         room_index,
-        signals.signal_index_for_name(button.arguments[1] or ''),
-        signals.signal_index_for_name(button.arguments[2] or ''),
-        signals.signal_index_for_name(button.arguments[3] or ''),
+        signals.signal_index_for_name(button.arguments[1]),
+        signals.optional_signal_index_for_name(button.arguments[2]),
+        signals.optional_signal_index_for_name(button.arguments[3])
     })
 end
 
@@ -76,7 +76,7 @@ for _, door in pairs(sk_scene.nodes_for_type('@door')) do
         position,
         rotation,
         world.find_coplanar_doorway(position) - 1,
-        signals.signal_index_for_name(door.arguments[1] or ''),
+        signals.signal_index_for_name(door.arguments[1]),
         parse_door_type(door.arguments[2])
     })
 end
@@ -128,6 +128,7 @@ for _, fizzler in pairs(sk_scene.nodes_for_type('@fizzler')) do
         1,
         1,
         room_index,
+        signals.optional_signal_index_for_name(fizzler.arguments[1]),
     })
 end
 

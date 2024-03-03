@@ -240,6 +240,7 @@ struct FizzlerDefinition {
     float width;
     float height;
     short roomIndex;
+    short cubeSignalIndex;
 };
 
 struct ElevatorDefinition {

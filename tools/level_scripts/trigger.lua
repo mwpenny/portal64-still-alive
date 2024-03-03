@@ -305,14 +305,6 @@ local function generate_cutscenes()
     return cutscenes_result, cutscene_data
 end
 
-local function parse_trigger_signal(signal)
-    if not signal or signal == '-1' then
-        return -1
-    end
-
-    return signals.signal_index_for_name(signal)
-end
-
 local function signal_type_index(index, is_hover)
     if index == 3 then
         if is_hover then
@@ -339,7 +331,7 @@ local function generate_triggers(cutscenes)
             table.insert(triggers, {
                 signal_type_index(i, string.sub(cutscene_name, 1, 6) == "HOVER_"),
                 cutscene,
-                parse_trigger_signal(trigger.arguments[i + 1]),
+                signals.optional_signal_index_for_name(trigger.arguments[i + 1]),
             })
         end
 
