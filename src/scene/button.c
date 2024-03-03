@@ -134,7 +134,7 @@ void buttonUpdate(struct Button* button) {
         targetPos.y -= BUTTON_MOVEMENT_AMOUNT;
         signalsSend(button->signalIndex);
 
-        if (shouldPress == PRESSED_WITH_CUBE) {
+        if (button->cubeSignalIndex != -1 && shouldPress == PRESSED_WITH_CUBE) {
             signalsSend(button->cubeSignalIndex);
         }
         
