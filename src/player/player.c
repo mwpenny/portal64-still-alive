@@ -321,7 +321,7 @@ int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPa
     return result;
 }
 
-void playerUpdateGrabbedObject(struct Player* player) {
+void playerUpdateGrabbedObject(struct Player* player, struct Vector3* forward) {
     if (playerIsDead(player)) {
         return;
     }
@@ -387,7 +387,7 @@ void playerUpdateGrabbedObject(struct Player* player) {
         }
 
         struct Vector3 grabPoint;
-        struct Quaternion grabRotation = player->lookTransform.rotation;
+        struct Quaternion grabRotation;
 
         // try to determine how far away to set the grab dist
         struct RaycastHit hit;
@@ -403,8 +403,27 @@ void playerUpdateGrabbedObject(struct Player* player) {
             playerSetGrabbing(player, NULL);
             return;
         }
-
-        transformPoint(&player->lookTransform, &temp_grab_dist, &grabPoint);
+    
+        // keep object at steady XZ-planar distance in front of player
+        {
+            struct Quaternion tmpRotation = player->lookTransform.rotation;
+            
+            //transformPoint(&player->lookTransform, &temp_grab_dist, &grabPoint);
+            // determine object target height
+            vector3Multiply(&player->lookTransform.scale, &temp_grab_dist, &grabPoint);
+            quatMultVector(&player->lookTransform.rotation, &grabPoint, &grabPoint);
+            float grabY = grabPoint.y;
+            
+            // object target pos in front of player at temp_grab_dist on XZ-plane
+            struct Vector3 forwardNegate;
+            vector3Negate(forward, &forwardNegate);
+            quatLook(&forwardNegate, &gUp, &player->lookTransform.rotation);
+            transformPoint(&player->lookTransform, &temp_grab_dist, &grabPoint);
+            grabPoint.y += grabY;
+            
+            grabRotation = player->lookTransform.rotation;
+            player->lookTransform.rotation = tmpRotation;
+        }
 
         if (player->grabbingThroughPortal != PLAYER_GRABBING_THROUGH_NOTHING) {
             if (!collisionSceneIsPortalOpen()) {
@@ -423,7 +442,7 @@ void playerUpdateGrabbedObject(struct Player* player) {
                 grabRotation = finalRotation;
             }
         }
-
+        
         pointConstraintUpdateTarget(&player->grabConstraint, &grabPoint, &grabRotation);
     }
 }
@@ -924,7 +943,7 @@ void playerUpdate(struct Player* player) {
         player->pitchVelocity = 0.0f;
     }
 
-    playerUpdateGrabbedObject(player);
+    playerUpdateGrabbedObject(player, &forward);
 
     collisionObjectUpdateBB(&player->collisionObject);
 
