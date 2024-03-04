@@ -168,7 +168,7 @@ void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int came
             continue;
         }
         if (box3DHasOverlap(&camera->collisionObject.boundingBox, portalBox)) {
-            rigidBodyUnmarkKinematic(&camera->rigidBody, 1.0f, collisionBoxSolidMofI(&gSecurityCameraCollider, 1.0f));
+            rigidBodyUnmarkKinematic(&camera->rigidBody, SECURITY_CAMERA_RIGID_BODY_MASS, securityCameraMofI());
             camera->collisionObject.collisionLayers |= COLLISION_LAYERS_GRABBABLE;
             camera->rigidBody.flags |= RigidBodyFlagsGrabbable;
 
@@ -178,4 +178,8 @@ void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int came
             }
         }
     }
+}
+
+float securityCameraMofI() {
+    return collisionBoxSolidMofI(&gSecurityCameraCollider, SECURITY_CAMERA_RIGID_BODY_MASS);
 }

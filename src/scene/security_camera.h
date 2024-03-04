@@ -5,6 +5,8 @@
 #include "../levels/level_definition.h"
 #include "../sk64/skelatool_armature.h"
 
+#define SECURITY_CAMERA_RIGID_BODY_MASS 1.0f
+
 struct SecurityCamera {
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
@@ -17,5 +19,7 @@ void securityCameraInit(struct SecurityCamera* securityCamera, struct SecurityCa
 void securityCameraUpdate(struct SecurityCamera* securityCamera);
 
 void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int cameraCount, struct Box3D* portalBox);
+
+float securityCameraMofI(); // utility for serialization
 
 #endif
