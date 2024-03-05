@@ -54,7 +54,7 @@
 #define MAX_ROTATE_RATE_DELTA MAX_ROTATE_RATE
 
 #define JUMP_IMPULSE   2.7f
-#define THROW_IMPULSE  2.7f
+#define THROW_IMPULSE  1.35f
 
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
@@ -307,7 +307,8 @@ void playerThrowObject(struct Player* player) {
     struct Vector3 forward, right;
     playerGetMoveBasis(&player->lookTransform, &forward, &right);
     
-    vector3Scale(&forward, &forward, -1.0f * THROW_IMPULSE);
+    // scale impulse with mass to throw each object the same distance
+    vector3Scale(&forward, &forward, -1.0f * THROW_IMPULSE * object->body->mass);
     rigidBodyAppyImpulse(object->body, &object->body->transform.position, &forward);
 }
 
