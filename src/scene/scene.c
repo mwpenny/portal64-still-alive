@@ -411,7 +411,7 @@ void sceneCheckPortals(struct Scene* scene) {
     }
 
     if ((fireOrange || fireBlue) && playerIsGrabbing(&scene->player)){
-        playerSetGrabbing(&scene->player, NULL);
+        playerThrowObject(&scene->player);
         scene->ignorePortalGun = fireOrange && fireBlue ? IGNORE_FIRE_BOTH : (fireBlue ? IGNORE_FIRE_BLUE : IGNORE_FIRE_ORANGE); // prevent blocking other button
     }
     
