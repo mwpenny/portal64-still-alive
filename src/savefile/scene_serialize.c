@@ -14,6 +14,7 @@ void playerSerialize(struct Serializer* serializer, SerializeAction action, stru
     action(serializer, &player->body.velocity, sizeof(player->body.velocity));
     action(serializer, &player->body.currentRoom, sizeof(player->body.currentRoom));
     action(serializer, &player->flags, sizeof(player->flags));
+    action(serializer, &player->grabbingThroughPortal, sizeof(player->grabbingThroughPortal));
 }
 
 void playerDeserialize(struct Serializer* serializer, struct Player* player) {
@@ -22,6 +23,7 @@ void playerDeserialize(struct Serializer* serializer, struct Player* player) {
     serializeRead(serializer, &player->body.velocity, sizeof(player->body.velocity));
     serializeRead(serializer, &player->body.currentRoom, sizeof(player->body.currentRoom));
     serializeRead(serializer, &player->flags, sizeof(player->flags));
+    serializeRead(serializer, &player->grabbingThroughPortal, sizeof(player->grabbingThroughPortal));
 }
 
 #define PORTAL_FLAGS_NO_PORTAL  -1
