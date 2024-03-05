@@ -53,9 +53,9 @@ Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 #define LEVEL_INDEX_WITH_GUN_0  2
 #define LEVEL_INDEX_WITH_GUN_1  8
 
-#define IGNORE_FIRE_BOTH 1
-#define IGNORE_FIRE_BLUE 2
-#define IGNORE_FIRE_ORANGE 3
+#define IGNORE_FIRE_BLUE   1
+#define IGNORE_FIRE_ORANGE 2
+#define IGNORE_FIRE_BOTH   IGNORE_FIRE_BLUE | IGNORE_FIRE_ORANGE
 
 void sceneUpdateListeners(struct Scene* scene);
 
@@ -375,17 +375,22 @@ void sceneCheckPortals(struct Scene* scene) {
     int fireOrange = controllerActionGet(ControllerActionOpenPortal1);
 
     // this prevents the firing of portals after unpausing or dropping an object
-    if (scene->ignorePortalGun == IGNORE_FIRE_BLUE && fireBlue) {
-        fireBlue = 0;
-    } else if (scene->ignorePortalGun == IGNORE_FIRE_ORANGE && fireOrange) {
-        fireOrange = 0;
-    } else if (scene->ignorePortalGun == IGNORE_FIRE_BOTH && (fireBlue || fireOrange)) {
-        fireBlue = 0;
-        fireOrange = 0;
-    } else {
-        scene->ignorePortalGun = 0;
+    if (scene->ignorePortalGun & IGNORE_FIRE_BLUE) {
+        if (fireBlue) {
+            fireBlue = 0;
+        } else {
+            scene->ignorePortalGun &= ~IGNORE_FIRE_BLUE;
+        }
     }
-
+    if (scene->ignorePortalGun & IGNORE_FIRE_ORANGE)
+    {
+        if (fireOrange) {
+            fireOrange = 0;
+        } else {
+            scene->ignorePortalGun &= ~IGNORE_FIRE_ORANGE;
+        }
+    }
+    
     int hasBlue = (scene->player.flags & PlayerHasFirstPortalGun) != 0;
     int hasOrange = (scene->player.flags & PlayerHasSecondPortalGun) != 0;
     if (scene->continuouslyAttemptingPortalOpen){
@@ -412,7 +417,7 @@ void sceneCheckPortals(struct Scene* scene) {
 
     if ((fireOrange || fireBlue) && playerIsGrabbing(&scene->player)){
         playerThrowObject(&scene->player);
-        scene->ignorePortalGun = fireOrange && fireBlue ? IGNORE_FIRE_BOTH : (fireBlue ? IGNORE_FIRE_BLUE : IGNORE_FIRE_ORANGE); // prevent blocking other button
+        scene->ignorePortalGun |= (fireBlue ? IGNORE_FIRE_BLUE : 0) | (fireOrange ? IGNORE_FIRE_ORANGE : 0); // prevent blocking other button
     }
     
     if ((scene->player.flags & PlayerFlagsGrounded) && (scene->player.flags & PlayerIsStepping)){
@@ -562,7 +567,7 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
 
         struct Transform relativeTransform;
         relativeTransform.position = boxDef->position;
-        relativeTransform.rotation = boxDef->rotation;   
+        relativeTransform.rotation = boxDef->rotation;
         relativeTransform.scale = gOneVec;
 
         struct Transform newTransform;
@@ -593,13 +598,13 @@ void sceneUpdate(struct Scene* scene) {
     if (gGameMenu.state != GameMenuStateResumeGame) {
         if (gGameMenu.state == GameMenuStateLanding && (controllerGetButtonDown(0, B_BUTTON) || controllerActionGet(ControllerActionPause))) {
             gGameMenu.state = GameMenuStateResumeGame;
-            scene->ignorePortalGun = 1;
             savefileSave();
         }
 
         gameMenuUpdate(&gGameMenu);
 
         if (gGameMenu.state == GameMenuStateResumeGame) {
+            scene->ignorePortalGun = IGNORE_FIRE_BOTH;
             soundPlayerResume();
             rumblePakSetPaused(0);
         }
