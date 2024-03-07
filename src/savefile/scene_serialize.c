@@ -463,7 +463,7 @@ void securityCameraSerialize(struct Serializer* serializer, SerializeAction acti
     
     for (int i = 0; i < scene->securityCameraCount; ++i) {
         struct SecurityCamera* cam = &scene->securityCameras[i];
-        if (!(cam->rigidBody.flags & RigidBodyIsKinematic)) {
+        if (securityCameraIsDetached(cam)) {
             u8 index = i;
             action(serializer, &index, sizeof(u8));
             
@@ -492,7 +492,7 @@ void securityCameraDeserialize(struct Serializer* serializer, struct Scene* scen
         
         struct SecurityCamera* cam = &scene->securityCameras[index];
         
-        rigidBodyUnmarkKinematic(&cam->rigidBody, SECURITY_CAMERA_RIGID_BODY_MASS, securityCameraMofI());
+        securityCameraDetach(cam);
         
         serializeRead(serializer, &cam->rigidBody.transform, sizeof(struct PartialTransform));
         serializeRead(serializer, &cam->rigidBody.velocity, sizeof(struct Vector3));

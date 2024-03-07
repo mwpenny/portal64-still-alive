@@ -27,7 +27,8 @@ struct ColliderTypeData gSecurityCameraCollider = {
     &gCollisionBoxCallbacks
 };
 
-#define CAMERA_RANGE    10.0f
+#define CAMERA_RANGE           10.0f
+#define CAMERA_RIGID_BODY_MASS 1.0f
 
 struct Quaternion gBarBoneRelative = {1.0f, 0.0f, 0.0f, 0.0f};
 
@@ -168,9 +169,7 @@ void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int came
             continue;
         }
         if (box3DHasOverlap(&camera->collisionObject.boundingBox, portalBox)) {
-            rigidBodyUnmarkKinematic(&camera->rigidBody, SECURITY_CAMERA_RIGID_BODY_MASS, securityCameraMofI());
-            camera->collisionObject.collisionLayers |= COLLISION_LAYERS_GRABBABLE;
-            camera->rigidBody.flags |= RigidBodyFlagsGrabbable;
+            securityCameraDetach(camera);
 
             if (!cutsceneRunnerIsChannelPlaying(CH_GLADOS)) {
                 short clipIndex = randomInRange(0, sizeof(gCameraDestroyClips) / sizeof(*gCameraDestroyClips));
@@ -180,6 +179,12 @@ void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int came
     }
 }
 
-float securityCameraMofI() {
-    return collisionBoxSolidMofI(&gSecurityCameraCollider, SECURITY_CAMERA_RIGID_BODY_MASS);
+void securityCameraDetach(struct SecurityCamera* securityCamera) {
+    rigidBodyUnmarkKinematic(&securityCamera->rigidBody, CAMERA_RIGID_BODY_MASS, collisionBoxSolidMofI(&gSecurityCameraCollider, CAMERA_RIGID_BODY_MASS));
+    securityCamera->collisionObject.collisionLayers |= COLLISION_LAYERS_GRABBABLE;
+    securityCamera->rigidBody.flags |= RigidBodyFlagsGrabbable;
+}
+
+int securityCameraIsDetached(struct SecurityCamera* securityCamera) {
+    return !(securityCamera->rigidBody.flags & RigidBodyIsKinematic);
 }
