@@ -33,7 +33,7 @@ struct ColliderTypeData gSecurityCameraCollider = {
 struct Quaternion gBarBoneRelative = {1.0f, 0.0f, 0.0f, 0.0f};
 
 void securityCameraLookAt(struct SecurityCamera* camera, struct Vector3* target) {
-    if (!(camera->rigidBody.flags & RigidBodyIsKinematic)) {
+    if (securityCameraIsDetached(camera)) {
         return;
     }
 
@@ -164,7 +164,7 @@ short gCameraDestroyClips[] = {
 void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int cameraCount, struct Box3D* portalBox) {
     for (int i = 0; i < cameraCount; ++i) {
         struct SecurityCamera* camera = &securityCameras[i];
-        if (!(camera->rigidBody.flags & RigidBodyIsKinematic)) {
+        if (securityCameraIsDetached(camera)) {
             // already free skip this one
             continue;
         }

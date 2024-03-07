@@ -451,7 +451,7 @@ void securityCameraSerialize(struct Serializer* serializer, SerializeAction acti
     short heldCam = -1;
     for (int i = 0; i < scene->securityCameraCount; ++i) {
         struct SecurityCamera* cam = &scene->securityCameras[i];
-        if (!(cam->rigidBody.flags & RigidBodyIsKinematic)) {
+        if (securityCameraIsDetached(cam)) {
             if (&cam->collisionObject == scene->player.grabConstraint.object) {
                 heldCam = serializedCount;
             }
