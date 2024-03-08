@@ -18,4 +18,7 @@ void securityCameraUpdate(struct SecurityCamera* securityCamera);
 
 void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int cameraCount, struct Box3D* portalBox);
 
+void securityCameraDetach();
+int securityCameraIsDetached();
+
 #endif

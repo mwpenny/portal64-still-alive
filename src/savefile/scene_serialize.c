@@ -321,7 +321,6 @@ void launcherSerialize(struct Serializer* serializer, SerializeAction action, st
         action(serializer, &launcher->currentBall.targetSpeed, sizeof(float));
         action(serializer, &launcher->currentBall.flags, sizeof(short));
 
-
         if (!ballIsActive(&launcher->currentBall) || ballIsCaught(&launcher->currentBall)) {
             continue;
         }
@@ -449,9 +448,72 @@ void sceneAnimatorDeserialize(struct Serializer* serializer, struct Scene* scene
     }
 }
 
-#define INCLUDE_SAVEFILE_ALIGH_CHECKS   0
+void securityCameraSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+    u8 serializedCount = 0;
+    short heldCam = -1;
+    for (int i = 0; i < scene->securityCameraCount; ++i) {
+        struct SecurityCamera* cam = &scene->securityCameras[i];
+        if (securityCameraIsDetached(cam)) {
+            if (&cam->collisionObject == scene->player.grabConstraint.object) {
+                heldCam = serializedCount;
+            }
+            ++serializedCount;
+        }
+    }
+    action(serializer, &serializedCount, sizeof(u8));
+    action(serializer, &heldCam, sizeof(short));
+    
+    for (int i = 0; i < scene->securityCameraCount; ++i) {
+        struct SecurityCamera* cam = &scene->securityCameras[i];
+        if (securityCameraIsDetached(cam)) {
+            u8 index = i;
+            action(serializer, &index, sizeof(u8));
+            
+            action(serializer, &cam->rigidBody.transform, sizeof(struct PartialTransform));
+            action(serializer, &cam->rigidBody.velocity, sizeof(struct Vector3));
+            action(serializer, &cam->rigidBody.angularVelocity, sizeof(struct Vector3));
+            action(serializer, &cam->rigidBody.flags, sizeof(enum RigidBodyFlags));
+            action(serializer, &cam->rigidBody.currentRoom, sizeof(short));
+        }
+    }
+}
 
-#if INCLUDE_SAVEFILE_ALIGH_CHECKS
+void securityCameraDeserialize(struct Serializer* serializer, struct Scene* scene) {
+    u8 serializedCount;
+    serializeRead(serializer, &serializedCount, sizeof(u8));
+    
+    short heldCam;
+    serializeRead(serializer, &heldCam, sizeof(short));
+    
+    for (int i = 0; i < serializedCount; ++i) {
+        u8 index;
+        serializeRead(serializer, &index, sizeof(u8));
+        if (index >= scene->securityCameraCount) {
+            continue;
+        }
+        
+        struct SecurityCamera* cam = &scene->securityCameras[index];
+        
+        securityCameraDetach(cam);
+        
+        serializeRead(serializer, &cam->rigidBody.transform, sizeof(struct PartialTransform));
+        serializeRead(serializer, &cam->rigidBody.velocity, sizeof(struct Vector3));
+        serializeRead(serializer, &cam->rigidBody.angularVelocity, sizeof(struct Vector3));
+        serializeRead(serializer, &cam->rigidBody.flags, sizeof(enum RigidBodyFlags));
+        serializeRead(serializer, &cam->rigidBody.currentRoom, sizeof(short));
+        
+        cam->rigidBody.flags &= ~RigidBodyIsSleeping;
+        cam->rigidBody.sleepFrames = IDLE_SLEEP_FRAMES;
+
+        if (heldCam == i) {
+            playerSetGrabbing(&scene->player, &cam->collisionObject);
+        }
+    }
+}
+
+#define INCLUDE_SAVEFILE_ALIGN_CHECKS   0
+
+#if INCLUDE_SAVEFILE_ALIGN_CHECKS
 #define WRITE_ALIGN_CHECK   {action(serializer, &currentAlign, 1); ++currentAlign;}
 #define READ_ALIGN_CHECK {serializeRead(serializer, &currentAlign, 1); if (currentAlign != expectedAlign) gdbBreak(); ++expectedAlign;}
 #else
@@ -460,7 +522,7 @@ void sceneAnimatorDeserialize(struct Serializer* serializer, struct Scene* scene
 #endif
 
 void sceneSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
-#if INCLUDE_SAVEFILE_ALIGH_CHECKS
+#if INCLUDE_SAVEFILE_ALIGN_CHECKS
     char currentAlign = 0;
 #endif
     playerSerialize(serializer, action, &scene->player);
@@ -487,10 +549,12 @@ void sceneSerialize(struct Serializer* serializer, SerializeAction action, struc
     WRITE_ALIGN_CHECK;
     switchSerialize(serializer, action, scene);
     WRITE_ALIGN_CHECK;
+    securityCameraSerialize(serializer, action, scene);
+    WRITE_ALIGN_CHECK;
 }
 
 void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
-#if INCLUDE_SAVEFILE_ALIGH_CHECKS
+#if INCLUDE_SAVEFILE_ALIGN_CHECKS
     char currentAlign = 0;
     char expectedAlign = 0;
 #endif
@@ -517,6 +581,8 @@ void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
     sceneAnimatorDeserialize(serializer, scene);
     READ_ALIGN_CHECK;
     switchSerialize(serializer, serializeRead, scene);
+    READ_ALIGN_CHECK;
+    securityCameraDeserialize(serializer, scene);
     READ_ALIGN_CHECK;
 
     for (int i = 0; i < scene->doorCount; ++i) {

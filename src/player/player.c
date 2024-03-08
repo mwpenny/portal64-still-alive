@@ -55,6 +55,7 @@
 #define MAX_ROTATE_RATE_DELTA MAX_ROTATE_RATE
 
 #define JUMP_IMPULSE   2.7f
+#define THROW_IMPULSE  1.35f
 
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
@@ -348,6 +349,21 @@ void playerSignalPortalChanged(struct Player* player) {
 
 int playerIsGrabbing(struct Player* player) {
     return player->grabConstraint.object != NULL;
+}
+
+void playerThrowObject(struct Player* player) {
+    if (!playerIsGrabbing(player)) {
+        return;
+    }
+    struct CollisionObject* object = player->grabConstraint.object;
+    playerSetGrabbing(player, NULL);
+    
+    struct Vector3 forward, right;
+    playerGetMoveBasis(&player->lookTransform, &forward, &right);
+    
+    // scale impulse with mass to throw each object the same distance
+    vector3Scale(&forward, &forward, -1.0f * THROW_IMPULSE * object->body->mass);
+    rigidBodyAppyImpulse(object->body, &object->body->transform.position, &forward);
 }
 
 int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPastObject) {

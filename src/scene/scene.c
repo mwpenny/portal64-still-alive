@@ -53,6 +53,7 @@ Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 #define LEVEL_INDEX_WITH_GUN_0  2
 #define LEVEL_INDEX_WITH_GUN_1  8
 
+
 void sceneUpdateListeners(struct Scene* scene);
 
 void sceneInitDynamicColliders(struct Scene* scene) {
@@ -96,7 +97,6 @@ void sceneInit(struct Scene* scene) {
     savefileMarkChapterProgress(gCurrentLevelIndex);
 
     gGameMenu.state = GameMenuStateResumeGame;
-    scene->ignorePortalGun = 0;
 }
 
 void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
@@ -370,14 +370,6 @@ void sceneCheckPortals(struct Scene* scene) {
     int fireBlue = controllerActionGet(ControllerActionOpenPortal0);
     int fireOrange = controllerActionGet(ControllerActionOpenPortal1);
 
-    // this prevents the firing of portals after unpausing
-    if (scene->ignorePortalGun && (fireBlue || fireOrange)) {
-        fireBlue = 0;
-        fireOrange = 0;
-    } else {
-        scene->ignorePortalGun = 0;
-    }
-
     int hasBlue = (scene->player.flags & PlayerHasFirstPortalGun) != 0;
     int hasOrange = (scene->player.flags & PlayerHasSecondPortalGun) != 0;
     if (scene->continuouslyAttemptingPortalOpen){
@@ -403,7 +395,12 @@ void sceneCheckPortals(struct Scene* scene) {
     }
 
     if ((fireOrange || fireBlue) && playerIsGrabbing(&scene->player)){
-        playerSetGrabbing(&scene->player, NULL);
+        if (fireBlue) {
+            playerThrowObject(&scene->player);
+        } else {
+            playerSetGrabbing(&scene->player, NULL);
+        }
+        controllerActionMuteActive(); // mute held portal buttons
     }
     
     if ((scene->player.flags & PlayerFlagsGrounded) && (scene->player.flags & PlayerIsStepping)){
@@ -553,7 +550,7 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
 
         struct Transform relativeTransform;
         relativeTransform.position = boxDef->position;
-        relativeTransform.rotation = boxDef->rotation;   
+        relativeTransform.rotation = boxDef->rotation;
         relativeTransform.scale = gOneVec;
 
         struct Transform newTransform;
@@ -584,13 +581,13 @@ void sceneUpdate(struct Scene* scene) {
     if (gGameMenu.state != GameMenuStateResumeGame) {
         if (gGameMenu.state == GameMenuStateLanding && (controllerGetButtonDown(0, B_BUTTON) || controllerActionGet(ControllerActionPause))) {
             gGameMenu.state = GameMenuStateResumeGame;
-            scene->ignorePortalGun = 1;
             savefileSave();
         }
 
         gameMenuUpdate(&gGameMenu);
 
         if (gGameMenu.state == GameMenuStateResumeGame) {
+            controllerActionMuteActive();
             soundPlayerResume();
             rumblePakSetPaused(0);
         }
