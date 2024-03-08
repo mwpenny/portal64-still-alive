@@ -301,18 +301,12 @@ void playerThrowObject(struct Player* player) {
     if (!playerIsGrabbing(player)) {
         return;
     }
-    struct Transform lookTransform = player->lookTransform;
-    if (player->grabbingThroughPortal != PLAYER_GRABBING_THROUGH_NOTHING) {
-        struct Transform pointTransform;
-        collisionSceneGetPortalTransform(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform);
-        for (int i = 0; i < abs(player->grabbingThroughPortal); ++i) {
-            struct Quaternion finalRotation;
-            quatMultiply(&pointTransform.rotation, &lookTransform.rotation, &finalRotation);
-            lookTransform.rotation = finalRotation;
-        }
-    }
+
+    struct Transform throwTransform = player->lookTransform;
+    playerPortalGrabTransform(player, &throwTransform.position, &throwTransform.rotation);
+
     struct Vector3 forward, right;
-    playerGetMoveBasis(&lookTransform, &forward, &right);
+    playerGetMoveBasis(&throwTransform, &forward, &right);
     
     struct CollisionObject* object = player->grabConstraint.object;
     playerSetGrabbing(player, NULL);
@@ -439,15 +433,7 @@ void playerUpdateGrabbedObject(struct Player* player) {
                 return;
             }
 
-            struct Transform pointTransform;
-            collisionSceneGetPortalTransform(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform);
-
-            for (int i = 0; i < abs(player->grabbingThroughPortal); ++i) {
-                transformPoint(&pointTransform, &grabPoint, &grabPoint);
-                struct Quaternion finalRotation;
-                quatMultiply(&pointTransform.rotation, &grabRotation, &finalRotation);
-                grabRotation = finalRotation;
-            }
+            playerPortalGrabTransform(player, &grabPoint, &grabRotation);
         }
 
         pointConstraintUpdateTarget(&player->grabConstraint, &grabPoint, &grabRotation);
@@ -470,6 +456,22 @@ void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, st
 
     vector3Normalize(forward, forward);
     vector3Normalize(right, right);
+}
+
+void playerPortalGrabTransform(struct Player* player, struct Vector3* grabPoint, struct Quaternion* grabRotation) {
+    if (player->grabbingThroughPortal == PLAYER_GRABBING_THROUGH_NOTHING) {
+        return;
+    }
+
+    struct Transform pointTransform;
+    collisionSceneGetPortalTransform(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform);
+
+    for (int i = 0; i < abs(player->grabbingThroughPortal); ++i) {
+        transformPoint(&pointTransform, grabPoint, grabPoint);
+        struct Quaternion finalRotation;
+        quatMultiply(&pointTransform.rotation, grabRotation, &finalRotation);
+        *grabRotation = finalRotation;
+    }
 }
 
 void playerGivePortalGun(struct Player* player, int flags) {
