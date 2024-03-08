@@ -53,9 +53,6 @@ Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 #define LEVEL_INDEX_WITH_GUN_0  2
 #define LEVEL_INDEX_WITH_GUN_1  8
 
-#define IGNORE_FIRE_BLUE   1
-#define IGNORE_FIRE_ORANGE 2
-#define IGNORE_FIRE_BOTH   IGNORE_FIRE_BLUE | IGNORE_FIRE_ORANGE
 
 void sceneUpdateListeners(struct Scene* scene);
 
@@ -100,7 +97,6 @@ void sceneInit(struct Scene* scene) {
     savefileMarkChapterProgress(gCurrentLevelIndex);
 
     gGameMenu.state = GameMenuStateResumeGame;
-    scene->ignorePortalGun = 0;
 }
 
 void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
@@ -374,23 +370,6 @@ void sceneCheckPortals(struct Scene* scene) {
     int fireBlue = controllerActionGet(ControllerActionOpenPortal0);
     int fireOrange = controllerActionGet(ControllerActionOpenPortal1);
 
-    // this prevents the firing of portals after unpausing or dropping an object
-    if (scene->ignorePortalGun & IGNORE_FIRE_BLUE) {
-        if (fireBlue) {
-            fireBlue = 0;
-        } else {
-            scene->ignorePortalGun &= ~IGNORE_FIRE_BLUE;
-        }
-    }
-    if (scene->ignorePortalGun & IGNORE_FIRE_ORANGE)
-    {
-        if (fireOrange) {
-            fireOrange = 0;
-        } else {
-            scene->ignorePortalGun &= ~IGNORE_FIRE_ORANGE;
-        }
-    }
-    
     int hasBlue = (scene->player.flags & PlayerHasFirstPortalGun) != 0;
     int hasOrange = (scene->player.flags & PlayerHasSecondPortalGun) != 0;
     if (scene->continuouslyAttemptingPortalOpen){
@@ -416,8 +395,12 @@ void sceneCheckPortals(struct Scene* scene) {
     }
 
     if ((fireOrange || fireBlue) && playerIsGrabbing(&scene->player)){
-        playerThrowObject(&scene->player);
-        scene->ignorePortalGun |= (fireBlue ? IGNORE_FIRE_BLUE : 0) | (fireOrange ? IGNORE_FIRE_ORANGE : 0); // prevent blocking other button
+        if (fireBlue) {
+            playerThrowObject(&scene->player);
+        } else {
+            playerSetGrabbing(&scene->player, NULL);
+        }
+        controllerActionMuteActive(); // mute held portal buttons
     }
     
     if ((scene->player.flags & PlayerFlagsGrounded) && (scene->player.flags & PlayerIsStepping)){
@@ -604,7 +587,7 @@ void sceneUpdate(struct Scene* scene) {
         gameMenuUpdate(&gGameMenu);
 
         if (gGameMenu.state == GameMenuStateResumeGame) {
-            scene->ignorePortalGun = IGNORE_FIRE_BOTH;
+            controllerActionMuteActive();
             soundPlayerResume();
             rumblePakSetPaused(0);
         }
