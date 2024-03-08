@@ -301,11 +301,21 @@ void playerThrowObject(struct Player* player) {
     if (!playerIsGrabbing(player)) {
         return;
     }
+    struct Transform lookTransform = player->lookTransform;
+    if (player->grabbingThroughPortal != PLAYER_GRABBING_THROUGH_NOTHING) {
+        struct Transform pointTransform;
+        collisionSceneGetPortalTransform(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform);
+        for (int i = 0; i < abs(player->grabbingThroughPortal); ++i) {
+            struct Quaternion finalRotation;
+            quatMultiply(&pointTransform.rotation, &lookTransform.rotation, &finalRotation);
+            lookTransform.rotation = finalRotation;
+        }
+    }
+    struct Vector3 forward, right;
+    playerGetMoveBasis(&lookTransform, &forward, &right);
+    
     struct CollisionObject* object = player->grabConstraint.object;
     playerSetGrabbing(player, NULL);
-    
-    struct Vector3 forward, right;
-    playerGetMoveBasis(&player->lookTransform, &forward, &right);
     
     // scale impulse with mass to throw each object the same distance
     vector3Scale(&forward, &forward, -1.0f * THROW_IMPULSE * object->body->mass);
