@@ -105,7 +105,7 @@ void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
 void buttonUpdate(struct Button* button) {
     struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, NULL);
     
-    int deactivated = signalsRead(button->deactivateSignalIndex);
+    int deactivated = button->deactivateSignalIndex != -1 && signalsRead(button->deactivateSignalIndex);
     if (!deactivated) {
         int shouldPress = 0;
         while (manifold) {
