@@ -41,6 +41,7 @@ struct Player {
     short grabbingThroughPortal;
     short dynamicId;
     struct PointConstraint grabConstraint;
+    struct Quaternion grabRotationBase;
     float pitchVelocity;
     float yawVelocity;
     enum PlayerFlags flags;
