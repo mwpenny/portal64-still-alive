@@ -1,0 +1,5 @@
+cutscenes:
+  SIGNAGE:
+    - activate_signage 15
+operators:
+  []
