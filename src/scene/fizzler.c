@@ -203,7 +203,7 @@ void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float wid
     }
 
     fizzler->oldestParticleIndex = 0;
-    fizzler->dynamicId = dynamicSceneAdd(fizzler, fizzlerRender, &fizzler->rigidBody.transform.position, sqrtf(width * width + height * height) * 0.5f);
+    fizzler->dynamicId = dynamicSceneAdd(fizzler, fizzlerRender, &fizzler->rigidBody.transform.position, sqrtf(width * width + height * height));
 
     dynamicSceneSetRoomFlags(fizzler->dynamicId, ROOM_FLAG_FROM_INDEX(room));
 
