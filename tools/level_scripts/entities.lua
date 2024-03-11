@@ -117,14 +117,14 @@ sk_definition_writer.add_definition('elevators', 'struct ElevatorDefinition[]', 
 local fizzlers = {}
 
 for _, fizzler in pairs(sk_scene.nodes_for_type('@fizzler')) do
-    local position, rotation = fizzler.node.full_transformation:decompose()
+    local position, rotation, scale = fizzler.node.full_transformation:decompose()
 
     local room_index = room_export.node_nearest_room_index(fizzler.node)
 
     table.insert(fizzlers, {
         position,
         rotation,
-        1,
+        scale.x,
         1,
         room_index,
         signals.optional_signal_index_for_name(fizzler.arguments[1]),

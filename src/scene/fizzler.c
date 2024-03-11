@@ -156,7 +156,7 @@ void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float wid
     collisionObjectUpdateBB(&fizzler->collisionObject);
     collisionSceneAddDynamicObject(&fizzler->collisionObject);
 
-    fizzler->maxExtent = (int)(width * SCENE_SCALE * 0.5f);
+    fizzler->maxExtent = (int)(maxf(0.0f, width - 0.5f) * SCENE_SCALE);
     fizzler->maxVerticalExtent = (int)(height * SCENE_SCALE);
 
     fizzler->particleCount = (int)(width * height * FIZZLER_PARTICLES_PER_1x1);
