@@ -423,7 +423,6 @@ void playerUpdateGrabbedObject(struct Player* player) {
         vector3Multiply(&player->lookTransform.scale, &temp_grab_dist, &temp_grab_dist);
         
         struct Vector3 grabPoint;
-        struct Quaternion grabRotation = player->lookTransform.rotation;
         
         // determine object target height
         quatMultVector(&player->lookTransform.rotation, &temp_grab_dist, &grabPoint);
@@ -438,6 +437,8 @@ void playerUpdateGrabbedObject(struct Player* player) {
         quatMultVector(&forwardRotation, &temp_grab_dist, &grabPoint);
         vector3Add(&player->lookTransform.position, &grabPoint, &grabPoint);
         grabPoint.y += grabY;
+        
+        struct Quaternion grabRotation = forwardRotation;
         
         if (player->grabbingThroughPortal != PLAYER_GRABBING_THROUGH_NOTHING) {
             if (!collisionSceneIsPortalOpen()) {
