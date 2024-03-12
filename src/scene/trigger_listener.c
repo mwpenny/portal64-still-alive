@@ -16,7 +16,6 @@ enum ObjectTriggerType triggerDetermineType(struct CollisionObject* objectEnteri
     }
 
     int decorType = decorIdForCollisionObject(objectEnteringTrigger);
-
     if (decorType == DECOR_TYPE_CUBE || decorType == DECOR_TYPE_CUBE_UNIMPORTANT) {
         return gScene.player.grabConstraint.object == objectEnteringTrigger ? TRIGGER_TYPE_TO_MASK(ObjectTriggerTypeCubeHover) | TRIGGER_TYPE_TO_MASK(ObjectTriggerTypeCube) : TRIGGER_TYPE_TO_MASK(ObjectTriggerTypeCube);
     }
