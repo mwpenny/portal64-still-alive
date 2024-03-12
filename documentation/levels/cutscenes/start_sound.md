@@ -1,4 +1,4 @@
-# starts_sound
+# start_sound
 
 Starts a sound immediately without blocking.
 
