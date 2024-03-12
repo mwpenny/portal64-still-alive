@@ -237,3 +237,7 @@ int decorIdForObjectDefinition(struct DecorObjectDefinition* def) {
 
     return result;
 }
+
+int decorIdForCollisionObject(struct CollisionObject* collisionObject) {
+    return decorIdForObjectDefinition((struct DecorObjectDefinition*)collisionObject->collider);
+}
