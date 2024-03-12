@@ -26,7 +26,7 @@ void fizzlerTrigger(void* data, struct CollisionObject* objectEnteringTrigger) {
     }
 
     if (fizzler->cubeSignalIndex != -1) {
-        int decorType = decorIdForObjectDefinition((struct DecorObjectDefinition*)objectEnteringTrigger->collider);
+        int decorType = decorIdForCollisionObject(objectEnteringTrigger);
         if (decorType == DECOR_TYPE_CUBE || decorType == DECOR_TYPE_CUBE_UNIMPORTANT) {
             signalsSend(fizzler->cubeSignalIndex);
         }
