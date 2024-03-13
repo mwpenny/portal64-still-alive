@@ -1,5 +1,16 @@
 cutscenes:
+  INTRO:
+    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
   SIGNAGE:
     - activate_signage 15
+  ROOM2:
+    - set_signal room2_launch_ball
+    - wait_for_signal room2_solved
+    - label room2_piston_loop
+    - play_animation room2_piston piston_move_down
+    - wait_for_signal room2_on_piston
+    - play_animation room2_piston piston_move_down -1
+    - wait_for_signal room2_not_on_piston
+    - goto room2_piston_loop
 operators:
-  []
+  - room2_not_on_piston = not room2_on_piston

@@ -400,7 +400,8 @@ ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_00/test_chamber_00_
 	build/assets/test_chambers/test_chamber_06/test_chamber_06_anim.o \
 	build/assets/test_chambers/test_chamber_07/test_chamber_07_anim.o \
 	build/assets/test_chambers/test_chamber_08/test_chamber_08_anim.o \
-	build/assets/test_chambers/test_chamber_09/test_chamber_09_anim.o
+	build/assets/test_chambers/test_chamber_09/test_chamber_09_anim.o \
+	build/assets/test_chambers/test_chamber_10/test_chamber_10_anim.o
 
 build/anims.ld: $(ANIM_LIST) $(ANIM_TEST_CHAMBERS) tools/generate_animation_ld.js
 	@mkdir -p $(@D)
