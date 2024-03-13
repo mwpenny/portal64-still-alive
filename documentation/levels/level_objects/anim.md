@@ -10,10 +10,10 @@ An animatable bone of an armature.
 
 ## Arguments
 
-| Name                                    | Description                                                                                                                          |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `ARMATURE_NAME`                         | The name of the armature the bone is a part of                                                                                       |
-| `sound_type SOUND_TYPE_NAME` (optional) | If specified, `SOUND_TYPE_NAME` will play while the armature is being animated. Only the sound type of the first bone found is used. |
+| Name                                    | Description                                                                                                                              |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `ARMATURE_NAME`                         | The name of the armature the bone is a part of                                                                                           |
+| `sound_type SOUND_TYPE_NAME` (optional) | If specified, `SOUND_TYPE_NAME` will play while the armature is moving. Only the sound type of the first bone that specifies it is used. |
 
 ## Notes
 
