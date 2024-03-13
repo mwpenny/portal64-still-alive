@@ -557,13 +557,25 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
 
         transformConcat(&baseTransform, &relativeTransform, &newTransform);
 
+        struct CollisionObject* collisionObject = &scene->dynamicColliders[i];
         struct Vector3 movement;
-        vector3Sub(&newTransform.position, &scene->dynamicColliders[i].body->transform .position, &movement);
+        vector3Sub(&newTransform.position, &collisionObject->body->transform .position, &movement);
 
-        scene->dynamicColliders[i].body->transform = newTransform;
-        vector3Scale(&movement, &scene->dynamicColliders[i].body->velocity, 1.0f / FIXED_DELTA_TIME);
+        collisionObject->body->transform = newTransform;
+        vector3Scale(&movement, &collisionObject->body->velocity, 1.0f / FIXED_DELTA_TIME);
 
-        collisionObjectUpdateBB(&scene->dynamicColliders[i]);
+        collisionObjectUpdateBB(collisionObject);
+
+        // Close portals touched by moving dynamic collision not part of the same animation
+        if (!vector3IsZero(&movement)) {
+            for (int portalIndex = 0; portalIndex < 2; ++portalIndex) {
+                if (boxDef->transformIndex != scene->portals[portalIndex].transformIndex &&
+                    collisionSceneObjectIsTouchingPortal(collisionObject, portalIndex)) {
+
+                    sceneClosePortal(scene, portalIndex);
+                }
+            }
+        }
     }
 }
 
