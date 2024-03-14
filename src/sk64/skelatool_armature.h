@@ -25,6 +25,7 @@ struct SKArmature {
 
 void skArmatureInit(struct SKArmature* object, struct SKArmatureDefinition* definition);
 void skArmatureInitWithPose(struct SKArmature* object, struct SKArmatureDefinition* definition, struct Transform* usePose);
+void skArmatureGetCenter(struct SKArmature* object, struct Vector3* out);
 Gfx* skBuildAttachments(struct SKArmature* object, Gfx** attachments, struct RenderState* renderState);
 void skRenderObject(struct SKArmature* object, Gfx** attachements, struct RenderState* intoState);
 void skCalculateTransforms(struct SKArmature* object, Mtx* into);

@@ -12,7 +12,13 @@ for _, node in pairs(sk_scene.nodes_for_type('@anim')) do
     if existing then
         table.insert(existing.nodes, node.node)
     else
-        armature_bones_by_name[name] = {nodes = {node.node}, arguments = node.arguments}
+        existing = {nodes = {node.node}, arguments = node.arguments}
+        armature_bones_by_name[name] = existing
+    end
+
+    -- Get the sound type from the first bone that specifies it
+    if not existing.sound_type then
+        existing.sound_type = sk_scene.find_named_argument(node.arguments, "sound_type")
     end
 end
 
@@ -26,7 +32,7 @@ local node_to_armature_index = {}
 local bones_as_array = {}
 
 for name, data in pairs(armature_bones_by_name) do
-    table.insert(armatures, {name = name, armature = sk_animation.build_armature(data.nodes), sound_type = sk_scene.find_named_argument(data.arguments, "sound_type")})
+    table.insert(armatures, {name = name, armature = sk_animation.build_armature(data.nodes), sound_type = data.sound_type})
 end
 
 table.sort(armatures, function(a, b)

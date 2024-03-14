@@ -46,7 +46,10 @@ void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo
         sceneAnimator->state[i].playbackSpeed = 1.0f;
         sceneAnimator->state[i].soundId = SOUND_ID_NONE;
         sceneAnimator->state[i].flags = 0;
-        vector3Scale(&sceneAnimator->armatures[i].pose[0].position, &sceneAnimator->state[i].lastPosition, 1.0f / SCENE_SCALE);
+
+        struct Vector3* lastPos = &sceneAnimator->state[i].lastPosition;
+        skArmatureGetCenter(&sceneAnimator->armatures[i], lastPos);
+        vector3Scale(lastPos, lastPos, 1.0f / SCENE_SCALE);
 
         pose += animationInfo[i].armature.numberOfBones;
     }
@@ -55,14 +58,20 @@ void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo
 void sceneAnimatorUpdate(struct SceneAnimator* sceneAnimator) {
     for (int i = 0; i < sceneAnimator->animatorCount; ++i) {
         struct SceneAnimatorState* state = &sceneAnimator->state[i];
+        struct SKAnimator* animator = &sceneAnimator->animators[i];
 
-        skAnimatorUpdate(&sceneAnimator->animators[i], sceneAnimator->armatures[i].pose, FIXED_DELTA_TIME * state->playbackSpeed);
+        if (!skAnimatorIsRunning(animator)) {
+            continue;
+        }
+
+        skAnimatorUpdate(animator, sceneAnimator->armatures[i].pose, FIXED_DELTA_TIME * state->playbackSpeed);
 
         struct AnimatedAudioInfo* audioInfo = &gAnimatedAudioInfo[sceneAnimator->animationInfo[i].soundType];
 
-
         struct Vector3 currentPos;
-        vector3Scale(&sceneAnimator->armatures[i].pose[0].position, &currentPos, 1.0f / SCENE_SCALE);
+        skArmatureGetCenter(&sceneAnimator->armatures[i], &currentPos);
+        vector3Scale(&currentPos, &currentPos, 1.0f / SCENE_SCALE);
+
         int isMoving = currentPos.x != state->lastPosition.x || currentPos.y != state->lastPosition.y || currentPos.z != state->lastPosition.z;
         int wasMoving = (state->flags & SceneAnimatorStateWasMoving) != 0;
 
@@ -81,7 +90,7 @@ void sceneAnimatorUpdate(struct SceneAnimator* sceneAnimator) {
             soundPlayerPlay(audioInfo->startSoundId, 1.0f, audioInfo->pitch, &currentPos, &gZeroVec, SoundTypeAll);
         }
 
-        if (!wasMoving && isMoving && audioInfo->endSoundId != SOUND_ID_NONE) {
+        if (wasMoving && !isMoving && audioInfo->endSoundId != SOUND_ID_NONE) {
             soundPlayerPlay(audioInfo->endSoundId, 1.0f, audioInfo->pitch, &currentPos, &gZeroVec, SoundTypeAll);
         }
 

@@ -37,6 +37,7 @@ int collisionObjectCollideShapeCast(struct CollisionObject* object, struct Vecto
 
 int collisionSceneIsTouchingSinglePortal(struct Vector3* contactPoint, struct Vector3* contactNormal, struct Transform* portalTransform, int portalIndex);
 int collisionSceneIsTouchingPortal(struct Vector3* contactPoint, struct Vector3* contactNormal);
+int collisionSceneObjectIsTouchingPortal(struct CollisionObject* object, int portalIndex);
 int collisionSceneIsPortalOpen();
 
 void collisionSceneSetPortal(int portalIndex, struct Transform* transform, int roomIndex, int colliderIndex);
