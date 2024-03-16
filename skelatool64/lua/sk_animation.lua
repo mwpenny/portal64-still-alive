@@ -154,7 +154,10 @@ local function build_armature_pose(armature, node_pose, result)
 end
 
 local function build_animation(armature, animation)
-    local n_frames = math.ceil(animation.duration * sk_input.settings.ticks_per_second / animation.ticks_per_second)
+    -- Don't stop at the last frame, include it
+    local ticks_to_include = animation.duration + 1
+
+    local n_frames = math.ceil(ticks_to_include * sk_input.settings.ticks_per_second / animation.ticks_per_second)
 
     local node_pose = {}
 
