@@ -10,7 +10,7 @@ cutscenes:
     - play_animation room2_piston piston_move_down
     - wait_for_signal room2_on_piston
     - play_animation room2_piston piston_move_down -1
-    - wait_for_signal room2_not_on_piston
+    - wait_for_signal room2_piston_needed
     - goto room2_piston_loop
 operators:
   - room2_not_on_piston = not room2_on_piston
