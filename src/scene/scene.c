@@ -538,7 +538,15 @@ void sceneUpdatePortalVelocity(struct Scene* scene) {
     }
 }
 
-#define FREE_CAM_VELOCITY   2.0f
+int sceneCheckObjectIsTouchingPortal(struct Scene* scene, struct CollisionObject* object, int portalIndex) {
+    if (!gCollisionScene.portalTransforms[portalIndex] ||
+        !box3DHasOverlap(&scene->portals[portalIndex].collisionObject.boundingBox, &object->boundingBox)) {
+
+        return 0;
+    }
+
+    return collisionSceneObjectIsTouchingPortal(object, portalIndex);
+}
 
 void sceneUpdateAnimatedObjects(struct Scene* scene) {
     for (int i = 0; i < gCurrentLevel->dynamicBoxCount; ++i) {
@@ -554,23 +562,22 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
         relativeTransform.scale = gOneVec;
 
         struct Transform newTransform;
-
         transformConcat(&baseTransform, &relativeTransform, &newTransform);
 
         struct CollisionObject* collisionObject = &scene->dynamicColliders[i];
-        struct Vector3 movement;
-        vector3Sub(&newTransform.position, &collisionObject->body->transform .position, &movement);
 
-        collisionObject->body->transform = newTransform;
+        struct Vector3 movement;
+        vector3Sub(&newTransform.position, &collisionObject->body->transform.position, &movement);
         vector3Scale(&movement, &collisionObject->body->velocity, 1.0f / FIXED_DELTA_TIME);
 
-        collisionObjectUpdateBB(collisionObject);
-
-        // Close portals touched by moving dynamic collision not part of the same animation
         if (!vector3IsZero(&movement)) {
+            collisionObject->body->transform = newTransform;
+            collisionObjectUpdateBB(collisionObject);
+
+            // Close portals touched by moving dynamic collision not part of the same animation
             for (int portalIndex = 0; portalIndex < 2; ++portalIndex) {
                 if (boxDef->transformIndex != scene->portals[portalIndex].transformIndex &&
-                    collisionSceneObjectIsTouchingPortal(collisionObject, portalIndex)) {
+                    sceneCheckObjectIsTouchingPortal(scene, collisionObject, portalIndex)) {
 
                     sceneClosePortal(scene, portalIndex);
                 }
@@ -578,6 +585,8 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
         }
     }
 }
+
+#define FREE_CAM_VELOCITY   2.0f
 
 void sceneUpdate(struct Scene* scene) {
     scene->boolCutsceneIsRunning = cutsceneIsSoundQueued();
