@@ -20,6 +20,7 @@ struct AnimatedAudioInfo gAnimatedAudioInfo[] = {
     {.startSoundId = SOUND_ID_NONE, .loopSoundId = SOUNDS_BEAM_PLATFORM_LOOP1, .endSoundId = SOUND_ID_NONE, .pitch = 0.5f},
     {.startSoundId = SOUNDS_DOORMOVE1, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUND_ID_NONE, .pitch = 0.4f},
     {.startSoundId = SOUNDS_TANK_TURRET_START1, .loopSoundId = SOUNDS_TANK_TURRET_LOOP1, .endSoundId = SOUNDS_ELEVATOR_STOP1, .pitch = 0.5f},
+    {.startSoundId = SOUNDS_APC_START_LOOP3, .loopSoundId = SOUNDS_DOOR_METAL_MEDIUM_OPEN1, .endSoundId = SOUNDS_APC_SHUTDOWN, .pitch = 0.5f},
 };
 
 void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo* animationInfo, int animatorCount) {
