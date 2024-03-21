@@ -156,7 +156,10 @@ aiQuaternion evaluateQuaternionAt(const aiQuatKey* keys, unsigned keyCount, doub
 }
 
 std::string generateanimationV2(const aiAnimation& animation, int index, BoneHierarchy& bones, CFileDefinition& fileDef, const DisplayListSettings& settings) {
-    int nFrames = ceil(animation.mDuration * settings.mTicksPerSecond / animation.mTicksPerSecond) + 1;
+    // Don't stop at the last frame, include it
+    int ticksToInclude = animation.mDuration + 1;
+
+    int nFrames = ceil(ticksToInclude * settings.mTicksPerSecond / animation.mTicksPerSecond);
 
     std::vector<std::vector<FrameData>> allFrameData(nFrames);
 

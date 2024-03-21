@@ -1,5 +1,6 @@
 cutscenes:
   INTRO:
+    - start_cutscene CHECK_STAIRS
     - start_cutscene CHECK_CUBE_ON_PISTON
     - start_cutscene CHECK_CUBE_OFF_BUTTON
     - q_sound 09_PART1_ENTRY_1 CH_GLADOS PORTAL_09_PART1_ENTRY_1
@@ -26,6 +27,16 @@ cutscenes:
     - play_animation pit_1 pit_1_down -1
     - delay 3
     - goto pit_loop
+  CHECK_STAIRS:
+    - label stair_loop
+    - wait_for_signal should_raise_stairs
+    - play_animation stairs stairs_ascend
+    - wait_for_animation stairs
+    - delay 2
+    - wait_for_signal should_lower_stairs
+    - play_animation stairs stairs_descend
+    - wait_for_animation stairs
+    - goto stair_loop
   CHECK_CUBE_ON_PISTON:
     - wait_for_signal cube_on_piston 210
     - stop_cutscene CHECK_CUBE_OFF_BUTTON
@@ -42,3 +53,6 @@ operators:
   - not_on_piston = not on_piston
   - not_cube_near_button = not cube_near_button
   - open_door = open_door or escape_hatch
+  - cube_retrieved = not cube_in_start
+  - should_raise_stairs = at_stairs_bottom or cube_retrieved
+  - should_lower_stairs = at_stairs_top and cube_in_start

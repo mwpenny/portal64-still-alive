@@ -40,3 +40,4 @@ The possible values for `SOUND_TYPE_NAME` are:
 * `LightRail`: Horizontal moving platform sound
 * `Piston`: Vertical moving platform sound
 * `Arm`: Horizontal moving wall sound
+* `Stairs`: Ascending/descending staircase sound
