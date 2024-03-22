@@ -86,7 +86,6 @@ struct Scene {
 
     u8 continuouslyAttemptingPortalOpen;
     u8 checkpointState;
-    u8 ignorePortalGun;
 };
 
 extern struct Scene gScene;

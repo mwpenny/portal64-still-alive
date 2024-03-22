@@ -15,7 +15,7 @@
 #include "hud.h"
 #include "scene.h"
 
-#define DROOPER_RELOAD_TIME     2.0f
+#define DROPPER_RELOAD_TIME     2.0f
 #define DROPPER_DROP_TIME       0.5f
 
 void boxDropperFakePos(struct BoxDropper* dropper, struct Transform* result) {
@@ -108,7 +108,7 @@ void boxDropperInit(struct BoxDropper* dropper, struct BoxDropperDefinition* def
     skAnimatorInit(&dropper->animator, PROPS_BOX_DROPPER_DEFAULT_BONES_COUNT);
 
     dropper->flags = 0;
-    dropper->reloadTimer = DROOPER_RELOAD_TIME;
+    dropper->reloadTimer = DROPPER_RELOAD_TIME;
 
     dynamicSceneSetRoomFlags(dropper->dynamicId, ROOM_FLAG_FROM_INDEX(dropper->roomIndex));
 
@@ -158,12 +158,11 @@ void boxDropperUpdate(struct BoxDropper* dropper) {
         dropper->flags &= ~BoxDropperFlagsCubeRequested;
         dropper->flags |= BoxDropperFlagsCubeIsActive;
 
-        dropper->reloadTimer = DROOPER_RELOAD_TIME;
+        dropper->reloadTimer = DROPPER_RELOAD_TIME;
     }
 
     dropper->flags &= ~BoxDropperFlagsSignalWasSet;
     if (signalIsSet) {
         dropper->flags |= BoxDropperFlagsSignalWasSet;
     }
-
 }

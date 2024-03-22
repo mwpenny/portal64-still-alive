@@ -64,6 +64,7 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance);
 void playerApplyCameraTransform(struct Player* player, struct Transform* cameraTransform);
 
 void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, struct Vector3* right);
+void playerPortalGrabTransform(struct Player* player, struct Vector3* point, struct Quaternion* rotation);
 
 void playerGivePortalGun(struct Player* player, int flags);
 
@@ -73,6 +74,7 @@ int playerIsDead(struct Player* player);
 void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing);
 void playerSignalPortalChanged(struct Player* player);
 int playerIsGrabbing(struct Player* player);
+void playerThrowObject(struct Player* player);
 
 void playerSerialize(struct Serializer* serializer, SerializeAction action, struct Player* player);
 void playerDeserialize(struct Serializer* serializer, struct Player* player);

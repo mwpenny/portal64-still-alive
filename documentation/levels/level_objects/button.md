@@ -5,15 +5,15 @@ A flat, circular button which emits a [signal](../signals.md) while pressed.
 ## Name structure
 
 ```
-@button PRESS_SIGNAL_NAME OBJECT_PRESS_SIGNAL_NAME
+@button PRESS_SIGNAL_NAME [OBJECT_PRESS_SIGNAL_NAME]
 ```
 
 ## Arguments
 
-| Name                       | Description                                               |
-| -------------------------- | --------------------------------------------------------- |
-| `PRESS_SIGNAL_NAME`        | The name of the signal to emit while pressed              |
-| `OBJECT_PRESS_SIGNAL_NAME` | The name of the signal to emit while pressed by an object |
+| Name                                  | Description                                                                                        |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `PRESS_SIGNAL_NAME`                   | The name of the signal to emit while pressed                                                       |
+| `OBJECT_PRESS_SIGNAL_NAME` (optional) | The name of the signal to emit while pressed by an object. Use `-1` or omit to indicate no signal. |
 
 ## Notes
 

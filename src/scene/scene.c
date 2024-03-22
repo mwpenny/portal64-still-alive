@@ -53,6 +53,7 @@ Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 #define LEVEL_INDEX_WITH_GUN_0  2
 #define LEVEL_INDEX_WITH_GUN_1  8
 
+
 void sceneUpdateListeners(struct Scene* scene);
 
 void sceneInitDynamicColliders(struct Scene* scene) {
@@ -96,7 +97,6 @@ void sceneInit(struct Scene* scene) {
     savefileMarkChapterProgress(gCurrentLevelIndex);
 
     gGameMenu.state = GameMenuStateResumeGame;
-    scene->ignorePortalGun = 0;
 }
 
 void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
@@ -191,7 +191,8 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
         fizzlerTransform.position = fizzlerDef->position;
         fizzlerTransform.rotation = fizzlerDef->rotation;
         fizzlerTransform.scale = gOneVec;
-        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height, fizzlerDef->roomIndex);
+        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height, 
+		            fizzlerDef->roomIndex, fizzlerDef->cubeSignalIndex);
     }
 
     scene->elevatorCount = gCurrentLevel->elevatorCount;
@@ -369,14 +370,6 @@ void sceneCheckPortals(struct Scene* scene) {
     int fireBlue = controllerActionGet(ControllerActionOpenPortal0);
     int fireOrange = controllerActionGet(ControllerActionOpenPortal1);
 
-    // this prevents the firing of portals after unpausing
-    if (scene->ignorePortalGun && (fireBlue || fireOrange)) {
-        fireBlue = 0;
-        fireOrange = 0;
-    } else {
-        scene->ignorePortalGun = 0;
-    }
-
     int hasBlue = (scene->player.flags & PlayerHasFirstPortalGun) != 0;
     int hasOrange = (scene->player.flags & PlayerHasSecondPortalGun) != 0;
     if (scene->continuouslyAttemptingPortalOpen){
@@ -402,7 +395,12 @@ void sceneCheckPortals(struct Scene* scene) {
     }
 
     if ((fireOrange || fireBlue) && playerIsGrabbing(&scene->player)){
-        playerSetGrabbing(&scene->player, NULL);
+        if (fireBlue) {
+            playerThrowObject(&scene->player);
+        } else {
+            playerSetGrabbing(&scene->player, NULL);
+        }
+        controllerActionMuteActive(); // mute held portal buttons
     }
     
     if ((scene->player.flags & PlayerFlagsGrounded) && (scene->player.flags & PlayerIsStepping)){
@@ -540,7 +538,15 @@ void sceneUpdatePortalVelocity(struct Scene* scene) {
     }
 }
 
-#define FREE_CAM_VELOCITY   2.0f
+int sceneCheckObjectIsTouchingPortal(struct Scene* scene, struct CollisionObject* object, int portalIndex) {
+    if (!gCollisionScene.portalTransforms[portalIndex] ||
+        !box3DHasOverlap(&scene->portals[portalIndex].collisionObject.boundingBox, &object->boundingBox)) {
+
+        return 0;
+    }
+
+    return collisionSceneObjectIsTouchingPortal(object, portalIndex);
+}
 
 void sceneUpdateAnimatedObjects(struct Scene* scene) {
     for (int i = 0; i < gCurrentLevel->dynamicBoxCount; ++i) {
@@ -552,22 +558,35 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
 
         struct Transform relativeTransform;
         relativeTransform.position = boxDef->position;
-        relativeTransform.rotation = boxDef->rotation;   
+        relativeTransform.rotation = boxDef->rotation;
         relativeTransform.scale = gOneVec;
 
         struct Transform newTransform;
-
         transformConcat(&baseTransform, &relativeTransform, &newTransform);
 
+        struct CollisionObject* collisionObject = &scene->dynamicColliders[i];
+
         struct Vector3 movement;
-        vector3Sub(&newTransform.position, &scene->dynamicColliders[i].body->transform .position, &movement);
+        vector3Sub(&newTransform.position, &collisionObject->body->transform.position, &movement);
+        vector3Scale(&movement, &collisionObject->body->velocity, 1.0f / FIXED_DELTA_TIME);
 
-        scene->dynamicColliders[i].body->transform = newTransform;
-        vector3Scale(&movement, &scene->dynamicColliders[i].body->velocity, 1.0f / FIXED_DELTA_TIME);
+        if (!vector3IsZero(&movement)) {
+            collisionObject->body->transform = newTransform;
+            collisionObjectUpdateBB(collisionObject);
 
-        collisionObjectUpdateBB(&scene->dynamicColliders[i]);
+            // Close portals touched by moving dynamic collision not part of the same animation
+            for (int portalIndex = 0; portalIndex < 2; ++portalIndex) {
+                if (boxDef->transformIndex != scene->portals[portalIndex].transformIndex &&
+                    sceneCheckObjectIsTouchingPortal(scene, collisionObject, portalIndex)) {
+
+                    sceneClosePortal(scene, portalIndex);
+                }
+            }
+        }
     }
 }
+
+#define FREE_CAM_VELOCITY   2.0f
 
 void sceneUpdate(struct Scene* scene) {
     scene->boolCutsceneIsRunning = cutsceneIsSoundQueued();
@@ -583,13 +602,13 @@ void sceneUpdate(struct Scene* scene) {
     if (gGameMenu.state != GameMenuStateResumeGame) {
         if (gGameMenu.state == GameMenuStateLanding && (controllerGetButtonDown(0, B_BUTTON) || controllerActionGet(ControllerActionPause))) {
             gGameMenu.state = GameMenuStateResumeGame;
-            scene->ignorePortalGun = 1;
             savefileSave();
         }
 
         gameMenuUpdate(&gGameMenu);
 
         if (gGameMenu.state == GameMenuStateResumeGame) {
+            controllerActionMuteActive();
             soundPlayerResume();
             rumblePakSetPaused(0);
         }

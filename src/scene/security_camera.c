@@ -27,12 +27,13 @@ struct ColliderTypeData gSecurityCameraCollider = {
     &gCollisionBoxCallbacks
 };
 
-#define CAMERA_RANGE    10.0f
+#define CAMERA_RANGE           10.0f
+#define CAMERA_RIGID_BODY_MASS 1.0f
 
 struct Quaternion gBarBoneRelative = {1.0f, 0.0f, 0.0f, 0.0f};
 
 void securityCameraLookAt(struct SecurityCamera* camera, struct Vector3* target) {
-    if (!(camera->rigidBody.flags & RigidBodyIsKinematic)) {
+    if (securityCameraIsDetached(camera)) {
         return;
     }
 
@@ -163,14 +164,12 @@ short gCameraDestroyClips[] = {
 void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int cameraCount, struct Box3D* portalBox) {
     for (int i = 0; i < cameraCount; ++i) {
         struct SecurityCamera* camera = &securityCameras[i];
-        if (!(camera->rigidBody.flags & RigidBodyIsKinematic)) {
+        if (securityCameraIsDetached(camera)) {
             // already free skip this one
             continue;
         }
         if (box3DHasOverlap(&camera->collisionObject.boundingBox, portalBox)) {
-            rigidBodyUnmarkKinematic(&camera->rigidBody, 1.0f, collisionBoxSolidMofI(&gSecurityCameraCollider, 1.0f));
-            camera->collisionObject.collisionLayers |= COLLISION_LAYERS_GRABBABLE;
-            camera->rigidBody.flags |= RigidBodyFlagsGrabbable;
+            securityCameraDetach(camera);
 
             if (!cutsceneRunnerIsChannelPlaying(CH_GLADOS)) {
                 short clipIndex = randomInRange(0, sizeof(gCameraDestroyClips) / sizeof(*gCameraDestroyClips));
@@ -178,4 +177,14 @@ void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int came
             }
         }
     }
+}
+
+void securityCameraDetach(struct SecurityCamera* securityCamera) {
+    rigidBodyUnmarkKinematic(&securityCamera->rigidBody, CAMERA_RIGID_BODY_MASS, collisionBoxSolidMofI(&gSecurityCameraCollider, CAMERA_RIGID_BODY_MASS));
+    securityCamera->collisionObject.collisionLayers |= COLLISION_LAYERS_GRABBABLE;
+    securityCamera->rigidBody.flags |= RigidBodyFlagsGrabbable;
+}
+
+int securityCameraIsDetached(struct SecurityCamera* securityCamera) {
+    return !(securityCamera->rigidBody.flags & RigidBodyIsKinematic);
 }

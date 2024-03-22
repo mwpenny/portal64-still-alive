@@ -215,6 +215,21 @@ int collisionSceneIsTouchingPortal(struct Vector3* contactPoint, struct Vector3*
     return 0;
 }
 
+int collisionSceneObjectIsTouchingPortal(struct CollisionObject* object, int portalIndex) {
+    if (!gCollisionScene.portalTransforms[portalIndex]) {
+        return 0;
+    }
+
+    struct Simplex simplex;
+    struct Vector3 direction;
+    quatMultVector(&gCollisionScene.portalTransforms[portalIndex]->rotation, &gRight, &direction);
+    return gjkCheckForOverlap(&simplex,
+        object, minkowsiSumAgainstObject,
+        gCollisionScene.portalTransforms[portalIndex], minkowsiSumAgainstPortal,
+        &direction
+    );
+}
+
 int collisionSceneIsPortalOpen() {
     return gCollisionScene.portalTransforms[0] != NULL && gCollisionScene.portalTransforms[1] != NULL;
 }
@@ -704,21 +719,6 @@ void collisionSceneCollideDynamicPairs(struct CollisionScene* collisionScene, st
 
     stackMallocFree(dynamicBroadphase.objectsInCurrentRange);
     stackMallocFree(dynamicBroadphase.edges);
-}
-
-int collisionSceneObjectIsTouchingPortal(struct CollisionObject* object, int portalIndex) {
-    if (!gCollisionScene.portalTransforms[portalIndex]) {
-        return 0;
-    }
-    
-    struct Simplex simplex;
-    struct Vector3 direction;
-    quatMultVector(&gCollisionScene.portalTransforms[portalIndex]->rotation, &gRight, &direction);
-    return gjkCheckForOverlap(&simplex, 
-        object, minkowsiSumAgainstObject,
-        gCollisionScene.portalTransforms[portalIndex], minkowsiSumAgainstPortal,
-        &direction
-    );   
 }
 
 void collisionSceneUpdateDynamics() {

@@ -27,6 +27,19 @@ void skArmatureInitWithPose(struct SKArmature* object, struct SKArmatureDefiniti
     }
 }
 
+void skArmatureGetCenter(struct SKArmature* object, struct Vector3* out) {
+    struct Vector3 minPoint = object->pose[0].position;
+    struct Vector3 maxPoint = minPoint;
+
+    for (int i = 1; i < object->numberOfBones; ++i) {
+        vector3Min(&minPoint, &object->pose[i].position, &minPoint);
+        vector3Max(&maxPoint, &object->pose[i].position, &maxPoint);
+    }
+
+    vector3Add(&minPoint, &maxPoint, out);
+    vector3Scale(out, out, 0.5f);
+}
+
 void skCleanupObject(struct SKArmature* object) {
     free(object->pose);
     object->pose = 0;

@@ -47,6 +47,8 @@ void staticRenderTraverseIndex(
     }
 }
 
+#define ANIMATED_CULL_THRESHOLD     50
+
 void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, Mtx* staticMatrices, struct Transform* staticTransforms, struct RenderScene* renderScene) {
     int currentRoom = 0;
 
@@ -60,17 +62,23 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, M
 
             struct BoundingBoxs16* animatedBox = roomIndex->animatedBoxes;
 
+            // For rooms with with many animated elements, calculating whether
+            // or not to cull them is more expensive than just rendering them
+            short animatedElementCount = roomIndex->animatedRange.max - roomIndex->animatedRange.min;
+            u8 shouldCull = animatedElementCount < ANIMATED_CULL_THRESHOLD;
+
             for (int i = roomIndex->animatedRange.min; i < roomIndex->animatedRange.max; ++i, ++animatedBox) {
                 struct StaticContentElement* staticElement = &gCurrentLevel->staticContent[i];
 
-                struct RotatedBox rotatedBox;
-
                 struct Transform* transform = &staticTransforms[staticElement->transformIndex];
 
-                rotatedBoxTransform(transform, animatedBox, &rotatedBox);
+                if (shouldCull) {
+                    struct RotatedBox rotatedBox;
+                    rotatedBoxTransform(transform, animatedBox, &rotatedBox);
 
-                if (isRotatedBoxOutsideFrustrum(cullingInfo, &rotatedBox)) {
-                    continue;
+                    if (isRotatedBoxOutsideFrustrum(cullingInfo, &rotatedBox)) {
+                        continue;
+                    }
                 }
 
                 struct Vector3 center;

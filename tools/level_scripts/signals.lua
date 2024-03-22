@@ -21,6 +21,14 @@ local function signal_index_for_name(name)
     return result
 end
 
+local function optional_signal_index_for_name(name)
+    if not name or name == '-1' then
+        return -1
+    end
+
+    return signal_index_for_name(name)
+end
+
 local function signal_number_for_name(name)
     signal_index_for_name(name)
     return name_to_number[name]
@@ -95,6 +103,7 @@ sk_definition_writer.add_definition('signal_operations', 'struct SignalOperator[
 
 return {
     signal_index_for_name = signal_index_for_name,
+    optional_signal_index_for_name = optional_signal_index_for_name,
     signal_number_for_name = signal_number_for_name,
     get_signal_count = get_signal_count,
     operators = operators,
