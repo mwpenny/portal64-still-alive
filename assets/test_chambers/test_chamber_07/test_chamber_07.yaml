@@ -30,6 +30,7 @@ cutscenes:
     - goto loop_start
   platform_ferry:
     - wait_for_signal move_platform
+    - save_checkpoint
     - delay 1.5 pre_slide
     - label anim_loop_start
     - play_animation horizontal slide 1
@@ -49,6 +50,7 @@ cutscenes:
     - start_cutscene platform_loop
     - close_portal 0
     - show_prompt CutscenePromptTypePortal0
+    - save_checkpoint
     - q_sound 07_PART1_GET_DEVICE_COMPONENT_1 CH_GLADOS PORTAL_07_PART1_GET_DEVICE_COMPONENT_1
     - q_sound 07_PART1_GET_DEVICE_COMPONENT_2 CH_GLADOS PORTAL_07_PART1_GET_DEVICE_COMPONENT_2
     - q_sound 07_PART1_GET_DEVICE_COMPONENT_3 CH_GLADOS PORTAL_07_PART1_GET_DEVICE_COMPONENT_3
@@ -87,6 +89,7 @@ cutscenes:
     - set_signal cube_dropper
     - goto cube_fizzle_check_loop
   TILT:
+    - save_checkpoint
     - delay 4
     - set_signal cube_dropper
     - play_animation tilt tilt
