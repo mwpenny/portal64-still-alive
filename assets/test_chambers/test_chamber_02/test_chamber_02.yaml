@@ -1,7 +1,8 @@
 cutscenes:
+  START:
+    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
   INTRO:
     - activate_signage 4
-    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
     - q_sound SOUNDS_02_PART1_ENTRY_1 CH_GLADOS PORTAL_02_PART1_ENTRY_1
     - q_sound SOUNDS_02_PART1_ENTRY_2 CH_GLADOS PORTAL_02_PART1_ENTRY_2
     - delay 2

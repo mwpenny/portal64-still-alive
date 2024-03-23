@@ -1,4 +1,33 @@
 cutscenes:
+  START:
+    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
+  INTRO:
+    - delay 1
+    - start_cutscene portal_loop
+    - start_cutscene platform_ferry
+    - set_signal launch_ball
+    - q_sound 07_PART1_ENTRY_1 CH_GLADOS PORTAL_07_PART1_ENTRY_1
+    - q_sound 07_PART1_ENTRY_2 CH_GLADOS PORTAL_07_PART1_ENTRY_2
+    - q_sound 07_PART1_ENTRY_3 CH_GLADOS PORTAL_07_PART1_ENTRY_3
+    - delay 2
+    - activate_signage 11
+  portal_loop:
+    - label loop_start
+    - open_portal portal_0 0 pedestal
+    - delay 3
+    - point_pedestal portal_1
+    - delay 4
+    - open_portal portal_1 0 pedestal
+    - delay 3 2
+    - point_pedestal portal_2
+    - delay 4 2
+    - open_portal portal_2 0 pedestal
+    - delay 3 3
+    - point_pedestal portal_3
+    - delay 4 3
+    - point_pedestal portal_0
+    - delay 4 4
+    - goto loop_start
   platform_ferry:
     - wait_for_signal move_platform
     - delay 1.5 pre_slide
@@ -9,6 +38,27 @@ cutscenes:
     - play_animation horizontal slide -1
     - wait_for_signal not_move_to_gun
     - goto anim_loop_start
+  PROMPT_SWITCH:
+    - show_prompt CutscenePromptTypeUse
+  DROWN_PLAYER:
+    - kill_player water
+  GET_GUN:
+    - hide_pedestal
+    - stop_cutscene portal_loop
+    - stop_cutscene platform_ferry
+    - start_cutscene platform_loop
+    - close_portal 0
+    - show_prompt CutscenePromptTypePortal0
+    - q_sound 07_PART1_GET_DEVICE_COMPONENT_1 CH_GLADOS PORTAL_07_PART1_GET_DEVICE_COMPONENT_1
+    - q_sound 07_PART1_GET_DEVICE_COMPONENT_2 CH_GLADOS PORTAL_07_PART1_GET_DEVICE_COMPONENT_2
+    - q_sound 07_PART1_GET_DEVICE_COMPONENT_3 CH_GLADOS PORTAL_07_PART1_GET_DEVICE_COMPONENT_3
+    - wait_for_channel CH_GLADOS
+    - q_sound PORTAL_SUBJECT_NAME_HERE CH_MUSIC SubtitleKeyNone
+    - wait_for_signal trapped
+    - q_sound 07_PART1_TRAPPED_1 CH_GLADOS PORTAL_07_PART1_TRAPPED_1
+    - q_sound 07_PART1_TRAPPED_2 CH_GLADOS PORTAL_07_PART1_TRAPPED_2
+    - wait_for_channel CH_GLADOS
+    - set_signal trap_door
   platform_loop:
     - label anim_platform_loop_start
     - play_animation horizontal slide 1 loop
@@ -18,23 +68,6 @@ cutscenes:
     - wait_for_animation horizontal loop_in
     - delay 3 anim_pause_end
     - goto anim_platform_loop_start
-  DROWN_PLAYER:
-    - kill_player water
-  START:
-    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
-    - delay 1
-    - start_cutscene portal_loop
-    - start_cutscene platform_ferry
-    - set_signal launch_ball
-    - q_sound 07_PART1_ENTRY_1 CH_GLADOS PORTAL_07_PART1_ENTRY_1
-    - q_sound 07_PART1_ENTRY_2 CH_GLADOS PORTAL_07_PART1_ENTRY_2
-    - q_sound 07_PART1_ENTRY_3 CH_GLADOS PORTAL_07_PART1_ENTRY_3
-    - delay 2
-    - activate_signage 11
-  TILT:
-    - delay 4
-    - set_signal cube_dropper
-    - play_animation tilt tilt
   START_1:
     - activate_signage 12
     - start_cutscene CHECK_CUBE_FIZZLE
@@ -53,42 +86,10 @@ cutscenes:
     - wait_for_channel CH_GLADOS
     - set_signal cube_dropper
     - goto cube_fizzle_check_loop
-  portal_loop:
-    - label loop_start
-    - open_portal portal_0 0 pedestal
-    - delay 3
-    - point_pedestal portal_1
+  TILT:
     - delay 4
-    - open_portal portal_1 0 pedestal
-    - delay 3 2
-    - point_pedestal portal_2
-    - delay 4 2
-    - open_portal portal_2 0 pedestal
-    - delay 3 3
-    - point_pedestal portal_3
-    - delay 4 3
-    - point_pedestal portal_0
-    - delay 4 4
-    - goto loop_start
-  GET_GUN:
-    - hide_pedestal
-    - stop_cutscene portal_loop
-    - stop_cutscene platform_ferry
-    - start_cutscene platform_loop
-    - close_portal 0
-    - show_prompt CutscenePromptTypePortal0
-    - q_sound 07_PART1_GET_DEVICE_COMPONENT_1 CH_GLADOS PORTAL_07_PART1_GET_DEVICE_COMPONENT_1
-    - q_sound 07_PART1_GET_DEVICE_COMPONENT_2 CH_GLADOS PORTAL_07_PART1_GET_DEVICE_COMPONENT_2
-    - q_sound 07_PART1_GET_DEVICE_COMPONENT_3 CH_GLADOS PORTAL_07_PART1_GET_DEVICE_COMPONENT_3
-    - wait_for_channel CH_GLADOS
-    - q_sound PORTAL_SUBJECT_NAME_HERE CH_MUSIC SubtitleKeyNone
-    - wait_for_signal trapped
-    - q_sound 07_PART1_TRAPPED_1 CH_GLADOS PORTAL_07_PART1_TRAPPED_1
-    - q_sound 07_PART1_TRAPPED_2 CH_GLADOS PORTAL_07_PART1_TRAPPED_2
-    - wait_for_channel CH_GLADOS
-    - set_signal trap_door
-  PROMPT_SWITCH:
-    - show_prompt CutscenePromptTypeUse
+    - set_signal cube_dropper
+    - play_animation tilt tilt
 operators:
   - weeeee = exit_1 and flying
   - not_move_to_gun = not move_to_gun

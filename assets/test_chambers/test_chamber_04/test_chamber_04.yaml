@@ -1,16 +1,17 @@
 cutscenes:
-  SUCCESS:
-    - q_sound SOUNDS_04_PART1_SUCCESS_1 CH_GLADOS PORTAL_04_PART1_SUCCESS_1
+  START:
+    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
   INTRO_CUTSCENE:
     - activate_signage 8
-    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
     - q_sound SOUNDS_04_PART1_ENTRY_1 CH_GLADOS PORTAL_04_PART1_ENTRY_1
     - wait_for_channel CH_GLADOS
     - q_sound PORTAL_PROCEDURAL_JIGGLE_BONE CH_MUSIC SubtitleKeyNone
+  SUCCESS:
+    - q_sound SOUNDS_04_PART1_SUCCESS_1 CH_GLADOS PORTAL_04_PART1_SUCCESS_1
   DROWN_PLAYER:
     - kill_player water
   OPEN_PORTAL:
-    - "save_checkpoint "
+    - save_checkpoint
     - delay 1
     - open_portal stationary_portal 0
     - set_signal launch_ball
