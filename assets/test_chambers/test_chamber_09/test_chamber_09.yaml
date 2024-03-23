@@ -51,6 +51,10 @@ cutscenes:
     - wait_for_signal not_cube_near_button
     - set_signal escape_hatch
     - stop_cutscene CHECK_CUBE_ON_PISTON
+  DOOR_ROOM:
+    - save_checkpoint
+  DROWN_PLAYER:
+    - kill_player water
 operators:
   - not_on_piston = not on_piston
   - not_cube_near_button = not cube_near_button
