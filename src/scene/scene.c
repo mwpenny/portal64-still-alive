@@ -296,6 +296,7 @@ LookAt gLookAt = gdSPDefLookAt(127, 0, 0, 0, 127, 0);
 
 void sceneRender(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
     playerApplyCameraTransform(&scene->player, &scene->camera.transform);
+    vector3Add(&scene->camera.transform.position, &scene->freeCameraOffset, &scene->camera.transform.position);
 
     gSPSetLights1(renderState->dl++, gSceneLights);
     LookAt* lookAt = renderStateRequestLookAt(renderState);
@@ -803,8 +804,6 @@ void sceneUpdate(struct Scene* scene) {
     if (controllerGetButtonDown(2, START_BUTTON)) {
         scene->freeCameraOffset = gZeroVec;
     }
-
-    vector3Add(&scene->camera.transform.position, &scene->freeCameraOffset, &scene->camera.transform.position);
 
     if (controllerGetButtonDown(2, L_TRIG)) {
         levelQueueLoad(NEXT_LEVEL, NULL, NULL);
