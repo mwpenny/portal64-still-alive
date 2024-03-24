@@ -3,7 +3,7 @@
 
 #include <algorithm>
 #include <iostream>
-#include "MathUtl.h"
+#include "MathUtil.h"
 
 aiMesh* copyMesh(aiMesh* mesh) {
     aiMesh* result = new aiMesh();
