@@ -1,7 +1,7 @@
 #include "CollisionGenerator.h"
 
 #include "../StringUtils.h"
-#include "../MathUtl.h"
+#include "../MathUtil.h"
 
 #include <algorithm>
 
