@@ -409,3 +409,17 @@ void savefileListConfirmOverwrite(struct SavefileListMenu* savefileList, Confirm
 
     confirmationDialogShow(&savefileList->confirmationDialog, &dialogParams);
 }
+
+void savefileListConfirmLoad(struct SavefileListMenu* savefileList, ConfirmationDialogCallback callback, void* callbackData) {
+    struct ConfirmationDialogParams dialogParams = {
+        translationsGet(GAMEUI_CONFIRMLOADGAME_TITLE),
+        translationsGet(GAMEUI_LOADWARNING),
+        translationsGet(GAMEUI_YES),
+        translationsGet(GAMEUI_NO),
+        0,
+        callback,
+        callbackData
+    };
+
+    confirmationDialogShow(&savefileList->confirmationDialog, &dialogParams);
+}

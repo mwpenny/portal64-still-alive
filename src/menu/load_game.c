@@ -37,6 +37,25 @@ void loadGamePopulate(struct LoadGameMenu* loadGame) {
     );
 }
 
+static void loadGameInSelectedSlot(struct LoadGameMenu* loadGame) {
+    Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
+    int testChamber;
+    int testSubject;
+    savefileLoadGame(savefileGetSlot(loadGame->savefileList), save, &testChamber, &testSubject);
+    gCurrentTestSubject = testSubject;
+
+    levelQueueLoad(getLevelIndexFromChamberDisplayNumber(testChamber), NULL, NULL);
+    checkpointUse(save);
+
+    stackMallocFree(save);
+}
+
+static void loadGameConfirmLoadClosed(struct LoadGameMenu* loadGame, int isConfirmed) {
+    if (isConfirmed) {
+        loadGameInSelectedSlot(loadGame);
+    }
+}
+
 static void loadGameConfirmDeletionClosed(struct LoadGameMenu* loadGame, int isConfirmed) {
     if (isConfirmed) {
         short selectedSaveIndex = loadGame->savefileList->selectedSave;
@@ -60,17 +79,15 @@ enum InputCapture loadGameUpdate(struct LoadGameMenu* loadGame) {
 
     if (loadGame->savefileList->numberOfSaves) {
         if (controllerGetButtonDown(0, A_BUTTON)) {
-            Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
-            int testChamber;
-            int testSubject;
-            savefileLoadGame(savefileGetSlot(loadGame->savefileList), save, &testChamber, &testSubject);
-            gCurrentTestSubject = testSubject;
-
-            levelQueueLoad(getLevelIndexFromChamberDisplayNumber(testChamber), NULL, NULL);
-            checkpointUse(save);
-
-            stackMallocFree(save);
-
+            if (gScene.mainMenuMode) {
+                loadGameInSelectedSlot(loadGame);
+            } else {
+                savefileListConfirmLoad(
+                    loadGame->savefileList,
+                    (ConfirmationDialogCallback)&loadGameConfirmLoadClosed,
+                    loadGame
+                );
+            }
             soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         } else if (controllerGetButtonDown(0, Z_TRIG)) {
             savefileListConfirmDeletion(

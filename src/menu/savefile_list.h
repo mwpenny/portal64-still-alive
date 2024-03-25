@@ -48,5 +48,6 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
 int savefileGetSlot(struct SavefileListMenu* savefileList);
 void savefileListConfirmDeletion(struct SavefileListMenu* savefileList, ConfirmationDialogCallback callback, void* callbackData);
 void savefileListConfirmOverwrite(struct SavefileListMenu* savefileList, ConfirmationDialogCallback callback, void* callbackData);
+void savefileListConfirmLoad(struct SavefileListMenu* savefileList, ConfirmationDialogCallback callback, void* callbackData);
 
 #endif
