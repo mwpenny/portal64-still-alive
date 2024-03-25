@@ -9,6 +9,7 @@
 #include "./save_game_menu.h"
 #include "./options_menu.h"
 #include "./load_game.h"
+#include "./confirmation_dialog.h"
 
 enum GameMenuState {
     GameMenuStateLanding,
@@ -17,6 +18,7 @@ enum GameMenuState {
     GameMenuStateLoadGame,
     GameMenuStateNewGame,
     GameMenuStateOptions,
+    GameMenuStateConfirmQuit,
     GameMenuStateQuit,
 };
 
@@ -28,6 +30,7 @@ struct GameMenu {
     struct LoadGameMenu loadGameMenu;
     struct SaveGameMenu saveGameMenu;
     struct OptionsMenu optionsMenu;
+    struct ConfirmationDialog confirmationDialog;
     short currentRenderedLanguage;
 };
 

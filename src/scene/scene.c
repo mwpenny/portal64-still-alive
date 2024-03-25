@@ -45,7 +45,7 @@ struct LandingMenuOption gPauseMenuOptions[] = {
     {GAMEUI_LOADGAME, GameMenuStateLoadGame},
     {GAMEUI_NEWGAME, GameMenuStateNewGame},
     {GAMEUI_OPTIONS, GameMenuStateOptions},
-    {GAMEUI_GAMEMENU_QUIT, GameMenuStateQuit},
+    {GAMEUI_GAMEMENU_QUIT, GameMenuStateConfirmQuit},
 };
 
 Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
@@ -254,6 +254,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     scene->continuouslyAttemptingPortalOpen=0;
     scene->boolCutsceneIsRunning=0;
     scene->checkpointState = SceneCheckpointStateSaved;
+    scene->mainMenuMode = mainMenuMode;
 
     scene->freeCameraOffset = gZeroVec;
 
