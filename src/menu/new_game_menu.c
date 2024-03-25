@@ -109,6 +109,8 @@ void newGameInit(struct NewGameMenu* newGameMenu) {
     newGameMenu->chapterOffset = 0;
     newGameMenu->selectedChapter = 0;    
     newGameMenu->chapterCount = 1; 
+
+    confirmationDialogInit(&newGameMenu->confirmationDialog);
 }
 
 void newGameRebuildText(struct NewGameMenu* newGameMenu) {
@@ -119,7 +121,26 @@ void newGameRebuildText(struct NewGameMenu* newGameMenu) {
     newGameMenu->newGameText = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(GAMEUI_NEWGAME), 48, 48, SCREEN_WD);
 }
 
+static void newGameStartSelectedChapter(struct NewGameMenu* newGameMenu) {
+    gCurrentTestSubject = savefileNextTestSubject();
+    levelQueueLoad(
+        gChapters[newGameMenu->selectedChapter].testChamberLevelIndex,
+        NULL,
+        NULL
+    );
+}
+
+static void newGameConfirmStartClosed(struct NewGameMenu* newGameMenu, int isConfirmed) {
+    if (isConfirmed) {
+        newGameStartSelectedChapter(newGameMenu);
+    }
+}
+
 enum InputCapture newGameUpdate(struct NewGameMenu* newGameMenu) {
+    if (newGameMenu->confirmationDialog.isShown) {
+        return confirmationDialogUpdate(&newGameMenu->confirmationDialog);
+    }
+
     // this is done on update so if the unlock menu cheat is used it shows up right away
     while (newGameMenu->chapterCount < MAX_CHAPTER_COUNT && 
             gChapters[newGameMenu->chapterCount].testChamberLevelIndex <= gSaveData.header.chapterProgressLevelIndex &&
@@ -132,9 +153,22 @@ enum InputCapture newGameUpdate(struct NewGameMenu* newGameMenu) {
     }
 
     if (controllerGetButtonDown(0, A_BUTTON) && gChapters[newGameMenu->selectedChapter].testChamberLevelIndex >= 0) {
-        gCurrentTestSubject = savefileNextTestSubject();
+        if (gScene.mainMenuMode) {
+            newGameStartSelectedChapter(newGameMenu);
+        } else {
+            struct ConfirmationDialogParams dialogParams = {
+                translationsGet(GAMEUI_CONFIRMNEWGAME_TITLE),
+                translationsGet(GAMEUI_NEWGAMEWARNING),
+                translationsGet(GAMEUI_YES),
+                translationsGet(GAMEUI_NO),
+                0,
+                (ConfirmationDialogCallback)&newGameConfirmStartClosed,
+                newGameMenu
+            };
+
+            confirmationDialogShow(&newGameMenu->confirmationDialog, &dialogParams);
+        }
         soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
-        levelQueueLoad(gChapters[newGameMenu->selectedChapter].testChamberLevelIndex, NULL, NULL);
     }
 
     if ((controllerGetDirectionDown(0) & ControllerDirectionRight) != 0 && 
@@ -226,5 +260,9 @@ void newGameRender(struct NewGameMenu* newGameMenu, struct RenderState* renderSt
             84, 48,
             gColorWhite
         );
+    }
+
+    if (newGameMenu->confirmationDialog.isShown) {
+        confirmationDialogRender(&newGameMenu->confirmationDialog, renderState);
     }
 }

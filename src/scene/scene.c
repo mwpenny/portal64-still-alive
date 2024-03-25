@@ -254,6 +254,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     scene->continuouslyAttemptingPortalOpen=0;
     scene->boolCutsceneIsRunning=0;
     scene->checkpointState = SceneCheckpointStateSaved;
+    scene->mainMenuMode = mainMenuMode;
 
     scene->freeCameraOffset = gZeroVec;
 
