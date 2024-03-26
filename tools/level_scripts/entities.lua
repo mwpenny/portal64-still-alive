@@ -118,13 +118,15 @@ local fizzlers = {}
 
 for _, fizzler in pairs(sk_scene.nodes_for_type('@fizzler')) do
     local position, rotation, scale = fizzler.node.full_transformation:decompose()
+	local bounding_box = fizzler.node.meshes[1].bb
+	local width = (bounding_box.max.x - bounding_box.min.x) * scale.x * 0.5
 
     local room_index = room_export.node_nearest_room_index(fizzler.node)
 
     table.insert(fizzlers, {
         position,
         rotation,
-        scale.x,
+        width,
         1,
         room_index,
         signals.optional_signal_index_for_name(fizzler.arguments[1]),

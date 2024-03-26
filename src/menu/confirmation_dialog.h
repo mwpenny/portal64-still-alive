@@ -11,6 +11,7 @@ struct ConfirmationDialogParams {
     char* message;
     char* confirmLabel;
     char* cancelLabel;
+    u8 isTranslucent;
     ConfirmationDialogCallback closeCallback;
     void* callbackData;
 };
@@ -24,7 +25,8 @@ struct ConfirmationDialog {
     struct MenuButton* selectedButton;
     ConfirmationDialogCallback closeCallback;
     void* callbackData;
-    int isShown;
+    u8 opacity;
+    u8 isShown;
 };
 
 void confirmationDialogInit(struct ConfirmationDialog* confirmationDialog);

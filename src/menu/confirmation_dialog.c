@@ -32,6 +32,7 @@ void confirmationDialogInit(struct ConfirmationDialog* confirmationDialog) {
     confirmationDialog->selectedButton = NULL;
     confirmationDialog->closeCallback = NULL;
     confirmationDialog->callbackData = NULL;
+    confirmationDialog->opacity = 255;
     confirmationDialog->isShown = 0;
 
     confirmationDialog->confirmButton = menuBuildButton(
@@ -129,6 +130,7 @@ void confirmationDialogShow(struct ConfirmationDialog* confirmationDialog, struc
     confirmationDialog->selectedButton = &confirmationDialog->cancelButton;
     confirmationDialog->closeCallback = params->closeCallback;
     confirmationDialog->callbackData = params->callbackData;
+    confirmationDialog->opacity = params->isTranslucent ? 128 : 255;
     confirmationDialog->isShown = 1;
 }
 
@@ -182,7 +184,7 @@ void confirmationDialogRender(struct ConfirmationDialog* confirmationDialog, str
 
     gSPDisplayList(renderState->dl++, ui_material_list[ROUNDED_CORNERS_INDEX]);
     gDPPipeSync(renderState->dl++);
-    gDPSetEnvColor(renderState->dl++, gDialogColor.r, gDialogColor.g, gDialogColor.b, gDialogColor.a);
+    gDPSetEnvColor(renderState->dl++, gDialogColor.r, gDialogColor.g, gDialogColor.b, confirmationDialog->opacity);
     gSPDisplayList(renderState->dl++, confirmationDialog->menuOutline);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[ROUNDED_CORNERS_INDEX]);
 

@@ -4,6 +4,7 @@
 #include "../graphics/graphics.h"
 #include "./menu.h"
 #include "../font/font.h"
+#include "./confirmation_dialog.h"
 #define CHAPTER_IMAGE_WIDTH     84
 #define CHAPTER_IMAGE_HEIGHT    48
 
@@ -31,6 +32,8 @@ struct NewGameMenu {
     Gfx* menuOutline;
     struct PrerenderedText* newGameText;
     Gfx* topLine;
+
+    struct ConfirmationDialog confirmationDialog;
 
     struct ChapterMenu displayedChapter0_left;
     struct ChapterMenu displayedChapter1_right;

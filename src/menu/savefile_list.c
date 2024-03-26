@@ -388,6 +388,7 @@ void savefileListConfirmDeletion(struct SavefileListMenu* savefileList, Confirma
         translationsGet(GAMEUI_CONFIRMDELETESAVEGAME_INFO),
         translationsGet(GAMEUI_CONFIRMDELETESAVEGAME_OK),
         translationsGet(GAMEUI_CANCEL),
+        0,
         callback,
         callbackData
     };
@@ -401,6 +402,21 @@ void savefileListConfirmOverwrite(struct SavefileListMenu* savefileList, Confirm
         translationsGet(GAMEUI_CONFIRMOVERWRITESAVEGAME_INFO),
         translationsGet(GAMEUI_CONFIRMOVERWRITESAVEGAME_OK),
         translationsGet(GAMEUI_CANCEL),
+        0,
+        callback,
+        callbackData
+    };
+
+    confirmationDialogShow(&savefileList->confirmationDialog, &dialogParams);
+}
+
+void savefileListConfirmLoad(struct SavefileListMenu* savefileList, ConfirmationDialogCallback callback, void* callbackData) {
+    struct ConfirmationDialogParams dialogParams = {
+        translationsGet(GAMEUI_CONFIRMLOADGAME_TITLE),
+        translationsGet(GAMEUI_LOADWARNING),
+        translationsGet(GAMEUI_YES),
+        translationsGet(GAMEUI_NO),
+        0,
         callback,
         callbackData
     };

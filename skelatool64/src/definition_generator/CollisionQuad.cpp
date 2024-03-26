@@ -1,6 +1,6 @@
 #include "CollisionQuad.h"
 
-#include "../MathUtl.h"
+#include "../MathUtil.h"
 
 #define SAME_TOLERANCE  0.00001f
 

@@ -45,7 +45,7 @@ struct LandingMenuOption gPauseMenuOptions[] = {
     {GAMEUI_LOADGAME, GameMenuStateLoadGame},
     {GAMEUI_NEWGAME, GameMenuStateNewGame},
     {GAMEUI_OPTIONS, GameMenuStateOptions},
-    {GAMEUI_GAMEMENU_QUIT, GameMenuStateQuit},
+    {GAMEUI_GAMEMENU_QUIT, GameMenuStateConfirmQuit},
 };
 
 Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
@@ -254,6 +254,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     scene->continuouslyAttemptingPortalOpen=0;
     scene->boolCutsceneIsRunning=0;
     scene->checkpointState = SceneCheckpointStateSaved;
+    scene->mainMenuMode = mainMenuMode;
 
     scene->freeCameraOffset = gZeroVec;
 
@@ -296,6 +297,7 @@ LookAt gLookAt = gdSPDefLookAt(127, 0, 0, 0, 127, 0);
 
 void sceneRender(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
     playerApplyCameraTransform(&scene->player, &scene->camera.transform);
+    vector3Add(&scene->camera.transform.position, &scene->freeCameraOffset, &scene->camera.transform.position);
 
     gSPSetLights1(renderState->dl++, gSceneLights);
     LookAt* lookAt = renderStateRequestLookAt(renderState);
@@ -803,8 +805,6 @@ void sceneUpdate(struct Scene* scene) {
     if (controllerGetButtonDown(2, START_BUTTON)) {
         scene->freeCameraOffset = gZeroVec;
     }
-
-    vector3Add(&scene->camera.transform.position, &scene->freeCameraOffset, &scene->camera.transform.position);
 
     if (controllerGetButtonDown(2, L_TRIG)) {
         levelQueueLoad(NEXT_LEVEL, NULL, NULL);

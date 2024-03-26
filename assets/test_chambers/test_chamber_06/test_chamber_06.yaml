@@ -1,15 +1,11 @@
 operators:
   []
 cutscenes:
-  THIRD_ROOM:
-    - clear_signal room_1_exit
-    - open_portal third_room_portal 0
-    - close_portal 1 room2
-    - play_animation piston_top piston_top_0
-    - play_animation piston_bottom piston_bottom_0
+  OPEN_FIRST_DOOR:
+    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
+    - set_signal room_0_exit
   FIRST_ROOM:
     - activate_signage 10
-    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
     - q_sound SOUNDS_06_PART1_ENTRY_1 CH_GLADOS PORTAL_06_PART1_ENTRY_1
     - delay 2
     - rumble 2
@@ -17,13 +13,6 @@ cutscenes:
     - open_portal first_room_portal 0
     - wait_for_channel CH_GLADOS
     - q_sound PORTAL_SELF_ESTEEM_FUND CH_MUSIC SubtitleKeyNone
-  OPEN_FIRST_DOOR:
-    - set_signal room_0_exit
-  SECOND_SUCCESS:
-    - q_sound SOUNDS_06_PART1_SUCCESS_2_1 CH_GLADOS PORTAL_06_PART1_SUCCESS_2_1
-    - play_animation piston_top piston_top_1
-  FIRST_SUCCESS:
-    - q_sound SOUNDS_06_PART1_SUCCESS_1_1 CH_GLADOS PORTAL_06_PART1_SUCCESS_1_1
   SECOND_ROOM:
     - close_portal 0
     - close_portal 1
@@ -31,3 +20,14 @@ cutscenes:
     - delay 3
     - set_signal room_1_exit
     - open_portal second_room_portal 0
+  FIRST_SUCCESS:
+    - q_sound SOUNDS_06_PART1_SUCCESS_1_1 CH_GLADOS PORTAL_06_PART1_SUCCESS_1_1
+  THIRD_ROOM:
+    - clear_signal room_1_exit
+    - open_portal third_room_portal 0
+    - close_portal 1 room2
+    - play_animation piston_top piston_top_0
+    - play_animation piston_bottom piston_bottom_0
+  SECOND_SUCCESS:
+    - q_sound SOUNDS_06_PART1_SUCCESS_2_1 CH_GLADOS PORTAL_06_PART1_SUCCESS_2_1
+    - play_animation piston_top piston_top_1
