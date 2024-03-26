@@ -15,7 +15,7 @@
 
 #include "../util/dynamic_asset_loader.h"
 
-#include <math.h>
+#include "../math/mathf.h"
 
 #define DIGIT_WIDTH     512
 
@@ -47,31 +47,31 @@ void clockSetDigit(int digitIndex, int currDigit) {
 }
 
 void clockSetTime(float timeInSeconds) {
-    float minutes = floor(timeInSeconds * (1.0f / 60.0f));
+    float minutes = floorf(timeInSeconds * (1.0f / 60.0f));
     clockSetDigit(0, (int)minutes);
     timeInSeconds -= minutes *= 60.0f;
 
-    float tenSeconds = floor(timeInSeconds * 0.1f);
+    float tenSeconds = floorf(timeInSeconds * 0.1f);
     clockSetDigit(1, (int)tenSeconds);
     timeInSeconds -= tenSeconds * 10.0f;
 
-    float seconds = floor(timeInSeconds);
+    float seconds = floorf(timeInSeconds);
     clockSetDigit(2, (int)seconds);
     timeInSeconds -= seconds;
 
-    float tenthsOfSecond = floor(timeInSeconds * 10.0f);
+    float tenthsOfSecond = floorf(timeInSeconds * 10.0f);
     clockSetDigit(3, (int)tenthsOfSecond);
     timeInSeconds -= tenthsOfSecond * 0.1f;
 
-    float hundredthsOfSecond = floor(timeInSeconds * 100.f);
+    float hundredthsOfSecond = floorf(timeInSeconds * 100.f);
     clockSetDigit(4, (int)hundredthsOfSecond);
     timeInSeconds -= hundredthsOfSecond * 0.01f;
 
-    float thousandthsOfSecond = floor(timeInSeconds * 1000.f);
+    float thousandthsOfSecond = floorf(timeInSeconds * 1000.f);
     clockSetDigit(5, (int)thousandthsOfSecond);
     timeInSeconds -= thousandthsOfSecond * 0.001f;
 
-    float tenThousandthsOfSecond = floor(timeInSeconds * 10000.f);
+    float tenThousandthsOfSecond = floorf(timeInSeconds * 10000.f);
     clockSetDigit(6, (int)tenThousandthsOfSecond);
 }
 
