@@ -24,9 +24,9 @@ Portal 64's high-level usage of proprietary libraries is listed in the following
 |          |                               | Message passing                              | ❌                          |
 |          |                               | Peripheral access                            | ❌                          |
 |          |                               | Video initialization                         | ❌                          |
-|          | Math                          | Trig functions                               | ❌                          |
-| libnustd | Math                          | `floor()`                                    | ❌                          |
-|          | String                        | `strcpy()`, `memset()`                       | ❌                          |
+|          | Math                          | Trig functions                               | ✅                          |
+| libnustd | Math                          | `floor()`                                    | ✅                          |
+|          | String                        | `strcpy()`, `memset()`                       | ✅                          |
 
 <sup>*</sup> = Not only the game uses these APIs. At build time, `Skeletool64` reads YAML files located in `assets/materials` to generate code containing static display lists. The YAML files, generated code, and Skeletool itself all refer to xDP/xSP function names and parameters.
 
