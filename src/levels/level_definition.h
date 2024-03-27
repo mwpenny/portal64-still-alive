@@ -216,6 +216,7 @@ struct ButtonDefinition {
     short roomIndex;
     short signalIndex;
     short cubeSignalIndex;
+    short deactivateSignalIndex;
 };
 
 struct SwitchDefinition {
