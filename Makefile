@@ -79,7 +79,7 @@ LCDEFS +=	-DF3DEX_GBI_2 -DSCENE_SCALE=${SCENE_SCALE}
 
 LDIRT  =	$(BASE_TARGET_NAME).elf $(CP_LD_SCRIPT) $(BASE_TARGET_NAME).z64 $(BASE_TARGET_NAME)_no_debug.map $(ASMOBJECTS)
 
-LDFLAGS =	-L$(N64_ROOT)/usr/lib/n64 $(N64LIB) -L$(N64_ROOT)/opt/crashsdk/mips64-elf/lib -l:libc.a -L$(N64_LIBGCCDIR) -lgcc
+LDFLAGS =	-L$(N64_ROOT)/usr/lib/n64 $(N64LIB) -L$(N64_ROOT)/opt/crashsdk/mips64-elf/lib -l:libc.a -l:libm.a -L$(N64_LIBGCCDIR) -lgcc
 
 default:	english_audio
 
