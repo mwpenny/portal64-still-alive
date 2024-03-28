@@ -16,6 +16,7 @@ local portalable_surfaces = {
     concrete_modular_wall001d = true,
     concrete_modular_ceiling001a = true,
     concrete_modular_floor001a = true,
+    transparent_portal_surface = true,
 }
 
 local signal_elements = {}
