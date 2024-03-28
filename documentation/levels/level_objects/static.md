@@ -1,7 +1,6 @@
 # @static
 
-Static level geometry. Used to generate level mesh and portal surface
-data.
+Static level geometry. Used to generate level mesh and portal surface data.
 
 ## Name structure
 
@@ -39,10 +38,13 @@ surfaces are portalable. The following material names allow portals to be placed
 * `concrete_modular_wall001d`
 * `concrete_modular_ceiling001a`
 * `concrete_modular_floor001a`
+* `transparent_portal_surface`
 
 This behavior can be overridden by using the `no_portals` argument. To accept
-portals, the geometry must also have a coplanar static collision object or be
-animated by a [bone](./anim.md) that also animates a dynamic collision object.
+portals, the geometry must also have associated collision so that it can be hit.
+This can be done by placing a coplanar static collision object or through
+animation with a [bone](./anim.md) that also animates a dynamic collision
+object.
 
 A mesh's UV coordinates are only used if its material does not have the
 `tileSizeS` and `tileSizeT` properties in its YAML definition. Otherwise, the
