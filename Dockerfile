@@ -20,7 +20,6 @@ RUN apt-get update -y && \
     binutils-mips-n64 \
     gcc-mips-n64 \
     n64sdk \
-    libnustd \
     makemask \
     root-compatibility-environment \
     libmpc-dev \
