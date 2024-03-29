@@ -1268,4 +1268,10 @@ materials:
     gSPGeometryMode:
       clear: [G_LIGHTING]
     gDPSetCycleType: G_CYC_1CYCLE
-    
+
+  # Portal surfaces are defined by level geometry, which requires a material.
+  # This material exists to create invisible portal surfaces. For example, to
+  # place portals over other, more complex geometry.
+  transparent_portal_surface:
+    gSPGeometryMode:
+      set: [G_CULL_BACK, G_CULL_FRONT]

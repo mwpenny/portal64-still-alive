@@ -31,7 +31,7 @@ cutscenes:
     - goto pit_loop
   CHECK_STAIRS:
     - label stair_loop
-    - wait_for_signal should_raise_stairs
+    - wait_for_signal should_raise_stairs 5
     - play_animation stairs stairs_ascend
     - wait_for_animation stairs
     - delay 2
