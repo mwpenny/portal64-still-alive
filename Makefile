@@ -230,10 +230,17 @@ portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims
 	@mkdir -p $(@D)
 	convert $< $(shell cat $(@:portal_pak_modified/%.png=assets/%.ims)) $@
 
+VALVE_INTRO_VIDEO = vpk/Portal/hl2/media/valve.bik
+
+# the macOS Portal version uses a .mov file, so if the .bik file doesn't exist, let's try that
+ifeq ("$(wildcard $(VALVE_INTRO_VIDEO))","")
+    VALVE_INTRO_VIDEO := $(subst .bik,.mov,$(VALVE_INTRO_VIDEO))
+endif
+
 build/assets/images/valve.png build/assets/images/valve-no-logo.png:
 	@mkdir -p $(@D)
-	ffmpeg -ss 00:00:04 -i vpk/Portal/hl2/media/valve.bik -frames:v 1 -q:v 2 -y build/assets/images/valve-full.png
-	ffmpeg -ss 00:00:01 -i vpk/Portal/hl2/media/valve.bik -frames:v 1 -q:v 2 -y build/assets/images/valve-full-no-logo.png
+	ffmpeg -ss 00:00:04 -i $(VALVE_INTRO_VIDEO) -frames:v 1 -q:v 2 -y build/assets/images/valve-full.png
+	ffmpeg -ss 00:00:01 -i $(VALVE_INTRO_VIDEO) -frames:v 1 -q:v 2 -y build/assets/images/valve-full-no-logo.png
 	convert build/assets/images/valve-full.png -crop 491x369+265+202 -resize 160x120 build/assets/images/valve.png
 	convert build/assets/images/valve-full-no-logo.png -crop 492x370+266+202 -resize 160x120 build/assets/images/valve-no-logo.png
 
@@ -489,7 +496,7 @@ portal_pak_dir/sound/music/%.wav: portal_pak_dir/sound/music/%.mp3
 
 build/assets/sound/music/valve.aifc:
 	@mkdir -p $(@D)
-	ffmpeg -i vpk/Portal/hl2/media/valve.bik -vn -ac 1 -ar 22050 -y build/assets/sound/music/valve.wav
+	ffmpeg -i $(VALVE_INTRO_VIDEO) -vn -ac 1 -ar 22050 -y build/assets/sound/music/valve.wav
 	$(SFZ2N64) -o $@ build/assets/sound/music/valve.wav
 
 build/assets/sound/vehicles/tank_turret_loop1.wav: portal_pak_dir
