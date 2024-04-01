@@ -407,7 +407,8 @@ ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_00/test_chamber_00_
 	build/assets/test_chambers/test_chamber_06/test_chamber_06_anim.o \
 	build/assets/test_chambers/test_chamber_07/test_chamber_07_anim.o \
 	build/assets/test_chambers/test_chamber_08/test_chamber_08_anim.o \
-	build/assets/test_chambers/test_chamber_09/test_chamber_09_anim.o
+	build/assets/test_chambers/test_chamber_09/test_chamber_09_anim.o \
+	build/assets/test_chambers/test_chamber_10/test_chamber_10_anim.o
 
 build/anims.ld: $(ANIM_LIST) $(ANIM_TEST_CHAMBERS) tools/generate_animation_ld.js
 	@mkdir -p $(@D)
@@ -426,7 +427,8 @@ TEST_CHAMBERS = assets/test_chambers/test_chamber_00/test_chamber_00.blend \
 	assets/test_chambers/test_chamber_06/test_chamber_06.blend \
 	assets/test_chambers/test_chamber_07/test_chamber_07.blend \
 	assets/test_chambers/test_chamber_08/test_chamber_08.blend \
-	assets/test_chambers/test_chamber_09/test_chamber_09.blend
+	assets/test_chambers/test_chamber_09/test_chamber_09.blend \
+	assets/test_chambers/test_chamber_10/test_chamber_10.blend
 
 TEST_CHAMBER_HEADERS = $(TEST_CHAMBERS:%.blend=build/%.h)
 TEST_CHAMBER_OBJECTS = $(TEST_CHAMBERS:%.blend=build/%_geo.o)
