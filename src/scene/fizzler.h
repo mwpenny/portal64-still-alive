@@ -17,8 +17,8 @@
 #define FIZZLER_PARTICLE_HEIGHT_FIXED   (int)(FIZZLER_PARTICLE_LENGTH * SCENE_SCALE * 0.25f)
 
 struct Fizzler {
-    struct CollisionObject collisionObject;
-    struct RigidBody rigidBody;
+    struct CollisionObject collisionObject, frameLeftCollisionObject, frameRightCollisionObject;
+    struct RigidBody rigidBody, frameLeftRigidBody, frameRightRigidBody;
     struct ColliderTypeData colliderType;
     struct CollisionBox collisionBox;
     Vtx* modelVertices;
