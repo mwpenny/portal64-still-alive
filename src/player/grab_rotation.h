@@ -15,7 +15,7 @@ enum GrabRotationFlags grabRotationFlagsForDecorId(const int decorId);
 enum GrabRotationFlags grabRotationFlagsForDecorObjectDef(struct DecorObjectDefinition* decorObjectDef);
 enum GrabRotationFlags grabRotationFlagsForCollisionObject(struct CollisionObject* collisionObject);
 
-void grabRotationGetBase(const enum GrabRotationFlags flags, struct Quaternion* objectRotationIn, struct Quaternion* lookRotationIn, struct Quaternion* grabRotationBaseOut);
+void grabRotationGetBase(const enum GrabRotationFlags flags, struct Quaternion* forwardRotationIn, struct Quaternion* objectRotationIn, struct Quaternion* grabRotationBaseOut);
 void grabRotationUpdate(const enum GrabRotationFlags flags, struct Quaternion* lookRotationDeltaIn, struct Quaternion* forwardRotationIn, struct Quaternion* grabRotationBaseIn, struct Quaternion* grabRotationOut);
 
 #endif

@@ -267,9 +267,13 @@ void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) 
     // init player->grabRotationBase
     if (player->grabConstraint.object) {
         struct Quaternion forwardRotation = player->lookTransform.rotation;
+        struct Vector3 forward, tmpVec;
+        playerGetMoveBasis(&forwardRotation, &forward, &tmpVec);
+        vector3Negate(&forward, &forward);
+        quatLook(&forward, &gUp, &forwardRotation);
         playerPortalGrabRotate(player, &forwardRotation);
         enum GrabRotationFlags grabRotationFlags = grabRotationFlagsForCollisionObject(player->grabConstraint.object);
-        grabRotationGetBase(grabRotationFlags, &player->grabConstraint.object->body->transform.rotation, &forwardRotation, &player->grabRotationBase);
+        grabRotationGetBase(grabRotationFlags, &forwardRotation, &player->grabConstraint.object->body->transform.rotation, &player->grabRotationBase);
     }
 }
 
