@@ -24,7 +24,7 @@ Portal 64's high-level usage of proprietary libraries is listed in the following
 |          |                               | Message passing                              | ❌                          |
 |          |                               | Peripheral access                            | ❌                          |
 |          |                               | Video initialization                         | ❌                          |
-|          | Math                          | Trig functions                               | ✅                          |
+|          | Math                          | Trig functions                               | ❌                          |
 | libnustd | Math                          | `floor()`                                    | ✅                          |
 |          | String                        | `strcpy()`, `memset()`                       | ✅                          |
 
