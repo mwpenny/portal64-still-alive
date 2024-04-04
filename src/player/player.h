@@ -66,7 +66,7 @@ void playerApplyCameraTransform(struct Player* player, struct Transform* cameraT
 
 void playerGetMoveBasis(struct Quaternion* rotation, struct Vector3* forward, struct Vector3* right);
 void playerPortalGrabTransform(struct Player* player, struct Vector3* point, struct Quaternion* rotation);
-void playerPortalGrabRotate(struct Player* player, struct Quaternion* grabRotation);
+void playerInitGrabRotationBase(struct Player* player);
 
 void playerGivePortalGun(struct Player* player, int flags);
 
