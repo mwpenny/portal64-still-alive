@@ -2,6 +2,16 @@
 #include "../player/player.h"
 
 
+struct Vector3 gCubeSurfaceNormals[6] = {
+    {  1.0f,  0.0f,  0.0f },
+    { -1.0f,  0.0f,  0.0f },
+    {  0.0f,  1.0f,  0.0f },
+    {  0.0f, -1.0f,  0.0f },
+    {  0.0f,  0.0f,  1.0f },
+    {  0.0f,  0.0f, -1.0f }
+};
+
+
 enum GrabRotationFlags grabRotationFlagsForDecorId(const int decorId) {
     enum GrabRotationFlags flags = 0;
     // object specific flags
@@ -32,33 +42,25 @@ void grabRotationApplySnapToCubeNormals(const enum GrabRotationFlags flags, stru
     quatMultVector(forwardRotationIn, &gForward, &forward);
     quatMultVector(forwardRotationIn, &gUp, &up);
     
-    struct Vector3 surfaceNormal, closestNormalTowards, closestNormalUp;
+    int closestNormalTowards = 0, closestNormalUp = 0;
     float closestNormalTowardsDot = 1.0f, closestNormalUpDot = -1.0f;
     for (int i = 0; i < 6; ++i) {
-        if      (i == 0) { surfaceNormal = (struct Vector3){ 1.0f,  0.0f,  0.0f}; }
-        else if (i == 1) { surfaceNormal = (struct Vector3){-1.0f,  0.0f,  0.0f}; }
-        else if (i == 2) { surfaceNormal = (struct Vector3){ 0.0f,  1.0f,  0.0f}; }
-        else if (i == 3) { surfaceNormal = (struct Vector3){ 0.0f, -1.0f,  0.0f}; }
-        else if (i == 4) { surfaceNormal = (struct Vector3){ 0.0f,  0.0f,  1.0f}; }
-        else if (i == 5) { surfaceNormal = (struct Vector3){ 0.0f,  0.0f, -1.0f}; }
-        quatMultVector(objectRotationInOut, &surfaceNormal, &surfaceNormal);
+        struct Vector3 surfaceNormal;
+        quatMultVector(objectRotationInOut, &gCubeSurfaceNormals[i], &surfaceNormal);
         
         float dot = vector3Dot(&surfaceNormal, &forward);
         if (dot < closestNormalTowardsDot) {
             closestNormalTowardsDot = dot;
-            closestNormalTowards = surfaceNormal;
+            closestNormalTowards = i;
         }
         dot = vector3Dot(&surfaceNormal, &up);
         if (dot > closestNormalUpDot) {
             closestNormalUpDot = dot;
-            closestNormalUp = surfaceNormal;
+            closestNormalUp = i;
         }
     }
-    quatConjugate(objectRotationInOut, objectRotationInOut);
-    quatMultVector(objectRotationInOut, &closestNormalTowards, &closestNormalTowards);
-    quatMultVector(objectRotationInOut, &closestNormalUp, &closestNormalUp);
     struct Quaternion normalRotation;
-    quatLook(&closestNormalTowards, &closestNormalUp, &normalRotation);
+    quatLook(&gCubeSurfaceNormals[closestNormalTowards], &gCubeSurfaceNormals[closestNormalUp], &normalRotation);
     quatConjugate(&normalRotation, &normalRotation);
     quatMultiply(forwardRotationIn, &normalRotation, objectRotationInOut);
 }
@@ -79,7 +81,7 @@ void grabRotationApplyUseZLookDirection(const enum GrabRotationFlags flags, stru
     *grabRotationBaseInOut = tmp;
 }
 
-void grabRotationGetBase(const enum GrabRotationFlags flags, struct Quaternion* forwardRotationIn, struct Quaternion* objectRotationIn, struct Quaternion* grabRotationBaseOut) {
+void grabRotationInitBase(const enum GrabRotationFlags flags, struct Quaternion* forwardRotationIn, struct Quaternion* objectRotationIn, struct Quaternion* grabRotationBaseOut) {
     // modify object rotation according to flags
     struct Quaternion objectRotation = *objectRotationIn;
     grabRotationApplySnapToCubeNormals(flags, forwardRotationIn, &objectRotation);
