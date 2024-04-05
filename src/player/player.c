@@ -292,33 +292,25 @@ void playerInitGrabRotationBase(struct Player* player) {
     struct Quaternion objectRotation = player->grabConstraint.object->body->transform.rotation;
     
     // snap target rotation to nearest cube normals
-    struct Vector3 surfaceNormal, closestNormalTowards, closestNormalUp;
-    float closestNormalTowardsDot = 1.0f, closestNormalUpDot = -1.0f; // has to be negative on success
+    int closestNormalUp = 0, closestNormalTowards = 0;
+    float closestNormalTowardsDot = 1.0f, closestNormalUpDot = -1.0f;
     for (int i = 0; i < 6; ++i) {
+        struct Vector3 surfaceNormal;
         quatMultVector(&objectRotation, &gCubeNormals[i], &surfaceNormal);
         
         float dot = vector3Dot(&surfaceNormal, &forward);
         if (dot < closestNormalTowardsDot) {
             closestNormalTowardsDot = dot;
-            closestNormalTowards = surfaceNormal;
+            closestNormalTowards = i;
         }
         dot = vector3Dot(&surfaceNormal, &up);
         if (dot > closestNormalUpDot) {
             closestNormalUpDot = dot;
-            closestNormalUp = surfaceNormal;
+            closestNormalUp = i;
         }
     }
-    quatConjugate(&objectRotation, &objectRotation);
-    quatMultVector(&objectRotation, &closestNormalTowards, &closestNormalTowards);
-    quatMultVector(&objectRotation, &closestNormalUp, &closestNormalUp);
-    struct Quaternion normalRotation;
-    quatLook(&closestNormalTowards, &closestNormalUp, &normalRotation);
-    quatConjugate(&normalRotation, &normalRotation);
-    quatMultiply(&forwardRotation, &normalRotation, &objectRotation);
-    
-    // untangle objectRotation from relative forwardRotation, store as grabRotationBase
-    quatConjugate(&forwardRotation, &forwardRotation);
-    quatMultiply(&forwardRotation, &objectRotation, &player->grabRotationBase);
+    quatLook(&gCubeNormals[closestNormalTowards], &gCubeNormals[closestNormalUp], &objectRotation);
+    quatConjugate(&objectRotation, &player->grabRotationBase);
 }
 
 void playerShakeUpdate(struct Player* player) {
@@ -535,7 +527,11 @@ void playerPortalGrabTransform(struct Player* player, struct Vector3* grabPoint,
         return;
     }
     struct Transform pointTransform;
-    collisionSceneGetPortalTransform(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform);
+    if (grabPoint) {
+        collisionSceneGetPortalTransform(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform);
+    } else {
+        collisionSceneGetPortalRotation(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform.rotation);
+    }
     
     for (int i = 0; i < abs(player->grabbingThroughPortal); ++i) {
         if (grabPoint) {
