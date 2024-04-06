@@ -778,7 +778,7 @@ void sceneUpdate(struct Scene* scene) {
     struct Vector3 lookDir;
     struct Vector3 rightDir;
 
-    playerGetMoveBasis(&scene->camera.transform, &lookDir, &rightDir);
+    playerGetMoveBasis(&scene->camera.transform.rotation, &lookDir, &rightDir);
 
     if (freecam->stick_y) {
         if (controllerGetButton(2, Z_TRIG)) {
