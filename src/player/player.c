@@ -23,7 +23,7 @@
 #include "../build/assets/models/portal_gun/w_portalgun.h"
 
 #define GRAB_RAYCAST_DISTANCE   2.5f
-#define GRAB_MAX_OFFSET_Y       1.1f
+#define GRAB_MAX_OFFSET_Y       1.25f
 
 #define DROWN_TIME              2.0f
 #define STEP_TIME               0.35f
