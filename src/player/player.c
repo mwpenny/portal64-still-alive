@@ -527,11 +527,7 @@ void playerPortalGrabTransform(struct Player* player, struct Vector3* grabPoint,
         return;
     }
     struct Transform pointTransform;
-    if (grabPoint) {
-        collisionSceneGetPortalTransform(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform);
-    } else {
-        collisionSceneGetPortalRotation(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform.rotation);
-    }
+    collisionSceneGetPortalTransform(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform);
     
     for (int i = 0; i < abs(player->grabbingThroughPortal); ++i) {
         if (grabPoint) {
