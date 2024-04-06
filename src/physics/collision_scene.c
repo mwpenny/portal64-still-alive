@@ -514,12 +514,6 @@ void collisionSceneGetPortalTransform(int fromPortal, struct Transform* out) {
     transformConcat(gCollisionScene.portalTransforms[1 - fromPortal], &inverseA, out);
 }
 
-void collisionSceneGetPortalRotation(int fromPortal, struct Quaternion* out) {
-    struct Quaternion inverse;
-    quatConjugate(&gCollisionScene.portalTransforms[fromPortal]->rotation, &inverse);
-    quatMultiply(&gCollisionScene.portalTransforms[1 - fromPortal]->rotation, &inverse, out);
-}
-
 void collisionSceneAddDynamicObject(struct CollisionObject* object) {
     if (gCollisionScene.dynamicObjectCount < MAX_DYNAMIC_OBJECTS) {
         gCollisionScene.dynamicObjects[gCollisionScene.dynamicObjectCount] = object;

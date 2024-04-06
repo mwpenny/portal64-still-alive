@@ -24,6 +24,8 @@
 #include "../build/assets/models/portal_gun/w_portalgun.h"
 
 #define GRAB_RAYCAST_DISTANCE   2.5f
+#define GRAB_MAX_OFFSET_Y       1.25f
+
 #define DROWN_TIME              2.0f
 #define STEP_TIME               0.35f
 
@@ -319,7 +321,6 @@ void playerThrowObject(struct Player* player) {
     if (!playerIsGrabbing(player)) {
         return;
     }
-
     struct Quaternion throwRotation = player->lookTransform.rotation;
     playerPortalGrabTransform(player, NULL, &throwRotation);
 
@@ -444,7 +445,7 @@ void playerUpdateGrabbedObject(struct Player* player) {
         
         // determine object target height
         quatMultVector(&player->lookTransform.rotation, &temp_grab_dist, &grabPoint);
-        float grabY = grabPoint.y;
+        float grabY = maxf(minf(grabPoint.y, GRAB_MAX_OFFSET_Y), -GRAB_MAX_OFFSET_Y);
         
         // keep object at steady XZ-planar distance in front of player
         struct Quaternion forwardRotation;
@@ -502,11 +503,7 @@ void playerPortalGrabTransform(struct Player* player, struct Vector3* grabPoint,
         return;
     }
     struct Transform pointTransform;
-    if (grabPoint) {
-        collisionSceneGetPortalTransform(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform);
-    } else {
-        collisionSceneGetPortalRotation(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform.rotation);
-    }
+    collisionSceneGetPortalTransform(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform);
     
     for (int i = 0; i < abs(player->grabbingThroughPortal); ++i) {
         if (grabPoint) {

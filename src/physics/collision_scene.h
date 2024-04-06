@@ -49,7 +49,6 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
 int collisionSceneRaycastOnlyDynamic(struct CollisionScene* scene, struct Ray* ray, int collisionLayers, float maxDistance, struct RaycastHit* hit);
 
 void collisionSceneGetPortalTransform(int fromPortal, struct Transform* out);
-void collisionSceneGetPortalRotation(int fromPortal, struct Quaternion* out);
 
 void collisionSceneAddDynamicObject(struct CollisionObject* object);
 void collisionSceneRemoveDynamicObject(struct CollisionObject* object);
