@@ -41,6 +41,7 @@ struct Player {
     short grabbingThroughPortal;
     short dynamicId;
     struct PointConstraint grabConstraint;
+    struct Quaternion grabRotationBase;
     float pitchVelocity;
     float yawVelocity;
     enum PlayerFlags flags;
@@ -63,8 +64,9 @@ void playerUpdate(struct Player* player);
 void playerUpdateFooting(struct Player* player, float maxStandDistance);
 void playerApplyCameraTransform(struct Player* player, struct Transform* cameraTransform);
 
-void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, struct Vector3* right);
+void playerGetMoveBasis(struct Quaternion* rotation, struct Vector3* forward, struct Vector3* right);
 void playerPortalGrabTransform(struct Player* player, struct Vector3* point, struct Quaternion* rotation);
+void playerInitGrabRotationBase(struct Player* player);
 
 void playerGivePortalGun(struct Player* player, int flags);
 
