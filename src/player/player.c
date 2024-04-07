@@ -24,6 +24,7 @@
 #include "../build/assets/models/portal_gun/w_portalgun.h"
 
 #define GRAB_RAYCAST_DISTANCE   2.5f
+#define GRAB_MIN_OFFSET_Y      -1.1f
 #define GRAB_MAX_OFFSET_Y       1.25f
 
 #define DROWN_TIME              2.0f
@@ -445,7 +446,7 @@ void playerUpdateGrabbedObject(struct Player* player) {
         
         // determine object target height
         quatMultVector(&player->lookTransform.rotation, &temp_grab_dist, &grabPoint);
-        float grabY = maxf(minf(grabPoint.y, GRAB_MAX_OFFSET_Y), -GRAB_MAX_OFFSET_Y);
+        float grabY = maxf(minf(grabPoint.y, GRAB_MAX_OFFSET_Y), GRAB_MIN_OFFSET_Y);
         
         // keep object at steady XZ-planar distance in front of player
         struct Quaternion forwardRotation;
