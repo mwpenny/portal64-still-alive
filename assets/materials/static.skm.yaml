@@ -9,6 +9,25 @@ materials:
       set: [G_CULL_BACK, G_ZBUFFER]
       clear: [G_CULL_FRONT, G_TEXTURE_GEN, G_TEXTURE_GEN_LINEAR, G_FOG]
 
+  concrete_modular_wall001b:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/concrete/concrete_modular_wall001b.png
+      siz: G_IM_SIZ_4b
+      twoTone: true
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode:
+      - color: [PRIMITIVE, "ENVIRONMENT", TEXEL0, "ENVIRONMENT"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["COMBINED", "0", "SHADE", "0"]
+        alpha: ["0", "0", "0", "1"]
+    gDPSetRenderMode:
+      - G_RM_PASS
+      - G_RM_ZB_OPA_SURF
+
   concrete_modular_wall001d:
     gDPSetTile: 
       filename: ../../portal_pak_modified/materials/concrete/concrete_modular_wall001d.png
