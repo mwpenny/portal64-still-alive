@@ -168,16 +168,14 @@ void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float wid
     
     struct Vector3 left = {-1.0f, 0.0f, 0.0f};
     quatMultVector(&transform->rotation, &left, &left);
+    fizzler->frameLeftRigidBody.transform = *transform;
     vector3AddScaled(&transform->position, &left, width - gFizzlerFrameBox.sideLength.x, &fizzler->frameLeftRigidBody.transform.position);
-    fizzler->frameLeftRigidBody.transform.rotation = transform->rotation;
-    fizzler->frameLeftRigidBody.transform.scale = transform->scale;
     fizzler->frameLeftRigidBody.currentRoom = room;
     
     struct Vector3 right;
     vector3Negate(&left, &right);
+    fizzler->frameRightRigidBody.transform = *transform;
     vector3AddScaled(&transform->position, &right, width - gFizzlerFrameBox.sideLength.x, &fizzler->frameRightRigidBody.transform.position);
-    fizzler->frameRightRigidBody.transform.rotation = transform->rotation;
-    fizzler->frameRightRigidBody.transform.scale = transform->scale;
     fizzler->frameRightRigidBody.currentRoom = room;
     
     fizzler->cubeSignalIndex = cubeSignalIndex;
