@@ -17,4 +17,4 @@ objects and any player-placed portals.
 
 ## Notes
 
-The cube signal is only set for the frame that fizzling starts.
+The cube signal is only emitted on the frame that fizzling starts.

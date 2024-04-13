@@ -30,15 +30,16 @@ For example, consider the following object names:
 * `@ball_catcher exit_activate`
 * `@door exit_activate`
 
-In this example, the ball catcher sets the `exit_activate` signal when
-activated. The door listens for that signal, and so it will open when a ball
-reaches the ball catcher.
+In this example, the [ball catcher](./level_objects/ball_catcher.md) sets the
+`exit_activate` signal when activated. The [door](./level_objects/door.md)
+listens for that signal, and so it will open when a ball reaches the ball catcher.
 
 There are various other level objects that can send and receive signals,
 including those that the player cannot directly interact with such as the
-indicator light strips. Some other special cases, such as buttons, can set
-multiple signals. The exact name structure differs per object. See
-[Level Objects](./level_objects/README.md) for more details.
+indicator light strips. Some other special cases, like
+[buttons](./level_objects/button.md), can set multiple signals. The exact name
+structure differs per object. See [Level Objects](./level_objects/README.md) for
+more details.
 
 Objects which can be deactivated will stop emitting their associated signal when
 that occurs.

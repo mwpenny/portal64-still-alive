@@ -17,3 +17,5 @@ stop_cutscene CUTSCENE_NAME
 ## Notes
 
 Nothing is done if the specified cutscene is not running.
+
+If multiple instances are running, all are stopped.
