@@ -1,11 +1,13 @@
 # Level Signals
 
 Signals are a way to indicate that something is happening in a level. They can
-be emitted by:
+be controlled by:
 * Level objects
 * Triggers
 * Cutscenes
 * Signal operators
+
+Emitting a signal sets its state to the inverse of its default state.
 
 Other parts of the level can listen for signals in order to perform some sort of
 action. The possible listeners are:
@@ -22,10 +24,7 @@ engine uses this to wire up the various emitters and listeners.
 ## Level objects
 
 Level objects which send or receive signals have the relevant signal name as
-part of their object name in the level's `.blend` file using the format:
-```
-@object_type SIGNAL_NAME
-```
+part of their object name in the level's `.blend` file.
 
 For example, consider the following object names:
 * `@ball_catcher exit_activate`
@@ -37,12 +36,12 @@ reaches the ball catcher.
 
 There are various other level objects that can send and receive signals,
 including those that the player cannot directly interact with such as the
-indicator light strips (they are materials). Some other special cases, such as
-buttons, can set multiple signals. The exact name structure differs per object.
-See [Level Objects](./level_objects/README.md) for more details.
+indicator light strips. Some other special cases, such as buttons, can set
+multiple signals. The exact name structure differs per object. See
+[Level Objects](./level_objects/README.md) for more details.
 
-Objects which can be deactivated will clear their associated signal when that
-occurs.
+Objects which can be deactivated will stop emitting their associated signal when
+that occurs.
 
 ## Triggers
 
@@ -53,26 +52,27 @@ names are of the form:
 ```
 @trigger PLAYER_CUTSCENE_NAME PLAYER_SIGNAL_NAME CUBE_CUTSCENE_NAME CUBE_SIGNAL_NAME
 ```
-`PLAYER_SIGNAL_NAME` is set/unset when the player enters/leaves the trigger and
-`CUBE_SIGNAL_NAME` is set/unset when a cube enters/leaves the trigger.
+`PLAYER_SIGNAL_NAME` is emitted while the player is inside the trigger and
+`CUBE_SIGNAL_NAME` is emitted while a cube is inside the trigger.
 
 ## Cutscenes
 
-[Cutscenes](./cutscenes/README.md) can set and clear signals using the
-`set_signal` and `clear_signal` steps, respectively. For example:
+[Cutscenes](./cutscenes/README.md) can change the default state of signals using
+the [set_signal](./cutscenes/set_signal.md) and
+[clear_signal](./cutscenes/clear_signal.md) steps, respectively. For example:
 ```
 set_signal door_activate
 [...]
 clear_signal door_activate
 ```
 
-The way this works internally is by altering the default state of the signal. In
-the above example, in between `set_signal` and `clear_signal`, other signal
-emitters such as buttons would clear the signal when activated.
+In between `set_signal` and `clear_signal`, the `door_activate` signal will be
+read as set. Since emitting a signal inverts the default state, signal emitters
+such as buttons will change the state to unset when activated.
 
-Cutscenes can also wait for a particular signal to occur using the
-`wait_for_signal` step. A number of frames the signal must be set for can
-optionally be specified. For example:
+Cutscenes can also wait for a particular signal to become set using the
+[wait_for_signal](./cutscenes/wait_for_signal.md) step. A number of frames the
+signal must be set for can optionally be specified. For example:
 ```
 [...]
 wait_for_signal player_in_trigger
