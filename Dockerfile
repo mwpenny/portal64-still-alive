@@ -18,6 +18,7 @@ RUN apt-get update -y && \
     dpkg --add-architecture i386 && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
     binutils-mips-n64 \
+    newlib-mips-n64 \
     gcc-mips-n64 \
     n64sdk \
     makemask \
