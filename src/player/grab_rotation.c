@@ -34,10 +34,11 @@ enum GrabRotationFlags grabRotationFlagsForCollisionObject(struct CollisionObjec
 }
 
 
-void grabRotationApplySnapToCubeNormals(const enum GrabRotationFlags flags, struct Quaternion* forwardRotationIn, struct Quaternion* objectRotationInOut) {
-    if (!(flags & GrabRotationSnapToCubeNormals) || (flags & GrabRotationTurnTowardsPlayer)) {
-        return; // GrabRotationTurnTowardsPlayer takes precedence anyways if enabled
-    }
+void grabRotationApplyTurnTowardsPlayer(struct Quaternion* grabRotationBaseOut) {
+    quatIdent(grabRotationBaseOut);
+}
+
+void grabRotationApplySnapToCubeNormals(struct Quaternion* forwardRotationIn, struct Quaternion* objectRotationIn, struct Quaternion* grabRotationBaseOut) {
     struct Vector3 forward, up;
     quatMultVector(forwardRotationIn, &gForward, &forward);
     quatMultVector(forwardRotationIn, &gUp, &up);
@@ -46,7 +47,7 @@ void grabRotationApplySnapToCubeNormals(const enum GrabRotationFlags flags, stru
     float closestNormalTowardsDot = 1.0f, closestNormalUpDot = -1.0f;
     for (int i = 0; i < 6; ++i) {
         struct Vector3 surfaceNormal;
-        quatMultVector(objectRotationInOut, &gCubeSurfaceNormals[i], &surfaceNormal);
+        quatMultVector(objectRotationIn, &gCubeSurfaceNormals[i], &surfaceNormal);
         
         float dot = vector3Dot(&surfaceNormal, &forward);
         if (dot < closestNormalTowardsDot) {
@@ -61,42 +62,39 @@ void grabRotationApplySnapToCubeNormals(const enum GrabRotationFlags flags, stru
     }
     struct Quaternion normalRotation;
     quatLook(&gCubeSurfaceNormals[closestNormalTowards], &gCubeSurfaceNormals[closestNormalUp], &normalRotation);
-    quatConjugate(&normalRotation, &normalRotation);
-    quatMultiply(forwardRotationIn, &normalRotation, objectRotationInOut);
+    quatConjugate(&normalRotation, grabRotationBaseOut);
 }
 
-void grabRotationApplyTurnTowardsPlayer(const enum GrabRotationFlags flags, struct Quaternion* forwardRotationIn, struct Quaternion* objectRotationInOut) {
-    if (!(flags & GrabRotationTurnTowardsPlayer)) {
-        return;
-    }
-    *objectRotationInOut = *forwardRotationIn;
+void grabRotationApplyNoRotation(struct Quaternion* forwardRotationIn, struct Quaternion* objectRotationIn, struct Quaternion* grabRotationBaseOut) {
+    struct Quaternion forwardRotationInverted;
+    quatConjugate(forwardRotationIn, &forwardRotationInverted);
+    quatMultiply(&forwardRotationInverted, objectRotationIn, grabRotationBaseOut);
 }
 
-void grabRotationApplyUseZLookDirection(const enum GrabRotationFlags flags, struct Quaternion* lookRotationDeltaIn, struct Quaternion* grabRotationBaseInOut) {
-    if (!(flags & GrabRotationUseZLookDirection)) {
-        return;
+void grabRotationInitBase(const enum GrabRotationFlags flags, struct Quaternion* forwardRotationIn, struct Quaternion* objectRotationIn, struct Quaternion* grabRotationBaseOut) {
+    // modify object rotation according to flags
+    if (flags & GrabRotationTurnTowardsPlayer) {
+        grabRotationApplyTurnTowardsPlayer(grabRotationBaseOut);
+    } else if (flags & GrabRotationSnapToCubeNormals) {
+        grabRotationApplySnapToCubeNormals(forwardRotationIn, objectRotationIn, grabRotationBaseOut);
+    } else { // with no rotation modifier, object is not rotated on grab
+        grabRotationApplyNoRotation(forwardRotationIn, objectRotationIn, grabRotationBaseOut);
     }
+}
+
+
+void grabRotationApplyUseZLookDirection(struct Quaternion* lookRotationDeltaIn, struct Quaternion* grabRotationBaseInOut) {
     struct Quaternion tmp;
     quatMultiply(lookRotationDeltaIn, grabRotationBaseInOut, &tmp);
     *grabRotationBaseInOut = tmp;
 }
 
-void grabRotationInitBase(const enum GrabRotationFlags flags, struct Quaternion* forwardRotationIn, struct Quaternion* objectRotationIn, struct Quaternion* grabRotationBaseOut) {
-    // modify object rotation according to flags
-    struct Quaternion objectRotation = *objectRotationIn;
-    grabRotationApplySnapToCubeNormals(flags, forwardRotationIn, &objectRotation);
-    grabRotationApplyTurnTowardsPlayer(flags, forwardRotationIn, &objectRotation);
-    
-    // untangle objectRotation from relative forwardRotation, store as grabRotationBase
-    struct Quaternion forwardRotationInverted;
-    quatConjugate(forwardRotationIn, &forwardRotationInverted);
-    quatMultiply(&forwardRotationInverted, &objectRotation, grabRotationBaseOut);
-}
-
 void grabRotationUpdate(const enum GrabRotationFlags flags, struct Quaternion* lookRotationDeltaIn, struct Quaternion* forwardRotationIn, struct Quaternion* grabRotationBaseIn, struct Quaternion* grabRotationOut) {
     // modify target object rotation in object-space
     struct Quaternion grabRotationBase = *grabRotationBaseIn;
-    grabRotationApplyUseZLookDirection(flags, lookRotationDeltaIn, &grabRotationBase);
+    if (flags & GrabRotationUseZLookDirection) {
+        grabRotationApplyUseZLookDirection(lookRotationDeltaIn, &grabRotationBase);
+    }
     
     // maintain object's relative rotation
     quatMultiply(forwardRotationIn, &grabRotationBase, grabRotationOut);
