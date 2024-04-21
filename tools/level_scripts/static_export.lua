@@ -13,6 +13,7 @@ sk_definition_writer.add_header('"../build/src/audio/subtitles.h"')
 sk_definition_writer.add_header('"levels/level_definition.h"')
 
 local portalable_surfaces = {
+    concrete_modular_wall001b = true,
     concrete_modular_wall001d = true,
     concrete_modular_ceiling001a = true,
     concrete_modular_floor001a = true,

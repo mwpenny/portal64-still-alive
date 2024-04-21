@@ -20,8 +20,9 @@ The start/end of level elevator that takes the player between test chambers.
 End of level elevators open when the player is near and lock once they step
 inside. Then, after some time, the screen shake animation and movement sound
 are played. Finally, the player's portals are closed and they are teleported to
-the destination elevator at the same relative position as in the starting
-elevator to create the illusion that it is the same. It does not actually move.
+the destination elevator at the same relative position and rotation as in the
+starting elevator to create the illusion that it is the same. It does not
+actually move.
 
 If a GLaDOS voice line is playing, the last elevator in a map will not start to
 transition the player to the next one until the line finishes.

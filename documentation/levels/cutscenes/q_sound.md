@@ -15,7 +15,7 @@ q_sound SOUND_ID CHANNEL_NAME SUBTITLE_ID [VOLUME]
 | `SOUND_ID`          | The ID of the sound to queue. `SOUNDS_` prefix can be omitted.                                                                             |
 | `CHANNEL_NAME`      | The name of the channel to queue the sound on                                                                                              |
 | `SUBTITLE_ID`       | The ID of the subtitle to display when playing the sound with subtitles enabled, or `SubtitleKeyNone`. Only shown for `CH_GLADOS` channel. |
-| `VOLUME` (optional) | The volume to play the sound at. 0 is muted and 1 is normal volume.                                                                        |
+| `VOLUME` (optional) | The volume multiplier for playback. 0 is muted and 1 is normal volume. Defaults to 1.                                                      |
 
 ## Notes
 

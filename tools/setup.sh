@@ -9,10 +9,10 @@ sudo dpkg --add-architecture i386
 sudo apt update
 
 # Install various packages
-sudo apt install binutils-mips-n64 gcc-mips-n64 git imagemagick liblua5.4-0 liblua5.4-dev libnustd lua5.4 make makemask mpg123 newlib-mips-n64 nodejs n64sdk root-compatibility-environment sfz2n64 sox unzip vtf2png -y
+sudo apt install binutils-mips-n64 gcc-mips-n64 git imagemagick liblua5.4-0 liblua5.4-dev lua5.4 make makemask mpg123 newlib-mips-n64 nodejs n64sdk root-compatibility-environment sfz2n64 sox unzip vtf2png -y
 
 # Ubuntu WSL  needs these for some reason.
-sudo apt-get update && sudo apt-get install libnustd libxfixes3 libxi6 libxkbcommon0 libxxf86vm1 libgl1-mesa-glx -y
+sudo apt-get update && sudo apt-get install libxfixes3 libxi6 libxkbcommon0 libxxf86vm1 libgl1-mesa-glx -y
 
 # Install Blender and FFmpeg  specific versions via snap
 sudo snap install blender --channel=3.6lts/stable --classic

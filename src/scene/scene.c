@@ -92,6 +92,12 @@ void sceneInit(struct Scene* scene) {
     } else {
         scene->checkpointState = SceneCheckpointStateSaved;
         checkpointLoadLast(scene);
+
+        // Signal materials are only updated on state change, and the loaded
+        // checkpoint could have active signals. Ensure materials accurately
+        // reflect the state of such signals, before the first scene update
+        // overwrites their previous state.
+        staticRenderCheckSignalMaterials();
     }
 
     savefileMarkChapterProgress(gCurrentLevelIndex);
