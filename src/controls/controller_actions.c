@@ -24,20 +24,20 @@ unsigned char gDefaultControllerSettings[ControllerActionSourceCount] = {
 };
 
 unsigned short gActionSourceButtonMask[ControllerActionSourceCount] = {
-    [ControllerActionSourceAButton] = A_BUTTON,
-    [ControllerActionSourceBButton] = B_BUTTON,
-    [ControllerActionSourceCUpButton] = U_CBUTTONS,
-    [ControllerActionSourceCRightButton] = R_CBUTTONS,
-    [ControllerActionSourceCDownButton] = D_CBUTTONS,
-    [ControllerActionSourceCLeftButton] = L_CBUTTONS,
-    [ControllerActionSourceDUpButton] = U_JPAD,
-    [ControllerActionSourceDRightButton] = R_JPAD,
-    [ControllerActionSourceDDownButton] = D_JPAD,
-    [ControllerActionSourceDLeftButton] = L_JPAD,
-    [ControllerActionSourceStartButton] = START_BUTTON,
-    [ControllerActionSourceLTrig] = L_TRIG,
-    [ControllerActionSourceRTrig] = R_TRIG,
-    [ControllerActionSourceZTrig] = Z_TRIG,
+    [ControllerActionSourceAButton] = BUTTON_A,
+    [ControllerActionSourceBButton] = BUTTON_B,
+    [ControllerActionSourceCUpButton] = BUTTON_C_UP,
+    [ControllerActionSourceCRightButton] = BUTTON_C_RIGHT,
+    [ControllerActionSourceCDownButton] = BUTTON_C_DOWN,
+    [ControllerActionSourceCLeftButton] = BUTTON_C_LEFT,
+    [ControllerActionSourceDUpButton] = BUTTON_UP,
+    [ControllerActionSourceDRightButton] = BUTTON_RIGHT,
+    [ControllerActionSourceDDownButton] = BUTTON_DOWN,
+    [ControllerActionSourceDLeftButton] = BUTTON_LEFT,
+    [ControllerActionSourceStartButton] = BUTTON_START,
+    [ControllerActionSourceLTrig] = BUTTON_L,
+    [ControllerActionSourceRTrig] = BUTTON_R,
+    [ControllerActionSourceZTrig] = BUTTON_Z,
     [ControllerActionSourceJoystick] = 0,
 };
 
@@ -83,38 +83,39 @@ void controllerActionReadDirection(enum ControllerActionSource source, int contr
 
     switch (source) {
         case ControllerActionSourceCUpButton:
-            if (controllerGetButton(controllerIndex, U_CBUTTONS)) {
+            if (controllerGetButton(controllerIndex, BUTTON_C_UP)) {
                 result.y += 1.0f;
             }
-            if (controllerGetButton(controllerIndex, D_CBUTTONS)) {
+            if (controllerGetButton(controllerIndex, BUTTON_C_DOWN)) {
                 result.y -= 1.0f;
             }
-            if (controllerGetButton(controllerIndex, R_CBUTTONS)) {
+            if (controllerGetButton(controllerIndex, BUTTON_C_RIGHT)) {
                 result.x += 1.0f;
             }
-            if (controllerGetButton(controllerIndex, L_CBUTTONS)) {
+            if (controllerGetButton(controllerIndex, BUTTON_C_LEFT)) {
                 result.x -= 1.0f;
             }
             break;
         case ControllerActionSourceDUpButton:
-            if (controllerGetButton(controllerIndex, U_JPAD)) {
+            if (controllerGetButton(controllerIndex, BUTTON_UP)) {
                 result.y += 1.0f;
             }
-            if (controllerGetButton(controllerIndex, D_JPAD)) {
+            if (controllerGetButton(controllerIndex, BUTTON_DOWN)) {
                 result.y -= 1.0f;
             }
-            if (controllerGetButton(controllerIndex, R_JPAD)) {
+            if (controllerGetButton(controllerIndex, BUTTON_RIGHT)) {
                 result.x += 1.0f;
             }
-            if (controllerGetButton(controllerIndex, L_JPAD)) {
+            if (controllerGetButton(controllerIndex, BUTTON_LEFT)) {
                 result.x -= 1.0f;
             }
             break;
         case ControllerActionSourceJoystick:
         {
-            OSContPad* pad = controllersGetControllerData(controllerIndex);
-            result.x += controllerCleanupStickInput(pad->stick_x);
-            result.y += controllerCleanupStickInput(pad->stick_y);
+            int8_t pad_stick_x = controllerGetStickX(controllerIndex);
+            int8_t pad_stick_y = controllerGetStickY(controllerIndex);
+            result.x += controllerCleanupStickInput(pad_stick_x);
+            result.y += controllerCleanupStickInput(pad_stick_y);
             break;
         }
         default:
@@ -251,9 +252,10 @@ struct ControllerSourceWithController controllerReadAnySource() {
             }
 
             if (result.button == ControllerActionSourceJoystick) {
-                OSContPad* pad = controllersGetControllerData(result.controller);
+                int8_t pad_stick_x = controllerGetStickX(result.controller);
+                int8_t pad_stick_y = controllerGetStickY(result.controller);
 
-                if (abs(pad->stick_x) > 40 || abs(pad->stick_y) > 40) {
+                if (abs(pad_stick_x) > 40 || abs(pad_stick_y) > 40) {
                     return result;
                 }
             }

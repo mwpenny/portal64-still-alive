@@ -87,14 +87,14 @@ enum InputCapture optionsMenuUpdate(struct OptionsMenu* options) {
             break;
     }
 
-    if (result == InputCaptureExit || controllerGetButtonDown(0, B_BUTTON)) {
+    if (result == InputCaptureExit || controllerGetButtonDown(0, BUTTON_B)) {
         savefileSave();
         return InputCaptureExit;
     } else if (result != InputCapturePass) {
         return result;
     }
 
-    if (controllerGetButtonDown(0, Z_TRIG | L_TRIG)) {
+    if (controllerGetButtonDown(0, BUTTON_Z | BUTTON_L)) {
         if (options->tabs.selectedTab == 0) {
             tabsSetSelectedTab(&options->tabs, OptionsMenuTabsCount - 1);
         } else {
@@ -105,7 +105,7 @@ enum InputCapture optionsMenuUpdate(struct OptionsMenu* options) {
         soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
-    if (controllerGetButtonDown(0, R_TRIG)) {
+    if (controllerGetButtonDown(0, BUTTON_R)) {
         if (options->tabs.selectedTab == OptionsMenuTabsCount - 1) {
             tabsSetSelectedTab(&options->tabs, 0);
         } else {

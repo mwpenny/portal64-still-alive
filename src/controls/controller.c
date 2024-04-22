@@ -6,6 +6,8 @@
 #include "rumble_pak.h"
 #include "../util/profile.h"
 
+#include <ultra64.h>
+
 #include <string.h>
 
 // 0 = disable, 1 = record, 2 = playback
@@ -80,42 +82,46 @@ void controllersTriggerRead() {
     }
 }
 
-OSContPad* controllersGetControllerData(int index) {
-    return &gControllerData[REMAP_PLAYER_INDEX(index)];
+int8_t controllerGetStickX(int index) {
+    return (int8_t)(gControllerData[REMAP_PLAYER_INDEX(index)].stick_x);
 }
 
-u16 controllerGetLastButton(int index) {
-    return gControllerLastButton[REMAP_PLAYER_INDEX(index)];
+int8_t controllerGetStickY(int index) {
+    return (int8_t)(gControllerData[REMAP_PLAYER_INDEX(index)].stick_y);
 }
 
-u16 controllerGetButton(int index, u16 button) {
-    return gControllerData[REMAP_PLAYER_INDEX(index)].button & button;
+uint16_t controllerGetLastButton(int index) {
+    return (uint16_t)(gControllerLastButton[REMAP_PLAYER_INDEX(index)]);
 }
 
-u16 controllerGetButtonDown(int index, u16 button) {
-    return gControllerData[REMAP_PLAYER_INDEX(index)].button & ~gControllerLastButton[REMAP_PLAYER_INDEX(index)] & button;
+uint16_t controllerGetButton(int index, uint16_t button) {
+    return (uint16_t)(gControllerData[REMAP_PLAYER_INDEX(index)].button & (u16)(button));
 }
 
-u16 controllerGetButtonUp(int index, u16 button) {
-    return ~gControllerData[REMAP_PLAYER_INDEX(index)].button & gControllerLastButton[REMAP_PLAYER_INDEX(index)] & button;
+uint16_t controllerGetButtonDown(int index, uint16_t button) {
+    return (uint16_t)(gControllerData[REMAP_PLAYER_INDEX(index)].button & ~gControllerLastButton[REMAP_PLAYER_INDEX(index)] & (u16)(button));
+}
+
+uint16_t controllerGetButtonUp(int index, uint16_t button) {
+    return (uint16_t)(~gControllerData[REMAP_PLAYER_INDEX(index)].button & gControllerLastButton[REMAP_PLAYER_INDEX(index)] & (u16)(button));
 }
 
 enum ControllerDirection controllerGetDirection(int index) {
     enum ControllerDirection result = 0;
 
-    if (gControllerData[REMAP_PLAYER_INDEX(index)].stick_y > 40 || (gControllerData[REMAP_PLAYER_INDEX(index)].button & U_JPAD) != 0) {
+    if (gControllerData[REMAP_PLAYER_INDEX(index)].stick_y > 40 || (gControllerData[REMAP_PLAYER_INDEX(index)].button & BUTTON_UP) != 0) {
         result |= ControllerDirectionUp;
     }
 
-    if (gControllerData[REMAP_PLAYER_INDEX(index)].stick_y < -40 || (gControllerData[REMAP_PLAYER_INDEX(index)].button & D_JPAD) != 0) {
+    if (gControllerData[REMAP_PLAYER_INDEX(index)].stick_y < -40 || (gControllerData[REMAP_PLAYER_INDEX(index)].button & BUTTON_DOWN) != 0) {
         result |= ControllerDirectionDown;
     }
 
-    if (gControllerData[REMAP_PLAYER_INDEX(index)].stick_x > 40 || (gControllerData[REMAP_PLAYER_INDEX(index)].button & R_JPAD) != 0) {
+    if (gControllerData[REMAP_PLAYER_INDEX(index)].stick_x > 40 || (gControllerData[REMAP_PLAYER_INDEX(index)].button & BUTTON_RIGHT) != 0) {
         result |= ControllerDirectionRight;
     }
 
-    if (gControllerData[REMAP_PLAYER_INDEX(index)].stick_x < -40 || (gControllerData[REMAP_PLAYER_INDEX(index)].button & L_JPAD) != 0) {
+    if (gControllerData[REMAP_PLAYER_INDEX(index)].stick_x < -40 || (gControllerData[REMAP_PLAYER_INDEX(index)].button & BUTTON_LEFT) != 0) {
         result |= ControllerDirectionLeft;
     }
 

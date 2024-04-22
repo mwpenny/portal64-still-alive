@@ -148,11 +148,11 @@ enum InputCapture newGameUpdate(struct NewGameMenu* newGameMenu) {
         ++newGameMenu->chapterCount;
     }
 
-    if (controllerGetButtonDown(0, B_BUTTON)) {
+    if (controllerGetButtonDown(0, BUTTON_B)) {
         return InputCaptureExit;
     }
 
-    if (controllerGetButtonDown(0, A_BUTTON) && gChapters[newGameMenu->selectedChapter].testChamberLevelIndex >= 0) {
+    if (controllerGetButtonDown(0, BUTTON_A) && gChapters[newGameMenu->selectedChapter].testChamberLevelIndex >= 0) {
         if (gScene.mainMenuMode) {
             newGameStartSelectedChapter(newGameMenu);
         } else {

@@ -378,7 +378,7 @@ enum InputCapture controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
         }
     }
 
-    if (controllerGetButtonDown(0, A_BUTTON)) {
+    if (controllerGetButtonDown(0, BUTTON_A)) {
         if (controlsMenu->selectedRow >= 0 && controlsMenu->selectedRow < ControllerActionCount) {
             controlsMenu->waitingForAction = gControllerDataRows[controlsMenu->selectedRow].action;
         } else if (controlsMenu->selectedRow == ControllerActionCount) {

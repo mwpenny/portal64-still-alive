@@ -608,7 +608,7 @@ void sceneUpdate(struct Scene* scene) {
     scene->lastFrameTime = frameStart - scene->lastFrameStart;
     
     if (gGameMenu.state != GameMenuStateResumeGame) {
-        if (gGameMenu.state == GameMenuStateLanding && (controllerGetButtonDown(0, B_BUTTON) || controllerActionGet(ControllerActionPause))) {
+        if (gGameMenu.state == GameMenuStateLanding && (controllerGetButtonDown(0, BUTTON_B) || controllerActionGet(ControllerActionPause))) {
             gGameMenu.state = GameMenuStateResumeGame;
             savefileSave();
         }
@@ -778,41 +778,41 @@ void sceneUpdate(struct Scene* scene) {
     scene->cpuTime = osGetTime() - frameStart;
     scene->lastFrameStart = frameStart;
 
-    OSContPad* freecam = controllersGetControllerData(2);
-
+    int8_t freecam_stick_x = controllerGetStickX(2);
+    int8_t freecam_stick_y = controllerGetStickY(2);
 
     struct Vector3 lookDir;
     struct Vector3 rightDir;
 
     playerGetMoveBasis(&scene->camera.transform.rotation, &lookDir, &rightDir);
 
-    if (freecam->stick_y) {
-        if (controllerGetButton(2, Z_TRIG)) {
+    if (freecam_stick_y) {
+        if (controllerGetButton(2, BUTTON_Z)) {
             vector3AddScaled(
                 &scene->freeCameraOffset, 
                 &lookDir, 
-                -freecam->stick_y * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f), 
+                -freecam_stick_y * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f), 
                 &scene->freeCameraOffset
             );
         } else {
-            scene->freeCameraOffset.y += freecam->stick_y * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f);
+            scene->freeCameraOffset.y += freecam_stick_y * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f);
         }
     }
 
-    if (freecam->stick_x) {
+    if (freecam_stick_x) {
         vector3AddScaled(
             &scene->freeCameraOffset, 
             &rightDir, 
-            freecam->stick_x * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f), 
+            freecam_stick_x * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f), 
             &scene->freeCameraOffset
         );
     }
 
-    if (controllerGetButtonDown(2, START_BUTTON)) {
+    if (controllerGetButtonDown(2, BUTTON_START)) {
         scene->freeCameraOffset = gZeroVec;
     }
 
-    if (controllerGetButtonDown(2, L_TRIG)) {
+    if (controllerGetButtonDown(2, BUTTON_L)) {
         levelQueueLoad(NEXT_LEVEL, NULL, NULL);
     }
 

@@ -78,7 +78,7 @@ enum InputCapture loadGameUpdate(struct LoadGameMenu* loadGame) {
     }
 
     if (loadGame->savefileList->numberOfSaves) {
-        if (controllerGetButtonDown(0, A_BUTTON)) {
+        if (controllerGetButtonDown(0, BUTTON_A)) {
             if (gScene.mainMenuMode) {
                 loadGameInSelectedSlot(loadGame);
             } else {
@@ -89,7 +89,7 @@ enum InputCapture loadGameUpdate(struct LoadGameMenu* loadGame) {
                 );
             }
             soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
-        } else if (controllerGetButtonDown(0, Z_TRIG)) {
+        } else if (controllerGetButtonDown(0, BUTTON_Z)) {
             savefileListConfirmDeletion(
                 loadGame->savefileList,
                 (ConfirmationDialogCallback)&loadGameConfirmDeletionClosed,
