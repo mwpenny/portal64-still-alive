@@ -2,7 +2,7 @@
 
 #include "../font/dejavusans.h"
 #include "../font/font.h"
-#include "../controls/controller.h"
+#include "../system/controller.h"
 #include "../audio/soundplayer.h"
 #include "../util/memory.h"
 #include "./translations.h"

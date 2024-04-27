@@ -1,7 +1,7 @@
 #include "./confirmation_dialog.h"
 
 #include "../font/dejavusans.h"
-#include "../controls/controller.h"
+#include "../system/controller.h"
 #include "../audio/soundplayer.h"
 #include "./translations.h"
 

@@ -7,7 +7,7 @@
 
 #include "../build/assets/materials/ui.h"
 
-#include "../controls/controller.h"
+#include "../system/controller.h"
 #include "../build/src/audio/clips.h"
 #include "../build/src/audio/subtitles.h"
 

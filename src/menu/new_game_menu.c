@@ -20,7 +20,7 @@
 
 #include "../levels/levels.h"
 #include "../savefile/savefile.h"
-#include "../controls/controller.h"
+#include "../system/controller.h"
 
 struct Chapter gChapters[] = {
     {images_chapter1_rgba_16b, 0, 0},

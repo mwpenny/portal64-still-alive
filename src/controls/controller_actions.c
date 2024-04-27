@@ -1,7 +1,7 @@
 #include "controller_actions.h"
 
 #include "../util/memory.h"
-#include "./controller.h"
+#include "../system/controller.h"
 #include "../math/mathf.h"
 #include "../savefile/savefile.h"
 

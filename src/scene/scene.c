@@ -12,7 +12,7 @@
 #include "shadow_map.h"
 #include "../physics/point_constraint.h"
 #include "../physics/debug_renderer.h"
-#include "../controls/controller.h"
+#include "../system/controller.h"
 #include "../controls/controller_actions.h"
 #include "../physics/collision_scene.h"
 #include "../levels/static_render.h"

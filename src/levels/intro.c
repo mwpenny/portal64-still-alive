@@ -8,7 +8,7 @@
 #include "../util/rom.h"
 #include "../graphics/image.h"
 #include "../build/assets/materials/images.h"
-#include "../controls/controller.h"
+#include "../system/controller.h"
 
 #define INTRO_TIME  9.0f
 

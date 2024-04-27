@@ -1,7 +1,7 @@
 #include "load_game.h"
 
 #include "../savefile/savefile.h"
-#include "../controls/controller.h"
+#include "../system/controller.h"
 #include "../levels/levels.h"
 #include "../util/memory.h"
 #include "../audio/soundplayer.h"

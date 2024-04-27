@@ -4,7 +4,7 @@
 #include "audio/audio.h"
 #include "audio/soundplayer.h"
 #include "controls/controller_actions.h"
-#include "controls/controller.h"
+#include "system/controller.h"
 #include "controls/rumble_pak.h"
 #include "defs.h"
 #include "graphics/graphics.h"

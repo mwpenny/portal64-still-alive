@@ -1,10 +1,10 @@
 
-#include "controller.h"
+#include "system/controller.h"
 #include "defs.h"
 #include "util/memory.h"
 #include <sched.h>
-#include "rumble_pak.h"
-#include "../util/profile.h"
+#include "controls/rumble_pak.h"
+#include "util/profile.h"
 
 #include <ultra64.h>
 

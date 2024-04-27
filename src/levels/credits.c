@@ -9,7 +9,7 @@
 #include "../graphics/image.h"
 #include "../build/assets/materials/static.h"
 #include "../build/assets/materials/ui.h"
-#include "../controls/controller.h"
+#include "../system/controller.h"
 #include "../font/font.h"
 #include "../font/liberation_mono.h"
 

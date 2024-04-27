@@ -7,7 +7,7 @@
 
 #include "../build/assets/materials/ui.h"
 #include "../scene/render_plan.h"
-#include "../controls/controller.h"
+#include "../system/controller.h"
 
 #include "../build/assets/test_chambers/test_chamber_00/test_chamber_00.h"
 #include "../build/src/audio/clips.h"
