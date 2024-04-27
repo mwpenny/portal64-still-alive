@@ -112,10 +112,9 @@ void controllerActionReadDirection(enum ControllerActionSource source, int contr
             break;
         case ControllerActionSourceJoystick:
         {
-            int8_t pad_stick_x = controllerGetStickX(controllerIndex);
-            int8_t pad_stick_y = controllerGetStickY(controllerIndex);
-            result.x += controllerCleanupStickInput(pad_stick_x);
-            result.y += controllerCleanupStickInput(pad_stick_y);
+            controller_sticks_t pad_sticks = controllerGetSticks(controllerIndex);
+            result.x += controllerCleanupStickInput(pad_sticks.x);
+            result.y += controllerCleanupStickInput(pad_sticks.y);
             break;
         }
         default:
@@ -252,10 +251,9 @@ struct ControllerSourceWithController controllerReadAnySource() {
             }
 
             if (result.button == ControllerActionSourceJoystick) {
-                int8_t pad_stick_x = controllerGetStickX(result.controller);
-                int8_t pad_stick_y = controllerGetStickY(result.controller);
+                controller_sticks_t pad_sticks = controllerGetSticks(result.controller);
 
-                if (abs(pad_stick_x) > 40 || abs(pad_stick_y) > 40) {
+                if (abs(pad_sticks.x) > 40 || abs(pad_sticks.y) > 40) {
                     return result;
                 }
             }

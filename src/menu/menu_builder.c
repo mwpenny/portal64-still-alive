@@ -187,8 +187,8 @@ enum InputCapture sliderMenuItemUpdate(struct MenuBuilderElement* element, MenuA
             slider->value = 0.0f;
         }
     } else {
-        int8_t pad_stick_x = controllerGetStickX(0);
-        float newValue = slider->value + pad_stick_x * SCROLL_MULTIPLIER;
+        controller_sticks_t pad_sticks = controllerGetSticks(0);
+        float newValue = slider->value + pad_sticks.x * SCROLL_MULTIPLIER;
 
         if (newValue > 1.0f) {
             newValue = 1.0f;

@@ -36,10 +36,14 @@ enum ControllerDirection {
     ControllerDirectionLeft = (1 << 3),
 };
 
+typedef struct {
+    int8_t x;
+    int8_t y;
+} controller_sticks_t;
+
 void controllersClearState();
 int controllerIsConnected(int index);
-int8_t   controllerGetStickX(int index);
-int8_t   controllerGetStickY(int index);
+controller_sticks_t controllerGetSticks(int index);
 uint16_t controllerGetLastButton(int index);
 uint16_t controllerGetButton(int index, uint16_t button);
 uint16_t controllerGetButtonDown(int index, uint16_t button);

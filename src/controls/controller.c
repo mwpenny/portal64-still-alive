@@ -82,12 +82,13 @@ void controllersTriggerRead() {
     }
 }
 
-int8_t controllerGetStickX(int index) {
-    return (int8_t)(gControllerData[REMAP_PLAYER_INDEX(index)].stick_x);
-}
+controller_sticks_t controllerGetSticks(int index) {
+    controller_sticks_t sticks = {
+        (int8_t)(gControllerData[REMAP_PLAYER_INDEX(index)].stick_x),
+        (int8_t)(gControllerData[REMAP_PLAYER_INDEX(index)].stick_y)
+    };
 
-int8_t controllerGetStickY(int index) {
-    return (int8_t)(gControllerData[REMAP_PLAYER_INDEX(index)].stick_y);
+    return sticks;
 }
 
 uint16_t controllerGetLastButton(int index) {
