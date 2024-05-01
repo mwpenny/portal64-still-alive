@@ -540,7 +540,6 @@ materials:
       color: ["SHADE", "0", "PRIMITIVE", "0"]
 
   plastic/plasticwall003a:
-
     gDPSetTile: 
       filename: ../../portal_pak_modified/materials/plastic/plasticwall003a.png
       siz: G_IM_SIZ_8b
@@ -551,6 +550,21 @@ materials:
       clear: [G_LIGHTING]
     gDPSetCombineMode: G_CC_DECALRGB
     gDPSetCycleType: G_CYC_1CYCLE
+
+  plastic/plasticwall004a:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/plastic/plasticwall004a.png
+      siz: G_IM_SIZ_8b
+      fmt: G_IM_FMT_I
+    t:
+        wrap: false
+
+    gDPSetCombineMode: G_CC_MODULATERGBA
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
 
   grav_flare:
     gDPSetTile:
