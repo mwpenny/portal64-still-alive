@@ -82,8 +82,8 @@ void controllersTriggerRead() {
     }
 }
 
-controller_sticks_t controllerGetSticks(int index) {
-    controller_sticks_t sticks = {
+ControllerStick controllerGetSticks(int index) {
+    ControllerStick sticks = {
         (int8_t)(gControllerData[REMAP_PLAYER_INDEX(index)].stick_x),
         (int8_t)(gControllerData[REMAP_PLAYER_INDEX(index)].stick_y)
     };

@@ -23,7 +23,7 @@ typedef enum {
     BUTTON_C_DOWN  = 0x0004,
     BUTTON_C_LEFT  = 0x0002,
     BUTTON_C_RIGHT = 0x0001,
-} buttons_t;
+} ControllerButton;
 
 void controllersInit();
 void controllersSavePreviousState();
@@ -39,11 +39,11 @@ enum ControllerDirection {
 typedef struct {
     int8_t x;
     int8_t y;
-} controller_sticks_t;
+} ControllerStick;
 
 void controllersClearState();
 int controllerIsConnected(int index);
-controller_sticks_t controllerGetSticks(int index);
+ControllerStick controllerGetSticks(int index);
 uint16_t controllerGetLastButton(int index);
 uint16_t controllerGetButton(int index, uint16_t button);
 uint16_t controllerGetButtonDown(int index, uint16_t button);

@@ -778,7 +778,7 @@ void sceneUpdate(struct Scene* scene) {
     scene->cpuTime = osGetTime() - frameStart;
     scene->lastFrameStart = frameStart;
 
-    controller_sticks_t freecam_sticks = controllerGetSticks(2);
+    ControllerStick freecam_sticks = controllerGetSticks(2);
 
     struct Vector3 lookDir;
     struct Vector3 rightDir;
