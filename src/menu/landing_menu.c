@@ -2,7 +2,7 @@
 
 #include "../font/font.h"
 #include "../font/dejavusans.h"
-#include "../controls/controller.h"
+#include "../system/controller.h"
 #include "../util/memory.h"
 #include "../audio/soundplayer.h"
 
@@ -123,7 +123,7 @@ struct LandingMenuOption* landingMenuUpdate(struct LandingMenu* landingMenu) {
         cheatCodeEnterDirection(CheatCodeDirRight);
     }
 
-    if (controllerGetButtonDown(0, A_BUTTON)) {
+    if (controllerGetButtonDown(0, BUTTON_A)) {
         soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         return &landingMenu->options[landingMenu->selectedItem];
     }

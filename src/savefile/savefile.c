@@ -1,7 +1,7 @@
 
 #include "savefile.h"
 #include "util/memory.h"
-#include "controls/controller.h"
+#include "system/controller.h"
 
 #include "../controls/controller_actions.h"
 #include "../build/src/audio/subtitles.h"

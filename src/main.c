@@ -4,7 +4,7 @@
 #include "audio/audio.h"
 #include "audio/soundplayer.h"
 #include "controls/controller_actions.h"
-#include "controls/controller.h"
+#include "system/controller.h"
 #include "controls/rumble_pak.h"
 #include "defs.h"
 #include "graphics/graphics.h"
@@ -331,7 +331,7 @@ static void gameProc(void* arg) {
                 }
     
 #if PORTAL64_WITH_RSP_PROFILER
-                if (controllerGetButtonDown(2, R_JPAD)) {
+                if (controllerGetButtonDown(2, BUTTON_RIGHT)) {
                     struct GraphicsTask* task = &gGraphicsTasks[drawBufferIndex];
                     profileTask(&scheduler, &gameThread, &task->task.list, task->framebuffer);
                 }

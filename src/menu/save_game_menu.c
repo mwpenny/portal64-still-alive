@@ -2,7 +2,7 @@
 
 #include "../savefile/savefile.h"
 #include "../levels/levels.h"
-#include "../controls/controller.h"
+#include "../system/controller.h"
 #include "../util/memory.h"
 #include "../audio/soundplayer.h"
 #include "./translations.h"
@@ -113,7 +113,7 @@ enum InputCapture saveGameUpdate(struct SaveGameMenu* saveGame) {
     }
 
     if (saveGame->savefileList->numberOfSaves) {
-        if (controllerGetButtonDown(0, A_BUTTON)) {
+        if (controllerGetButtonDown(0, BUTTON_A)) {
             short selectedSaveIndex = saveGame->savefileList->selectedSave;
             struct SavefileInfo* selectedSave = &saveGame->savefileList->savefileInfo[selectedSaveIndex];
 
@@ -127,7 +127,7 @@ enum InputCapture saveGameUpdate(struct SaveGameMenu* saveGame) {
                 );
                 soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
             }
-        } else if (controllerGetButtonDown(0, Z_TRIG)) {
+        } else if (controllerGetButtonDown(0, BUTTON_Z)) {
             short selectedSaveIndex = saveGame->savefileList->selectedSave;
             struct SavefileInfo* selectedSave = &saveGame->savefileList->savefileInfo[selectedSaveIndex];
 

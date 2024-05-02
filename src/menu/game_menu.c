@@ -7,7 +7,7 @@
 
 #include "../build/assets/materials/ui.h"
 #include "../scene/render_plan.h"
-#include "../controls/controller.h"
+#include "../system/controller.h"
 #include "./translations.h"
 
 void gameMenuInit(struct GameMenu* gameMenu, struct LandingMenuOption* options, int optionCount, int darkenBackground) {
