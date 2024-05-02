@@ -43,7 +43,7 @@ typedef struct {
 
 void controllersClearState();
 int controllerIsConnected(int index);
-ControllerStick controllerGetSticks(int index);
+ControllerStick controllerGetStick(int index);
 uint16_t controllerGetLastButton(int index);
 uint16_t controllerGetButton(int index, uint16_t button);
 uint16_t controllerGetButtonDown(int index, uint16_t button);

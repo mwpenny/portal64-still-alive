@@ -82,13 +82,13 @@ void controllersTriggerRead() {
     }
 }
 
-ControllerStick controllerGetSticks(int index) {
-    ControllerStick sticks = {
+ControllerStick controllerGetStick(int index) {
+    ControllerStick stick = {
         (int8_t)(gControllerData[REMAP_PLAYER_INDEX(index)].stick_x),
         (int8_t)(gControllerData[REMAP_PLAYER_INDEX(index)].stick_y)
     };
 
-    return sticks;
+    return stick;
 }
 
 uint16_t controllerGetLastButton(int index) {

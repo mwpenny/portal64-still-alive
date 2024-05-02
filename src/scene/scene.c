@@ -778,31 +778,31 @@ void sceneUpdate(struct Scene* scene) {
     scene->cpuTime = osGetTime() - frameStart;
     scene->lastFrameStart = frameStart;
 
-    ControllerStick freecam_sticks = controllerGetSticks(2);
+    ControllerStick freecam_stick = controllerGetStick(2);
 
     struct Vector3 lookDir;
     struct Vector3 rightDir;
 
     playerGetMoveBasis(&scene->camera.transform.rotation, &lookDir, &rightDir);
 
-    if (freecam_sticks.y) {
+    if (freecam_stick.y) {
         if (controllerGetButton(2, BUTTON_Z)) {
             vector3AddScaled(
                 &scene->freeCameraOffset, 
                 &lookDir, 
-                -freecam_sticks.y * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f), 
+                -freecam_stick.y * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f), 
                 &scene->freeCameraOffset
             );
         } else {
-            scene->freeCameraOffset.y += freecam_sticks.y * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f);
+            scene->freeCameraOffset.y += freecam_stick.y * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f);
         }
     }
 
-    if (freecam_sticks.x) {
+    if (freecam_stick.x) {
         vector3AddScaled(
             &scene->freeCameraOffset, 
             &rightDir, 
-            freecam_sticks.x * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f), 
+            freecam_stick.x * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f), 
             &scene->freeCameraOffset
         );
     }
