@@ -8,7 +8,7 @@
 #include "../util/rom.h"
 #include "../graphics/image.h"
 #include "../build/assets/materials/images.h"
-#include "../controls/controller.h"
+#include "../system/controller.h"
 
 #define INTRO_TIME  9.0f
 
@@ -33,7 +33,7 @@ void introInit(struct Intro* intro) {
 void introUpdate(struct Intro* intro) {
     intro->time += FIXED_DELTA_TIME;
 
-    if (intro->time > INTRO_TIME || controllerGetButtonDown(0, START_BUTTON)) {
+    if (intro->time > INTRO_TIME || controllerGetButtonDown(0, BUTTON_START)) {
         levelQueueLoad(MAIN_MENU, NULL, NULL);
     }
 }

@@ -29,7 +29,7 @@ void signalsInit(unsigned signalCount) {
 }
 
 void signalsReset() {
-    int binCount = (gSignalCount + 63) >> 6;
+    int binCount = SIGNAL_BIN_COUNT(gSignalCount);
 
     for (int i = 0; i < binCount; ++i) {
         gPrevSignals[i] = gSignals[i];

@@ -20,8 +20,7 @@ Progress is tracked below.
 - [x] Chamber 11
 - [x] Chamber 12
 - [x] Chamber 13
-- [ ] Chamber 14
-    - [ ] Rising staircase
+- [x] Chamber 14
 - [ ] Chamber 15
 - [ ] Chamber 16
     - [ ] Turrets

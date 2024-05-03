@@ -2,7 +2,7 @@
 
 #include "../font/dejavusans.h"
 #include "../font/font.h"
-#include "../controls/controller.h"
+#include "../system/controller.h"
 #include "../audio/soundplayer.h"
 #include "../util/memory.h"
 #include "./translations.h"
@@ -378,7 +378,7 @@ enum InputCapture controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
         }
     }
 
-    if (controllerGetButtonDown(0, A_BUTTON)) {
+    if (controllerGetButtonDown(0, BUTTON_A)) {
         if (controlsMenu->selectedRow >= 0 && controlsMenu->selectedRow < ControllerActionCount) {
             controlsMenu->waitingForAction = gControllerDataRows[controlsMenu->selectedRow].action;
         } else if (controlsMenu->selectedRow == ControllerActionCount) {

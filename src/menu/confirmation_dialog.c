@@ -1,7 +1,7 @@
 #include "./confirmation_dialog.h"
 
 #include "../font/dejavusans.h"
-#include "../controls/controller.h"
+#include "../system/controller.h"
 #include "../audio/soundplayer.h"
 #include "./translations.h"
 
@@ -144,9 +144,9 @@ static void confirmationDialogClose(struct ConfirmationDialog* confirmationDialo
 }
 
 enum InputCapture confirmationDialogUpdate(struct ConfirmationDialog* confirmationDialog) {
-    if (controllerGetButtonDown(0, B_BUTTON)) {
+    if (controllerGetButtonDown(0, BUTTON_B)) {
         confirmationDialogClose(confirmationDialog, 0);
-    } else if (controllerGetButtonDown(0, A_BUTTON)) {
+    } else if (controllerGetButtonDown(0, BUTTON_A)) {
         if (confirmationDialog->selectedButton == &confirmationDialog->confirmButton) {
             confirmationDialogClose(confirmationDialog, 1);
         } else {

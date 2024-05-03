@@ -2,12 +2,6 @@
 
 First, you will need to setup [Modern SDK](https://crashoveride95.github.io/n64hbrew/modernsdk/startoff.html).
 
-After installing modern sdk you will want to also install
-
-```sh
-sudo apt install libnustd
-```
-
 Next, you will need to install the latest version of Blender 3.6 LTS (please don't use e.g. 4.x, only 3.6.x will work correctly). Then set the environment variable `BLENDER_3_6` to be the absolute path where the Blender 3.6 executable is located on your system.
 
 ```sh

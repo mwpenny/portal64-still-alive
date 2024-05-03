@@ -36,6 +36,7 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
     * [Doors](./door.md) (when open)
     * [Dynamic boxes](./dynamic_box.md)
     * [Elevators](./elevator.md)
+    * [Fizzler](./fizzler.md) frames
     * Player
     * Portals
     * [Security cameras](./security_camera.md)

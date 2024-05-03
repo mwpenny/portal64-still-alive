@@ -1,6 +1,6 @@
 #include "audio_options.h"
 
-#include "../controls/controller.h"
+#include "../system/controller.h"
 #include "../savefile/savefile.h"
 #include "../font/dejavusans.h"
 #include "../audio/soundplayer.h"

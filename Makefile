@@ -20,8 +20,8 @@ $(SKELATOOL64):
 	@$(MAKE) -C skelatool64
 
 OPTIMIZER		:= -Os
-LCDEFS			:= -DDEBUG -g -Isrc/ -I$(N64_ROOT)/usr/include/n64/nustd -Werror -Wall
-N64LIB			:= -lultra_rom -lnustd
+LCDEFS			:= -DDEBUG -g -Werror -Wall
+N64LIB			:= -lultra_rom
 
 ifeq ($(PORTAL64_WITH_DEBUGGER),1)
 LCDEFS += -DPORTAL64_WITH_DEBUGGER
@@ -71,7 +71,7 @@ DEPS = $(patsubst %.c, build/%.d, $(CODEFILES)) $(patsubst %.c, build/%.d, $(DAT
 
 -include $(DEPS)
 
-LCINCS =	-I$(N64_ROOT)/usr/include/n64/PR
+LCINCS =	-I$(N64_ROOT)/usr/include/n64/PR -Isrc/ -I$(N64_ROOT)/opt/crashsdk/mips64-elf/include
 LCDEFS +=	-DF3DEX_GBI_2 -DSCENE_SCALE=${SCENE_SCALE}
 #LCDEFS +=	-DF3DEX_GBI_2 -DFOG
 #LCDEFS +=	-DF3DEX_GBI_2 -DFOG -DXBUS
@@ -79,7 +79,8 @@ LCDEFS +=	-DF3DEX_GBI_2 -DSCENE_SCALE=${SCENE_SCALE}
 
 LDIRT  =	$(BASE_TARGET_NAME).elf $(CP_LD_SCRIPT) $(BASE_TARGET_NAME).z64 $(BASE_TARGET_NAME)_no_debug.map $(ASMOBJECTS)
 
-LDFLAGS =	-L$(N64_ROOT)/usr/lib/n64 $(N64LIB)  -L$(N64_LIBGCCDIR) -lgcc
+LDDIRS  =	-L$(N64_ROOT)/usr/lib/n64 -L$(N64_ROOT)/opt/crashsdk/mips64-elf/lib -L$(N64_LIBGCCDIR)
+LDFLAGS =	$(N64LIB) -lc -lgcc
 
 default:	english_audio
 
@@ -586,7 +587,7 @@ CODEOBJECTS_NO_DEBUG += build/debugger/debugger_stub.o build/debugger/serial_stu
 endif
 
 $(CODESEGMENT)_no_debug.o:	$(CODEOBJECTS_NO_DEBUG)
-	$(LD) -o $(CODESEGMENT)_no_debug.o -r $(CODEOBJECTS_NO_DEBUG) $(LDFLAGS)
+	$(LD) -o $(CODESEGMENT)_no_debug.o -r $(CODEOBJECTS_NO_DEBUG) $(LDDIRS) $(LDFLAGS)
 
 
 $(CP_LD_SCRIPT)_no_debug.ld: $(LD_SCRIPT) build/levels.ld build/dynamic_models.ld build/anims.ld build/subtitles.ld
@@ -606,7 +607,7 @@ CODEOBJECTS_DEBUG += build/debugger/debugger.o build/debugger/serial.o
 endif
 
 $(CODESEGMENT)_debug.o:	$(CODEOBJECTS_DEBUG)
-	$(LD) -o $(CODESEGMENT)_debug.o -r $(CODEOBJECTS_DEBUG) $(LDFLAGS)
+	$(LD) -o $(CODESEGMENT)_debug.o -r $(CODEOBJECTS_DEBUG $(LDDIRS) $(LDFLAGS)
 
 $(CP_LD_SCRIPT)_debug.ld: $(LD_SCRIPT) build/levels.ld build/dynamic_models.ld build/anims.ld build/subtitles.ld
 	cpp -P -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_debug.o -o $@ $<

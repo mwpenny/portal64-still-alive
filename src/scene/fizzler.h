@@ -18,7 +18,11 @@
 
 struct Fizzler {
     struct CollisionObject collisionObject;
+    struct CollisionObject frameLeftCollisionObject;
+    struct CollisionObject frameRightCollisionObject;
     struct RigidBody rigidBody;
+    struct RigidBody frameLeftRigidBody;
+    struct RigidBody frameRightRigidBody;
     struct ColliderTypeData colliderType;
     struct CollisionBox collisionBox;
     Vtx* modelVertices;

@@ -17,12 +17,16 @@
 #include "../physics/contact_insertion.h"
 #include "../scene/ball.h"
 #include "../savefile/savefile.h"
+#include "../player/grab_rotation.h"
 
 #include "../build/assets/models/player/chell.h"
 #include "../build/assets/materials/static.h"
 #include "../build/assets/models/portal_gun/w_portalgun.h"
 
 #define GRAB_RAYCAST_DISTANCE   2.5f
+#define GRAB_MIN_OFFSET_Y      -1.1f
+#define GRAB_MAX_OFFSET_Y       1.25f
+
 #define DROWN_TIME              2.0f
 #define STEP_TIME               0.35f
 
@@ -90,7 +94,7 @@ void playerRender(void* data, struct DynamicRenderDataList* renderList, struct R
     struct Vector3 forwardVector;
     struct Vector3 unusedRight;
 
-    playerGetMoveBasis(&player->lookTransform, &forwardVector, &unusedRight);
+    playerGetMoveBasis(&player->lookTransform.rotation, &forwardVector, &unusedRight);
     
     finalPlayerTransform.position = player->body.transform.position;
     quatLook(&forwardVector, &gUp, &finalPlayerTransform.rotation);
@@ -263,6 +267,23 @@ void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) 
     } else if (grabbing != player->grabConstraint.object) {
         pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 1.0f);
     }
+    
+    playerInitGrabRotationBase(player);
+}
+
+void playerInitGrabRotationBase(struct Player* player) {
+    if (!player->grabConstraint.object) {
+        return;
+    }
+    struct Quaternion forwardRotation = player->lookTransform.rotation;
+    struct Vector3 forward, tmpVec;
+    playerGetMoveBasis(&forwardRotation, &forward, &tmpVec);
+    vector3Negate(&forward, &forward);
+    quatLook(&forward, &gUp, &forwardRotation);
+    playerPortalGrabTransform(player, NULL, &forwardRotation);
+    
+    enum GrabRotationFlags grabRotationFlags = grabRotationFlagsForCollisionObject(player->grabConstraint.object);
+    grabRotationInitBase(grabRotationFlags, &forwardRotation, &player->grabConstraint.object->body->transform.rotation, &player->grabRotationBase);
 }
 
 void playerShakeUpdate(struct Player* player) {
@@ -301,12 +322,11 @@ void playerThrowObject(struct Player* player) {
     if (!playerIsGrabbing(player)) {
         return;
     }
-
-    struct Transform throwTransform = player->lookTransform;
-    playerPortalGrabTransform(player, &throwTransform.position, &throwTransform.rotation);
+    struct Quaternion throwRotation = player->lookTransform.rotation;
+    playerPortalGrabTransform(player, NULL, &throwRotation);
 
     struct Vector3 forward, right;
-    playerGetMoveBasis(&throwTransform, &forward, &right);
+    playerGetMoveBasis(&throwRotation, &forward, &right);
     
     struct CollisionObject* object = player->grabConstraint.object;
     playerSetGrabbing(player, NULL);
@@ -356,9 +376,9 @@ void playerUpdateGrabbedObject(struct Player* player) {
                 hit.object->flags |= COLLISION_OBJECT_INTERACTED;
 
                 if (hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable) && !(hit.object->flags & COLLISION_OBJECT_PLAYER_STANDING)) {
-                    playerSetGrabbing(player, hit.object);
                     player->flags |= PlayerJustSelect;
                     player->grabbingThroughPortal = hit.numPortalsPassed;
+                    playerSetGrabbing(player, hit.object);
                 }
                 else if ((hit.object->body)){
                     player->flags |= PlayerJustSelect;
@@ -426,19 +446,22 @@ void playerUpdateGrabbedObject(struct Player* player) {
         
         // determine object target height
         quatMultVector(&player->lookTransform.rotation, &temp_grab_dist, &grabPoint);
-        float grabY = grabPoint.y;
-//
+        float grabY = maxf(minf(grabPoint.y, GRAB_MAX_OFFSET_Y), GRAB_MIN_OFFSET_Y);
+        
         // keep object at steady XZ-planar distance in front of player
         struct Quaternion forwardRotation;
         struct Vector3 forward, forwardNegate, right;
-        playerGetMoveBasis(&player->lookTransform, &forward, &right);
+        playerGetMoveBasis(&player->lookTransform.rotation, &forward, &right);
         vector3Negate(&forward, &forwardNegate);
         quatLook(&forwardNegate, &gUp, &forwardRotation);
         quatMultVector(&forwardRotation, &temp_grab_dist, &grabPoint);
         vector3Add(&player->lookTransform.position, &grabPoint, &grabPoint);
         grabPoint.y += grabY;
         
-        struct Quaternion grabRotation = forwardRotation;
+        // remember delta between forwardRotation and lookTransform.rotation
+        struct Quaternion lookRotationDelta, forwardRotationInv;
+        quatConjugate(&forwardRotation, &forwardRotationInv);
+        quatMultiply(&forwardRotationInv, &player->lookTransform.rotation, &lookRotationDelta);
         
         if (player->grabbingThroughPortal != PLAYER_GRABBING_THROUGH_NOTHING) {
             if (!collisionSceneIsPortalOpen()) {
@@ -447,22 +470,26 @@ void playerUpdateGrabbedObject(struct Player* player) {
                 return;
             }
 
-            playerPortalGrabTransform(player, &grabPoint, &grabRotation);
+            playerPortalGrabTransform(player, &grabPoint, &forwardRotation);
         }
-
+        
+        struct Quaternion grabRotation;
+        enum GrabRotationFlags grabRotationFlags = grabRotationFlagsForCollisionObject(player->grabConstraint.object);
+        grabRotationUpdate(grabRotationFlags, &lookRotationDelta, &forwardRotation, &player->grabRotationBase, &grabRotation);
+        
         pointConstraintUpdateTarget(&player->grabConstraint, &grabPoint, &grabRotation);
     }
 }
 
-void playerGetMoveBasis(struct Transform* transform, struct Vector3* forward, struct Vector3* right) {
-    quatMultVector(&transform->rotation, &gForward, forward);
-    quatMultVector(&transform->rotation, &gRight, right);
+void playerGetMoveBasis(struct Quaternion* rotation, struct Vector3* forward, struct Vector3* right) {
+    quatMultVector(rotation, &gForward, forward);
+    quatMultVector(rotation, &gRight, right);
 
     if (forward->y > 0.7f) {
-        quatMultVector(&transform->rotation, &gUp, forward);
+        quatMultVector(rotation, &gUp, forward);
         vector3Negate(forward, forward);
     } else if (forward->y < -0.7f) {
-        quatMultVector(&transform->rotation, &gUp, forward);
+        quatMultVector(rotation, &gUp, forward);
     }
 
     forward->y = 0.0f;
@@ -476,12 +503,13 @@ void playerPortalGrabTransform(struct Player* player, struct Vector3* grabPoint,
     if (player->grabbingThroughPortal == PLAYER_GRABBING_THROUGH_NOTHING) {
         return;
     }
-
     struct Transform pointTransform;
     collisionSceneGetPortalTransform(player->grabbingThroughPortal > 0 ? 0 : 1, &pointTransform);
-
+    
     for (int i = 0; i < abs(player->grabbingThroughPortal); ++i) {
-        transformPoint(&pointTransform, grabPoint, grabPoint);
+        if (grabPoint) {
+            transformPoint(&pointTransform, grabPoint, grabPoint);
+        }
         struct Quaternion finalRotation;
         quatMultiply(&pointTransform.rotation, grabRotation, &finalRotation);
         *grabRotation = finalRotation;
@@ -731,7 +759,7 @@ void playerUpdate(struct Player* player) {
     skBlenderUpdate(&player->animator, player->armature.pose, FIXED_DELTA_TIME);
 
     int doorwayMask = worldCheckDoorwaySides(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom);
-    playerGetMoveBasis(&player->lookTransform, &forward, &right);
+    playerGetMoveBasis(&player->lookTransform.rotation, &forward, &right);
 
     int isDead = playerIsDead(player);
 
