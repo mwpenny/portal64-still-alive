@@ -18,9 +18,8 @@
 #include "../build/assets/models/props/door_01.h"
 #include "../build/assets/models/props/door_02.h"
 
-#define OPEN_VELOCITY   8.0f
-
-#define OPEN_WIDTH  0.625
+#define DOOR_COLLISION_Y_OFFSET 1.0f
+#define DOOR_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_BALL)
 
 struct CollisionBox gDoorCollisionBox = {
     {1.0f, 1.0f, 0.1125f}
@@ -42,7 +41,6 @@ struct DoorTypeDefinition gDoorTypeDefinitions[] = {
         PROPS_DOOR_01_ARMATURE_OPENED_CLIP_INDEX,
         DOOR_01_INDEX,
         -1,
-        1.0f,
         {0.0f, 0.0f, 0.0f, 1.0f},
     },
     [DoorType02] = {
@@ -52,7 +50,6 @@ struct DoorTypeDefinition gDoorTypeDefinitions[] = {
         PROPS_DOOR_02_ARMATURE_OPENED_CLIP_INDEX,
         DOOR_02_INDEX,
         PROPS_DOOR_02_DOOR_BONE,
-        3.0f,
         {0.707106781f, 0.0f, 0.0f, 0.707106781f},
     },
 };
@@ -85,7 +82,7 @@ void doorRender(void* data, struct DynamicRenderDataList* renderList, struct Ren
 }
 
 void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct World* world) {
-    collisionObjectInit(&door->collisionObject, &gDoorCollider, &door->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE|COLLISION_LAYERS_STATIC);
+    collisionObjectInit(&door->collisionObject, &gDoorCollider, &door->rigidBody, 1.0f, DOOR_COLLISION_LAYERS);
     rigidBodyMarkKinematic(&door->rigidBody);
     collisionSceneAddDynamicObject(&door->collisionObject);
 
@@ -95,10 +92,12 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct W
     skArmatureInit(&door->armature, armature->armature);
     skAnimatorInit(&door->animator, armature->armature->numberOfBones);
 
-    door->rigidBody.transform.position = doorDefinition->location;
-    door->rigidBody.transform.position.y += 1.0f;
     quatMultiply(&doorDefinition->rotation, &typeDefinition->relativeRotation, &door->rigidBody.transform.rotation);
     door->rigidBody.transform.scale = gOneVec;
+
+    struct Vector3 collisionOffset = { 0.0f, DOOR_COLLISION_Y_OFFSET, 0.0f };
+    quatMultVector(&door->rigidBody.transform.rotation, &collisionOffset, &collisionOffset);
+    vector3Add(&doorDefinition->location, &collisionOffset, &door->rigidBody.transform.position);
 
     collisionObjectUpdateBB(&door->collisionObject);
 
@@ -154,15 +153,17 @@ void doorUpdate(struct Door* door) {
     }
 
     if (typeDefinition->colliderBoneIndex == -1) {
-        door->collisionObject.collisionLayers = isDoorwayOpen ? 0 : (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_STATIC);
+        door->collisionObject.collisionLayers = isDoorwayOpen ? 0 : DOOR_COLLISION_LAYERS;
     } else {
         struct Vector3 finalPos;
         skCalculateBonePosition(&door->armature, typeDefinition->colliderBoneIndex, &gZeroVec, &finalPos);
+        finalPos.x = 0.0f;
+        finalPos.y = DOOR_COLLISION_Y_OFFSET + (finalPos.z * (1.0f / SCENE_SCALE));
+        finalPos.z = 0.0f;
 
-        door->rigidBody.transform.position.y = 
-            door->doorDefinition->location.y + 
-            1.0f +
-            finalPos.z * (1.0f / SCENE_SCALE);
+        door->rigidBody.transform.position = door->doorDefinition->location;
+        quatMultVector(&door->rigidBody.transform.rotation, &finalPos, &finalPos);
+        vector3Add(&door->rigidBody.transform.position, &finalPos, &door->rigidBody.transform.position);
     }
 }
 

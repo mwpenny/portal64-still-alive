@@ -14,7 +14,7 @@
 #define CONTROLLER_LOG_CONTROLLER_DATA  0
 
 #if CONTROLLER_LOG_CONTROLLER_DATA
-    #include "../debugger/serial.h"
+    #include "../../debugger/serial.h"
 #endif
 
 #define MAX_PLAYERS 4
