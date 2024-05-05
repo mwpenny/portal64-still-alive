@@ -19,6 +19,7 @@
 #include "../build/assets/models/props/door_02.h"
 
 #define DOOR_COLLISION_Y_OFFSET 1.0f
+#define DOOR_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_BALL)
 
 struct CollisionBox gDoorCollisionBox = {
     {1.0f, 1.0f, 0.1125f}
@@ -81,7 +82,7 @@ void doorRender(void* data, struct DynamicRenderDataList* renderList, struct Ren
 }
 
 void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct World* world) {
-    collisionObjectInit(&door->collisionObject, &gDoorCollider, &door->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE|COLLISION_LAYERS_STATIC);
+    collisionObjectInit(&door->collisionObject, &gDoorCollider, &door->rigidBody, 1.0f, DOOR_COLLISION_LAYERS);
     rigidBodyMarkKinematic(&door->rigidBody);
     collisionSceneAddDynamicObject(&door->collisionObject);
 
@@ -152,7 +153,7 @@ void doorUpdate(struct Door* door) {
     }
 
     if (typeDefinition->colliderBoneIndex == -1) {
-        door->collisionObject.collisionLayers = isDoorwayOpen ? 0 : (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_STATIC);
+        door->collisionObject.collisionLayers = isDoorwayOpen ? 0 : DOOR_COLLISION_LAYERS;
     } else {
         struct Vector3 finalPos;
         skCalculateBonePosition(&door->armature, typeDefinition->colliderBoneIndex, &gZeroVec, &finalPos);
