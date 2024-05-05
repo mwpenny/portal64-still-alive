@@ -20,6 +20,7 @@ cutscenes:
   #   - set_signal final_room_ball_launcher
   #   - start_cutscene SWITCH_ROOM_1_PISTON
   #   - start_cutscene SWITCH_ROOM_2_PISTON
+  #   - start_cutscene CHECK_TRAPPED
   #   # TODO: disable spawning (looping) of hazard hallway platforms
   #   - save_checkpoint
 
@@ -50,8 +51,23 @@ cutscenes:
   #   - wait_for_signal not_on_switch_room_2_piston
   #   - goto piston_loop
 
+  # CHECK_TRAPPED:
+  #   - label trapped_loop
+  #   - wait_for_signal trapped 30
+  #   - q_sound 07_PART1_TRAPPED_1 CH_GLADOS PORTAL_07_PART1_TRAPPED_1
+  #   - q_sound 07_PART1_TRAPPED_2 CH_GLADOS PORTAL_07_PART1_TRAPPED_2
+  #   - wait_for_channel CH_GLADOS
+  #   - play_animation escape_hatch escape_hatch_open
+  #   - wait_for_signal not_in_ball_trap 30
+  #   - play_animation escape_hatch escape_hatch_open -1
+  #   - goto trapped_loop
+
 operators:
   - room2_not_on_piston = not room2_on_piston
   # - not_on_exit_piston = not on_exit_piston
   # - not_on_switch_room_1_piston = not on_switch_room_1_piston
   # - not_on_switch_room_2_piston = not on_switch_room_2_piston
+  # - ball_trap_open = ball_door_1 and ball_door_2
+  # - ball_trap_closed = not ball_trap_open
+  # - trapped = ball_trap_closed and in_ball_trap
+  # - not_in_ball_trap = not in_ball_trap
