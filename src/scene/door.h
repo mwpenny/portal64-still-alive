@@ -19,7 +19,6 @@ struct DoorTypeDefinition {
     short openedClipIndex;
     short materialIndex;
     short colliderBoneIndex;
-    float closeSpeed;
     struct Quaternion relativeRotation;
 };
 
