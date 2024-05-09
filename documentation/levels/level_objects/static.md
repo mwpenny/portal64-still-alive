@@ -41,11 +41,11 @@ surfaces are portalable. The following material names allow portals to be placed
 * `concrete_modular_floor001a`
 * `transparent_portal_surface`
 
-This behavior can be overridden by using the `no_portals` argument. To accept
-portals, the geometry must also have associated collision so that it can be hit.
-This can be done by placing a coplanar static collision object or through
-animation with a [bone](./anim.md) that also animates a dynamic collision
-object.
+This behavior can be overridden by using the `accept_portals` or `no_portals`
+arguments. Only one can be specified at a time. To accept portals, the geometry
+must also have associated collision so that it can be hit. This can be done by
+placing a coplanar static collision object or through animation with a
+[bone](./anim.md) that also animates a dynamic collision object.
 
 A mesh's UV coordinates are only used if its material does not have the
 `tileSizeS` and `tileSizeT` properties in its YAML definition. Otherwise, the
