@@ -124,7 +124,16 @@ local function list_static_nodes(nodes)
 
             local plane = sk_math.plane3_with_point(chunkV.mesh.normals[1], chunkV.mesh.vertices[1])
             local should_join_mesh = true
-            local accept_portals = chunkV.mesh.material and portalable_surfaces[chunkV.mesh.material.name] and not sk_scene.find_flag_argument(v.arguments, "no_portals")
+
+            local portalable_material = chunkV.mesh.material and portalable_surfaces[chunkV.mesh.material.name]
+            local no_portals = sk_scene.find_flag_argument(v.arguments, "no_portals")
+            local accept_portals_override = sk_scene.find_flag_argument(v.arguments, "accept_portals")
+
+            if no_portals and accept_portals_override then
+                error("Static geometry '" .. v.arguments .. "' cannot specify both 'no_portals' and 'accept_portals'")
+            end
+
+            local accept_portals = (portalable_material or accept_portals_override) and not no_portals
 
             if transform_index or signal or accept_portals or not is_coplanar(chunkV.mesh, plane) then
                 should_join_mesh = false
