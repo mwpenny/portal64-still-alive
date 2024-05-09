@@ -67,10 +67,3 @@ void matrixFromBasis(float matrix[4][4], struct Vector3* origin, struct Vector3*
     matrix[3][2] = origin->z * SCENE_SCALE;
     matrix[3][3] = 1.0f;
 }
-
-
-void matrixFromBasisL(Mtx* matrix, struct Vector3* origin, struct Vector3* x, struct Vector3* y, struct Vector3* z) {
-    float fmtx[4][4];
-    matrixFromBasis(fmtx, origin, x, y, z);
-    guMtxF2L(fmtx, matrix);
-}

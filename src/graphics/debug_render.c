@@ -28,6 +28,12 @@ Gfx gfx_quad[] = {
 	gsSPEndDisplayList(),
 };
 
+void matrixFromBasisL(Mtx* matrix, struct Vector3* origin, struct Vector3* x, struct Vector3* y, struct Vector3* z) {
+    float fmtx[4][4];
+    matrixFromBasis(fmtx, origin, x, y, z);
+    guMtxF2L(fmtx, matrix);
+}
+
 void debugRenderQuad(struct Vector3* origin, struct Vector3* edgeA, struct Vector3* edgeB, float edgeLengthA, float edgeLengthB, struct RenderState* renderState) {
     Mtx* mtx = renderStateRequestMatrices(renderState, 1);
 
