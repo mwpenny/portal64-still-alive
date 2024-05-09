@@ -1150,6 +1150,26 @@ materials:
       set: [G_SHADE]
       clear: [G_LIGHTING]
 
+  signage_overlay_aperture_logo_worn:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/signage/overlay_aperture_logo_worn.png
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+
+    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetRenderMode: G_RM_ZB_XLU_DECAL
+
+    gSPGeometryMode:
+      clear: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode:
+      color: ["0", "0", "0", "PRIMITIVE"]
+      alpha: ["0", "0", "0", "TEXEL0"]
+
+    gDPSetPrimColor:
+      r: 31
+      g: 28
+      b: 31
+
   signage_overlay_fling1:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/signage/signage_overlay_fling1.png
