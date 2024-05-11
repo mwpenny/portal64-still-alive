@@ -1,5 +1,7 @@
 #include "time.h"
 
+#include <ultra64.h>
+
 float gTimePassed = 0.0f;
 int gCurrentFrame = 0;
 float gFixedDeltaTime = ((1.0f + FRAME_SKIP) / 60.0f);

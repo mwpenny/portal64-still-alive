@@ -1,12 +1,9 @@
 #ifndef _TIME_H
 #define _TIME_H
 
-#include <ultra64.h>
-
 #include <stdint.h>
 
 extern float gTimePassed;
-extern OSTime gLastTime;
 extern int gCurrentFrame;
 extern float gFixedDeltaTime;
 
