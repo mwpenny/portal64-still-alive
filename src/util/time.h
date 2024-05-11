@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#include <stdint.h>
+
 extern float gTimePassed;
 extern OSTime gLastTime;
 extern int gCurrentFrame;
@@ -11,6 +13,8 @@ extern float gFixedDeltaTime;
 #define FRAME_SKIP  1
 #define FIXED_DELTA_TIME    gFixedDeltaTime
 
+void timeInit();
+void timeUSleep(uint64_t usec);
 void timeUpdateDelta();
 void timeSetFrameRate(int fps);
 

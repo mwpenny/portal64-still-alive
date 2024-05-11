@@ -1,6 +1,7 @@
 
 #include "savefile.h"
 #include "util/memory.h"
+#include "util/time.h"
 #include "system/controller.h"
 
 #include "../controls/controller_actions.h"
@@ -16,8 +17,6 @@ int gCurrentTestSubject = -1;
 #endif
 
 OSPiHandle gSramHandle;
-OSMesgQueue     timerQueue;
-OSMesg     timerQueueBuf;
 
 extern OSMesgQueue dmaMessageQ;
 
@@ -26,13 +25,11 @@ extern OSMesgQueue dmaMessageQ;
 #define SRAM_pageSize    0xd 
 #define SRAM_relDuration 0x2
 
-#define SRAM_CHUNK_DELAY        OS_USEC_TO_CYCLES(10 * 1000)
+#define SRAM_CHUNK_DELAY (10 * 1000)
 
 #define SRAM_ADDR   0x08000000
 
 void savefileSramSave(void* dst, void* src, int size) {
-    OSTimer timer;
-
     OSIoMesg dmaIoMesgBuf;
 
     // save checkpoint
@@ -49,13 +46,10 @@ void savefileSramSave(void* dst, void* src, int size) {
     }
     (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
 
-    osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
-    (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
+    timeUSleep(SRAM_CHUNK_DELAY);
 }
 
 int savefileSramLoad(void* sramAddr, void* ramAddr, int size) {
-    OSTimer timer;
-
     OSIoMesg dmaIoMesgBuf;
 
     dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
@@ -71,8 +65,7 @@ int savefileSramLoad(void* sramAddr, void* ramAddr, int size) {
     }
     (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
 
-    osSetTimer(&timer, SRAM_CHUNK_DELAY, 0, &timerQueue, 0);
-    (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
+    timeUSleep(SRAM_CHUNK_DELAY);
 
     return 1;
 }
@@ -125,7 +118,7 @@ void savefileLoad() {
     gSramHandle.domain = PI_DOMAIN2;
     gSramHandle.speed = 0;
 
-    osCreateMesgQueue(&timerQueue, &timerQueueBuf, 1);
+    timeInit();
 
     /* TODO gSramHandle.speed = */
 
