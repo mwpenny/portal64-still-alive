@@ -16,6 +16,9 @@ cutscenes:
     - wait_for_signal room2_piston_needed
     - goto room2_piston_loop
 
+  # ENTERED_ROOM_3:
+  #   - set_signal room_3_ball_launcher
+
   # ENTERED_FINAL_ROOM:
   #   - set_signal final_room_ball_launcher
   #   - start_cutscene SWITCH_ROOM_1_PISTON
