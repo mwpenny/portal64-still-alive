@@ -4,7 +4,7 @@
 #include <ultra64.h>
 #include "../math/transform.h"
 #include "defs.h"
-#include "../util/time.h"
+#include "system/time.h"
 
 #include "../physics/collision_box.h"
 #include "../physics/collision_object.h"

@@ -2,7 +2,7 @@
 
 #include "../scene/dynamic_scene.h"
 #include "../defs.h"
-#include "../util/time.h"
+#include "system/time.h"
 #include "../util/dynamic_asset_loader.h"
 
 #include "../build/assets/materials/static.h"

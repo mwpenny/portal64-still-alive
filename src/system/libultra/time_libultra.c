@@ -1,4 +1,4 @@
-#include "time.h"
+#include "system/time.h"
 
 #include <ultra64.h>
 

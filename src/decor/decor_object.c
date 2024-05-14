@@ -4,7 +4,7 @@
 #include "../scene/dynamic_scene.h"
 #include "../util/memory.h"
 #include "../audio/soundplayer.h"
-#include "../util/time.h"
+#include "system/time.h"
 #include "../util/dynamic_asset_loader.h"
 
 #define TIME_TO_FIZZLE      2.0f

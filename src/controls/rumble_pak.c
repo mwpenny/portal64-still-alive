@@ -1,7 +1,7 @@
 #include "rumble_pak.h"
 
 #include <ultra64.h>
-#include "../util/time.h"
+#include "system/time.h"
 
 #define MAX_ACTIVE_RUMBLE   4
 

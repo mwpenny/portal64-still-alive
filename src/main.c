@@ -24,7 +24,7 @@
 #include "util/memory.h"
 #include "util/profile.h"
 #include "util/rom.h"
-#include "util/time.h"
+#include "system/time.h"
 #include "graphics/profile_task.h"
 
 #include "levels/levels.h"
