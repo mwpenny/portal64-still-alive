@@ -247,6 +247,7 @@ static void gameProc(void* arg) {
     contactSolverInit(&gContactSolver);
     portalSurfaceCleanupQueueInit();
     
+    timeInit();
     savefileLoad();
     
     levelLoadWithCallbacks(INTRO_MENU);

@@ -118,8 +118,6 @@ void savefileLoad() {
     gSramHandle.domain = PI_DOMAIN2;
     gSramHandle.speed = 0;
 
-    timeInit();
-
     /* TODO gSramHandle.speed = */
 
     zeroMemory(&(gSramHandle.transferInfo), sizeof(gSramHandle.transferInfo));
