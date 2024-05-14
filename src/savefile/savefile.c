@@ -25,7 +25,7 @@ extern OSMesgQueue dmaMessageQ;
 #define SRAM_pageSize    0xd 
 #define SRAM_relDuration 0x2
 
-#define SRAM_CHUNK_DELAY (10 * 1000)
+#define SRAM_CHUNK_DELAY_USECS (10 * 1000)
 
 #define SRAM_ADDR   0x08000000
 
@@ -46,7 +46,7 @@ void savefileSramSave(void* dst, void* src, int size) {
     }
     (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
 
-    timeUSleep(SRAM_CHUNK_DELAY);
+    timeUSleep(SRAM_CHUNK_DELAY_USECS);
 }
 
 int savefileSramLoad(void* sramAddr, void* ramAddr, int size) {
@@ -65,7 +65,7 @@ int savefileSramLoad(void* sramAddr, void* ramAddr, int size) {
     }
     (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
 
-    timeUSleep(SRAM_CHUNK_DELAY);
+    timeUSleep(SRAM_CHUNK_DELAY_USECS);
 
     return 1;
 }
