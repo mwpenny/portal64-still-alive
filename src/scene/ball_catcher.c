@@ -1,6 +1,6 @@
 #include "ball_catcher.h"
 
-#include "../util/time.h"
+#include "system/time.h"
 
 #include "../physics/collision_box.h"
 #include "../physics/collision_scene.h"

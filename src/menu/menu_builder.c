@@ -4,7 +4,7 @@
 #include "../system/controller.h"
 #include "./translations.h"
 #include "../audio/soundplayer.h"
-#include "../util/time.h"
+#include "system/time.h"
 #include "../math/mathf.h"
 
 #include "../font/dejavusans.h"

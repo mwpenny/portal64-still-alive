@@ -8,7 +8,7 @@
 #include "../physics/collision_object.h"
 #include "../scene/dynamic_scene.h"
 #include "../player/player.h"
-#include "../util/time.h"
+#include "system/time.h"
 #include "../effects/portal_trail.h"
 #include "../scene/camera.h"
 #include "../sk64/skelatool_armature.h"

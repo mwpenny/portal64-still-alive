@@ -1,6 +1,6 @@
 #include "cutscene_runner.h"
 #include "../audio/soundplayer.h"
-#include "../util/time.h"
+#include "system/time.h"
 #include "../scene/scene.h"
 #include "../scene/signals.h"
 #include "../levels/levels.h"

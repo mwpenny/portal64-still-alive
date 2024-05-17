@@ -8,7 +8,7 @@
 #include "../build/assets/materials/static.h"
 #include "../graphics/color.h"
 
-#include "../util/time.h"
+#include "system/time.h"
 
 #define TRAIL_LENGTH    8.0f
 #define FADE_IN_LENGTH  4.0f
