@@ -1,0 +1,6 @@
+-alpha off
+-resize 32x32 -repage +0+0
+\( portal_pak_dir/materials/signage/signage_overlay_midair2.png -alpha off -resize 32x32 -repage +32+0 \)
+
+-compose Copy
+-layers merge

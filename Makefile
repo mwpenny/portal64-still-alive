@@ -203,6 +203,7 @@ portal_pak_dir/materials/effects/portal_1_particle_orange.png: portal_pak_dir/ma
 	$(VTF2PNG) -f 2 $< $@
 
 portal_pak_dir/materials/signage/signage_overlay_fling1.png: portal_pak_dir/materials/signage/signage_overlay_fling2.png portal_pak_dir/materials/signage/signage_overlay_dots1.png portal_pak_dir/materials/signage/signage_overlay_dots2.png portal_pak_dir/materials/signage/signage_overlay_dots3.png portal_pak_dir/materials/signage/signage_overlay_dots4.png portal_pak_dir/materials/signage/signage_overlay_toxic.png portal_pak_dir/materials/signage/signage_overlay_fountain.png
+portal_pak_dir/materials/signage/signage_overlay_midair1.png: portal_pak_dir/materials/signage/signage_overlay_midair2.png
 portal_pak_dir/materials/signage/signage_exit.png: portal_pak_dir/materials/signage/signage_overlay_arrow.png portal_pak_dir/materials/signage/signage_overlay_boxdispenser.png portal_pak_dir/materials/signage/signage_overlay_boxhurt.png portal_pak_dir/materials/signage/signage_overlay_energyball.png portal_pak_dir/materials/signage/signage_overlay_catcher.png portal_pak_dir/materials/signage/signage_overlay_toxic.png portal_pak_dir/materials/signage/signage_overlay_fountain.png
 portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor.png: portal_pak_dir/materials/signage/indicator_lights/indicator_lights_corner_floor.png
 portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor_on.png: portal_pak_dir/materials/signage/indicator_lights/indicator_lights_corner_floor_on.png
