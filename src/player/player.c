@@ -44,7 +44,7 @@
 #define FUNNEL_MIN_DOWN_VEL -2.25f
 #define FUNNEL_MAX_HORZ_VEL 7.0f
 
-#define PLAYER_SPEED    (150.0f / 64.0f)
+#define PLAYER_SPEED    (999.0f / 1.0f)
 #define PLAYER_ACCEL    (20.0f)
 #define PLAYER_AIR_ACCEL    (5.875f)
 #define PLAYER_FAST_AIR_ACCEL    (2.0f)
