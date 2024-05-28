@@ -5,6 +5,7 @@
 
 #ifdef PORTAL64_WITH_DEBUGGER
 #include "../debugger/serial.h"
+#include "system/time.h"
 #endif
 
 #include <string.h>
@@ -132,7 +133,7 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task, u16*
             osWritebackDCacheAll();
 
 #ifdef PORTAL64_WITH_DEBUGGER
-            OSTime start = osGetTime();
+            Time start = timeGetTime();
 #endif
             osSpTaskStart(task);
             OSMesg recv;
@@ -142,9 +143,9 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task, u16*
             } while ((int)recv != RDP_DONE_MSG);
 
 #ifdef PORTAL64_WITH_DEBUGGER
-            OSTime result = osGetTime() - start;
+            Time result = timeGetTime() - start;
 
-            u64 us = OS_CYCLES_TO_NSEC(result);
+            uint64_t ns = timeNanoseconds(result);
 #endif
 
             // wait for DP to be available
@@ -163,8 +164,8 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task, u16*
                 total,
                 curr->words.w0,
                 curr->words.w1,
-                (int)(us / 1000000), 
-                (int)(us % 1000000)
+                (int)(ns / 1000000),
+                (int)(ns % 1000000)
             );
             gdbSendMessage(GDBDataTypeText, message, messageLen);
 #endif

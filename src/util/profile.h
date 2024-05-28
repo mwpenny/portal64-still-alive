@@ -1,10 +1,10 @@
 #ifndef __UTIL_PROFILE_H__
 #define __UTIL_PROFILE_H__
 
-#include <ultra64.h>
+#include "system/time.h"
 
-#define profileStart() osGetTime()
-void profileEnd(u64 startTime, int bin);
+#define profileStart() timeGetTime()
+void profileEnd(Time startTime, int bin);
 
 void profileReport();
 

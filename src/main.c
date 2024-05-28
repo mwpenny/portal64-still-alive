@@ -310,7 +310,7 @@ static void gameProc(void* arg) {
                 }
 
                 if (pendingGFX < 2 && drawingEnabled) {
-                    u64 renderStart = profileStart();
+                    Time renderStart = profileStart();
                     graphicsCreateTask(&gGraphicsTasks[drawBufferIndex], gSceneCallbacks->graphicsCallback, gSceneCallbacks->data);
                     profileEnd(renderStart, 1);
                     drawBufferIndex = drawBufferIndex ^ 1;
@@ -325,7 +325,7 @@ static void gameProc(void* arg) {
                 if (inputIgnore) {
                     --inputIgnore;
                 } else {
-                    u64 updateStart = profileStart();
+                    Time updateStart = profileStart();
                     gSceneCallbacks->updateCallback(gSceneCallbacks->data);
                     profileEnd(updateStart, 0);
                     drawingEnabled = 1;

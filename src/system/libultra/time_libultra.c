@@ -13,6 +13,18 @@ void timeInit() {
     osCreateMesgQueue(&timerQueue, &timerQueueBuf, 1);
 }
 
+Time timeGetTime() {
+    return (Time)(osGetTime());
+}
+
+uint64_t timeMicroseconds(Time time) {
+    return (uint64_t)(OS_CYCLES_TO_USEC((OSTime)(time)));
+}
+
+uint64_t timeNanoseconds(Time time) {
+    return (uint64_t)(OS_CYCLES_TO_NSEC((OSTime)(time)));
+}
+
 void timeUSleep(uint64_t usec) {
     OSTimer timer;
     OSTime  countdown = OS_USEC_TO_CYCLES((u64)(usec));
