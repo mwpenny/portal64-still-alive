@@ -295,11 +295,12 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
     }
 
     // set the near clipping plane to be the exit portal surface
-    quatMultVector(&exitPortal->rotation, &gForward, &next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal);
+    struct Plane* nearPlane = &next->cameraMatrixInfo.cullingInformation.clippingPlanes[CLIPPING_PLANE_NEAR];
+    quatMultVector(&exitPortal->rotation, &gForward, &nearPlane->normal);
     if (portalIndex == 1) {
-        vector3Negate(&next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal, &next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal);
+        vector3Negate(&nearPlane->normal, &nearPlane->normal);
     }
-    next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].d = -(vector3Dot(&next->cameraMatrixInfo.cullingInformation.clippingPlanes[4].normal, &exitPortal->position) + 0.01f) * SCENE_SCALE;
+    nearPlane->d = -(vector3Dot(&nearPlane->normal, &exitPortal->position) + 0.01f) * SCENE_SCALE;
 
     next->clippingPortalIndex = -1;
 

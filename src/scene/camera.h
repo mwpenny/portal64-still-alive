@@ -12,6 +12,12 @@
 #include "../math/boxs16.h"
 #include "../math/rotated_box.h"
 
+#define CLIPPING_PLANE_LEFT         0
+#define CLIPPING_PLANE_BOTTOM       1
+#define CLIPPING_PLANE_RIGHT        2
+#define CLIPPING_PLANE_TOP          3
+#define CLIPPING_PLANE_NEAR         4
+#define CLIPPING_PLANE_FAR          5
 #define MAX_CLIPPING_PLANE_COUNT    6
 
 struct Camera {
@@ -40,6 +46,7 @@ enum FrustrumResult {
     FrustrumResultBoth,
 };
 
+void frustumFromQuad(struct Vector3* cameraPos, struct CollisionQuad* quad, struct FrustrumCullingInformation* out);
 enum FrustrumResult isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox);
 int isRotatedBoxOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct RotatedBox* rotatedBox);
 int isSphereOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Vector3* scaledCenter, float scaledRadius);

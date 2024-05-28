@@ -108,17 +108,17 @@ void staticRenderDetermineVisibleRooms(struct FrustrumCullingInformation* cullin
     }
 
     u64 roomMask = 1LL << currentRoom;
-
-    if (*visitedRooms & roomMask) {
-        return;
-    }
-
     *visitedRooms |= roomMask;
 
     for (int i = 0; i < gCurrentLevel->world.rooms[currentRoom].doorwayCount; ++i) {
         struct Doorway* doorway = &gCurrentLevel->world.doorways[gCurrentLevel->world.rooms[currentRoom].doorwayIndices[i]];
 
         if ((doorway->flags & DoorwayFlagsOpen) == 0) {
+            continue;
+        }
+
+        int newRoom = currentRoom == doorway->roomA ? doorway->roomB : doorway->roomA;
+        if (*visitedRooms & (1LL << newRoom)) {
             continue;
         }
 
@@ -131,7 +131,15 @@ void staticRenderDetermineVisibleRooms(struct FrustrumCullingInformation* cullin
             continue;
         }
 
-        staticRenderDetermineVisibleRooms(cullingInfo, currentRoom == doorway->roomA ? doorway->roomB : doorway->roomA, visitedRooms);
+        // Narrow the view to what can be seen through the doorway.
+        //
+        // This can be improved by first clipping the quad to the current
+        // frustum and using the clipped quad to generate the new frustum.
+        // Need to measure performance to see if it's worth it.
+        struct FrustrumCullingInformation doorwayFrustum;
+        frustumFromQuad(&cullingInfo->cameraPos, &doorway->quad, &doorwayFrustum);
+
+        staticRenderDetermineVisibleRooms(&doorwayFrustum, newRoom, visitedRooms);
     };
 }
 

@@ -5,6 +5,52 @@
 #include "../graphics/graphics.h"
 #include "../math/mathf.h"
 
+void frustumFromQuad(struct Vector3* cameraPos, struct CollisionQuad* quad, struct FrustrumCullingInformation* out) {
+    float isInFront = planePointDistance(&quad->plane, cameraPos) > 0;
+
+    // Bottom left, bottom right, top right, top left
+    struct Vector3 corners[4];
+
+    // Find corners as seen from camera's POV
+    if (isInFront) {
+        corners[0] = quad->corner;
+        vector3AddScaled(&quad->corner, &quad->edgeB, quad->edgeBLength, &corners[1]);
+    } else {
+        corners[1] = quad->corner;
+        vector3AddScaled(&quad->corner, &quad->edgeB, quad->edgeBLength, &corners[0]);
+    }
+    vector3AddScaled(&corners[0], &quad->edgeA, quad->edgeALength, &corners[3]);
+    vector3AddScaled(&corners[1], &quad->edgeA, quad->edgeALength, &corners[2]);
+
+    struct Vector3 corner1Dir, corner2Dir, planeNormal;
+    vector3Sub(cameraPos, &corners[3], &corner1Dir);
+
+    // Build planes
+    for (int i = 0; i < 4; ++i) {
+        if (i % 2) {
+            vector3Sub(cameraPos, &corners[i], &corner1Dir);
+            vector3Cross(&corner2Dir, &corner1Dir, &planeNormal);
+        } else {
+            vector3Sub(cameraPos, &corners[i], &corner2Dir);
+            vector3Cross(&corner1Dir, &corner2Dir, &planeNormal);
+        }
+        vector3Normalize(&planeNormal, &planeNormal);
+        planeInitWithNormalAndPoint(&out->clippingPlanes[i], &planeNormal, cameraPos);
+        out->clippingPlanes[i].d *= SCENE_SCALE;
+    }
+
+    out->clippingPlanes[CLIPPING_PLANE_NEAR] = quad->plane;
+    out->clippingPlanes[CLIPPING_PLANE_NEAR].d *= SCENE_SCALE;
+
+    if (isInFront) {
+        vector3Negate(&out->clippingPlanes[CLIPPING_PLANE_NEAR].normal, &out->clippingPlanes[CLIPPING_PLANE_NEAR].normal);
+        out->clippingPlanes[CLIPPING_PLANE_NEAR].d *= -1;
+    }
+
+    out->usedClippingPlaneCount = 5;
+    out->cameraPos = *cameraPos;
+}
+
 enum FrustrumResult isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox) {
     enum FrustrumResult result = FrustrumResultInside;
 
@@ -154,11 +200,11 @@ int cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, 
     guMtxF2L(combined, output->projectionView);
 
     if (extractClippingPlanes) {
-        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[0], 0, 1.0f);
-        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[1], 0, -1.0f);
-        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[2], 1, 1.0f);
-        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[3], 1, -1.0f);
-        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[4], 2, 1.0f);
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[CLIPPING_PLANE_RIGHT],  0,  1.0f);
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[CLIPPING_PLANE_LEFT],   0, -1.0f);
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[CLIPPING_PLANE_TOP],    1,  1.0f);
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[CLIPPING_PLANE_BOTTOM], 1, -1.0f);
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[CLIPPING_PLANE_NEAR],   2,  1.0f);
         output->cullingInformation.cameraPos = camera->transform.position;
         output->cullingInformation.usedClippingPlaneCount = 5;
     }
