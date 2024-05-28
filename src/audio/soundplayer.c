@@ -2,7 +2,7 @@
 #include "soundplayer.h"
 #include "soundarray.h"
 #include "util/rom.h"
-#include "util/time.h"
+#include "system/time.h"
 #include "math/mathf.h"
 #include "clips.h"
 #include "../physics/collision_scene.h"

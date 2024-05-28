@@ -24,7 +24,7 @@
 #include "util/memory.h"
 #include "util/profile.h"
 #include "util/rom.h"
-#include "util/time.h"
+#include "system/time.h"
 #include "graphics/profile_task.h"
 
 #include "levels/levels.h"
@@ -247,6 +247,7 @@ static void gameProc(void* arg) {
     contactSolverInit(&gContactSolver);
     portalSurfaceCleanupQueueInit();
     
+    timeInit();
     savefileLoad();
     
     levelLoadWithCallbacks(INTRO_MENU);
@@ -309,7 +310,7 @@ static void gameProc(void* arg) {
                 }
 
                 if (pendingGFX < 2 && drawingEnabled) {
-                    u64 renderStart = profileStart();
+                    Time renderStart = profileStart();
                     graphicsCreateTask(&gGraphicsTasks[drawBufferIndex], gSceneCallbacks->graphicsCallback, gSceneCallbacks->data);
                     profileEnd(renderStart, 1);
                     drawBufferIndex = drawBufferIndex ^ 1;
@@ -324,7 +325,7 @@ static void gameProc(void* arg) {
                 if (inputIgnore) {
                     --inputIgnore;
                 } else {
-                    u64 updateStart = profileStart();
+                    Time updateStart = profileStart();
                     gSceneCallbacks->updateCallback(gSceneCallbacks->data);
                     profileEnd(updateStart, 0);
                     drawingEnabled = 1;

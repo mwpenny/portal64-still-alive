@@ -7,7 +7,7 @@
 #include "materials/subject.h"
 #include "materials/light.h"
 #include "materials/point_light_rendered.h"
-#include "util/time.h"
+#include "system/time.h"
 #include "sk64/skelatool_defs.h"
 #include "shadow_map.h"
 #include "../physics/point_constraint.h"
@@ -604,7 +604,7 @@ void sceneUpdate(struct Scene* scene) {
         scene->checkpointState = SceneCheckpointStateSaved;
     }
     
-    OSTime frameStart = osGetTime();
+    Time frameStart = timeGetTime();
     scene->lastFrameTime = frameStart - scene->lastFrameStart;
     
     if (gGameMenu.state != GameMenuStateResumeGame) {
@@ -775,7 +775,7 @@ void sceneUpdate(struct Scene* scene) {
 
     cutscenesUpdate();
 
-    scene->cpuTime = osGetTime() - frameStart;
+    scene->cpuTime = timeGetTime() - frameStart;
     scene->lastFrameStart = frameStart;
 
     ControllerStick freecam_stick = controllerGetStick(2);

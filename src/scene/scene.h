@@ -65,9 +65,9 @@ struct Scene {
     struct SavedPortal savedPortal;
     struct Effects effects;
     struct Hud hud;
-    OSTime cpuTime;
-    OSTime lastFrameStart;
-    OSTime lastFrameTime;
+    Time cpuTime;
+    Time lastFrameStart;
+    Time lastFrameTime;
     u8 buttonCount;
     u8 decorCount;
     u8 triggerListenerCount;

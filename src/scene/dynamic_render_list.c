@@ -188,7 +188,7 @@ void dynamicRenderListPopulate(struct DynamicRenderDataList* list, struct Render
                 continue;
             }
 
-            if (isSphereOutsideFrustrum(&stages[stageIndex].cameraMatrixInfo.cullingInformation, &scaledPos, object->scaledRadius)) {
+            if (isSphereOutsideFrustum(&stages[stageIndex].cameraMatrixInfo.cullingInformation, &scaledPos, object->scaledRadius)) {
                 continue;
             }
 
@@ -210,7 +210,7 @@ void dynamicRenderPopulateRenderScene(
     int stageIndex, 
     struct RenderScene* renderScene, 
     struct Transform* cameraTransform, 
-    struct FrustrumCullingInformation* cullingInfo, 
+    struct FrustumCullingInformation* cullingInfo,
     u64 visiblerooms
 ) {
     int stageMask = (1 << stageIndex);
@@ -238,7 +238,7 @@ void dynamicRenderPopulateRenderScene(
         struct Vector3 scaledPos;
         vector3Scale(object->position, &scaledPos, SCENE_SCALE);
 
-        if (isSphereOutsideFrustrum(cullingInfo, &scaledPos, object->scaledRadius)) {
+        if (isSphereOutsideFrustum(cullingInfo, &scaledPos, object->scaledRadius)) {
             continue;
         }
 

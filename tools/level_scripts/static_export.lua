@@ -130,7 +130,7 @@ local function list_static_nodes(nodes)
             local accept_portals_override = sk_scene.find_flag_argument(v.arguments, "accept_portals")
 
             if no_portals and accept_portals_override then
-                error("Static geometry '" .. v.arguments .. "' cannot specify both 'no_portals' and 'accept_portals'")
+                error("Static geometry '" .. table.concat(v.arguments, " ") .. "' cannot specify both 'no_portals' and 'accept_portals'")
             end
 
             local accept_portals = (portalable_material or accept_portals_override) and not no_portals

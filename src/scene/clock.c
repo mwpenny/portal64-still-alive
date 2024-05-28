@@ -7,7 +7,7 @@
 #include "../levels/cutscene_runner.h"
 #include "../build/assets/models/signage/clock_digits.h"
 #include "../util/memory.h"
-#include "../util/time.h"
+#include "system/time.h"
 
 #include "../build/assets/models/dynamic_model_list.h"
 

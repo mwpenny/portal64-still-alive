@@ -5,23 +5,69 @@
 #include "../graphics/graphics.h"
 #include "../math/mathf.h"
 
-enum FrustrumResult isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox) {
-    enum FrustrumResult result = FrustrumResultInside;
+void frustumFromQuad(struct Vector3* cameraPos, struct CollisionQuad* quad, struct FrustumCullingInformation* out) {
+    float isInFront = planePointDistance(&quad->plane, cameraPos) > 0;
 
-    for (int i = 0; i < frustrum->usedClippingPlaneCount; ++i) {
+    // Bottom left, bottom right, top right, top left
+    struct Vector3 corners[4];
+
+    // Find corners as seen from camera's POV
+    if (isInFront) {
+        corners[0] = quad->corner;
+        vector3AddScaled(&quad->corner, &quad->edgeB, quad->edgeBLength, &corners[1]);
+    } else {
+        corners[1] = quad->corner;
+        vector3AddScaled(&quad->corner, &quad->edgeB, quad->edgeBLength, &corners[0]);
+    }
+    vector3AddScaled(&corners[0], &quad->edgeA, quad->edgeALength, &corners[3]);
+    vector3AddScaled(&corners[1], &quad->edgeA, quad->edgeALength, &corners[2]);
+
+    struct Vector3 corner1Dir, corner2Dir, planeNormal;
+    vector3Sub(cameraPos, &corners[3], &corner1Dir);
+
+    // Build planes
+    for (int i = 0; i < 4; ++i) {
+        if (i % 2) {
+            vector3Sub(cameraPos, &corners[i], &corner1Dir);
+            vector3Cross(&corner2Dir, &corner1Dir, &planeNormal);
+        } else {
+            vector3Sub(cameraPos, &corners[i], &corner2Dir);
+            vector3Cross(&corner1Dir, &corner2Dir, &planeNormal);
+        }
+        vector3Normalize(&planeNormal, &planeNormal);
+        planeInitWithNormalAndPoint(&out->clippingPlanes[i], &planeNormal, cameraPos);
+        out->clippingPlanes[i].d *= SCENE_SCALE;
+    }
+
+    out->clippingPlanes[CLIPPING_PLANE_NEAR] = quad->plane;
+    out->clippingPlanes[CLIPPING_PLANE_NEAR].d *= SCENE_SCALE;
+
+    if (isInFront) {
+        vector3Negate(&out->clippingPlanes[CLIPPING_PLANE_NEAR].normal, &out->clippingPlanes[CLIPPING_PLANE_NEAR].normal);
+        out->clippingPlanes[CLIPPING_PLANE_NEAR].d *= -1;
+    }
+
+    out->usedClippingPlaneCount = 5;
+    out->cameraPos = *cameraPos;
+}
+
+enum FrustumResult isOutsideFrustum(struct FrustumCullingInformation* frustum, struct BoundingBoxs16* boundingBox) {
+    enum FrustumResult result = FrustumResultInside;
+
+    for (int i = 0; i < frustum->usedClippingPlaneCount; ++i) {
         struct Vector3 closestPoint;
 
-        struct Vector3* normal = &frustrum->clippingPlanes[i].normal;
+        struct Vector3* normal = &frustum->clippingPlanes[i].normal;
 
         closestPoint.x = normal->x < 0.0f ? boundingBox->minX : boundingBox->maxX;
         closestPoint.y = normal->y < 0.0f ? boundingBox->minY : boundingBox->maxY;
         closestPoint.z = normal->z < 0.0f ? boundingBox->minZ : boundingBox->maxZ;
 
-        if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.00001f) {
-            return FrustrumResultOutisde;
+        if (planePointDistance(&frustum->clippingPlanes[i], &closestPoint) < 0.00001f) {
+            return FrustumResultOutisde;
         }
 
-        if (result == FrustrumResultBoth) {
+        if (result == FrustumResultBoth) {
             continue;
         }
 
@@ -30,19 +76,19 @@ enum FrustrumResult isOutsideFrustrum(struct FrustrumCullingInformation* frustru
         closestPoint.y = normal->y > 0.0f ? boundingBox->minY : boundingBox->maxY;
         closestPoint.z = normal->z > 0.0f ? boundingBox->minZ : boundingBox->maxZ;
         
-        if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.00001f) {
-            result = FrustrumResultBoth;
+        if (planePointDistance(&frustum->clippingPlanes[i], &closestPoint) < 0.00001f) {
+            result = FrustumResultBoth;
         }
     }
 
     return result;
 }
 
-int isRotatedBoxOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct RotatedBox* rotatedBox) {
-    for (int i = 0; i < frustrum->usedClippingPlaneCount; ++i) {
+int isRotatedBoxOutsideFrustum(struct FrustumCullingInformation* frustum, struct RotatedBox* rotatedBox) {
+    for (int i = 0; i < frustum->usedClippingPlaneCount; ++i) {
         struct Vector3 closestPoint = rotatedBox->origin;
 
-        struct Vector3* normal = &frustrum->clippingPlanes[i].normal;
+        struct Vector3* normal = &frustum->clippingPlanes[i].normal;
 
         for (int axis = 0; axis < 3; ++axis) {
             if (vector3Dot(&rotatedBox->sides[axis], normal) > 0.0f) {
@@ -50,7 +96,7 @@ int isRotatedBoxOutsideFrustrum(struct FrustrumCullingInformation* frustrum, str
             }
         }
 
-        if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.00001f) {
+        if (planePointDistance(&frustum->clippingPlanes[i], &closestPoint) < 0.00001f) {
             return 1;
         }
     }
@@ -58,9 +104,9 @@ int isRotatedBoxOutsideFrustrum(struct FrustrumCullingInformation* frustrum, str
     return 0;
 }
 
-int isSphereOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Vector3* scaledCenter, float scaledRadius) {
-    for (int i = 0; i < frustrum->usedClippingPlaneCount; ++i) {
-        if (planePointDistance(&frustrum->clippingPlanes[i], scaledCenter) < -scaledRadius) {
+int isSphereOutsideFrustum(struct FrustumCullingInformation* frustum, struct Vector3* scaledCenter, float scaledRadius) {
+    for (int i = 0; i < frustum->usedClippingPlaneCount; ++i) {
+        if (planePointDistance(&frustum->clippingPlanes[i], scaledCenter) < -scaledRadius) {
             return 1;
         }
     }
@@ -68,9 +114,9 @@ int isSphereOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct 
     return 0;
 }
 
-int isQuadOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct CollisionQuad* quad) {
-    for (int i = 0; i < frustrum->usedClippingPlaneCount; ++i) {
-        struct Vector3* normal = &frustrum->clippingPlanes[i].normal;
+int isQuadOutsideFrustum(struct FrustumCullingInformation* frustum, struct CollisionQuad* quad) {
+    for (int i = 0; i < frustum->usedClippingPlaneCount; ++i) {
+        struct Vector3* normal = &frustum->clippingPlanes[i].normal;
         float aLerp = vector3Dot(normal, &quad->edgeA) < 0.0f ? 0.0f : quad->edgeALength;
         float bLerp = vector3Dot(normal, &quad->edgeB) < 0.0f ? 0.0f : quad->edgeBLength;
 
@@ -80,7 +126,7 @@ int isQuadOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Co
 
         vector3Scale(&closestPoint, &closestPoint, SCENE_SCALE);
 
-        if (planePointDistance(&frustrum->clippingPlanes[i], &closestPoint) < 0.0f) {
+        if (planePointDistance(&frustum->clippingPlanes[i], &closestPoint) < 0.0f) {
             return 1;
         }
     }
@@ -154,11 +200,11 @@ int cameraSetupMatrices(struct Camera* camera, struct RenderState* renderState, 
     guMtxF2L(combined, output->projectionView);
 
     if (extractClippingPlanes) {
-        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[0], 0, 1.0f);
-        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[1], 0, -1.0f);
-        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[2], 1, 1.0f);
-        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[3], 1, -1.0f);
-        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[4], 2, 1.0f);
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[CLIPPING_PLANE_RIGHT],  0,  1.0f);
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[CLIPPING_PLANE_LEFT],   0, -1.0f);
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[CLIPPING_PLANE_TOP],    1,  1.0f);
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[CLIPPING_PLANE_BOTTOM], 1, -1.0f);
+        cameraExtractClippingPlane(combined, &output->cullingInformation.clippingPlanes[CLIPPING_PLANE_NEAR],   2,  1.0f);
         output->cullingInformation.cameraPos = camera->transform.position;
         output->cullingInformation.usedClippingPlaneCount = 5;
     }
