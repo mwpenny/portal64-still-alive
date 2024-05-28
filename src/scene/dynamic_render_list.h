@@ -63,7 +63,7 @@ void dynamicRenderPopulateRenderScene(
     int stageIndex, 
     struct RenderScene* renderScene, 
     struct Transform* cameraTransform, 
-    struct FrustrumCullingInformation* cullingInfo, 
+    struct FrustumCullingInformation* cullingInfo,
     u64 visibleRooms
 );
 

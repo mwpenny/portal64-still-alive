@@ -11,23 +11,23 @@
 #include "../build/assets/materials/static.h"
 
 void staticRenderTraverseIndex(
-    struct StaticContentBox* box, 
+    struct StaticContentBox* box,
     struct StaticContentBox* boxEnd, 
     struct StaticContentElement* staticContent, 
-    struct FrustrumCullingInformation* cullingInfo, 
+    struct FrustumCullingInformation* cullingInfo,
     struct RenderScene* renderScene
 ) {
     struct StaticContentBox* fullyVisibleEnd = box;    
 
     while (box < boxEnd) {
         if (box >= fullyVisibleEnd) {
-            enum FrustrumResult cullResult = isOutsideFrustrum(cullingInfo, &box->box);
+            enum FrustumResult cullResult = isOutsideFrustum(cullingInfo, &box->box);
 
-            if (cullResult == FrustrumResultOutisde) {
+            if (cullResult == FrustumResultOutisde) {
                 // skip all children
                 box = box + box->siblingOffset;
                 continue;
-            } else if (cullResult == FrustrumResultInside) {
+            } else if (cullResult == FrustumResultInside) {
                 fullyVisibleEnd = box + box->siblingOffset;
             }
         }
@@ -49,7 +49,7 @@ void staticRenderTraverseIndex(
 
 #define ANIMATED_CULL_THRESHOLD     50
 
-void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, Mtx* staticMatrices, struct Transform* staticTransforms, struct RenderScene* renderScene) {
+void staticRenderPopulateRooms(struct FrustumCullingInformation* cullingInfo, Mtx* staticMatrices, struct Transform* staticTransforms, struct RenderScene* renderScene) {
     int currentRoom = 0;
 
     u64 visibleRooms = renderScene->visibleRooms;
@@ -76,7 +76,7 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, M
                     struct RotatedBox rotatedBox;
                     rotatedBoxTransform(transform, animatedBox, &rotatedBox);
 
-                    if (isRotatedBoxOutsideFrustrum(cullingInfo, &rotatedBox)) {
+                    if (isRotatedBoxOutsideFrustum(cullingInfo, &rotatedBox)) {
                         continue;
                     }
                 }
@@ -102,7 +102,7 @@ void staticRenderPopulateRooms(struct FrustrumCullingInformation* cullingInfo, M
 
 #define FORCE_RENDER_DOORWAY_DISTANCE   0.1f
 
-void staticRenderDetermineVisibleRooms(struct FrustrumCullingInformation* cullingInfo, u16 currentRoom, u64* visitedRooms) {
+void staticRenderDetermineVisibleRooms(struct FrustumCullingInformation* cullingInfo, u16 currentRoom, u64* visitedRooms) {
     if (currentRoom == RIGID_BODY_NO_ROOM) {
         return;
     }
@@ -127,7 +127,7 @@ void staticRenderDetermineVisibleRooms(struct FrustrumCullingInformation* cullin
         if (
             // if the player is close enough to the doorway it should still render it, even if facing the wrong way
             (fabsf(doorwayDistance) > FORCE_RENDER_DOORWAY_DISTANCE || collisionQuadDetermineEdges(&cullingInfo->cameraPos, &doorway->quad)) && 
-            isQuadOutsideFrustrum(cullingInfo, &doorway->quad)) {
+            isQuadOutsideFrustum(cullingInfo, &doorway->quad)) {
             continue;
         }
 
@@ -136,7 +136,7 @@ void staticRenderDetermineVisibleRooms(struct FrustrumCullingInformation* cullin
         // This can be improved by first clipping the quad to the current
         // frustum and using the clipped quad to generate the new frustum.
         // Need to measure performance to see if it's worth it.
-        struct FrustrumCullingInformation doorwayFrustum;
+        struct FrustumCullingInformation doorwayFrustum;
         frustumFromQuad(&cullingInfo->cameraPos, &doorway->quad, &doorwayFrustum);
 
         staticRenderDetermineVisibleRooms(&doorwayFrustum, newRoom, visitedRooms);
@@ -147,7 +147,7 @@ int staticRenderIsRoomVisible(u64 visibleRooms, u16 roomIndex) {
     return (visibleRooms & (1LL << roomIndex)) != 0;
 }
 
-void staticRender(struct Transform* cameraTransform, struct FrustrumCullingInformation* cullingInfo, u64 visibleRooms, struct DynamicRenderDataList* dynamicList, int stageIndex, Mtx* staticMatrices, struct Transform* staticTransforms, struct RenderState* renderState) {
+void staticRender(struct Transform* cameraTransform, struct FrustumCullingInformation* cullingInfo, u64 visibleRooms, struct DynamicRenderDataList* dynamicList, int stageIndex, Mtx* staticMatrices, struct Transform* staticTransforms, struct RenderState* renderState) {
     if (!gCurrentLevel) {
         return;
     }

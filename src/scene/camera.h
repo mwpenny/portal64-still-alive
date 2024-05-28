@@ -27,7 +27,7 @@ struct Camera {
     float fov;
 };
 
-struct FrustrumCullingInformation {
+struct FrustumCullingInformation {
     struct Plane clippingPlanes[MAX_CLIPPING_PLANE_COUNT];
     short usedClippingPlaneCount;
 
@@ -37,20 +37,20 @@ struct FrustrumCullingInformation {
 struct CameraMatrixInfo {
     Mtx* projectionView;
     u16 perspectiveNormalize;
-    struct FrustrumCullingInformation cullingInformation;
+    struct FrustumCullingInformation cullingInformation;
 };
 
-enum FrustrumResult {
-    FrustrumResultOutisde,
-    FrustrumResultInside,
-    FrustrumResultBoth,
+enum FrustumResult {
+    FrustumResultOutisde,
+    FrustumResultInside,
+    FrustumResultBoth,
 };
 
-void frustumFromQuad(struct Vector3* cameraPos, struct CollisionQuad* quad, struct FrustrumCullingInformation* out);
-enum FrustrumResult isOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct BoundingBoxs16* boundingBox);
-int isRotatedBoxOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct RotatedBox* rotatedBox);
-int isSphereOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct Vector3* scaledCenter, float scaledRadius);
-int isQuadOutsideFrustrum(struct FrustrumCullingInformation* frustrum, struct CollisionQuad* quad);
+void frustumFromQuad(struct Vector3* cameraPos, struct CollisionQuad* quad, struct FrustumCullingInformation* out);
+enum FrustumResult isOutsideFrustum(struct FrustumCullingInformation* frustum, struct BoundingBoxs16* boundingBox);
+int isRotatedBoxOutsideFrustum(struct FrustumCullingInformation* frustum, struct RotatedBox* rotatedBox);
+int isSphereOutsideFrustum(struct FrustumCullingInformation* frustum, struct Vector3* scaledCenter, float scaledRadius);
+int isQuadOutsideFrustum(struct FrustumCullingInformation* frustum, struct CollisionQuad* quad);
 
 void cameraInit(struct Camera* camera, float fov, float near, float far);
 void cameraBuildViewMatrix(struct Camera* camera, float matrix[4][4]);
