@@ -14,13 +14,13 @@ Static level geometry. Used to generate level mesh and portal surface data.
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `no_portals` (optional)                   | If specified, the surface will not be considered portalable, regardless of its material name                                                                                     |
 | `indicator_lights SIGNAL_NAME` (optional) | If specified and the indicator light or door state material is used, it will be switched to the corresponding "active" variant when the specified [signal](../signals.md) is set |
-| `uvtransx TRANS_X` (optional)             | If specified and the material has `tileSizeS` and `tileSizeT` properties, translates UV coordinates by `TRANS_X` on the X axis                                                   |
-| `uvtransy TRANS_Y` (optional)             | If specified and the material has `tileSizeS` and `tileSizeT` properties, translates UV coordinates by `TRANS_Y` on the Y axis                                                   |
-| `uvtransz TRANS_Z` (optional)             | If specified and the material has `tileSizeS` and `tileSizeT` properties, translates UV coordinates by `TRANS_Z` on the Z axis                                                   |
-| `uvrotx ROT_X` (optional)                 | If specified and the material has `tileSizeS` and `tileSizeT` properties, rotates UV coordinates by `ROT_X` degrees on the X axis                                                |
-| `uvroty ROT_Y` (optional)                 | If specified and the material has `tileSizeS` and `tileSizeT` properties, rotates UV coordinates by `ROT_Y` degrees on the Y axis                                                |
-| `uvrotz ROT_Z` (optional)                 | If specified and the material has `tileSizeS` and `tileSizeT` properties, rotates UV coordinates by `ROT_Z` degrees on the Z axis                                                |
-| `uvscale SCALE` (optional)                | If specified and the material has `tileSizeS` and `tileSizeT` properties, scales UV coordinates by `SCALE/tileSize` in each direction                                            |
+| `uvtransx TRANS_X` (optional)             | If specified and the material has `tileSizeS` and `tileSizeT` properties, translates UV coordinates by `TRANS_X` on the X axis. Defaults to 0.                                   |
+| `uvtransy TRANS_Y` (optional)             | If specified and the material has `tileSizeS` and `tileSizeT` properties, translates UV coordinates by `TRANS_Y` on the Y axis. Defaults to 0.                                   |
+| `uvtransz TRANS_Z` (optional)             | If specified and the material has `tileSizeS` and `tileSizeT` properties, translates UV coordinates by `TRANS_Z` on the Z axis. Defaults to 0.                                   |
+| `uvrotx ROT_X` (optional)                 | If specified and the material has `tileSizeS` and `tileSizeT` properties, rotates UV coordinates by `ROT_X` degrees on the X axis. Defaults to 0.                                |
+| `uvroty ROT_Y` (optional)                 | If specified and the material has `tileSizeS` and `tileSizeT` properties, rotates UV coordinates by `ROT_Y` degrees on the Y axis. Defaults to 0.                                |
+| `uvrotz ROT_Z` (optional)                 | If specified and the material has `tileSizeS` and `tileSizeT` properties, rotates UV coordinates by `ROT_Z` degrees on the Z axis. Defaults to 0.                                |
+| `uvscale SCALE` (optional)                | If specified and the material has `tileSizeS` and `tileSizeT` properties, scales UV coordinates by `SCALE/tileSize` in each direction. Defaults to 1.                            |
 
 ## Notes
 

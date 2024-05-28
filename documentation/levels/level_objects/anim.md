@@ -41,3 +41,4 @@ The possible values for `SOUND_TYPE_NAME` are:
 * `Piston`: Vertical moving platform sound
 * `Arm`: Horizontal moving wall sound
 * `Stairs`: Ascending/descending staircase sound
+* `Door`: Door open/close sound

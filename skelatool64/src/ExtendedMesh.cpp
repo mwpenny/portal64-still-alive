@@ -458,7 +458,7 @@ void cubeProjectSingleFace(aiMesh* mesh, std::set<aiFace*>& faces, double sTile,
         for (unsigned i = 0; i < face->mNumIndices; ++i) {
             aiVector3D vertex = mesh->mVertices[face->mIndices[i]];
 
-            vertex = rotation.Rotate(vertex) + translation;
+            vertex = rotation.Rotate(vertex);
 
             minLeft = std::min(minLeft, vertex * left);
             minUp = std::min(minUp, vertex * up);

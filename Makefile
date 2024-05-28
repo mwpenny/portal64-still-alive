@@ -203,6 +203,7 @@ portal_pak_dir/materials/effects/portal_1_particle_orange.png: portal_pak_dir/ma
 	$(VTF2PNG) -f 2 $< $@
 
 portal_pak_dir/materials/signage/signage_overlay_fling1.png: portal_pak_dir/materials/signage/signage_overlay_fling2.png portal_pak_dir/materials/signage/signage_overlay_dots1.png portal_pak_dir/materials/signage/signage_overlay_dots2.png portal_pak_dir/materials/signage/signage_overlay_dots3.png portal_pak_dir/materials/signage/signage_overlay_dots4.png portal_pak_dir/materials/signage/signage_overlay_toxic.png portal_pak_dir/materials/signage/signage_overlay_fountain.png
+portal_pak_dir/materials/signage/signage_overlay_midair1.png: portal_pak_dir/materials/signage/signage_overlay_midair2.png
 portal_pak_dir/materials/signage/signage_exit.png: portal_pak_dir/materials/signage/signage_overlay_arrow.png portal_pak_dir/materials/signage/signage_overlay_boxdispenser.png portal_pak_dir/materials/signage/signage_overlay_boxhurt.png portal_pak_dir/materials/signage/signage_overlay_energyball.png portal_pak_dir/materials/signage/signage_overlay_catcher.png portal_pak_dir/materials/signage/signage_overlay_toxic.png portal_pak_dir/materials/signage/signage_overlay_fountain.png
 portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor.png: portal_pak_dir/materials/signage/indicator_lights/indicator_lights_corner_floor.png
 portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor_on.png: portal_pak_dir/materials/signage/indicator_lights/indicator_lights_corner_floor_on.png
@@ -408,7 +409,8 @@ ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_00/test_chamber_00_
 	build/assets/test_chambers/test_chamber_06/test_chamber_06_anim.o \
 	build/assets/test_chambers/test_chamber_07/test_chamber_07_anim.o \
 	build/assets/test_chambers/test_chamber_08/test_chamber_08_anim.o \
-	build/assets/test_chambers/test_chamber_09/test_chamber_09_anim.o
+	build/assets/test_chambers/test_chamber_09/test_chamber_09_anim.o \
+	build/assets/test_chambers/test_chamber_10/test_chamber_10_anim.o
 
 build/anims.ld: $(ANIM_LIST) $(ANIM_TEST_CHAMBERS) tools/generate_animation_ld.js
 	@mkdir -p $(@D)
@@ -427,7 +429,8 @@ TEST_CHAMBERS = assets/test_chambers/test_chamber_00/test_chamber_00.blend \
 	assets/test_chambers/test_chamber_06/test_chamber_06.blend \
 	assets/test_chambers/test_chamber_07/test_chamber_07.blend \
 	assets/test_chambers/test_chamber_08/test_chamber_08.blend \
-	assets/test_chambers/test_chamber_09/test_chamber_09.blend
+	assets/test_chambers/test_chamber_09/test_chamber_09.blend \
+	assets/test_chambers/test_chamber_10/test_chamber_10.blend
 
 TEST_CHAMBER_HEADERS = $(TEST_CHAMBERS:%.blend=build/%.h)
 TEST_CHAMBER_OBJECTS = $(TEST_CHAMBERS:%.blend=build/%_geo.o)
