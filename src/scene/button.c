@@ -78,94 +78,96 @@ void buttonRender(void* data, struct DynamicRenderDataList* renderList, struct R
 
 void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
     dynamicAssetAnimatedModel(PROPS_BUTTON_DYNAMIC_ANIMATED_MODEL);
-
+    
     collisionObjectInit(&button->collisionObject, &gButtonCollider, &button->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
     rigidBodyMarkKinematic(&button->rigidBody);
     collisionSceneAddDynamicObject(&button->collisionObject);
-
+    
     button->rigidBody.transform.position = definition->location;
     quatIdent(&button->rigidBody.transform.rotation);
     button->rigidBody.transform.scale = gOneVec;
     button->rigidBody.currentRoom = definition->roomIndex;
-
+    
     collisionObjectUpdateBB(&button->collisionObject);
-
+    
     button->dynamicId = dynamicSceneAdd(button, buttonRender, &button->rigidBody.transform.position, 0.84f);
     button->signalIndex = definition->signalIndex;
-
-    button->originalPos = definition->location;
     button->cubeSignalIndex = definition->cubeSignalIndex;
+    button->deactivateSignalIndex = definition->deactivateSignalIndex;
+    button->originalPos = definition->location;
     button->flags = 0;
     
     button->cubePressFrames = CUBE_PRESS_IDLE_FRAMES;
-
+    
     dynamicSceneSetRoomFlags(button->dynamicId, ROOM_FLAG_FROM_INDEX(button->rigidBody.currentRoom));
 }
 
 void buttonUpdate(struct Button* button) {
     struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, NULL);
+    
+    int deactivated = button->deactivateSignalIndex != -1 && signalsRead(button->deactivateSignalIndex);
+    if (!deactivated) {
+        int shouldPress = 0;
+        while (manifold) {
+            struct CollisionObject* other = manifold->shapeA == &button->collisionObject ? manifold->shapeB : manifold->shapeA;
 
-    int shouldPress = 0;
-    while (manifold) {
-        struct CollisionObject* other = manifold->shapeA == &button->collisionObject ? manifold->shapeB : manifold->shapeA;
+            if (other->body && other->body->mass > MASS_BUTTON_PRESS_THRESHOLD) {
+                
+                shouldPress = 1;
 
-        if (other->body && other->body->mass > MASS_BUTTON_PRESS_THRESHOLD) {
-            
-            shouldPress = 1;
-
-            if ((other->body->flags & RigidBodyFlagsGrabbable) == RigidBodyFlagsGrabbable && button->cubePressFrames <= 0) {
-                shouldPress = PRESSED_WITH_CUBE;
+                if ((other->body->flags & RigidBodyFlagsGrabbable) == RigidBodyFlagsGrabbable && button->cubePressFrames <= 0) {
+                    shouldPress = PRESSED_WITH_CUBE;
+                }
+                
+                break;
             }
             
-            break;
+            manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, manifold);
         }
-
-        manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, manifold);
-    }
     
-    if (button->collisionObject.flags & COLLISION_OBJECT_PLAYER_STANDING) {
-        button->collisionObject.flags &= ~COLLISION_OBJECT_PLAYER_STANDING;
-        shouldPress = 1;
-    }
-
-    struct Vector3 targetPos = button->originalPos;
-    
-    if (shouldPress) {
-        targetPos.y -= BUTTON_MOVEMENT_AMOUNT;
-        signalsSend(button->signalIndex);
-
-        if (button->cubeSignalIndex != -1 && shouldPress == PRESSED_WITH_CUBE) {
-            signalsSend(button->cubeSignalIndex);
+        if (button->collisionObject.flags & COLLISION_OBJECT_PLAYER_STANDING) {
+            button->collisionObject.flags &= ~COLLISION_OBJECT_PLAYER_STANDING;
+            shouldPress = 1;
         }
         
-        if (button->cubePressFrames > 0) {
-            --button->cubePressFrames;
-        }
-    } else {
-        button->cubePressFrames = CUBE_PRESS_IDLE_FRAMES;
-    }
+        struct Vector3 targetPos = button->originalPos;
+        
+        if (shouldPress) {
+            targetPos.y -= BUTTON_MOVEMENT_AMOUNT;
+            signalsSend(button->signalIndex);
 
-    //if its actively moving up or down
-    if (targetPos.y != button->rigidBody.transform.position.y) {
-        //actively going down
-        if (shouldPress){
-            if (!(button->flags & ButtonFlagsBeingPressed)){
-                soundPlayerPlay(soundsButton, 2.5f, 0.5f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
-                hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_DOWN, SubtitleTypeCaption);
+            if (button->cubeSignalIndex != -1 && shouldPress == PRESSED_WITH_CUBE) {
+                signalsSend(button->cubeSignalIndex);
             }
-            button->flags |= ButtonFlagsBeingPressed;
-        }
-        // actively going up
-        else{
-            if ((button->flags & ButtonFlagsBeingPressed)){
-                soundPlayerPlay(soundsButtonRelease, 2.5f, 0.4f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
-                hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_UP, SubtitleTypeCaption);
+            
+            if (button->cubePressFrames > 0) {
+                --button->cubePressFrames;
             }
-            button->flags &= ~ButtonFlagsBeingPressed;
+        } else {
+            button->cubePressFrames = CUBE_PRESS_IDLE_FRAMES;
         }
+        
+        //if its actively moving up or down
+        if (targetPos.y != button->rigidBody.transform.position.y) {
+            //actively going down
+            if (shouldPress) {
+                if (!(button->flags & ButtonFlagsBeingPressed)) {
+                    soundPlayerPlay(soundsButton, 2.5f, 0.5f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+                    hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_DOWN, SubtitleTypeCaption);
+                }
+                button->flags |= ButtonFlagsBeingPressed;
+            }
+            // actively going up
+            else {
+                if ((button->flags & ButtonFlagsBeingPressed)) {
+                    soundPlayerPlay(soundsButtonRelease, 2.5f, 0.4f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+                    hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_UP, SubtitleTypeCaption);
+                }
+                button->flags &= ~ButtonFlagsBeingPressed;
+            }
 
-        vector3MoveTowards(&button->rigidBody.transform.position, &targetPos, BUTTON_MOVE_VELOCTY * FIXED_DELTA_TIME, &button->rigidBody.transform.position);
-        collisionObjectUpdateBB(&button->collisionObject);
+            vector3MoveTowards(&button->rigidBody.transform.position, &targetPos, BUTTON_MOVE_VELOCTY * FIXED_DELTA_TIME, &button->rigidBody.transform.position);
+            collisionObjectUpdateBB(&button->collisionObject);
+        }
     }
-    
 }
