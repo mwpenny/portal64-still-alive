@@ -16,6 +16,9 @@
 #define IMAGE_WIDTH     16
 #define IMAGE_HEIGHT    64
 
+#define FRAME_HEIGHT    2
+#define FRAME_WIDTH     0.125
+
 #define GFX_PER_PARTICLE(particleCount) ((particleCount) + (((particleCount) + 7) >> 3) + 1)
 
 void fizzlerTrigger(void* data, struct CollisionObject* objectEnteringTrigger) {
@@ -45,18 +48,6 @@ struct Transform gRelativeRight = {
     {1.0f, 1.0f, 1.0f},
 };
 
-struct CollisionBox gFizzlerFrameBox = {
-    {0.125f, 1.0f, 0.125f}
-};
-
-struct ColliderTypeData gFizzlerFrameCollider = {
-    CollisionShapeTypeBox,
-    &gFizzlerFrameBox,
-    0.0f,
-    1.0f,
-    &gCollisionBoxCallbacks
-};
-
 void fizzlerRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Fizzler* fizzler = (struct Fizzler*)data;
 
@@ -70,22 +61,33 @@ void fizzlerRender(void* data, struct DynamicRenderDataList* renderList, struct 
 
     dynamicRenderListAddData(renderList, fizzler->modelGraphics, matrix, PORTAL_CLEANSER_INDEX, &fizzler->rigidBody.transform.position, NULL);
 
-    Mtx* sideMatrices = renderStateRequestMatrices(renderState, 2);
-    
+    int height = fizzler->collisionBox.sideLength.y * 2;
+    int rows = (int)(height / FRAME_HEIGHT);
+    Mtx* sideMatrices = renderStateRequestMatrices(renderState, rows * 2);
+
     if (!sideMatrices) {
         return;
     }
 
-    struct Transform combinedTransform;
-    gRelativeLeft.position.x = fizzler->collisionBox.sideLength.x;
-    transformConcat(&fizzler->rigidBody.transform, &gRelativeLeft, &combinedTransform);
-    transformToMatrixL(&combinedTransform, &sideMatrices[0], SCENE_SCALE);
-    dynamicRenderListAddData(renderList, dynamicAssetModel(PROPS_PORTAL_CLEANSER_DYNAMIC_MODEL), &sideMatrices[0], PORTAL_CLEANSER_WALL_INDEX, &fizzler->rigidBody.transform.position, NULL);
+    Gfx* sideModel = dynamicAssetModel(PROPS_PORTAL_CLEANSER_DYNAMIC_MODEL);
+    struct Transform sideTransform;
+    int sideY = (height - FRAME_HEIGHT) / 2;
 
-    gRelativeRight.position.x = -fizzler->collisionBox.sideLength.x;
-    transformConcat(&fizzler->rigidBody.transform, &gRelativeRight, &combinedTransform);
-    transformToMatrixL(&combinedTransform, &sideMatrices[1], SCENE_SCALE);
-    dynamicRenderListAddData(renderList, dynamicAssetModel(PROPS_PORTAL_CLEANSER_DYNAMIC_MODEL), &sideMatrices[1], PORTAL_CLEANSER_WALL_INDEX, &fizzler->rigidBody.transform.position, NULL);
+    for (int i = 0; i < rows; ++i, sideY -= FRAME_HEIGHT) {
+        int sideIndex = i * 2;
+
+        gRelativeLeft.position.x = fizzler->collisionBox.sideLength.x;
+        gRelativeLeft.position.y = sideY;
+        transformConcat(&fizzler->rigidBody.transform, &gRelativeLeft, &sideTransform);
+        transformToMatrixL(&sideTransform, &sideMatrices[sideIndex], SCENE_SCALE);
+        dynamicRenderListAddData(renderList, sideModel, &sideMatrices[sideIndex], PORTAL_CLEANSER_WALL_INDEX, &fizzler->rigidBody.transform.position, NULL);
+
+        gRelativeRight.position.x = -fizzler->collisionBox.sideLength.x;
+        gRelativeRight.position.y = sideY;
+        transformConcat(&fizzler->rigidBody.transform, &gRelativeRight, &sideTransform);
+        transformToMatrixL(&sideTransform, &sideMatrices[sideIndex + 1], SCENE_SCALE);
+        dynamicRenderListAddData(renderList, sideModel, &sideMatrices[sideIndex + 1], PORTAL_CLEANSER_WALL_INDEX, &fizzler->rigidBody.transform.position, NULL);
+    }
 }
 
 void fizzlerSpawnParticle(struct Fizzler* fizzler, int particleIndex) {
@@ -154,11 +156,21 @@ void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float wid
     fizzler->colliderType.friction = 0.0f;
     fizzler->colliderType.callbacks = &gCollisionBoxCallbacks;
 
+    fizzler->frameCollisionBox.sideLength.x = FRAME_WIDTH;
+    fizzler->frameCollisionBox.sideLength.y = height;
+    fizzler->frameCollisionBox.sideLength.z = FRAME_WIDTH;
+
+    fizzler->frameColliderType.type = CollisionShapeTypeBox;
+    fizzler->frameColliderType.data = &fizzler->frameCollisionBox;
+    fizzler->frameColliderType.bounce = 0.0f;
+    fizzler->frameColliderType.friction = 0.0f;
+    fizzler->frameColliderType.callbacks = &gCollisionBoxCallbacks;
+
     collisionObjectInit(&fizzler->collisionObject, &fizzler->colliderType, &fizzler->rigidBody, 1.0f, COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_PORTAL);
     rigidBodyMarkKinematic(&fizzler->rigidBody);
-    collisionObjectInit(&fizzler->frameLeftCollisionObject, &gFizzlerFrameCollider, &fizzler->frameLeftRigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
+    collisionObjectInit(&fizzler->frameLeftCollisionObject, &fizzler->frameColliderType, &fizzler->frameLeftRigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
     rigidBodyMarkKinematic(&fizzler->frameLeftRigidBody);
-    collisionObjectInit(&fizzler->frameRightCollisionObject, &gFizzlerFrameCollider, &fizzler->frameRightRigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
+    collisionObjectInit(&fizzler->frameRightCollisionObject, &fizzler->frameColliderType, &fizzler->frameRightRigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
     rigidBodyMarkKinematic(&fizzler->frameRightRigidBody);
 
     fizzler->collisionObject.trigger = fizzlerTrigger;
@@ -169,13 +181,13 @@ void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float wid
     struct Vector3 left = {-1.0f, 0.0f, 0.0f};
     quatMultVector(&transform->rotation, &left, &left);
     fizzler->frameLeftRigidBody.transform = *transform;
-    vector3AddScaled(&transform->position, &left, width - gFizzlerFrameBox.sideLength.x, &fizzler->frameLeftRigidBody.transform.position);
+    vector3AddScaled(&transform->position, &left, width - fizzler->frameCollisionBox.sideLength.x, &fizzler->frameLeftRigidBody.transform.position);
     fizzler->frameLeftRigidBody.currentRoom = room;
     
     struct Vector3 right;
     vector3Negate(&left, &right);
     fizzler->frameRightRigidBody.transform = *transform;
-    vector3AddScaled(&transform->position, &right, width - gFizzlerFrameBox.sideLength.x, &fizzler->frameRightRigidBody.transform.position);
+    vector3AddScaled(&transform->position, &right, width - fizzler->frameCollisionBox.sideLength.x, &fizzler->frameRightRigidBody.transform.position);
     fizzler->frameRightRigidBody.currentRoom = room;
     
     fizzler->cubeSignalIndex = cubeSignalIndex;
