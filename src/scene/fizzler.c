@@ -13,11 +13,11 @@
 
 #include "../build/assets/materials/static.h"
 
-#define IMAGE_WIDTH     16
-#define IMAGE_HEIGHT    64
+#define IMAGE_WIDTH         16
+#define IMAGE_HEIGHT        64
 
-#define FRAME_HEIGHT    2
-#define FRAME_WIDTH     0.125
+#define FRAME_HALF_HEIGHT   1
+#define FRAME_HALF_WIDTH    0.125
 
 #define GFX_PER_PARTICLE(particleCount) ((particleCount) + (((particleCount) + 7) >> 3) + 1)
 
@@ -61,8 +61,8 @@ void fizzlerRender(void* data, struct DynamicRenderDataList* renderList, struct 
 
     dynamicRenderListAddData(renderList, fizzler->modelGraphics, matrix, PORTAL_CLEANSER_INDEX, &fizzler->rigidBody.transform.position, NULL);
 
-    int height = fizzler->collisionBox.sideLength.y * 2;
-    int rows = (int)(height / FRAME_HEIGHT);
+    int halfHeight = fizzler->collisionBox.sideLength.y;
+    int rows = (int)(halfHeight / FRAME_HALF_HEIGHT);
     Mtx* sideMatrices = renderStateRequestMatrices(renderState, rows * 2);
 
     if (!sideMatrices) {
@@ -71,9 +71,9 @@ void fizzlerRender(void* data, struct DynamicRenderDataList* renderList, struct 
 
     Gfx* sideModel = dynamicAssetModel(PROPS_PORTAL_CLEANSER_DYNAMIC_MODEL);
     struct Transform sideTransform;
-    int sideY = (height - FRAME_HEIGHT) / 2;
+    int sideY = halfHeight - FRAME_HALF_HEIGHT;
 
-    for (int i = 0; i < rows; ++i, sideY -= FRAME_HEIGHT) {
+    for (int i = 0; i < rows; ++i, sideY -= FRAME_HALF_HEIGHT * 2) {
         int sideIndex = i * 2;
 
         gRelativeLeft.position.x = fizzler->collisionBox.sideLength.x;
@@ -156,9 +156,9 @@ void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float wid
     fizzler->colliderType.friction = 0.0f;
     fizzler->colliderType.callbacks = &gCollisionBoxCallbacks;
 
-    fizzler->frameCollisionBox.sideLength.x = FRAME_WIDTH;
+    fizzler->frameCollisionBox.sideLength.x = FRAME_HALF_WIDTH;
     fizzler->frameCollisionBox.sideLength.y = height;
-    fizzler->frameCollisionBox.sideLength.z = FRAME_WIDTH;
+    fizzler->frameCollisionBox.sideLength.z = FRAME_HALF_WIDTH;
 
     fizzler->frameColliderType.type = CollisionShapeTypeBox;
     fizzler->frameColliderType.data = &fizzler->frameCollisionBox;
