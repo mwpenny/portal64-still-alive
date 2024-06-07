@@ -102,6 +102,10 @@ end
 --- @tfield number z
 Vector3.__index = Vector3;
 
+Vector3.RIGHT = vector3(1, 0, 0)
+Vector3.UP = vector3(0, 1, 0)
+Vector3.FORWARD = vector3(0, 0, 1)
+
 --- @function __eq
 --- @tparam number|Vector3 b
 --- @treturn Vector3

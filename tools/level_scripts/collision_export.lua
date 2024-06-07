@@ -4,6 +4,7 @@ local sk_scene = require('sk_scene')
 local sk_mesh = require('sk_mesh')
 local sk_math = require('sk_math')
 local room_export = require('tools.level_scripts.room_export')
+local entities = require('tools.level_scripts.entities')
 
 local COLLISION_GRID_CELL_SIZE = 4
 
@@ -141,7 +142,30 @@ local function find_adjacent_vertices(mesh, corner_index)
     return result
 end
 
-local function create_collision_quad(mesh, thickness)
+local function create_collision_quad(corner_point, edge_a, edge_b, normal, thickness)
+    -- make sure the basis is right handed
+    if edge_a:cross(edge_b):dot(normal) < 0 then
+        edge_a, edge_b = edge_b, edge_a
+    end
+
+    local edge_a_normalized = edge_a:normalized()
+    local edge_b_normalized = edge_b:normalized()
+
+    return {
+        corner = corner_point,
+        edgeA = edge_a_normalized,
+        edgeALength = edge_a:dot(edge_a_normalized),
+        edgeB = edge_b_normalized,
+        edgeBLength = edge_b:dot(edge_b_normalized),
+        plane = {
+            normal = normal,
+            d = -corner_point:dot(normal),
+        },
+        thickness = thickness,
+    }
+end
+
+local function collision_quad_from_mesh(mesh, thickness)
     local bottom_right_most = mesh.vertices[1]
 
     local corner_point, corner_index = bottom_right_most_index(mesh.vertices)
@@ -154,8 +178,8 @@ local function create_collision_quad(mesh, thickness)
         table.insert(edges_from_corner, mesh.vertices[index] - corner_point)
     end
 
-    local edge_a_point = find_most_opposite_edge(edges_from_corner[1], edges_from_corner)
-    local edge_b_point = find_most_opposite_edge(edge_a_point, edges_from_corner)
+    local edge_a = find_most_opposite_edge(edges_from_corner[1], edges_from_corner)
+    local edge_b = find_most_opposite_edge(edge_a, edges_from_corner)
 
     local normal_sum = sk_math.vector3(0, 0, 0)
 
@@ -165,27 +189,47 @@ local function create_collision_quad(mesh, thickness)
 
     local final_normal = normal_sum:normalized()
 
-    -- make sure the basis is right handed
-    if edge_a_point:cross(edge_b_point):dot(final_normal) < 0 then
-        edge_a_point, edge_b_point = edge_b_point, edge_a_point
+    return create_collision_quad(
+        corner_point,
+        edge_a,
+        edge_b,
+        final_normal,
+        thickness
+    )
+end
+
+local function create_collision_quads_from_box(box)
+    local rot_size = {
+        x = box.basis.x * box.half_size.x * 2,
+        y = box.basis.y * box.half_size.y * 2,
+        z = box.basis.z * box.half_size.z * 2
+    }
+    local corner_dir = (rot_size.x + rot_size.y + rot_size.z) / 2
+    local bottom_corner = box.position - corner_dir
+
+    local faces = {
+        { corner_offset = sk_math.vector3(), edge_a = rot_size.y, edge_b = rot_size.x },
+        { corner_offset = rot_size.x, edge_a = rot_size.y, edge_b = rot_size.z },
+        { corner_offset = rot_size.x + rot_size.z, edge_a = rot_size.y, edge_b = -rot_size.x },
+        { corner_offset = rot_size.z, edge_a = rot_size.y, edge_b = -rot_size.z },
+        { corner_offset = sk_math.vector3(), edge_a = rot_size.x, edge_b = rot_size.z },
+        { corner_offset = rot_size.y, edge_a = rot_size.z, edge_b = rot_size.x }
+    }
+
+    local quads = {}
+
+    for _, face in pairs(faces) do
+        local quad = create_collision_quad(
+            bottom_corner + face.corner_offset,
+            face.edge_a,
+            face.edge_b,
+            face.edge_a:cross(face.edge_b),
+            0
+        )
+        table.insert(quads, quad)
     end
 
-    local edge_a_normalized = edge_a_point:normalized()
-    local edge_b_normalized = edge_b_point:normalized()
-
-
-    return {
-        corner = corner_point,
-        edgeA = edge_a_normalized,
-        edgeALength = edge_a_point:dot(edge_a_normalized),
-        edgeB = edge_b_normalized,
-        edgeBLength = edge_b_point:dot(edge_b_normalized),
-        plane = {
-            normal = final_normal,
-            d = -corner_point:dot(final_normal),
-        },
-        thickness = thickness,
-    }
+    return quads
 end
 
 local function collision_quad_bb(collision_quad)
@@ -267,6 +311,42 @@ local room_bb = {}
 
 local room_grids = {}
 
+local default_collision_layers = {
+    'COLLISION_LAYERS_STATIC',
+    'COLLISION_LAYERS_BLOCK_BALL',
+    'COLLISION_LAYERS_TANGIBLE'
+}
+
+local function add_collider(collider, collision_layers, room_index)
+    local bb = collision_quad_bb(collider)
+
+    if room_bb[room_index + 1] then
+        room_bb[room_index + 1] = room_bb[room_index + 1]:union(bb)
+    else
+        room_bb[room_index + 1] = bb
+    end
+
+    table.insert(colliders, collider)
+    table.insert(quad_rooms, room_index)
+
+    local collider_type = {
+        sk_definition_writer.raw("CollisionShapeTypeQuad"),
+        sk_definition_writer.reference_to(collider),
+        0,
+        1,
+        sk_definition_writer.null_value,
+    }
+
+    table.insert(collider_types, collider_type)
+
+    table.insert(collision_objects, {
+        sk_definition_writer.reference_to(collider_type),
+        sk_definition_writer.null_value,
+        bb,
+        sk_definition_writer.raw(table.concat(collision_layers, ' | '))
+    })
+end
+
 for index, node in pairs(collider_nodes) do
     local is_transparent = sk_scene.find_flag_argument(node.arguments, "transparent")
 
@@ -279,9 +359,7 @@ for index, node in pairs(collider_nodes) do
     end
 
     if #collision_layers == 0 then
-        table.insert(collision_layers, 'COLLISION_LAYERS_STATIC')
-        table.insert(collision_layers, 'COLLISION_LAYERS_BLOCK_BALL')
-        table.insert(collision_layers, 'COLLISION_LAYERS_TANGIBLE')
+        collision_layers = { table.unpack(default_collision_layers) }
 
         if is_transparent then 
             table.insert(collision_layers, 'COLLISION_LAYERS_TRANSPARENT')
@@ -291,7 +369,7 @@ for index, node in pairs(collider_nodes) do
     for _, mesh in pairs(node.node.meshes) do
         local global_mesh = mesh:transform(node.node.full_transformation)
 
-        local collider = create_collision_quad(global_mesh, parse_quad_thickness(node))
+        local collider = collision_quad_from_mesh(global_mesh, parse_quad_thickness(node))
 
         local named_entry = sk_scene.find_named_argument(node.arguments, "name")
 
@@ -299,33 +377,17 @@ for index, node in pairs(collider_nodes) do
             sk_definition_writer.add_macro(named_entry .. "_COLLISION_INDEX", #colliders)
         end
 
-        local bb = collision_quad_bb(collider)
-        
-        if room_bb[node.room_index + 1] then
-            room_bb[node.room_index + 1] = room_bb[node.room_index + 1]:union(bb)
-        else
-            room_bb[node.room_index + 1] = bb
-        end
+        add_collider(collider, collision_layers, node.room_index)
+    end
+end
 
-        table.insert(colliders, collider)
-        table.insert(quad_rooms, node.room_index)
-
-        local collider_type = {
-            sk_definition_writer.raw("CollisionShapeTypeQuad"),
-            sk_definition_writer.reference_to(collider),
-            0,
-            1,
-            sk_definition_writer.null_value,
-        }
-        
-        table.insert(collider_types, collider_type)
-
-        table.insert(collision_objects, {
-            sk_definition_writer.reference_to(collider_type),
-            sk_definition_writer.null_value,
-            bb,
-            sk_definition_writer.raw(table.concat(collision_layers, ' | '))
-        })
+for _, box in pairs(entities.static_collision_boxes) do
+    for _, collider in pairs(create_collision_quads_from_box(box)) do
+        add_collider(
+            collider,
+            default_collision_layers,
+            room_export.nearest_room_index(box.position)
+        )
     end
 end
 
@@ -352,6 +414,6 @@ return {
     colliders = colliders,
     collision_quad_bb = collision_quad_bb,
     collision_objects = collision_objects,
-    create_collision_quad = create_collision_quad,
+    collision_quad_from_mesh = collision_quad_from_mesh,
     room_grids = room_grids,
 }

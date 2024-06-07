@@ -18,15 +18,9 @@
 
 struct Fizzler {
     struct CollisionObject collisionObject;
-    struct CollisionObject frameLeftCollisionObject;
-    struct CollisionObject frameRightCollisionObject;
     struct RigidBody rigidBody;
-    struct RigidBody frameLeftRigidBody;
-    struct RigidBody frameRightRigidBody;
     struct ColliderTypeData colliderType;
-    struct ColliderTypeData frameColliderType;
     struct CollisionBox collisionBox;
-    struct CollisionBox frameCollisionBox;
     Vtx* modelVertices;
     Gfx* modelGraphics;
     short particleCount;

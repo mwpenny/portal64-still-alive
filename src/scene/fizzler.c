@@ -17,7 +17,6 @@
 #define IMAGE_HEIGHT        64
 
 #define FRAME_HALF_HEIGHT   1
-#define FRAME_HALF_WIDTH    0.125
 
 #define GFX_PER_PARTICLE(particleCount) ((particleCount) + (((particleCount) + 7) >> 3) + 1)
 
@@ -156,49 +155,18 @@ void fizzlerInit(struct Fizzler* fizzler, struct Transform* transform, float wid
     fizzler->colliderType.friction = 0.0f;
     fizzler->colliderType.callbacks = &gCollisionBoxCallbacks;
 
-    fizzler->frameCollisionBox.sideLength.x = FRAME_HALF_WIDTH;
-    fizzler->frameCollisionBox.sideLength.y = height;
-    fizzler->frameCollisionBox.sideLength.z = FRAME_HALF_WIDTH;
-
-    fizzler->frameColliderType.type = CollisionShapeTypeBox;
-    fizzler->frameColliderType.data = &fizzler->frameCollisionBox;
-    fizzler->frameColliderType.bounce = 0.0f;
-    fizzler->frameColliderType.friction = 0.0f;
-    fizzler->frameColliderType.callbacks = &gCollisionBoxCallbacks;
-
     collisionObjectInit(&fizzler->collisionObject, &fizzler->colliderType, &fizzler->rigidBody, 1.0f, COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_PORTAL);
     rigidBodyMarkKinematic(&fizzler->rigidBody);
-    collisionObjectInit(&fizzler->frameLeftCollisionObject, &fizzler->frameColliderType, &fizzler->frameLeftRigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
-    rigidBodyMarkKinematic(&fizzler->frameLeftRigidBody);
-    collisionObjectInit(&fizzler->frameRightCollisionObject, &fizzler->frameColliderType, &fizzler->frameRightRigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
-    rigidBodyMarkKinematic(&fizzler->frameRightRigidBody);
 
     fizzler->collisionObject.trigger = fizzlerTrigger;
     fizzler->collisionObject.data = fizzler;
     fizzler->rigidBody.transform = *transform;
     fizzler->rigidBody.currentRoom = room;
     
-    struct Vector3 left = {-1.0f, 0.0f, 0.0f};
-    quatMultVector(&transform->rotation, &left, &left);
-    fizzler->frameLeftRigidBody.transform = *transform;
-    vector3AddScaled(&transform->position, &left, width - fizzler->frameCollisionBox.sideLength.x, &fizzler->frameLeftRigidBody.transform.position);
-    fizzler->frameLeftRigidBody.currentRoom = room;
-    
-    struct Vector3 right;
-    vector3Negate(&left, &right);
-    fizzler->frameRightRigidBody.transform = *transform;
-    vector3AddScaled(&transform->position, &right, width - fizzler->frameCollisionBox.sideLength.x, &fizzler->frameRightRigidBody.transform.position);
-    fizzler->frameRightRigidBody.currentRoom = room;
-    
     fizzler->cubeSignalIndex = cubeSignalIndex;
     
     collisionObjectUpdateBB(&fizzler->collisionObject);
-    collisionObjectUpdateBB(&fizzler->frameLeftCollisionObject);
-    collisionObjectUpdateBB(&fizzler->frameRightCollisionObject);
-    
     collisionSceneAddDynamicObject(&fizzler->collisionObject);
-    collisionSceneAddDynamicObject(&fizzler->frameLeftCollisionObject);
-    collisionSceneAddDynamicObject(&fizzler->frameRightCollisionObject);
     
     fizzler->maxExtent = (int)(maxf(0.0f, width - 0.5f) * SCENE_SCALE);
     fizzler->maxVerticalExtent = (int)(height * SCENE_SCALE);
