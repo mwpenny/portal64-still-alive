@@ -655,6 +655,7 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
 
     struct RaycastHit hit;
     struct Ray ray;
+    hit.roomIndex = player->body.currentRoom;
     ray.origin = player->body.transform.position;
     vector3Scale(&gUp, &ray.dir, -1.0f);
     if (collisionSceneRaycastOnlyDynamic(&gCollisionScene, &ray, COLLISION_LAYERS_TANGIBLE, hitDistance, &hit)) {

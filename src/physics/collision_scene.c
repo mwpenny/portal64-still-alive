@@ -407,11 +407,15 @@ int collisionSceneRaycastDoorways(struct CollisionScene* scene, struct Room* roo
     return nextRoom;
 }
 
-void collisionSceneRaycastDynamic(struct CollisionScene* scene, struct Ray* ray, int collisionLayers, struct RaycastHit* hit) {
+void collisionSceneRaycastDynamic(struct CollisionScene* scene, struct Ray* ray, int collisionLayers, struct RaycastHit* hit, u64* rayRooms) {
     for (int i = 0; i < scene->dynamicObjectCount; ++i) {
         struct RaycastHit hitTest;
 
         struct CollisionObject* object = scene->dynamicObjects[i];
+
+        if (((1LL << object->body->currentRoom) & *rayRooms) == 0) {
+            continue;
+        }
 
         if ((object->collisionLayers & collisionLayers) == 0 || (object->trigger != NULL && !(object->collisionLayers & COLLISION_LAYERS_FIZZLER)) ) {
             continue;
@@ -433,7 +437,8 @@ int collisionSceneRaycastOnlyDynamic(struct CollisionScene* scene, struct Ray* r
     hit->distance = maxDistance;
     hit->throughPortal = NULL;
 
-    collisionSceneRaycastDynamic(scene, ray, collisionLayers, hit);
+    u64 rayRooms = 1LL << hit->roomIndex;
+    collisionSceneRaycastDynamic(scene, ray, collisionLayers, hit, &rayRooms);
 
     return hit->distance != maxDistance;
 }
@@ -445,6 +450,7 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
     hit->numPortalsPassed = 0;
 
     int roomsToCheck = 5;
+    u64 rayRooms = 1LL << roomIndex;
 
     while (roomsToCheck && roomIndex != -1) {
         struct Room* room = &scene->world->rooms[roomIndex];
@@ -462,12 +468,13 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
         // even on a miss, the raycast should report which room it ended up in
         if (roomIndex != -1) {
             hit->roomIndex = roomIndex;
+            rayRooms |= 1LL << roomIndex;
         }
 
         --roomsToCheck;
     }
 
-    collisionSceneRaycastDynamic(scene, ray, collisionLayers, hit);
+    collisionSceneRaycastDynamic(scene, ray, collisionLayers, hit, &rayRooms);
 
     if (passThroughPortals && 
         hit->distance != maxDistance &&
