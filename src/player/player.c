@@ -747,6 +747,78 @@ void playerPortalFunnel(struct Player* player) {
     }
 }
 
+void playerUpdateCamera(struct Player* player, struct Vector2* lookInput, int didPassThroughPortal) {
+    float camera_y_modifier = (player->flags & PlayerCrouched) ? -0.25f : 0.0f;
+
+    player->lookTransform.position = player->body.transform.position;
+    player->lookTransform.position.y += camera_y_modifier;
+    player->lookTransform.rotation = player->body.transform.rotation;
+
+    // If player is shaking, shake screen
+    playerShakeUpdate(player);
+
+    // Compute yaw and pitch velocities
+    float rotateRate = mathfLerp(MIN_ROTATE_RATE, MAX_ROTATE_RATE, (float)gSaveData.controls.sensitivity / 0xFFFF);
+    float targetYaw = -lookInput->x * rotateRate;
+    float targetPitch = lookInput->y * rotateRate;
+    if (gSaveData.controls.flags & ControlSaveFlagsInvert) {
+        targetPitch = -targetPitch;
+    }
+
+    float rotateRateDelta = mathfLerp(MIN_ROTATE_RATE_DELTA, MAX_ROTATE_RATE_DELTA, (float)gSaveData.controls.acceleration / 0xFFFF);
+    player->yawVelocity = mathfMoveTowards(
+        player->yawVelocity,
+        targetYaw,
+        rotateRateDelta
+    );
+    player->pitchVelocity = mathfMoveTowards(
+        player->pitchVelocity,
+        targetPitch,
+        rotateRateDelta
+    );
+
+    struct Vector3 lookingForward;
+    vector3Negate(&gForward, &lookingForward);
+    quatMultVector(&player->lookTransform.rotation, &lookingForward, &lookingForward);
+
+    // Move roll toward correct orientation (i.e., after going through a portal upside down)
+    // If player is looking close to directly up or down, there is no need and doing so will create jitter
+    if (fabsf(lookingForward.y) < 0.99f) {
+        struct Quaternion upRotation;
+        quatLook(&lookingForward, &gUp, &upRotation);
+        quatLerp(&upRotation, &player->lookTransform.rotation, 0.9f, &player->lookTransform.rotation);
+    }
+
+    // Apply yaw velocity
+    struct Quaternion deltaRotate;
+    quatAxisAngle(&gUp, player->yawVelocity * FIXED_DELTA_TIME, &deltaRotate);
+    struct Quaternion postYawRotate;
+    quatMultiply(&deltaRotate, &player->lookTransform.rotation, &postYawRotate);
+
+    // Apply pitch velocity
+    quatAxisAngle(&gRight, player->pitchVelocity * FIXED_DELTA_TIME, &deltaRotate);
+    quatMultiply(&postYawRotate, &deltaRotate, &player->lookTransform.rotation);
+
+    // Prevent player from looking too far up or down
+    vector3Negate(&gForward, &lookingForward);
+    quatMultVector(&postYawRotate, &lookingForward, &lookingForward);
+    struct Vector3 newLookingForward;
+    vector3Negate(&gForward, &newLookingForward);
+    quatMultVector(&player->lookTransform.rotation, &newLookingForward, &newLookingForward);
+
+    float pitchSign = signf(player->pitchVelocity);
+
+    if (!didPassThroughPortal && lookingForward.y * pitchSign > newLookingForward.y * pitchSign && lookingForward.y * pitchSign > 0.0f) {
+        // Snap to up/down
+        struct Vector3 newForward = gZeroVec;
+        newForward.y = pitchSign;
+        struct Vector3 newUp;
+        quatMultVector(&postYawRotate, &gUp, &newUp);
+        quatLook(&newForward, &newUp, &player->lookTransform.rotation);
+        player->pitchVelocity = 0.0f;
+    }
+}
+
 void playerUpdate(struct Player* player) {
     struct Vector3 forward;
     struct Vector3 right;
@@ -774,16 +846,6 @@ void playerUpdate(struct Player* player) {
         hudResolvePrompt(&gScene.hud, CutscenePromptTypeJump);
     }
 
-    struct Vector3 targetVelocity = gZeroVec;
-
-    float camera_y_modifier = 0.0;
-    if (player->flags & PlayerCrouched){
-        camera_y_modifier = -0.25;
-    }
-    else{
-        camera_y_modifier = 0.0;
-    }
-
     struct Vector2 moveInput = controllerDirectionGet(ControllerActionMove);
     struct Vector2 lookInput = controllerDirectionGet(ControllerActionRotate);
 
@@ -798,6 +860,8 @@ void playerUpdate(struct Player* player) {
         hudResolvePrompt(&gScene.hud, CutscenePromptTypeMove);
     }
 
+    struct Vector3 targetVelocity = gZeroVec;
+
     if (!isDead) {
         if (vector2MagSqr(&moveInput) > 1.0f){
             vector2Normalize(&moveInput, &moveInput);
@@ -809,12 +873,10 @@ void playerUpdate(struct Player* player) {
         // if player isnt crouched, crouch
         if (!(player->flags & PlayerCrouched) && (controllerActionGet(ControllerActionDuck))){
             player->flags |= PlayerCrouched;
-            camera_y_modifier = -0.25;
         }
         //if player crouched, uncrouch
         else if ((player->flags & PlayerCrouched) && (controllerActionGet(ControllerActionDuck))){
             player->flags &= ~PlayerCrouched;
-            camera_y_modifier = 0.0;
         }
 
         //look straight forward
@@ -915,16 +977,6 @@ void playerUpdate(struct Player* player) {
 
     int didPassThroughPortal = rigidBodyCheckPortals(&player->body);
     player->passedThroughPortal = didPassThroughPortal;
-
-    player->lookTransform.position = player->body.transform.position;
-    player->lookTransform.position.y += camera_y_modifier;
-
-    //if player is shaking, shake screen 
-    playerShakeUpdate(player);
-
-    player->lookTransform.rotation = player->body.transform.rotation;
-    quatIdent(&player->body.transform.rotation);
-
     if (didPassThroughPortal) {
         soundPlayerPlay(soundsPortalEnter[didPassThroughPortal - 1], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTALPLAYER_ENTERPORTAL, SubtitleTypeCaption);
@@ -935,68 +987,10 @@ void playerUpdate(struct Player* player) {
         gPlayerCollider.extendDownward = mathfMoveTowards(gPlayerCollider.extendDownward, TARGET_CAPSULE_EXTEND_HEIGHT, STAND_SPEED * FIXED_DELTA_TIME);
     }
 
-    float rotateRate = mathfLerp(MIN_ROTATE_RATE, MAX_ROTATE_RATE, (float)gSaveData.controls.sensitivity / 0xFFFF);
-    float targetYaw = -lookInput.x * rotateRate;
-    float targetPitch = lookInput.y * rotateRate;
-
-    if (gSaveData.controls.flags & ControlSaveFlagsInvert) {
-        targetPitch = -targetPitch;
-    }
-
-    float rotateRateDelta = mathfLerp(MIN_ROTATE_RATE_DELTA, MAX_ROTATE_RATE_DELTA, (float)gSaveData.controls.acceleration / 0xFFFF);
-
-    player->yawVelocity = mathfMoveTowards(
-        player->yawVelocity, 
-        targetYaw, 
-        rotateRateDelta
-    );
-    player->pitchVelocity = mathfMoveTowards(
-        player->pitchVelocity, 
-        targetPitch, 
-        rotateRateDelta
-    );
-
-    struct Vector3 lookingForward;
-    vector3Negate(&gForward, &lookingForward);
-    quatMultVector(&player->lookTransform.rotation, &lookingForward, &lookingForward);
-
-    // if player is looking close to directly up or down, don't correct the rotation
-    if (fabsf(lookingForward.y) < 0.99f) {
-        struct Quaternion upRotation;
-        quatLook(&lookingForward, &gUp, &upRotation);
-        quatLerp(&upRotation, &player->lookTransform.rotation, 0.9f, &player->lookTransform.rotation);
-    }
-
-    // yaw
-    struct Quaternion deltaRotate;
-    quatAxisAngle(&gUp, player->yawVelocity * FIXED_DELTA_TIME, &deltaRotate);
-    struct Quaternion tempRotation;
-    quatMultiply(&deltaRotate, &player->lookTransform.rotation, &tempRotation);
-
-    // pitch
-    quatAxisAngle(&gRight, player->pitchVelocity * FIXED_DELTA_TIME, &deltaRotate);
-    quatMultiply(&tempRotation, &deltaRotate, &player->lookTransform.rotation);
-
-    // prevent player from looking too far up or down
-    vector3Negate(&gForward, &lookingForward);
-    quatMultVector(&tempRotation, &lookingForward, &lookingForward);
-    struct Vector3 newLookingForward;
-    vector3Negate(&gForward, &newLookingForward);
-    quatMultVector(&player->lookTransform.rotation, &newLookingForward, &newLookingForward);
-
-    float pitchSign = signf(player->pitchVelocity);
-
-    if (!didPassThroughPortal && lookingForward.y * pitchSign > newLookingForward.y * pitchSign && lookingForward.y * pitchSign > 0.0f) {
-        struct Vector3 newForward = gZeroVec;
-        newForward.y = pitchSign;
-        struct Vector3 newUp;
-        quatMultVector(&tempRotation, &gUp, &newUp);
-        quatLook(&newForward, &newUp, &player->lookTransform.rotation);
-        player->pitchVelocity = 0.0f;
-    }
+    playerUpdateCamera(player, &lookInput, didPassThroughPortal);
+    quatIdent(&player->body.transform.rotation);
 
     playerUpdateGrabbedObject(player);
-
     collisionObjectUpdateBB(&player->collisionObject);
 
     if (!didPassThroughPortal) {
