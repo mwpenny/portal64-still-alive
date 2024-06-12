@@ -739,7 +739,7 @@ void sceneUpdate(struct Scene* scene) {
                     &scene->elevators[teleportTo].rigidBody.transform,
                     &gZeroVec,
                     &gZeroVec,
-                    scene->elevators[teleportTo].roomIndex
+                    scene->elevators[teleportTo].rigidBody.currentRoom
                 );
                 sceneQueueCheckpoint(&gScene);
                 sceneClosePortal(&gScene, 0);

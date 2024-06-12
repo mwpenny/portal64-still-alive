@@ -77,7 +77,7 @@ void switchRender(void* data, struct DynamicRenderDataList* renderList, struct R
 void switchInit(struct Switch* switchObj, struct SwitchDefinition* definition) {
     struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_SWITCH001_DYNAMIC_ANIMATED_MODEL);
 
-    collisionObjectInit(&switchObj->collisionObject, &gSwitchCollider, &switchObj->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
+    collisionObjectInit(&switchObj->collisionObject, &gSwitchCollider, &switchObj->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_BLOCK_PORTAL);
     rigidBodyMarkKinematic(&switchObj->rigidBody);
     collisionSceneAddDynamicObject(&switchObj->collisionObject);
 

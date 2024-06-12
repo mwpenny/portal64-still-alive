@@ -413,7 +413,7 @@ void collisionSceneRaycastDynamic(struct CollisionScene* scene, struct Ray* ray,
 
         struct CollisionObject* object = scene->dynamicObjects[i];
 
-        if (((1LL << object->body->currentRoom) & *rayRooms) == 0) {
+        if (object->body->currentRoom != RIGID_BODY_NO_ROOM && ((1LL << object->body->currentRoom) & *rayRooms) == 0) {
             continue;
         }
 

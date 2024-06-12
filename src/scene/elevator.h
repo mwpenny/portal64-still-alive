@@ -20,7 +20,6 @@ struct Elevator {
     short dynamicId;
     short flags;
     short targetElevator;
-    short roomIndex;
     float openAmount;
     float timer;
     float movingTimer;

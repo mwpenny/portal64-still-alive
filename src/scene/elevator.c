@@ -97,13 +97,13 @@ void elevatorInit(struct Elevator* elevator, struct ElevatorDefinition* elevator
 
     elevator->rigidBody.transform.position = elevatorDefinition->position;
     elevator->rigidBody.transform.rotation = elevatorDefinition->rotation;
+    elevator->rigidBody.currentRoom = elevatorDefinition->roomIndex;
 
     collisionObjectUpdateBB(&elevator->collisionObject);
 
     elevator->dynamicId = dynamicSceneAdd(elevator, elevatorRender, &elevator->rigidBody.transform.position, 3.9f);
     elevator->flags = elevatorDefinition->targetElevator == -1 ? ElevatorFlagsIsExit : 0;
     elevator->openAmount = 0.0f;
-    elevator->roomIndex = elevatorDefinition->roomIndex;
     elevator->targetElevator = elevatorDefinition->targetElevator;
 
     elevator->timer = elevatorDefinition->targetElevator == -1 ? OPEN_DELAY : CLOSE_DELAY;

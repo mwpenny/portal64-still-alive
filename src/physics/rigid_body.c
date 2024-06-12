@@ -22,7 +22,7 @@ void rigidBodyInit(struct RigidBody* rigidBody, float mass, float momentOfIniter
 
     rigidBody->flags = 0;
 
-    rigidBody->currentRoom = 0;
+    rigidBody->currentRoom = RIGID_BODY_NO_ROOM;
     rigidBody->sleepFrames = IDLE_SLEEP_FRAMES;
 
     basisFromQuat(&rigidBody->rotationBasis, &rigidBody->transform.rotation);
