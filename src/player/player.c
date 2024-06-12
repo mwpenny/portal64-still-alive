@@ -782,7 +782,9 @@ void playerUpdateCamera(struct Player* player, struct Vector2* lookInput, int di
     quatMultVector(&player->lookTransform.rotation, &lookingForward, &lookingForward);
 
     // Move roll toward correct orientation (i.e., after going through a portal upside down)
-    // If player is looking close to directly up or down, there is no need and doing so will create jitter
+    // If player is looking close to directly up or down, there is no need and doing so will:
+    //   a) Create jitter (if standing)
+    //   b) Flip the view undesirably (going through a portal vertically while looking into it)
     if (fabsf(lookingForward.y) < 0.99f) {
         struct Quaternion upRotation;
         quatLook(&lookingForward, &gUp, &upRotation);

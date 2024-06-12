@@ -51,7 +51,9 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
     * Player
     * [Security cameras](./security_camera.md)
 * `BLOCK_PORTAL`: Used for portal raycasts, and by:
+    * [Buttons](./button.md)
     * [Fizzlers](./fizzler.md)
+    * [Switches](./switch.md)
 * `BLOCK_BALL`: Used by:
     * Energy balls
     * [Ball launchers](./ball_launcher.md)
