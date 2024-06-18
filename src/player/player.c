@@ -164,11 +164,6 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->passedThroughPortal = 0;
     player->jumpImpulse = JUMP_IMPULSE;
 
-    if (gCurrentLevelIndex == 0){
-        player->flags &= ~PlayerHasFirstPortalGun;
-        player->flags &= ~PlayerHasSecondPortalGun;
-    }
-
     // player->flags |= PlayerHasFirstPortalGun | PlayerHasSecondPortalGun;
 
     player->dynamicId = dynamicSceneAdd(player, playerRender, &player->body.transform.position, 1.5f);
@@ -520,12 +515,46 @@ void playerGivePortalGun(struct Player* player, int flags) {
     player->flags |= flags;
 }
 
-void playerUpdateSpeedSound(struct Player* player) {
-    float soundPlayerVolume;
-    soundPlayerVolume = sqrtf(vector3MagSqrd(&player->body.velocity))*(0.6f / MAX_PORTAL_SPEED);
-    soundPlayerVolume = clampf(soundPlayerVolume, 0.0, 1.0f);
-    soundPlayerAdjustVolume(player->flyingSoundLoopId, soundPlayerVolume);
-    if (soundPlayerVolume >= 0.75){
+void playerUpdateSounds(struct Player* player) {
+    enum PlayerFlags flags = player->flags;
+
+    if ((flags & PlayerFlagsGrounded) && (flags & PlayerIsStepping)) {
+        soundPlayerPlay(soundsConcreteFootstep[player->currentFoot], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        player->flags &= ~PlayerIsStepping;
+    }
+    if (flags & PlayerJustJumped) {
+        soundPlayerPlay(soundsConcreteFootstep[3], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        player->flags &= ~PlayerJustJumped;
+    }
+    if (flags & PlayerJustLanded) {
+        soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        player->flags &= ~PlayerJustLanded;
+    }
+    if (flags & PlayerJustSelect) {
+        soundPlayerPlay(soundsSelecting[1], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        player->flags &= ~PlayerJustSelect;
+    }
+    if (flags & PlayerJustDeniedSelect) {
+        if (flags & PlayerHasFirstPortalGun) {
+            soundPlayerPlay(soundsSelecting[0], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        } else {
+            soundPlayerPlay(soundsSelecting[2], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        }
+        player->flags &= ~PlayerJustDeniedSelect;
+    }
+    if (player->passedThroughPortal) {
+        soundPlayerPlay(soundsPortalEnter[player->passedThroughPortal - 1], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
+        hudShowSubtitle(&gScene.hud, PORTALPLAYER_ENTERPORTAL, SubtitleTypeCaption);
+        soundPlayerPlay(soundsPortalExit[2 - player->passedThroughPortal], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
+        hudShowSubtitle(&gScene.hud, PORTALPLAYER_EXITPORTAL, SubtitleTypeCaption);
+    }
+
+    float flyingSoundVolume = clampf(
+        sqrtf(vector3MagSqrd(&player->body.velocity))*(0.6f / MAX_PORTAL_SPEED),
+        0.0f, 1.0f
+    );
+    soundPlayerAdjustVolume(player->flyingSoundLoopId, flyingSoundVolume);
+    if (flyingSoundVolume >= 0.75){
         hudShowSubtitle(&gScene.hud, PORTALPLAYER_WOOSH, SubtitleTypeCaption);
     }
 }
@@ -638,26 +667,38 @@ struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* bl
 #define FOOTING_CAST_DISTANCE   (PLAYER_HEAD_HEIGHT + 0.2f)
 
 void playerUpdateFooting(struct Player* player, float maxStandDistance) {
-    if (player->anchoredTo){
+    // Anchor velocity and last position are needed to follow moving platforms
+    if (player->anchoredTo) {
+        if (!vector3IsZero(&player->lastAnchorToPosition)) {
+            vector3Sub(&player->anchoredTo->transform.position, &player->lastAnchorToPosition, &player->lastAnchorToVelocity);
+            vector3Scale(&player->lastAnchorToVelocity, &player->lastAnchorToVelocity, 1.0f / FIXED_DELTA_TIME);
+        }
         player->lastAnchorToPosition = player->anchoredTo->transform.position;
+    } else {
+        if (player->flags & PlayerFlagsGrounded) {
+            player->lastAnchorToVelocity = gZeroVec;
+        }
+        player->lastAnchorToPosition = gZeroVec;
     }
-    player->anchoredTo = NULL;
 
+    // Clamp hit distance to nearest static collider (if any)
     struct Vector3 castOffset;
     struct Vector3 hitLocation;
-
     float hitDistance = FOOTING_CAST_DISTANCE;
-
     vector3Scale(&gUp, &castOffset, -(hitDistance - gPlayerCollider.radius - gPlayerCollider.extendDownward));
     if (collisionObjectCollideShapeCast(&player->collisionObject, &castOffset, &gCollisionScene, &hitLocation)) {
         hitDistance = gPlayerCollider.radius + gPlayerCollider.extendDownward + player->collisionObject.body->transform.position.y - hitLocation.y;
     }
 
+    // Find dynamic object below feet
     struct RaycastHit hit;
     struct Ray ray;
     hit.roomIndex = player->body.currentRoom;
     ray.origin = player->body.transform.position;
     vector3Scale(&gUp, &ray.dir, -1.0f);
+
+    player->anchoredTo = NULL;
+
     if (collisionSceneRaycastOnlyDynamic(&gCollisionScene, &ray, COLLISION_LAYERS_TANGIBLE, hitDistance, &hit)) {
         hitDistance = hit.distance;
 
@@ -674,8 +715,8 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
         }
     }
     
+    // Stand on collision
     float penetration = hitDistance - PLAYER_HEAD_HEIGHT;
-
     if (penetration < 0.0f) {
         vector3AddScaled(&player->body.transform.position, &gUp, MIN(-penetration, maxStandDistance), &player->body.transform.position);
         if (player->body.velocity.y < 0.0f) {
@@ -689,6 +730,20 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
         player->flags |= PlayerFlagsGrounded;
     } else {
         player->flags &= ~PlayerFlagsGrounded;
+    }
+
+    // Update state for footstep sounds
+    if ((player->flags & PlayerFlagsGrounded) && (player->body.velocity.x == 0) && (player->body.velocity.z == 0)) {
+        player->stepTimer = STEP_TIME;
+        player->flags &= ~PlayerIsStepping;
+    } else {
+        player->stepTimer -= FIXED_DELTA_TIME;
+
+        if (player->stepTimer < 0.0f) {
+            player->flags |= PlayerIsStepping;
+            player->stepTimer = STEP_TIME;
+            player->currentFoot = !player->currentFoot;
+        }
     }
 }
 
@@ -744,6 +799,123 @@ void playerPortalFunnel(struct Player* player) {
                     }
             }
         }
+    }
+}
+
+void playerProcessInput(struct Player* player, struct Vector3* forward, struct Vector3* right, struct Vector2* moveInput, struct Vector2* lookInput) {
+    *moveInput = controllerDirectionGet(ControllerActionMove);
+    *lookInput = controllerDirectionGet(ControllerActionRotate);
+
+    if (gSaveData.controls.flags & ControlSaveTankControls) {
+        float tmp;
+        tmp = moveInput->y;
+        moveInput->y = lookInput->y;
+        lookInput->y = tmp;
+    }
+
+    vector2Normalize(moveInput, moveInput);
+
+    if (!playerIsDead(player)) {
+        if (controllerActionGet(ControllerActionDuck)) {
+            player->flags ^= PlayerCrouched;
+        }
+
+        if (controllerActionGet(ControllerActionLookForward)) {
+            struct Vector3 forwardNegate;
+            vector3Negate(forward, &forwardNegate);
+            quatLook(&forwardNegate, &gUp, &player->lookTransform.rotation);
+        }
+
+        if (controllerActionGet(ControllerActionLookBackward)) {
+            quatLook(forward, &gUp, &player->lookTransform.rotation);
+        }
+    }
+}
+
+// TODO: ground vs air acceleration
+void playerAccelerate(struct Player* player, struct Vector3* targetVelocity) {
+    float velocityDot = vector3Dot(&player->body.velocity, targetVelocity);
+    int isAccelerating = velocityDot > 0.0f;
+    float acceleration = 0.0f;
+    float horizontalVelocitySqrd = player->body.velocity.x * player->body.velocity.x + player->body.velocity.z * player->body.velocity.z;
+    int isFast = horizontalVelocitySqrd >= PLAYER_SPEED * PLAYER_SPEED;
+
+    if (!(player->flags & PlayerFlagsGrounded)) {
+        if (isFast) {
+            struct Vector2 movementCenter;
+            movementCenter.x = player->body.velocity.x;
+            movementCenter.y = player->body.velocity.z;
+            float horizontalVelocity = sqrtf(horizontalVelocitySqrd);
+            vector2Scale(&movementCenter, (horizontalVelocity - PLAYER_SPEED) / horizontalVelocity, &movementCenter);
+            targetVelocity->x += movementCenter.x;
+            targetVelocity->z += movementCenter.y;
+
+            acceleration = PLAYER_FAST_AIR_ACCEL * FIXED_DELTA_TIME;
+        } else {
+            acceleration = PLAYER_AIR_ACCEL * FIXED_DELTA_TIME;
+        }
+    } else if (isFast) {
+        acceleration = PLAYER_SLIDE_ACCEL * FIXED_DELTA_TIME;
+    } else if (isAccelerating) {
+        acceleration = PLAYER_ACCEL * FIXED_DELTA_TIME;
+    } else {
+        acceleration = PLAYER_STOP_ACCEL * FIXED_DELTA_TIME;
+    }
+
+    vector3MoveTowards(
+        &player->body.velocity,
+        targetVelocity,
+        acceleration,
+        &player->body.velocity
+    );
+
+    player->body.angularVelocity = gZeroVec;
+
+    player->body.velocity.y += GRAVITY_CONSTANT * FIXED_DELTA_TIME;
+}
+
+void playerMove(struct Player* player, struct Vector2* moveInput, struct Vector3* forward, struct Vector3* right) {
+    if (moveInput->x != 0.0f || moveInput->y != 0.0f) {
+        hudResolvePrompt(&gScene.hud, CutscenePromptTypeMove);
+    }
+
+    if ((player->flags & PlayerFlagsGrounded) && controllerActionGet(ControllerActionJump)) {
+        player->body.velocity.y += player->jumpImpulse;
+        player->flags |= PlayerJustJumped;
+        hudResolvePrompt(&gScene.hud, CutscenePromptTypeJump);
+
+        // Launch with velocity of moving platform
+        if (player->anchoredTo != NULL && !vector3IsZero(&player->lastAnchorToVelocity)) {
+            player->body.velocity.x += player->lastAnchorToVelocity.x;
+            player->body.velocity.z += player->lastAnchorToVelocity.z;
+        }
+    }
+
+    struct Vector3 targetVelocity = gZeroVec;
+    vector3AddScaled(&targetVelocity, right, PLAYER_SPEED * moveInput->x, &targetVelocity);
+    vector3AddScaled(&targetVelocity, forward, -PLAYER_SPEED * moveInput->y, &targetVelocity);
+    targetVelocity.y = player->body.velocity.y;
+
+    // Follow moving platform while in air
+    if (player->anchoredTo == NULL && !(player->flags & PlayerFlagsGrounded) && !vector3IsZero(&player->lastAnchorToVelocity)) {
+        targetVelocity.x += player->lastAnchorToVelocity.x;
+        targetVelocity.z += player->lastAnchorToVelocity.z;
+    }
+
+    playerAccelerate(player, &targetVelocity);
+
+    if ((gSaveData.controls.flags & ControlSavePortalFunneling) && (vector2MagSqr(moveInput) == 0.0f)){
+        playerPortalFunnel(player);
+    }
+
+    vector3AddScaled(&player->body.transform.position, &player->body.velocity, FIXED_DELTA_TIME, &player->body.transform.position);
+
+    // Follow moving platform while on it
+    if (player->anchoredTo) {
+        struct Vector3 anchorOffset;
+        transformPoint(&player->anchoredTo->transform, &player->relativeAnchor, &anchorOffset);
+        vector3Sub(&anchorOffset, &player->lastAnchorPoint, &anchorOffset);
+        vector3Add(&player->body.transform.position, &anchorOffset, &player->body.transform.position);
     }
 }
 
@@ -822,140 +994,25 @@ void playerUpdateCamera(struct Player* player, struct Vector2* lookInput, int di
 }
 
 void playerUpdate(struct Player* player) {
-    struct Vector3 forward;
-    struct Vector3 right;
-
-    player->passedThroughPortal = 0;
-
     if (player->flags & PlayerInCutscene) {
         return;
     }
 
     skBlenderUpdate(&player->animator, player->armature.pose, FIXED_DELTA_TIME);
 
-    int doorwayMask = worldCheckDoorwaySides(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom);
+    struct Vector3 forward;
+    struct Vector3 right;
     playerGetMoveBasis(&player->lookTransform.rotation, &forward, &right);
 
-    int isDead = playerIsDead(player);
-
-    if (!isDead && (player->flags & PlayerFlagsGrounded) && controllerActionGet(ControllerActionJump)) {
-        player->body.velocity.y += player->jumpImpulse;
-        if (!vector3IsZero(&player->lastAnchorToVelocity) && player->anchoredTo != NULL){
-            player->body.velocity.x += player->lastAnchorToVelocity.x;
-            player->body.velocity.z += player->lastAnchorToVelocity.z;
-        }
-        player->flags |= PlayerJustJumped;
-        hudResolvePrompt(&gScene.hud, CutscenePromptTypeJump);
-    }
-
-    struct Vector2 moveInput = controllerDirectionGet(ControllerActionMove);
-    struct Vector2 lookInput = controllerDirectionGet(ControllerActionRotate);
-
-    if (gSaveData.controls.flags & ControlSaveTankControls) {
-        float tmp;
-        tmp = moveInput.y;
-        moveInput.y = lookInput.y;
-        lookInput.y = tmp;
-    }
-
-    if (moveInput.x != 0.0f || moveInput.y != 0.0f) {
-        hudResolvePrompt(&gScene.hud, CutscenePromptTypeMove);
-    }
-
-    struct Vector3 targetVelocity = gZeroVec;
-
-    if (!isDead) {
-        if (vector2MagSqr(&moveInput) > 1.0f){
-            vector2Normalize(&moveInput, &moveInput);
-        }
-
-        vector3AddScaled(&targetVelocity, &right, PLAYER_SPEED * moveInput.x, &targetVelocity);
-        vector3AddScaled(&targetVelocity, &forward, -PLAYER_SPEED * moveInput.y, &targetVelocity);
-
-        // if player isnt crouched, crouch
-        if (!(player->flags & PlayerCrouched) && (controllerActionGet(ControllerActionDuck))){
-            player->flags |= PlayerCrouched;
-        }
-        //if player crouched, uncrouch
-        else if ((player->flags & PlayerCrouched) && (controllerActionGet(ControllerActionDuck))){
-            player->flags &= ~PlayerCrouched;
-        }
-
-        //look straight forward
-        if (controllerActionGet(ControllerActionLookForward)){
-            struct Vector3 forwardNegate;
-            vector3Negate(&forward, &forwardNegate);
-            quatLook(&forwardNegate, &gUp, &player->lookTransform.rotation);
-        }
-        //look behind
-        if (controllerActionGet(ControllerActionLookBackward)){
-            quatLook(&forward, &gUp, &player->lookTransform.rotation);
-        }
-    }
-
-    targetVelocity.y = player->body.velocity.y;
-    if (!vector3IsZero(&player->lastAnchorToVelocity) && !(player->flags & PlayerFlagsGrounded) && !(player->anchoredTo)){
-        targetVelocity.x += player->lastAnchorToVelocity.x;
-        targetVelocity.z += player->lastAnchorToVelocity.z;
-    }
-
-    float velocityDot = vector3Dot(&player->body.velocity, &targetVelocity);
-    int isAccelerating = velocityDot > 0.0f;
-    float acceleration = 0.0f;
-    float horizontalVelocitySqrd = player->body.velocity.x * player->body.velocity.x + player->body.velocity.z * player->body.velocity.z;
-    int isFast = horizontalVelocitySqrd >= PLAYER_SPEED * PLAYER_SPEED;
-    playerUpdateSpeedSound(player);
-
-    if (!(player->flags & PlayerFlagsGrounded)) {
-        if (isFast) {
-            struct Vector2 movementCenter;
-            movementCenter.x = player->body.velocity.x;
-            movementCenter.y = player->body.velocity.z;
-            float horizontalVelocity = sqrtf(horizontalVelocitySqrd);
-            vector2Scale(&movementCenter, (horizontalVelocity - PLAYER_SPEED) / horizontalVelocity, &movementCenter);
-            targetVelocity.x += movementCenter.x;
-            targetVelocity.z += movementCenter.y;
-
-            acceleration = PLAYER_FAST_AIR_ACCEL * FIXED_DELTA_TIME;
-        } else {
-            acceleration = PLAYER_AIR_ACCEL * FIXED_DELTA_TIME;
-        }
-    } else if (isFast) {
-        acceleration = PLAYER_SLIDE_ACCEL * FIXED_DELTA_TIME;
-    } else if (isAccelerating) {
-        acceleration = PLAYER_ACCEL * FIXED_DELTA_TIME;
-    } else {
-        acceleration = PLAYER_STOP_ACCEL * FIXED_DELTA_TIME;
-    }
-
-    vector3MoveTowards(
-        &player->body.velocity, 
-        &targetVelocity, 
-        acceleration, 
-        &player->body.velocity
-    );
-    player->body.angularVelocity = gZeroVec;
-
-    player->body.velocity.y += GRAVITY_CONSTANT * FIXED_DELTA_TIME;
+    struct Vector2 moveInput;
+    struct Vector2 lookInput;
+    playerProcessInput(player, &forward, &right, &moveInput, &lookInput);
 
     struct Vector3 prevPos = player->body.transform.position;
+    int doorwayMask = worldCheckDoorwaySides(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom);
 
-    vector3AddScaled(&player->body.transform.position, &player->body.velocity, FIXED_DELTA_TIME, &player->body.transform.position);
-
-    if (player->anchoredTo) {
-        struct Vector3 newAnchor;
-        transformPoint(&player->anchoredTo->transform, &player->relativeAnchor, &newAnchor);
-        vector3Add(&player->body.transform.position, &newAnchor, &player->body.transform.position);
-        vector3Sub(&player->body.transform.position, &player->lastAnchorPoint, &player->body.transform.position);
-    } else {
-        player->lastAnchorToPosition = gZeroVec;
-    }
-
-    if (!vector3IsZero(&player->lastAnchorToPosition) && player->anchoredTo){
-        vector3Sub(&player->anchoredTo->transform.position, &player->lastAnchorToPosition, &player->lastAnchorToVelocity);
-        vector3Scale(&player->lastAnchorToVelocity, &player->lastAnchorToVelocity, 1.0f / FIXED_DELTA_TIME);
-    } else if (!(player->anchoredTo) && (player->flags & PlayerFlagsGrounded)){
-        player->lastAnchorToVelocity = gZeroVec;
+    if (!playerIsDead(player)) {
+        playerMove(player, &moveInput, &forward, &right);
     }
 
     struct Box3D sweptBB = player->collisionObject.boundingBox;
@@ -980,10 +1037,6 @@ void playerUpdate(struct Player* player) {
     int didPassThroughPortal = rigidBodyCheckPortals(&player->body);
     player->passedThroughPortal = didPassThroughPortal;
     if (didPassThroughPortal) {
-        soundPlayerPlay(soundsPortalEnter[didPassThroughPortal - 1], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
-        hudShowSubtitle(&gScene.hud, PORTALPLAYER_ENTERPORTAL, SubtitleTypeCaption);
-        soundPlayerPlay(soundsPortalExit[2 - didPassThroughPortal], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
-        hudShowSubtitle(&gScene.hud, PORTALPLAYER_EXITPORTAL, SubtitleTypeCaption);
         gPlayerCollider.extendDownward = 0.0f;
     } else {
         gPlayerCollider.extendDownward = mathfMoveTowards(gPlayerCollider.extendDownward, TARGET_CAPSULE_EXTEND_HEIGHT, STAND_SPEED * FIXED_DELTA_TIME);
@@ -1002,7 +1055,6 @@ void playerUpdate(struct Player* player) {
 
     float startTime = 0.0f;
     struct SKAnimationClip* clip = playerDetermineNextClip(player, &player->animator.blendLerp, &startTime, &forward, &right);
-
     if (clip != player->animator.from.currentClip) {
         skAnimatorRunClip(&player->animator.from, clip, startTime, SKAnimatorFlagsLoop);
     }
@@ -1015,28 +1067,8 @@ void playerUpdate(struct Player* player) {
             playerKill(player, 0);
         }
     }
-
-
-    if ((gSaveData.controls.flags & ControlSavePortalFunneling) && (vector2MagSqr(&moveInput) == 0.0f)){
-        playerPortalFunnel(player);
-    }
     
-    
-    // player not moving on ground
-    if ((player->flags & PlayerFlagsGrounded) && (player->body.velocity.x == 0) && (player->body.velocity.z == 0)){
-        player->stepTimer = STEP_TIME;
-        player->flags &= ~PlayerIsStepping;
-    }
-    // player moving on ground
-    else{
-        player->stepTimer -= FIXED_DELTA_TIME;
-
-        if (player->stepTimer < 0.0f) {
-            player->flags |= PlayerIsStepping;
-            player->stepTimer = STEP_TIME;
-            player->currentFoot = !player->currentFoot;
-        }
-    }
+    playerUpdateSounds(player);
 }
 
 void playerApplyCameraTransform(struct Player* player, struct Transform* cameraTransform) {

@@ -410,32 +410,6 @@ void sceneCheckPortals(struct Scene* scene) {
         }
         controllerActionMuteActive(); // mute held portal buttons
     }
-    
-    if ((scene->player.flags & PlayerFlagsGrounded) && (scene->player.flags & PlayerIsStepping)){
-        soundPlayerPlay(soundsConcreteFootstep[scene->player.currentFoot], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
-        scene->player.flags &= ~PlayerIsStepping;
-    }
-    if (scene->player.flags & PlayerJustJumped){
-        soundPlayerPlay(soundsConcreteFootstep[3], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
-        scene->player.flags &= ~PlayerJustJumped;
-    }
-    if (scene->player.flags & PlayerJustLanded){
-        soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
-        scene->player.flags &= ~PlayerJustLanded;
-    }
-    if (scene->player.flags & PlayerJustSelect){
-        soundPlayerPlay(soundsSelecting[1], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
-        scene->player.flags &= ~PlayerJustSelect;
-    }
-    if (scene->player.flags & PlayerJustDeniedSelect){
-        if (scene->player.flags & PlayerHasFirstPortalGun){
-            soundPlayerPlay(soundsSelecting[0], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
-        }
-        else{
-            soundPlayerPlay(soundsSelecting[2], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
-        }
-        scene->player.flags &= ~PlayerJustDeniedSelect;
-    }
 
     hudUpdatePortalIndicators(&scene->hud, &raycastRay, &playerUp);
 
