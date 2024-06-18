@@ -527,6 +527,7 @@ void playerUpdateSounds(struct Player* player) {
         player->flags &= ~PlayerJustJumped;
     }
     if (flags & PlayerJustLanded) {
+        // TODO: Dead body sound when landing on ground while dead
         soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         player->flags &= ~PlayerJustLanded;
     }
@@ -908,10 +909,16 @@ void playerMove(struct Player* player, struct Vector2* moveInput, struct Vector3
         playerPortalFunnel(player);
     }
 
+    int isDead = playerIsDead(player);
+    if (isDead) {
+        player->body.velocity.x = 0;
+        player->body.velocity.z = 0;
+    }
+
     vector3AddScaled(&player->body.transform.position, &player->body.velocity, FIXED_DELTA_TIME, &player->body.transform.position);
 
     // Follow moving platform while on it
-    if (player->anchoredTo) {
+    if (!isDead && player->anchoredTo) {
         struct Vector3 anchorOffset;
         transformPoint(&player->anchoredTo->transform, &player->relativeAnchor, &anchorOffset);
         vector3Sub(&anchorOffset, &player->lastAnchorPoint, &anchorOffset);
@@ -1011,9 +1018,7 @@ void playerUpdate(struct Player* player) {
     struct Vector3 prevPos = player->body.transform.position;
     int doorwayMask = worldCheckDoorwaySides(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom);
 
-    if (!playerIsDead(player)) {
-        playerMove(player, &moveInput, &forward, &right);
-    }
+    playerMove(player, &moveInput, &forward, &right);
 
     struct Box3D sweptBB = player->collisionObject.boundingBox;
     collisionObjectUpdateBB(&player->collisionObject);
