@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include "player.h"
 #include "player_rumble_clips.h"
@@ -37,28 +36,31 @@
 
 #define PLAYER_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_BALL)
 
-#define FUNNEL_DAMPENING_CONSTANT 0.32f
-#define FUNNEL_CENTERING_CONSTANT 0.05f
-#define FUNNEL_ACCEPTABLE_CENTERED_DISTANCE 0.1f
-#define FUNNEL_MAX_DIST 1.2f
-#define FUNNEL_MIN_DOWN_VEL -2.25f
-#define FUNNEL_MAX_HORZ_VEL 7.0f
+#define FUNNEL_STRENGTH         5.0f
+#define FUNNEL_CENTER_TOLERANCE 0.1f
+#define FUNNEL_CENTER_SLOWDOWN  0.05f
+#define FUNNEL_STOP_DIST        0.6f
+#define FUNNEL_STOP_HEIGHT      0.25f
+#define FUNNEL_MAX_HORIZ_DIST   1.2f
+#define FUNNEL_MIN_DOWN_VEL     -2.25f
+#define FUNNEL_MAX_HORIZ_VEL    7.0f
 
-#define PLAYER_SPEED    (150.0f / 64.0f)
-#define PLAYER_ACCEL    (20.0f)
-#define PLAYER_AIR_ACCEL    (5.875f)
-#define PLAYER_FAST_AIR_ACCEL    (2.0f)
-#define PLAYER_STOP_ACCEL    (5.875f)
-#define PLAYER_SLIDE_ACCEL    (40.0f)
+#define PLAYER_SPEED            (150.0f / 64.0f)
+#define PLAYER_AIR_SPEED        (60.0f  / 64.0f)
+#define PLAYER_ACCEL            (20.0f)
+#define PLAYER_AIR_ACCEL        (15.0f)
+#define PLAYER_FRICTION         (5.875f)
 
-#define MIN_ROTATE_RATE (M_PI * 0.5f)
-#define MAX_ROTATE_RATE (M_PI * 3.5f)
+#define FAST_FRICTION_THRESHOLD (190.0f / 64.0f)
 
-#define MIN_ROTATE_RATE_DELTA (M_PI * 0.06125f)
-#define MAX_ROTATE_RATE_DELTA MAX_ROTATE_RATE
+#define MIN_ROTATE_RATE         (M_PI * 0.5f)
+#define MAX_ROTATE_RATE         (M_PI * 3.5f)
 
-#define JUMP_IMPULSE   2.7f
-#define THROW_IMPULSE  1.35f
+#define MIN_ROTATE_RATE_DELTA   (M_PI * 0.06125f)
+#define MAX_ROTATE_RATE_DELTA   MAX_ROTATE_RATE
+
+#define JUMP_IMPULSE            2.7f
+#define THROW_IMPULSE           1.35f
 
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
@@ -179,8 +181,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->body.transform = player->lookTransform;
 
     player->anchoredTo = NULL;
-    player->lastAnchorToPosition = gZeroVec;
-    player->lastAnchorToVelocity = gZeroVec;
+    player->anchorLastPosition = gZeroVec;
 
     collisionObjectUpdateBB(&player->collisionObject);
 
@@ -668,20 +669,6 @@ struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* bl
 #define FOOTING_CAST_DISTANCE   (PLAYER_HEAD_HEIGHT + 0.2f)
 
 void playerUpdateFooting(struct Player* player, float maxStandDistance) {
-    // Anchor velocity and last position are needed to follow moving platforms
-    if (player->anchoredTo) {
-        if (!vector3IsZero(&player->lastAnchorToPosition)) {
-            vector3Sub(&player->anchoredTo->transform.position, &player->lastAnchorToPosition, &player->lastAnchorToVelocity);
-            vector3Scale(&player->lastAnchorToVelocity, &player->lastAnchorToVelocity, 1.0f / FIXED_DELTA_TIME);
-        }
-        player->lastAnchorToPosition = player->anchoredTo->transform.position;
-    } else {
-        if (player->flags & PlayerFlagsGrounded) {
-            player->lastAnchorToVelocity = gZeroVec;
-        }
-        player->lastAnchorToPosition = gZeroVec;
-    }
-
     // Clamp hit distance to nearest static collider (if any)
     struct Vector3 castOffset;
     struct Vector3 hitLocation;
@@ -698,7 +685,7 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
     ray.origin = player->body.transform.position;
     vector3Scale(&gUp, &ray.dir, -1.0f);
 
-    player->anchoredTo = NULL;
+    struct RigidBody* anchor = NULL;
 
     if (collisionSceneRaycastOnlyDynamic(&gCollisionScene, &ray, COLLISION_LAYERS_TANGIBLE, hitDistance, &hit)) {
         hitDistance = hit.distance;
@@ -710,9 +697,7 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
         }
 
         if (hit.object->body && (hit.object->body->flags & RigidBodyIsKinematic)) {
-            player->anchoredTo = hit.object->body;
-            player->lastAnchorPoint = hit.at;
-            transformPointInverseNoScale(&player->anchoredTo->transform, &hit.at, &player->relativeAnchor);
+            anchor = hit.object->body;
         }
     }
     
@@ -729,8 +714,19 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
             player->flags |= PlayerJustLanded;
         }
         player->flags |= PlayerFlagsGrounded;
+
+        player->anchoredTo = anchor;
     } else {
         player->flags &= ~PlayerFlagsGrounded;
+
+        // Stay anchored so we can follow it in the air
+    }
+
+    if (player->anchoredTo) {
+        // Save last position so the anchor can be followed
+        player->anchorLastPosition = player->anchoredTo->transform.position;
+    } else {
+        player->anchorLastPosition = gZeroVec;
     }
 
     // Update state for footstep sounds
@@ -748,57 +744,65 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
     }
 }
 
-void playerPortalFunnel(struct Player* player) {
-    if (gCollisionScene.portalTransforms[0] != NULL && gCollisionScene.portalTransforms[1] != NULL){
-        struct Transform portal0transform = *gCollisionScene.portalTransforms[0];
-        struct Transform portal1transform = *gCollisionScene.portalTransforms[1];
-        struct Transform targetPortalTransform;
+void playerPortalFunnel(struct Player* player, struct Vector3* targetVelocity) {
+    if (gCollisionScene.portalTransforms[0] == NULL || gCollisionScene.portalTransforms[1] == NULL) {
+        return;
+    }
 
-        //remove z from distance calc
-        portal0transform.position.y = player->body.transform.position.y;
-        portal1transform.position.y = player->body.transform.position.y;
-        
-        float portal0dist = vector3DistSqrd(&player->body.transform.position, &portal0transform.position);
-        float portal1dist = vector3DistSqrd(&player->body.transform.position, &portal1transform.position);
-        float targetDist;
+    struct Vector3 portal0HorizPos = gCollisionScene.portalTransforms[0]->position;
+    struct Vector3 portal1HorizPos = gCollisionScene.portalTransforms[1]->position;
+    struct Transform* targetPortalTransform;
 
-        if (portal0dist < portal1dist){
-            targetPortalTransform = portal0transform;
-            targetDist = portal0dist;
-        } else{
-            targetPortalTransform = portal1transform;
-            targetDist = portal1dist;
+    portal0HorizPos.y = player->body.transform.position.y;
+    portal1HorizPos.y = player->body.transform.position.y;
+
+    float portal0HorizDist = vector3DistSqrd(&player->body.transform.position, &portal0HorizPos);
+    float portal1HorizDist = vector3DistSqrd(&player->body.transform.position, &portal1HorizPos);
+    float targetHorizDist;
+
+    if (portal0HorizDist < portal1HorizDist) {
+        targetPortalTransform = gCollisionScene.portalTransforms[0];
+        targetHorizDist = portal0HorizDist;
+    } else {
+        targetPortalTransform = gCollisionScene.portalTransforms[1];
+        targetHorizDist = portal1HorizDist;
+    }
+
+    struct Vector3 portalNormal;
+    vector3Negate(&gForward, &portalNormal);
+    quatMultVector(&targetPortalTransform->rotation, &portalNormal, &portalNormal);
+    if (fabsf(portalNormal.y) < 0.999f) {
+        // Not a floor portal
+        return;
+    }
+
+    if (player->flags & PlayerFlagsGrounded ||
+        targetHorizDist > (FUNNEL_MAX_HORIZ_DIST * FUNNEL_MAX_HORIZ_DIST) ||
+        player->body.velocity.y > FUNNEL_MIN_DOWN_VEL ||
+        fabsf(player->body.velocity.x) > FUNNEL_MAX_HORIZ_VEL ||
+        fabsf(player->body.velocity.z) > FUNNEL_MAX_HORIZ_VEL) {
+
+        return;
+    }
+
+    struct Vector3 targetOffset;
+    vector3Sub(&targetPortalTransform->position, &player->body.transform.position, &targetOffset);
+
+    if (targetHorizDist < (FUNNEL_STOP_DIST * FUNNEL_STOP_DIST) && targetOffset.y > -FUNNEL_STOP_HEIGHT) {
+        // Don't carry horizontal momentum through fling (helps land where intended)
+        player->body.velocity.x = 0.0f;
+        player->body.velocity.z = 0.0f;
+    } else {
+        if (fabsf(targetOffset.x) > FUNNEL_CENTER_TOLERANCE) {
+            targetVelocity->x += FUNNEL_STRENGTH * targetOffset.x;
+        } else {
+            player->body.velocity.x *= FUNNEL_CENTER_SLOWDOWN;
         }
 
-        struct Vector3 straightForward;
-        vector3Negate(&gForward, &straightForward);
-        quatMultVector(&targetPortalTransform.rotation, &straightForward, &straightForward);
-        if (fabsf(straightForward.y) > 0.999f) {
-            if (!(player->flags & PlayerFlagsGrounded) && 
-                targetDist < (FUNNEL_MAX_DIST*FUNNEL_MAX_DIST) && 
-                player->body.velocity.y < FUNNEL_MIN_DOWN_VEL && 
-                fabsf(player->body.velocity.x) < FUNNEL_MAX_HORZ_VEL && 
-                fabsf(player->body.velocity.z) < FUNNEL_MAX_HORZ_VEL){
-                    if (player->body.transform.position.x < targetPortalTransform.position.x - FUNNEL_ACCEPTABLE_CENTERED_DISTANCE){
-                        player->body.velocity.x += (FUNNEL_DAMPENING_CONSTANT * (targetPortalTransform.position.x - player->body.transform.position.x));
-                    }
-                    else if (player->body.transform.position.x > targetPortalTransform.position.x + FUNNEL_ACCEPTABLE_CENTERED_DISTANCE){
-                        player->body.velocity.x -= (FUNNEL_DAMPENING_CONSTANT * (player->body.transform.position.x - targetPortalTransform.position.x));
-                    }
-                    else{
-                        player->body.velocity.x *= FUNNEL_CENTERING_CONSTANT;
-                    }
-
-                    if (player->body.transform.position.z < targetPortalTransform.position.z - FUNNEL_ACCEPTABLE_CENTERED_DISTANCE){
-                        player->body.velocity.z += (FUNNEL_DAMPENING_CONSTANT * (targetPortalTransform.position.z - player->body.transform.position.z));
-                    }
-                    else if (player->body.transform.position.z > targetPortalTransform.position.z + FUNNEL_ACCEPTABLE_CENTERED_DISTANCE){
-                        player->body.velocity.z -= (FUNNEL_DAMPENING_CONSTANT * (player->body.transform.position.z - targetPortalTransform.position.z));
-                    }
-                    else{
-                        player->body.velocity.z *= FUNNEL_CENTERING_CONSTANT;
-                    }
-            }
+        if (fabsf(targetOffset.z) > FUNNEL_CENTER_TOLERANCE) {
+            targetVelocity->z += FUNNEL_STRENGTH * targetOffset.z;
+        } else {
+            player->body.velocity.z *= FUNNEL_CENTER_SLOWDOWN;
         }
     }
 }
@@ -833,45 +837,64 @@ void playerProcessInput(struct Player* player, struct Vector3* forward, struct V
     }
 }
 
-// TODO: ground vs air acceleration
-void playerAccelerate(struct Player* player, struct Vector3* targetVelocity) {
-    float velocityDot = vector3Dot(&player->body.velocity, targetVelocity);
-    int isAccelerating = velocityDot > 0.0f;
-    float acceleration = 0.0f;
-    float horizontalVelocitySqrd = player->body.velocity.x * player->body.velocity.x + player->body.velocity.z * player->body.velocity.z;
-    int isFast = horizontalVelocitySqrd >= PLAYER_SPEED * PLAYER_SPEED;
-
-    if (!(player->flags & PlayerFlagsGrounded)) {
-        if (isFast) {
-            struct Vector2 movementCenter;
-            movementCenter.x = player->body.velocity.x;
-            movementCenter.y = player->body.velocity.z;
-            float horizontalVelocity = sqrtf(horizontalVelocitySqrd);
-            vector2Scale(&movementCenter, (horizontalVelocity - PLAYER_SPEED) / horizontalVelocity, &movementCenter);
-            targetVelocity->x += movementCenter.x;
-            targetVelocity->z += movementCenter.y;
-
-            acceleration = PLAYER_FAST_AIR_ACCEL * FIXED_DELTA_TIME;
-        } else {
-            acceleration = PLAYER_AIR_ACCEL * FIXED_DELTA_TIME;
-        }
-    } else if (isFast) {
-        acceleration = PLAYER_SLIDE_ACCEL * FIXED_DELTA_TIME;
-    } else if (isAccelerating) {
-        acceleration = PLAYER_ACCEL * FIXED_DELTA_TIME;
-    } else {
-        acceleration = PLAYER_STOP_ACCEL * FIXED_DELTA_TIME;
+void playerApplyFriction(struct Player* player) {
+    if (vector3IsZero(&player->body.velocity)) {
+        return;
     }
 
-    vector3MoveTowards(
-        &player->body.velocity,
-        targetVelocity,
-        acceleration,
-        &player->body.velocity
+    float currentSpeed = sqrtf(vector3MagSqrd(&player->body.velocity));
+    if (currentSpeed < 0.01f) {
+        player->body.velocity = gZeroVec;
+        return;
+    }
+
+    float stopAccel;
+    if (currentSpeed < FAST_FRICTION_THRESHOLD) {
+        stopAccel = FAST_FRICTION_THRESHOLD;
+    } else if (currentSpeed >= (FAST_FRICTION_THRESHOLD * 2.0f)) {
+        stopAccel = currentSpeed * 0.5625f;
+    } else {
+        stopAccel = currentSpeed;
+    }
+
+    float targetSpeed = MAX(
+        currentSpeed - (stopAccel * PLAYER_FRICTION * FIXED_DELTA_TIME),
+        0.0f
     );
 
-    player->body.angularVelocity = gZeroVec;
+    vector3Scale(
+        &player->body.velocity,
+        &player->body.velocity,
+        targetSpeed / currentSpeed
+    );
+}
 
+void playerAccelerate(struct Player* player, struct Vector3* targetVelocity, float acceleration, float maxSpeed) {
+    if (!vector3IsZero(targetVelocity)) {
+        struct Vector3 targetDirection;
+        vector3Normalize(targetVelocity, &targetDirection);
+
+        float targetSpeed = MIN(
+            sqrtf(vector3MagSqrd(targetVelocity)),
+            maxSpeed
+        );
+
+        // Accelerate more as the player diverges from the movement direction
+        // Limiting this projection, not velocity, is what enables bunny hopping / air strafing
+        float velocityProj = vector3Dot(&player->body.velocity, &targetDirection);
+        float maxAcceleration = targetSpeed - velocityProj;
+
+        if (maxAcceleration > 0.0f) {
+            vector3AddScaled(
+                &player->body.velocity,
+                &targetDirection,
+                MIN(acceleration * targetSpeed * FIXED_DELTA_TIME, maxAcceleration),
+                &player->body.velocity
+            );
+        }
+    }
+
+    player->body.angularVelocity = gZeroVec;
     player->body.velocity.y += GRAVITY_CONSTANT * FIXED_DELTA_TIME;
 }
 
@@ -884,46 +907,35 @@ void playerMove(struct Player* player, struct Vector2* moveInput, struct Vector3
         player->body.velocity.y += player->jumpImpulse;
         player->flags |= PlayerJustJumped;
         hudResolvePrompt(&gScene.hud, CutscenePromptTypeJump);
-
-        // Launch with velocity of moving platform
-        if (player->anchoredTo != NULL && !vector3IsZero(&player->lastAnchorToVelocity)) {
-            player->body.velocity.x += player->lastAnchorToVelocity.x;
-            player->body.velocity.z += player->lastAnchorToVelocity.z;
-        }
     }
 
     struct Vector3 targetVelocity = gZeroVec;
     vector3AddScaled(&targetVelocity, right, PLAYER_SPEED * moveInput->x, &targetVelocity);
     vector3AddScaled(&targetVelocity, forward, -PLAYER_SPEED * moveInput->y, &targetVelocity);
-    targetVelocity.y = player->body.velocity.y;
 
-    // Follow moving platform while in air
-    if (player->anchoredTo == NULL && !(player->flags & PlayerFlagsGrounded) && !vector3IsZero(&player->lastAnchorToVelocity)) {
-        targetVelocity.x += player->lastAnchorToVelocity.x;
-        targetVelocity.z += player->lastAnchorToVelocity.z;
+    if (player->flags & PlayerFlagsGrounded) {
+        playerApplyFriction(player);
+        playerAccelerate(player, &targetVelocity, PLAYER_ACCEL, PLAYER_SPEED);
+    } else {
+        if ((gSaveData.controls.flags & ControlSavePortalFunneling) && vector2IsZero(moveInput)) {
+            playerPortalFunnel(player, &targetVelocity);
+        }
+
+        playerAccelerate(player, &targetVelocity, PLAYER_AIR_ACCEL, PLAYER_AIR_SPEED);
     }
 
-    playerAccelerate(player, &targetVelocity);
-
-    if ((gSaveData.controls.flags & ControlSavePortalFunneling) && (vector2MagSqr(moveInput) == 0.0f)){
-        playerPortalFunnel(player);
-    }
-
-    int isDead = playerIsDead(player);
-    if (isDead) {
-        player->body.velocity.x = 0;
-        player->body.velocity.z = 0;
+    if (playerIsDead(player)) {
+        player->body.velocity.x = 0.0f;
+        player->body.velocity.z = 0.0f;
+    } else if (player->anchoredTo) {
+        // Follow moving platform
+        struct Vector3 anchorOffset;
+        vector3Sub(&player->anchoredTo->transform.position, &player->anchorLastPosition, &anchorOffset);
+        player->body.transform.position.x += anchorOffset.x;
+        player->body.transform.position.z += anchorOffset.z;
     }
 
     vector3AddScaled(&player->body.transform.position, &player->body.velocity, FIXED_DELTA_TIME, &player->body.transform.position);
-
-    // Follow moving platform while on it
-    if (!isDead && player->anchoredTo) {
-        struct Vector3 anchorOffset;
-        transformPoint(&player->anchoredTo->transform, &player->relativeAnchor, &anchorOffset);
-        vector3Sub(&anchorOffset, &player->lastAnchorPoint, &anchorOffset);
-        vector3Add(&player->body.transform.position, &anchorOffset, &player->body.transform.position);
-    }
 }
 
 void playerUpdateCamera(struct Player* player, struct Vector2* lookInput, int didPassThroughPortal) {
