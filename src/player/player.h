@@ -46,10 +46,7 @@ struct Player {
     float yawVelocity;
     enum PlayerFlags flags;
     struct RigidBody* anchoredTo;
-    struct Vector3 lastAnchorToPosition;
-    struct Vector3 lastAnchorToVelocity;
-    struct Vector3 relativeAnchor;
-    struct Vector3 lastAnchorPoint;
+    struct Vector3 anchorLastPosition;
     short flyingSoundLoopId;
     float drownTimer;
     float stepTimer;
