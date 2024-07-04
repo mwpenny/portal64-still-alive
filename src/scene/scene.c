@@ -843,6 +843,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
             }
 
             collisionScenePushObjectsOutOfPortal(portalIndex);
+            collisionScenePushObjectsOutOfPortal(1 - portalIndex);
 
             // the portal position may have been adjusted
             if (transformIndex != NO_TRANSFORM_INDEX) {
