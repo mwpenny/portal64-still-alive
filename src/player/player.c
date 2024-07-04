@@ -920,15 +920,12 @@ void playerMove(struct Player* player, struct Vector2* moveInput, struct Vector3
         playerApplyFriction(player);
         playerAccelerate(player, &targetVelocity, PLAYER_ACCEL, PLAYER_SPEED);
     } else {
-        // Prevent moving against flings
-        struct Vector3 horizontalVelocity = { player->body.velocity.x, 0.0f, player->body.velocity.z };
-        if (vector3MagSqrd(&horizontalVelocity) > FLING_THRESHOLD_VEL * FLING_THRESHOLD_VEL) {
-            vector3Normalize(&horizontalVelocity, &horizontalVelocity);
-
-            float opposingVel = vector3Dot(&targetVelocity, &horizontalVelocity);
-            if (opposingVel < 0) {
-                vector3AddScaled(&targetVelocity, &horizontalVelocity, -opposingVel, &targetVelocity);
-            }
+        // Prevent moving against flings. Axis-aligned only, to prevent breaking out with side movement.
+        if (fabsf(player->body.velocity.x) > FLING_THRESHOLD_VEL && (targetVelocity.x * player->body.velocity.x) < 0.0f) {
+            targetVelocity.x = 0.0f;
+        }
+        if (fabsf(player->body.velocity.z) > FLING_THRESHOLD_VEL && (targetVelocity.z * player->body.velocity.z) < 0.0f) {
+            targetVelocity.z = 0.0f;
         }
 
         if ((gSaveData.controls.flags & ControlSavePortalFunneling) && !hasMoveInput) {
