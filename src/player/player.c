@@ -52,6 +52,7 @@
 #define PLAYER_FRICTION         (5.875f)
 
 #define FAST_FRICTION_THRESHOLD (190.0f / 64.0f)
+#define FLING_THRESHOLD_VEL     (5.0f)
 
 #define MIN_ROTATE_RATE         (M_PI * 0.5f)
 #define MAX_ROTATE_RATE         (M_PI * 3.5f)
@@ -899,25 +900,38 @@ void playerAccelerate(struct Player* player, struct Vector3* targetVelocity, flo
 }
 
 void playerMove(struct Player* player, struct Vector2* moveInput, struct Vector3* forward, struct Vector3* right) {
-    if (moveInput->x != 0.0f || moveInput->y != 0.0f) {
+    int hasMoveInput = !vector2IsZero(moveInput);
+    struct Vector3 targetVelocity = gZeroVec;
+
+    if (hasMoveInput) {
+        vector3AddScaled(&targetVelocity, right, PLAYER_SPEED * moveInput->x, &targetVelocity);
+        vector3AddScaled(&targetVelocity, forward, -PLAYER_SPEED * moveInput->y, &targetVelocity);
+
         hudResolvePrompt(&gScene.hud, CutscenePromptTypeMove);
     }
 
-    if ((player->flags & PlayerFlagsGrounded) && controllerActionGet(ControllerActionJump)) {
-        player->body.velocity.y += player->jumpImpulse;
-        player->flags |= PlayerJustJumped;
-        hudResolvePrompt(&gScene.hud, CutscenePromptTypeJump);
-    }
-
-    struct Vector3 targetVelocity = gZeroVec;
-    vector3AddScaled(&targetVelocity, right, PLAYER_SPEED * moveInput->x, &targetVelocity);
-    vector3AddScaled(&targetVelocity, forward, -PLAYER_SPEED * moveInput->y, &targetVelocity);
-
     if (player->flags & PlayerFlagsGrounded) {
+        if (controllerActionGet(ControllerActionJump)) {
+            player->body.velocity.y += player->jumpImpulse;
+            player->flags |= PlayerJustJumped;
+            hudResolvePrompt(&gScene.hud, CutscenePromptTypeJump);
+        }
+
         playerApplyFriction(player);
         playerAccelerate(player, &targetVelocity, PLAYER_ACCEL, PLAYER_SPEED);
     } else {
-        if ((gSaveData.controls.flags & ControlSavePortalFunneling) && vector2IsZero(moveInput)) {
+        // Prevent moving against flings
+        struct Vector3 horizontalVelocity = { player->body.velocity.x, 0.0f, player->body.velocity.z };
+        if (vector3MagSqrd(&horizontalVelocity) > FLING_THRESHOLD_VEL * FLING_THRESHOLD_VEL) {
+            vector3Normalize(&horizontalVelocity, &horizontalVelocity);
+
+            float opposingVel = vector3Dot(&targetVelocity, &horizontalVelocity);
+            if (opposingVel < 0) {
+                vector3AddScaled(&targetVelocity, &horizontalVelocity, -opposingVel, &targetVelocity);
+            }
+        }
+
+        if ((gSaveData.controls.flags & ControlSavePortalFunneling) && !hasMoveInput) {
             playerPortalFunnel(player, &targetVelocity);
         }
 
