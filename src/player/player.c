@@ -53,6 +53,7 @@
 
 #define FAST_FRICTION_THRESHOLD (190.0f / 64.0f)
 #define FLING_THRESHOLD_VEL     (5.0f)
+#define JUMP_BOOST_LIMIT        (PLAYER_SPEED * 1.5f)
 
 #define MIN_ROTATE_RATE         (M_PI * 0.5f)
 #define MAX_ROTATE_RATE         (M_PI * 3.5f)
@@ -60,8 +61,8 @@
 #define MIN_ROTATE_RATE_DELTA   (M_PI * 0.06125f)
 #define MAX_ROTATE_RATE_DELTA   MAX_ROTATE_RATE
 
-#define JUMP_IMPULSE            2.7f
-#define THROW_IMPULSE           1.35f
+#define JUMP_IMPULSE            2.5f
+#define THROW_IMPULSE           1.25f
 
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
@@ -910,13 +911,20 @@ void playerMove(struct Player* player, struct Vector2* moveInput, struct Vector3
         hudResolvePrompt(&gScene.hud, CutscenePromptTypeMove);
     }
 
-    if (player->flags & PlayerFlagsGrounded) {
-        if (controllerActionGet(ControllerActionJump)) {
-            player->body.velocity.y += player->jumpImpulse;
-            player->flags |= PlayerJustJumped;
-            hudResolvePrompt(&gScene.hud, CutscenePromptTypeJump);
+    // Do this first so skilled players can avoid friction on the first frame
+    if ((player->flags & PlayerFlagsGrounded) && controllerActionGet(ControllerActionJump)) {
+        if (vector3MagSqrd(&player->body.velocity) < JUMP_BOOST_LIMIT * JUMP_BOOST_LIMIT) {
+            vector3AddScaled(&player->body.velocity, forward, (-PLAYER_SPEED * moveInput->y) * 0.5f, &player->body.velocity);
         }
+        player->body.velocity.y += player->jumpImpulse;
 
+        player->flags &= ~PlayerFlagsGrounded;
+        player->flags |= PlayerJustJumped;
+
+        hudResolvePrompt(&gScene.hud, CutscenePromptTypeJump);
+    }
+
+    if (player->flags & PlayerFlagsGrounded) {
         playerApplyFriction(player);
         playerAccelerate(player, &targetVelocity, PLAYER_ACCEL, PLAYER_SPEED);
     } else {
