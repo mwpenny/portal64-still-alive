@@ -839,6 +839,28 @@ void playerProcessInput(struct Player* player, struct Vector3* forward, struct V
     }
 }
 
+void playerJump(struct Player* player, struct Vector3* targetVelocity, struct Vector3* forward) {
+    float forwardVelocity = vector3Dot(&player->body.velocity, forward);
+    float maxBoost = JUMP_BOOST_LIMIT - fabsf(forwardVelocity);
+
+    if (maxBoost > 0) {
+        float targetForwardVelocity = vector3Dot(targetVelocity, forward);
+
+        vector3AddScaled(
+            &player->body.velocity,
+            forward,
+            clampf(targetForwardVelocity * 0.5f, -maxBoost, maxBoost),
+            &player->body.velocity
+        );
+    }
+    player->body.velocity.y += player->jumpImpulse;
+
+    player->flags &= ~PlayerFlagsGrounded;
+    player->flags |= PlayerJustJumped;
+
+    hudResolvePrompt(&gScene.hud, CutscenePromptTypeJump);
+}
+
 void playerApplyFriction(struct Player* player) {
     if (vector3IsZero(&player->body.velocity)) {
         return;
@@ -913,15 +935,7 @@ void playerMove(struct Player* player, struct Vector2* moveInput, struct Vector3
 
     // Do this first so skilled players can avoid friction on the first frame
     if ((player->flags & PlayerFlagsGrounded) && controllerActionGet(ControllerActionJump)) {
-        if (vector3MagSqrd(&player->body.velocity) < JUMP_BOOST_LIMIT * JUMP_BOOST_LIMIT) {
-            vector3AddScaled(&player->body.velocity, forward, (-PLAYER_SPEED * moveInput->y) * 0.5f, &player->body.velocity);
-        }
-        player->body.velocity.y += player->jumpImpulse;
-
-        player->flags &= ~PlayerFlagsGrounded;
-        player->flags |= PlayerJustJumped;
-
-        hudResolvePrompt(&gScene.hud, CutscenePromptTypeJump);
+        playerJump(player, &targetVelocity, forward);
     }
 
     if (player->flags & PlayerFlagsGrounded) {
