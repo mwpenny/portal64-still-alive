@@ -51,7 +51,7 @@
 #define PLAYER_AIR_ACCEL        (15.0f)
 #define PLAYER_FRICTION         (5.875f)
 
-#define FAST_FRICTION_THRESHOLD (190.0f / 64.0f)
+#define FRICTION_STOP_THRESHOLD (190.0f / 64.0f)
 #define FLING_THRESHOLD_VEL     (5.0f)
 #define JUMP_BOOST_LIMIT        (PLAYER_SPEED * 1.5f)
 
@@ -840,19 +840,18 @@ void playerProcessInput(struct Player* player, struct Vector3* forward, struct V
 }
 
 void playerJump(struct Player* player, struct Vector3* targetVelocity, struct Vector3* forward) {
-    float forwardVelocity = vector3Dot(&player->body.velocity, forward);
-    float maxBoost = JUMP_BOOST_LIMIT - fabsf(forwardVelocity);
+    vector3AddScaled(
+        &player->body.velocity,
+        forward,
+        vector3Dot(targetVelocity, forward) * 0.5f,
+        &player->body.velocity
+    );
 
-    if (maxBoost > 0) {
-        float targetForwardVelocity = vector3Dot(targetVelocity, forward);
-
-        vector3AddScaled(
-            &player->body.velocity,
-            forward,
-            clampf(targetForwardVelocity * 0.5f, -maxBoost, maxBoost),
-            &player->body.velocity
-        );
+    float speed = vector3MagSqrd(&player->body.velocity);
+    if (speed > JUMP_BOOST_LIMIT * JUMP_BOOST_LIMIT) {
+        vector3Scale(&player->body.velocity, &player->body.velocity, JUMP_BOOST_LIMIT / sqrtf(speed));
     }
+
     player->body.velocity.y += player->jumpImpulse;
 
     player->flags &= ~PlayerFlagsGrounded;
@@ -873,12 +872,12 @@ void playerApplyFriction(struct Player* player) {
     }
 
     float stopAccel;
-    if (currentSpeed < FAST_FRICTION_THRESHOLD) {
-        stopAccel = FAST_FRICTION_THRESHOLD;
-    } else if (currentSpeed >= (FAST_FRICTION_THRESHOLD * 2.0f)) {
-        stopAccel = currentSpeed * 0.5625f;
-    } else {
+    if (currentSpeed < FRICTION_STOP_THRESHOLD) {
+        stopAccel = FRICTION_STOP_THRESHOLD;
+    } else if (currentSpeed < (FRICTION_STOP_THRESHOLD * 2.0f)) {
         stopAccel = currentSpeed;
+    } else {
+        stopAccel = currentSpeed * 0.5625f;
     }
 
     float targetSpeed = MAX(
