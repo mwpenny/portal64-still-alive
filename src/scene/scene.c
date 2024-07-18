@@ -233,9 +233,9 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     ballBurnMarkInit();
 
-    scene->ballLancherCount = gCurrentLevel->ballLauncherCount;
-    scene->ballLaunchers = malloc(sizeof(struct BallLauncher) * scene->ballLancherCount);
-    for (int i = 0; i < scene->ballLancherCount; ++i) {
+    scene->ballLauncherCount = gCurrentLevel->ballLauncherCount;
+    scene->ballLaunchers = malloc(sizeof(struct BallLauncher) * scene->ballLauncherCount);
+    for (int i = 0; i < scene->ballLauncherCount; ++i) {
         ballLauncherInit(&scene->ballLaunchers[i], &gCurrentLevel->ballLaunchers[i]);
     }
 
@@ -672,7 +672,7 @@ void sceneUpdate(struct Scene* scene) {
     }
 
     for (int i = 0; i < scene->ballCatcherCount; ++i) {
-        ballCatcherUpdate(&scene->ballCatchers[i], scene->ballLaunchers, scene->ballLancherCount);
+        ballCatcherUpdate(&scene->ballCatchers[i], scene->ballLaunchers, scene->ballLauncherCount);
     }
 
     for (int i = 0; i < scene->triggerListenerCount; ++i) {
@@ -735,7 +735,7 @@ void sceneUpdate(struct Scene* scene) {
         boxDropperUpdate(&scene->boxDroppers[i]);
     }
 
-    for (int i = 0; i < scene->ballLancherCount; ++i) {
+    for (int i = 0; i < scene->ballLauncherCount; ++i) {
         ballLauncherUpdate(&scene->ballLaunchers[i]);
     }
 

@@ -316,7 +316,7 @@ void pedestalDeserialize(struct Serializer* serializer, struct Scene* scene) {
 }
 
 void launcherSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
-    for (int i = 0; i < scene->ballLancherCount; ++i) {
+    for (int i = 0; i < scene->ballLauncherCount; ++i) {
         struct BallLauncher* launcher = &scene->ballLaunchers[i];
         action(serializer, &launcher->currentBall.targetSpeed, sizeof(float));
         action(serializer, &launcher->currentBall.flags, sizeof(short));
@@ -333,7 +333,7 @@ void launcherSerialize(struct Serializer* serializer, SerializeAction action, st
 }
 
 void launcherDeserialize(struct Serializer* serializer, struct Scene* scene) {
-    for (int i = 0; i < scene->ballLancherCount; ++i) {
+    for (int i = 0; i < scene->ballLauncherCount; ++i) {
         struct BallLauncher* launcher = &scene->ballLaunchers[i];
         serializeRead(serializer, &launcher->currentBall.targetSpeed, sizeof(float));
         serializeRead(serializer, &launcher->currentBall.flags, sizeof(short));
@@ -361,8 +361,8 @@ void catcherSerialize(struct Serializer* serializer, SerializeAction action, str
 
         short caughtIndex = -1;
 
-        for (int launcherIndex = 0; launcherIndex < scene->ballLancherCount; ++launcherIndex) {
-            if (&scene->ballLaunchers[i].currentBall == catcher->caughtBall) {
+        for (int launcherIndex = 0; launcherIndex < scene->ballLauncherCount; ++launcherIndex) {
+            if (&scene->ballLaunchers[launcherIndex].currentBall == catcher->caughtBall) {
                 caughtIndex = launcherIndex;
                 break;
             }

@@ -78,7 +78,7 @@ struct Scene {
     u8 signageCount;
     u8 boxDropperCount;
     u8 switchCount;
-    u8 ballLancherCount;
+    u8 ballLauncherCount;
     u8 ballCatcherCount;
     u8 clockCount;
     u8 securityCameraCount;

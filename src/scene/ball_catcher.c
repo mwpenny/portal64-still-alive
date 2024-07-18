@@ -146,4 +146,5 @@ void ballCatcherHandBall(struct BallCatcher* catcher, struct Ball* caughtBall) {
     struct Vector3 targetPosition;
     transformPoint(&catcher->rigidBody.transform, &gLocalCatcherLocation, &targetPosition);
     catcher->caughtBall->rigidBody.transform.position = targetPosition;
+    catcher->caughtBall->flags |= BallFlagsPowering;
 }
