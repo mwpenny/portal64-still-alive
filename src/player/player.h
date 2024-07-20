@@ -66,6 +66,7 @@ void playerPortalGrabTransform(struct Player* player, struct Vector3* point, str
 void playerInitGrabRotationBase(struct Player* player);
 
 void playerGivePortalGun(struct Player* player, int flags);
+void playerSetLocation(struct Player* player, struct Location* location);
 
 void playerKill(struct Player* player, int isUnderwater);
 
@@ -75,8 +76,6 @@ void playerSignalPortalChanged(struct Player* player);
 int playerIsGrabbing(struct Player* player);
 void playerThrowObject(struct Player* player);
 
-void playerSerialize(struct Serializer* serializer, SerializeAction action, struct Player* player);
-void playerDeserialize(struct Serializer* serializer, struct Player* player);
 void playerToggleJumpImpulse(struct Player* player, float newJumpImpulse);
 void playerToggleInvincibility(struct Player* player);
 

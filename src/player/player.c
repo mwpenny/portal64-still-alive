@@ -173,21 +173,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->dynamicId = dynamicSceneAdd(player, playerRender, &player->body.transform.position, 1.5f);
     dynamicSceneSetFlags(player->dynamicId, DYNAMIC_SCENE_OBJECT_SKIP_ROOT);
 
-    if (startLocation) {
-        player->lookTransform = startLocation->transform;
-        player->body.currentRoom = startLocation->roomIndex;
-    } else {
-        transformInitIdentity(&player->lookTransform);
-        player->body.currentRoom = 0;
-    }
-    player->body.transform = player->lookTransform;
-
-    player->anchoredTo = NULL;
-    player->anchorLastPosition = gZeroVec;
-
-    collisionObjectUpdateBB(&player->collisionObject);
-
-    dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
+    playerSetLocation(player, startLocation);
 }
 
 void playerHandleCollision(struct Player* player) {
@@ -516,6 +502,23 @@ void playerPortalGrabTransform(struct Player* player, struct Vector3* grabPoint,
 
 void playerGivePortalGun(struct Player* player, int flags) {
     player->flags |= flags;
+}
+
+void playerSetLocation(struct Player* player, struct Location* location) {
+    if (location) {
+        player->lookTransform = location->transform;
+        player->body.currentRoom = location->roomIndex;
+    } else {
+        transformInitIdentity(&player->lookTransform);
+        player->body.currentRoom = 0;
+    }
+    player->body.transform = player->lookTransform;
+
+    player->anchoredTo = NULL;
+    player->anchorLastPosition = gZeroVec;
+
+    collisionObjectUpdateBB(&player->collisionObject);
+    dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
 }
 
 void playerUpdateSounds(struct Player* player) {

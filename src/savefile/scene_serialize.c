@@ -18,12 +18,16 @@ void playerSerialize(struct Serializer* serializer, SerializeAction action, stru
 }
 
 void playerDeserialize(struct Serializer* serializer, struct Player* player) {
-    serializeRead(serializer, &player->lookTransform, sizeof(struct PartialTransform));
-    player->body.transform.position = player->lookTransform.position;
+    struct Location location;
+    transformInitIdentity(&location.transform);
+
+    serializeRead(serializer, &location.transform, sizeof(struct PartialTransform));
     serializeRead(serializer, &player->body.velocity, sizeof(player->body.velocity));
-    serializeRead(serializer, &player->body.currentRoom, sizeof(player->body.currentRoom));
+    serializeRead(serializer, &location.roomIndex, sizeof(location.roomIndex));
     serializeRead(serializer, &player->flags, sizeof(player->flags));
     serializeRead(serializer, &player->grabbingThroughPortal, sizeof(player->grabbingThroughPortal));
+
+    playerSetLocation(player, &location);
 }
 
 #define PORTAL_FLAGS_NO_PORTAL  -1
