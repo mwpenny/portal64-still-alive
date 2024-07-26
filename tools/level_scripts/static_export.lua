@@ -4,6 +4,7 @@ local sk_scene = require('sk_scene')
 local sk_mesh = require('sk_mesh')
 local sk_math = require('sk_math')
 local sk_input = require('sk_input')
+local sk_transform = require('sk_transform')
 local room_export = require('tools.level_scripts.room_export')
 local animation = require('tools.level_scripts.animation')
 local signals = require('tools.level_scripts.signals')
@@ -78,6 +79,20 @@ local function bb_list(bb)
     }
 end
 
+local function rotated_bb_list(untransformed_bb, transform, bb_scale)
+    local _, rotation, _ = transform:decompose()
+    local side_lengths = (untransformed_bb.max - untransformed_bb.min) * bb_scale
+
+    return {
+        (transform * untransformed_bb.min) * bb_scale,
+        {
+            rotation * sk_math.vector3(side_lengths.x),
+            rotation * sk_math.vector3(0, side_lengths.y),
+            rotation * sk_math.vector3(0, 0, side_lengths.z)
+        }
+    }
+end
+
 local function check_for_decals(portal_surface, all_static_ndes)
     if not portal_surface.accept_portals then
         return false
@@ -134,8 +149,9 @@ local function list_static_nodes(nodes)
             end
 
             local accept_portals = (portalable_material or accept_portals_override) and not no_portals
+            local precise_culling = sk_scene.find_flag_argument(v.arguments, "precise_culling")
 
-            if transform_index or signal or accept_portals or not is_coplanar(chunkV.mesh, plane) then
+            if transform_index or signal or accept_portals or precise_culling or not is_coplanar(chunkV.mesh, plane) then
                 should_join_mesh = false
             end
     
@@ -146,6 +162,7 @@ local function list_static_nodes(nodes)
                 transform_index = transform_index,
                 room_index = room_export.node_nearest_room_index(v.node) or 0,
                 accept_portals = accept_portals,
+                precise_culling = precise_culling,
                 has_decals = false,
                 signal = signal,
                 original_bb = original_bb,
@@ -335,6 +352,9 @@ local function process_static_nodes(nodes)
     local result = {}
     local bb_scale = sk_input.settings.fixed_point_scale
 
+    -- For precise culling
+    local static_bounding_boxes = {}
+
     local source_nodes = list_static_nodes(nodes)
 
     for _, source_node in pairs(source_nodes) do
@@ -350,6 +370,17 @@ local function process_static_nodes(nodes)
         mesh_bb.max.y = math.floor(mesh_bb.max.y + 0.5)
         mesh_bb.max.z = math.floor(mesh_bb.max.z + 0.5)
 
+        -- Save the object's exact (i.e., rotated) bounding box to use for culling
+        -- More expensive at runtime than BVH's AABB checks, but prevents geometry behind portals from showing
+        if source_node.precise_culling then
+            local transform = source_node.node.full_transformation
+            local untransformed = source_node.chunk.mesh:transform(transform:inverse())
+            local rotated_bb = rotated_bb_list(untransformed.bb, transform, bb_scale)
+
+            source_node.bounding_box_index = #static_bounding_boxes
+            table.insert(static_bounding_boxes, rotated_bb)
+        end
+
         table.insert(result, {
             node = source_node.node, 
             mesh = source_node.chunk.mesh,
@@ -357,12 +388,15 @@ local function process_static_nodes(nodes)
             display_list = sk_definition_writer.raw(gfxName), 
             material_index = sk_definition_writer.raw(source_node.chunk.material.macro_name),
             transform_index = source_node.transform_index,
+            bounding_box_index = source_node.bounding_box_index,
             room_index = source_node.room_index,
             accept_portals = source_node.accept_portals,
             has_decals = source_node.has_decals,
             signal = source_node.signal,
         })
     end
+
+    sk_definition_writer.add_definition('static_bounding_boxes', 'struct RotatedBox[]', '_geo', static_bounding_boxes);
 
     table.sort(result, function(a, b)
         return a.room_index < b.room_index
@@ -417,10 +451,10 @@ local function process_static_nodes(nodes)
 
     sk_definition_writer.add_definition('room_bvh', 'struct StaticIndex[]', '_geo', room_bvh_list);
 
-    return final_static_list, room_bvh_list;
+    return final_static_list, room_bvh_list, static_bounding_boxes;
 end
 
-local static_nodes, room_bvh_list = process_static_nodes(sk_scene.nodes_for_type('@static'))
+local static_nodes, room_bvh_list, static_bounding_boxes = process_static_nodes(sk_scene.nodes_for_type('@static'))
 
 local static_content_elements = {}
 
@@ -444,6 +478,7 @@ for index, static_node in pairs(static_nodes) do
         center = static_node.mesh_bb:lerp(0.5) * bb_scale_inv,
         materialIndex = static_node.material_index,
         transformIndex = static_node.transform_index and (static_node.transform_index - 1) or sk_definition_writer.raw('NO_TRANSFORM_INDEX'),
+        boundingBoxIndex = static_node.bounding_box_index or sk_definition_writer.raw('NO_BOUNDING_BOX_INDEX'),
     })
 
     good_index = index - 1
@@ -480,6 +515,7 @@ sk_definition_writer.add_definition('signal_indices', 'u16[]', '_geo', signal_in
 return {
     static_nodes = static_nodes,
     static_content_elements = static_content_elements,
+    static_bounding_boxes = static_bounding_boxes,
     room_ranges = room_ranges,
     signal_ranges = signal_ranges,
     signal_indices = signal_indices,

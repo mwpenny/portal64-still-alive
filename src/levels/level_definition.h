@@ -7,11 +7,13 @@
 #include "../math/boxs16.h"
 #include "../math/box3d.h"
 #include "../math/range.h"
+#include "../math/rotated_box.h"
 #include "../sk64/skelatool_clip.h"
 #include "../sk64/skelatool_armature.h"
 #include "../physics/collision_box.h"
 
-#define NO_TRANSFORM_INDEX  0xFF
+#define NO_TRANSFORM_INDEX    0xFF
+#define NO_BOUNDING_BOX_INDEX 0xFF
 
 struct StaticContentBox {
     struct BoundingBoxs16 box;
@@ -31,6 +33,7 @@ struct StaticContentElement {
     struct Vector3 center;
     u8 materialIndex;
     u8 transformIndex;
+    u8 boundingBoxIndex;
 };
 
 struct BoundingSphere {
@@ -322,13 +325,15 @@ struct SecurityCameraDefinition {
 
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
-    struct StaticContentElement *staticContent;
+    struct StaticContentElement* staticContent;
+    // For precise culling (second pass after BVH)
+    struct RotatedBox* staticBoundingBoxes;
     struct StaticIndex* roomBvhList;
-    struct Rangeu16 *signalToStaticRanges;
-    u16 *signalToStaticIndices;
-    struct Rangeu16 *roomStaticMapping;
+    struct Rangeu16* signalToStaticRanges;
+    u16* signalToStaticIndices;
+    struct Rangeu16* roomStaticMapping;
     struct PortalSurface* portalSurfaces;
-    // maps index of a collisionQuads to indices in portalSurfaces
+    // Maps index of a collisionQuads to indices in portalSurfaces
     struct PortalSurfaceMappingRange* portalSurfaceMappingRange;
     struct DynamicBoxDefinition* dynamicBoxes;
     struct PortalSurfaceMappingRange* portalSurfaceDynamicMappingRange;

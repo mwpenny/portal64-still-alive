@@ -14,6 +14,7 @@ void staticRenderTraverseIndex(
     struct StaticContentBox* box,
     struct StaticContentBox* boxEnd, 
     struct StaticContentElement* staticContent, 
+    struct RotatedBox* staticBoundingBoxes,
     struct FrustumCullingInformation* cullingInfo,
     struct RenderScene* renderScene
 ) {
@@ -32,7 +33,14 @@ void staticRenderTraverseIndex(
             }
         }
 
+        // Leaf nodes
         for (int i = box->staticRange.min; i < box->staticRange.max; ++i) {
+            if (staticContent[i].boundingBoxIndex != NO_BOUNDING_BOX_INDEX &&
+                isRotatedBoxOutsideFrustum(cullingInfo, &staticBoundingBoxes[staticContent[i].boundingBoxIndex])) {
+
+                continue;
+            }
+
             renderSceneAdd(
                 renderScene, 
                 staticContent[i].displayList, 
@@ -58,7 +66,14 @@ void staticRenderPopulateRooms(struct FrustumCullingInformation* cullingInfo, Mt
         if (0x1 & visibleRooms) {
             struct StaticIndex* roomIndex = &gCurrentLevel->roomBvhList[currentRoom];
     
-            staticRenderTraverseIndex(roomIndex->boxIndex, roomIndex->boxIndex + roomIndex->boxCount, gCurrentLevel->staticContent, cullingInfo, renderScene);
+            staticRenderTraverseIndex(
+                roomIndex->boxIndex,
+                roomIndex->boxIndex + roomIndex->boxCount,
+                gCurrentLevel->staticContent,
+                gCurrentLevel->staticBoundingBoxes,
+                cullingInfo,
+                renderScene
+            );
 
             struct BoundingBoxs16* animatedBox = roomIndex->animatedBoxes;
 

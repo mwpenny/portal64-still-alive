@@ -5,7 +5,7 @@ Static level geometry. Used to generate level mesh and portal surface data.
 ## Name structure
 
 ```
-@static [no_portals] [indicator_lights SIGNAL_NAME] [uvtransx TRANS_X] [uvtransy TRANS_Y] [uvtransz TRANS_Z] [uvrotx ROT_X] [uvroty ROT_Y] [uvrotz ROT_Z] [uvscale SCALE]
+@static [no_portals] [indicator_lights SIGNAL_NAME] [uvtransx TRANS_X] [uvtransy TRANS_Y] [uvtransz TRANS_Z] [uvrotx ROT_X] [uvroty ROT_Y] [uvrotz ROT_Z] [uvscale SCALE] [precise_culling]
 ```
 
 ## Arguments
@@ -21,6 +21,7 @@ Static level geometry. Used to generate level mesh and portal surface data.
 | `uvroty ROT_Y` (optional)                 | If specified and the material has `tileSizeS` and `tileSizeT` properties, rotates UV coordinates by `ROT_Y` degrees on the Y axis. Defaults to 0.                                |
 | `uvrotz ROT_Z` (optional)                 | If specified and the material has `tileSizeS` and `tileSizeT` properties, rotates UV coordinates by `ROT_Z` degrees on the Z axis. Defaults to 0.                                |
 | `uvscale SCALE` (optional)                | If specified and the material has `tileSizeS` and `tileSizeT` properties, scales UV coordinates by `SCALE/tileSize` in each direction. Defaults to 1.                            |
+| `precise_culling` (optional)              | If specified, the object's exact bounding box will be used for culling. This requires extra work but prevents geometry behind portals from showing through.                      |
 
 ## Notes
 
