@@ -21,19 +21,65 @@ cutscenes:
   ENTERED_ROOM_3:
     - set_signal room_3_ball_launcher
     - wait_for_signal hallway_platforms_activate
+
+    - start_cutscene HALLWAY_PLATFORM_1
+    - start_cutscene HALLWAY_PLATFORM_2
+    - start_cutscene HALLWAY_PLATFORM_3
+    - start_cutscene HALLWAY_PLATFORM_4
+
     - start_cutscene HAZARD_HALLWAY_CHECKPOINT
-    # TODO: start platform spawn
+
+  # TODO: simplify platform animation
+  # - Takes up space (exacerbated by animation duplication issue)
+  # - Slow to export
+  # - Cumbersome to change
+  HALLWAY_PLATFORM_1:
+    - play_animation hallway_1 hallway_1_intro
+    - wait_for_animation hallway_1
+    - delay 32.15
+    - label loop
+    - play_animation hallway_1 hallway
+    - wait_for_animation hallway_1
+    - delay 5.8
+    - goto loop
+  HALLWAY_PLATFORM_2:
+    - play_animation hallway_2 hallway_2_intro
+    - wait_for_animation hallway_2
+    - delay 11.8
+    - label loop
+    - play_animation hallway_2 hallway
+    - wait_for_animation hallway_2
+    - delay 5.8
+    - goto loop
+  HALLWAY_PLATFORM_3:
+    - delay 15
+    - label loop
+    - play_animation hallway_3 hallway
+    - wait_for_animation hallway_3
+    - delay 5.8
+    - goto loop
+  HALLWAY_PLATFORM_4:
+    - delay 30
+    - label loop
+    - play_animation hallway_4 hallway
+    - wait_for_animation hallway_4
+    - delay 5.8
+    - goto loop
   HAZARD_HALLWAY_CHECKPOINT:
     - wait_for_signal in_hazard_hallway_checkpoint
     - save_checkpoint
   DROWN_PLAYER:
     - kill_player water
   ENTERED_FINAL_ROOM:
+    - stop_cutscene HALLWAY_PLATFORM_1
+    - stop_cutscene HALLWAY_PLATFORM_2
+    - stop_cutscene HALLWAY_PLATFORM_3
+    - stop_cutscene HALLWAY_PLATFORM_4
+
     - set_signal final_room_ball_launcher
     - start_cutscene SWITCH_ROOM_1_PISTON
     - start_cutscene SWITCH_ROOM_2_PISTON
     - start_cutscene CHECK_TRAPPED
-    # TODO: disable spawning (looping) of hazard hallway platforms
     - save_checkpoint
 
     - wait_for_signal exit_activate
