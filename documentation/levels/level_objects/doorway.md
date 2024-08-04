@@ -22,5 +22,6 @@ collide with other objects in the entered room while ignoring those in the
 exited room.
 
 Doorways do not need to be linked to a physical door in the world. For example,
-a doorway can be placed over a window so that the room on the other side is
-not considered for rendering when out of the player's view.
+they are used for windows so the room on the other side is visible when looking
+through. They can also be used to break up large physical spaces into smaller
+chunks.
