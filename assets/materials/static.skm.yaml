@@ -217,7 +217,7 @@ materials:
       filename: ../../portal_pak_modified/materials/metal/metal_modular_floor001.png
       siz: G_IM_SIZ_16b
     
-    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCombineMode: G_CC_MODULATERGB
     gDPSetCycleType: G_CYC_1CYCLE
 
     gSPGeometryMode:
@@ -547,8 +547,9 @@ materials:
       t:
         wrap: false
     gSPGeometryMode:
+      set: [G_SHADE]
       clear: [G_LIGHTING]
-    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCombineMode: G_CC_MODULATERGB
     gDPSetCycleType: G_CYC_1CYCLE
 
   plastic/plasticwall004a:
