@@ -65,7 +65,7 @@ sudo chmod +x tools/setup.sh
 ./tools/setup.sh
 ```
 
-Alternative setup methods include [Docker setup](./documentation/docker_setup.md), [Ubuntu setup](./documentation/ubuntu_setup.md), and [Ubuntu Derivitive setup](./documentation/steam_ubuntu_no-snap_setup.md).
+Alternative setup methods include [Docker setup](./documentation/docker_setup.md), [Ubuntu setup](./documentation/ubuntu_setup.md), and [Ubuntu Derivative setup](./documentation/steam_ubuntu_no-snap_setup.md).
 
 Whatever setup you choose, you will still need to add the Portal folder to `portal64/vpk/` OR create a symbolic link to the Portal folder. See [vpk/add_vpk_here.md](./vpk/add_vpk_here.md) for more details! Symlinks do not work for Docker builds.
 
