@@ -30,7 +30,7 @@ Clone the Portal64 repo or download the zip.
 
 ```sh
 sudo apt install git
-git clone https://github.com/lambertjamesd/portal64.git
+git clone https://github.com/mwpenny/portal64-still-alive.git
 cd portal64
 ```
 Setup and install dependencies for `skelatool64`
