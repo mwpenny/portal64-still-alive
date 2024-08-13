@@ -21,7 +21,7 @@ Progress is tracked below.
 - [x] Chamber 12
 - [x] Chamber 13
 - [x] Chamber 14
-- [ ] Chamber 15
+- [x] Chamber 15
 - [ ] Chamber 16
     - [ ] Turrets
 - [ ] Chamber 17
