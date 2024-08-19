@@ -38,6 +38,13 @@ for doorway_index, doorway in pairs(sk_scene.nodes_for_type('@doorway')) do
     quad.edgeALength = quad.edgeALength + 1.0
     quad.edgeBLength = quad.edgeBLength + 1.0
 
+    for _, doorway in pairs(doorways) do
+        if (doorway[2] == room_a and doorway[3] == room_b) or
+           (doorway[2] == room_b and doorway[3] == room_a) then
+            error('At most one doorway can connect two rooms. Found multiple doorways for rooms ' .. room_a .. ' and ' .. room_b .. '.')
+        end
+    end
+
     table.insert(doorways, {
         quad,
         room_a,

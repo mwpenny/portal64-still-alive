@@ -25,3 +25,5 @@ know their room index, which is updated when passing through
 For performance reasons, only the player's current room and those visible
 through open doorways are considered for rendering, and only objects in the same
 room can collide with each other.
+
+Levels are limited to 64 rooms.

@@ -25,3 +25,5 @@ Doorways do not need to be linked to a physical door in the world. For example,
 they are used for windows so the room on the other side is visible when looking
 through. They can also be used to break up large physical spaces into smaller
 chunks.
+
+At most one doorway can connect two given rooms.
