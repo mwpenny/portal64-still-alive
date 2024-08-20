@@ -100,19 +100,9 @@ materials:
       b: 255
       a: 255
 
-  patreon_qr:
+  github_qr:
     gDPSetTile:
-      filename: "../images/patreon_qr.png"
-      siz: G_IM_SIZ_4b
-      fmt: G_IM_FMT_I
-    gDPSetCombineMode: 
-      color: ["0", "0", "0", ENVIRONMENT]
-      alpha: [TEXEL0, "0", ENVIRONMENT, "0"]
-    gDPSetRenderMode: G_RM_XLU_SURF
-
-  youtube_qr:
-    gDPSetTile:
-      filename: "../images/youtube_qr.png"
+      filename: "../images/github_qr.png"
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
     gDPSetCombineMode: 

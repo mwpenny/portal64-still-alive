@@ -55,82 +55,65 @@ void creditsRender(void* data, struct RenderState* renderState, struct GraphicsT
     struct FontRenderer* renderer = stackMalloc(sizeof(struct FontRenderer));
     fontRendererLayout(renderer, &gLiberationMonoFont, "THANK YOU FOR PARTICIPATING\nIN THIS\nENRICHMENT CENTER ACTIVITY!!\n\nIt is still in development.", SCREEN_WD);
     renderState->dl = fontRendererBuildGfx(
-        renderer, 
-        gLiberationMonoImages, 
-        35, 
-        36, 
-        &color, 
+        renderer,
+        gLiberationMonoImages,
+        35,
+        36,
+        &color,
         renderState->dl
     );
 
     fontRendererLayout(renderer, &gLiberationMonoFont, "-----------------------------------------", SCREEN_WD);
     renderState->dl = fontRendererBuildGfx(
-        renderer, 
-        gLiberationMonoImages, 
-        14, 
-        12, 
-        &color, 
+        renderer,
+        gLiberationMonoImages,
+        14,
+        12,
+        &color,
         renderState->dl
     );
     renderState->dl = fontRendererBuildGfx(
-        renderer, 
-        gLiberationMonoImages, 
-        14, 
-        SCREEN_HT - 24, 
-        &color, 
+        renderer,
+        gLiberationMonoImages,
+        14,
+        SCREEN_HT - 24,
+        &color,
         renderState->dl
     );
 
     fontRendererLayout(renderer, &gLiberationMonoFont, "|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|", SCREEN_WD);
     renderState->dl = fontRendererBuildGfx(
-        renderer, 
-        gLiberationMonoImages, 
-        14, 
-        24, 
-        &color, 
+        renderer,
+        gLiberationMonoImages,
+        14,
+        24,
+        &color,
         renderState->dl
     );
     renderState->dl = fontRendererBuildGfx(
-        renderer, 
-        gLiberationMonoImages, 
-        294, 
-        24, 
-        &color, 
+        renderer,
+        gLiberationMonoImages,
+        294,
+        24,
+        &color,
         renderState->dl
     );
 
-    fontRendererLayout(renderer, &gLiberationMonoFont, "Subscribe", SCREEN_WD);
+    fontRendererLayout(renderer, &gLiberationMonoFont, "GitHub", SCREEN_WD);
     renderState->dl = fontRendererBuildGfx(
-        renderer, 
-        gLiberationMonoImages, 
-        70, 
-        120, 
-        &color, 
+        renderer,
+        gLiberationMonoImages,
+        74,
+        120,
+        &color,
         renderState->dl
     );
 
-
-    fontRendererLayout(renderer, &gLiberationMonoFont, "Support", SCREEN_WD);
-    renderState->dl = fontRendererBuildGfx(
-        renderer, 
-        gLiberationMonoImages, 
-        182, 
-        120, 
-        &color, 
-        renderState->dl
-    );
-
-    gSPDisplayList(renderState->dl++, ui_material_list[YOUTUBE_QR_INDEX]);
-    gSPTextureRectangle(renderState->dl++, 70 << 2, 138 << 2, (70 + 64) << 2, (138 + 64) << 2, G_TX_RENDERTILE, 0, 0, 1 << 9, 1 << 9);
-
-    gSPDisplayList(renderState->dl++, ui_material_list[PATREON_QR_INDEX]);
-    gSPTextureRectangle(renderState->dl++, 182 << 2, 138 << 2, (182 + 64) << 2, (138 + 64) << 2, G_TX_RENDERTILE, 0, 0, 1 << 9, 1 << 9);
+    gSPDisplayList(renderState->dl++, ui_material_list[GITHUB_QR_INDEX]);
+    gSPTextureRectangle(renderState->dl++, 74 << 2, 138 << 2, (74 + 64) << 2, (138 + 64) << 2, G_TX_RENDERTILE, 0, 0, 1 << 9, 1 << 9);
 
     gSPDisplayList(renderState->dl++, ui_material_list[CREDITS_ICONS_INDEX]);
-    gSPTextureRectangle(renderState->dl++, 30 << 2, 130 << 2, (30 + 32) << 2, (130 + 32) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
-
-    gSPDisplayList(renderState->dl++, ui_material_list[CREDITS_ICONS_INDEX]);
-    gSPTextureRectangle(renderState->dl++, 148 << 2, 130 << 2, (148 + 32) << 2, (130 + 32) << 2, G_TX_RENDERTILE, 32 << 5, 0, 1 << 10, 1 << 10);
+    gSPTextureRectangle(renderState->dl++, 34 << 2, 134 << 2, (34 + 32) << 2, (134 + 32) << 2, G_TX_RENDERTILE, 0, 0, 1 << 10, 1 << 10);
 
     stackMallocFree(renderer);
 }
