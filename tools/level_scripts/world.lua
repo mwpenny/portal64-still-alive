@@ -22,13 +22,11 @@ for doorway_index, doorway in pairs(sk_scene.nodes_for_type('@doorway')) do
     local room_a = room_export.node_nearest_room_index(doorway.node, nil)
     local room_b, room_b_bb = room_export.node_nearest_room_index(doorway.node, room_a)
 
-    if room_b_block then
-        local room_b_center = room_b_bb:lerp(0.5)
+    local room_b_center = room_b_bb:lerp(0.5)
 
-        -- check if the doorway is facing room A
-        if (room_b_center - quad.corner):dot(quad.plane.normal > 0) then
-            room_a, room_b = room_b, room_a
-        end
+    -- Check if the doorway is facing room A
+    if (room_b_center - quad.corner):dot(quad.plane.normal) > 0 then
+        room_a, room_b = room_b, room_a
     end
 
     table.insert(room_doorways[room_a + 1], doorway_index - 1)
