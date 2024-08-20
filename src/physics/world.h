@@ -29,6 +29,8 @@ struct Room {
 
     short* doorwayIndices;
     short doorwayCount;
+
+    u64 nonVisibleRooms;
 };
 
 struct World {

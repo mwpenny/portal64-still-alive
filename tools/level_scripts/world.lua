@@ -128,6 +128,7 @@ local function generate_room(room_index)
         room_export.room_bb[room_index] or sk_math.box3(),
         sk_definition_writer.reference_to(room_doorways[room_index], 1),
         #room_doorways[room_index],
+        room_export.room_non_visibility[room_index]
     }
 end
 

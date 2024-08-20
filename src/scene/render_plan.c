@@ -370,7 +370,7 @@ int renderShouldRenderOtherPortal(struct Scene* scene, int visiblePortal, struct
 }
 
 void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderProps* properties, struct RenderState* renderState) {
-    staticRenderDetermineVisibleRooms(&properties->cameraMatrixInfo.cullingInformation, properties->fromRoom, &properties->visiblerooms);
+    staticRenderDetermineVisibleRooms(&properties->cameraMatrixInfo.cullingInformation, properties->fromRoom, &properties->visiblerooms, 0);
 
     struct Ray cameraRay;
     quatMultVector(&properties->camera.transform.rotation, &gForward, &cameraRay.dir);

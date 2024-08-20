@@ -18,8 +18,9 @@ Static level collision geometry. Must be a quad.
 
 ## Notes
 
-Game objects in the same [room](./room.md) and on the same collision layer can
-collide. Some layers are also used for certain checks by the game.
+Game objects can collide if they share a collision layer. Some layers are also
+used for certain checks by the game. Static collision is only collidable if it
+is in the same [room](./room.md)
 
 If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
 `BLOCK_BALL`. The possible layers and their uses are as follows.
