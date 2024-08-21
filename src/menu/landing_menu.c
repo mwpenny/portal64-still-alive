@@ -11,19 +11,21 @@
 #include "cheat_codes.h"
 #include "./translations.h"
 
-#define PORTAL_LOGO_X   30
-#define PORTAL_LOGO_Y   74
+#define PORTAL_LOGO_X               30
+#define PORTAL_LOGO_Y               74
 
-#define PORTAL_LOGO_WIDTH  128
-#define PORTAL_LOGO_P_WIDTH  15
-#define PORTAL_LOGO_O_WIDTH  30
-#define PORTAL_LOGO_HEIGHT 47
+#define PORTAL_LOGO_WIDTH           128
+#define PORTAL_LOGO_P_WIDTH         15
+#define PORTAL_LOGO_O_WIDTH         30
+#define PORTAL_LOGO_HEIGHT          47
 
-#define LANDING_MENU_TEXT_START_X 30
-#define LANDING_MENU_TEXT_START_Y 132
-#define STRIDE_OPTION_1 12
-#define STRIDE_OPTION_2 16
-#define PACKED_MENU_THRESHOLD 4
+#define LANDING_MENU_TEXT_START_X   30
+#define LANDING_MENU_TEXT_START_Y   132
+#define STRIDE_OPTION_1             12
+#define STRIDE_OPTION_2             16
+#define PACKED_MENU_THRESHOLD       4
+
+#define LANDING_MENU_VERSION_END_Y  20
 
 Gfx portal_logo_gfx[] = {
     gsSPTextureRectangle(
@@ -72,11 +74,19 @@ void landingMenuInitText(struct LandingMenu* landingMenu) {
             SCREEN_WD);
         y += stride;
     }
+
+    landingMenu->versionText = menuBuildPrerenderedText(&gDejaVuSansFont, GAME_VERSION, 0, 0, SCREEN_WD);
+    prerenderedTextRelocate(
+        landingMenu->versionText,
+        SCREEN_WD - LANDING_MENU_TEXT_START_X - landingMenu->versionText->width,
+        SCREEN_HT - LANDING_MENU_VERSION_END_Y - landingMenu->versionText->height
+    );
 }
 
 void landingMenuInit(struct LandingMenu* landingMenu, struct LandingMenuOption* options, int optionCount, int darkenBackground) {
     landingMenu->optionText = malloc(sizeof(struct PrerenderedText*) * optionCount);
     landingMenu->options = options;
+    landingMenu->versionText = NULL;
     landingMenu->selectedItem = 0;
     landingMenu->optionCount = optionCount;
     landingMenu->darkenBackground = darkenBackground;
@@ -87,6 +97,8 @@ void landingMenuRebuildText(struct LandingMenu* landingMenu) {
     for (int i = 0; i < landingMenu->optionCount; ++i) {
         prerenderedTextFree(landingMenu->optionText[i]);
     }
+    prerenderedTextFree(landingMenu->versionText);
+
     landingMenuInitText(landingMenu);
 }
 
@@ -169,6 +181,8 @@ void landingMenuRender(struct LandingMenu* landingMenu, struct RenderState* rend
     for (int i = 0; i < landingMenu->optionCount; ++i) {
         prerenderedBatchAdd(batch, landingMenu->optionText[i], &gColorWhite);
     }
+    prerenderedBatchAdd(batch, landingMenu->versionText, &gHalfTransparentWhite);
+
     renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 }

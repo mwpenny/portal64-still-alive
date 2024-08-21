@@ -19,8 +19,11 @@ $(SKELATOOL64):
 
 	@$(MAKE) -C skelatool64
 
+# Use tag name if a tag exists, otherwise use commit hash
+GAME_VERSION		:=  $(shell git describe --tags --exact-match HEAD 2>/dev/null || git rev-parse --short HEAD)
+
 OPTIMIZER		:= -Os
-LCDEFS			:= -DDEBUG -g -Werror -Wall
+LCDEFS			:= -DDEBUG -DGAME_VERSION=\"$(GAME_VERSION)\" -g -Werror -Wall
 N64LIB			:= -lultra_rom
 
 ifeq ($(PORTAL64_WITH_DEBUGGER),1)
@@ -133,6 +136,14 @@ spanish_audio: vpk/portal_sound_vo_spanish_dir.vpk vpk/portal_sound_vo_spanish_0
 	cd assets/locales/es/sound/vo/aperture_ai/; ls | xargs -I {} mv {} es_{}
 
 buildgame: $(BASE_TARGET_NAME).z64
+
+# Allow targets to depend on the GAME_VERSION variable via a file.
+# Update the file only when it differs from the variable (triggers rebuild).
+.PHONY: gameversion
+build/version.txt: gameversion
+ifneq ($(shell cat build/version.txt 2>/dev/null), $(GAME_VERSION))
+	echo -n $(GAME_VERSION) > build/version.txt
+endif
 
 include $(COMMONRULES)
 
@@ -363,7 +374,7 @@ build/src/menu/controls.o: build/assets/materials/ui.h build/src/audio/clips.h b
 build/src/menu/game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
 build/src/menu/gameplay_options.o: build/assets/materials/ui.h build/src/audio/clips.h
 build/src/menu/joystick_options.o: build/assets/materials/ui.h build/src/audio/clips.h
-build/src/menu/landing_menu.o: build/assets/materials/ui.h build/src/audio/clips.h
+build/src/menu/landing_menu.o: build/assets/materials/ui.h build/src/audio/clips.h build/version.txt
 build/src/menu/load_game.o: build/assets/materials/ui.h build/src/audio/clips.h build/src/audio/subtitles.h
 build/src/menu/main_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h
 build/src/menu/new_game_menu.o: build/src/audio/clips.h build/assets/materials/ui.h build/assets/materials/images.h build/src/audio/subtitles.h build/assets/test_chambers/test_chamber_00/test_chamber_00.h

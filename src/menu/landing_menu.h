@@ -13,6 +13,7 @@ struct LandingMenuOption {
 struct LandingMenu {
     struct LandingMenuOption* options;
     struct PrerenderedText** optionText;
+    struct PrerenderedText* versionText;
     short selectedItem;
     short optionCount;
     short darkenBackground;
