@@ -15,7 +15,7 @@ After that you can build the docker image using:
 
 ```sh
 
-make f Makefile.docker image    # Builds the Docker image.
+make -f Makefile.docker image    # Builds the Docker image.
 
 ```
 
