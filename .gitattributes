@@ -1,0 +1,2 @@
+# Save version on export to support building outside of git repo
+version.txt export-subst

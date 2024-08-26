@@ -19,8 +19,12 @@ $(SKELATOOL64):
 
 	@$(MAKE) -C skelatool64
 
-# Use tag name if a tag exists, otherwise use commit hash
-GAME_VERSION		:=  $(shell git describe --tags --exact-match HEAD 2>/dev/null || git rev-parse --short HEAD)
+# Use tag name if the current commit is tagged, otherwise use commit hash
+# If not in a git repo, fall back to exported version
+GAME_VERSION		:=  $(shell \
+	(git describe --tags HEAD 2>/dev/null || cat version.txt) | \
+	awk -F '-' '{print (NF >= 3 ? substr($$3, 2) : $$1)}' \
+)
 
 OPTIMIZER		:= -Os
 LCDEFS			:= -DDEBUG -DGAME_VERSION=\"$(GAME_VERSION)\" -g -Werror -Wall
@@ -142,7 +146,8 @@ buildgame: $(BASE_TARGET_NAME).z64
 .PHONY: gameversion
 build/version.txt: gameversion
 ifneq ($(shell cat build/version.txt 2>/dev/null), $(GAME_VERSION))
-	echo -n $(GAME_VERSION) > build/version.txt
+	@mkdir -p $(@D)
+	@echo -n $(GAME_VERSION) > $@
 endif
 
 include $(COMMONRULES)
