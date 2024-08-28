@@ -1,4 +1,4 @@
-from ubuntu:23.04
+from ubuntu:24.04
 
 WORKDIR /usr/src/app
 
@@ -62,3 +62,6 @@ ENV BLENDER_3_6 /opt/blender/blender-3.6.1-linux-x64/blender
 
 RUN pipx ensurepath --force
 RUN pipx install vpk
+
+# Avoid "dubious ownership" error when running git commands
+RUN git config --global --add safe.directory "$PWD"
