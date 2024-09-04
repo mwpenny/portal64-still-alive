@@ -235,15 +235,6 @@ portal_pak_dir/materials/signage/clock/clock_digits.png: portal_pak_dir/material
 
 convert_all_png: $(ALL_PNG_IMAGES)
 
-portal_pak_dir/%_copy_0.png: portal_pak_dir/%.png
-	cp $< $@
-
-portal_pak_dir/%_copy_1.png: portal_pak_dir/%.png
-	cp $< $@
-
-portal_pak_dir/%_copy_2.png: portal_pak_dir/%.png
-	cp $< $@
-
 portal_pak_modified/%.png: portal_pak_dir/%.png assets/%.ims
 	@mkdir -p $(@D)
 	convert $< $(shell cat $(@:portal_pak_modified/%.png=assets/%.ims)) $@

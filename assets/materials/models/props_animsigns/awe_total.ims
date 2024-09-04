@@ -1,1 +1,47 @@
+\(
+    +clone
+
+    -alpha extract -crop 154x1024+1894+0 -resize 32x212
+
+    -write portal_pak_modified/materials/models/props_animsigns/awe_total_copy_0.png
+    +delete
+\)
+
+\(
+    +clone
+
+    -alpha extract
+    \( +clone -crop 436x146+1061+438 -rotate 90 \) -insert 0
+    \( +clone -crop 146x436+1463+147 \) -insert 1
+    \( +clone -crop 146x436+1609+147 \) -insert 2
+    \( +clone -crop 146x436+1755+147 \) -insert 3
+    \( +clone -crop 146x436+1025+583 \) -insert 4
+    \( +clone -crop 146x436+1171+583 \) -insert 5
+    \( +clone -crop 146x436+1317+583 \) -insert 6
+    \( +clone -crop 146x436+1463+583 \) -insert 7
+    \( +clone -crop 146x436+1609+583 \) -insert 8
+    \( +clone -crop 146x436+1755+583 \) -insert 9
+    +append
+    +repage
+    -crop 1460x436+0+0
+    -fill black
+    -background black
+    -draw 'rectangle 141,310 189,424'
+    -draw 'rectangle 1447,337 1460,404'
+    -resize 140x
+    -extent 144x
+
+    -write portal_pak_modified/materials/models/props_animsigns/awe_total_copy_1.png
+    +delete
+\)
+
+\(
+    +clone
+
+    -alpha extract -crop 342x682+682+342 -resize 32x64
+
+    -write portal_pak_modified/materials/models/props_animsigns/awe_total_copy_2.png
+    +delete
+\)
+
 -alpha extract \( +clone -crop 682x342+682+0 \) -gravity west -append -crop 682x1364+0+0 -resize 64x128
