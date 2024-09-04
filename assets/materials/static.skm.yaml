@@ -1094,7 +1094,7 @@ materials:
 
   clock_digits:
     gDPSetTile:
-      filename: ../../portal_pak_modified/materials/signage/clock/clock_digits.png
+      filename: ../../portal_pak_modified/materials/signage/clock/countdown.png
       siz: G_IM_SIZ_4b
       twoTone: true
 

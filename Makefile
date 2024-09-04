@@ -218,20 +218,34 @@ portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor_on.png:
 portal_pak_dir/materials/effects/portal_1_particle_orange.png: portal_pak_dir/materials/effects/portal_1_particle.vtf
 	$(VTF2PNG) -f 2 $< $@
 
+portal_pak_dir/materials/signage/clock/countdown.png: portal_pak_dir/materials/signage/clock/countdown.vtf
+	$(VTF2PNG) -f 60 $< $@
+portal_pak_dir/materials/signage/clock/countdown_1.png: portal_pak_dir/materials/signage/clock/countdown.vtf
+	$(VTF2PNG) -f 59 $< $@
+portal_pak_dir/materials/signage/clock/countdown_2.png: portal_pak_dir/materials/signage/clock/countdown.vtf
+	$(VTF2PNG) -f 58 $< $@
+portal_pak_dir/materials/signage/clock/countdown_3.png: portal_pak_dir/materials/signage/clock/countdown.vtf
+	$(VTF2PNG) -f 57 $< $@
+portal_pak_dir/materials/signage/clock/countdown_4.png: portal_pak_dir/materials/signage/clock/countdown.vtf
+	$(VTF2PNG) -f 56 $< $@
+portal_pak_dir/materials/signage/clock/countdown_5.png: portal_pak_dir/materials/signage/clock/countdown.vtf
+	$(VTF2PNG) -f 55 $< $@
+portal_pak_dir/materials/signage/clock/countdown_6.png: portal_pak_dir/materials/signage/clock/countdown.vtf
+	$(VTF2PNG) -f 54 $< $@
+portal_pak_dir/materials/signage/clock/countdown_7.png: portal_pak_dir/materials/signage/clock/countdown.vtf
+	$(VTF2PNG) -f 53 $< $@
+portal_pak_dir/materials/signage/clock/countdown_8.png: portal_pak_dir/materials/signage/clock/countdown.vtf
+	$(VTF2PNG) -f 52 $< $@
+portal_pak_dir/materials/signage/clock/countdown_9.png: portal_pak_dir/materials/signage/clock/countdown.vtf
+	$(VTF2PNG) -f 51 $< $@
+
+portal_pak_dir/materials/signage/clock/countdown.png: portal_pak_dir/materials/signage/clock/countdown_1.png portal_pak_dir/materials/signage/clock/countdown_2.png portal_pak_dir/materials/signage/clock/countdown_3.png portal_pak_dir/materials/signage/clock/countdown_4.png portal_pak_dir/materials/signage/clock/countdown_5.png portal_pak_dir/materials/signage/clock/countdown_6.png portal_pak_dir/materials/signage/clock/countdown_7.png portal_pak_dir/materials/signage/clock/countdown_8.png portal_pak_dir/materials/signage/clock/countdown_9.png portal_pak_dir/materials/signage/clock/clock_dots.png
 portal_pak_dir/materials/signage/signage_overlay_fling1.png: portal_pak_dir/materials/signage/signage_overlay_fling2.png portal_pak_dir/materials/signage/signage_overlay_dots1.png portal_pak_dir/materials/signage/signage_overlay_dots2.png portal_pak_dir/materials/signage/signage_overlay_dots3.png portal_pak_dir/materials/signage/signage_overlay_dots4.png portal_pak_dir/materials/signage/signage_overlay_toxic.png portal_pak_dir/materials/signage/signage_overlay_fountain.png
 portal_pak_dir/materials/signage/signage_overlay_midair1.png: portal_pak_dir/materials/signage/signage_overlay_midair2.png
 portal_pak_dir/materials/signage/signage_exit.png: portal_pak_dir/materials/signage/signage_overlay_arrow.png portal_pak_dir/materials/signage/signage_overlay_boxdispenser.png portal_pak_dir/materials/signage/signage_overlay_boxhurt.png portal_pak_dir/materials/signage/signage_overlay_energyball.png portal_pak_dir/materials/signage/signage_overlay_catcher.png portal_pak_dir/materials/signage/signage_overlay_toxic.png portal_pak_dir/materials/signage/signage_overlay_fountain.png
 portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor.png: portal_pak_dir/materials/signage/indicator_lights/indicator_lights_corner_floor.png
 portal_pak_dir/materials/signage/indicator_lights/indicator_lights_floor_on.png: portal_pak_dir/materials/signage/indicator_lights/indicator_lights_corner_floor_on.png
 portal_pak_dir/materials/models/props/round_elevator_sheet_1.png: portal_pak_dir/materials/models/props/round_elevator_sheet_3.png
-
-portal_pak_dir/materials/signage/clock/clock_digits.png: portal_pak_dir/materials/signage/clock/countdown.vtf portal_pak_dir/materials/signage/clock/clock_dots.png
-	for i in $(shell seq 0 9); do \
-		$(VTF2PNG) -f $$((60 - $$i)) portal_pak_dir/materials/signage/clock/countdown.vtf $(@D)/$$i.png; \
-	done
-	convert $(@D)/[0-9].png -crop 64x128+64+0 +append $@
-	convert $@ $(@D)/clock_dots.png -background '#e9fbff' +smush +16 -extent 704x128 $@
-	rm $(@D)/[0-9].png
 
 convert_all_png: $(ALL_PNG_IMAGES)
 
