@@ -4,11 +4,14 @@ project(portal64)
 # Tools
 # TODO: find automatically
 # TODO: test on Windows
+set(FFMPEG "ffmpeg")
 set(IMAGEMAGICK_CONVERT "convert")
-set(VTF2PNG "vtf2png")
 set(PYTHON3 "python")
 set(VPK "vpk")
+set(VTF2PNG "vtf2png")
+
 set(CONVERT_ASSET "${PROJECT_SOURCE_DIR}/tools/convert_asset.py")
+set(SKELETOOL64 "${PROJECT_SOURCE_DIR}/skelatool64/skeletool64")
 
 # Directories
 set(ASSETS_DIR "${PROJECT_SOURCE_DIR}/assets")

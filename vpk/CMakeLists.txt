@@ -1,3 +1,7 @@
+####################
+## VPK extraction ##
+####################
+
 # TODO: multiple languages
 set(VPKS_PORTAL
     Portal/portal/portal_pak_dir.vpk
@@ -24,19 +28,14 @@ set(VPKS_HL2_SOUND_MISC
     Portal/hl2/hl2_sound_misc_002.vpk
 )
 
-set(VPK_LISTS
-    VPKS_PORTAL
-    VPKS_HL2_MISC
-    VPKS_HL2_SOUND_MISC
-)
-
-set(VPK_STAMP_FILES "")
-
-foreach(VPK_LIST ${VPK_LISTS})
+function(_add_vpk_extract_command VPK_LIST OUTPUT_LIST)
     # First VPK is the one to extract
     list(GET ${VPK_LIST} 0 MAIN_VPK)
 
-    cmake_path(GET MAIN_VPK STEM MAIN_VPK_NAME)
+    cmake_path(
+        GET MAIN_VPK STEM
+        MAIN_VPK_NAME
+    )
     set(MAIN_VPK_STAMP "${PAK_DIR}/${MAIN_VPK_NAME}.stamp")
     list(APPEND VPK_STAMP_FILES ${MAIN_VPK_STAMP})
 
@@ -55,7 +54,16 @@ foreach(VPK_LIST ${VPK_LISTS})
             "Extracting ${MAIN_VPK}"
         VERBATIM
     )
-endforeach()
+
+    list(APPEND ${OUTPUT_LIST} ${MAIN_VPK_STAMP})
+    return(PROPAGATE ${OUTPUT_LIST})
+endfunction()
+
+set(VPK_STAMP_FILES "")
+
+_add_vpk_extract_command(VPKS_PORTAL VPK_STAMP_FILES)
+_add_vpk_extract_command(VPKS_HL2_MISC VPK_STAMP_FILES)
+_add_vpk_extract_command(VPKS_HL2_SOUND_MISC VPK_STAMP_FILES)
 
 add_custom_target(
     extract_vpks
