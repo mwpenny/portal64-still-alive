@@ -6,11 +6,15 @@ project(portal64)
 # TODO: test on Windows
 set(FFMPEG "ffmpeg")
 set(IMAGEMAGICK_CONVERT "convert")
+set(MPG123 "mpg123")
+set(NODEJS "node")
 set(PYTHON3 "python")
+set(SOX "sox")
 set(VPK "vpk")
 set(VTF2PNG "vtf2png")
 
 set(CONVERT_ASSET "${PROJECT_SOURCE_DIR}/tools/convert_asset.py")
+set(JSOX "${PROJECT_SOURCE_DIR}/tools/jsox.js")
 set(SKELETOOL64 "${PROJECT_SOURCE_DIR}/skelatool64/skeletool64")
 
 # Directories

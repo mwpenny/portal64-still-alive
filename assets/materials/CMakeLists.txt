@@ -105,12 +105,6 @@ function(_add_texture_convert_command INPUT_FILE OUTPUT_FILE)
         endif()
     endif()
 
-    cmake_path(
-        RELATIVE_PATH INPUT_FILE
-        BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
-        OUTPUT_VARIABLE RELATIVE_INPUT_FILE
-    )
-
     add_custom_command(
         DEPENDS
             extract_vpks ${INPUT_FILE}
@@ -119,7 +113,7 @@ function(_add_texture_convert_command INPUT_FILE OUTPUT_FILE)
         COMMAND
             ${VTF2PNG} ${ARGS} ${INPUT_FILE} ${OUTPUT_FILE}
         COMMENT
-            "Converting ${RELATIVE_INPUT_FILE}"
+            "Converting $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
     )
 endfunction()
@@ -188,11 +182,6 @@ function(_add_extract_frame_command INPUT_FILE OUTPUT_FILE SECONDS)
         GET OUTPUT_FILE PARENT_PATH
         OUTPUT_DIR
     )
-    cmake_path(
-        RELATIVE_PATH INPUT_FILE
-        BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
-        OUTPUT_VARIABLE RELATIVE_INPUT_FILE
-    )
 
     add_custom_command(
         DEPENDS
@@ -202,11 +191,11 @@ function(_add_extract_frame_command INPUT_FILE OUTPUT_FILE SECONDS)
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${FFMPEG} -ss 00:00:${SECONDS} -i ${VALVE_INTRO_VIDEO} -frames:v 1 -update true -q:v 2 -y ${OUTPUT_FILE}
+            ${FFMPEG} -ss 00:00:${SECONDS} -i ${VALVE_INTRO_VIDEO} -frames:v 1 -update true -q:v 2 -loglevel quiet -y ${OUTPUT_FILE}
         COMMAND
             ${IMAGEMAGICK_CONVERT} ${OUTPUT_FILE} -crop 491x369+265+202 -resize 160x120 ${OUTPUT_FILE}
         COMMENT
-            "Converting ${RELATIVE_INPUT_FILE}"
+            "Converting $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
     )
 endfunction()
@@ -264,12 +253,6 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
     set(OUTPUT_FILES ${OUTPUT_FILE})
     _get_texture_script_file_list(${TEXTURE_SCRIPT} ADDITIONAL_OUTPUTS ${PAK_MODIFIED_MATERIALS_DIR} OUTPUT_FILES)
 
-    cmake_path(
-        RELATIVE_PATH INPUT_FILE
-        BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
-        OUTPUT_VARIABLE RELATIVE_INPUT_FILE
-    )
-
     add_custom_command(
         DEPENDS
             ${CONVERT_ASSET} ${DEPENDENCY_FILES}
@@ -281,7 +264,7 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
             # TODO: Change this to PAK_MODIFIED_DIR and update .ims files with relative path
             ${PROJECT_SOURCE_DIR}
         COMMENT
-            "Transforming ${RELATIVE_INPUT_FILE}"
+            "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
     )
 
@@ -428,12 +411,6 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
         list(APPEND DEPENDENCY_FILES ${DEP_FILE_LIST})
     endif()
 
-    cmake_path(
-        RELATIVE_PATH INPUT_FILE
-        BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
-        OUTPUT_VARIABLE RELATIVE_INPUT_FILE
-    )
-
     # TODO: add dependency on skeletool once it is built with CMake
     add_custom_command(
         DEPENDS
@@ -445,7 +422,7 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
         WORKING_DIRECTORY
             ${PROJECT_SOURCE_DIR}
         COMMENT
-            "Generating materials for ${RELATIVE_INPUT_FILE}"
+            "Generating materials for $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
     )
 
