@@ -260,12 +260,12 @@ ifeq ("$(wildcard $(VALVE_INTRO_VIDEO))","")
     VALVE_INTRO_VIDEO := $(subst .bik,.mov,$(VALVE_INTRO_VIDEO))
 endif
 
-build/assets/images/valve.png build/assets/images/valve-no-logo.png:
+portal_pak_modified/images/valve.png portal_pak_modified/images/valve-no-logo.png:
 	@mkdir -p $(@D)
-	ffmpeg -ss 00:00:04 -i $(VALVE_INTRO_VIDEO) -frames:v 1 -q:v 2 -y build/assets/images/valve-full.png
-	ffmpeg -ss 00:00:01 -i $(VALVE_INTRO_VIDEO) -frames:v 1 -q:v 2 -y build/assets/images/valve-full-no-logo.png
-	convert build/assets/images/valve-full.png -crop 491x369+265+202 -resize 160x120 build/assets/images/valve.png
-	convert build/assets/images/valve-full-no-logo.png -crop 492x370+266+202 -resize 160x120 build/assets/images/valve-no-logo.png
+	ffmpeg -ss 00:00:04 -i $(VALVE_INTRO_VIDEO) -frames:v 1 -q:v 2 -y portal_pak_modified/images/valve-full.png
+	ffmpeg -ss 00:00:01 -i $(VALVE_INTRO_VIDEO) -frames:v 1 -q:v 2 -y portal_pak_modified/images/valve-full-no-logo.png
+	convert portal_pak_modified/images/valve-full.png -crop 491x369+265+202 -resize 160x120 portal_pak_modified/images/valve.png
+	convert portal_pak_modified/images/valve-full-no-logo.png -crop 492x370+266+202 -resize 160x120 portal_pak_modified/images/valve-no-logo.png
 
 ####################
 ## Materials
@@ -279,7 +279,7 @@ build/assets/materials/ui.h build/assets/materials/ui_mat.c: assets/materials/ui
 	@mkdir -p $(@D)
 	$(SKELATOOL64) --name ui --default-material default_ui -m $< --material-output -o build/assets/materials/ui.h
 
-build/assets/materials/images.h build/assets/materials/images_mat.c: assets/materials/images.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64) build/assets/images/valve.png
+build/assets/materials/images.h build/assets/materials/images_mat.c: assets/materials/images.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64) portal_pak_modified/images/valve.png
 	@mkdir -p $(@D)
 	$(SKELATOOL64) --name images --default-material default_ui -m $< --material-output -o build/assets/materials/images.h
 
