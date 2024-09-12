@@ -160,23 +160,6 @@ endforeach()
 ## Valve logo ##
 ################
 
-set(VALVE_INTRO_VIDEO "${VPK_DIR}/Portal/hl2/media/valve.bik")
-
-if(NOT EXISTS ${VALVE_INTRO_VIDEO})
-    # The Mac release of Portal uses a .mov instead of a .bik
-    string(REPLACE ".mov" ".bik" VALVE_INTRO_VIDEO_MAC "${VALVE_INTRO_VIDEO}")
-
-    # The Valve video doesn't exist in a VPK so we can check its type at
-    # configuration time and avoid complicating the conversion command.
-    #
-    # Users may forget to copy their game files before running CMake.
-    # Only use the .mov if it exists at configuration time, so the build
-    # system supports the common case by default.
-    if (EXISTS ${VALVE_INTRO_VIDEO_MAC})
-        set(VALVE_INTRO_VIDEO ${VALVE_INTRO_VIDEO_MAC})
-    endif()
-endif()
-
 function(_add_extract_frame_command INPUT_FILE OUTPUT_FILE SECONDS)
     cmake_path(
         GET OUTPUT_FILE PARENT_PATH
@@ -191,7 +174,7 @@ function(_add_extract_frame_command INPUT_FILE OUTPUT_FILE SECONDS)
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${FFMPEG} -ss 00:00:${SECONDS} -i ${VALVE_INTRO_VIDEO} -frames:v 1 -update true -q:v 2 -loglevel quiet -y ${OUTPUT_FILE}
+            ${FFMPEG} -ss 00:00:${SECONDS} -i ${INPUT_FILE} -frames:v 1 -update true -q:v 2 -loglevel quiet -y ${OUTPUT_FILE}
         COMMAND
             ${IMAGEMAGICK_CONVERT} ${OUTPUT_FILE} -crop 491x369+265+202 -resize 160x120 ${OUTPUT_FILE}
         COMMENT
@@ -202,13 +185,13 @@ endfunction()
 
 _add_extract_frame_command(
     ${VALVE_INTRO_VIDEO}
-    ${CMAKE_BINARY_DIR}/assets/images/valve.png
+    ${PAK_MODIFIED_DIR}/images/valve.png
     4
 )
 
 _add_extract_frame_command(
     ${VALVE_INTRO_VIDEO}
-    ${CMAKE_BINARY_DIR}/assets/images/valve-no-logo.png
+    ${PAK_MODIFIED_DIR}/images/valve-no-logo.png
     1
 )
 
@@ -220,18 +203,6 @@ _add_extract_frame_command(
 # TEXTURES list above, which will retrigger CMake on build and so the typical
 # glob pitfalls do not apply here.
 file(GLOB_RECURSE TEXTURE_SCRIPTS "*.ims")
-
-function(_get_texture_script_file_list TEXTURE_SCRIPT PROPERTY_NAME PARENT_DIR OUTPUT)
-    get_source_file_property(FILE_LIST ${TEXTURE_SCRIPT} ${PROPERTY_NAME})
-
-    if (FILE_LIST)
-        list(TRANSFORM FILE_LIST PREPEND "${PARENT_DIR}/" OUTPUT_VARIABLE FILE_LIST)
-        list(TRANSFORM FILE_LIST APPEND ".png" OUTPUT_VARIABLE FILE_LIST)
-        list(APPEND ${OUTPUT} ${FILE_LIST})
-    endif()
-
-    return(PROPAGATE ${OUTPUT})
-endfunction()
 
 function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
     cmake_path(
@@ -261,7 +232,7 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
         COMMAND
             ${PYTHON3} ${CONVERT_ASSET} ${IMAGEMAGICK_CONVERT} ${INPUT_FILE} ${TEXTURE_SCRIPT} ${OUTPUT_FILE}
         WORKING_DIRECTORY
-            # TODO: Change this to PAK_MODIFIED_DIR and update .ims files with relative path
+            # TODO: Change this to PAK_MODIFIED_MATERIALS_DIR and update .ims files with relative path
             ${PROJECT_SOURCE_DIR}
         COMMENT
             "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
@@ -270,6 +241,18 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
 
     list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILES})
     return(PROPAGATE ${OUTPUT_LIST})
+endfunction()
+
+function(_get_texture_script_file_list TEXTURE_SCRIPT PROPERTY_NAME PARENT_DIR OUTPUT)
+    get_source_file_property(FILE_LIST ${TEXTURE_SCRIPT} ${PROPERTY_NAME})
+
+    if (FILE_LIST)
+        list(TRANSFORM FILE_LIST PREPEND "${PARENT_DIR}/" OUTPUT_VARIABLE FILE_LIST)
+        list(TRANSFORM FILE_LIST APPEND ".png" OUTPUT_VARIABLE FILE_LIST)
+        list(APPEND ${OUTPUT} ${FILE_LIST})
+    endif()
+
+    return(PROPAGATE ${OUTPUT})
 endfunction()
 
 # Add commands for transforming converted PNG textures (crop, scale, etc.).
@@ -419,8 +402,6 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
             ${OUTPUT_FILE_H} ${OUTPUT_FILE_C}
         COMMAND
             ${SKELETOOL64} --name ${MATERIAL_NAME} -m ${INPUT_FILE} --material-output -o ${OUTPUT_FILE_H}
-        WORKING_DIRECTORY
-            ${PROJECT_SOURCE_DIR}
         COMMENT
             "Generating materials for $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -440,7 +421,7 @@ set_property(SOURCE hud.skm.yaml
 
 set_property(SOURCE images.skm.yaml
     PROPERTY ADDITIONAL_DEPS
-        ${CMAKE_BINARY_DIR}/assets/images/valve.png
+        ${PAK_MODIFIED_DIR}/images/valve.png
 )
 
 set_property(SOURCE ui.skm.yaml
@@ -463,6 +444,7 @@ foreach(MATERIAL ${MATERIALS})
     _add_material_generate_command(${MATERIAL} GENERATED_MATERIALS)
 endforeach()
 
+# TODO: proper dependencies from consumers
 add_custom_target(
     all_materials
     DEPENDS ${GENERATED_MATERIALS}

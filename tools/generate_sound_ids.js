@@ -32,6 +32,10 @@ for (let i = 2; i < process.argv.length; ++i) {
     }
 }
 
+if (!fs.existsSync(output)) {
+    fs.mkdirSync(output, { recursive: true });
+}
+
 outputLanguagesSourceFile = output + '/languages.c';
 outputLanguagesHeader += output + '/languages.h';
 output += '/clips.h';
