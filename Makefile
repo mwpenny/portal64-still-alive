@@ -513,16 +513,15 @@ MUSIC_ATTRIBUTES = $(shell find assets/sound/music/ -type f -name '*.msox')
 
 INS_SOUNDS = $(shell find assets/ -type f -name '*.ins')
 
-SOUND_CLIPS = $(SOUND_ATTRIBUTES:%.sox=build/%.aifc) $(SOUND_JATTRIBUTES:%.jsox=build/%.aifc) $(INS_SOUNDS) $(MUSIC_ATTRIBUTES:%.msox=build/%.aifc) build/assets/sound/music/valve.aifc
+SOUND_CLIPS = $(SOUND_ATTRIBUTES:%.sox=build/%.aifc) $(SOUND_JATTRIBUTES:%.jsox=build/%.aifc) $(INS_SOUNDS) $(MUSIC_ATTRIBUTES:%.msox=build/%.aifc)
 
 $(INS_SOUNDS): portal_pak_dir
 
 portal_pak_dir/sound/music/%.wav: portal_pak_dir/sound/music/%.mp3
 
-build/assets/sound/music/valve.aifc:
+portal_pak_dir/sound/ambient/music/valve.wav:
 	@mkdir -p $(@D)
-	ffmpeg -i $(VALVE_INTRO_VIDEO) -vn -ac 1 -ar 22050 -y build/assets/sound/music/valve.wav
-	$(SFZ2N64) -o $@ build/assets/sound/music/valve.wav
+	ffmpeg -i $(VALVE_INTRO_VIDEO) -vn -y $@
 
 build/assets/sound/vehicles/tank_turret_loop1.wav: portal_pak_dir
 	@mkdir -p $(@D)
@@ -532,17 +531,17 @@ build/assets/sound/ambient/atmosphere/ambience_base.wav: portal_pak_dir
 	@mkdir -p $(@D)
 	sox portal_pak_dir/sound/ambient/atmosphere/ambience_base.wav -c 1 -r 22050 $@
 
-build/%.aifc: %.sox portal_pak_dir
+build/assets/%.aifc: assets/%.sox portal_pak_dir/%.wav
 	@mkdir -p $(@D)
 	sox $(<:assets/%.sox=portal_pak_dir/%.wav) $(shell cat $<) $(@:%.aifc=%.wav)
 	$(SFZ2N64) -o $@ $(@:%.aifc=%.wav)
 
-build/%.aifc: %.jsox tools/jsox.js portal_pak_dir
+build/assets/%.aifc: assets/%.jsox tools/jsox.js portal_pak_dir/%.wav
 	@mkdir -p $(@D)
 	node tools/jsox.js $< $(<:assets/%.jsox=portal_pak_dir/%.wav) $(@:%.aifc=%.wav)
 	$(SFZ2N64) -o $@ $(@:%.aifc=%.wav)
 
-build/%.aifc: %.msox portal_pak_dir
+build/assets/%.aifc: assets/%.msox portal_pak_dir/%.mp3
 	@mkdir -p $(@D)
 	mpg123 -w $(<:assets/%.msox=portal_pak_dir/%.wav) $(<:assets/%.msox=portal_pak_dir/%.mp3)
 	sox $(<:assets/%.msox=portal_pak_dir/%.wav) $(shell cat $<) $(@:%.aifc=%.wav)
