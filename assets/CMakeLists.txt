@@ -17,3 +17,4 @@ endif()
 
 add_subdirectory(materials)
 add_subdirectory(sound)
+add_subdirectory(test_chambers)

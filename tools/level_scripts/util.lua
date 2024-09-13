@@ -29,7 +29,13 @@ local function trim(inputstr)
     return string.sub(inputstr, start_index, end_index)
 end
 
+local function path_join(...)
+    local dir_sep = package.config:sub(1,1)
+    return table.concat({...}, dir_sep)
+end
+
 return {
     string_split = string_split,
     trim = trim,
+    path_join = path_join
 }

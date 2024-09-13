@@ -463,7 +463,7 @@ build/%.fbx: %.blend
 	$(BLENDER_3_6) $< --background --python tools/export_fbx.py -- $@
 
 build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c build/assets/test_chambers/%_anim.c: build/assets/test_chambers/%.fbx assets/test_chambers/%.yaml build/assets/materials/static.h build/src/audio/subtitles.h $(SKELATOOL64) $(TEXTURE_IMAGES) $(LUA_FILES)
-	$(SKELATOOL64) --script tools/export_level.lua --fixed-point-scale ${SCENE_SCALE} --model-scale 0.01 --name $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
+	$(SKELATOOL64) --script tools/level_scripts/export_level.lua --fixed-point-scale ${SCENE_SCALE} --model-scale 0.01 --name $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
 
 build/assets/test_chambers/%.o: build/assets/test_chambers/%.c build/assets/materials/static.h
 	@mkdir -p $(@D)

@@ -174,7 +174,14 @@ function(_add_extract_frame_command INPUT_FILE OUTPUT_FILE SECONDS)
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${FFMPEG} -ss 00:00:${SECONDS} -i ${INPUT_FILE} -frames:v 1 -update true -q:v 2 -loglevel quiet -y ${OUTPUT_FILE}
+            ${FFMPEG}
+            -ss 00:00:${SECONDS}
+            -i ${INPUT_FILE}
+            -frames:v 1
+            -update true
+            -q:v 2
+            -loglevel error
+            -y ${OUTPUT_FILE}
         COMMAND
             ${IMAGEMAGICK_CONVERT} ${OUTPUT_FILE} -crop 491x369+265+202 -resize 160x120 ${OUTPUT_FILE}
         COMMENT
@@ -230,7 +237,8 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
         OUTPUT
             ${OUTPUT_FILES}
         COMMAND
-            ${PYTHON3} ${CONVERT_ASSET} ${IMAGEMAGICK_CONVERT} ${INPUT_FILE} ${TEXTURE_SCRIPT} ${OUTPUT_FILE}
+            ${PYTHON3} ${CONVERT_ASSET}
+            ${IMAGEMAGICK_CONVERT} ${INPUT_FILE} ${TEXTURE_SCRIPT} ${OUTPUT_FILE}
         WORKING_DIRECTORY
             # TODO: Change this to PAK_MODIFIED_MATERIALS_DIR and update .ims files with relative path
             ${PROJECT_SOURCE_DIR}
@@ -401,7 +409,10 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
         OUTPUT
             ${OUTPUT_FILE_H} ${OUTPUT_FILE_C}
         COMMAND
-            ${SKELETOOL64} --name ${MATERIAL_NAME} -m ${INPUT_FILE} --material-output -o ${OUTPUT_FILE_H}
+            ${SKELETOOL64}
+            --name ${MATERIAL_NAME}
+            -m ${INPUT_FILE}
+            --material-output -o ${OUTPUT_FILE_H}
         COMMENT
             "Generating materials for $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM

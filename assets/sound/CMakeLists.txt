@@ -27,7 +27,7 @@ function(_add_extract_video_audio_command INPUT_FILE OUTPUT_FILE)
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${FFMPEG} -i ${INPUT_FILE} -vn -loglevel quiet -y ${OUTPUT_FILE}
+            ${FFMPEG} -i ${INPUT_FILE} -vn -loglevel error -y ${OUTPUT_FILE}
         COMMENT
             "Converting $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -424,7 +424,7 @@ set(LANGUAGES_H "${BUILD_AUDIO_DIR}/languages.h")
 set(LANGUAGES_C "${BUILD_AUDIO_DIR}/languages.c")
 add_custom_command(
     DEPENDS
-        all_sounds ${SOUND_TABLE_DEPENDENCIES}
+        all_sounds ${GEN_SOUND_IDS} ${SOUND_TABLE_DEPENDENCIES}
     OUTPUT
         ${CLIPS_H} ${LANGUAGES_H} ${LANGUAGES_C}
     COMMAND

@@ -4,6 +4,7 @@ project(portal64)
 # Tools
 # TODO: find automatically
 # TODO: test on Windows
+set(BLENDER_3_6 "blender")
 set(FFMPEG "ffmpeg")
 set(IMAGEMAGICK_CONVERT "convert")
 set(MPG123 "mpg123")
@@ -15,6 +16,8 @@ set(VPK "vpk")
 set(VTF2PNG "vtf2png")
 
 set(CONVERT_ASSET "${PROJECT_SOURCE_DIR}/tools/convert_asset.py")
+set(EXPORT_FBX "${PROJECT_SOURCE_DIR}/tools/export_fbx.py")
+set(GEN_LEVEL_LIST "${PROJECT_SOURCE_DIR}/tools/generate_level_list.js")
 set(GEN_SOUND_IDS "${PROJECT_SOURCE_DIR}/tools/generate_sound_ids.js")
 set(JSOX "${PROJECT_SOURCE_DIR}/tools/jsox.js")
 set(SKELETOOL64 "${PROJECT_SOURCE_DIR}/skelatool64/skeletool64")
