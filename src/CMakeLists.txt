@@ -1,0 +1,166 @@
+# TODO: generated code
+# TODO: linking
+add_executable(portal)
+
+target_include_directories(portal PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+# TODO: file sets, headers
+target_sources(portal PRIVATE
+    audio/audio.c
+    audio/audiomgr.c
+    audio/clips.c
+    audio/soundarray.c
+    audio/soundplayer.c
+    controls/controller_actions.c
+    controls/rumble_pak.c
+    decor/decor_object.c
+    decor/decor_object_list.c
+    effects/effect_definitions.c
+    effects/effects.c
+    effects/portal_trail.c
+    effects/splash_particle_effect.c
+    font/dejavusans.c
+    font/dejavusans_images.c
+    font/font.c
+    font/liberation_mono.c
+    font/liberation_mono_images.c
+    graphics/color.c
+    graphics/debug_render.c
+    graphics/graphics.c
+    graphics/image.c
+    graphics/initgfx.c
+    graphics/profile_task.c
+    graphics/render_scene.c
+    graphics/renderstate.c
+    graphics/screen_clipper.c
+    levels/credits.c
+    levels/cutscene_runner.c
+    levels/intro.c
+    levels/level_definition.c
+    levels/levels.c
+    levels/material_state.c
+    levels/static_render.c
+    locales/locales.c
+    main.c
+    materials/light.c
+    materials/point_light_rendered.c
+    materials/shadow_caster.c
+    materials/subject.c
+    math/basis.c
+    math/box2d.c
+    math/box3d.c
+    math/boxs16.c
+    math/mathf.c
+    math/matrix.c
+    math/plane.c
+    math/quaternion.c
+    math/ray.c
+    math/rotated_box.c
+    math/transform.c
+    math/vector2.c
+    math/vector2s16.c
+    math/vector3.c
+    math/vector4.c
+    menu/audio_options.c
+    menu/cheat_codes.c
+    menu/confirmation_dialog.c
+    menu/controls.c
+    menu/game_menu.c
+    menu/gameplay_options.c
+    menu/joystick_options.c
+    menu/landing_menu.c
+    menu/load_game.c
+    menu/main_menu.c
+    menu/menu.c
+    menu/menu_builder.c
+    menu/new_game_menu.c
+    menu/options_menu.c
+    menu/save_game_menu.c
+    menu/savefile_list.c
+    menu/tabs.c
+    menu/text_manipulation.c
+    menu/translations.c
+    menu/video_options.c
+    physics/collision.c
+    physics/collision_box.c
+    physics/collision_capsule.c
+    physics/collision_cylinder.c
+    physics/collision_object.c
+    physics/collision_point.c
+    physics/collision_quad.c
+    physics/collision_scene.c
+    physics/collision_sphere.c
+    physics/contact_insertion.c
+    physics/contact_solver.c
+    physics/debug_renderer.c
+    physics/epa.c
+    physics/gjk.c
+    physics/line.c
+    physics/mesh_collider.c
+    physics/point_constraint.c
+    physics/raycasting.c
+    physics/rigid_body.c
+    physics/world.c
+    player/grab_rotation.c
+    player/player.c
+    player/player_rumble_clips.c
+    savefile/checkpoint.c
+    savefile/savefile.c
+    savefile/scene_serialize.c
+    savefile/serializer.c
+    scene/ball.c
+    scene/ball_catcher.c
+    scene/ball_launcher.c
+    scene/box_dropper.c
+    scene/button.c
+    scene/camera.c
+    scene/clock.c
+    scene/door.c
+    scene/dynamic_render_list.c
+    scene/dynamic_scene.c
+    scene/elevator.c
+    scene/fizzler.c
+    scene/hud.c
+    scene/pedestal.c
+    scene/point_light.c
+    scene/portal.c
+    scene/portal_gun.c
+    scene/portal_render.c
+    scene/portal_surface.c
+    scene/portal_surface_generator.c
+    scene/portal_surface_gfx.c
+    scene/render_plan.c
+    scene/scene.c
+    scene/scene_animator.c
+    scene/security_camera.c
+    scene/shadow_map.c
+    scene/shadow_renderer.c
+    scene/signage.c
+    scene/signals.c
+    scene/static_scene.c
+    scene/switch.c
+    scene/trigger_listener.c
+    sk64/skelatool_animator.c
+    sk64/skelatool_armature.c
+    util/assert.c
+    util/dynamic_animated_asset_data.c
+    util/dynamic_asset_data.c
+    util/dynamic_asset_loader.c
+    util/linked_list.c
+    util/memory.c
+    util/profile.c
+    util/rom.c
+)
+
+# TODO: move some of this into toolchain
+if (LIBULTRA)
+    target_sources(portal PRIVATE
+        system/libultra/controller_libultra.c
+        system/libultra/time_libultra.c
+    )
+
+    target_include_directories(portal BEFORE PRIVATE ${LIBULTRA_INCLUDE_DIRS})
+    target_compile_definitions(portal PRIVATE F3DEX_GBI_2)
+endif()

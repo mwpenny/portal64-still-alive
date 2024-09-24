@@ -3,7 +3,6 @@
 #define __audio__
 
 #include <ultra64.h>
-#include <libaudio.h>
 #include <sched.h>
 
 #define MAX_UPDATES             64
