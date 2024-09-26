@@ -183,12 +183,18 @@ add_dependencies(portal gen_version_header)
 ###########################
 
 # TODO: move some of this into toolchain
-if (LIBULTRA)
+if (USING_LIBULTRA)
     target_sources(portal PRIVATE
         system/libultra/controller_libultra.c
         system/libultra/time_libultra.c
     )
 
-    target_include_directories(portal BEFORE PRIVATE ${LIBULTRA_INCLUDE_DIRS})
     target_compile_definitions(portal PRIVATE F3DEX_GBI_2)
+
+    target_link_libraries(portal libultra)
+
+    # Need explicit call for proper ordering
+    target_include_directories(portal BEFORE
+        PRIVATE $<TARGET_PROPERTY:libultra,INTERFACE_INCLUDE_DIRECTORIES>
+    )
 endif()
