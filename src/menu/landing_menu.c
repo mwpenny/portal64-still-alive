@@ -11,6 +11,11 @@
 #include "cheat_codes.h"
 #include "./translations.h"
 
+// TODO: remove when makefile is no longer in use
+#ifdef CMAKE
+#include "../build/version.h"
+#endif
+
 #define PORTAL_LOGO_X               30
 #define PORTAL_LOGO_Y               74
 

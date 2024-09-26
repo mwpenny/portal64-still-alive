@@ -6,6 +6,10 @@ target_include_directories(portal PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+###############
+## Game code ##
+###############
+
 # TODO: file sets, headers
 target_sources(portal PRIVATE
     audio/audio.c
@@ -153,6 +157,30 @@ target_sources(portal PRIVATE
     util/profile.c
     util/rom.c
 )
+
+#########################
+## Version information ##
+#########################
+
+set(GEN_VERSION_HEADER "${PROJECT_SOURCE_DIR}/cmake/gen_version_header.cmake")
+set(VERSION_H "${CMAKE_BINARY_DIR}/version.h")
+
+add_custom_target(gen_version_header
+    DEPENDS
+        ${GEN_VERSION_HEADER}
+    COMMAND
+        ${CMAKE_COMMAND} -D GIT=${GIT} -D OUTPUT_FILE=${VERSION_H} -P ${GEN_VERSION_HEADER}
+    WORKING_DIRECTORY
+        ${PROJECT_SOURCE_DIR}
+    VERBATIM
+)
+
+# Make sure version header is always up to date
+add_dependencies(portal gen_version_header)
+
+###########################
+## Library-specific code ##
+###########################
 
 # TODO: move some of this into toolchain
 if (LIBULTRA)

@@ -103,7 +103,7 @@ function(_add_level_generate_command LEVEL_NAME LEVEL_FBX OUTPUT_LIST)
             --script ${EXPORT_LEVEL}
             --fixed-point-scale ${SCENE_SCALE}
             --model-scale ${MODEL_SCALE}
-            --name ${LEVEL_NAME}
+            --name ${LEVEL_NAME}/${LEVEL_NAME}
             ${MATERIAL_ARGS}
             --output ${OUTPUT_FILE_H}
             ${LEVEL_FBX}

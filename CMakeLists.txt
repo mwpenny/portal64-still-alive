@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 3.28)
 project(portal64)
 
+# TODO: remove when makefile is no longer in use
+add_compile_definitions(CMAKE)
+
 # Tools
 # TODO: find automatically
 # TODO: test on Windows
 set(BLENDER_3_6 "blender")
 set(FFMPEG "ffmpeg")
+set(GIT "git")
 set(IMAGEMAGICK_CONVERT "convert")
 set(MPG123 "mpg123")
 set(NODEJS "node")
