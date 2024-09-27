@@ -185,7 +185,7 @@ function(_add_extract_frame_command INPUT_FILE OUTPUT_FILE SECONDS)
         COMMAND
             ${IMAGEMAGICK_CONVERT} ${OUTPUT_FILE} -crop 491x369+265+202 -resize 160x120 ${OUTPUT_FILE}
         COMMENT
-            "Converting $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
+            "Extracting frame from $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
     )
 endfunction()
@@ -455,8 +455,7 @@ foreach(MATERIAL ${MATERIALS})
     _add_material_generate_command(${MATERIAL} GENERATED_MATERIALS)
 endforeach()
 
-# TODO: proper dependencies from consumers
 add_custom_target(
-    all_materials
+    materials
     DEPENDS ${GENERATED_MATERIALS}
 )

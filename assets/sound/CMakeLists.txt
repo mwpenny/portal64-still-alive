@@ -29,7 +29,7 @@ function(_add_extract_video_audio_command INPUT_FILE OUTPUT_FILE)
         COMMAND
             ${FFMPEG} -i ${INPUT_FILE} -vn -loglevel error -y ${OUTPUT_FILE}
         COMMENT
-            "Converting $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
+            "Extracting audio from $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
     )
 endfunction()
@@ -327,7 +327,6 @@ endforeach()
 ######################
 
 function(_add_sound_convert_command INPUT_FILE OUTPUT_LIST)
-    # TODO: change output to PAK_MODIFIED_SOUND_DIR once makefile is no longer in use
     cmake_path(
         REPLACE_EXTENSION INPUT_FILE
         ".aifc"
@@ -434,17 +433,14 @@ add_custom_command(
     VERBATIM
 )
 
-# TODO: proper dependencies from consumers
 add_custom_target(
-    sound_data_tables
+    sound_tables
     DEPENDS
+        # Sound data
         ${SOUND_TABLE_SOUNDS}
         ${SOUND_TABLE_TBL}
-)
 
-add_custom_target(
-    sound_lookup_tables
-    DEPENDS
+        # Lookup tables
         ${CLIPS_H}
         ${LANGUAGES_H}
         ${LANGUAGES_C}

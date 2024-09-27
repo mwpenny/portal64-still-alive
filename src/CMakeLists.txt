@@ -6,6 +6,15 @@ target_include_directories(portal PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+# Generated code
+add_dependencies(portal
+    materials
+    sound_tables
+
+    # TODO: rework when including chambers in compilation
+    level_list
+)
+
 ###############
 ## Game code ##
 ###############

@@ -158,7 +158,6 @@ add_custom_command(
     VERBATIM
 )
 
-# TODO: remove
 add_custom_target(
     level_list
     DEPENDS ${LEVEL_LIST}
