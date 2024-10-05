@@ -158,16 +158,6 @@ materials:
       set: [G_LIGHTING, G_SHADE]
     gDPSetCombineMode: 
       color: ["SHADE", "0", "TEXEL0", "0"]
-    
-  door_frame_01:
-    gDPSetPrimColor:
-      r: 32
-      g: 32
-      b: 32
-    gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
-    gDPSetCombineMode: 
-      color: ["SHADE", "0", "PRIMITIVE", "0"]
 
   solid_white:
     gDPSetPrimColor:
