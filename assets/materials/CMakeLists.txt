@@ -225,6 +225,11 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
     set(INPUT_FILE "${PAK_MATERIALS_DIR}/${TEXTURE_NAME}.png")
     set(OUTPUT_FILE "${PAK_MODIFIED_MATERIALS_DIR}/${TEXTURE_NAME}.png")
 
+    cmake_path(
+        GET OUTPUT_FILE PARENT_PATH
+        OUTPUT_DIR
+    )
+
     set(DEPENDENCY_FILES ${INPUT_FILE} ${TEXTURE_SCRIPT})
     _get_texture_script_file_list(${TEXTURE_SCRIPT} ADDITIONAL_DEPS ${PAK_MATERIALS_DIR} DEPENDENCY_FILES)
 
@@ -237,7 +242,9 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
         OUTPUT
             ${OUTPUT_FILES}
         COMMAND
-            ${PYTHON3} ${CONVERT_ASSET}
+            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
+        COMMAND
+            ${Python3_EXECUTABLE} ${CONVERT_ASSET}
             ${IMAGEMAGICK_CONVERT} ${INPUT_FILE} ${TEXTURE_SCRIPT} ${OUTPUT_FILE}
         WORKING_DIRECTORY
             # TODO: Change this to PAK_MODIFIED_MATERIALS_DIR and update .ims files with relative path

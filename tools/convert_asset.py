@@ -11,18 +11,14 @@ import sys
 # such files in a cross-platform way.
 
 if __name__ == "__main__":
-    if len(sys.argv) != 5:
+    if len(sys.argv) < 4:
         print("Runs a specified command with the given input and output file paths")
         print("The command's arguments are read from a file")
         print()
-        print(f"Usage: {sys.argv[0]} COMMAND INPUT_FILE ARGS_FILE OUTPUT_FILE")
+        print(f"Usage: {sys.argv[0]} COMMAND INPUT_FILE ARGS_FILE [ARG]...")
         sys.exit(1)
 
-    command, input_file, args_file, output_file = sys.argv[1:]
-
-    output_parent_dir = os.path.dirname(output_file)
-    if output_parent_dir:
-        os.makedirs(output_parent_dir, exist_ok=True)
+    command, input_file, args_file, *additional_args = sys.argv[1:]
 
     with open(args_file) as f:
         args = shlex.split(f.read().strip())
@@ -31,6 +27,6 @@ if __name__ == "__main__":
         command,
         input_file,
         *args,
-        output_file
+        *additional_args
     ])
     sys.exit(rc.returncode)

@@ -8,9 +8,6 @@ cmake_path(
 ## Level export ##
 ##################
 
-set(SCENE_SCALE 128)
-set(MODEL_SCALE 0.01)
-
 set(LEVELS
     test_chamber_00
     test_chamber_01
@@ -31,6 +28,7 @@ set(LEVEL_MATERIALS
 
 set(EXPORT_LEVEL ${PROJECT_SOURCE_DIR}/tools/level_scripts/export_level.lua)
 set(EXPORT_SCRIPTS
+    ${EXPORT_LEVEL}
     ${PROJECT_SOURCE_DIR}/tools/level_scripts/animation.lua
     ${PROJECT_SOURCE_DIR}/tools/level_scripts/collision_export.lua
     ${PROJECT_SOURCE_DIR}/tools/level_scripts/dynamic_collision_export.lua
@@ -95,7 +93,7 @@ function(_add_level_generate_command LEVEL_NAME LEVEL_FBX OUTPUT_LIST)
 
     add_custom_command(
         DEPENDS
-            ${EXPORT_LEVEL} ${LEVEL_FBX} ${LEVEL_YAML} ${LEVEL_MATERIALS}
+            ${EXPORT_SCRIPTS} ${LEVEL_FBX} ${LEVEL_YAML} ${LEVEL_MATERIALS}
         OUTPUT
             ${OUTPUT_FILE_H} ${OUTPUT_FILE_GEO_C} ${OUTPUT_FILE_ANIM_C}
         COMMAND
@@ -146,7 +144,7 @@ set(LEVEL_LIST "${LEVEL_LIST_OUT_DIR}/level_list.h")
 
 add_custom_command(
     DEPENDS
-        ${GENERATE_LEVEL_LIST} ${LEVEL_GENERATED_HEADERS}
+        ${GEN_LEVEL_LIST} ${LEVEL_GENERATED_HEADERS}
     OUTPUT
         ${LEVEL_LIST}
     COMMAND

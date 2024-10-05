@@ -238,13 +238,20 @@ function(_add_sound_transform_command SOUND_SCRIPT OUTPUT_LIST)
 endfunction()
 
 function(_add_sound_transform_command_sox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
+    cmake_path(
+        GET OUTPUT_FILE PARENT_PATH
+        OUTPUT_DIR
+    )
+
     add_custom_command(
         DEPENDS
             extract_vpks ${CONVERT_ASSET} ${INPUT_FILE} ${SOUND_SCRIPT}
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
-            ${PYTHON3} ${CONVERT_ASSET} ${SOX} ${INPUT_FILE} ${SOUND_SCRIPT} ${OUTPUT_FILE}
+            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
+        COMMAND
+            ${Python3_EXECUTABLE} ${CONVERT_ASSET} ${SOX} ${INPUT_FILE} ${SOUND_SCRIPT} ${OUTPUT_FILE}
         COMMENT
             "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM

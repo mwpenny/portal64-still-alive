@@ -11,8 +11,9 @@ add_dependencies(portal
     materials
     sound_tables
 
-    # TODO: rework when including chambers in compilation
+    # TODO: rework when including models in compilation
     level_list
+    models
 )
 
 ###############
