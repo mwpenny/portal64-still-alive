@@ -244,7 +244,7 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${Python3_EXECUTABLE} ${CONVERT_ASSET}
+            ${PYTHON3} ${CONVERT_ASSET}
             ${IMAGEMAGICK_CONVERT} ${INPUT_FILE} ${TEXTURE_SCRIPT} ${OUTPUT_FILE}
         WORKING_DIRECTORY
             # TODO: Change this to PAK_MODIFIED_MATERIALS_DIR and update .ims files with relative path
@@ -419,7 +419,8 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
             ${SKELETOOL64}
             --name ${MATERIAL_NAME}
             -m ${INPUT_FILE}
-            --material-output -o ${OUTPUT_FILE_H}
+            --material-output
+            --output ${OUTPUT_FILE_H}
         COMMENT
             "Generating materials for $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
