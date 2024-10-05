@@ -1,1 +1,1 @@
--r 0,0,0 -m assets/materials/static.skm.yaml -m assets/materials/objects.skm.yaml --default-material button
+-m assets/materials/static.skm.yaml -m assets/materials/objects.skm.yaml --default-material button
