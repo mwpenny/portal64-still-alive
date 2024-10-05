@@ -5,7 +5,7 @@
 #include "SceneModification.h"
 #include <iostream>
 
-aiScene* loadScene(const std::string& filename, bool isLevel, int vertexCacheSize, unsigned int additionalPFlags) {
+aiScene* loadScene(const std::string& filename, bool shouldSimplify, int vertexCacheSize, unsigned int additionalPFlags) {
     Assimp::Importer importer;
 
     importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 1);
@@ -16,7 +16,7 @@ aiScene* loadScene(const std::string& filename, bool isLevel, int vertexCacheSiz
         aiProcess_OptimizeMeshes |
         additionalPFlags;
 
-    if (!isLevel) {
+    if (shouldSimplify) {
         importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE);
         pFlags |= aiProcess_OptimizeGraph | aiProcess_SortByPType;
     }
@@ -28,7 +28,7 @@ aiScene* loadScene(const std::string& filename, bool isLevel, int vertexCacheSiz
         return 0;
     }
 
-    if (!isLevel) {
+    if (shouldSimplify) {
         std::cout << "Splitting scenes by bones" << std::endl;
         splitSceneByBones(const_cast<aiScene*>(scene));
     }

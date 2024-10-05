@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
                 hasError = true;
             }
         } else {
-            aiScene* materialScene = loadScene(*materialFile, false, settings.mVertexCacheSize, 0);
+            aiScene* materialScene = loadScene(*materialFile, true, settings.mVertexCacheSize, 0);
 
             if (!materialScene) {
                 hasError = true;
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
 
     if (args.mInputFile.length()) {
         std::cout << "Generating from mesh "  << args.mInputFile << std::endl;
-        scene = loadScene(args.mInputFile, args.mProcessAsModel || args.mOutputType != FileOutputType::Mesh, settings.mVertexCacheSize, additionalPFlags);
+        scene = loadScene(args.mInputFile, args.mOutputType == FileOutputType::Mesh && !args.mProcessAsModel, settings.mVertexCacheSize, additionalPFlags);
 
         if (!scene) {
             return 1;
