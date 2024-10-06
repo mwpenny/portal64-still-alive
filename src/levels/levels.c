@@ -117,7 +117,7 @@ void levelLoad(int index) {
         return;
     }
 
-    struct LevelMetadata* metadata = &gLevelList[index];
+    struct LevelMetadata* metadata = &gLevels[index];
 
     void* memory = malloc(metadata->segmentRomEnd - metadata->segmentRomStart);
     romCopy(metadata->segmentRomStart, memory, metadata->segmentRomEnd - metadata->segmentRomStart);

@@ -3,26 +3,10 @@
 
 #include <ultra64.h>
 
+#include "dynamic_asset_model.h"
+
 #include "../sk64/skelatool_armature.h"
 #include "../sk64/skelatool_clip.h"
-
-struct DynamicAssetModel {
-    void* addressStart;
-    void* addressEnd;
-    void* segmentStart;
-    Gfx* model;
-    char* name;
-};
-
-struct DynamicAnimatedAssetModel {
-    void* addressStart;
-    void* addressEnd;
-    void* segmentStart;
-    struct SKArmatureDefinition* armature;
-    struct SKAnimationClip** clips;
-    short clipCount;
-    char* name;
-};
 
 struct SKArmatureWithAnimations {
     struct SKArmatureDefinition* armature;

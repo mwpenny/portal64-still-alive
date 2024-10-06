@@ -359,7 +359,9 @@ ANIM_LIST = build/assets/models/pedestal_anim.o \
 	build/assets/models/props/switch001_anim.o
 
 MODEL_HEADERS = $(MODEL_LIST:%.blend=build/%.h)
-MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o)
+MODEL_OBJECTS = $(MODEL_LIST:%.blend=build/%_geo.o) \
+	build/assets/models/dynamic_model_list.o \
+	build/assets/models/dynamic_animated_model_list.o
 
 DYNAMIC_MODEL_HEADERS = $(DYNAMIC_MODEL_LIST:%.blend=build/%.h)
 DYNAMIC_MODEL_OBJECTS = $(DYNAMIC_MODEL_LIST:%.blend=build/%_geo.o)
@@ -415,8 +417,6 @@ build/src/scene/render_plan.o: $(MODEL_HEADERS)
 build/src/scene/security_camera.o: build/src/audio/clips.h build/assets/models/props/security_camera.h build/assets/models/dynamic_animated_model_list.h
 build/src/scene/signage.o: $(MODEL_HEADERS)
 build/src/scene/switch.o: build/assets/models/props/switch001.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
-build/src/util/dynamic_asset_data.o: build/assets/models/dynamic_model_list_data.h
-build/src/util/dynamic_animated_asset_data.o: build/assets/models/dynamic_animated_model_list_data.h
 build/src/util/dynamic_asset_loader.o: build/assets/models/dynamic_model_list.h build/assets/models/dynamic_animated_model_list.h
 build/src/menu/audio_options.o: build/src/audio/subtitles.h
 build/src/menu/video_options.o: build/src/audio/subtitles.h
@@ -460,7 +460,7 @@ LUA_FILES = $(shell find tools/ -type f -name '*.lua')
 
 build/%.fbx: %.blend
 	@mkdir -p $(@D)
-	$(BLENDER_3_6) $< --background --python tools/export_fbx.py -- $@
+	$(BLENDER_3_6) $< --background --python tools/models/export_fbx.py -- $@
 
 build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c build/assets/test_chambers/%_anim.c: build/assets/test_chambers/%.fbx assets/test_chambers/%.yaml build/assets/materials/static.h build/src/audio/subtitles.h $(SKELATOOL64) $(TEXTURE_IMAGES) $(LUA_FILES)
 	$(SKELATOOL64) --script tools/level_scripts/export_level.lua --fixed-point-scale ${SCENE_SCALE} --model-scale 0.01 --name $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
@@ -478,17 +478,17 @@ build/assets/materials/%_mat.o: build/assets/materials/%_mat.c
 levels: $(TEST_CHAMBER_HEADERS)
 	echo $(TEST_CHAMBER_HEADERS)
 
-build/assets/test_chambers/level_list.h: $(TEST_CHAMBER_HEADERS) tools/generate_level_list.js
+build/assets/test_chambers/level_list.h: $(TEST_CHAMBER_HEADERS) tools/models/generate_level_list.js tools/models/model_list_utils.js
 	@mkdir -p $(@D)
-	node tools/generate_level_list.js $@ $(TEST_CHAMBER_HEADERS)
+	node tools/models/generate_level_list.js $@ $(TEST_CHAMBER_HEADERS)
 
-build/assets/models/dynamic_model_list.h build/assets/models/dynamic_model_list_data.h: $(DYNAMIC_MODEL_HEADERS) tools/generate_dynamic_model_list.js build/assets/models/cube/cube.h
+build/assets/models/dynamic_model_list.h build/assets/models/dynamic_model_list.c: $(DYNAMIC_MODEL_HEADERS) tools/models/generate_dynamic_model_list.js tools/models/model_list_utils.js build/assets/models/cube/cube.h
 	@mkdir -p $(@D)
-	node tools/generate_dynamic_model_list.js build/assets/models/dynamic_model_list.h build/assets/models/dynamic_model_list_data.h $(DYNAMIC_MODEL_HEADERS)
+	node tools/models/generate_dynamic_model_list.js build/assets/models/dynamic_model_list.h $(DYNAMIC_MODEL_HEADERS)
 
-build/assets/models/dynamic_animated_model_list.h build/assets/models/dynamic_animated_model_list_data.h: $(DYNAMIC_ANIMATED_MODEL_HEADERS) tools/generate_dynamic_animated_model_list.js
+build/assets/models/dynamic_animated_model_list.h build/assets/models/dynamic_animated_model_list.c: $(DYNAMIC_ANIMATED_MODEL_HEADERS) tools/models/generate_dynamic_animated_model_list.js tools/models/model_list_utils.js
 	@mkdir -p $(@D)
-	node tools/generate_dynamic_animated_model_list.js build/assets/models/dynamic_animated_model_list.h build/assets/models/dynamic_animated_model_list_data.h $(DYNAMIC_ANIMATED_MODEL_HEADERS)
+	node tools/models/generate_dynamic_animated_model_list.js build/assets/models/dynamic_animated_model_list.h $(DYNAMIC_ANIMATED_MODEL_HEADERS)
 
 build/levels.ld: $(TEST_CHAMBER_OBJECTS) tools/generate_level_ld.js
 	@mkdir -p $(@D)
@@ -536,9 +536,9 @@ build/assets/%.aifc: assets/%.sox portal_pak_dir/%.wav
 	sox $(<:assets/%.sox=portal_pak_dir/%.wav) $(shell cat $<) $(@:%.aifc=%.wav)
 	$(SFZ2N64) -o $@ $(@:%.aifc=%.wav)
 
-build/assets/%.aifc: assets/%.jsox tools/jsox.js portal_pak_dir/%.wav
+build/assets/%.aifc: assets/%.jsox tools/sound/jsox.js portal_pak_dir/%.wav
 	@mkdir -p $(@D)
-	node tools/jsox.js $< $(<:assets/%.jsox=portal_pak_dir/%.wav) $(@:%.aifc=%.wav)
+	node tools/sound/jsox.js $< $(<:assets/%.jsox=portal_pak_dir/%.wav) $(@:%.aifc=%.wav)
 	$(SFZ2N64) -o $@ $(@:%.aifc=%.wav)
 
 build/assets/%.aifc: assets/%.msox portal_pak_dir/%.mp3
@@ -554,9 +554,9 @@ build/assets/sound/sounds.sounds build/assets/sound/sounds.sounds.tbl: $(SOUND_C
 
 build/asm/sound_data.o: build/assets/sound/sounds.sounds build/assets/sound/sounds.sounds.tbl
 
-build/src/audio/clips.h build/src/audio/languages.h build/src/audio/languages.c: tools/generate_sound_ids.js $(SOUND_CLIPS)
+build/src/audio/clips.h build/src/audio/languages.h build/src/audio/languages.c: tools/sound/generate_sound_ids.js $(SOUND_CLIPS)
 	@mkdir -p $(@D)
-	node tools/generate_sound_ids.js -o $(@D) -p SOUNDS_ $(SOUND_CLIPS)
+	node tools/sound/generate_sound_ids.js -o $(@D) -p SOUNDS_ $(SOUND_CLIPS)
 
 build/src/audio/clips.o: build/src/audio/clips.h
 build/src/decor/decor_object_list.o: build/src/audio/clips.h

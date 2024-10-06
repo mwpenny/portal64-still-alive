@@ -13,7 +13,7 @@ add_dependencies(portal
 
     # TODO: rework when including models in compilation
     level_list
-    models
+    model_lists
 )
 
 ###############
@@ -159,10 +159,7 @@ target_sources(portal PRIVATE
     sk64/skelatool_animator.c
     sk64/skelatool_armature.c
     util/assert.c
-    util/dynamic_animated_asset_data.c
-    util/dynamic_asset_data.c
     util/dynamic_asset_loader.c
-    util/linked_list.c
     util/memory.c
     util/profile.c
     util/rom.c

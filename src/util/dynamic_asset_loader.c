@@ -6,9 +6,6 @@
 #include "../build/assets/models/dynamic_model_list.h"
 #include "../build/assets/models/dynamic_animated_model_list.h"
 
-extern struct DynamicAssetModel gDynamicModels[];
-extern struct DynamicAnimatedAssetModel gDynamicAnimatedModels[];
-
 Gfx* gLoadedModels[DYNAMIC_MODEL_COUNT];
 u32 gModelPointerOffset[DYNAMIC_MODEL_COUNT];
 

@@ -1,5 +1,5 @@
-#ifndef __LEVEL_LIST_H__
-#define __LEVEL_LIST_H__
+#ifndef __LEVELS_H__
+#define __LEVELS_H__
 
 #include "physics/collision_object.h"
 #include "level_definition.h"

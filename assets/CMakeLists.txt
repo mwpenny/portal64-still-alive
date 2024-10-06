@@ -24,6 +24,11 @@ set(MODEL_SCALE 0.01)
 # Scaling factor for render space
 set(SCENE_SCALE 128)
 
+# Tools for asset conversion
+set(CONVERT_ASSET "${PROJECT_SOURCE_DIR}/tools/convert_asset.py")
+set(EXPORT_FBX "${PROJECT_SOURCE_DIR}/tools/models/export_fbx.py")
+set(MODEL_LIST_UTILS "${PROJECT_SOURCE_DIR}/tools/models/model_list_utils.js")
+
 add_subdirectory(materials)
 add_subdirectory(models)
 add_subdirectory(sound)

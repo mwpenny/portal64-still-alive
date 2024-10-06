@@ -19,11 +19,6 @@ set(SOX "sox")
 set(VPK "vpk")
 set(VTF2PNG "vtf2png")
 
-set(CONVERT_ASSET "${PROJECT_SOURCE_DIR}/tools/convert_asset.py")
-set(EXPORT_FBX "${PROJECT_SOURCE_DIR}/tools/export_fbx.py")
-set(GEN_LEVEL_LIST "${PROJECT_SOURCE_DIR}/tools/generate_level_list.js")
-set(GEN_SOUND_IDS "${PROJECT_SOURCE_DIR}/tools/generate_sound_ids.js")
-set(JSOX "${PROJECT_SOURCE_DIR}/tools/jsox.js")
 set(SKELETOOL64 "${PROJECT_SOURCE_DIR}/skelatool64/skeletool64")
 
 # Directories

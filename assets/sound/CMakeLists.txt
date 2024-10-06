@@ -186,6 +186,8 @@ set(INSTRUMENT_BANKS
     weapons/physcannon/energy_sing_loop4.ins
 )
 
+set(JSOX "${PROJECT_SOURCE_DIR}/tools/sound/jsox.js")
+
 # TODO: remove
 function(_add_sound_transform_command_direct SOUND_NAME ARGS OUTPUT_LIST)
     set(INPUT_FILE "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
@@ -251,7 +253,7 @@ function(_add_sound_transform_command_sox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${Python3_EXECUTABLE} ${CONVERT_ASSET} ${SOX} ${INPUT_FILE} ${SOUND_SCRIPT} ${OUTPUT_FILE}
+            ${PYTHON3} ${CONVERT_ASSET} ${SOX} ${INPUT_FILE} ${SOUND_SCRIPT} ${OUTPUT_FILE}
         COMMENT
             "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -372,6 +374,8 @@ add_custom_target(
 ############################
 ## Sound table generation ##
 ############################
+
+set(GEN_SOUND_IDS "${PROJECT_SOURCE_DIR}/tools/sound/generate_sound_ids.js")
 
 set(SOUND_TABLE_DEPENDENCIES ${SOUNDS_CONVERTED})
 set(SOUND_TABLE_INPUTS "")

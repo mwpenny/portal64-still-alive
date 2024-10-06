@@ -43,6 +43,8 @@ set(EXPORT_SCRIPTS
     ${PROJECT_SOURCE_DIR}/tools/level_scripts/yaml_loader.lua
 )
 
+set(GEN_LEVEL_LIST "${PROJECT_SOURCE_DIR}/tools/models/generate_level_list.js")
+
 function(_add_level_export_command LEVEL_NAME OUTPUT_VARIABLE)
     set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${LEVEL_NAME}/${LEVEL_NAME}.blend")
     set(OUTPUT_FILE "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${LEVEL_NAME}/${LEVEL_NAME}.fbx")
@@ -144,7 +146,7 @@ set(LEVEL_LIST "${LEVEL_LIST_OUT_DIR}/level_list.h")
 
 add_custom_command(
     DEPENDS
-        ${GEN_LEVEL_LIST} ${LEVEL_GENERATED_HEADERS}
+        ${GEN_LEVEL_LIST} ${MODEL_LIST_UTILS} ${LEVEL_GENERATED_HEADERS}
     OUTPUT
         ${LEVEL_LIST}
     COMMAND
