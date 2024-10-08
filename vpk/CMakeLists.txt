@@ -37,7 +37,6 @@ function(_add_vpk_extract_command VPK_LIST OUTPUT_LIST)
         MAIN_VPK_NAME
     )
     set(MAIN_VPK_STAMP "${PAK_DIR}/${MAIN_VPK_NAME}.stamp")
-    list(APPEND VPK_STAMP_FILES ${MAIN_VPK_STAMP})
 
     add_custom_command(
         DEPENDS
@@ -65,7 +64,6 @@ _add_vpk_extract_command(VPKS_PORTAL VPK_STAMP_FILES)
 _add_vpk_extract_command(VPKS_HL2_MISC VPK_STAMP_FILES)
 _add_vpk_extract_command(VPKS_HL2_SOUND_MISC VPK_STAMP_FILES)
 
-add_custom_target(
-    extract_vpks
+add_custom_target(extract_vpks
     DEPENDS ${VPK_STAMP_FILES}
 )

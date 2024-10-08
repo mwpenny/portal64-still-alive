@@ -3,6 +3,9 @@
 set(PAK_SOUND_DIR "${PAK_DIR}/sound")
 set(PAK_MODIFIED_SOUND_DIR "${PAK_MODIFIED_DIR}/sound")
 
+set(JSOX "${PROJECT_SOURCE_DIR}/tools/sound/jsox.js")
+set(GEN_SOUND_IDS "${PROJECT_SOURCE_DIR}/tools/sound/generate_sound_ids.js")
+
 cmake_path(
     RELATIVE_PATH CMAKE_CURRENT_SOURCE_DIR
     BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
@@ -186,8 +189,6 @@ set(INSTRUMENT_BANKS
     weapons/physcannon/energy_sing_loop4.ins
 )
 
-set(JSOX "${PROJECT_SOURCE_DIR}/tools/sound/jsox.js")
-
 # TODO: remove
 function(_add_sound_transform_command_direct SOUND_NAME ARGS OUTPUT_LIST)
     set(INPUT_FILE "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
@@ -213,27 +214,6 @@ function(_add_sound_transform_command_direct SOUND_NAME ARGS OUTPUT_LIST)
             "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
     )
-
-    list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILE})
-    return(PROPAGATE ${OUTPUT_LIST})
-endfunction()
-
-function(_add_sound_transform_command SOUND_SCRIPT OUTPUT_LIST)
-    cmake_path(
-        REMOVE_EXTENSION SOUND_SCRIPT
-        OUTPUT_VARIABLE SOUND_NAME
-    )
-
-    # TODO: change output to PAK_MODIFIED_SOUND_DIR once makefile is no longer in use
-    set(SOUND_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/${SOUND_SCRIPT}")
-    set(INPUT_FILE "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
-    set(OUTPUT_FILE "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.wav")
-
-    if(SOUND_SCRIPT MATCHES ".*\.jsox")
-        _add_sound_transform_command_jsox(${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE})
-    else()
-        _add_sound_transform_command_sox(${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE})
-    endif()
 
     list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILE})
     return(PROPAGATE ${OUTPUT_LIST})
@@ -272,6 +252,27 @@ function(_add_sound_transform_command_jsox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
             "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
     )
+endfunction()
+
+function(_add_sound_transform_command SOUND_SCRIPT OUTPUT_LIST)
+    cmake_path(
+        REMOVE_EXTENSION SOUND_SCRIPT
+        OUTPUT_VARIABLE SOUND_NAME
+    )
+
+    # TODO: change output to PAK_MODIFIED_SOUND_DIR once makefile is no longer in use
+    set(SOUND_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/${SOUND_SCRIPT}")
+    set(INPUT_FILE "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
+    set(OUTPUT_FILE "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.wav")
+
+    if(SOUND_SCRIPT MATCHES ".*\.jsox")
+        _add_sound_transform_command_jsox(${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE})
+    else()
+        _add_sound_transform_command_sox(${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE})
+    endif()
+
+    list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILE})
+    return(PROPAGATE ${OUTPUT_LIST})
 endfunction()
 
 function(_add_music_transform_command MUSIC_SCRIPT OUTPUT_LIST)
@@ -337,8 +338,7 @@ endforeach()
 
 function(_add_sound_convert_command INPUT_FILE OUTPUT_LIST)
     cmake_path(
-        REPLACE_EXTENSION INPUT_FILE
-        ".aifc"
+        REPLACE_EXTENSION INPUT_FILE ".aifc"
         OUTPUT_VARIABLE OUTPUT_FILE
     )
 
@@ -366,16 +366,13 @@ foreach(TRANSFORMED_SOUND ${SOUNDS_TRANSFORMED})
     _add_sound_convert_command(${TRANSFORMED_SOUND} SOUNDS_CONVERTED)
 endforeach()
 
-add_custom_target(
-    all_sounds
+add_custom_target(sounds
     DEPENDS ${SOUNDS_CONVERTED}
 )
 
 ############################
 ## Sound table generation ##
 ############################
-
-set(GEN_SOUND_IDS "${PROJECT_SOURCE_DIR}/tools/sound/generate_sound_ids.js")
 
 set(SOUND_TABLE_DEPENDENCIES ${SOUNDS_CONVERTED})
 set(SOUND_TABLE_INPUTS "")
@@ -401,8 +398,7 @@ foreach(CONVERTED_SOUND ${SOUNDS_CONVERTED})
         OUTPUT_VARIABLE INS_BANK
     )
     cmake_path(
-        REPLACE_EXTENSION INS_BANK
-        ".ins"
+        REPLACE_EXTENSION INS_BANK ".ins"
         OUTPUT_VARIABLE INS_BANK
     )
 
@@ -416,11 +412,15 @@ endforeach()
 
 set(SOUND_TABLE_SOUNDS "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/sounds.sounds")
 set(SOUND_TABLE_TBL "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/sounds.sounds.tbl")
+set(SOUND_DATA_TABLE_FILES
+    ${SOUND_TABLE_SOUNDS}
+    ${SOUND_TABLE_TBL}
+)
 add_custom_command(
     DEPENDS
-        all_sounds ${SOUND_TABLE_DEPENDENCIES}
+        ${SOUND_TABLE_DEPENDENCIES}
     OUTPUT
-        ${SOUND_TABLE_SOUNDS} ${SOUND_TABLE_TBL}
+        ${SOUND_DATA_TABLE_FILES}
     COMMAND
         ${SFZ2N64} -o ${SOUND_TABLE_SOUNDS} ${SOUND_TABLE_INPUTS}
     COMMENT
@@ -432,27 +432,34 @@ set(BUILD_AUDIO_DIR "${CMAKE_BINARY_DIR}/src/audio")
 set(CLIPS_H "${BUILD_AUDIO_DIR}/clips.h")
 set(LANGUAGES_H "${BUILD_AUDIO_DIR}/languages.h")
 set(LANGUAGES_C "${BUILD_AUDIO_DIR}/languages.c")
+set(SOUND_LOOKUP_TABLE_FILES
+    ${CLIPS_H}
+    ${LANGUAGES_H}
+    ${LANGUAGES_C}
+)
 add_custom_command(
     DEPENDS
-        all_sounds ${GEN_SOUND_IDS} ${SOUND_TABLE_DEPENDENCIES}
+        ${GEN_SOUND_IDS} ${SOUND_TABLE_DEPENDENCIES}
     OUTPUT
-        ${CLIPS_H} ${LANGUAGES_H} ${LANGUAGES_C}
+        ${SOUND_LOOKUP_TABLE_FILES}
     COMMAND
         ${NODEJS} ${GEN_SOUND_IDS} -o ${BUILD_AUDIO_DIR} -p SOUNDS_ ${SOUND_TABLE_INPUTS}
+    WORKING_DIRECTORY
+        # TODO: Update once script is refactored
+        ${PROJECT_SOURCE_DIR}
     COMMENT
         "Generating sound lookup tables"
     VERBATIM
 )
 
-add_custom_target(
-    sound_tables
+add_custom_target(sound_tables
     DEPENDS
-        # Sound data
-        ${SOUND_TABLE_SOUNDS}
-        ${SOUND_TABLE_TBL}
+        ${SOUND_DATA_TABLE_FILES}
+        ${SOUND_LOOKUP_TABLE_FILES}
+)
 
-        # Lookup tables
-        ${CLIPS_H}
-        ${LANGUAGES_H}
-        ${LANGUAGES_C}
+add_library(sound_lookup_tables INTERFACE)
+add_dependencies(sound_lookup_tables sound_tables)
+target_sources(sound_lookup_tables INTERFACE
+    ${SOUND_LOOKUP_TABLE_FILES}
 )

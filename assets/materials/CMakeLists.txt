@@ -211,6 +211,18 @@ _add_extract_frame_command(
 # glob pitfalls do not apply here.
 file(GLOB_RECURSE TEXTURE_SCRIPTS "*.ims")
 
+function(_get_texture_script_file_list TEXTURE_SCRIPT PROPERTY_NAME PARENT_DIR OUTPUT)
+    get_source_file_property(FILE_LIST ${TEXTURE_SCRIPT} ${PROPERTY_NAME})
+
+    if (FILE_LIST)
+        list(TRANSFORM FILE_LIST PREPEND "${PARENT_DIR}/" OUTPUT_VARIABLE FILE_LIST)
+        list(TRANSFORM FILE_LIST APPEND ".png" OUTPUT_VARIABLE FILE_LIST)
+        list(APPEND ${OUTPUT} ${FILE_LIST})
+    endif()
+
+    return(PROPAGATE ${OUTPUT})
+endfunction()
+
 function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
     cmake_path(
         RELATIVE_PATH TEXTURE_SCRIPT
@@ -256,18 +268,6 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
 
     list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILES})
     return(PROPAGATE ${OUTPUT_LIST})
-endfunction()
-
-function(_get_texture_script_file_list TEXTURE_SCRIPT PROPERTY_NAME PARENT_DIR OUTPUT)
-    get_source_file_property(FILE_LIST ${TEXTURE_SCRIPT} ${PROPERTY_NAME})
-
-    if (FILE_LIST)
-        list(TRANSFORM FILE_LIST PREPEND "${PARENT_DIR}/" OUTPUT_VARIABLE FILE_LIST)
-        list(TRANSFORM FILE_LIST APPEND ".png" OUTPUT_VARIABLE FILE_LIST)
-        list(APPEND ${OUTPUT} ${FILE_LIST})
-    endif()
-
-    return(PROPAGATE ${OUTPUT})
 endfunction()
 
 # Add commands for transforming converted PNG textures (crop, scale, etc.).
@@ -370,9 +370,12 @@ foreach(TEXTURE_SCRIPT ${TEXTURE_SCRIPTS})
     _add_texture_transform_command(${TEXTURE_SCRIPT} TEXTURES_TRANSFORMED)
 endforeach()
 
-add_custom_target(
-    all_textures
+add_custom_target(textures
     DEPENDS ${TEXTURES_TRANSFORMED}
+)
+set_target_properties(textures PROPERTIES
+    # Enable dependents to easily depend on transformed textures
+    OUTPUTS ${TEXTURES_TRANSFORMED}
 )
 
 #########################
@@ -401,7 +404,7 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
     set(OUTPUT_FILE_H "${CMAKE_BINARY_DIR}/${RELATIVE_DIR}/${MATERIAL_NAME}.h")
     set(OUTPUT_FILE_C "${CMAKE_BINARY_DIR}/${RELATIVE_DIR}/${MATERIAL_NAME}_mat.c")
 
-    # Depend on all textures for simplicity. Materials are cheap to rebuild.
+    # Depend on all textures for simplicity
     set(DEPENDENCY_FILES ${INPUT_FILE} ${TEXTURES_TRANSFORMED})
 
     get_source_file_property(DEP_FILE_LIST ${INPUT_FILE} ADDITIONAL_DEPS)
@@ -412,7 +415,7 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
     # TODO: add dependency on skeletool once it is built with CMake
     add_custom_command(
         DEPENDS
-            all_textures ${DEPENDENCY_FILES}
+            ${DEPENDENCY_FILES}
         OUTPUT
             ${OUTPUT_FILE_H} ${OUTPUT_FILE_C}
         COMMAND
@@ -463,7 +466,12 @@ foreach(MATERIAL ${MATERIALS})
     _add_material_generate_command(${MATERIAL} GENERATED_MATERIALS)
 endforeach()
 
-add_custom_target(
-    materials
+add_custom_target(generated_materials
     DEPENDS ${GENERATED_MATERIALS}
+)
+
+add_library(materials INTERFACE)
+add_dependencies(materials generated_materials)
+target_sources(materials INTERFACE
+    ${GENERATED_MATERIALS}
 )

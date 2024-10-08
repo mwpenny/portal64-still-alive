@@ -54,7 +54,9 @@ function formatSoundName(soundFilename, index) {
 }
 
 function formatFile(outputFilename, soundFilenames) {
-    const defineName = outputFilename.replace(invalidCharactersRegex, '_').toUpperCase();
+    const relativeOutput = path.relative(process.cwd(), outputFilename);
+    const defineName = relativeOutput.replace(invalidCharactersRegex, '_').toUpperCase();
+
     return `#ifndef ${defineName}
 #define ${defineName}
 

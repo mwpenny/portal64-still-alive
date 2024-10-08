@@ -7,9 +7,12 @@ target_include_directories(portal PRIVATE
 )
 
 # Generated code
-add_dependencies(portal
+target_link_libraries(portal
+    levels
     materials
-    sound_tables
+    models
+    sound_lookup_tables
+)
 
     # TODO: rework when including models in compilation
     level_list

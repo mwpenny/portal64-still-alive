@@ -1,3 +1,22 @@
+set(EXPORT_LEVEL ${PROJECT_SOURCE_DIR}/tools/level_scripts/export_level.lua)
+set(EXPORT_SCRIPTS
+    ${EXPORT_LEVEL}
+    ${PROJECT_SOURCE_DIR}/tools/level_scripts/animation.lua
+    ${PROJECT_SOURCE_DIR}/tools/level_scripts/collision_export.lua
+    ${PROJECT_SOURCE_DIR}/tools/level_scripts/dynamic_collision_export.lua
+    ${PROJECT_SOURCE_DIR}/tools/level_scripts/entities.lua
+    ${PROJECT_SOURCE_DIR}/tools/level_scripts/portal_surfaces.lua
+    ${PROJECT_SOURCE_DIR}/tools/level_scripts/room_export.lua
+    ${PROJECT_SOURCE_DIR}/tools/level_scripts/signals.lua
+    ${PROJECT_SOURCE_DIR}/tools/level_scripts/static_export.lua
+    ${PROJECT_SOURCE_DIR}/tools/level_scripts/trigger.lua
+    ${PROJECT_SOURCE_DIR}/tools/level_scripts/util.lua
+    ${PROJECT_SOURCE_DIR}/tools/level_scripts/world.lua
+    ${PROJECT_SOURCE_DIR}/tools/level_scripts/yaml_loader.lua
+)
+
+set(GEN_LEVEL_LIST "${PROJECT_SOURCE_DIR}/tools/models/generate_level_list.js")
+
 cmake_path(
     RELATIVE_PATH CMAKE_CURRENT_SOURCE_DIR
     BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
@@ -25,25 +44,6 @@ set(LEVELS
 set(LEVEL_MATERIALS
     ${ASSETS_DIR}/materials/static.skm.yaml
 )
-
-set(EXPORT_LEVEL ${PROJECT_SOURCE_DIR}/tools/level_scripts/export_level.lua)
-set(EXPORT_SCRIPTS
-    ${EXPORT_LEVEL}
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/animation.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/collision_export.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/dynamic_collision_export.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/entities.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/portal_surfaces.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/room_export.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/signals.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/static_export.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/trigger.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/util.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/world.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/yaml_loader.lua
-)
-
-set(GEN_LEVEL_LIST "${PROJECT_SOURCE_DIR}/tools/models/generate_level_list.js")
 
 function(_add_level_export_command LEVEL_NAME OUTPUT_VARIABLE)
     set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${LEVEL_NAME}/${LEVEL_NAME}.blend")
@@ -82,6 +82,10 @@ function(_add_level_generate_command LEVEL_NAME LEVEL_FBX OUTPUT_LIST)
 
     set(OUTPUT_FILE_H "${OUTPUT_FILE_NO_EXTENSION}.h")
     set(OUTPUT_FILE_GEO_C "${OUTPUT_FILE_NO_EXTENSION}_geo.c")
+    set(OUTPUT_FILES
+        ${OUTPUT_FILE_H}
+        ${OUTPUT_FILE_GEO_C}
+    )
 
     # TODO: not all levels have animations
     # set(OUTPUT_FILE_ANIM_C "${OUTPUT_FILE_NO_EXTENSION}_anim.c")
@@ -97,7 +101,7 @@ function(_add_level_generate_command LEVEL_NAME LEVEL_FBX OUTPUT_LIST)
         DEPENDS
             ${EXPORT_SCRIPTS} ${LEVEL_FBX} ${LEVEL_YAML} ${LEVEL_MATERIALS}
         OUTPUT
-            ${OUTPUT_FILE_H} ${OUTPUT_FILE_GEO_C} ${OUTPUT_FILE_ANIM_C}
+            ${OUTPUT_FILES}
         COMMAND
             ${SKELETOOL64}
             --script ${EXPORT_LEVEL}
@@ -114,11 +118,7 @@ function(_add_level_generate_command LEVEL_NAME LEVEL_FBX OUTPUT_LIST)
         VERBATIM
     )
 
-    list(APPEND ${OUTPUT_LIST}
-        ${OUTPUT_FILE_H}
-        ${OUTPUT_FILE_GEO_C}
-        ${OUTPUT_FILE_ANIM_C}
-    )
+    list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILES})
     return(PROPAGATE ${OUTPUT_LIST})
 endfunction()
 
@@ -131,8 +131,7 @@ foreach(LEVEL ${LEVELS})
     _add_level_generate_command(${LEVEL} ${LEVEL_FBX} LEVEL_GENERATED_FILES)
 endforeach()
 
-add_custom_target(
-    all_levels
+add_custom_target(generated_levels
     DEPENDS ${LEVEL_GENERATED_FILES}
 )
 
@@ -158,7 +157,16 @@ add_custom_command(
     VERBATIM
 )
 
-add_custom_target(
-    level_list
+add_custom_target(level_list
     DEPENDS ${LEVEL_LIST}
+)
+
+add_library(levels INTERFACE)
+add_dependencies(levels
+    generated_levels
+    level_list
+)
+target_sources(levels INTERFACE
+    ${LEVEL_GENERATED_FILES}
+    ${LEVEL_LIST}
 )

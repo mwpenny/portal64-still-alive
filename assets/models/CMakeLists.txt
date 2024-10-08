@@ -1,3 +1,6 @@
+set(GEN_DYNAMIC_MODEL_LIST "${PROJECT_SOURCE_DIR}/tools/models/generate_dynamic_model_list.js")
+set(GEN_DYNAMIC_ANIM_MODEL_LIST "${PROJECT_SOURCE_DIR}/tools/models/generate_dynamic_animated_model_list.js")
+
 cmake_path(
     RELATIVE_PATH CMAKE_CURRENT_SOURCE_DIR
     BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
@@ -71,9 +74,6 @@ set(MODEL_DEFAULT_MATERIALS
     ${ASSETS_DIR}/materials/objects.skm.yaml
 )
 
-set(GEN_DYNAMIC_MODEL_LIST "${PROJECT_SOURCE_DIR}/tools/models/generate_dynamic_model_list.js")
-set(GEN_DYNAMIC_ANIM_MODEL_LIST "${PROJECT_SOURCE_DIR}/tools/models/generate_dynamic_animated_model_list.js")
-
 function(_add_model_export_command MODEL_NAME OUTPUT_VARIABLE)
     set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}.blend")
     set(OUTPUT_FILE "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${MODEL_NAME}.fbx")
@@ -127,6 +127,8 @@ function(_add_model_generate_command MODEL_NAME MODEL_FBX OUTPUT_LIST)
 
     add_custom_command(
         DEPENDS
+            # Need to depend on textures since some models embed them
+            textures "$<TARGET_PROPERTY:textures,OUTPUTS>"
             ${CONVERT_ASSET} ${MODEL_FBX} ${MODEL_FLAGS} ${MODEL_MATERIALS}
         OUTPUT
             ${OUTPUT_FILE_H} ${OUTPUT_FILE_GEO_C} ${OUTPUT_FILE_ANIM_C}
@@ -155,7 +157,6 @@ function(_add_model_generate_command MODEL_NAME MODEL_FBX OUTPUT_LIST)
     )
     return(PROPAGATE ${OUTPUT_LIST})
 endfunction()
-
 
 # Add commands for exporting model files
 # There are some special cases for models which use non-default materials
@@ -192,8 +193,7 @@ foreach(MODEL ${MODELS})
     _add_model_generate_command(${MODEL} ${MODEL_FBX} MODEL_GENERATED_FILES)
 endforeach()
 
-add_custom_target(
-    models
+add_custom_target(generated_models
     DEPENDS ${MODEL_GENERATED_FILES}
 )
 
@@ -257,12 +257,24 @@ add_custom_command(
     VERBATIM
 )
 
-add_custom_target(
-    model_lists
+set(MODEL_LIST_FILES
+    ${DYNAMIC_MODEL_LIST_H}
+    ${DYNAMIC_MODEL_LIST_C}
+    ${DYNAMIC_ANIMATED_MODEL_LIST_H}
+    ${DYNAMIC_ANIMATED_MODEL_LIST_C}
+)
+
+add_custom_target(model_lists
     DEPENDS
-        ${MODEL_GENERATED_FILES}
-        ${DYNAMIC_MODEL_LIST_H}
-        ${DYNAMIC_MODEL_LIST_C}
-        ${DYNAMIC_ANIMATED_MODEL_LIST_H}
-        ${DYNAMIC_ANIMATED_MODEL_LIST_C}
+        ${MODEL_LIST_FILES}
+)
+
+add_library(models INTERFACE)
+add_dependencies(models
+    generated_models
+    model_lists
+)
+target_sources(models INTERFACE
+    ${MODEL_GENERATED_FILES}
+    ${MODEL_LIST_FILES}
 )
