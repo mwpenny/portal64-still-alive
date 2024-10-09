@@ -139,6 +139,30 @@ spanish_audio: vpk/portal_sound_vo_spanish_dir.vpk vpk/portal_sound_vo_spanish_0
 	cd assets/locales/es/sound/vo/aperture_ai/; rm -f ding_off.sox ding_on.sox
 	cd assets/locales/es/sound/vo/aperture_ai/; ls | xargs -I {} mv {} es_{}
 
+german_audio_only: vpk/portal_sound_vo_german_dir.vpk vpk/portal_sound_vo_german_000.vpk build/src/audio/subtitles.h portal_pak_dir $(SKELATOOL64)
+	rm -rf portal_pak_dir/locales/
+	vpk -x portal_pak_dir/ vpk/portal_sound_vo_german_dir.vpk
+	@$(MAKE) -C skelatool64
+	@$(MAKE) buildgame
+
+french_audio_only: vpk/portal_sound_vo_french_dir.vpk vpk/portal_sound_vo_french_000.vpk build/src/audio/subtitles.h portal_pak_dir $(SKELATOOL64)
+	rm -rf portal_pak_dir/locales/
+	vpk -x portal_pak_dir/ vpk/portal_sound_vo_french_dir.vpk
+	@$(MAKE) -C skelatool64
+	@$(MAKE) buildgame
+
+russian_audio_only: vpk/portal_sound_vo_russian_dir.vpk vpk/portal_sound_vo_russian_000.vpk build/src/audio/subtitles.h portal_pak_dir $(SKELATOOL64)
+	rm -rf portal_pak_dir/locales/
+	vpk -x portal_pak_dir/ vpk/portal_sound_vo_russian_dir.vpk
+	@$(MAKE) -C skelatool64
+	@$(MAKE) buildgame
+
+spanish_audio_only: vpk/portal_sound_vo_spanish_dir.vpk vpk/portal_sound_vo_spanish_000.vpk build/src/audio/subtitles.h portal_pak_dir $(SKELATOOL64)
+	rm -rf portal_pak_dir/locales/
+	vpk -x portal_pak_dir/ vpk/portal_sound_vo_spanish_dir.vpk
+	@$(MAKE) -C skelatool64
+	@$(MAKE) buildgame
+
 buildgame: $(BASE_TARGET_NAME).z64
 
 # Allow targets to depend on the GAME_VERSION variable via a file.
