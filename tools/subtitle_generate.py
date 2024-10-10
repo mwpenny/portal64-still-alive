@@ -5,6 +5,8 @@ import sys
 import json
 from os.path import exists
 
+sys.stdout.reconfigure(encoding="utf8")
+
 hl_gameui_whitelist = {
     "GAMEUI_ASPECTWIDE",
     "GAMEUI_AUDIO",

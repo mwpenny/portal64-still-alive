@@ -12,11 +12,7 @@ target_link_libraries(portal
     materials
     models
     sound_lookup_tables
-)
-
-    # TODO: rework when including models in compilation
-    level_list
-    model_lists
+    strings
 )
 
 ###############
