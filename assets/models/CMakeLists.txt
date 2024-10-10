@@ -11,42 +11,8 @@ cmake_path(
 ## Model export ##
 ##################
 
-# Models whose data is loaded/unloaded as needed
-set(DYNAMIC_MODELS
-    cube/cube
-    props/autoportal_frame/autoportal_frame
-    props/box_dropper_glass
-    props/cylinder_test
-    props/lab_chair
-    props/lab_desk/lab_desk01
-    props/lab_desk/lab_desk02
-    props/lab_desk/lab_desk03
-    props/lab_desk/lab_desk04
-    props/lab_monitor
-    props/light_rail_endcap
-    props/portal_cleanser
-    props/radio
-    signage/clock
-    signage/clock_digits
-)
-
-# Animated models whose data is loaded/unloaded as needed
-set(DYNAMIC_ANIMATED_MODELS
-    pedestal
-    props/box_dropper
-    props/button
-    props/combine_ball_catcher
-    props/combine_ball_launcher
-    props/door_01
-    props/door_02
-    props/security_camera
-    props/switch001
-)
-
-# All models
-set(MODELS
-    ${DYNAMIC_MODELS}
-    ${DYNAMIC_ANIMATED_MODELS}
+# Models whose data is always loaded
+set(STATIC_MODELS
     fleck_ash2
     grav_flare
     player/chell
@@ -65,6 +31,60 @@ set(MODELS
     props/round_elevator_collision
     props/round_elevator_interior
     props/signage
+)
+
+# Models whose data is loaded/unloaded as needed
+set(DYNAMIC_MODELS
+    cube/cube
+    pedestal
+    props/autoportal_frame/autoportal_frame
+    props/box_dropper
+    props/box_dropper_glass
+    props/button
+    props/combine_ball_catcher
+    props/combine_ball_launcher
+    props/cylinder_test
+    props/door_01
+    props/door_02
+    props/lab_chair
+    props/lab_desk/lab_desk01
+    props/lab_desk/lab_desk02
+    props/lab_desk/lab_desk03
+    props/lab_desk/lab_desk04
+    props/lab_monitor
+    props/light_rail_endcap
+    props/portal_cleanser
+    props/radio
+    props/security_camera
+    props/switch001
+    signage/clock
+    signage/clock_digits
+)
+
+# Models with predefined animations
+set(KEYFRAMED_ANIMATED_MODELS
+    pedestal
+    player/chell
+    portal_gun/v_portalgun
+    props/box_dropper
+    props/combine_ball_catcher
+    props/combine_ball_launcher
+    props/door_01
+    props/door_02
+    props/switch001
+)
+
+# All animated models, including those which are only procedurally animated
+set(ANIMATED_MODELS
+    ${KEYFRAMED_ANIMATED_MODELS}
+    props/button
+    props/security_camera
+)
+
+# All models
+set(MODELS
+    ${DYNAMIC_MODELS}
+    ${STATIC_MODELS}
 )
 
 # Most models depend on both of these. Some only depend on one or the other,
@@ -121,17 +141,22 @@ function(_add_model_generate_command MODEL_NAME MODEL_FBX OUTPUT_LIST)
 
     set(OUTPUT_FILE_H "${OUTPUT_FILE_NO_EXTENSION}.h")
     set(OUTPUT_FILE_GEO_C "${OUTPUT_FILE_NO_EXTENSION}_geo.c")
+    set(OUTPUT_FILES
+        ${OUTPUT_FILE_H}
+        ${OUTPUT_FILE_GEO_C}
+    )
 
-    # TODO: not all models have animations
-    # set(OUTPUT_FILE_ANIM_C "${OUTPUT_FILE_NO_EXTENSION}_anim.c")
+    if (MODEL_NAME IN_LIST KEYFRAMED_ANIMATED_MODELS)
+        set(OUTPUT_FILE_ANIM_C "${OUTPUT_FILE_NO_EXTENSION}_anim.c")
+        list(APPEND OUTPUT_FILES ${OUTPUT_FILE_ANIM_C})
+    endif()
 
     add_custom_command(
         DEPENDS
-            # Need to depend on textures since some models embed them
             textures "$<TARGET_PROPERTY:textures,OUTPUTS>"
             ${CONVERT_ASSET} ${MODEL_FBX} ${MODEL_FLAGS} ${MODEL_MATERIALS}
         OUTPUT
-            ${OUTPUT_FILE_H} ${OUTPUT_FILE_GEO_C} ${OUTPUT_FILE_ANIM_C}
+            ${OUTPUT_FILES}
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
@@ -150,11 +175,7 @@ function(_add_model_generate_command MODEL_NAME MODEL_FBX OUTPUT_LIST)
         VERBATIM
     )
 
-    list(APPEND ${OUTPUT_LIST}
-        ${OUTPUT_FILE_H}
-        ${OUTPUT_FILE_GEO_C}
-        ${OUTPUT_FILE_ANIM_C}
-    )
+    list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILES})
     return(PROPAGATE ${OUTPUT_LIST})
 endfunction()
 
@@ -217,9 +238,11 @@ foreach(GENERATED_HEADER ${MODEL_GENERATED_HEADERS})
     )
 
     if(MODEL_NAME IN_LIST DYNAMIC_MODELS)
-        list(APPEND DYNAMIC_MODEL_HEADERS ${GENERATED_HEADER})
-    elseif(MODEL_NAME IN_LIST DYNAMIC_ANIMATED_MODELS)
-        list(APPEND DYNAMIC_ANIMATED_MODEL_HEADERS ${GENERATED_HEADER})
+        if(MODEL_NAME IN_LIST ANIMATED_MODELS)
+            list(APPEND DYNAMIC_ANIMATED_MODEL_HEADERS ${GENERATED_HEADER})
+        else()
+            list(APPEND DYNAMIC_MODEL_HEADERS ${GENERATED_HEADER})
+        endif()
     endif()
 endforeach()
 

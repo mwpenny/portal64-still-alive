@@ -41,6 +41,17 @@ set(LEVELS
     test_chamber_10
 )
 
+set(ANIMATED_LEVELS
+    test_chamber_00
+    test_chamber_03
+    test_chamber_04
+    test_chamber_06
+    test_chamber_07
+    test_chamber_08
+    test_chamber_09
+    test_chamber_10
+)
+
 set(LEVEL_MATERIALS
     ${ASSETS_DIR}/materials/static.skm.yaml
 )
@@ -87,8 +98,10 @@ function(_add_level_generate_command LEVEL_NAME LEVEL_FBX OUTPUT_LIST)
         ${OUTPUT_FILE_GEO_C}
     )
 
-    # TODO: not all levels have animations
-    # set(OUTPUT_FILE_ANIM_C "${OUTPUT_FILE_NO_EXTENSION}_anim.c")
+    if (LEVEL_NAME IN_LIST ANIMATED_LEVELS)
+        set(OUTPUT_FILE_ANIM_C "${OUTPUT_FILE_NO_EXTENSION}_anim.c")
+        list(APPEND OUTPUT_FILES ${OUTPUT_FILE_ANIM_C})
+    endif()
 
     set(MATERIAL_ARGS "")
     foreach(MATERIAL ${LEVEL_MATERIALS})
@@ -99,6 +112,7 @@ function(_add_level_generate_command LEVEL_NAME LEVEL_FBX OUTPUT_LIST)
 
     add_custom_command(
         DEPENDS
+            textures "$<TARGET_PROPERTY:textures,OUTPUTS>"
             ${EXPORT_SCRIPTS} ${LEVEL_FBX} ${LEVEL_YAML} ${LEVEL_MATERIALS}
         OUTPUT
             ${OUTPUT_FILES}
