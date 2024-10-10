@@ -154,7 +154,10 @@ function(_add_model_generate_command MODEL_NAME MODEL_FBX OUTPUT_LIST)
     add_custom_command(
         DEPENDS
             textures "$<TARGET_PROPERTY:textures,OUTPUTS>"
-            ${CONVERT_ASSET} ${MODEL_FBX} ${MODEL_FLAGS} ${MODEL_MATERIALS}
+            ${CONVERT_ASSET}
+            ${MODEL_FBX}
+            ${MODEL_FLAGS}
+            ${MODEL_MATERIALS}
         OUTPUT
             ${OUTPUT_FILES}
         COMMAND
@@ -252,7 +255,8 @@ set(DYNAMIC_MODEL_LIST_H "${DYNAMIC_MODEL_LIST_OUT_DIR}/dynamic_model_list.h")
 set(DYNAMIC_MODEL_LIST_C "${DYNAMIC_MODEL_LIST_OUT_DIR}/dynamic_model_list.c")
 add_custom_command(
     DEPENDS
-        ${GEN_DYNAMIC_MODEL_LIST} ${MODEL_LIST_UTILS} ${DYNAMIC_MODEL_HEADERS}
+        generated_models ${DYNAMIC_MODEL_HEADERS}
+        ${GEN_DYNAMIC_MODEL_LIST} ${MODEL_LIST_UTILS}
     OUTPUT
         ${DYNAMIC_MODEL_LIST_H} ${DYNAMIC_MODEL_LIST_C}
     COMMAND
@@ -268,7 +272,8 @@ set(DYNAMIC_ANIMATED_MODEL_LIST_H "${DYNAMIC_MODEL_LIST_OUT_DIR}/dynamic_animate
 set(DYNAMIC_ANIMATED_MODEL_LIST_C "${DYNAMIC_MODEL_LIST_OUT_DIR}/dynamic_animated_model_list.c")
 add_custom_command(
     DEPENDS
-        ${GEN_DYNAMIC_ANIM_MODEL_LIST} ${MODEL_LIST_UTILS} ${DYNAMIC_ANIMATED_MODEL_HEADERS}
+        generated_models ${DYNAMIC_ANIMATED_MODEL_HEADERS}
+        ${GEN_DYNAMIC_ANIM_MODEL_LIST} ${MODEL_LIST_UTILS}
     OUTPUT
         ${DYNAMIC_ANIMATED_MODEL_LIST_H} ${DYNAMIC_ANIMATED_MODEL_LIST_C}
     COMMAND

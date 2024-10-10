@@ -113,7 +113,10 @@ function(_add_level_generate_command LEVEL_NAME LEVEL_FBX OUTPUT_LIST)
     add_custom_command(
         DEPENDS
             textures "$<TARGET_PROPERTY:textures,OUTPUTS>"
-            ${EXPORT_SCRIPTS} ${LEVEL_FBX} ${LEVEL_YAML} ${LEVEL_MATERIALS}
+            ${EXPORT_SCRIPTS}
+            ${LEVEL_FBX}
+            ${LEVEL_YAML}
+            ${LEVEL_MATERIALS}
         OUTPUT
             ${OUTPUT_FILES}
         COMMAND
@@ -159,7 +162,8 @@ set(LEVEL_LIST "${LEVEL_LIST_OUT_DIR}/level_list.h")
 
 add_custom_command(
     DEPENDS
-        ${GEN_LEVEL_LIST} ${MODEL_LIST_UTILS} ${LEVEL_GENERATED_HEADERS}
+        generated_levels ${LEVEL_GENERATED_HEADERS}
+        ${GEN_LEVEL_LIST} ${MODEL_LIST_UTILS}
     OUTPUT
         ${LEVEL_LIST}
     COMMAND

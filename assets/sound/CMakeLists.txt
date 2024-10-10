@@ -227,7 +227,9 @@ function(_add_sound_transform_command_sox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
 
     add_custom_command(
         DEPENDS
-            extract_vpks ${CONVERT_ASSET} ${INPUT_FILE} ${SOUND_SCRIPT}
+            extract_vpks ${INPUT_FILE}
+            ${CONVERT_ASSET}
+            ${SOUND_SCRIPT}
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
@@ -243,7 +245,9 @@ endfunction()
 function(_add_sound_transform_command_jsox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
     add_custom_command(
         DEPENDS
-            extract_vpks ${JSOX} ${INPUT_FILE} ${SOUND_SCRIPT}
+            extract_vpks ${INPUT_FILE}
+            ${JSOX}
+            ${SOUND_SCRIPT}
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
@@ -418,7 +422,7 @@ set(SOUND_DATA_TABLE_FILES
 )
 add_custom_command(
     DEPENDS
-        ${SOUND_TABLE_DEPENDENCIES}
+        extract_vpks sounds ${SOUND_TABLE_DEPENDENCIES}
     OUTPUT
         ${SOUND_DATA_TABLE_FILES}
     COMMAND
@@ -439,7 +443,8 @@ set(SOUND_LOOKUP_TABLE_FILES
 )
 add_custom_command(
     DEPENDS
-        ${GEN_SOUND_IDS} ${SOUND_TABLE_DEPENDENCIES}
+        extract_vpks sounds ${SOUND_TABLE_DEPENDENCIES}
+        ${GEN_SOUND_IDS}
     OUTPUT
         ${SOUND_LOOKUP_TABLE_FILES}
     COMMAND
