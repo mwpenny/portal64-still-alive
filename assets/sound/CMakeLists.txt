@@ -209,7 +209,7 @@ function(_add_sound_transform_command_direct SOUND_NAME ARGS OUTPUT_LIST)
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${SOX} ${INPUT_FILE} ${ARGS} ${OUTPUT_FILE}
+            ${SOX} ${INPUT_FILE} ${ARGS} ${OUTPUT_FILE} -V1
         COMMENT
             "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -235,7 +235,8 @@ function(_add_sound_transform_command_sox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${PYTHON3} ${CONVERT_ASSET} ${SOX} ${INPUT_FILE} ${SOUND_SCRIPT} ${OUTPUT_FILE}
+            ${Python3_EXECUTABLE} ${CONVERT_ASSET}
+            ${SOX} ${INPUT_FILE} ${SOUND_SCRIPT} ${OUTPUT_FILE} -V1
         COMMENT
             "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
