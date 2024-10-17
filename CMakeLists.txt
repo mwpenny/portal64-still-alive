@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.28)
-project(portal64)
+project(portal64 C ASM)
+
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # TODO: remove when makefile is no longer in use
 add_compile_definitions(CMAKE)
+
+set(USING_LIBULTRA TRUE)
 
 # Tools
 # TODO: find automatically

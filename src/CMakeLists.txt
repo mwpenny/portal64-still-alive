@@ -2,6 +2,8 @@
 # TODO: linking
 add_executable(portal)
 
+set_target_properties(portal PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+
 target_include_directories(portal PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}"
 )
@@ -168,7 +170,7 @@ target_sources(portal PRIVATE
 ## Version information ##
 #########################
 
-set(GEN_VERSION_HEADER "${PROJECT_SOURCE_DIR}/cmake/gen_version_header.cmake")
+set(GEN_VERSION_HEADER "${PROJECT_SOURCE_DIR}/cmake/GenVersionHeader.cmake")
 set(VERSION_H "${CMAKE_BINARY_DIR}/version.h")
 
 add_custom_target(gen_version_header
@@ -197,6 +199,7 @@ if (USING_LIBULTRA)
 
     target_compile_definitions(portal PRIVATE F3DEX_GBI_2)
 
+    find_package(Libultra REQUIRED)
     target_link_libraries(portal libultra)
 
     # Need explicit call for proper ordering
