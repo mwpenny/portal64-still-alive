@@ -299,7 +299,7 @@ function(_add_music_transform_command MUSIC_SCRIPT OUTPUT_LIST)
         OUTPUT
             ${CONVERTED_FILE}
         COMMAND
-            ${MPG123} -q -w ${CONVERTED_FILE} ${INPUT_FILE}
+            ${FFMPEG} -y -i ${INPUT_FILE} ${CONVERTED_FILE}
         COMMENT
             "Converting $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM

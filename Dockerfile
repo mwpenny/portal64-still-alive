@@ -1,4 +1,4 @@
-from ubuntu:24.04
+FROM ubuntu:24.04
 
 WORKDIR /usr/src/app
 
@@ -48,7 +48,6 @@ RUN apt-get update -y && \
     lua5.4 \
     liblua5.4-dev \
     liblua5.4-0 \
-    mpg123 \
     ffmpeg \
     wget
 
