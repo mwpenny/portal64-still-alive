@@ -8,29 +8,26 @@ add_compile_definitions(CMAKE)
 
 set(USING_LIBULTRA TRUE)
 
-# Tools
-# TODO: find automatically
-# TODO: test on Windows
-set(BLENDER_3_6 "blender")
-set(FFMPEG "ffmpeg")
-set(GIT "git")
-set(IMAGEMAGICK_CONVERT "convert")
-set(MPG123 "mpg123")
-set(NODEJS "node")
-set(PYTHON3 "python")
-set(SFZ2N64 "sfz2n64")
-set(SOX "sox")
-set(VPK "vpk")
-set(VTF2PNG "vtf2png")
+find_package(Blender                3.6 EXACT   REQUIRED)
+find_program(FFmpeg_EXECUTABLE      ffmpeg      REQUIRED)
+find_program(Git_EXECUTABLE         git         REQUIRED)
+find_package(ImageMagickConvert     6 EXACT     REQUIRED)
+find_program(NodeJs_EXECUTABLE      node        REQUIRED)
+find_package(Python3                            REQUIRED)
+find_program(SFZ2N64_EXECUTABLE     sfz2n64     REQUIRED)
+find_program(Sox_EXECUTABLE         sox         REQUIRED)
+find_program(VPK_EXECUTABLE         vpk         REQUIRED)
+find_program(VTF2PNG_EXECUTABLE     vtf2png     REQUIRED)
 
 set(SKELETOOL64 "${PROJECT_SOURCE_DIR}/skelatool64/skeletool64")
 
 # Directories
 set(ASSETS_DIR "${PROJECT_SOURCE_DIR}/assets")
-set(PAK_DIR "${PROJECT_SOURCE_DIR}/portal_pak_dir")
-set(PAK_MODIFIED_DIR "${PROJECT_SOURCE_DIR}/portal_pak_modified")
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/src")
 set(VPK_DIR "${PROJECT_SOURCE_DIR}/vpk")
+
+set(PAK_DIR "${PROJECT_SOURCE_DIR}/portal_pak_dir")
+set(PAK_MODIFIED_DIR "${PROJECT_SOURCE_DIR}/portal_pak_modified")
 
 add_subdirectory(${ASSETS_DIR})
 add_subdirectory(${SRC_DIR})

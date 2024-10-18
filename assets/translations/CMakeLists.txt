@@ -2,9 +2,9 @@
 
 set(SUBTITLE_GENERATE "${PROJECT_SOURCE_DIR}/tools/subtitle_generate.py")
 
-###############
-## Subtitles ##
-###############
+##################
+## Translations ##
+##################
 
 set(STRINGS
     "${VPK_DIR}/Portal/hl2/resource/gameui_english.txt"
@@ -58,7 +58,7 @@ add_custom_command(
         ${STRING_GENERATED_FILES}
     COMMAND
         # TODO: update script to have configurable output location
-        ${PYTHON3} ${SUBTITLE_GENERATE}
+        ${Python3_EXECUTABLE} ${SUBTITLE_GENERATE}
     WORKING_DIRECTORY
         # TODO: Update once script is refactored
         ${PROJECT_SOURCE_DIR}

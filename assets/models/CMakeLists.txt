@@ -111,7 +111,8 @@ function(_add_model_export_command MODEL_NAME OUTPUT_VARIABLE)
         COMMAND
            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${BLENDER_3_6} ${INPUT_FILE} --background --python ${EXPORT_FBX} -- ${OUTPUT_FILE}
+            ${Blender_EXECUTABLE}
+            ${INPUT_FILE} --background --python ${EXPORT_FBX} -- ${OUTPUT_FILE}
         COMMENT
             "Exporting $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -163,7 +164,7 @@ function(_add_model_generate_command MODEL_NAME MODEL_FBX OUTPUT_LIST)
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${PYTHON3} ${CONVERT_ASSET}
+            ${Python3_EXECUTABLE} ${CONVERT_ASSET}
             ${SKELETOOL64}
             ${MODEL_FBX}
             ${MODEL_FLAGS}
@@ -260,7 +261,7 @@ add_custom_command(
     OUTPUT
         ${DYNAMIC_MODEL_LIST_H} ${DYNAMIC_MODEL_LIST_C}
     COMMAND
-        ${NODEJS} ${GEN_DYNAMIC_MODEL_LIST}
+        ${NodeJs_EXECUTABLE} ${GEN_DYNAMIC_MODEL_LIST}
         ${DYNAMIC_MODEL_LIST_H}
         ${DYNAMIC_MODEL_HEADERS}
     COMMENT
@@ -277,7 +278,7 @@ add_custom_command(
     OUTPUT
         ${DYNAMIC_ANIMATED_MODEL_LIST_H} ${DYNAMIC_ANIMATED_MODEL_LIST_C}
     COMMAND
-        ${NODEJS} ${GEN_DYNAMIC_ANIM_MODEL_LIST}
+        ${NodeJs_EXECUTABLE} ${GEN_DYNAMIC_ANIM_MODEL_LIST}
         ${DYNAMIC_ANIMATED_MODEL_LIST_H}
         ${DYNAMIC_ANIMATED_MODEL_HEADERS}
     COMMENT

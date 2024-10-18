@@ -538,7 +538,7 @@ build/assets/%.aifc: assets/%.sox portal_pak_dir/%.wav
 
 build/assets/%.aifc: assets/%.jsox tools/sound/jsox.js portal_pak_dir/%.wav
 	@mkdir -p $(@D)
-	node tools/sound/jsox.js $< $(<:assets/%.jsox=portal_pak_dir/%.wav) $(@:%.aifc=%.wav)
+	node tools/sound/jsox.js sox $< $(<:assets/%.jsox=portal_pak_dir/%.wav) $(@:%.aifc=%.wav)
 	$(SFZ2N64) -o $@ $(@:%.aifc=%.wav)
 
 build/assets/%.aifc: assets/%.msox portal_pak_dir/%.mp3

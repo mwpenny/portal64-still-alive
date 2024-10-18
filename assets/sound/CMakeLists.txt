@@ -30,7 +30,8 @@ function(_add_extract_video_audio_command INPUT_FILE OUTPUT_FILE)
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${FFMPEG} -i ${INPUT_FILE} -vn -loglevel error -y ${OUTPUT_FILE}
+            ${FFmpeg_EXECUTABLE}
+            -i ${INPUT_FILE} -vn -loglevel error -y ${OUTPUT_FILE}
         COMMENT
             "Extracting audio from $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -209,7 +210,7 @@ function(_add_sound_transform_command_direct SOUND_NAME ARGS OUTPUT_LIST)
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${SOX} ${INPUT_FILE} ${ARGS} ${OUTPUT_FILE} -V1
+            ${Sox_EXECUTABLE} ${INPUT_FILE} ${ARGS} ${OUTPUT_FILE} -V1
         COMMENT
             "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -236,7 +237,7 @@ function(_add_sound_transform_command_sox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
             ${Python3_EXECUTABLE} ${CONVERT_ASSET}
-            ${SOX} ${INPUT_FILE} ${SOUND_SCRIPT} ${OUTPUT_FILE} -V1
+            ${Sox_EXECUTABLE} ${INPUT_FILE} ${SOUND_SCRIPT} ${OUTPUT_FILE} -V1
         COMMENT
             "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -252,7 +253,8 @@ function(_add_sound_transform_command_jsox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
-            ${NODEJS} ${JSOX} ${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE}
+            ${NodeJs_EXECUTABLE} ${JSOX}
+            ${Sox_EXECUTABLE} ${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE}
         COMMENT
             "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -299,7 +301,8 @@ function(_add_music_transform_command MUSIC_SCRIPT OUTPUT_LIST)
         OUTPUT
             ${CONVERTED_FILE}
         COMMAND
-            ${FFMPEG} -y -i ${INPUT_FILE} ${CONVERTED_FILE}
+            ${FFmpeg_EXECUTABLE}
+            -i ${INPUT_FILE} -loglevel error -y ${CONVERTED_FILE}
         COMMENT
             "Converting $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -353,7 +356,7 @@ function(_add_sound_convert_command INPUT_FILE OUTPUT_LIST)
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
-            ${SFZ2N64} -o ${OUTPUT_FILE} ${INPUT_FILE}
+            ${SFZ2N64_EXECUTABLE} -o ${OUTPUT_FILE} ${INPUT_FILE}
         COMMENT
             "Converting $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -427,7 +430,7 @@ add_custom_command(
     OUTPUT
         ${SOUND_DATA_TABLE_FILES}
     COMMAND
-        ${SFZ2N64} -o ${SOUND_TABLE_SOUNDS} ${SOUND_TABLE_INPUTS}
+        ${SFZ2N64_EXECUTABLE} -o ${SOUND_TABLE_SOUNDS} ${SOUND_TABLE_INPUTS}
     COMMENT
         "Generating sound data tables"
     VERBATIM
@@ -449,7 +452,8 @@ add_custom_command(
     OUTPUT
         ${SOUND_LOOKUP_TABLE_FILES}
     COMMAND
-        ${NODEJS} ${GEN_SOUND_IDS} -o ${BUILD_AUDIO_DIR} -p SOUNDS_ ${SOUND_TABLE_INPUTS}
+        ${NodeJs_EXECUTABLE} ${GEN_SOUND_IDS}
+        -o ${BUILD_AUDIO_DIR} -p SOUNDS_ ${SOUND_TABLE_INPUTS}
     WORKING_DIRECTORY
         # TODO: Update once script is refactored
         ${PROJECT_SOURCE_DIR}

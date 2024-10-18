@@ -2,6 +2,7 @@
 ## VPK extraction ##
 ####################
 
+# TODO: automatic discovery of game files
 # TODO: multiple languages
 set(VPKS_PORTAL
     Portal/portal/portal_pak_dir.vpk
@@ -44,7 +45,7 @@ function(_add_vpk_extract_command VPK_LIST OUTPUT_LIST)
         OUTPUT
             ${MAIN_VPK_STAMP}
         COMMAND
-            ${VPK} -x ${PAK_DIR} ${MAIN_VPK}
+            ${VPK_EXECUTABLE} -x ${PAK_DIR} ${MAIN_VPK}
         COMMAND
             ${CMAKE_COMMAND} -E touch ${MAIN_VPK_STAMP}
         WORKING_DIRECTORY

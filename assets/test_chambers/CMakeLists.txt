@@ -73,7 +73,8 @@ function(_add_level_export_command LEVEL_NAME OUTPUT_VARIABLE)
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${BLENDER_3_6} ${INPUT_FILE} --background --python ${EXPORT_FBX} -- ${OUTPUT_FILE}
+            ${Blender_EXECUTABLE}
+            ${INPUT_FILE} --background --python ${EXPORT_FBX} -- ${OUTPUT_FILE}
         COMMENT
             "Exporting $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -167,7 +168,8 @@ add_custom_command(
     OUTPUT
         ${LEVEL_LIST}
     COMMAND
-        ${NODEJS} ${GEN_LEVEL_LIST} ${LEVEL_LIST} ${LEVEL_GENERATED_HEADERS}
+        ${NodeJs_EXECUTABLE} ${GEN_LEVEL_LIST}
+        ${LEVEL_LIST} ${LEVEL_GENERATED_HEADERS}
     WORKING_DIRECTORY
         ${LEVEL_LIST_OUT_DIR}
     COMMENT

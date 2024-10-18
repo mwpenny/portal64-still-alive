@@ -5,7 +5,7 @@
 # First try getting the version from git
 execute_process(
     COMMAND
-        ${GIT} describe --tags HEAD
+        ${Git_EXECUTABLE} describe --tags HEAD
     RESULT_VARIABLE
         GIT_DESCRIBE_RC
     OUTPUT_VARIABLE

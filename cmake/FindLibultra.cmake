@@ -1,17 +1,17 @@
+###################
+## Find libultra ##
+###################
+
 include(FindPackageHandleStandardArgs)
 
 find_path(Libultra_INCLUDE_DIR ultra64.h
     PATH_SUFFIXES
         "n64"
-    DOC
-        "Libultra include directory"
 )
 
 find_library(Libultra_LIBRARY ultra_rom
     PATH_SUFFIXES
         "n64"
-    DOC
-        "Libultra library file"
 )
 
 find_package_handle_standard_args(Libultra

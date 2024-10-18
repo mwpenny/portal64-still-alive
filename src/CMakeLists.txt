@@ -177,7 +177,10 @@ add_custom_target(gen_version_header
     DEPENDS
         ${GEN_VERSION_HEADER}
     COMMAND
-        ${CMAKE_COMMAND} -D GIT=${GIT} -D OUTPUT_FILE=${VERSION_H} -P ${GEN_VERSION_HEADER}
+        ${CMAKE_COMMAND}
+        -D Git_EXECUTABLE=${Git_EXECUTABLE}
+        -D OUTPUT_FILE=${VERSION_H}
+        -P ${GEN_VERSION_HEADER}
     WORKING_DIRECTORY
         ${PROJECT_SOURCE_DIR}
     VERBATIM

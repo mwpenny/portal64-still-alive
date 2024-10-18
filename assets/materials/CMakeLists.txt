@@ -111,7 +111,7 @@ function(_add_texture_convert_command INPUT_FILE OUTPUT_FILE)
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
-            ${VTF2PNG} ${ARGS} ${INPUT_FILE} ${OUTPUT_FILE}
+            ${VTF2PNG_EXECUTABLE} ${ARGS} ${INPUT_FILE} ${OUTPUT_FILE}
         COMMENT
             "Converting $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -174,7 +174,7 @@ function(_add_extract_frame_command INPUT_FILE OUTPUT_FILE SECONDS)
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${FFMPEG}
+            ${FFmpeg_EXECUTABLE}
             -ss 00:00:${SECONDS}
             -i ${INPUT_FILE}
             -frames:v 1
@@ -183,7 +183,8 @@ function(_add_extract_frame_command INPUT_FILE OUTPUT_FILE SECONDS)
             -loglevel error
             -y ${OUTPUT_FILE}
         COMMAND
-            ${IMAGEMAGICK_CONVERT} ${OUTPUT_FILE} -crop 491x369+265+202 -resize 160x120 ${OUTPUT_FILE}
+            ${ImageMagickConvert_EXECUTABLE}
+            ${OUTPUT_FILE} -crop 491x369+265+202 -resize 160x120 ${OUTPUT_FILE}
         COMMENT
             "Extracting frame from $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -256,8 +257,11 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
-            ${PYTHON3} ${CONVERT_ASSET}
-            ${IMAGEMAGICK_CONVERT} ${INPUT_FILE} ${TEXTURE_SCRIPT} ${OUTPUT_FILE}
+            ${Python3_EXECUTABLE} ${CONVERT_ASSET}
+            ${ImageMagickConvert_EXECUTABLE}
+            ${INPUT_FILE}
+            ${TEXTURE_SCRIPT}
+            ${OUTPUT_FILE}
         WORKING_DIRECTORY
             # TODO: Change this to PAK_MODIFIED_MATERIALS_DIR and update .ims files with relative path
             ${PROJECT_SOURCE_DIR}
