@@ -11,12 +11,12 @@ OUTPUT_ARCH (mips)
     __romPos += SIZEOF(.name);
 
 #define BEGIN_NOLOAD(name) \
-    _##name##SegmentBssStart = ADDR(.name.noload); \
+    _##name##SegmentNoLoadStart = ADDR(.name.noload); \
     .name.noload (NOLOAD) :
 
 #define END_NOLOAD(name) \
-    _##name##SegmentBssEnd = ADDR(.name.noload) + SIZEOF(.name.noload); \
-    _##name##SegmentBssSize = SIZEOF(.name.noload);
+    _##name##SegmentNoLoadEnd = ADDR(.name.noload) + SIZEOF(.name.noload); \
+    _##name##SegmentNoLoadSize = SIZEOF(.name.noload);
 
 
 SECTIONS
@@ -48,6 +48,7 @@ SECTIONS
       CODE_SEGMENT(.rodata*);
    }
    END_SEG(code)
+
    BEGIN_NOLOAD(code)
    {
       CODE_SEGMENT(COMMON);
@@ -57,7 +58,7 @@ SECTIONS
    }
    END_NOLOAD(code)
    
-   _codeSegmentBssEnd = .;
+   _codeSegmentNoLoadEnd = .;
    
    _heapStart = .;
 

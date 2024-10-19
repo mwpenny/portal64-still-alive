@@ -10,6 +10,7 @@ target_include_directories(portal PRIVATE
 
 # Generated code
 target_link_libraries(portal
+    asm_sources
     levels
     materials
     models

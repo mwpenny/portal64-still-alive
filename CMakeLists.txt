@@ -22,6 +22,7 @@ find_program(VTF2PNG_EXECUTABLE     vtf2png     REQUIRED)
 set(SKELETOOL64 "${PROJECT_SOURCE_DIR}/skelatool64/skeletool64")
 
 # Directories
+set(ASM_DIR "${PROJECT_SOURCE_DIR}/asm")
 set(ASSETS_DIR "${PROJECT_SOURCE_DIR}/assets")
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/src")
 set(VPK_DIR "${PROJECT_SOURCE_DIR}/vpk")
@@ -29,6 +30,7 @@ set(VPK_DIR "${PROJECT_SOURCE_DIR}/vpk")
 set(PAK_DIR "${PROJECT_SOURCE_DIR}/portal_pak_dir")
 set(PAK_MODIFIED_DIR "${PROJECT_SOURCE_DIR}/portal_pak_modified")
 
+add_subdirectory(${ASM_DIR})
 add_subdirectory(${ASSETS_DIR})
 add_subdirectory(${SRC_DIR})
 add_subdirectory(${VPK_DIR})
