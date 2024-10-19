@@ -468,6 +468,12 @@ add_custom_target(sound_tables
         ${SOUND_LOOKUP_TABLE_FILES}
 )
 
+add_library(sound_data_tables INTERFACE)
+add_dependencies(sound_data_tables sound_tables)
+target_sources(sound_data_tables INTERFACE
+    ${SOUND_DATA_TABLE_FILES}
+)
+
 add_library(sound_lookup_tables INTERFACE)
 add_dependencies(sound_lookup_tables sound_tables)
 target_sources(sound_lookup_tables INTERFACE

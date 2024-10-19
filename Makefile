@@ -153,7 +153,7 @@ endif
 include $(COMMONRULES)
 
 .s.o:
-	$(AS) -Wa,-Iasm -o $@ $<
+	$(AS) -o $@ $<
 
 build/%.o: %.c
 	@mkdir -p $(@D)
@@ -162,7 +162,7 @@ build/%.o: %.c
 
 build/%.o: %.s
 	@mkdir -p $(@D)
-	$(AS) -Wa,-Iasm -o $@ $<
+	$(AS) -o $@ $<
 
 ####################
 ## Assets

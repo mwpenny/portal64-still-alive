@@ -8,6 +8,7 @@ add_compile_definitions(CMAKE)
 
 set(USING_LIBULTRA TRUE)
 
+# Programs used in build
 find_package(Blender                3.6 EXACT   REQUIRED)
 find_program(FFmpeg_EXECUTABLE      ffmpeg      REQUIRED)
 find_program(Git_EXECUTABLE         git         REQUIRED)
