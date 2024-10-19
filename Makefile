@@ -13,10 +13,6 @@ VTF2PNG:=vtf2png
 SFZ2N64:=sfz2n64
 
 $(SKELATOOL64):
-	skelatool64/setup_dependencies.sh
-
-
-
 	@$(MAKE) -C skelatool64
 
 # Use tag name if the current commit is tagged, otherwise use commit hash

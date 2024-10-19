@@ -115,7 +115,7 @@ bool PixelIAu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) {
     }
 }
 
-struct PixelRGBAu8 readRGBAPixel(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y) {
+struct PixelRGBAu8 readRGBAPixel(cimg_library::CImg<unsigned char>& input, int x, int y) {
     struct PixelRGBAu8 result;
 
     result.r = 0;
@@ -143,7 +143,7 @@ struct PixelRGBAu8 readRGBAPixel(cimg_library_suffixed::CImg<unsigned char>& inp
     return result;
 }
 
-struct PixelIu8 readIPixel(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y) {
+struct PixelIu8 readIPixel(cimg_library::CImg<unsigned char>& input, int x, int y) {
     switch (input.spectrum()) {
         case 4:
         case 3:
@@ -160,7 +160,7 @@ struct PixelIu8 readIPixel(cimg_library_suffixed::CImg<unsigned char>& input, in
     return PixelIu8(0);
 }
 
-struct PixelIAu8 readIAPixel(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y) {
+struct PixelIAu8 readIAPixel(cimg_library::CImg<unsigned char>& input, int x, int y) {
     uint8_t alpha = 0xFF;
 
     switch (input.spectrum()) {
@@ -181,7 +181,7 @@ struct PixelIAu8 readIAPixel(cimg_library_suffixed::CImg<unsigned char>& input, 
     return PixelIAu8(0, alpha);
 }
 
-void writeRGBAPixel(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y, struct PixelRGBAu8 value) {
+void writeRGBAPixel(cimg_library::CImg<unsigned char>& input, int x, int y, struct PixelRGBAu8 value) {
     switch (input.spectrum()) {
         case 4:
             input(x, y, 0, 3) = value.a;
@@ -198,7 +198,7 @@ void writeRGBAPixel(cimg_library_suffixed::CImg<unsigned char>& input, int x, in
     }
 }
 
-void writeIAPixel(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y, struct PixelIAu8 value) {
+void writeIAPixel(cimg_library::CImg<unsigned char>& input, int x, int y, struct PixelIAu8 value) {
     switch (input.spectrum()) {
         case 4:
             input(x, y, 0, 3) = value.a;
@@ -215,7 +215,7 @@ void writeIAPixel(cimg_library_suffixed::CImg<unsigned char>& input, int x, int 
     }
 }
 
-bool convertPixel(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y, DataChunkStream& output, G_IM_FMT fmt, G_IM_SIZ siz, const std::shared_ptr<PalleteDefinition>& pallete) {
+bool convertPixel(cimg_library::CImg<unsigned char>& input, int x, int y, DataChunkStream& output, G_IM_FMT fmt, G_IM_SIZ siz, const std::shared_ptr<PalleteDefinition>& pallete) {
     switch (fmt) {
         case G_IM_FMT::G_IM_FMT_RGBA: {
             PixelRGBAu8 pixel = readRGBAPixel(input, x, y);
@@ -281,7 +281,7 @@ uint8_t floatToByte(float input) {
     return result;
 }
 
-void applyTwoToneEffect(cimg_library_suffixed::CImg<unsigned char>& input, PixelRGBAu8& maxColor, PixelRGBAu8& minColor) {
+void applyTwoToneEffect(cimg_library::CImg<unsigned char>& input, PixelRGBAu8& maxColor, PixelRGBAu8& minColor) {
     LinearLeastSquares r;
     LinearLeastSquares g;
     LinearLeastSquares b;
@@ -333,8 +333,8 @@ void applyTwoToneEffect(cimg_library_suffixed::CImg<unsigned char>& input, Pixel
 
 #define NORMAL_45_STEEPNESS 16
 
-void calculateNormalMap(cimg_library_suffixed::CImg<unsigned char>& input) {
-    cimg_library_suffixed::CImg<unsigned char> result(input.width(), input.height(), 1, 3);
+void calculateNormalMap(cimg_library::CImg<unsigned char>& input) {
+    cimg_library::CImg<unsigned char> result(input.width(), input.height(), 1, 3);
 
     for (int y = 0; y < input.height(); ++y) {
         for (int x = 0; x < input.width(); ++x) {
@@ -360,7 +360,7 @@ void calculateNormalMap(cimg_library_suffixed::CImg<unsigned char>& input) {
     input = result;
 }
 
-void invertImage(cimg_library_suffixed::CImg<unsigned char>& input) {
+void invertImage(cimg_library::CImg<unsigned char>& input) {
     for (int y = 0; y < input.height(); ++y) {
         for (int x = 0; x < input.width(); ++x) {
             PixelRGBAu8 colorValue = readRGBAPixel(input, x, y);
@@ -369,7 +369,7 @@ void invertImage(cimg_library_suffixed::CImg<unsigned char>& input) {
     }
 }
 
-void selectChannel(cimg_library_suffixed::CImg<unsigned char>& input, TextureDefinitionEffect effects) {
+void selectChannel(cimg_library::CImg<unsigned char>& input, TextureDefinitionEffect effects) {
     for (int y = 0; y < input.height(); ++y) {
         for (int x = 0; x < input.width(); ++x) {
             PixelRGBAu8 colorValue = readRGBAPixel(input, x, y);
@@ -387,7 +387,7 @@ void selectChannel(cimg_library_suffixed::CImg<unsigned char>& input, TextureDef
 
 PalleteDefinition::PalleteDefinition(const std::string& filename):
     mName(getBaseName(replaceExtension(filename, "")) + "_tlut") {
-    cimg_library_suffixed::CImg<unsigned char> imageData(filename.c_str());
+    cimg_library::CImg<unsigned char> imageData(filename.c_str());
 
     DataChunkStream dataStream;
     
@@ -536,7 +536,7 @@ TextureDefinition::TextureDefinition(
     }
     
 }
-bool isGrayscale(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y) {
+bool isGrayscale(cimg_library::CImg<unsigned char>& input, int x, int y) {
     switch (input.spectrum()) {
         case 1:
         case 2:
@@ -549,7 +549,7 @@ bool isGrayscale(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y
     return false;
 }
 
-int colorHash(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y) {
+int colorHash(cimg_library::CImg<unsigned char>& input, int x, int y) {
     switch (input.spectrum()) {
         case 1:
         case 2:
@@ -563,7 +563,7 @@ int colorHash(cimg_library_suffixed::CImg<unsigned char>& input, int x, int y) {
 }
 
 void TextureDefinition::DetermineIdealFormat(const std::string& filename, G_IM_FMT& fmt, G_IM_SIZ& siz) {
-    cimg_library_suffixed::CImg<unsigned char> imageData(filename.c_str());
+    cimg_library::CImg<unsigned char> imageData(filename.c_str());
 
     bool hasColor = false;
     bool hasFullTransparency = false;

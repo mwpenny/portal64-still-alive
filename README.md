@@ -59,7 +59,6 @@ The following commands allow the scripts to run on the system, then it runs the 
 As always it is good practice look over scripts from the internet before running them on your system.
 
 ```sh
-sudo chmod +x skelatool64/setup_dependencies.sh
 sudo chmod +x tools/romfix64.sh
 sudo chmod +x tools/setup.sh
 ./tools/setup.sh

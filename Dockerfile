@@ -18,37 +18,38 @@ RUN apt-get update -y && \
     dpkg --add-architecture i386 && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
     binutils-mips-n64 \
-    newlib-mips-n64 \
+    build-essential \
+    cimg-dev \
+    cmake \
+    ffmpeg \
     gcc-mips-n64 \
-    n64sdk \
-    makemask \
-    root-compatibility-environment \
-    libmpc-dev \
-    sfz2n64 \
-    vtf2png \
-    libxi6 \
-    libxxf86vm-dev \
-    libxfixes3 \
-    libxrender1 \
-    libgl1 \
-    python3 \
-    pip \
-    pipx \
+    git \
     imagemagick \
+    libassimp-dev \
+    libgl1 \
+    liblua5.4-0 \
+    liblua5.4-dev \
+    libmpc-dev \
     libpng-dev \
     libtiff-dev \
-    libassimp-dev \
-    git \
-    cmake \
-    build-essential \
-    wget \
-    unzip \
-    sox \
-    nodejs \
+    libxfixes3 \
+    libxi6 \
+    libxrender1 \
+    libxxf86vm-dev \
+    libyaml-cpp-dev \
     lua5.4 \
-    liblua5.4-dev \
-    liblua5.4-0 \
-    ffmpeg \
+    makemask \
+    newlib-mips-n64 \
+    nodejs \
+    n64sdk \
+    pip \
+    pipx \
+    python3 \
+    root-compatibility-environment \
+    sfz2n64 \
+    sox \
+    unzip \
+    vtf2png \
     wget
 
 RUN mkdir /opt/blender

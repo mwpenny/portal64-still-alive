@@ -16,8 +16,8 @@
 class CImgu8 {
 public:
     CImgu8(const std::string& filename);
-    CImgu8(const cimg_library_suffixed::CImg<unsigned char>& img);
-    cimg_library_suffixed::CImg<unsigned char> mImg;
+    CImgu8(const cimg_library::CImg<unsigned char>& img);
+    cimg_library::CImg<unsigned char> mImg;
 };
 
 #endif
