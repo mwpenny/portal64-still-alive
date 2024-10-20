@@ -19,12 +19,12 @@ find_package_handle_standard_args(Libultra
     Libultra_LIBRARY
 )
 
-if(Libultra_FOUND AND NOT TARGET libultra)
-    add_library(libultra STATIC IMPORTED)
-    set_target_properties(libultra PROPERTIES
+if(Libultra_FOUND AND NOT TARGET libultra::libultra)
+    add_library(libultra::libultra STATIC IMPORTED)
+    set_target_properties(libultra::libultra PROPERTIES
         IMPORTED_LOCATION ${Libultra_LIBRARY}
     )
-    target_include_directories(libultra INTERFACE
+    target_include_directories(libultra::libultra INTERFACE
         "${Libultra_INCLUDE_DIR}"
         "${Libultra_INCLUDE_DIR}/PR"
     )

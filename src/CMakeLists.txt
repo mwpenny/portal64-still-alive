@@ -204,10 +204,10 @@ if (USING_LIBULTRA)
     target_compile_definitions(portal PRIVATE F3DEX_GBI_2)
 
     find_package(Libultra REQUIRED)
-    target_link_libraries(portal libultra)
+    target_link_libraries(portal libultra::libultra)
 
     # Need explicit call for proper ordering
     target_include_directories(portal BEFORE
-        PRIVATE $<TARGET_PROPERTY:libultra,INTERFACE_INCLUDE_DIRECTORIES>
+        PRIVATE $<TARGET_PROPERTY:libultra::libultra,INTERFACE_INCLUDE_DIRECTORIES>
     )
 endif()
