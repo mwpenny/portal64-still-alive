@@ -9,7 +9,7 @@
 // included in every file. That is whey I created
 // The CImgu8 class. You should not include this header
 // file from other header files
-#include "../../cimg/CImg.h"
+#include <CImg.h>
 
 #include <string>
 

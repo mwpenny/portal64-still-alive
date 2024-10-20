@@ -8,12 +8,13 @@
 # --------------------------------------------------------------------
 include $(N64_ROOT)/usr/include/n64/make/PRdefs
 
-SKELATOOL64:=skelatool64/skeletool64
+SKELATOOL64:=skelatool64/build/skeletool64
 VTF2PNG:=vtf2png
 SFZ2N64:=sfz2n64
 
 $(SKELATOOL64):
-	@$(MAKE) -C skelatool64
+	cmake -S skelatool64 -B skelatool64/build
+	cmake --build skelatool64/build
 
 # Use tag name if the current commit is tagged, otherwise use commit hash
 # If not in a git repo, fall back to exported version
@@ -88,11 +89,11 @@ LDFLAGS =	$(N64LIB) -lc -lgcc
 default:	english_audio
 
 english_audio: build/src/audio/subtitles.h portal_pak_dir $(SKELATOOL64)
-	@$(MAKE) -C skelatool64
+	@$(MAKE) $(SKELATOOL64)
 	@$(MAKE) buildgame
 
 all_languages: build/src/audio/subtitles.h portal_pak_dir german_audio french_audio russian_audio spanish_audio $(SKELATOOL64)
-	@$(MAKE) -C skelatool64
+	@$(MAKE) $(SKELATOOL64)
 	@$(MAKE) buildgame
 
 german_audio: vpk/portal_sound_vo_german_dir.vpk vpk/portal_sound_vo_german_000.vpk portal_pak_dir
@@ -640,7 +641,7 @@ clean:
 	rm -rf portal_pak_dir
 	rm -rf portal_pak_modified
 	rm -rf assets/locales
-	@$(MAKE) -C skelatool64 clean
+	cmake --build skelatool64/build --target clean
 
 clean-src:
 	rm -rf build/src

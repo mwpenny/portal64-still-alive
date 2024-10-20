@@ -1,7 +1,7 @@
 #ifndef __LUA_TRANSFORM_H__
 #define __LUA_TRANSFORM_H__
 
-#include <lua5.4/lua.hpp>
+#include <lua.hpp>
 #include <assimp/scene.h>
 
 #include "LuaGeometry.h"

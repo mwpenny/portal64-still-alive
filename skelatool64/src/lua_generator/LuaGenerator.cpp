@@ -10,7 +10,7 @@
 #include "LuaBasicTypes.h"
 #include "LuaYaml.h"
 
-#include <lua5.4/lua.hpp>
+#include <lua.hpp>
 #include <iostream>
 
 #define EMIT(name) extern const char _binary_build_lua_##name##_out_start[]; extern const char _binary_build_lua_##name##_out_end[];

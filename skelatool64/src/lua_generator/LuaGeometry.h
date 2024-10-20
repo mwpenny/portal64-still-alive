@@ -1,7 +1,7 @@
 #ifndef __LUA_GEOMETRY_H__
 #define __LUA_GEOMETRY_H__
 
-#include <lua5.4/lua.hpp>
+#include <lua.hpp>
 #include <assimp/scene.h>
 
 void toLua(lua_State* L, const aiQuaternion& quaternion);

@@ -20,7 +20,7 @@ find_program(Sox_EXECUTABLE         sox         REQUIRED)
 find_program(VPK_EXECUTABLE         vpk         REQUIRED)
 find_program(VTF2PNG_EXECUTABLE     vtf2png     REQUIRED)
 
-set(SKELETOOL64 "${PROJECT_SOURCE_DIR}/skelatool64/skeletool64")
+set(SKELETOOL64 "${PROJECT_SOURCE_DIR}/skelatool64/build/skeletool64")
 
 # Directories
 set(ASM_DIR "${PROJECT_SOURCE_DIR}/asm")
