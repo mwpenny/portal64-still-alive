@@ -195,7 +195,7 @@ function(_add_sound_transform_command_direct SOUND_NAME ARGS OUTPUT_LIST)
     set(INPUT_FILE "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
     string(REPLACE " " ";" ARGS ${ARGS})
 
-    set(OUTPUT_FILE "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.wav")
+    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.wav")
 
     cmake_path(
         GET OUTPUT_FILE PARENT_PATH
@@ -270,7 +270,7 @@ function(_add_sound_transform_command SOUND_SCRIPT OUTPUT_LIST)
     # TODO: change output to PAK_MODIFIED_SOUND_DIR once makefile is no longer in use
     set(SOUND_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/${SOUND_SCRIPT}")
     set(INPUT_FILE "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
-    set(OUTPUT_FILE "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.wav")
+    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.wav")
 
     if(SOUND_SCRIPT MATCHES ".*\.jsox")
         _add_sound_transform_command_jsox(${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE})
@@ -292,7 +292,7 @@ function(_add_music_transform_command MUSIC_SCRIPT OUTPUT_LIST)
     set(MUSIC_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/${MUSIC_SCRIPT}")
     set(INPUT_FILE "${PAK_SOUND_DIR}/${MUSIC_NAME}.mp3")
     set(CONVERTED_FILE "${PAK_SOUND_DIR}/${MUSIC_NAME}.wav")
-    set(OUTPUT_FILE "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${MUSIC_NAME}.wav")
+    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${MUSIC_NAME}.wav")
 
     # First convert to WAV
     add_custom_command(
@@ -402,7 +402,7 @@ endforeach()
 foreach(CONVERTED_SOUND ${SOUNDS_CONVERTED})
     cmake_path(
         RELATIVE_PATH CONVERTED_SOUND
-        BASE_DIRECTORY "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}"
+        BASE_DIRECTORY "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}"
         OUTPUT_VARIABLE INS_BANK
     )
     cmake_path(
@@ -418,8 +418,8 @@ endforeach()
 
 # Add commands for generating sound tables
 
-set(SOUND_TABLE_SOUNDS "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/sounds.sounds")
-set(SOUND_TABLE_TBL "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/sounds.sounds.tbl")
+set(SOUND_TABLE_SOUNDS "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/sounds.sounds")
+set(SOUND_TABLE_TBL "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/sounds.sounds.tbl")
 set(SOUND_DATA_TABLE_FILES
     ${SOUND_TABLE_SOUNDS}
     ${SOUND_TABLE_TBL}
@@ -436,7 +436,7 @@ add_custom_command(
     VERBATIM
 )
 
-set(BUILD_AUDIO_DIR "${CMAKE_BINARY_DIR}/src/audio")
+set(BUILD_AUDIO_DIR "${PROJECT_BINARY_DIR}/src/audio")
 set(CLIPS_H "${BUILD_AUDIO_DIR}/clips.h")
 set(LANGUAGES_H "${BUILD_AUDIO_DIR}/languages.h")
 set(LANGUAGES_C "${BUILD_AUDIO_DIR}/languages.c")

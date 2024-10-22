@@ -20,7 +20,7 @@ set(STRING_DEPENDENCIES
 )
 
 # TODO: rename/relocate somewhere else. "Subtitles" also contain UI strings.
-set(BUILD_AUDIO_DIR "${CMAKE_BINARY_DIR}/src/audio")
+set(BUILD_AUDIO_DIR "${PROJECT_BINARY_DIR}/src/audio")
 set(SUBTITLES_H "${BUILD_AUDIO_DIR}/subtitles.h")
 set(SUBTITLES_C "${BUILD_AUDIO_DIR}/subtitles.c")
 set(STRING_GENERATED_FILES

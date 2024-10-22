@@ -172,7 +172,7 @@ target_sources(portal PRIVATE
 #########################
 
 set(GEN_VERSION_HEADER "${PROJECT_SOURCE_DIR}/cmake/GenVersionHeader.cmake")
-set(VERSION_H "${CMAKE_BINARY_DIR}/version.h")
+set(VERSION_H "${PROJECT_BINARY_DIR}/version.h")
 
 add_custom_target(gen_version_header
     DEPENDS

@@ -19,7 +19,7 @@ function(_add_embed_lua_command INPUT_FILE OUTPUT_LIST)
     )
 
     set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${INPUT_FILE}")
-    set(OUTPUT_FILE_OBJ "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${INPUT_NAME}.out")
+    set(OUTPUT_FILE_OBJ "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${INPUT_NAME}.out")
     set(OUTPUT_FILE_C "${OUTPUT_FILE_OBJ}.c")
 
     add_custom_command(
@@ -32,11 +32,11 @@ function(_add_embed_lua_command INPUT_FILE OUTPUT_LIST)
         COMMAND
             # Use relative path for nice symbol name
             ${CMAKE_COMMAND}
-            -D INPUT_FILE=$<PATH:RELATIVE_PATH,${OUTPUT_FILE_OBJ},${CMAKE_BINARY_DIR}>
+            -D INPUT_FILE=$<PATH:RELATIVE_PATH,${OUTPUT_FILE_OBJ},${PROJECT_BINARY_DIR}>
             -D OUTPUT_FILE=${OUTPUT_FILE_C}
             -P ${EMBED_RESOURCE}
         WORKING_DIRECTORY
-            ${CMAKE_BINARY_DIR}
+            ${PROJECT_BINARY_DIR}
         COMMENT
             "Embedding $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM

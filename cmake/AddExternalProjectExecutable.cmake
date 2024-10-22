@@ -14,7 +14,7 @@ function(add_external_project_executable PROJECT_NAME)
         SOURCE_DIR
             "${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}"
         PREFIX
-            "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}"
+            "${PROJECT_BINARY_DIR}/${PROJECT_NAME}"
         CMAKE_ARGS
             "-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>"
         BUILD_BYPRODUCTS
