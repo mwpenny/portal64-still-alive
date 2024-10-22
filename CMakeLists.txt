@@ -20,7 +20,24 @@ find_program(Sox_EXECUTABLE         sox         REQUIRED)
 find_program(VPK_EXECUTABLE         vpk         REQUIRED)
 find_program(VTF2PNG_EXECUTABLE     vtf2png     REQUIRED)
 
-set(SKELETOOL64 "${PROJECT_SOURCE_DIR}/skelatool64/build/skeletool64")
+# Add skeletool as external project to isolate from toolchain
+set(SKELETOOL_BUILD_DIR "${CMAKE_BINARY_DIR}/skeletool64")
+ExternalProject_Add(skeletool64
+    SOURCE_DIR
+        "${PROJECT_SOURCE_DIR}/skelatool64"
+    PREFIX
+        "${CMAKE_BINARY_DIR}/skeletool64"
+    CMAKE_ARGS
+        "-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>"
+    BUILD_BYPRODUCTS
+        "<INSTALL_DIR>/bin/skeletool64"
+    BUILD_ALWAYS TRUE
+)
+add_executable(skeletool64::skeletool64 IMPORTED)
+set_target_properties(skeletool64::skeletool64 PROPERTIES
+    IMPORTED_LOCATION "${SKELETOOL_BUILD_DIR}/bin/skeletool64"
+)
+add_dependencies(skeletool64::skeletool64 skeletool64)
 
 # Directories
 set(ASM_DIR "${PROJECT_SOURCE_DIR}/asm")

@@ -13,19 +13,19 @@
 #include <lua.hpp>
 #include <iostream>
 
-#define EMIT(name) extern const char _binary_build_lua_##name##_out_start[]; extern const char _binary_build_lua_##name##_out_end[];
+#define EMIT(name) extern const char _binary_lua_##name##_out[]; extern const size_t _binary_lua_##name##_out_size[];
 #include "LuaFiles.h"
 #undef EMIT
 
 struct LuaFile {
     const char* start;
-    const char* end;
+    const size_t size;
     const char* name;
     const char* moduleName;
 };
 
 struct LuaFile luaFiles[] = {
-#define EMIT(name) {_binary_build_lua_##name##_out_start, _binary_build_lua_##name##_out_end, "lua/" #name ".lua", #name},
+#define EMIT(name) {_binary_lua_##name##_out, *_binary_lua_##name##_out_size, "lua/" #name ".lua", #name},
 #include "LuaFiles.h"
 #undef EMIT
 };
@@ -56,7 +56,7 @@ int loadPrecompiledModule(lua_State* L) {
             continue;
         }
 
-        luaL_loadbuffer(L, file->start, file->end - file->start, file->name);
+        luaL_loadbuffer(L, file->start, file->size, file->name);
 
         int errCode = lua_pcall(L, 0, 1, 0);
 

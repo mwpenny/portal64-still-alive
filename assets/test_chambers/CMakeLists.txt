@@ -114,6 +114,7 @@ function(_add_level_generate_command LEVEL_NAME LEVEL_FBX OUTPUT_LIST)
     add_custom_command(
         DEPENDS
             textures "$<TARGET_PROPERTY:textures,OUTPUTS>"
+            skeletool64::skeletool64
             ${EXPORT_SCRIPTS}
             ${LEVEL_FBX}
             ${LEVEL_YAML}
@@ -121,7 +122,7 @@ function(_add_level_generate_command LEVEL_NAME LEVEL_FBX OUTPUT_LIST)
         OUTPUT
             ${OUTPUT_FILES}
         COMMAND
-            ${SKELETOOL64}
+            skeletool64::skeletool64
             --script ${EXPORT_LEVEL}
             --fixed-point-scale ${SCENE_SCALE}
             --model-scale ${MODEL_SCALE}

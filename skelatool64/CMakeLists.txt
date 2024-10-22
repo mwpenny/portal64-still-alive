@@ -6,11 +6,12 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 find_package(assimp                 REQUIRED)
 find_package(CImg                   REQUIRED)
 find_package(Lua        5.4 EXACT   REQUIRED)
+find_package(Luac       5.4 EXACT   REQUIRED)
 find_package(yaml-cpp               REQUIRED)
 find_package(PNG                    REQUIRED)
 find_package(TIFF                   REQUIRED)
 
-add_subdirectory("lua")
+add_subdirectory(lua)
 
 add_executable(skeletool64
     main.cpp
@@ -81,3 +82,5 @@ target_link_libraries(skeletool64
     yaml-cpp::yaml-cpp
     lua_scripts
 )
+
+install(TARGETS skeletool64)

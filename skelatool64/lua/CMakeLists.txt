@@ -1,3 +1,5 @@
+set(EMBED_RESOURCE "${PROJECT_SOURCE_DIR}/cmake/EmbedResource.cmake")
+
 set(LUA_SCRIPTS
     sk_animation.lua
     sk_definition_writer.lua
@@ -5,7 +7,7 @@ set(LUA_SCRIPTS
     sk_scene.lua
 )
 
-function(_add_compile_lua_command INPUT_FILE OUTPUT_LIST)
+function(_add_embed_lua_command INPUT_FILE OUTPUT_LIST)
     cmake_path(
         RELATIVE_PATH CMAKE_CURRENT_SOURCE_DIR
         BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
@@ -17,45 +19,45 @@ function(_add_compile_lua_command INPUT_FILE OUTPUT_LIST)
     )
 
     set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${INPUT_FILE}")
-    set(OUTPUT_FILE_LUAC "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${INPUT_NAME}.out")
-    set(OUTPUT_FILE_OBJ "${OUTPUT_FILE_LUAC}${CMAKE_CXX_OUTPUT_EXTENSION}")
+    set(OUTPUT_FILE_OBJ "${CMAKE_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${INPUT_NAME}.out")
+    set(OUTPUT_FILE_C "${OUTPUT_FILE_OBJ}.c")
 
     add_custom_command(
         DEPENDS
-            ${INPUT_FILE}
+            ${EMBED_RESOURCE} ${INPUT_FILE}
         OUTPUT
-            ${OUTPUT_FILE_LUAC} ${OUTPUT_FILE_OBJ}
+            ${OUTPUT_FILE_OBJ} ${OUTPUT_FILE_C}
         COMMAND
-            # TODO: find dynamically
-            luac -o ${OUTPUT_FILE_LUAC} ${INPUT_FILE}
+            ${Luac_EXECUTABLE} -o ${OUTPUT_FILE_OBJ} ${INPUT_FILE}
         COMMAND
-            # Not cross-platform :(
-            # TODO: don't compile these. Read them at runtime.
-            ${CMAKE_LINKER} -r -b binary -o ${OUTPUT_FILE_OBJ}
-            "$<PATH:RELATIVE_PATH,${OUTPUT_FILE_LUAC},${PROJECT_SOURCE_DIR}>"
+            # Use relative path for nice symbol name
+            ${CMAKE_COMMAND}
+            -D INPUT_FILE=$<PATH:RELATIVE_PATH,${OUTPUT_FILE_OBJ},${CMAKE_BINARY_DIR}>
+            -D OUTPUT_FILE=${OUTPUT_FILE_C}
+            -P ${EMBED_RESOURCE}
         WORKING_DIRECTORY
-            ${PROJECT_SOURCE_DIR}
+            ${CMAKE_BINARY_DIR}
         COMMENT
-            "Compiling $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
+            "Embedding $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
     )
 
-    list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILE_OBJ})
+    list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILE_C})
     return(PROPAGATE ${OUTPUT_LIST})
 endfunction()
 
-set(LUA_OBJS "")
+set(LUA_C_FILES "")
 
 foreach(LUA_SCRIPT ${LUA_SCRIPTS})
-    _add_compile_lua_command(${LUA_SCRIPT} LUA_OBJS)
+    _add_embed_lua_command(${LUA_SCRIPT} LUA_C_FILES)
 endforeach()
 
-add_custom_target(lua_script_objs
-    DEPENDS ${LUA_OBJS}
+add_custom_target(lua_c_files
+    DEPENDS ${LUA_C_FILES}
 )
 
-add_library(lua_scripts OBJECT IMPORTED GLOBAL)
-add_dependencies(lua_scripts lua_script_objs)
-set_target_properties(lua_scripts PROPERTIES
-    IMPORTED_OBJECTS "${LUA_OBJS}"
+add_library(lua_scripts INTERFACE)
+add_dependencies(lua_scripts lua_c_files)
+target_sources(lua_scripts INTERFACE
+    ${LUA_C_FILES}
 )

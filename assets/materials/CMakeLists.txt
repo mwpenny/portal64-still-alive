@@ -416,14 +416,14 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
         list(APPEND DEPENDENCY_FILES ${DEP_FILE_LIST})
     endif()
 
-    # TODO: add dependency on skeletool once it is built with CMake
     add_custom_command(
         DEPENDS
             textures ${DEPENDENCY_FILES}
+            skeletool64::skeletool64
         OUTPUT
             ${OUTPUT_FILE_H} ${OUTPUT_FILE_C}
         COMMAND
-            ${SKELETOOL64}
+            skeletool64::skeletool64
             --name ${MATERIAL_NAME}
             -m ${INPUT_FILE}
             --material-output
