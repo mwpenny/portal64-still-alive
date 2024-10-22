@@ -158,8 +158,8 @@ target_sources(portal PRIVATE
     scene/static_scene.c
     scene/switch.c
     scene/trigger_listener.c
-    sk64/skelatool_animator.c
-    sk64/skelatool_armature.c
+    sk64/skeletool_animator.c
+    sk64/skeletool_armature.c
     util/assert.c
     util/dynamic_asset_loader.c
     util/memory.c

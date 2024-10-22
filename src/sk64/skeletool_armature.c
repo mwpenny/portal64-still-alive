@@ -1,6 +1,6 @@
 
-#include "skelatool_armature.h"
-#include "skelatool_defs.h"
+#include "skeletool_armature.h"
+#include "skeletool_defs.h"
 #include "util/memory.h"
 #include "util/rom.h"
 

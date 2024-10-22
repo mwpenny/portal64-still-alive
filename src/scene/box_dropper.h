@@ -2,8 +2,8 @@
 #define _SCENE_BOX_DROPPER_H__
 
 #include "../math/transform.h"
-#include "../sk64/skelatool_armature.h"
-#include "../sk64/skelatool_animator.h"
+#include "../sk64/skeletool_armature.h"
+#include "../sk64/skeletool_animator.h"
 #include "../levels/level_definition.h"
 #include "../audio/clips.h"
 #include "../audio/soundplayer.h"

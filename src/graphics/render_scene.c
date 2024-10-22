@@ -3,7 +3,7 @@
 #include "../util/memory.h"
 #include "defs.h"
 #include "../levels/levels.h"
-#include "sk64/skelatool_defs.h"
+#include "sk64/skeletool_defs.h"
 
 struct RenderScene* renderSceneNew(struct Transform* cameraTransform, struct RenderState *renderState, int capacity, u64 visibleRooms) {
     struct RenderScene* result = stackMalloc(sizeof(struct RenderScene));

@@ -44,7 +44,7 @@ pipx install vpk
 
 ### Skeletool Dependencies
 
-Setup and install dependencies for `skelatool64`:
+Setup and install dependencies for `skeletool64`:
 
 ```sh
 sudo apt install cimg-dev libassimp-dev liblua5.4-0 liblua5.4-dev libpng-dev libtiff-dev libyaml-cpp-dev lua5.4

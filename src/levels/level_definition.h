@@ -8,8 +8,8 @@
 #include "../math/box3d.h"
 #include "../math/range.h"
 #include "../math/rotated_box.h"
-#include "../sk64/skelatool_clip.h"
-#include "../sk64/skelatool_armature.h"
+#include "../sk64/skeletool_clip.h"
+#include "../sk64/skeletool_armature.h"
 #include "../physics/collision_box.h"
 
 #define NO_TRANSFORM_INDEX    0xFF

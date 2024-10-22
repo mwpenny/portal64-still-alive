@@ -1,5 +1,5 @@
-#ifndef __SKELATOOL_OBJECT_H
-#define __SKELATOOL_OBJECT_H
+#ifndef __SKELETOOL_OBJECT_H
+#define __SKELETOOL_OBJECT_H
 
 #include <ultra64.h>
 #include "math/transform.h"

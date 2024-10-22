@@ -5,8 +5,8 @@
 #include "../levels/level_definition.h"
 #include "../audio/soundplayer.h"
 #include "../audio/clips.h"
-#include "../sk64/skelatool_animator.h"
-#include "../sk64/skelatool_armature.h"
+#include "../sk64/skeletool_animator.h"
+#include "../sk64/skeletool_armature.h"
 
 enum DoorFlags {
     DoorFlagsIsOpen = (1 << 0),

@@ -8,13 +8,13 @@
 # --------------------------------------------------------------------
 include $(N64_ROOT)/usr/include/n64/make/PRdefs
 
-SKELATOOL64:=skelatool64/build/skeletool64
+SKELETOOL64:=skeletool64/build/skeletool64
 VTF2PNG:=vtf2png
 SFZ2N64:=sfz2n64
 
-$(SKELATOOL64):
-	cmake -S skelatool64 -B skelatool64/build
-	cmake --build skelatool64/build
+$(SKELETOOL64):
+	cmake -S skeletool64 -B skeletool64/build
+	cmake --build skeletool64/build
 
 # Use tag name if the current commit is tagged, otherwise use commit hash
 # If not in a git repo, fall back to exported version
@@ -88,12 +88,12 @@ LDFLAGS =	$(N64LIB) -lc -lgcc
 
 default:	english_audio
 
-english_audio: build/src/audio/subtitles.h portal_pak_dir $(SKELATOOL64)
-	@$(MAKE) $(SKELATOOL64)
+english_audio: build/src/audio/subtitles.h portal_pak_dir $(SKELETOOL64)
+	@$(MAKE) $(SKELETOOL64)
 	@$(MAKE) buildgame
 
-all_languages: build/src/audio/subtitles.h portal_pak_dir german_audio french_audio russian_audio spanish_audio $(SKELATOOL64)
-	@$(MAKE) $(SKELATOOL64)
+all_languages: build/src/audio/subtitles.h portal_pak_dir german_audio french_audio russian_audio spanish_audio $(SKELETOOL64)
+	@$(MAKE) $(SKELETOOL64)
 	@$(MAKE) buildgame
 
 german_audio: vpk/portal_sound_vo_german_dir.vpk vpk/portal_sound_vo_german_000.vpk portal_pak_dir
@@ -268,21 +268,21 @@ portal_pak_modified/images/valve.png portal_pak_modified/images/valve-no-logo.pn
 ## Materials
 ####################
 
-build/assets/materials/static.h build/assets/materials/static_mat.c: assets/materials/static.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
+build/assets/materials/static.h build/assets/materials/static_mat.c: assets/materials/static.skm.yaml $(TEXTURE_IMAGES) $(SKELETOOL64)
 	@mkdir -p $(@D)
-	$(SKELATOOL64) --name static -m $< --material-output -o build/assets/materials/static.h
+	$(SKELETOOL64) --name static -m $< --material-output -o build/assets/materials/static.h
 
-build/assets/materials/ui.h build/assets/materials/ui_mat.c: assets/materials/ui.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
+build/assets/materials/ui.h build/assets/materials/ui_mat.c: assets/materials/ui.skm.yaml $(TEXTURE_IMAGES) $(SKELETOOL64)
 	@mkdir -p $(@D)
-	$(SKELATOOL64) --name ui --default-material default_ui -m $< --material-output -o build/assets/materials/ui.h
+	$(SKELETOOL64) --name ui --default-material default_ui -m $< --material-output -o build/assets/materials/ui.h
 
-build/assets/materials/images.h build/assets/materials/images_mat.c: assets/materials/images.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64) portal_pak_modified/images/valve.png
+build/assets/materials/images.h build/assets/materials/images_mat.c: assets/materials/images.skm.yaml $(TEXTURE_IMAGES) $(SKELETOOL64) portal_pak_modified/images/valve.png
 	@mkdir -p $(@D)
-	$(SKELATOOL64) --name images --default-material default_ui -m $< --material-output -o build/assets/materials/images.h
+	$(SKELETOOL64) --name images --default-material default_ui -m $< --material-output -o build/assets/materials/images.h
 
-build/assets/materials/hud.h build/assets/materials/hud_mat.c: assets/materials/hud.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
+build/assets/materials/hud.h build/assets/materials/hud_mat.c: assets/materials/hud.skm.yaml $(TEXTURE_IMAGES) $(SKELETOOL64)
 	@mkdir -p $(@D)
-	$(SKELATOOL64) --name hud -m $< --material-output -o build/assets/materials/hud.h
+	$(SKELETOOL64) --name hud -m $< --material-output -o build/assets/materials/hud.h
 
 src/levels/level_def_gen.h: build/assets/materials/static.h
 
@@ -366,8 +366,8 @@ DYNAMIC_MODEL_OBJECTS = $(DYNAMIC_MODEL_LIST:%.blend=build/%_geo.o)
 DYNAMIC_ANIMATED_MODEL_HEADERS = $(DYNAMIC_ANIMATED_MODEL_LIST:%.blend=build/%.h)
 DYNAMIC_ANIMATED_MODEL_OBJECTS = $(DYNAMIC_ANIMATED_MODEL_LIST:%.blend=build/%_geo.o)
 
-build/assets/models/%.h build/assets/models/%_geo.c build/assets/models/%_anim.c: build/assets/models/%.fbx assets/models/%.flags assets/materials/elevator.skm.yaml assets/materials/objects.skm.yaml assets/materials/static.skm.yaml $(TEXTURE_IMAGES) $(SKELATOOL64)
-	$(SKELATOOL64) --fixed-point-scale ${SCENE_SCALE} --model-scale 0.01 --name $(<:build/assets/models/%.fbx=%) $(shell cat $(<:build/assets/models/%.fbx=assets/models/%.flags)) -o $(<:%.fbx=%.h) $<
+build/assets/models/%.h build/assets/models/%_geo.c build/assets/models/%_anim.c: build/assets/models/%.fbx assets/models/%.flags assets/materials/elevator.skm.yaml assets/materials/objects.skm.yaml assets/materials/static.skm.yaml $(TEXTURE_IMAGES) $(SKELETOOL64)
+	$(SKELETOOL64) --fixed-point-scale ${SCENE_SCALE} --model-scale 0.01 --name $(<:build/assets/models/%.fbx=%) $(shell cat $(<:build/assets/models/%.fbx=assets/models/%.flags)) -o $(<:%.fbx=%.h) $<
 
 build/assets/models/player/chell.h: assets/materials/chell.skm.yaml
 build/assets/models/props/combine_ball_catcher.h: assets/materials/ball_catcher.skm.yaml
@@ -459,8 +459,8 @@ build/%.fbx: %.blend
 	@mkdir -p $(@D)
 	$(BLENDER_3_6) $< --background --python tools/models/export_fbx.py -- $@
 
-build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c build/assets/test_chambers/%_anim.c: build/assets/test_chambers/%.fbx assets/test_chambers/%.yaml build/assets/materials/static.h build/src/audio/subtitles.h $(SKELATOOL64) $(TEXTURE_IMAGES) $(LUA_FILES)
-	$(SKELATOOL64) --script tools/level_scripts/export_level.lua --fixed-point-scale ${SCENE_SCALE} --model-scale 0.01 --name $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
+build/assets/test_chambers/%.h build/assets/test_chambers/%_geo.c build/assets/test_chambers/%_anim.c: build/assets/test_chambers/%.fbx assets/test_chambers/%.yaml build/assets/materials/static.h build/src/audio/subtitles.h $(SKELETOOL64) $(TEXTURE_IMAGES) $(LUA_FILES)
+	$(SKELETOOL64) --script tools/level_scripts/export_level.lua --fixed-point-scale ${SCENE_SCALE} --model-scale 0.01 --name $(<:build/assets/test_chambers/%.fbx=%) -m assets/materials/static.skm.yaml -o $(<:%.fbx=%.h) $<
 
 build/assets/test_chambers/%.o: build/assets/test_chambers/%.c build/assets/materials/static.h
 	@mkdir -p $(@D)
@@ -641,7 +641,7 @@ clean:
 	rm -rf portal_pak_dir
 	rm -rf portal_pak_modified
 	rm -rf assets/locales
-	cmake --build skelatool64/build --target clean
+	cmake --build skeletool64/build --target clean
 
 clean-src:
 	rm -rf build/src

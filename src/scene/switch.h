@@ -1,8 +1,8 @@
 #ifndef __SWITCH_H__
 #define __SWITCH_H__
 
-#include "../sk64/skelatool_armature.h"
-#include "../sk64/skelatool_animator.h"
+#include "../sk64/skeletool_armature.h"
+#include "../sk64/skeletool_animator.h"
 #include "../physics/collision_object.h"
 #include "../audio/soundplayer.h"
 #include "../audio/clips.h"

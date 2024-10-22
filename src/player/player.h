@@ -7,8 +7,8 @@
 #include "../physics/collision_object.h"
 #include "../levels/level_definition.h"
 #include "../scene/dynamic_scene.h"
-#include "../sk64/skelatool_animator.h"
-#include "../sk64/skelatool_armature.h"
+#include "../sk64/skeletool_animator.h"
+#include "../sk64/skeletool_armature.h"
 #include "../physics/point_constraint.h"
 
 #define PLAYER_GRABBING_THROUGH_NOTHING 0

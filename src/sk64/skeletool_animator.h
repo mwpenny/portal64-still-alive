@@ -1,7 +1,7 @@
-#ifndef _SKELATOOL_ANIMATOR_H
-#define _SKELATOOL_ANIMATOR_H
+#ifndef _SKELETOOL_ANIMATOR_H
+#define _SKELETOOL_ANIMATOR_H
 
-#include "skelatool_clip.h"
+#include "skeletool_clip.h"
 #include "../math/transform.h"
 
 enum SKAnimatorFlags {

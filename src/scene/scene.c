@@ -8,7 +8,7 @@
 #include "materials/light.h"
 #include "materials/point_light_rendered.h"
 #include "system/time.h"
-#include "sk64/skelatool_defs.h"
+#include "sk64/skeletool_defs.h"
 #include "shadow_map.h"
 #include "../physics/point_constraint.h"
 #include "../physics/debug_renderer.h"

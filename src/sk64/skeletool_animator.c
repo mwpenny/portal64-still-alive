@@ -1,8 +1,8 @@
-#include "skelatool_animator.h"
+#include "skeletool_animator.h"
 
 #include "../util/memory.h"
 #include "../math/mathf.h"
-#include "skelatool_animator.h"
+#include "skeletool_animator.h"
 
 #define MAX_ANIMATION_QUEUE_ENTRIES 20
 

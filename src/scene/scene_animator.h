@@ -3,8 +3,8 @@
 
 #include "../levels/level_definition.h"
 
-#include "../sk64/skelatool_armature.h"
-#include "../sk64/skelatool_animator.h"
+#include "../sk64/skeletool_armature.h"
+#include "../sk64/skeletool_animator.h"
 
 #include "../graphics/renderstate.h"
 

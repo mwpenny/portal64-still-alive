@@ -284,7 +284,7 @@ AnimationResults generateAnimationForScene(const aiScene* scene, CFileDefinition
         aiVector3D(0, 0, 0)
     );
 
-    fileDefinition.AddHeader("\"sk64/skelatool_clip.h\"");
+    fileDefinition.AddHeader("\"sk64/skeletool_clip.h\"");
 
     std::unique_ptr<StructureDataChunk> boneParentDataChunk(new StructureDataChunk());
 

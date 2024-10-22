@@ -1,8 +1,8 @@
 #ifndef __SCENE_BALL_LAUNCHER_H__
 #define __SCENE_BALL_LAUNCHER_H__
 
-#include "../sk64/skelatool_armature.h"
-#include "../sk64/skelatool_animator.h"
+#include "../sk64/skeletool_armature.h"
+#include "../sk64/skeletool_animator.h"
 #include "../physics/collision_object.h"
 
 #include "../levels/level_definition.h"

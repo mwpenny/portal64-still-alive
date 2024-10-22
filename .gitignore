@@ -5,8 +5,6 @@
 *.z64
 *.blend1
 
-lua-5.4.4/
-
 build/
 debugger
 gfxvalidator
@@ -20,8 +18,6 @@ resource/closecaption_*
 
 tools/skeletool64*
 tools/vtf2png*
-
-skelatool64/*.zip*
 
 src/controls/controller-data.h
 

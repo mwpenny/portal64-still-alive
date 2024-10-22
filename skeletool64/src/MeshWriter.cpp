@@ -145,7 +145,7 @@ std::string generateMesh(const aiScene* scene, CFileDefinition& fileDefinition, 
 
 
     if (fileDefinition.GetBoneHierarchy().HasData()) {
-        dlResult->AddTypeHeader("\"sk64/skelatool_defs.h\"");
+        dlResult->AddTypeHeader("\"sk64/skeletool_defs.h\"");
     }
 
     fileDefinition.AddDefinition(std::move(dlResult));

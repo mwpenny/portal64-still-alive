@@ -3,7 +3,7 @@
 
 #include "../physics/collision_object.h"
 #include "../levels/level_definition.h"
-#include "../sk64/skelatool_armature.h"
+#include "../sk64/skeletool_armature.h"
 
 struct SecurityCamera {
     struct CollisionObject collisionObject;

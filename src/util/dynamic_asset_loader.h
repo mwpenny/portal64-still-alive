@@ -5,8 +5,8 @@
 
 #include "dynamic_asset_model.h"
 
-#include "../sk64/skelatool_armature.h"
-#include "../sk64/skelatool_clip.h"
+#include "../sk64/skeletool_armature.h"
+#include "../sk64/skeletool_clip.h"
 
 struct SKArmatureWithAnimations {
     struct SKArmatureDefinition* armature;

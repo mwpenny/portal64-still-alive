@@ -173,7 +173,7 @@ MeshDefinitionResults MeshDefinitionGenerator::GenerateDefinitionsWithResults(co
 
         std::unique_ptr<StructureDataChunk> armatureDef(new StructureDataChunk());
 
-        fileDefinition.AddHeader("\"sk64/skelatool_armature.h\"");
+        fileDefinition.AddHeader("\"sk64/skeletool_armature.h\"");
 
         armatureDef->AddPrimitive(result.modelName);
         armatureDef->AddPrimitive(animationResults.initialPoseReference);
