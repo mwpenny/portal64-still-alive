@@ -258,24 +258,6 @@ def determine_invalid_characters(lang_name, lang_lines, good_characters):
 
     return used_characters
 
-
-def make_subtitle_ld(languages):
-    lines = []
-
-    for language in languages:
-        language_name = language['name']
-
-        lines.append(f"    __romPos = (__romPos + 15) & ~0xF;\n")
-        lines.append(f"    BEGIN_SEG(subtitles_{language_name}, 0x04000000)\n")
-        lines.append("    {\n")
-        lines.append(f"       build/src/audio/subtitles_{language_name}.o(.data);\n")
-        lines.append(f"       build/src/audio/subtitles_{language_name}.o(.bss);\n")
-        lines.append("    }\n")
-        lines.append(f"    END_SEG(subtitles_{language_name})\n")
-        lines.append("\n")
-
-    dump_lines('build/subtitles.ld', lines)
-
 def make_overall_subtitles_sourcefile(language_list):
     sourcefile_lines = []
     sourcefile_lines.append('#include "subtitles.h"\n')
@@ -415,8 +397,6 @@ def process_all_closecaption_files(dir, language_names):
     print(f"unused characters\n{''.join(sorted(list(good_characters - used_characters)))}")
     print(f"invalid characters\n{''.join(sorted(list(used_characters - good_characters)))}")
     print(f"max message length\n{max_message_length}")
-
-    make_subtitle_ld(language_with_values_list)
 
     make_overall_subtitles_header(header_lines, language_list, len(language_with_values_list[0]['value']), max_message_length)
     make_overall_subtitles_sourcefile(language_list)

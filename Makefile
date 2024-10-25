@@ -430,9 +430,9 @@ ANIM_TEST_CHAMBERS = build/assets/test_chambers/test_chamber_00/test_chamber_00_
 	build/assets/test_chambers/test_chamber_09/test_chamber_09_anim.o \
 	build/assets/test_chambers/test_chamber_10/test_chamber_10_anim.o
 
-build/anims.ld: $(ANIM_LIST) $(ANIM_TEST_CHAMBERS) tools/generate_animation_ld.js
+build/anims.ld: $(ANIM_LIST) $(ANIM_TEST_CHAMBERS) tools/generate_segment_ld.js
 	@mkdir -p $(@D)
-	node tools/generate_animation_ld.js $@ $(ANIM_LIST) $(ANIM_TEST_CHAMBERS)
+	node tools/generate_segment_ld.js --single-segment-name animation_segment $@ 0x0D000000 $(ANIM_LIST) $(ANIM_TEST_CHAMBERS)
 
 ####################
 ## Test Chambers
@@ -487,13 +487,13 @@ build/assets/models/dynamic_animated_model_list.h build/assets/models/dynamic_an
 	@mkdir -p $(@D)
 	node tools/models/generate_dynamic_animated_model_list.js build/assets/models/dynamic_animated_model_list.h $(DYNAMIC_ANIMATED_MODEL_HEADERS)
 
-build/levels.ld: $(TEST_CHAMBER_OBJECTS) tools/generate_level_ld.js
+build/levels.ld: $(TEST_CHAMBER_OBJECTS) tools/generate_segment_ld.js
 	@mkdir -p $(@D)
-	node tools/generate_level_ld.js $@ 0x02000000 $(TEST_CHAMBER_OBJECTS)
+	node tools/generate_segment_ld.js $@ 0x02000000 $(TEST_CHAMBER_OBJECTS)
 
-build/dynamic_models.ld: $(DYNAMIC_MODEL_OBJECTS) $(DYNAMIC_ANIMATED_MODEL_OBJECTS) tools/generate_level_ld.js
+build/dynamic_models.ld: $(DYNAMIC_MODEL_OBJECTS) $(DYNAMIC_ANIMATED_MODEL_OBJECTS) tools/generate_segment_ld.js
 	@mkdir -p $(@D)
-	node tools/generate_level_ld.js $@ 0x03000000 $(DYNAMIC_MODEL_OBJECTS) $(DYNAMIC_ANIMATED_MODEL_OBJECTS)
+	node tools/generate_segment_ld.js $@ 0x03000000 $(DYNAMIC_MODEL_OBJECTS) $(DYNAMIC_ANIMATED_MODEL_OBJECTS)
 
 build/src/levels/levels.o: build/assets/test_chambers/level_list.h build/assets/materials/static.h
 
@@ -570,8 +570,12 @@ build/src/audio/subtitles_%.o: build/src/audio/subtitles_%.c
 	$(CC) $(CFLAGS) -MM $^ -MF "$(@:.o=.d)" -MT"$@"
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-build/src/audio/subtitles.h build/src/audio/subtitles.c build/subtitles.ld: vpk/Portal/portal/resource/closecaption_english.txt vpk/Portal/hl2/resource/gameui_english.txt vpk/Portal/hl2/resource/valve_english.txt assets/translations/extra_english.txt tools/subtitle_generate.py
+build/src/audio/subtitles.h build/src/audio/subtitles.c: vpk/Portal/portal/resource/closecaption_english.txt vpk/Portal/hl2/resource/gameui_english.txt vpk/Portal/hl2/resource/valve_english.txt assets/translations/extra_english.txt tools/subtitle_generate.py
 	python3 tools/subtitle_generate.py
+
+build/subtitles.ld:	$(SUBTITLE_OBJECTS) tools/generate_segment_ld.js
+	@mkdir -p $(@D)
+	node tools/generate_segment_ld.js --alignment 16 $@ 0x04000000 $(SUBTITLE_OBJECTS)
 	
 ####################
 ## Linking
