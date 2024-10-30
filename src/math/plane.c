@@ -65,7 +65,7 @@ void calculateBarycentricCoords(struct Vector3* a, struct Vector3* b, struct Vec
         if (d00 > d11) {
             // b is other point
             output->y = calculateLerp(a, b, point);
-            output->x = 1.0 - output->y;
+            output->x = 1.0f - output->y;
             output->z = 0.0f;
 
         } else {
