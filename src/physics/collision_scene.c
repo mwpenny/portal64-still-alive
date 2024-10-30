@@ -659,7 +659,7 @@ void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct 
                     continue;
                 }
 
-                if (!collisionObjectShouldGenerateConctacts(existing) && !collisionObjectShouldGenerateConctacts(subject)) {
+                if (!collisionObjectShouldGenerateContacts(existing) && !collisionObjectShouldGenerateContacts(subject)) {
                     continue;
                 }
 
@@ -754,7 +754,7 @@ void collisionSceneUpdateDynamics() {
         prevPosList[i] = object->body->transform.position;
         sweptBB[i] = object->boundingBox;
 
-        if (!collisionObjectShouldGenerateConctacts(object)) {
+        if (!collisionObjectShouldGenerateContacts(object)) {
             continue;
         }
 
@@ -794,7 +794,7 @@ void collisionSceneUpdateDynamics() {
             // kind of a hack, but the player is the only kinematic body that
             // also generates contacts and the player velocty should not be 
             // cleared
-            if (!collisionObjectShouldGenerateConctacts(collisionObject)) {
+            if (!collisionObjectShouldGenerateContacts(collisionObject)) {
                 // clear out any velocities
                 collisionObject->body->velocity = gZeroVec;
                 collisionObject->body->angularVelocity = gZeroVec;

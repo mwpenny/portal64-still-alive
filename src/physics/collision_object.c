@@ -34,7 +34,7 @@ int collisionObjectIsGrabbable(struct CollisionObject* object) {
     return object->body && ((object->body->flags & (RigidBodyFlagsGrabbable)) != 0);
 }
 
-int collisionObjectShouldGenerateConctacts(struct CollisionObject* object) {
+int collisionObjectShouldGenerateContacts(struct CollisionObject* object) {
     return collisionObjectIsActive(object) || (object->body->flags & RigidBodyIsPlayer) != 0;
 }
 
