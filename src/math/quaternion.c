@@ -210,31 +210,31 @@ void quatLook(struct Vector3* lookDir, struct Vector3* up, struct Quaternion* ou
     if (trace > 0) { 
         float sqrtResult = sqrtf(trace+1.0f) * 2.0f;
         float invSqrtResult = 1.0f / sqrtResult;
-        out->w = 0.25 * sqrtResult;
+        out->w = 0.25f * sqrtResult;
         out->x = (yDir.z - zDir.y) * invSqrtResult;
         out->y = (zDir.x - xDir.z) * invSqrtResult; 
         out->z = (xDir.y - yDir.x) * invSqrtResult; 
     } else if ((xDir.x > yDir.y) && (xDir.x > zDir.z)) { 
-        float sqrtResult = sqrtf(1.0 + xDir.x - yDir.y - zDir.z) * 2.0f;
+        float sqrtResult = sqrtf(1.0f + xDir.x - yDir.y - zDir.z) * 2.0f;
         float invSqrtResult = 1.0f / sqrtResult;
         out->w = (yDir.z - zDir.y) * invSqrtResult;
-        out->x = 0.25 * sqrtResult;
+        out->x = 0.25f * sqrtResult;
         out->y = (yDir.x + xDir.y) * invSqrtResult; 
         out->z = (zDir.x + xDir.z) * invSqrtResult; 
     } else if (yDir.y > zDir.z) { 
-        float sqrtResult = sqrtf(1.0 + yDir.y - xDir.x - zDir.z) * 2.0f;
+        float sqrtResult = sqrtf(1.0f + yDir.y - xDir.x - zDir.z) * 2.0f;
         float invSqrtResult = 1.0f / sqrtResult;
         out->w = (zDir.x - xDir.z) * invSqrtResult;
         out->x = (yDir.x + xDir.y) * invSqrtResult; 
-        out->y = 0.25 * sqrtResult;
+        out->y = 0.25f * sqrtResult;
         out->z = (zDir.y + yDir.z) * invSqrtResult; 
     } else { 
-        float sqrtResult = sqrtf(1.0 + zDir.z - xDir.x - yDir.y) * 2.0f;
+        float sqrtResult = sqrtf(1.0f + zDir.z - xDir.x - yDir.y) * 2.0f;
         float invSqrtResult = 1.0f / sqrtResult;
         out->w = (xDir.y - yDir.x) * invSqrtResult;
         out->x = (zDir.x + xDir.z) * invSqrtResult;
         out->y = (zDir.y + yDir.z) * invSqrtResult;
-        out->z = 0.25 * sqrtResult;
+        out->z = 0.25f * sqrtResult;
     }
 }
 
