@@ -36,7 +36,7 @@ float matrixNormalizedZValue(float depth, float near, float far) {
         return 1.0f;
     }
 
-    return (far * (depth + near) + 2.0 * far * near) / (depth * (far - near));
+    return (far * (depth + near) + 2.0f * far * near) / (depth * (far - near));
 }
 
 void matrixVec3Mul(float matrix[4][4], struct Vector3* input, struct Vector4* output) {
