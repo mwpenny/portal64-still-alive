@@ -286,7 +286,7 @@ void collisionScenePushObjectsOutOfPortal(int portalIndex) {
         }
 
         // Add a little extra to push it beyond the edge
-        depth += 0.5 * signf(depth);
+        depth += 0.5f * signf(depth);
 
         vector3AddScaled(&object->body->transform.position, &reversePortalNormal, depth, &object->body->transform.position);
     }
