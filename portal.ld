@@ -80,10 +80,10 @@ SECTIONS
    }
    END_SEG(images)
 
-#include "build/levels.ld"
-#include "build/dynamic_models.ld"
-#include "build/anims.ld"
-#include "build/subtitles.ld"
+#include "levels.ld"
+#include "dynamic_models.ld"
+#include "anims.ld"
+#include "subtitles.ld"
 
    /* Discard standard sections not mentioned above, keep debug info */
    /DISCARD/ :
