@@ -55,21 +55,11 @@ endif
 
 CODESEGMENT =	build/codesegment
 
-BOOT		=	$(N64_ROOT)/usr/lib/n64/PR/bootcode/boot.6102
-BOOT_OBJ	=	build/boot.o
+BOOT_CODE	=	$(N64_ROOT)/usr/lib/n64/PR/bootcode/boot.6102
 
-UCODE_RSP	=	$(N64_ROOT)/usr/lib/n64/PR/rspboot.o
-RSP_OBJ		=	build/rspboot.o
-
-UCODE_GSP	=	$(N64_ROOT)/usr/lib/n64/PR/gspF3DEX2.fifo.o
-GSP_OBJ		=	build/gspMain.o
-
-UCODE_ASP	=	$(N64_ROOT)/usr/lib/n64/PR/aspMain.o
-ASP_OBJ		=	build/aspMain.o
-
-UCODE_OBJS	=	$(RSP_OBJ) $(GSP_OBJ) $(ASP_OBJ)
-
-OBJECTS		=	$(ASMOBJECTS) $(BOOT_OBJ) $(UCODE_OBJS)
+RSP_OBJ		=	$(N64_ROOT)/usr/lib/n64/PR/rspboot.o
+GSP_OBJ		=	$(N64_ROOT)/usr/lib/n64/PR/gspF3DEX2.fifo.o
+ASP_OBJ		=	$(N64_ROOT)/usr/lib/n64/PR/aspMain.o
 
 DEPS = $(patsubst %.c, build/%.d, $(CODEFILES)) $(patsubst %.c, build/%.d, $(DATAFILES))
 
@@ -80,8 +70,6 @@ LCDEFS +=	-DF3DEX_GBI_2 -DSCENE_SCALE=${SCENE_SCALE}
 #LCDEFS +=	-DF3DEX_GBI_2 -DFOG
 #LCDEFS +=	-DF3DEX_GBI_2 -DFOG -DXBUS
 #LCDEFS +=	-DF3DEX_GBI_2 -DFOG -DXBUS -DSTOP_AUDIO
-
-LDIRT  =	$(BASE_TARGET_NAME).elf $(CP_LD_SCRIPT) $(BASE_TARGET_NAME).z64 $(BASE_TARGET_NAME)_no_debug.map $(ASMOBJECTS)
 
 LDDIRS  =	-L$(N64_ROOT)/usr/lib/n64 -L$(N64_ROOT)/opt/crashsdk/mips64-elf/lib -L$(N64_LIBGCCDIR)
 LDFLAGS =	$(N64LIB) -lc -lgcc
@@ -149,9 +137,6 @@ endif
 
 include $(COMMONRULES)
 
-.s.o:
-	$(AS) -o $@ $<
-
 build/%.o: %.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -MM $^ -MF "$(@:.o=.d)" -MT"$@"
@@ -159,7 +144,7 @@ build/%.o: %.c
 
 build/%.o: %.s
 	@mkdir -p $(@D)
-	$(AS) -o $@ $<
+	$(AS) -o $@ $< -DBOOT_CODE=$(BOOT_CODE)
 
 ####################
 ## Assets
@@ -581,15 +566,6 @@ build/subtitles.ld:	$(SUBTITLE_OBJECTS) tools/generate_segment_ld.js
 ## Linking
 ####################
 
-$(BOOT_OBJ): $(BOOT)
-	$(OBJCOPY) -I binary -B mips -O elf32-bigmips $< $@
-
-$(RSP_OBJ): $(UCODE_RSP)
-$(GSP_OBJ): $(UCODE_GSP)
-$(ASP_OBJ): $(UCODE_ASP)
-$(UCODE_OBJS):
-	cp $< $@
-
 # without debugger
 
 CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) \
@@ -613,10 +589,10 @@ $(CODESEGMENT)_no_debug.o:	$(CODEOBJECTS_NO_DEBUG)
 
 
 $(CP_LD_SCRIPT)_no_debug.ld: $(LD_SCRIPT) build/levels.ld build/dynamic_models.ld build/anims.ld build/subtitles.ld
-	cpp -P -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_no_debug.o -o $@ $<
+	cpp -P -Ibuild -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_no_debug.o -DRSP_OBJ=$(RSP_OBJ) -DGSP_OBJ=$(GSP_OBJ) -DASP_OBJ=$(ASP_OBJ) -o $@ $<
 
-$(BASE_TARGET_NAME).z64: $(CODESEGMENT)_no_debug.o $(OBJECTS) $(DATA_OBJECTS) $(SUBTITLE_OBJECTS) $(CP_LD_SCRIPT)_no_debug.ld
-	$(LD) -L. -T $(CP_LD_SCRIPT)_no_debug.ld -Map $(BASE_TARGET_NAME)_no_debug.map -o $(BASE_TARGET_NAME).elf
+$(BASE_TARGET_NAME).z64: $(CODESEGMENT)_no_debug.o $(ASMOBJECTS) $(DATA_OBJECTS) $(SUBTITLE_OBJECTS) $(CP_LD_SCRIPT)_no_debug.ld
+	$(LD) -L. -T $(CP_LD_SCRIPT)_no_debug.ld -Map $(BASE_TARGET_NAME)_no_debug.map -o $(BASE_TARGET_NAME).elf $(ASMOBJECTS) $(DATA_OBJECTS)
 	$(OBJCOPY) --pad-to=0x100000 --gap-fill=0xFF $(BASE_TARGET_NAME).elf $(BASE_TARGET_NAME).z64 -O binary
 	makemask $(BASE_TARGET_NAME).z64
 	sh tools/romfix64.sh $(BASE_TARGET_NAME).z64
@@ -629,13 +605,13 @@ CODEOBJECTS_DEBUG += build/debugger/debugger.o build/debugger/serial.o
 endif
 
 $(CODESEGMENT)_debug.o:	$(CODEOBJECTS_DEBUG)
-	$(LD) -o $(CODESEGMENT)_debug.o -r $(CODEOBJECTS_DEBUG $(LDDIRS) $(LDFLAGS)
+	$(LD) -o $(CODESEGMENT)_debug.o -r $(CODEOBJECTS_DEBUG) $(LDDIRS) $(LDFLAGS)
 
 $(CP_LD_SCRIPT)_debug.ld: $(LD_SCRIPT) build/levels.ld build/dynamic_models.ld build/anims.ld build/subtitles.ld
-	cpp -P -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_debug.o -o $@ $<
+	cpp -P -Ibuild -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_debug.o -DRSP_OBJ=$(RSP_OBJ) -DGSP_OBJ=$(GSP_OBJ) -DASP_OBJ=$(ASP_OBJ) -o $@ $<
 
-$(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(OBJECTS) $(DATA_OBJECTS) $(SUBTITLE_OBJECTS) $(CP_LD_SCRIPT)_debug.ld
-	$(LD) -L. -T $(CP_LD_SCRIPT)_debug.ld -Map $(BASE_TARGET_NAME)_debug.map -o $(BASE_TARGET_NAME)_debug.elf
+$(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(ASMOBJECTS) $(DATA_OBJECTS) $(SUBTITLE_OBJECTS) $(CP_LD_SCRIPT)_debug.ld
+	$(LD) -L. -T $(CP_LD_SCRIPT)_debug.ld -Map $(BASE_TARGET_NAME)_debug.map -o $(BASE_TARGET_NAME)_debug.elf $(ASMOBJECTS) $(DATA_OBJECTS)
 	$(OBJCOPY) --pad-to=0x100000 --gap-fill=0xFF $(BASE_TARGET_NAME)_debug.elf $(BASE_TARGET_NAME)_debug.z64 -O binary
 	makemask $(BASE_TARGET_NAME)_debug.z64
 	sh tools/romfix64.sh $(BASE_TARGET_NAME).z64

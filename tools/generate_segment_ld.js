@@ -17,6 +17,7 @@ function generateSegmentContent(objectPath) {
     return `
         ${objectPath}(.data)
         ${objectPath}(.bss)
+        ${objectPath}(.rodata*)
     `.trim();
 }
 

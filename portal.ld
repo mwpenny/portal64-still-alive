@@ -1,4 +1,5 @@
-OUTPUT_ARCH (mips)
+OUTPUT_FORMAT("elf32-bigmips", "elf32-bigmips", "elf32-littlemips")
+OUTPUT_ARCH(mips)
 
 #define BEGIN_SEG(name, addr) \
     _##name##SegmentStart = ADDR(.name); \
@@ -25,24 +26,25 @@ SECTIONS
 
    BEGIN_SEG(boot, 0x04000000)
    {
-      build/asm/rom_header.o(.text);
-      build/boot.o(.data);
+      *asm/rom_header.*(.text);
+      *asm/boot.*(.text);
    }
    END_SEG(boot)
 
    BEGIN_SEG(code, 0x80000400) SUBALIGN(16)
    {
-      build/asm/entry.o(.text);
+      /* code */
+      *asm/entry.*(.text);
       CODE_SEGMENT(.text);
-      build/rspboot.o(.text);
-      build/gspMain.o(.text);
-      build/aspMain.o(.text);
+      RSP_OBJ(.text);
+      GSP_OBJ(.text);
+      ASP_OBJ(.text);
 
       /* data */
       CODE_SEGMENT(.data*);
-      build/rspboot.o(.data*);
-      build/gspMain.o(.data*);
-      build/aspMain.o(.data*);
+      RSP_OBJ(.data*);
+      GSP_OBJ(.data*);
+      ASP_OBJ(.data*);
 
       /* rodata */
       CODE_SEGMENT(.rodata*);
@@ -66,15 +68,15 @@ SECTIONS
 
    BEGIN_SEG(sound_data, __romPos)
    {
-      build/asm/sound_data.o(.data);
-      build/asm/sound_data.o(.bss);
+      *asm/sound_data.*(.data);
+      *asm/sound_data.*(.bss);
    }
    END_SEG(sound_data)
 
    BEGIN_SEG(images, __romPos)
    {
-      build/assets/materials/images_mat.o(.data);
-      build/assets/materials/images_mat.o(.bss);
+      *assets/materials/images_mat.*(.data);
+      *assets/materials/images_mat.*(.bss);
    }
    END_SEG(images)
 
@@ -83,9 +85,13 @@ SECTIONS
 #include "build/anims.ld"
 #include "build/subtitles.ld"
 
-   /* Discard everything not specifically mentioned above. */
+   /* Discard standard sections not mentioned above, keep debug info */
    /DISCARD/ :
    {
+      *(.text)
+      *(.data*)
+      *(.rodata*)
+      *(.bss*)
       *(.eh_frame)
       *(.MIPS.abiflags)
    }
