@@ -386,11 +386,14 @@ set_target_properties(textures PROPERTIES
 ## Material generation ##
 #########################
 
-set(MATERIALS
+set(CORE_MATERIALS
     hud.skm.yaml
-    images.skm.yaml
     static.skm.yaml
     ui.skm.yaml
+)
+
+set(IMAGE_MATERIALS
+    images.skm.yaml
 )
 
 function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
@@ -464,18 +467,31 @@ set_property(SOURCE ui.skm.yaml
         ${PROJECT_SOURCE_DIR}/assets/images/rounded_corners.png
 )
 
-set(GENERATED_MATERIALS "")
+set(GENERATED_CORE_MATERIALS "")
+set(GENERATED_IMAGE_MATERIALS "")
 
-foreach(MATERIAL ${MATERIALS})
-    _add_material_generate_command(${MATERIAL} GENERATED_MATERIALS)
+foreach(MATERIAL ${CORE_MATERIALS})
+    _add_material_generate_command(${MATERIAL} GENERATED_CORE_MATERIALS)
 endforeach()
 
-add_custom_target(generated_materials
-    DEPENDS ${GENERATED_MATERIALS}
+foreach(MATERIAL ${IMAGE_MATERIALS})
+    _add_material_generate_command(${MATERIAL} GENERATED_IMAGE_MATERIALS)
+endforeach()
+
+add_custom_target(materials
+    DEPENDS
+        ${GENERATED_CORE_MATERIALS}
+        ${GENERATED_IMAGE_MATERIALS}
 )
 
-add_library(materials INTERFACE)
-add_dependencies(materials generated_materials)
-target_sources(materials INTERFACE
-    ${GENERATED_MATERIALS}
+add_library(materials_core INTERFACE)
+add_dependencies(materials_core materials)
+target_sources(materials_core INTERFACE
+    ${GENERATED_CORE_MATERIALS}
+)
+
+add_library(materials_images INTERFACE)
+add_dependencies(materials_images materials)
+target_sources(materials_images INTERFACE
+    ${GENERATED_IMAGE_MATERIALS}
 )

@@ -213,13 +213,25 @@ set_property(SOURCE props/round_elevator_interior.flags
 )
 
 set(MODEL_GENERATED_FILES "")
+set(STATIC_MODEL_GENERATED_FILES "")
+set(DYNAMIC_MODEL_GENERATED_FILES "")
 
 foreach(MODEL ${MODELS})
+    set(GENERATED_FILES "")
+
     _add_model_export_command(${MODEL} MODEL_FBX)
-    _add_model_generate_command(${MODEL} ${MODEL_FBX} MODEL_GENERATED_FILES)
+    _add_model_generate_command(${MODEL} ${MODEL_FBX} GENERATED_FILES)
+
+    if(MODEL IN_LIST DYNAMIC_MODELS)
+        list(APPEND DYNAMIC_MODEL_GENERATED_FILES ${GENERATED_FILES})
+    else()
+        list(APPEND STATIC_MODEL_GENERATED_FILES ${GENERATED_FILES})
+    endif()
+
+    list(APPEND MODEL_GENERATED_FILES ${GENERATED_FILES})
 endforeach()
 
-add_custom_target(generated_models
+add_custom_target(models
     DEPENDS ${MODEL_GENERATED_FILES}
 )
 
@@ -257,7 +269,7 @@ set(DYNAMIC_MODEL_LIST_H "${DYNAMIC_MODEL_LIST_OUT_DIR}/dynamic_model_list.h")
 set(DYNAMIC_MODEL_LIST_C "${DYNAMIC_MODEL_LIST_OUT_DIR}/dynamic_model_list.c")
 add_custom_command(
     DEPENDS
-        generated_models ${DYNAMIC_MODEL_HEADERS}
+        models ${DYNAMIC_MODEL_HEADERS}
         ${GEN_DYNAMIC_MODEL_LIST} ${MODEL_LIST_UTILS}
     OUTPUT
         ${DYNAMIC_MODEL_LIST_H} ${DYNAMIC_MODEL_LIST_C}
@@ -274,7 +286,7 @@ set(DYNAMIC_ANIMATED_MODEL_LIST_H "${DYNAMIC_MODEL_LIST_OUT_DIR}/dynamic_animate
 set(DYNAMIC_ANIMATED_MODEL_LIST_C "${DYNAMIC_MODEL_LIST_OUT_DIR}/dynamic_animated_model_list.c")
 add_custom_command(
     DEPENDS
-        generated_models ${DYNAMIC_ANIMATED_MODEL_HEADERS}
+        models ${DYNAMIC_ANIMATED_MODEL_HEADERS}
         ${GEN_DYNAMIC_ANIM_MODEL_LIST} ${MODEL_LIST_UTILS}
     OUTPUT
         ${DYNAMIC_ANIMATED_MODEL_LIST_H} ${DYNAMIC_ANIMATED_MODEL_LIST_C}
@@ -294,17 +306,18 @@ set(MODEL_LIST_FILES
     ${DYNAMIC_ANIMATED_MODEL_LIST_C}
 )
 
-add_custom_target(model_lists
-    DEPENDS
-        ${MODEL_LIST_FILES}
+add_custom_target(generated_model_lists
+    DEPENDS ${MODEL_LIST_FILES}
 )
 
-add_library(models INTERFACE)
-add_dependencies(models
-    generated_models
-    model_lists
-)
-target_sources(models INTERFACE
-    ${MODEL_GENERATED_FILES}
+add_library(model_lists INTERFACE)
+add_dependencies(model_lists generated_model_lists)
+target_sources(model_lists INTERFACE
     ${MODEL_LIST_FILES}
+)
+
+add_library(models_static INTERFACE)
+add_dependencies(models_static models)
+target_sources(models_static INTERFACE
+    ${STATIC_MODEL_GENERATED_FILES}
 )

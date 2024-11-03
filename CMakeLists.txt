@@ -4,11 +4,6 @@ project(portal64 C ASM)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(AddExternalProjectExecutable)
 
-# TODO: remove when makefile is no longer in use
-add_compile_definitions(CMAKE)
-
-set(USING_LIBULTRA TRUE)
-
 # Programs used in build
 find_package(Blender                3.6 EXACT   REQUIRED)
 find_program(FFmpeg_EXECUTABLE      ffmpeg      REQUIRED)
@@ -24,16 +19,35 @@ find_program(VTF2PNG_EXECUTABLE     vtf2png     REQUIRED)
 # Add skeletool as external project to isolate from toolchain
 add_external_project_executable(skeletool64)
 
-# Directories
+# Game file directories
 set(ASM_DIR "${PROJECT_SOURCE_DIR}/asm")
 set(ASSETS_DIR "${PROJECT_SOURCE_DIR}/assets")
 set(SRC_DIR "${PROJECT_SOURCE_DIR}/src")
 set(VPK_DIR "${PROJECT_SOURCE_DIR}/vpk")
 
+# Asset extraction/conversion output directories
 set(PAK_DIR "${PROJECT_SOURCE_DIR}/portal_pak_dir")
 set(PAK_MODIFIED_DIR "${PROJECT_SOURCE_DIR}/portal_pak_modified")
+
+add_library(platform INTERFACE)
+find_package(Libultra REQUIRED)
+target_link_libraries(platform INTERFACE libultra::libultra)
+target_compile_definitions(platform INTERFACE F3DEX_GBI_2)
 
 add_subdirectory(${ASM_DIR})
 add_subdirectory(${ASSETS_DIR})
 add_subdirectory(${SRC_DIR})
 add_subdirectory(${VPK_DIR})
+
+add_library(code_segment OBJECT)
+target_link_libraries(code_segment
+    platform
+
+    engine
+    level_list
+    materials_core
+    model_lists
+    models_static
+    sound_lookup_tables
+    string_lookup_tables
+)

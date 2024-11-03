@@ -23,10 +23,11 @@ set(STRING_DEPENDENCIES
 set(BUILD_AUDIO_DIR "${PROJECT_BINARY_DIR}/src/audio")
 set(SUBTITLES_H "${BUILD_AUDIO_DIR}/subtitles.h")
 set(SUBTITLES_C "${BUILD_AUDIO_DIR}/subtitles.c")
-set(STRING_GENERATED_FILES
+set(STRING_LOOKUP_TABLE_FILES
     ${SUBTITLES_H}
     ${SUBTITLES_C}
-
+)
+set(STRING_DATA_TABLE_FILES
     # TODO: make this dynamic
     ${BUILD_AUDIO_DIR}/subtitles_brazilian.c
     ${BUILD_AUDIO_DIR}/subtitles_bulgarian.c
@@ -55,7 +56,8 @@ add_custom_command(
     DEPENDS
         ${STRING_DEPENDENCIES} ${SUBTITLE_GENERATE}
     OUTPUT
-        ${STRING_GENERATED_FILES}
+        ${STRING_LOOKUP_TABLE_FILES}
+        ${STRING_DATA_TABLE_FILES}
     COMMAND
         # TODO: update script to have configurable output location
         ${Python3_EXECUTABLE} ${SUBTITLE_GENERATE}
@@ -67,12 +69,20 @@ add_custom_command(
     VERBATIM
 )
 
-add_custom_target(generated_strings
-    DEPENDS ${STRING_GENERATED_FILES}
+add_custom_target(strings
+    DEPENDS
+        ${STRING_LOOKUP_TABLE_FILES}
+        ${STRING_DATA_TABLE_FILES}
 )
 
-add_library(strings INTERFACE)
-add_dependencies(strings generated_strings)
-target_sources(strings INTERFACE
-    ${STRING_GENERATED_FILES}
+add_library(string_data_tables INTERFACE)
+add_dependencies(string_data_tables strings)
+target_sources(string_data_tables INTERFACE
+    ${STRING_DATA_TABLE_FILES}
+)
+
+add_library(string_lookup_tables INTERFACE)
+add_dependencies(string_lookup_tables strings)
+target_sources(string_lookup_tables INTERFACE
+    ${STRING_LOOKUP_TABLE_FILES}
 )

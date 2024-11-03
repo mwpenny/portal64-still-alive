@@ -4,6 +4,7 @@
 
 set(CMAKE_SYSTEM_NAME Generic)
 
+set(N64 TRUE)
 set(N64_TOOLCHAIN_ROOT   ""            CACHE PATH   "Root directory of N64 toolchain")
 set(N64_TOOLCHAIN_PREFIX "mips64-elf-" CACHE STRING "File name prefix for toolchain programs")
 

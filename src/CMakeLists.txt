@@ -1,21 +1,7 @@
-# TODO: generated code
-# TODO: linking
-add_executable(portal)
+add_library(engine INTERFACE)
 
-set_target_properties(portal PROPERTIES COMPILE_WARNING_AS_ERROR ON)
-
-target_include_directories(portal PRIVATE
+target_include_directories(engine INTERFACE
     "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-
-# Generated code
-target_link_libraries(portal
-    asm_sources
-    levels
-    materials
-    models
-    sound_lookup_tables
-    strings
 )
 
 ###############
@@ -23,7 +9,7 @@ target_link_libraries(portal
 ###############
 
 # TODO: file sets, headers
-target_sources(portal PRIVATE
+target_sources(engine INTERFACE
     audio/audio.c
     audio/audiomgr.c
     audio/clips.c
@@ -165,6 +151,7 @@ target_sources(portal PRIVATE
     util/memory.c
     util/profile.c
     util/rom.c
+    util/string.c
 )
 
 #########################
@@ -174,7 +161,7 @@ target_sources(portal PRIVATE
 set(GEN_VERSION_HEADER "${PROJECT_SOURCE_DIR}/cmake/GenVersionHeader.cmake")
 set(VERSION_H "${PROJECT_BINARY_DIR}/version.h")
 
-add_custom_target(gen_version_header
+add_custom_target(version_header
     DEPENDS
         ${GEN_VERSION_HEADER}
     COMMAND
@@ -188,26 +175,17 @@ add_custom_target(gen_version_header
 )
 
 # Make sure version header is always up to date
-add_dependencies(portal gen_version_header)
+add_dependencies(engine version_header)
+
+# TODO: remove when makefile is no longer in use
+target_compile_definitions(engine INTERFACE CMAKE)
 
 ###########################
 ## Library-specific code ##
 ###########################
 
-# TODO: move some of this into toolchain
-if (USING_LIBULTRA)
-    target_sources(portal PRIVATE
-        system/libultra/controller_libultra.c
-        system/libultra/time_libultra.c
-    )
-
-    target_compile_definitions(portal PRIVATE F3DEX_GBI_2)
-
-    find_package(Libultra REQUIRED)
-    target_link_libraries(portal libultra::libultra)
-
-    # Need explicit call for proper ordering
-    target_include_directories(portal BEFORE
-        PRIVATE $<TARGET_PROPERTY:libultra::libultra,INTERFACE_INCLUDE_DIRECTORIES>
-    )
-endif()
+# TODO: make this conditional
+target_sources(engine INTERFACE
+    system/libultra/controller_libultra.c
+    system/libultra/time_libultra.c
+)

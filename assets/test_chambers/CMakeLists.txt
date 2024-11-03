@@ -178,16 +178,12 @@ add_custom_command(
     VERBATIM
 )
 
-add_custom_target(level_list
+add_custom_target(generated_level_list
     DEPENDS ${LEVEL_LIST}
 )
 
-add_library(levels INTERFACE)
-add_dependencies(levels
-    generated_levels
-    level_list
-)
-target_sources(levels INTERFACE
-    ${LEVEL_GENERATED_FILES}
+add_library(level_list INTERFACE)
+add_dependencies(level_list generated_level_list)
+target_sources(level_list INTERFACE
     ${LEVEL_LIST}
 )
