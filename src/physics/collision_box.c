@@ -3,8 +3,6 @@
 #include "raycasting.h"
 #include "../math/mathf.h"
 
-#include <math.h>
-
 struct ColliderCallbacks gCollisionBoxCallbacks = {
     raycastBox,
     collisionBoxSolidMofI,

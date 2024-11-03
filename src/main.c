@@ -19,7 +19,6 @@
 #include "scene/scene.h"
 #include "sk64/skeletool_animator.h"
 #include "sk64/skeletool_defs.h"
-#include "string.h"
 #include "util/dynamic_asset_loader.h"
 #include "util/memory.h"
 #include "util/profile.h"

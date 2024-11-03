@@ -8,7 +8,6 @@
 #include "system/time.h"
 #endif
 
-#include <string.h>
 #include "../graphics/graphics.h"
 #include "../util/memory.h"
 

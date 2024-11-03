@@ -9,8 +9,6 @@
 #include "../locales/locales.h"
 #include "../controls/rumble_pak.h"
 
-#include <math.h>
-
 unsigned char gPortalOpenRumbleData[] = {
     0xFA, 0xA9,
 };

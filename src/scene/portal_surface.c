@@ -3,7 +3,6 @@
 #include "portal.h"
 #include "math/mathf.h"
 #include "math/vector2.h"
-#include <math.h>
 #include "portal_surface_generator.h"
 #include "../levels/level_definition.h"
 #include "../levels/levels.h"

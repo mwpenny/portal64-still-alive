@@ -8,7 +8,6 @@
 #include "./text_manipulation.h"
 #include "./controls.h"
 #include "./translations.h"
-#include <string.h>
 
 #include "../build/assets/materials/ui.h"
 #include "../build/src/audio/clips.h"
@@ -38,7 +37,7 @@ void savefileListSlotUseInfo(struct SavefileListSlot* savefileListSlot, struct S
     savefileListSlot->testChamberText = menuBuildPrerenderedText(&gDejaVuSansFont, message, x + BORDER_WIDTH + 8, y, 120);
 
     if (savefileInfo->savefileName) {
-        strcpy(message, savefileInfo->savefileName);
+        strCopy(message, savefileInfo->savefileName);
     } else {
         textManipSubjectMessage(message, gSaveData.saveSlotMetadata[savefileInfo->slotIndex].testSubjectNumber);
     }

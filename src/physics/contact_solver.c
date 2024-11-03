@@ -1,12 +1,11 @@
 
 #include "contact_solver.h"
 #include "system/time.h"
+#include "util/memory.h"
 #include "../math/mathf.h"
 #include "rigid_body.h"
 #include "collision_object.h"
 #include "collision_scene.h"
-
-#include <string.h>
 
 #define Q3_BAUMGARTE 0.15f
 
@@ -180,7 +179,7 @@ void contactSolverCheckPortalContacts(struct ContactSolver* contactSolver) {
 
 void contactSolverInit(struct ContactSolver* contactSolver) {
 	int solverSize = sizeof(struct ContactSolver);
-	memset(contactSolver, 0, solverSize);
+	zeroMemory(contactSolver, solverSize);
 
 	contactSolver->contactCapacity = MAX_CONTACT_COUNT;
 

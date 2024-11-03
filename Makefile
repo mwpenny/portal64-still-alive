@@ -24,7 +24,7 @@ GAME_VERSION		:=  $(shell \
 )
 
 OPTIMIZER		:= -Os
-LCDEFS			:= -DDEBUG -DGAME_VERSION=\"$(GAME_VERSION)\" -g -Werror -Wall
+LCDEFS			:= -DGAME_VERSION=\"$(GAME_VERSION)\" -g -Werror -Wall
 N64LIB			:= -lultra_rom
 
 ifeq ($(PORTAL64_WITH_DEBUGGER),1)
@@ -65,14 +65,14 @@ DEPS = $(patsubst %.c, build/%.d, $(CODEFILES)) $(patsubst %.c, build/%.d, $(DAT
 
 -include $(DEPS)
 
-LCINCS =	-I$(N64_ROOT)/usr/include/n64/PR -Isrc/ -I$(N64_ROOT)/opt/crashsdk/mips64-elf/include
+LCINCS =	-I$(N64_ROOT)/usr/include/n64/PR -Isrc/
 LCDEFS +=	-DF3DEX_GBI_2 -DSCENE_SCALE=${SCENE_SCALE}
 #LCDEFS +=	-DF3DEX_GBI_2 -DFOG
 #LCDEFS +=	-DF3DEX_GBI_2 -DFOG -DXBUS
 #LCDEFS +=	-DF3DEX_GBI_2 -DFOG -DXBUS -DSTOP_AUDIO
 
-LDDIRS  =	-L$(N64_ROOT)/usr/lib/n64 -L$(N64_ROOT)/opt/crashsdk/mips64-elf/lib -L$(N64_LIBGCCDIR)
-LDFLAGS =	$(N64LIB) -lc -lgcc
+LDDIRS  =	-L$(N64_ROOT)/usr/lib/n64
+LDFLAGS =	$(N64LIB) $(shell $(CC) -print-libgcc-file-name)
 
 default:	english_audio
 

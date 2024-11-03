@@ -1,7 +1,5 @@
 #include "new_game_menu.h"
 
-#include <string.h>
-
 #include "./translations.h"
 
 #include "../font/font.h"

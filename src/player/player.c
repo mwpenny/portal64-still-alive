@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include "player.h"
 #include "player_rumble_clips.h"
 #include "../audio/clips.h"

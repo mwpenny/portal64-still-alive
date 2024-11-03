@@ -3,7 +3,6 @@
 #include <ultra64.h>
 #include <assert.h>
 #include "mathf.h"
-#include <math.h>
 
 struct Quaternion gQuaternionZero = {0.0f, 0.0f, 0.0f, 0.0f};
 

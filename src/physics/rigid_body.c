@@ -4,7 +4,6 @@
 #include "contact_solver.h"
 #include "collision_scene.h"
 #include "defs.h"
-#include <math.h>
 
 #define VELOCITY_SLEEP_THRESHOLD      0.001f
 #define ANGULAR_VELOCITY_SLEEP_THRESHOLD  0.001f

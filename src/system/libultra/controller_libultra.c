@@ -8,8 +8,6 @@
 
 #include <ultra64.h>
 
-#include <string.h>
-
 // 0 = disable, 1 = record, 2 = playback
 #define CONTROLLER_LOG_CONTROLLER_DATA  0
 

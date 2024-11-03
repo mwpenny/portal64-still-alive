@@ -10,8 +10,6 @@
 #include "../build/assets/models/props/cylinder_test.h"
 #include "../../build/assets/materials/static.h"
 
-                                                            
-#include <stdlib.h>   
 
 struct SignStateFrame {
     u8 backlightColor:2;
