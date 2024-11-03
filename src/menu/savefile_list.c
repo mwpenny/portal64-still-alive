@@ -12,6 +12,8 @@
 #include "../build/assets/materials/ui.h"
 #include "../build/src/audio/clips.h"
 
+#include "../util/string.h"
+
 #define SAVE_SLOT_RENDER_W  (SAVE_SLOT_IMAGE_W * 2)
 #define SAVE_SLOT_RENDER_H  (SAVE_SLOT_IMAGE_H * 2)
 

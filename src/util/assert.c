@@ -1,7 +1,7 @@
 
 #include "assert.h"
 
-#if DEBUG
+#if !(NDEBUG)
 
 asm(
 ".global __assert\n"
