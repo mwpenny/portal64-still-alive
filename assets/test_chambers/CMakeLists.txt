@@ -154,6 +154,18 @@ add_custom_target(generated_levels
     DEPENDS ${LEVEL_GENERATED_FILES}
 )
 
+add_library(levels OBJECT)
+add_dependencies(levels
+    materials
+    generated_levels
+)
+target_sources(levels PRIVATE
+    ${LEVEL_GENERATED_FILES}
+)
+target_link_libraries(levels PRIVATE
+    platform
+)
+
 # Add command for generating level list header
 
 set(LEVEL_GENERATED_HEADERS ${LEVEL_GENERATED_FILES})
@@ -186,4 +198,27 @@ add_library(level_list INTERFACE)
 add_dependencies(level_list generated_level_list)
 target_sources(level_list INTERFACE
     ${LEVEL_LIST}
+)
+
+# Add command for generating level linker script fragment
+
+set(LEVEL_LINKER_SCRIPT "${LINKER_SCRIPT_DIR}/levels.ld")
+add_custom_command(
+    DEPENDS
+        ${GEN_SEGMENT_LD}
+    OUTPUT
+        ${LEVEL_LINKER_SCRIPT}
+    COMMAND
+        ${NodeJs_EXECUTABLE} ${GEN_SEGMENT_LD}
+        ${LEVEL_LINKER_SCRIPT}
+        0x02000000
+        "$<LIST:FILTER,$<TARGET_OBJECTS:levels>,INCLUDE,_geo\..+$>"
+    COMMENT
+        "Generating $<PATH:RELATIVE_PATH,${LEVEL_LINKER_SCRIPT},${PROJECT_SOURCE_DIR}>"
+    COMMAND_EXPAND_LISTS
+    VERBATIM
+)
+
+add_custom_target(level_linker_script
+    DEPENDS ${LEVEL_LINKER_SCRIPT}
 )

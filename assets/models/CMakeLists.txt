@@ -222,7 +222,7 @@ foreach(MODEL ${MODELS})
     _add_model_export_command(${MODEL} MODEL_FBX)
     _add_model_generate_command(${MODEL} ${MODEL_FBX} GENERATED_FILES)
 
-    if(MODEL IN_LIST DYNAMIC_MODELS)
+    if (MODEL IN_LIST DYNAMIC_MODELS)
         list(APPEND DYNAMIC_MODEL_GENERATED_FILES ${GENERATED_FILES})
     else()
         list(APPEND STATIC_MODEL_GENERATED_FILES ${GENERATED_FILES})
@@ -233,6 +233,30 @@ endforeach()
 
 add_custom_target(models
     DEPENDS ${MODEL_GENERATED_FILES}
+)
+
+add_library(models_static OBJECT)
+add_dependencies(models_static
+    materials
+    models
+)
+target_sources(models_static PRIVATE
+    ${STATIC_MODEL_GENERATED_FILES}
+)
+target_link_libraries(models_static PRIVATE
+    platform
+)
+
+add_library(models_dynamic OBJECT)
+add_dependencies(models_dynamic
+    materials
+    models
+)
+target_sources(models_dynamic PRIVATE
+    ${DYNAMIC_MODEL_GENERATED_FILES}
+)
+target_link_libraries(models_dynamic PRIVATE
+    platform
 )
 
 # Add commands for generating dynamic model lists
@@ -254,8 +278,8 @@ foreach(GENERATED_HEADER ${MODEL_GENERATED_HEADERS})
         OUTPUT_VARIABLE MODEL_NAME
     )
 
-    if(MODEL_NAME IN_LIST DYNAMIC_MODELS)
-        if(MODEL_NAME IN_LIST ANIMATED_MODELS)
+    if (MODEL_NAME IN_LIST DYNAMIC_MODELS)
+        if (MODEL_NAME IN_LIST ANIMATED_MODELS)
             list(APPEND DYNAMIC_ANIMATED_MODEL_HEADERS ${GENERATED_HEADER})
         else()
             list(APPEND DYNAMIC_MODEL_HEADERS ${GENERATED_HEADER})
@@ -316,8 +340,25 @@ target_sources(model_lists INTERFACE
     ${MODEL_LIST_FILES}
 )
 
-add_library(models_static INTERFACE)
-add_dependencies(models_static models)
-target_sources(models_static INTERFACE
-    ${STATIC_MODEL_GENERATED_FILES}
+# Add command for generating dynamic model linker script fragment
+
+set(DYNAMIC_MODELS_LINKER_SCRIPT "${LINKER_SCRIPT_DIR}/dynamic_models.ld")
+add_custom_command(
+    DEPENDS
+        ${GEN_SEGMENT_LD}
+    OUTPUT
+        ${DYNAMIC_MODELS_LINKER_SCRIPT}
+    COMMAND
+        ${NodeJs_EXECUTABLE} ${GEN_SEGMENT_LD}
+        ${DYNAMIC_MODELS_LINKER_SCRIPT}
+        0x03000000
+        "$<LIST:FILTER,$<TARGET_OBJECTS:models_dynamic>,INCLUDE,_geo\..+$>"
+    COMMENT
+        "Generating $<PATH:RELATIVE_PATH,${DYNAMIC_MODELS_LINKER_SCRIPT},${PROJECT_SOURCE_DIR}>"
+    COMMAND_EXPAND_LISTS
+    VERBATIM
+)
+
+add_custom_target(models_dynamic_linker_script
+    DEPENDS ${DYNAMIC_MODELS_LINKER_SCRIPT}
 )

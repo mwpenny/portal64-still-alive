@@ -98,7 +98,7 @@ function(_add_texture_convert_command INPUT_FILE OUTPUT_FILE)
     set(OUTPUT_FILE "${PAK_MATERIALS_DIR}/${OUTPUT_FILE}.png")
     set(ARGS "${ARGN}")
 
-    if(NOT ARGS)
+    if (NOT ARGS)
         get_source_file_property(FILE_ARGS ${INPUT_FILE} ARGS)
         if (FILE_ARGS)
             set(ARGS "${FILE_ARGS}")

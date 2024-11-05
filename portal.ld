@@ -1,5 +1,5 @@
 OUTPUT_FORMAT("elf32-bigmips", "elf32-bigmips", "elf32-littlemips")
-OUTPUT_ARCH(mips)
+OUTPUT_ARCH("mips")
 
 #define BEGIN_SEG(name, addr) \
     _##name##SegmentStart = ADDR(.name); \
@@ -26,15 +26,15 @@ SECTIONS
 
    BEGIN_SEG(boot, 0x04000000)
    {
-      *asm/rom_header.*(.text);
-      *asm/boot.*(.text);
+      */rom_header.*(.text);
+      */boot.*(.text);
    }
    END_SEG(boot)
 
    BEGIN_SEG(code, 0x80000400) SUBALIGN(16)
    {
       /* code */
-      *asm/entry.*(.text);
+      */entry.*(.text);
       CODE_SEGMENT(.text);
       RSP_OBJ(.text);
       GSP_OBJ(.text);
@@ -68,8 +68,8 @@ SECTIONS
 
    BEGIN_SEG(sound_data, __romPos)
    {
-      *asm/sound_data.*(.data);
-      *asm/sound_data.*(.bss);
+      */sound_data.*(.data);
+      */sound_data.*(.bss);
    }
    END_SEG(sound_data)
 

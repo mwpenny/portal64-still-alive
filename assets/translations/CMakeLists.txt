@@ -75,9 +75,9 @@ add_custom_target(strings
         ${STRING_DATA_TABLE_FILES}
 )
 
-add_library(string_data_tables INTERFACE)
+add_library(string_data_tables OBJECT)
 add_dependencies(string_data_tables strings)
-target_sources(string_data_tables INTERFACE
+target_sources(string_data_tables PRIVATE
     ${STRING_DATA_TABLE_FILES}
 )
 
@@ -85,4 +85,28 @@ add_library(string_lookup_tables INTERFACE)
 add_dependencies(string_lookup_tables strings)
 target_sources(string_lookup_tables INTERFACE
     ${STRING_LOOKUP_TABLE_FILES}
+)
+
+# Add command for generating strings linker script fragment
+
+set(STRING_LINKER_SCRIPT "${LINKER_SCRIPT_DIR}/subtitles.ld")
+add_custom_command(
+    DEPENDS
+        ${GEN_SEGMENT_LD}
+    OUTPUT
+        ${STRING_LINKER_SCRIPT}
+    COMMAND
+        ${NodeJs_EXECUTABLE} ${GEN_SEGMENT_LD}
+        --alignment 16
+        ${STRING_LINKER_SCRIPT}
+        0x04000000
+        "$<TARGET_OBJECTS:string_data_tables>"
+    COMMENT
+        "Generating $<PATH:RELATIVE_PATH,${STRING_LINKER_SCRIPT},${PROJECT_SOURCE_DIR}>"
+    COMMAND_EXPAND_LISTS
+    VERBATIM
+)
+
+add_custom_target(string_linker_script
+    DEPENDS ${STRING_LINKER_SCRIPT}
 )

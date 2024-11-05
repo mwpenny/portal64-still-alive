@@ -10,7 +10,7 @@ function sanitize(s) {
 
 function generateSegmentNameFromObject(objectPath) {
     const { name } = path.parse(objectPath);
-    return sanitize(name);
+    return sanitize(name.split('.')[0]);
 }
 
 function generateSegmentContent(objectPath) {
@@ -57,6 +57,11 @@ const { values, positionals } = util.parseArgs({
 const [outputLinkerScript, loadAddress, ...objectPaths] = positionals;
 const singleSegmentName = values['single-segment-name'];
 const alignment = values['alignment'];
+
+const outputParentDir = path.dirname(outputLinkerScript);
+if (!fs.existsSync(outputParentDir)) {
+    fs.mkdirSync(outputParentDir, { recursive: true });
+}
 
 const output = singleSegmentName ?
     generateSegment(singleSegmentName, loadAddress, alignment, objectPaths) :

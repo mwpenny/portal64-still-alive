@@ -1,7 +1,7 @@
 #include "string.h"
 
 size_t strLength(char* s) {
-    int size = 0;
+    size_t size = 0;
 
     while (*s++ != '\0') {
         ++size;

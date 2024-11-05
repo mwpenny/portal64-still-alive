@@ -272,7 +272,7 @@ function(_add_sound_transform_command SOUND_SCRIPT OUTPUT_LIST)
     set(INPUT_FILE "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
     set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.wav")
 
-    if(SOUND_SCRIPT MATCHES ".*\.jsox")
+    if (SOUND_SCRIPT MATCHES ".*\.jsox")
         _add_sound_transform_command_jsox(${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE})
     else()
         _add_sound_transform_command_sox(${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE})
@@ -411,7 +411,7 @@ foreach(CONVERTED_SOUND ${SOUNDS_CONVERTED})
     )
 
     # Only include the sound if an instrument bank doesn't already do so
-    if(NOT INS_BANK IN_LIST INSTRUMENT_BANKS)
+    if (NOT INS_BANK IN_LIST INSTRUMENT_BANKS)
         list(APPEND SOUND_TABLE_INPUTS ${CONVERTED_SOUND})
     endif()
 endforeach()
