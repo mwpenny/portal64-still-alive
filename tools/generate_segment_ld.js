@@ -8,16 +8,20 @@ function sanitize(s) {
     return s.replace(INVALID_TOKEN_CHARACTER, '_');
 }
 
-function generateSegmentNameFromObject(objectPath) {
+function getObjectName(objectPath) {
     const { name } = path.parse(objectPath);
     return sanitize(name.split('.')[0]);
 }
 
 function generateSegmentContent(objectPath) {
+    // Use a wildcard so the linker script is configuration independent
+    // I.e., same script works for both debug and release
+    const objectMatch = `*/${getObjectName(objectPath)}.*`;
+
     return `
-        ${objectPath}(.data)
-        ${objectPath}(.bss)
-        ${objectPath}(.rodata*)
+        ${objectMatch}(.data)
+        ${objectMatch}(.bss)
+        ${objectMatch}(.rodata*)
     `.trim();
 }
 
@@ -37,7 +41,7 @@ function generateSegment(segmentName, loadAddress, alignment, objectPaths) {
 
 function generateMultiSegments(loadAddress, alignment, objectPaths) {
     return objectPaths.map(objectPath => {
-        const segmentName = generateSegmentNameFromObject(objectPath);
+        const segmentName = getObjectName(objectPath);
         return generateSegment(segmentName, loadAddress, alignment, [objectPath]);
     }).join('\n');
 }

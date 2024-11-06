@@ -35,27 +35,37 @@ SECTIONS
    {
       /* code */
       */entry.*(.text);
-      CODE_SEGMENT(.text);
-      RSP_OBJ(.text);
-      GSP_OBJ(.text);
-      ASP_OBJ(.text);
+      *code_segment.*:(.text);
+      *libultra_rom.*:(.text);
+      *libgcc.*:(.text);
+      RSP_BOOT(.text);
+      RSP_UCODE(.text);
+      ASP_UCODE(.text);
 
       /* data */
-      CODE_SEGMENT(.data*);
-      RSP_OBJ(.data*);
-      GSP_OBJ(.data*);
-      ASP_OBJ(.data*);
+      *code_segment.*:(.data*);
+      *libultra_rom.*:(.data*);
+      *libgcc.*:(.data*);
+      RSP_BOOT(.data*);
+      RSP_UCODE(.data*);
+      ASP_UCODE(.data*);
 
       /* rodata */
-      CODE_SEGMENT(.rodata*);
+      *code_segment.*:(.rodata*);
+      *libultra_rom.*:(.rodata*);
+      *libgcc.*:(.rodata*);
    }
    END_SEG(code)
 
    BEGIN_NOLOAD(code)
    {
-      CODE_SEGMENT(COMMON);
-      CODE_SEGMENT(.scommon*);
-      CODE_SEGMENT(.bss*);
+      *code_segment.*:(.bss*);
+      *libgcc.*:(.bss*);
+
+      *libultra_rom.*:(COMMON);
+      *libultra_rom.*:(.scommon*);
+      *libultra_rom.*:(.bss*);
+
       . = ALIGN(0x8);
    }
    END_NOLOAD(code)
@@ -75,8 +85,8 @@ SECTIONS
 
    BEGIN_SEG(images, __romPos)
    {
-      *assets/materials/images_mat.*(.data);
-      *assets/materials/images_mat.*(.bss);
+      */assets/materials/images_mat.*(.data);
+      */assets/materials/images_mat.*(.bss);
    }
    END_SEG(images)
 

@@ -53,13 +53,13 @@ LCDEFS += -DPORTAL64_WITH_GFX_VALIDATOR
 CODEFILES += gfxvalidator/validator.c gfxvalidator/error_printer.c gfxvalidator/command_printer.c
 endif
 
-CODESEGMENT =	build/codesegment
+CODESEGMENT =	build/code_segment
 
 BOOT_CODE	=	$(N64_ROOT)/usr/lib/n64/PR/bootcode/boot.6102
 
-RSP_OBJ		=	$(N64_ROOT)/usr/lib/n64/PR/rspboot.o
-GSP_OBJ		=	$(N64_ROOT)/usr/lib/n64/PR/gspF3DEX2.fifo.o
-ASP_OBJ		=	$(N64_ROOT)/usr/lib/n64/PR/aspMain.o
+RSP_BOOT	=	$(N64_ROOT)/usr/lib/n64/PR/rspboot.o
+RSP_UCODE	=	$(N64_ROOT)/usr/lib/n64/PR/gspF3DEX2.fifo.o
+ASP_UCODE	=	$(N64_ROOT)/usr/lib/n64/PR/aspMain.o
 
 DEPS = $(patsubst %.c, build/%.d, $(CODEFILES)) $(patsubst %.c, build/%.d, $(DATAFILES))
 
@@ -578,21 +578,26 @@ CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) \
 
 CODEOBJECTS_NO_DEBUG = $(CODEOBJECTS)
 
-DATA_OBJECTS = build/assets/materials/images_mat.o
+DATA_OBJECTS = build/assets/materials/images_mat.o \
+	$(TEST_CHAMBER_OBJECTS) \
+	$(ANIM_TEST_CHAMBERS) \
+	$(ANIM_LIST) \
+	$(DYNAMIC_MODEL_OBJECTS) \
+	$(DYNAMIC_ANIMATED_MODEL_OBJECTS) \
+	$(SUBTITLE_OBJECTS)
 
 ifeq ($(PORTAL64_WITH_DEBUGGER),1)
 CODEOBJECTS_NO_DEBUG += build/debugger/debugger_stub.o build/debugger/serial_stub.o 
 endif
 
-$(CODESEGMENT)_no_debug.o:	$(CODEOBJECTS_NO_DEBUG)
-	$(LD) -o $(CODESEGMENT)_no_debug.o -r $(CODEOBJECTS_NO_DEBUG) $(LDDIRS) $(LDFLAGS)
+$(CODESEGMENT).no_debug.a:	$(CODEOBJECTS_NO_DEBUG)
+	ar r $@ $^
 
+$(CP_LD_SCRIPT).no_debug.ld: $(LD_SCRIPT) build/levels.ld build/dynamic_models.ld build/anims.ld build/subtitles.ld
+	cpp -P -Ibuild -Wno-trigraphs $(LCDEFS) -DRSP_BOOT=$(RSP_BOOT) -DRSP_UCODE=$(RSP_UCODE) -DASP_UCODE=$(ASP_UCODE) -o $@ $<
 
-$(CP_LD_SCRIPT)_no_debug.ld: $(LD_SCRIPT) build/levels.ld build/dynamic_models.ld build/anims.ld build/subtitles.ld
-	cpp -P -Ibuild -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_no_debug.o -DRSP_OBJ=$(RSP_OBJ) -DGSP_OBJ=$(GSP_OBJ) -DASP_OBJ=$(ASP_OBJ) -o $@ $<
-
-$(BASE_TARGET_NAME).z64: $(CODESEGMENT)_no_debug.o $(ASMOBJECTS) $(DATA_OBJECTS) $(SUBTITLE_OBJECTS) $(CP_LD_SCRIPT)_no_debug.ld
-	$(LD) -L. -T $(CP_LD_SCRIPT)_no_debug.ld -Map $(BASE_TARGET_NAME)_no_debug.map -o $(BASE_TARGET_NAME).elf $(ASMOBJECTS) $(DATA_OBJECTS)
+$(BASE_TARGET_NAME).z64: $(CODESEGMENT).no_debug.a $(ASMOBJECTS) $(DATA_OBJECTS) $(CP_LD_SCRIPT).no_debug.ld
+	$(LD) -L. -T $(CP_LD_SCRIPT).no_debug.ld -Map $(BASE_TARGET_NAME).no_debug.map -o $(BASE_TARGET_NAME).elf $(ASMOBJECTS) $(DATA_OBJECTS) $(CODESEGMENT).no_debug.a $(LDDIRS) $(LDFLAGS)
 	$(OBJCOPY) --pad-to=0x100000 --gap-fill=0xFF $(BASE_TARGET_NAME).elf $(BASE_TARGET_NAME).z64 -O binary
 	makemask $(BASE_TARGET_NAME).z64
 	sh tools/romfix64.sh $(BASE_TARGET_NAME).z64
@@ -604,14 +609,14 @@ ifeq ($(PORTAL64_WITH_DEBUGGER),1)
 CODEOBJECTS_DEBUG += build/debugger/debugger.o build/debugger/serial.o 
 endif
 
-$(CODESEGMENT)_debug.o:	$(CODEOBJECTS_DEBUG)
-	$(LD) -o $(CODESEGMENT)_debug.o -r $(CODEOBJECTS_DEBUG) $(LDDIRS) $(LDFLAGS)
+$(CODESEGMENT).debug.a:	$(CODEOBJECTS_DEBUG)
+	ar r $@ $^
 
-$(CP_LD_SCRIPT)_debug.ld: $(LD_SCRIPT) build/levels.ld build/dynamic_models.ld build/anims.ld build/subtitles.ld
-	cpp -P -Ibuild -Wno-trigraphs $(LCDEFS) -DCODE_SEGMENT=$(CODESEGMENT)_debug.o -DRSP_OBJ=$(RSP_OBJ) -DGSP_OBJ=$(GSP_OBJ) -DASP_OBJ=$(ASP_OBJ) -o $@ $<
+$(CP_LD_SCRIPT).debug.ld: $(LD_SCRIPT) build/levels.ld build/dynamic_models.ld build/anims.ld build/subtitles.ld
+	cpp -P -Ibuild -Wno-trigraphs $(LCDEFS) -DRSP_BOOT=$(RSP_BOOT) -DRSP_UCODE=$(RSP_UCODE) -DASP_UCODE=$(ASP_UCODE) -o $@ $<
 
-$(BASE_TARGET_NAME)_debug.z64: $(CODESEGMENT)_debug.o $(ASMOBJECTS) $(DATA_OBJECTS) $(SUBTITLE_OBJECTS) $(CP_LD_SCRIPT)_debug.ld
-	$(LD) -L. -T $(CP_LD_SCRIPT)_debug.ld -Map $(BASE_TARGET_NAME)_debug.map -o $(BASE_TARGET_NAME)_debug.elf $(ASMOBJECTS) $(DATA_OBJECTS)
+$(BASE_TARGET_NAME).debug.z64: $(CODESEGMENT).debug.a $(ASMOBJECTS) $(DATA_OBJECTS) $(CP_LD_SCRIPT).debug.ld
+	$(LD) -L. -T $(CP_LD_SCRIPT).debug.ld -Map $(BASE_TARGET_NAME).debug.map -o $(BASE_TARGET_NAME).elf $(ASMOBJECTS) $(DATA_OBJECTS) $(CODESEGMENT).debug.a $(LDDIRS) $(LDFLAGS)
 	$(OBJCOPY) --pad-to=0x100000 --gap-fill=0xFF $(BASE_TARGET_NAME)_debug.elf $(BASE_TARGET_NAME)_debug.z64 -O binary
 	makemask $(BASE_TARGET_NAME)_debug.z64
 	sh tools/romfix64.sh $(BASE_TARGET_NAME).z64
@@ -625,8 +630,8 @@ clean:
 
 clean-src:
 	rm -rf build/src
-	rm -f $(CODESEGMENT)_debug.o
-	rm -f $(CODESEGMENT)_no_debug.o
+	rm -f $(CODESEGMENT).debug.a
+	rm -f $(CODESEGMENT).no_debug.a
 	rm -f $(BASE_TARGET_NAME)_debug.elf
 	rm -f $(BASE_TARGET_NAME).elf
 	rm -f $(BASE_TARGET_NAME).z64
@@ -635,8 +640,8 @@ clean-src:
 clean-assets:
 	rm -rf build/assets
 	rm -rf assets/locales/
-	rm -f $(CODESEGMENT)_debug.o
-	rm -f $(CODESEGMENT)_no_debug.o
+	rm -f $(CODESEGMENT).debug.a
+	rm -f $(CODESEGMENT).no_debug.a
 	rm -f $(BASE_TARGET_NAME)_debug.elf
 	rm -f $(BASE_TARGET_NAME).elf
 	rm -f $(BASE_TARGET_NAME).z64

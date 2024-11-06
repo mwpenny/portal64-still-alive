@@ -122,7 +122,7 @@ function(_add_model_export_command MODEL_NAME OUTPUT_VARIABLE)
     return(PROPAGATE ${OUTPUT_VARIABLE})
 endfunction()
 
-function(_add_model_generate_command MODEL_NAME MODEL_FBX OUTPUT_LIST)
+function(_add_model_generate_command MODEL_NAME MODEL_FBX MODEL_OUTPUT_LIST ANIM_OUTPUT_LIST)
     set(MODEL_FLAGS "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}.flags")
     set(MODEL_MATERIALS ${MODEL_DEFAULT_MATERIALS})
 
@@ -142,14 +142,15 @@ function(_add_model_generate_command MODEL_NAME MODEL_FBX OUTPUT_LIST)
 
     set(OUTPUT_FILE_H "${OUTPUT_FILE_NO_EXTENSION}.h")
     set(OUTPUT_FILE_GEO_C "${OUTPUT_FILE_NO_EXTENSION}_geo.c")
-    set(OUTPUT_FILES
+    set(MODEL_OUTPUT_FILES
         ${OUTPUT_FILE_H}
         ${OUTPUT_FILE_GEO_C}
     )
+    set(ANIM_OUTPUT_FILES "")
 
     if (MODEL_NAME IN_LIST KEYFRAMED_ANIMATED_MODELS)
         set(OUTPUT_FILE_ANIM_C "${OUTPUT_FILE_NO_EXTENSION}_anim.c")
-        list(APPEND OUTPUT_FILES ${OUTPUT_FILE_ANIM_C})
+        list(APPEND ANIM_OUTPUT_FILES ${OUTPUT_FILE_ANIM_C})
     endif()
 
     add_custom_command(
@@ -161,7 +162,8 @@ function(_add_model_generate_command MODEL_NAME MODEL_FBX OUTPUT_LIST)
             ${MODEL_FLAGS}
             ${MODEL_MATERIALS}
         OUTPUT
-            ${OUTPUT_FILES}
+            ${MODEL_OUTPUT_FILES}
+            ${ANIM_OUTPUT_FILES}
         COMMAND
             ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
         COMMAND
@@ -180,8 +182,23 @@ function(_add_model_generate_command MODEL_NAME MODEL_FBX OUTPUT_LIST)
         VERBATIM
     )
 
-    list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILES})
-    return(PROPAGATE ${OUTPUT_LIST})
+    list(APPEND ${MODEL_OUTPUT_LIST} ${MODEL_OUTPUT_FILES})
+    list(APPEND ${ANIM_OUTPUT_LIST} ${ANIM_OUTPUT_FILES})
+    return(PROPAGATE ${MODEL_OUTPUT_LIST} ${ANIM_OUTPUT_LIST})
+endfunction()
+
+function(_add_model_lib LIB_NAME LIB_SOURCES)
+    add_library(${LIB_NAME} OBJECT)
+    add_dependencies(${LIB_NAME}
+        materials
+        models
+    )
+    target_sources(${LIB_NAME} PRIVATE
+        ${LIB_SOURCES}
+    )
+    target_link_libraries(${LIB_NAME}
+        platform
+    )
 endfunction()
 
 # Add commands for exporting model files
@@ -212,62 +229,49 @@ set_property(SOURCE props/round_elevator_interior.flags
         ${ASSETS_DIR}/materials/elevator.skm.yaml
 )
 
-set(MODEL_GENERATED_FILES "")
 set(STATIC_MODEL_GENERATED_FILES "")
 set(DYNAMIC_MODEL_GENERATED_FILES "")
+set(ANIM_GENERATED_FILES "")
 
 foreach(MODEL ${MODELS})
-    set(GENERATED_FILES "")
+    set(MODEL_GENERATED_FILES "")
 
     _add_model_export_command(${MODEL} MODEL_FBX)
-    _add_model_generate_command(${MODEL} ${MODEL_FBX} GENERATED_FILES)
+    _add_model_generate_command(${MODEL} ${MODEL_FBX}
+        MODEL_GENERATED_FILES
+        ANIM_GENERATED_FILES
+    )
 
     if (MODEL IN_LIST DYNAMIC_MODELS)
-        list(APPEND DYNAMIC_MODEL_GENERATED_FILES ${GENERATED_FILES})
+        list(APPEND DYNAMIC_MODEL_GENERATED_FILES ${MODEL_GENERATED_FILES})
     else()
-        list(APPEND STATIC_MODEL_GENERATED_FILES ${GENERATED_FILES})
+        list(APPEND STATIC_MODEL_GENERATED_FILES ${MODEL_GENERATED_FILES})
     endif()
-
-    list(APPEND MODEL_GENERATED_FILES ${GENERATED_FILES})
 endforeach()
 
 add_custom_target(models
-    DEPENDS ${MODEL_GENERATED_FILES}
+    DEPENDS
+        ${STATIC_MODEL_GENERATED_FILES}
+        ${DYNAMIC_MODEL_GENERATED_FILES}
+        ${ANIM_GENERATED_FILES}
 )
 
-add_library(models_static OBJECT)
-add_dependencies(models_static
-    materials
-    models
-)
-target_sources(models_static PRIVATE
-    ${STATIC_MODEL_GENERATED_FILES}
-)
-target_link_libraries(models_static PRIVATE
-    platform
-)
-
-add_library(models_dynamic OBJECT)
-add_dependencies(models_dynamic
-    materials
-    models
-)
-target_sources(models_dynamic PRIVATE
-    ${DYNAMIC_MODEL_GENERATED_FILES}
-)
-target_link_libraries(models_dynamic PRIVATE
-    platform
-)
+_add_model_lib(models_static    "${STATIC_MODEL_GENERATED_FILES}")
+_add_model_lib(models_dynamic   "${DYNAMIC_MODEL_GENERATED_FILES}")
+_add_model_lib(model_animations "${ANIM_GENERATED_FILES}")
 
 # Add commands for generating dynamic model lists
 
-set(MODEL_GENERATED_HEADERS ${MODEL_GENERATED_FILES})
-list(FILTER MODEL_GENERATED_HEADERS INCLUDE REGEX "\.h$")
+set(DYNAMIC_MODEL_GENERATED_HEADERS ${DYNAMIC_MODEL_GENERATED_FILES})
+list(FILTER
+    DYNAMIC_MODEL_GENERATED_HEADERS
+    INCLUDE REGEX "\.h$"
+)
 
-set(DYNAMIC_MODEL_HEADERS "")
+set(DYNAMIC_NON_ANIMATED_MODEL_HEADERS "")
 set(DYNAMIC_ANIMATED_MODEL_HEADERS "")
 
-foreach(GENERATED_HEADER ${MODEL_GENERATED_HEADERS})
+foreach(GENERATED_HEADER ${DYNAMIC_MODEL_GENERATED_HEADERS})
     cmake_path(
         RELATIVE_PATH GENERATED_HEADER
         BASE_DIRECTORY "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}"
@@ -278,12 +282,10 @@ foreach(GENERATED_HEADER ${MODEL_GENERATED_HEADERS})
         OUTPUT_VARIABLE MODEL_NAME
     )
 
-    if (MODEL_NAME IN_LIST DYNAMIC_MODELS)
-        if (MODEL_NAME IN_LIST ANIMATED_MODELS)
-            list(APPEND DYNAMIC_ANIMATED_MODEL_HEADERS ${GENERATED_HEADER})
-        else()
-            list(APPEND DYNAMIC_MODEL_HEADERS ${GENERATED_HEADER})
-        endif()
+    if (MODEL_NAME IN_LIST ANIMATED_MODELS)
+        list(APPEND DYNAMIC_ANIMATED_MODEL_HEADERS ${GENERATED_HEADER})
+    else()
+        list(APPEND DYNAMIC_NON_ANIMATED_MODEL_HEADERS ${GENERATED_HEADER})
     endif()
 endforeach()
 
@@ -293,14 +295,14 @@ set(DYNAMIC_MODEL_LIST_H "${DYNAMIC_MODEL_LIST_OUT_DIR}/dynamic_model_list.h")
 set(DYNAMIC_MODEL_LIST_C "${DYNAMIC_MODEL_LIST_OUT_DIR}/dynamic_model_list.c")
 add_custom_command(
     DEPENDS
-        models ${DYNAMIC_MODEL_HEADERS}
+        models ${DYNAMIC_NON_ANIMATED_MODEL_HEADERS}
         ${GEN_DYNAMIC_MODEL_LIST} ${MODEL_LIST_UTILS}
     OUTPUT
         ${DYNAMIC_MODEL_LIST_H} ${DYNAMIC_MODEL_LIST_C}
     COMMAND
         ${NodeJs_EXECUTABLE} ${GEN_DYNAMIC_MODEL_LIST}
         ${DYNAMIC_MODEL_LIST_H}
-        ${DYNAMIC_MODEL_HEADERS}
+        ${DYNAMIC_NON_ANIMATED_MODEL_HEADERS}
     COMMENT
         "Generating dynamic model list"
     VERBATIM
@@ -352,7 +354,7 @@ add_custom_command(
         ${NodeJs_EXECUTABLE} ${GEN_SEGMENT_LD}
         ${DYNAMIC_MODELS_LINKER_SCRIPT}
         0x03000000
-        "$<LIST:FILTER,$<TARGET_OBJECTS:models_dynamic>,INCLUDE,_geo\..+$>"
+        "$<TARGET_OBJECTS:models_dynamic>"
     COMMENT
         "Generating $<PATH:RELATIVE_PATH,${DYNAMIC_MODELS_LINKER_SCRIPT},${PROJECT_SOURCE_DIR}>"
     COMMAND_EXPAND_LISTS

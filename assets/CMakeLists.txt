@@ -48,8 +48,8 @@ add_custom_command(
         --single-segment-name animation_segment
         ${ANIMS_LINKER_SCRIPT}
         0x0D000000
-        "$<LIST:FILTER,$<TARGET_OBJECTS:models_dynamic>,INCLUDE,_anim\..+$>"
-        "$<LIST:FILTER,$<TARGET_OBJECTS:levels>,INCLUDE,_anim\..+$>"
+        "$<TARGET_OBJECTS:model_animations>"
+        "$<TARGET_OBJECTS:level_animations>"
     COMMENT
         "Generating $<PATH:RELATIVE_PATH,${ANIMS_LINKER_SCRIPT},${PROJECT_SOURCE_DIR}>"
     COMMAND_EXPAND_LISTS

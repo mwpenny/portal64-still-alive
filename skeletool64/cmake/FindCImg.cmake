@@ -11,7 +11,7 @@ find_package_handle_standard_args(CImg
         CImg_INCLUDE_DIR
 )
 
-if(CImg_FOUND AND NOT TARGET cimg::cimg)
+if (CImg_FOUND AND NOT TARGET cimg::cimg)
     add_library(cimg::cimg INTERFACE IMPORTED)
     target_include_directories(cimg::cimg INTERFACE
         ${CImg_INCLUDE_DIR}

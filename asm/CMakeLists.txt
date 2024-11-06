@@ -16,7 +16,6 @@ add_dependencies(asm_sources
 target_sources(asm_sources PRIVATE
     ${ASM_FILES}
 )
-target_compile_definitions(asm_sources PRIVATE
-    # TODO
-    #BOOT_CODE=...
+target_link_libraries(asm_sources
+    platform
 )

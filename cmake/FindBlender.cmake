@@ -6,7 +6,7 @@ include(FindPackageHandleStandardArgs)
 
 find_program(Blender_EXECUTABLE blender)
 
-if(Blender_EXECUTABLE)
+if (Blender_EXECUTABLE)
     execute_process(
         COMMAND
             ${Blender_EXECUTABLE} --version
@@ -20,7 +20,7 @@ if(Blender_EXECUTABLE)
 
     if (NOT VERSION_COMMAND_RC EQUAL 0)
         message(SEND_ERROR "Error getting Blender version: ${VERSION_COMMAND_ERROR}")
-    elseif(VERSION_COMMAND_OUTPUT MATCHES "^Blender ([0-9\\.]+)")
+    elseif (VERSION_COMMAND_OUTPUT MATCHES "^Blender ([0-9\\.]+)")
         set(VERSION_NUMBER "${CMAKE_MATCH_1}")
     endif()
 endif()
