@@ -12,9 +12,9 @@ A 3D box whose vertex colors allow ambient lighting to be calculated for
 ## Notes
 
 Ambient light sources are not used at runtime. Rather, they are used by the
-[tools/bake_lighting.py](../../../tools/bake_lighting.py) Blender script to
-precompute vertex colors for static geometry. This script must be run manually
-in Blender prior to exporting a level.
+[tools/blender/bake_lighting.py](../../../tools/blender/bake_lighting.py)
+Blender script to precompute vertex colors for static geometry. This script
+must be run manually in Blender prior to exporting a level.
 
 Baked colors are chosen for a given vertex by considering the (up to) two
 closest ambient light sources. The color contribution of each found source is
