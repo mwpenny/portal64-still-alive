@@ -3,8 +3,8 @@
 ###################
 
 set(CMAKE_SYSTEM_NAME Generic)
-
 set(N64 TRUE)
+
 set(N64_TOOLCHAIN_ROOT   ""            CACHE PATH   "Root directory of N64 toolchain")
 set(N64_TOOLCHAIN_PREFIX "mips64-elf-" CACHE STRING "File name prefix for toolchain programs")
 
@@ -12,8 +12,8 @@ list(APPEND CMAKE_PREFIX_PATH
     "/usr"
 )
 
-# Search for programs in the host and target environment
-# Search for headers and libraries in the target environment
+# Programs may be in the host or target environment
+# We should never use headers or libraries from the host
 set(CMAKE_FIND_ROOT_PATH "${N64_TOOLCHAIN_ROOT}")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
@@ -24,6 +24,7 @@ find_program(CMAKE_C_COMPILER       ${N64_TOOLCHAIN_PREFIX}gcc      REQUIRED)
 find_program(CMAKE_CPP              ${N64_TOOLCHAIN_PREFIX}cpp      REQUIRED)
 find_program(CMAKE_CXX_COMPILER     ${N64_TOOLCHAIN_PREFIX}g++      REQUIRED)
 find_program(CMAKE_OBJCOPY          ${N64_TOOLCHAIN_PREFIX}objcopy  REQUIRED)
+find_program(Makemask_EXECUTABLE    makemask                        REQUIRED)  # TODO: support different boot code
 
 # General flags
 set(COMPILE_FLAGS                   "-mabi=32 -mfix4300 -G 0 -Wall -Werror")
@@ -57,3 +58,30 @@ else()
     set(CMAKE_BUILD_TYPE "DebugOptimized" CACHE STRING "Project build type")
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${BUILD_TYPES})
 endif()
+
+# ROM generation
+
+function(target_linker_script TARGET SCRIPT_FILE)
+    target_link_options(${TARGET} PRIVATE
+        -T "${SCRIPT_FILE}"
+        -Wl,-Map=$<PATH:REPLACE_EXTENSION,$<TARGET_FILE:${TARGET}>,map>
+    )
+endfunction()
+
+function(add_n64_rom TARGET)
+    set(INPUT_FILE "$<TARGET_FILE:${TARGET}>")
+    set(OUTPUT_ROM "$<PATH:REPLACE_EXTENSION,$<TARGET_FILE:${TARGET}>,z64>")
+
+    add_custom_command(TARGET portal POST_BUILD
+        COMMAND
+            ${CMAKE_OBJCOPY} --pad-to=0x100000 --gap-fill=0xFF -O binary
+            ${INPUT_FILE}
+            ${OUTPUT_ROM}
+        COMMAND
+            ${Makemask_EXECUTABLE}
+            ${OUTPUT_ROM}
+        COMMENT
+            "Generating $<PATH:RELATIVE_PATH,${OUTPUT_ROM},${PROJECT_SOURCE_DIR}>"
+        VERBATIM
+    )
+endfunction()

@@ -1,10 +1,10 @@
 # TODO: multiple languages
 
-set(PAK_SOUND_DIR "${PAK_DIR}/sound")
+set(PAK_SOUND_DIR          "${PAK_DIR}/sound")
 set(PAK_MODIFIED_SOUND_DIR "${PAK_MODIFIED_DIR}/sound")
 
-set(JSOX "${PROJECT_SOURCE_DIR}/tools/sound/jsox.js")
-set(GEN_SOUND_IDS "${PROJECT_SOURCE_DIR}/tools/sound/generate_sound_ids.js")
+set(JSOX                   "${PROJECT_SOURCE_DIR}/tools/sound/jsox.js")
+set(GEN_SOUND_IDS          "${PROJECT_SOURCE_DIR}/tools/sound/generate_sound_ids.js")
 
 cmake_path(
     RELATIVE_PATH CMAKE_CURRENT_SOURCE_DIR

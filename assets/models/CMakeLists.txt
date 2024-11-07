@@ -1,4 +1,4 @@
-set(GEN_DYNAMIC_MODEL_LIST "${PROJECT_SOURCE_DIR}/tools/models/generate_dynamic_model_list.js")
+set(GEN_DYNAMIC_MODEL_LIST      "${PROJECT_SOURCE_DIR}/tools/models/generate_dynamic_model_list.js")
 set(GEN_DYNAMIC_ANIM_MODEL_LIST "${PROJECT_SOURCE_DIR}/tools/models/generate_dynamic_animated_model_list.js")
 
 cmake_path(

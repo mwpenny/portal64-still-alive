@@ -37,7 +37,7 @@ endif
 
 BASE_TARGET_NAME = build/portal
 
-LD_SCRIPT	= portal.ld
+LD_SCRIPT	= linker/portal.ld
 CP_LD_SCRIPT	= build/portal
 
 SCENE_SCALE = 128
