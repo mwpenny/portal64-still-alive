@@ -8,6 +8,12 @@ set(N64 TRUE)
 set(N64_TOOLCHAIN_ROOT   ""            CACHE PATH   "Root directory of N64 toolchain")
 set(N64_TOOLCHAIN_PREFIX "mips64-elf-" CACHE STRING "File name prefix for toolchain programs")
 
+# Ensure CMake can find toolchain during compiler tests
+list(APPEND CMAKE_TRY_COMPILE_PLATFORM_VARIABLES
+    N64_TOOLCHAIN_ROOT
+    N64_TOOLCHAIN_PREFIX
+)
+
 list(APPEND CMAKE_PREFIX_PATH
     "/usr"
 )
