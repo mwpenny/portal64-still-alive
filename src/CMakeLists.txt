@@ -2,6 +2,10 @@
 ## Game code ##
 ###############
 
+set(DEBUGGER      OFF CACHE BOOL "Build with support for hardware debugging")
+set(GFX_VALIDATOR OFF CACHE BOOL "Build with display list validator")
+set(RSP_PROFILER  OFF CACHE BOOL "Build with RSP performance profiler")
+
 add_library(engine INTERFACE)
 
 target_include_directories(engine INTERFACE
@@ -157,6 +161,33 @@ target_sources(engine INTERFACE
     util/rom.c
     util/string.c
 )
+
+if (DEBUGGER)
+    target_sources(engine INTERFACE
+        debugger/debugger.c
+        debugger/serial.c
+    )
+    target_compile_definitions(engine INTERFACE
+        PORTAL64_WITH_DEBUGGER
+    )
+endif()
+
+if (GFX_VALIDATOR)
+    target_sources(engine INTERFACE
+        gfxvalidator/command_printer.c
+        gfxvalidator/error_printer.c
+        gfxvalidator/validator.c
+    )
+    target_compile_definitions(engine INTERFACE
+        PORTAL64_WITH_GFX_VALIDATOR
+    )
+endif()
+
+if (RSP_PROFILER)
+    target_compile_definitions(engine INTERFACE
+        PORTAL64_WITH_RSP_PROFILER
+    )
+endif()
 
 #########################
 ## Version information ##
