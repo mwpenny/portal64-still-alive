@@ -46,6 +46,7 @@ function generateMultiSegments(loadAddress, alignment, objectPaths) {
     }).join('\n');
 }
 
+// Main
 const { values, positionals } = util.parseArgs({
     options: {
         'single-segment-name': {

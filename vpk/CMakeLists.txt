@@ -3,7 +3,6 @@
 ####################
 
 # TODO: automatic discovery of game files
-# TODO: multiple languages
 set(VPKS_PORTAL
     Portal/portal/portal_pak_dir.vpk
     Portal/portal/portal_pak_000.vpk
@@ -29,9 +28,9 @@ set(VPKS_HL2_SOUND_MISC
     Portal/hl2/hl2_sound_misc_002.vpk
 )
 
-function(_add_vpk_extract_command VPK_LIST OUTPUT_LIST)
+function(_add_vpk_extract_command VPK_LIST OUTPUT_DIR OUTPUT_LIST)
     # First VPK is the one to extract
-    list(GET ${VPK_LIST} 0 MAIN_VPK)
+    list(GET VPK_LIST 0 MAIN_VPK)
 
     cmake_path(
         GET MAIN_VPK STEM
@@ -41,11 +40,11 @@ function(_add_vpk_extract_command VPK_LIST OUTPUT_LIST)
 
     add_custom_command(
         DEPENDS
-            ${${VPK_LIST}}
+            ${VPK_LIST}
         OUTPUT
             ${MAIN_VPK_STAMP}
         COMMAND
-            ${VPK_EXECUTABLE} -x ${PAK_DIR} ${MAIN_VPK}
+            ${VPK_EXECUTABLE} -x ${OUTPUT_DIR} ${MAIN_VPK}
         COMMAND
             ${CMAKE_COMMAND} -E touch ${MAIN_VPK_STAMP}
         WORKING_DIRECTORY
@@ -61,9 +60,25 @@ endfunction()
 
 set(VPK_STAMP_FILES "")
 
-_add_vpk_extract_command(VPKS_PORTAL VPK_STAMP_FILES)
-_add_vpk_extract_command(VPKS_HL2_MISC VPK_STAMP_FILES)
-_add_vpk_extract_command(VPKS_HL2_SOUND_MISC VPK_STAMP_FILES)
+_add_vpk_extract_command("${VPKS_PORTAL}"         ${PAK_DIR} VPK_STAMP_FILES)
+_add_vpk_extract_command("${VPKS_HL2_MISC}"       ${PAK_DIR} VPK_STAMP_FILES)
+_add_vpk_extract_command("${VPKS_HL2_SOUND_MISC}" ${PAK_DIR} VPK_STAMP_FILES)
+
+# Extract audio for each selected additional non-English locale
+foreach(LANGUAGE ${AUDIO_LANGUAGE_LIST})
+    if (LANGUAGE STREQUAL "english")
+        # English audio is included in the base VPKs
+        continue()
+    endif()
+
+    set(LANGUAGE_VPKS
+        "portal_sound_vo_${LANGUAGE}_dir.vpk"
+        "portal_sound_vo_${LANGUAGE}_000.vpk"
+    )
+    set(OUTPUT_DIR "${PAK_DIR}/localized/${LANGUAGE}")
+
+    _add_vpk_extract_command("${LANGUAGE_VPKS}" ${OUTPUT_DIR} VPK_STAMP_FILES)
+endforeach()
 
 add_custom_target(extract_vpks
     DEPENDS ${VPK_STAMP_FILES}

@@ -87,42 +87,42 @@ all_languages: build/src/audio/subtitles.h portal_pak_dir german_audio french_au
 german_audio: vpk/portal_sound_vo_german_dir.vpk vpk/portal_sound_vo_german_000.vpk portal_pak_dir
 	rm -rf portal_pak_dir/locales/de/
 	vpk -x portal_pak_dir/locales/de/ vpk/portal_sound_vo_german_dir.vpk
-	cd portal_pak_dir/locales/de/sound/vo/aperture_ai/; ls | xargs -I {} mv {} de_{}
+	cp portal_pak_dir/sound/vo/aperture_ai/ding*.wav portal_pak_dir/locales/de/sound/vo/aperture_ai/
+	cd portal_pak_dir/locales/de/sound/vo/aperture_ai/; ls | xargs -I {} mv {} german_{}
 	rm -rf assets/locales/de/sound/vo/aperture_ai/
 	@mkdir -p assets/locales/de/sound/vo/aperture_ai/
 	cp assets/sound/vo/aperture_ai/*.sox assets/locales/de/sound/vo/aperture_ai/
-	cd assets/locales/de/sound/vo/aperture_ai/; rm -f ding_off.sox ding_on.sox
-	cd assets/locales/de/sound/vo/aperture_ai/; ls | xargs -I {} mv {} de_{}
+	cd assets/locales/de/sound/vo/aperture_ai/; ls | xargs -I {} mv {} german_{}
 	
 french_audio: vpk/portal_sound_vo_french_dir.vpk vpk/portal_sound_vo_french_000.vpk portal_pak_dir
 	rm -rf portal_pak_dir/locales/fr/
 	vpk -x portal_pak_dir/locales/fr/ vpk/portal_sound_vo_french_dir.vpk
-	cd portal_pak_dir/locales/fr/sound/vo/aperture_ai/; ls | xargs -I {} mv {} fr_{}
+	cp portal_pak_dir/sound/vo/aperture_ai/ding*.wav portal_pak_dir/locales/fr/sound/vo/aperture_ai/
+	cd portal_pak_dir/locales/fr/sound/vo/aperture_ai/; ls | xargs -I {} mv {} french_{}
 	rm -rf assets/locales/fr/sound/vo/aperture_ai/
 	@mkdir -p assets/locales/fr/sound/vo/aperture_ai/
 	cp assets/sound/vo/aperture_ai/*.sox assets/locales/fr/sound/vo/aperture_ai/
-	cd assets/locales/fr/sound/vo/aperture_ai/; rm -f ding_off.sox ding_on.sox
-	cd assets/locales/fr/sound/vo/aperture_ai/; ls | xargs -I {} mv {} fr_{}
+	cd assets/locales/fr/sound/vo/aperture_ai/; ls | xargs -I {} mv {} french_{}
 	
 russian_audio: vpk/portal_sound_vo_russian_dir.vpk vpk/portal_sound_vo_russian_000.vpk portal_pak_dir
 	rm -rf portal_pak_dir/locales/ru/
 	vpk -x portal_pak_dir/locales/ru/ vpk/portal_sound_vo_russian_dir.vpk
-	cd portal_pak_dir/locales/ru/sound/vo/aperture_ai/; ls | xargs -I {} mv {} ru_{}
+	cp portal_pak_dir/sound/vo/aperture_ai/ding*.wav portal_pak_dir/locales/ru/sound/vo/aperture_ai/
+	cd portal_pak_dir/locales/ru/sound/vo/aperture_ai/; ls | xargs -I {} mv {} russian_{}
 	rm -rf assets/locales/ru/sound/vo/aperture_ai/
 	@mkdir -p assets/locales/ru/sound/vo/aperture_ai/
 	cp assets/sound/vo/aperture_ai/*.sox assets/locales/ru/sound/vo/aperture_ai/
-	cd assets/locales/ru/sound/vo/aperture_ai/; rm -f ding_off.sox ding_on.sox
-	cd assets/locales/ru/sound/vo/aperture_ai/; ls | xargs -I {} mv {} ru_{}
+	cd assets/locales/ru/sound/vo/aperture_ai/; ls | xargs -I {} mv {} russian_{}
 	
 spanish_audio: vpk/portal_sound_vo_spanish_dir.vpk vpk/portal_sound_vo_spanish_000.vpk portal_pak_dir
 	rm -rf portal_pak_dir/locales/es/
 	vpk -x portal_pak_dir/locales/es/ vpk/portal_sound_vo_spanish_dir.vpk
-	cd portal_pak_dir/locales/es/sound/vo/aperture_ai/; ls | xargs -I {} mv {} es_{}
+	cp portal_pak_dir/sound/vo/aperture_ai/ding*.wav portal_pak_dir/locales/es/sound/vo/aperture_ai/
+	cd portal_pak_dir/locales/es/sound/vo/aperture_ai/; ls | xargs -I {} mv {} spanish_{}
 	rm -rf assets/locales/es/sound/vo/aperture_ai/
 	@mkdir -p assets/locales/es/sound/vo/aperture_ai/
 	cp assets/sound/vo/aperture_ai/*.sox assets/locales/es/sound/vo/aperture_ai/
-	cd assets/locales/es/sound/vo/aperture_ai/; rm -f ding_off.sox ding_on.sox
-	cd assets/locales/es/sound/vo/aperture_ai/; ls | xargs -I {} mv {} es_{}
+	cd assets/locales/es/sound/vo/aperture_ai/; ls | xargs -I {} mv {} spanish_{}
 
 german_audio_only: vpk/portal_sound_vo_german_dir.vpk vpk/portal_sound_vo_german_000.vpk build/src/audio/subtitles.h portal_pak_dir $(SKELATOOL64)
 	rm -rf portal_pak_dir/locales/
@@ -562,7 +562,7 @@ build/asm/sound_data.o: build/assets/sound/sounds.sounds build/assets/sound/soun
 
 build/src/audio/clips.h build/src/audio/languages.h build/src/audio/languages.c: tools/sound/generate_sound_ids.js $(SOUND_CLIPS)
 	@mkdir -p $(@D)
-	node tools/sound/generate_sound_ids.js -o $(@D) -p SOUNDS_ $(SOUND_CLIPS)
+	node tools/sound/generate_sound_ids.js --makefile-hack --out-dir $(@D) $(SOUND_CLIPS)
 
 build/src/audio/clips.o: build/src/audio/clips.h
 build/src/decor/decor_object_list.o: build/src/audio/clips.h

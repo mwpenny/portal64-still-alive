@@ -1,151 +1,250 @@
-
 const fs = require('fs');
 const path = require('path');
+const util = require('util')
 
-let output = '';
-let inputs = [];
-let definePrefix = '';
-let lastCommand = '';
+const SUPPORTED_LANGUAGES = {
+    "english": "English",
+    "french":  "Français",
+    "german":  "Deutsch",
+    "russian": "Русский язык",
+    "spanish": "Español"
+};
 
-let outputLanguagesSourceFile = '';
-let outputLanguagesHeader = '';
-let allSounds = [];
-let languages = [];
-let languages_codes = ["EN", "DE", "ES", "FR", "RU"];
-let language_names = {"EN": "English", "DE": "Deutsch", "ES": "Español", "FR": "Français",  "RU": "Русский язык"};
-let lookup = [];
-languages.push("EN"); // Always included by default
+const INVALID_TOKEN_CHARACTER = /[^A-Za-z0-9_]/gim;
 
-for (let i = 2; i < process.argv.length; ++i) {
-    const arg = process.argv[i];
-    if (lastCommand) {
-        if (lastCommand == '-o') {
-            output = arg;
-        } else if (lastCommand == '-p') {
-            definePrefix = arg;
-        }
-        lastCommand = '';
-    } else if (arg[0] == '-') {
-        lastCommand = arg;
-    } else {
-        inputs.push(arg);
+// Helper functions
+
+function sanitize(s) {
+    return s.replace(INVALID_TOKEN_CHARACTER, '_');
+}
+
+function getSoundName(soundFile, stripPrefix) {
+    let { name } = path.parse(soundFile);
+
+    if (stripPrefix && name.startsWith(stripPrefix)) {
+        name = name.substring(stripPrefix.length);
     }
+
+    return `SOUNDS_${sanitize(name).toUpperCase()}`;
 }
 
-if (!fs.existsSync(output)) {
-    fs.mkdirSync(output, { recursive: true });
-}
+function getSoundLanguage(soundFile, makefileHack) {
+    const { name } = path.parse(soundFile);
 
-outputLanguagesSourceFile = output + '/languages.c';
-outputLanguagesHeader += output + '/languages.h';
-output += '/clips.h';
+    // HACK: remove when makefile is no longer in use
+    if (makefileHack && soundFile.includes('assets/sound/vo/aperture_ai/')) {
+        return 'english';
+    }
 
-inputs.push('TOTAL_COUNT');
-
-const invalidCharactersRegex = /[^\w\d_]+/gm;
-
-function formatSoundName(soundFilename, index) {
-    const extension = path.extname(soundFilename);
-    const lastPart = path.basename(soundFilename, extension);
-    const defineName = definePrefix + lastPart.replace(invalidCharactersRegex, '_').toUpperCase();
-    
-    trackSoundLanguages(soundFilename, defineName, index);
-    return `#define ${defineName} ${index}`;
-}
-
-function formatFile(outputFilename, soundFilenames) {
-    const relativeOutput = path.relative(process.cwd(), outputFilename);
-    const defineName = relativeOutput.replace(invalidCharactersRegex, '_').toUpperCase();
-
-    return `#ifndef ${defineName}
-#define ${defineName}
-
-${soundFilenames.map(formatSoundName).join('\n')}
-
-#endif`
-}
-
-fs.writeFileSync(output, formatFile(output, inputs));
-
-function trackSoundLanguages(soundFilename, defineName, index) {
-    languages_codes.forEach((language) => {
-        if (defineName.includes("_" + language + "_") && !languages.includes(language))
-            languages.push(language);
+    return Object.keys(SUPPORTED_LANGUAGES).find(lang => {
+        return name.toLowerCase().startsWith(`${lang}_`);
     });
-    if (soundFilename != "TOTAL_COUNT")
-        allSounds.push({defineName: defineName, index: index});
 }
 
-function fillOverrideLookup() {
-    for (let language of languages) {
-        for (let overrideSound of allSounds) {
-            let baseSound = overrideSound;
-            let overrideName = overrideSound.defineName;
-            // check if current sound has base version of default language
-            if (overrideName.includes('_' + language + '_') && language != "EN") {
-                baseSound = allSounds.find(element => element.defineName == overrideName.replace('_' + language + '_', '_'));
+function getSoundNameWithoutLanguage(soundFile, language) {
+    return getSoundName(soundFile, language && `${language}_`);
+}
+
+function getProvidedLanguages(soundFiles, makefileHack) {
+    const languageNames = new Set();
+
+    for (const soundFile of soundFiles) {
+        const language = getSoundLanguage(soundFile, makefileHack);
+        if (language) {
+            languageNames.add(language);
+        }
+    }
+
+    // Sort in consistent order
+    return Object.keys(SUPPORTED_LANGUAGES)
+        .filter(lang => languageNames.has(lang));
+}
+
+function validateLocalizedSounds(languages) {
+    for (const [language, localizedSounds] of languages) {
+        let prevIndex;
+        for (const sound of localizedSounds.values()) {
+            if (prevIndex !== undefined && sound.index != prevIndex + 1) {
+                throw new Error(
+                    `Localized sound indices must be contiguous. ` +
+                    `Found invalid index for language '${language}' and sound '${sound.localizedName}' (${sound.index})`
+                );
             }
-            lookup.push({language: language, baseIndex: baseSound.index, index: overrideSound.index, defineName: overrideSound.defineName});
+            prevIndex = sound.index;
         }
     }
 }
 
-function generateLanguagesHeader() {
+function parseSounds(soundFiles, makefileHack) {
+    const languageNames = getProvidedLanguages(soundFiles, makefileHack);
+    const defaultLanguage = languageNames[0];
 
-    let header = `#ifndef __LANGUAGES_H__
+    // Initialize in language order so output order is consistent
+    // ES6 maps guarantee iteration and insertion order are the same
+    const languages = new Map();
+    for (const languageName of languageNames) {
+        languages.set(languageName, new Map());
+    }
+
+    const unlocalized = new Map();
+
+    for (const [i, soundFile] of soundFiles.entries()) {
+        const language = getSoundLanguage(soundFile, makefileHack);
+        const canonicalName = getSoundNameWithoutLanguage(soundFile, language);
+        const sound = {
+            // The game references sounds by canonical name
+            // Remove language prefix on default language sounds
+            localizedName: getSoundNameWithoutLanguage(soundFile, defaultLanguage),
+            index: i
+        };
+
+        const soundMap = language ? languages.get(language) : unlocalized;
+        soundMap.set(canonicalName, sound);
+    }
+
+    validateLocalizedSounds(languages);
+    return { languages, unlocalized, defaultLanguage };
+}
+
+// clips.h
+
+function generateSoundIndices(soundInfo) {
+    const allSounds = [
+        ...soundInfo.unlocalized.values(),
+        ...[...soundInfo.languages.values()]
+            .map(sounds => [...sounds.values()])
+            .flat()
+    ];
+
+    return allSounds.map(s => `#define ${s.localizedName} ${s.index}`);
+}
+
+function generateClipsHeaderFile(soundInfo) {
+    const soundIndices = generateSoundIndices(soundInfo);
+
+    return `#ifndef __SOUND_CLIPS_H__
+#define __SOUND_CLIPS_H__
+
+${soundIndices.join('\n')}
+#define SOUNDS_TOTAL_COUNT ${soundIndices.length}
+
+#endif`;
+}
+
+// languages.h
+
+function generateLanguageEnumEntries(languages) {
+    return [...languages.keys()].map(k => {
+        return `\tAUDIO_LANGUAGE_${k.toUpperCase()}`;
+    });
+}
+
+function generateLanguagesHeaderFile(soundInfo) {
+    const { languages, defaultLanguage } = soundInfo;
+    const defaultLanguageSounds = languages.get(defaultLanguage);
+
+    return `#ifndef __LANGUAGES_H__
 #define __LANGUAGES_H__
 
-#define NUM_AUDIO_LANGUAGES ${languages.length}
+#define NUM_AUDIO_LANGUAGES ${languages.size}
+#define FIRST_LOCALIZED_SOUND ${[...defaultLanguageSounds.values()][0].index}
+#define NUM_LOCALIZED_SOUNDS ${defaultLanguageSounds.size}
 
 extern char* AudioLanguages[];
-extern int AudioLanguageValues[][${allSounds.length}];
+extern int AudioLanguageValues[][NUM_LOCALIZED_SOUNDS];
 
-`
-    header += 'enum AudioLanguagesKey\n{\n';
-    header += (languages.length > 0 ? '\tAUDIO_LANGUAGE_' + languages.join(',\n\tAUDIO_LANGUAGE_') + ',\n' : '');
-    header += '};\n';
-    header += '#endif';
-    
-    return header;
+enum AudioLanguagesKey
+{
+${generateLanguageEnumEntries(languages).join(',\n')}
+};
+
+#endif`;
 }
 
-function generateLanguagesSourceFile() {
-    fillOverrideLookup();
-    let sourcefile = '#include "languages.h"\n';
-    sourcefile += '\n';
-    
-    sourcefile += 'char* AudioLanguages[] = \n{\n';
-    
-    for (let language of languages) {
-        sourcefile += '\t"' + language_names[language] + '",\n';
-    }
+// languages.c
 
-    sourcefile += '};\n';
-    
-    sourcefile += 'int AudioLanguageValues[][' + allSounds.length + '] = \n{\n';
+function generateLanguageNameStrings(languages) {
+    return [...languages.keys()]
+        .map(lang => `\t"${SUPPORTED_LANGUAGES[lang]}"`);
+}
 
-    for (let language of languages) {
-        if (language == "EN") continue; // save RAM
-        sourcefile += '\t//' + language + '\n\t{\n';
+function generateLanguageSoundEntries(soundInfo) {
+    const { languages, defaultLanguage } = soundInfo;
+    const defaultLanguageSounds = languages.get(defaultLanguage);
 
-        for (let baseSound of allSounds) {
-            let overrideSound = lookup.find(lookElement => lookElement.language == language && lookElement.baseIndex == baseSound.index && lookElement.baseIndex != lookElement.index);
-            if (overrideSound === undefined) overrideSound = baseSound; // no override, use default
-            sourcefile += '\t' + overrideSound.index + ', // ' + baseSound.defineName + ' ('+baseSound.index+') -> ' + overrideSound.defineName + ' ('+ overrideSound.index+')' + '\n';
+    const entries = [];
+
+    for (const [language, localizedSounds] of languages.entries()) {
+        if (language === defaultLanguage) {
+            // Default language sounds are played directly without using the table
+            continue;
         }
-        sourcefile += '\t},\n';
+
+        entries.push(`\t// ${language}`);
+        entries.push('\t{');
+
+        // Try to use localized sounds, fall back to default language
+        for (const [name, sound] of defaultLanguageSounds.entries()) {
+            const soundToUse = localizedSounds.get(name) || sound;
+
+            let entry = `\t\t${soundToUse.index},`;
+            entry += `  // ${sound.localizedName} (${sound.index}) -> `;
+            entry += `${soundToUse.localizedName} (${soundToUse.index})`;
+
+            entries.push(entry);
+        }
+
+        entries.push('\t},');
     }
-    sourcefile += '};';
-    return sourcefile;
+
+    return entries;
 }
 
-// sort found languages in order of elements in language_codes
-let temp = [...languages_codes];
-languages = temp.filter(function(cItem) {
-  return languages.find(function(aItem) {
-    return cItem === aItem
-  })
-})
+function generateLanguagesSourceFile(soundInfo) {
+    return `#include "languages.h"
 
-fs.writeFileSync(outputLanguagesHeader, generateLanguagesHeader());
-fs.writeFileSync(outputLanguagesSourceFile, generateLanguagesSourceFile());
+char* AudioLanguages[] = {
+${generateLanguageNameStrings(soundInfo.languages).join(',\n')}
+};
+
+int AudioLanguageValues[][NUM_LOCALIZED_SOUNDS] = {
+${generateLanguageSoundEntries(soundInfo).join('\n')}
+};`;
+}
+
+// Main
+const { values, positionals } = util.parseArgs({
+    options: {
+        'out-dir': {
+            type: 'string'
+        },
+        // HACK: remove when makefile is no longer in use
+        'makefile-hack': {
+            type: 'boolean'
+        }
+    },
+    allowPositionals: true
+});
+
+const outDir = values['out-dir'];
+const makefileHack = values['makefile-hack'];
+const soundFiles = positionals;
+
+if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir, { recursive: true });
+}
+
+const soundInfo = parseSounds(soundFiles, makefileHack);
+
+fs.writeFileSync(
+    path.join(outDir, 'clips.h'),
+    generateClipsHeaderFile(soundInfo)
+);
+fs.writeFileSync(
+    path.join(outDir, 'languages.h'),
+    generateLanguagesHeaderFile(soundInfo)
+);
+fs.writeFileSync(
+    path.join(outDir, 'languages.c'),
+    generateLanguagesSourceFile(soundInfo)
+);

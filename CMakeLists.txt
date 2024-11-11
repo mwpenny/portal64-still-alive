@@ -4,6 +4,9 @@ project(portal64 C ASM)
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(AddExternalProjectExecutable)
 
+set(AUDIO_LANGUAGES "english" CACHE STRING "Game audio languages to include")
+string(REPLACE "," ";" AUDIO_LANGUAGE_LIST "${AUDIO_LANGUAGES}")
+
 # Programs used in build
 find_package(Blender                3.6 EXACT   REQUIRED)
 find_program(FFmpeg_EXECUTABLE      ffmpeg      REQUIRED)
@@ -38,8 +41,8 @@ target_include_directories(platform INTERFACE
     "${PROJECT_SOURCE_DIR}/src"
 )
 
-add_subdirectory(${ASM_DIR})
 add_subdirectory(${ASSETS_DIR})
+add_subdirectory(${ASM_DIR})
 add_subdirectory(${SRC_DIR})
 add_subdirectory(${LINKER_DIR})
 add_subdirectory(${VPK_DIR})

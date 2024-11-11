@@ -1,5 +1,3 @@
-# TODO: multiple languages
-
 set(PAK_SOUND_DIR          "${PAK_DIR}/sound")
 set(PAK_MODIFIED_SOUND_DIR "${PAK_MODIFIED_DIR}/sound")
 
@@ -11,6 +9,30 @@ cmake_path(
     BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
     OUTPUT_VARIABLE RELATIVE_CURRENT_DIR
 )
+
+function(_get_localized_pak_sound_dir LANGUAGE DIR_OUT)
+    if (LANGUAGE STREQUAL "english")
+        set(${DIR_OUT} "${PAK_SOUND_DIR}")
+    else()
+        set(${DIR_OUT} "${PAK_DIR}/localized/${LANGUAGE}/sound")
+    endif()
+
+    return(PROPAGATE ${DIR_OUT})
+endfunction()
+
+function(_get_localized_sound_name SOUND_NAME LANGUAGE NAME_OUT)
+    cmake_path(
+        GET SOUND_NAME FILENAME
+        SOUND_FILENAME
+    )
+    cmake_path(
+        REPLACE_FILENAME SOUND_NAME
+        "${LANGUAGE}_${SOUND_FILENAME}"
+        OUTPUT_VARIABLE ${NAME_OUT}
+    )
+
+    return(PROPAGATE ${NAME_OUT})
+endfunction()
 
 #################
 ## Valve sound ##
@@ -77,6 +99,21 @@ set(SOUND_SCRIPTS
     vehicles/apc/apc_shutdown.sox
     vehicles/apc/apc_start_loop3.jsox
     vehicles/tank_turret_start1.sox
+    vo/aperture_ai/ding_off.sox
+    vo/aperture_ai/ding_on.sox
+    weapons/cguard/charging.sox
+    weapons/physcannon/energy_bounce1.sox
+    weapons/physcannon/energy_disintegrate4.sox
+    weapons/physcannon/energy_sing_explosion2.sox
+    weapons/physcannon/energy_sing_flyby1.sox
+    weapons/portalgun/portal_fizzle2.sox
+    weapons/portalgun/portal_open2.sox
+    weapons/portalgun/portalgun_shoot_blue1.sox
+    weapons/portalgun/portalgun_shoot_red1.sox
+    weapons/stunstick/alyx_stunner1.sox
+)
+
+set(LOCALIZED_SOUND_SCRIPTS
     vo/aperture_ai/00_part1_entry-1.sox
     vo/aperture_ai/00_part1_entry-2.sox
     vo/aperture_ai/00_part1_entry-3.sox
@@ -149,8 +186,6 @@ set(SOUND_SCRIPTS
     vo/aperture_ai/10_part1_entry-2.sox
     vo/aperture_ai/10_part1_entry-3.sox
     vo/aperture_ai/10_part1_success-1.sox
-    vo/aperture_ai/ding_off.sox
-    vo/aperture_ai/ding_on.sox
     vo/aperture_ai/escape_01_part1_nag01-1.sox
     vo/aperture_ai/generic_crate_vaporized_in_emancipation_grid-1.sox
     vo/aperture_ai/generic_crate_vaporized_in_emancipation_grid-2.sox
@@ -159,16 +194,6 @@ set(SOUND_SCRIPTS
     vo/aperture_ai/generic_security_camera_destroyed-3.sox
     vo/aperture_ai/generic_security_camera_destroyed-4.sox
     vo/aperture_ai/generic_security_camera_destroyed-5.sox
-    weapons/cguard/charging.sox
-    weapons/physcannon/energy_bounce1.sox
-    weapons/physcannon/energy_disintegrate4.sox
-    weapons/physcannon/energy_sing_explosion2.sox
-    weapons/physcannon/energy_sing_flyby1.sox
-    weapons/portalgun/portal_fizzle2.sox
-    weapons/portalgun/portal_open2.sox
-    weapons/portalgun/portalgun_shoot_blue1.sox
-    weapons/portalgun/portalgun_shoot_red1.sox
-    weapons/stunstick/alyx_stunner1.sox
 )
 
 # TODO: rename to .sox after makefile is no longer in use
@@ -261,16 +286,11 @@ function(_add_sound_transform_command_jsox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
     )
 endfunction()
 
-function(_add_sound_transform_command SOUND_SCRIPT OUTPUT_LIST)
-    cmake_path(
-        REMOVE_EXTENSION SOUND_SCRIPT
-        OUTPUT_VARIABLE SOUND_NAME
-    )
-
+function(_add_sound_transform_command SOUND_SCRIPT INPUT_FILE OUTPUT_NAME OUTPUT_LIST)
     # TODO: change output to PAK_MODIFIED_SOUND_DIR once makefile is no longer in use
+    #   Better place for it, and also allows .ins to not depend on hard-coded build path
     set(SOUND_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/${SOUND_SCRIPT}")
-    set(INPUT_FILE "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
-    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.wav")
+    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${OUTPUT_NAME}.wav")
 
     if (SOUND_SCRIPT MATCHES ".*\.jsox")
         _add_sound_transform_command_jsox(${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE})
@@ -333,9 +353,34 @@ _add_sound_transform_command_direct(
 )
 
 foreach(SOUND_SCRIPT ${SOUND_SCRIPTS})
-    _add_sound_transform_command(${SOUND_SCRIPT} SOUNDS_TRANSFORMED)
+    cmake_path(
+        REMOVE_EXTENSION SOUND_SCRIPT
+        OUTPUT_VARIABLE SOUND_NAME
+    )
+
+    set(INPUT_FILE "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
+    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.wav")
+    _add_sound_transform_command(${SOUND_SCRIPT} ${INPUT_FILE} ${SOUND_NAME} SOUNDS_TRANSFORMED)
 endforeach()
 
+# Localized sounds
+# Sounds within a language must be contiguous, so loop over languages first
+foreach(LANGUAGE ${AUDIO_LANGUAGE_LIST})
+    foreach(SOUND_SCRIPT ${LOCALIZED_SOUND_SCRIPTS})
+        cmake_path(
+            REMOVE_EXTENSION SOUND_SCRIPT
+            OUTPUT_VARIABLE SOUND_NAME
+        )
+
+        _get_localized_pak_sound_dir(${LANGUAGE} INPUT_DIR)
+        _get_localized_sound_name(${SOUND_NAME} ${LANGUAGE} LOCALIZED_NAME)
+        set(INPUT_FILE "${INPUT_DIR}/${SOUND_NAME}.wav")
+
+        _add_sound_transform_command(${SOUND_SCRIPT} ${INPUT_FILE} ${LOCALIZED_NAME} SOUNDS_TRANSFORMED)
+    endforeach()
+endforeach()
+
+# Music
 foreach(MUSIC_SCRIPT ${MUSIC_SCRIPTS})
     _add_music_transform_command(${MUSIC_SCRIPT} SOUNDS_TRANSFORMED)
 endforeach()
@@ -416,6 +461,9 @@ foreach(CONVERTED_SOUND ${SOUNDS_CONVERTED})
     endif()
 endforeach()
 
+# Avoid extremely long argument list (MSYS2 has low ARG_MAX)
+list(TRANSFORM SOUND_TABLE_INPUTS REPLACE "${PROJECT_SOURCE_DIR}/" "" OUTPUT_VARIABLE SOUND_TABLE_INPUTS)
+
 # Add commands for generating sound tables
 
 set(SOUND_TABLE_SOUNDS "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/sounds.sounds")
@@ -431,6 +479,8 @@ add_custom_command(
         ${SOUND_DATA_TABLE_FILES}
     COMMAND
         ${SFZ2N64_EXECUTABLE} -o ${SOUND_TABLE_SOUNDS} ${SOUND_TABLE_INPUTS}
+    WORKING_DIRECTORY
+        ${PROJECT_SOURCE_DIR}
     COMMENT
         "Generating sound data tables"
     VERBATIM
@@ -453,9 +503,8 @@ add_custom_command(
         ${SOUND_LOOKUP_TABLE_FILES}
     COMMAND
         ${NodeJs_EXECUTABLE} ${GEN_SOUND_IDS}
-        -o ${BUILD_AUDIO_DIR} -p SOUNDS_ ${SOUND_TABLE_INPUTS}
+        --out-dir ${BUILD_AUDIO_DIR} ${SOUND_TABLE_INPUTS}
     WORKING_DIRECTORY
-        # TODO: Update once script is refactored
         ${PROJECT_SOURCE_DIR}
     COMMENT
         "Generating sound lookup tables"
@@ -468,10 +517,13 @@ add_custom_target(sound_tables
         ${SOUND_LOOKUP_TABLE_FILES}
 )
 
-add_library(sound_data_tables INTERFACE)
-add_dependencies(sound_data_tables sound_tables)
-target_sources(sound_data_tables INTERFACE
-    ${SOUND_DATA_TABLE_FILES}
+add_custom_target(sound_data_tables
+    DEPENDS
+        sound_tables
+        ${SOUND_DATA_TABLE_FILES}
+)
+set_target_properties(sound_data_tables PROPERTIES
+    OUTPUTS "${SOUND_DATA_TABLE_FILES}"
 )
 
 add_library(sound_lookup_tables INTERFACE)

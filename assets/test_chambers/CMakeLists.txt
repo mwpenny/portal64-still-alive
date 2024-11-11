@@ -148,6 +148,8 @@ function(_add_level_lib LIB_NAME LIB_SOURCES)
     add_library(${LIB_NAME} OBJECT)
     add_dependencies(${LIB_NAME}
         materials
+        sound_lookup_tables
+        string_lookup_tables
         generated_levels
     )
     target_sources(${LIB_NAME} PRIVATE
