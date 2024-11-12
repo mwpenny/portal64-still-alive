@@ -50,6 +50,7 @@ add_subdirectory(${VPK_DIR})
 add_library(code_segment STATIC)
 target_link_libraries(code_segment PRIVATE
     engine
+    font_layout_tables
     level_list
     materials_core
     model_lists

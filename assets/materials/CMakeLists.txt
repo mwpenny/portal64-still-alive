@@ -455,12 +455,12 @@ set_property(SOURCE images.skm.yaml
 
 set_property(SOURCE ui.skm.yaml
     PROPERTY ADDITIONAL_DEPS
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans_0.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans_1.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans_2.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans_3.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans_4.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/liberation_mono_0.png
+        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_0.png
+        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_1.png
+        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_2.png
+        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_3.png
+        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_4.png
+        ${PROJECT_SOURCE_DIR}/assets/fonts/liberation_mono/liberation_mono_0.png
         ${PROJECT_SOURCE_DIR}/assets/images/button_icons.png
         ${PROJECT_SOURCE_DIR}/assets/images/credits_icons.png
         ${PROJECT_SOURCE_DIR}/assets/images/github_qr.png

@@ -31,10 +31,8 @@ target_sources(engine INTERFACE
     effects/effects.c
     effects/portal_trail.c
     effects/splash_particle_effect.c
-    font/dejavusans.c
-    font/dejavusans_images.c
+    font/dejavu_sans_images.c
     font/font.c
-    font/liberation_mono.c
     font/liberation_mono_images.c
     graphics/color.c
     graphics/debug_render.c

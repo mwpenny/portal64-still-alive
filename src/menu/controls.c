@@ -1,6 +1,6 @@
 #include "controls.h"
 
-#include "../font/dejavusans.h"
+#include "../font/dejavu_sans.h"
 #include "../font/font.h"
 #include "../system/controller.h"
 #include "../audio/soundplayer.h"

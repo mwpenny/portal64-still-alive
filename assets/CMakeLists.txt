@@ -30,6 +30,7 @@ set(GEN_SEGMENT_LD   "${PROJECT_SOURCE_DIR}/tools/generate_segment_ld.js")
 set(EXPORT_FBX       "${PROJECT_SOURCE_DIR}/tools/models/export_fbx.py")
 set(MODEL_LIST_UTILS "${PROJECT_SOURCE_DIR}/tools/models/model_list_utils.js")
 
+add_subdirectory(fonts)
 add_subdirectory(materials)
 add_subdirectory(models)
 add_subdirectory(sound)

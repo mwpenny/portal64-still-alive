@@ -7,7 +7,7 @@
 #include "system/time.h"
 #include "../math/mathf.h"
 
-#include "../font/dejavusans.h"
+#include "../font/dejavu_sans.h"
 #include "../build/assets/materials/ui.h"
 #include "../build/src/audio/clips.h"
 

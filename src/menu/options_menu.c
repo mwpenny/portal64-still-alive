@@ -1,7 +1,7 @@
 #include "options_menu.h"
 
 #include "../font/font.h"
-#include "../font/dejavusans.h"
+#include "../font/dejavu_sans.h"
 
 #include "../savefile/savefile.h"
 

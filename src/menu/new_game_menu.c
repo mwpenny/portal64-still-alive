@@ -3,7 +3,7 @@
 #include "./translations.h"
 
 #include "../font/font.h"
-#include "../font/dejavusans.h"
+#include "../font/dejavu_sans.h"
 
 #include "../graphics/image.h"
 #include "../util/memory.h"

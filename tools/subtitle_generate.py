@@ -103,7 +103,7 @@ language_translations = {
 }
 
 def get_supported_characters():
-    with open('assets/fonts/dejavu_sans_book_8.json', 'r') as f:
+    with open('assets/fonts/dejavu_sans/dejavu_sans_all.json', 'r') as f:
         content = json.loads('\n'.join(f.readlines()))
 
     result = {' ', '\t', '\n', '\r'}

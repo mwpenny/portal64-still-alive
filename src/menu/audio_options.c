@@ -2,7 +2,7 @@
 
 #include "../system/controller.h"
 #include "../savefile/savefile.h"
-#include "../font/dejavusans.h"
+#include "../font/dejavu_sans.h"
 #include "../audio/soundplayer.h"
 #include "../build/src/audio/subtitles.h"
 #include "../build/src/audio/languages.h"

@@ -16,7 +16,7 @@ set(STRINGS
 
 set(STRING_DEPENDENCIES
     ${STRINGS}
-    "${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans_book_8.json"
+    "${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_all.json"
 )
 
 # TODO: rename/relocate somewhere else. "Subtitles" also contain UI strings.

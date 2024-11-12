@@ -404,7 +404,7 @@ build/src/menu/cheat_codes.o: build/src/audio/clips.h
 build/src/levels/intro.o: build/src/audio/clips.h build/assets/materials/images.h
 build/src/levels/credits.o: build/src/audio/clips.h build/assets/materials/ui.h
 build/src/menu/savefile_list.o: build/assets/materials/ui.h build/src/audio/clips.h
-build/src/font/dejavusans_images.o: build/assets/materials/ui.h
+build/src/font/dejavu_sans_images.o: build/assets/materials/ui.h
 build/src/font/liberation_mono_images.o: build/assets/materials/ui.h
 build/src/player/player.o: build/assets/models/player/chell.h build/assets/materials/static.h build/src/audio/subtitles.h
 build/src/scene/ball_catcher.o: build/assets/models/props/combine_ball_catcher.h build/assets/materials/static.h build/assets/models/dynamic_animated_model_list.h
@@ -568,6 +568,25 @@ build/src/audio/clips.o: build/src/audio/clips.h
 build/src/decor/decor_object_list.o: build/src/audio/clips.h
 
 ####################
+## Fonts
+####################
+
+FONT_SOURCES = build/assets/fonts/dejavu_sans.c \
+	build/assets/fonts/liberation_mono.c
+FONT_OBJECTS = $(patsubst %.c, %.o, $(FONT_SOURCES))
+
+DEJAVU_SANS_JSON = $(shell find assets/fonts/dejavu_sans/ -type f -name 'dejavu_sans*.json')
+LIBERATION_MONO_JSON = $(shell find assets/fonts/liberation_mono/ -type f -name 'liberation_mono*.json')
+
+build/assets/fonts/dejavu_sans.c: tools/text/font_converter.js $(DEJAVU_SANS_JSON)
+	@mkdir -p $(@D)
+	node tools/text/font_converter.js DejaVuSans assets/fonts/dejavu_sans/ $@
+
+build/assets/fonts/liberation_mono.c: tools/text/font_converter.js $(LIBERATION_MONO_JSON)
+	@mkdir -p $(@D)
+	node tools/text/font_converter.js LiberationMono assets/fonts/liberation_mono/ $@
+
+####################
 ## Subtitles
 ####################
 
@@ -594,6 +613,7 @@ build/subtitles.ld:	$(SUBTITLE_OBJECTS) tools/generate_segment_ld.js
 
 CODEOBJECTS = $(patsubst %.c, build/%.o, $(CODEFILES)) \
 	$(MODEL_OBJECTS) \
+	$(FONT_OBJECTS) \
 	build/assets/materials/static_mat.o \
 	build/assets/materials/ui_mat.o \
 	build/assets/materials/hud_mat.o \

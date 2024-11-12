@@ -1,7 +1,7 @@
 #include "gameplay_options.h"
 
 #include "../system/controller.h"
-#include "../font/dejavusans.h"
+#include "../font/dejavu_sans.h"
 #include "../audio/soundplayer.h"
 #include "../savefile/savefile.h"
 
