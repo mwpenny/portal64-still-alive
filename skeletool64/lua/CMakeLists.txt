@@ -19,20 +19,20 @@ function(_add_embed_lua_command INPUT_FILE OUTPUT_LIST)
     )
 
     set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${INPUT_FILE}")
-    set(OUTPUT_FILE_OBJ "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${INPUT_NAME}.out")
-    set(OUTPUT_FILE_C "${OUTPUT_FILE_OBJ}.c")
+    set(OUTPUT_FILE_LUAC "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${INPUT_NAME}.luac")
+    set(OUTPUT_FILE_C "${OUTPUT_FILE_LUAC}.c")
 
     add_custom_command(
         DEPENDS
             ${EMBED_RESOURCE} ${INPUT_FILE}
         OUTPUT
-            ${OUTPUT_FILE_OBJ} ${OUTPUT_FILE_C}
+            ${OUTPUT_FILE_LUAC} ${OUTPUT_FILE_C}
         COMMAND
-            ${Luac_EXECUTABLE} -o ${OUTPUT_FILE_OBJ} ${INPUT_FILE}
+            ${Luac_EXECUTABLE} -o ${OUTPUT_FILE_LUAC} ${INPUT_FILE}
         COMMAND
             # Use relative path for nice symbol name
             ${CMAKE_COMMAND}
-            -D INPUT_FILE=$<PATH:RELATIVE_PATH,${OUTPUT_FILE_OBJ},${PROJECT_BINARY_DIR}>
+            -D INPUT_FILE=$<PATH:RELATIVE_PATH,${OUTPUT_FILE_LUAC},${PROJECT_BINARY_DIR}>
             -D OUTPUT_FILE=${OUTPUT_FILE_C}
             -P ${EMBED_RESOURCE}
         WORKING_DIRECTORY
