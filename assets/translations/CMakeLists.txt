@@ -1,69 +1,47 @@
-# TODO: multiple languages
+set(BUILD_AUDIO_DIR "${PROJECT_BINARY_DIR}/src/audio")
 
-set(SUBTITLE_GENERATE "${PROJECT_SOURCE_DIR}/tools/subtitle_generate.py")
+set(GENERATE_STRINGS "${PROJECT_SOURCE_DIR}/tools/text/subtitle_generate.py")
 
 ##################
 ## Translations ##
 ##################
 
-set(STRINGS
-    "${VPK_DIR}/Portal/hl2/resource/gameui_english.txt"
-    "${VPK_DIR}/Portal/hl2/resource/valve_english.txt"
-    "${VPK_DIR}/Portal/portal/resource/closecaption_english.txt"
-    "${VPK_DIR}/Portal/portal/resource/portal_english.txt"
-    extra_english.txt
-)
+set(STRING_INPUT_FILES "")
 
-set(STRING_DEPENDENCIES
-    ${STRINGS}
-    "${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_all.json"
-)
-
-# TODO: rename/relocate somewhere else. "Subtitles" also contain UI strings.
-set(BUILD_AUDIO_DIR "${PROJECT_BINARY_DIR}/src/audio")
 set(SUBTITLES_H "${BUILD_AUDIO_DIR}/subtitles.h")
 set(SUBTITLES_C "${BUILD_AUDIO_DIR}/subtitles.c")
 set(STRING_LOOKUP_TABLE_FILES
     ${SUBTITLES_H}
     ${SUBTITLES_C}
 )
-set(STRING_DATA_TABLE_FILES
-    # TODO: make this dynamic
-    ${BUILD_AUDIO_DIR}/subtitles_brazilian.c
-    ${BUILD_AUDIO_DIR}/subtitles_bulgarian.c
-    ${BUILD_AUDIO_DIR}/subtitles_czech.c
-    ${BUILD_AUDIO_DIR}/subtitles_danish.c
-    ${BUILD_AUDIO_DIR}/subtitles_dutch.c
-    ${BUILD_AUDIO_DIR}/subtitles_english.c
-    ${BUILD_AUDIO_DIR}/subtitles_finnish.c
-    ${BUILD_AUDIO_DIR}/subtitles_french.c
-    ${BUILD_AUDIO_DIR}/subtitles_german.c
-    ${BUILD_AUDIO_DIR}/subtitles_greek.c
-    ${BUILD_AUDIO_DIR}/subtitles_hungarian.c
-    ${BUILD_AUDIO_DIR}/subtitles_italian.c
-    ${BUILD_AUDIO_DIR}/subtitles_latam.c
-    ${BUILD_AUDIO_DIR}/subtitles_norwegian.c
-    ${BUILD_AUDIO_DIR}/subtitles_polish.c
-    ${BUILD_AUDIO_DIR}/subtitles_portuguese.c
-    ${BUILD_AUDIO_DIR}/subtitles_romanian.c
-    ${BUILD_AUDIO_DIR}/subtitles_russian.c
-    ${BUILD_AUDIO_DIR}/subtitles_spanish.c
-    ${BUILD_AUDIO_DIR}/subtitles_swedish.c
-    ${BUILD_AUDIO_DIR}/subtitles_turkish.c
-    ${BUILD_AUDIO_DIR}/subtitles_ukrainian.c
-)
+set(STRING_DATA_TABLE_FILES "")
+
+foreach(LANGUAGE ${TEXT_LANGUAGE_LIST})
+    list(APPEND STRING_INPUT_FILES
+        "${VPK_DIR}/Portal/hl2/resource/gameui_${LANGUAGE}.txt"
+        "${VPK_DIR}/Portal/hl2/resource/valve_${LANGUAGE}.txt"
+        "${VPK_DIR}/Portal/portal/resource/closecaption_${LANGUAGE}.txt"
+        "${VPK_DIR}/Portal/portal/resource/portal_${LANGUAGE}.txt"
+        "extra_${LANGUAGE}.txt"
+    )
+
+    list(APPEND STRING_DATA_TABLE_FILES
+        "${BUILD_AUDIO_DIR}/subtitles_${LANGUAGE}.c"
+    )
+endforeach()
+
 add_custom_command(
     DEPENDS
-        ${STRING_DEPENDENCIES} ${SUBTITLE_GENERATE}
+        ${STRING_DEPENDENCIES} ${GENERATE_STRINGS}
     OUTPUT
         ${STRING_LOOKUP_TABLE_FILES}
         ${STRING_DATA_TABLE_FILES}
     COMMAND
-        # TODO: update script to have configurable output location
-        ${Python3_EXECUTABLE} ${SUBTITLE_GENERATE}
-    WORKING_DIRECTORY
-        # TODO: Update once script is refactored
-        ${PROJECT_SOURCE_DIR}
+        ${Python3_EXECUTABLE} ${GENERATE_STRINGS}
+        --languages ${TEXT_LANGUAGES}
+        --game-root-dir ${VPK_DIR}
+        --extra-translations-dir ${CMAKE_CURRENT_SOURCE_DIR}
+        --output-dir ${BUILD_AUDIO_DIR}
     COMMENT
         "Generating strings"
     VERBATIM

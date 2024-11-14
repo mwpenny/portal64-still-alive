@@ -598,8 +598,8 @@ build/src/audio/subtitles_%.o: build/src/audio/subtitles_%.c
 	$(CC) $(CFLAGS) -MM $^ -MF "$(@:.o=.d)" -MT"$@"
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-build/src/audio/subtitles.h build/src/audio/subtitles.c: vpk/Portal/portal/resource/closecaption_english.txt vpk/Portal/hl2/resource/gameui_english.txt vpk/Portal/hl2/resource/valve_english.txt assets/translations/extra_english.txt tools/subtitle_generate.py
-	python3 tools/subtitle_generate.py
+build/src/audio/subtitles.h build/src/audio/subtitles.c: vpk/Portal/portal/resource/closecaption_english.txt vpk/Portal/hl2/resource/gameui_english.txt vpk/Portal/hl2/resource/valve_english.txt assets/translations/extra_english.txt tools/text/subtitle_generate.py
+	python3 tools/text/subtitle_generate.py --game-root-dir vpk --extra-translations-dir assets/translations --output-dir build/src/audio
 
 build/subtitles.ld:	$(SUBTITLE_OBJECTS) tools/generate_segment_ld.js
 	@mkdir -p $(@D)

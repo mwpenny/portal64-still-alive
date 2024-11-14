@@ -4,6 +4,7 @@
 #include <ultra64.h>
 #include "../math/vector2s16.h"
 #include "../graphics/color.h"
+#include "../build/src/audio/subtitles.h"
 
 struct FontKerning {
     char amount;
@@ -46,7 +47,7 @@ struct SymbolLocation {
     char imageIndex;
 };
 
-#define FONT_RENDERER_MAX_SYBMOLS   340
+#define FONT_RENDERER_MAX_SYBMOLS   MAX_SUBTITLE_LENGTH
 
 struct FontRenderer {
     struct SymbolLocation symbols[FONT_RENDERER_MAX_SYBMOLS];

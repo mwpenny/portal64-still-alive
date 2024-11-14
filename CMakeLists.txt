@@ -7,6 +7,9 @@ include(AddExternalProjectExecutable)
 set(AUDIO_LANGUAGES "english" CACHE STRING "Game audio languages to include")
 string(REPLACE "," ";" AUDIO_LANGUAGE_LIST "${AUDIO_LANGUAGES}")
 
+set(TEXT_LANGUAGES "english" CACHE STRING "Text languages to include")
+string(REPLACE "," ";" TEXT_LANGUAGE_LIST "${TEXT_LANGUAGES}")
+
 # Programs used in build
 find_package(Blender                3.6 EXACT   REQUIRED)
 find_program(FFmpeg_EXECUTABLE      ffmpeg      REQUIRED)
