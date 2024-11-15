@@ -1,5 +1,6 @@
 set(BUILD_AUDIO_DIR "${PROJECT_BINARY_DIR}/src/audio")
 
+set(FONT_DEF         "${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_all.json")
 set(GENERATE_STRINGS "${PROJECT_SOURCE_DIR}/tools/text/subtitle_generate.py")
 
 ##################
@@ -16,7 +17,7 @@ set(STRING_LOOKUP_TABLE_FILES
 )
 set(STRING_DATA_TABLE_FILES "")
 
-foreach(LANGUAGE ${TEXT_LANGUAGE_LIST})
+foreach(LANGUAGE ${TEXT_LANGUAGES_LIST})
     list(APPEND STRING_INPUT_FILES
         "${VPK_DIR}/Portal/hl2/resource/gameui_${LANGUAGE}.txt"
         "${VPK_DIR}/Portal/hl2/resource/valve_${LANGUAGE}.txt"
@@ -32,7 +33,7 @@ endforeach()
 
 add_custom_command(
     DEPENDS
-        ${STRING_DEPENDENCIES} ${GENERATE_STRINGS}
+        ${STRING_INPUT_FILES} ${FONT_DEF} ${GENERATE_STRINGS}
     OUTPUT
         ${STRING_LOOKUP_TABLE_FILES}
         ${STRING_DATA_TABLE_FILES}
@@ -42,6 +43,7 @@ add_custom_command(
         --game-root-dir ${VPK_DIR}
         --extra-translations-dir ${CMAKE_CURRENT_SOURCE_DIR}
         --output-dir ${BUILD_AUDIO_DIR}
+        --check-font ${FONT_DEF}
     COMMENT
         "Generating strings"
     VERBATIM
@@ -87,4 +89,7 @@ add_custom_command(
 
 add_custom_target(string_linker_script
     DEPENDS ${STRING_LINKER_SCRIPT}
+)
+set_target_properties(string_linker_script PROPERTIES
+    OUTPUT "${STRING_LINKER_SCRIPT}"
 )

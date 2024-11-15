@@ -2,9 +2,9 @@
 ## Game code ##
 ###############
 
-set(DEBUGGER      OFF CACHE BOOL "Build with support for hardware debugging")
-set(GFX_VALIDATOR OFF CACHE BOOL "Build with display list validator")
-set(RSP_PROFILER  OFF CACHE BOOL "Build with RSP performance profiler")
+option(DEBUGGER      "Build with support for hardware debugging")
+option(GFX_VALIDATOR "Build with display list validator")
+option(RSP_PROFILER  "Build with RSP performance profiler")
 
 add_library(engine INTERFACE)
 

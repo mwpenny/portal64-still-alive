@@ -9,10 +9,10 @@ set(OUTPUT_LINKER_SCRIPT "${LINKER_SCRIPT_DIR}/portal.ld")
 add_custom_command(
     DEPENDS
         ${LINKER_SCRIPT}
-        anims_linker_script
-        level_linker_script
-        models_dynamic_linker_script
-        string_linker_script
+        anims_linker_script          "$<TARGET_PROPERTY:anims_linker_script,OUTPUT>"
+        level_linker_script          "$<TARGET_PROPERTY:level_linker_script,OUTPUT>"
+        models_dynamic_linker_script "$<TARGET_PROPERTY:models_dynamic_linker_script,OUTPUT>"
+        string_linker_script         "$<TARGET_PROPERTY:string_linker_script,OUTPUT>"
     OUTPUT
         ${OUTPUT_LINKER_SCRIPT}
     COMMAND

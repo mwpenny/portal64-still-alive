@@ -55,7 +55,7 @@ endfunction()
 
 set(FONT_FILES "")
 
-_add_convert_font_command(DejaVuSans "${DEJAVU_SANS_FILES}" FONT_FILES)
+_add_convert_font_command(DejaVuSans     "${DEJAVU_SANS_FILES}"     FONT_FILES)
 _add_convert_font_command(LiberationMono "${LIBERATION_MONO_FILES}" FONT_FILES)
 
 add_custom_target(fonts

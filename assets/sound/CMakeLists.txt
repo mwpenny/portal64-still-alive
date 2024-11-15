@@ -365,7 +365,7 @@ endforeach()
 
 # Localized sounds
 # Sounds within a language must be contiguous, so loop over languages first
-foreach(LANGUAGE ${AUDIO_LANGUAGE_LIST})
+foreach(LANGUAGE ${AUDIO_LANGUAGES_LIST})
     foreach(SOUND_SCRIPT ${LOCALIZED_SOUND_SCRIPTS})
         cmake_path(
             REMOVE_EXTENSION SOUND_SCRIPT

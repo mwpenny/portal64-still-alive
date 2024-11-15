@@ -6,6 +6,7 @@
 //  - Settings used by game fonts: layout=optimized box, padding=1px right
 //  - Each image must be smaller than 4 KB
 //  - Name each JSON file <font>_0.json, <font>_1.json, ..., <font>_N.json
+//  - Name the font directory the same as the font
 //
 // 2. Also generate a single font with all characters on the same line
 //  - Name the JSON file <font>_all.json

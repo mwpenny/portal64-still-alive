@@ -3,12 +3,16 @@ project(portal64 C ASM)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(AddExternalProjectExecutable)
+include(ListOption)
 
-set(AUDIO_LANGUAGES "english" CACHE STRING "Game audio languages to include")
-string(REPLACE "," ";" AUDIO_LANGUAGE_LIST "${AUDIO_LANGUAGES}")
-
-set(TEXT_LANGUAGES "english" CACHE STRING "Text languages to include")
-string(REPLACE "," ";" TEXT_LANGUAGE_LIST "${TEXT_LANGUAGES}")
+list_option(AUDIO_LANGUAGES "english"
+    "Game audio languages to include"
+    "${SUPPORTED_AUDIO_LANGUAGES}"
+)
+list_option(TEXT_LANGUAGES "all"
+    "Text languages to include"
+    "${SUPPORTED_TEXT_LANGUAGES}"
+)
 
 # Programs used in build
 find_package(Blender                3.6 EXACT   REQUIRED)

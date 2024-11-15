@@ -364,3 +364,6 @@ add_custom_command(
 add_custom_target(models_dynamic_linker_script
     DEPENDS ${DYNAMIC_MODELS_LINKER_SCRIPT}
 )
+set_target_properties(models_dynamic_linker_script PROPERTIES
+    OUTPUT "${DYNAMIC_MODELS_LINKER_SCRIPT}"
+)

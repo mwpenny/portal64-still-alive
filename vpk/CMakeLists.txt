@@ -65,7 +65,7 @@ _add_vpk_extract_command("${VPKS_HL2_MISC}"       ${PAK_DIR} VPK_STAMP_FILES)
 _add_vpk_extract_command("${VPKS_HL2_SOUND_MISC}" ${PAK_DIR} VPK_STAMP_FILES)
 
 # Extract audio for each selected additional non-English locale
-foreach(LANGUAGE ${AUDIO_LANGUAGE_LIST})
+foreach(LANGUAGE ${AUDIO_LANGUAGES_LIST})
     if (LANGUAGE STREQUAL "english")
         # English audio is included in the base VPKs
         continue()
