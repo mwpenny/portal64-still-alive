@@ -42,7 +42,6 @@ cd portal64
 
 # Replace <build_directory> with build directory name
 cmake -DDEBUGGER=ON <build_directory>
-export PORTAL64_WITH_DEBUGGER=1
 ```
 
 Then build as normal. This will build a version of the game that has a debugger
