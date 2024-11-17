@@ -11,7 +11,7 @@ sudo apt update
 # Install various packages
 sudo apt install -y \
     binutils-mips-n64 \
-    build-essential
+    build-essential \
     cimg-dev \
     cmake \
     ffmpeg \
@@ -45,8 +45,6 @@ sudo apt-get update && sudo apt-get install libxfixes3 libxi6 libxkbcommon0 libx
 sudo snap install blender --channel=3.6lts/stable --classic
 
 # Append environment variables to .bashrc
-echo 'export N64_LIBGCCDIR=/opt/crashsdk/lib/gcc/mips64-elf/12.2.0' >> ~/.bashrc
-echo 'export BLENDER_3_6=/snap/bin/blender' >> ~/.bashrc
 echo 'export PATH=$PATH:/opt/crashsdk/bin' >> ~/.bashrc
 echo 'export ROOT=/etc/n64' >> ~/.bashrc
 
@@ -58,9 +56,4 @@ pipx install vpk
 # Source the updated .bashrc to apply changes in the current terminal
 source ~/.bashrc
 
-echo "Setup is almost complete. Add the files from the Portal folder to portal64/vpk"
-
-read -p "When complete, press Enter to finish setup."
-
-# Displaying 'Setup complete' message after user input
 echo "Setup complete. Please restart the terminal if paths are not updated."

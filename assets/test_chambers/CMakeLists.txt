@@ -242,5 +242,5 @@ add_custom_target(level_linker_script
     DEPENDS ${LEVEL_LINKER_SCRIPT}
 )
 set_target_properties(level_linker_script PROPERTIES
-    OUTPUT "${LEVEL_LINKER_SCRIPT}"
+    SCRIPT_FILE "${LEVEL_LINKER_SCRIPT}"
 )

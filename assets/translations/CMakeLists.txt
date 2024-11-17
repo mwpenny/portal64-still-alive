@@ -91,5 +91,5 @@ add_custom_target(string_linker_script
     DEPENDS ${STRING_LINKER_SCRIPT}
 )
 set_target_properties(string_linker_script PROPERTIES
-    OUTPUT "${STRING_LINKER_SCRIPT}"
+    SCRIPT_FILE "${STRING_LINKER_SCRIPT}"
 )

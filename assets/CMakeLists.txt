@@ -61,5 +61,5 @@ add_custom_target(anims_linker_script
     DEPENDS ${ANIMS_LINKER_SCRIPT}
 )
 set_target_properties(anims_linker_script PROPERTIES
-    OUTPUT "${ANIMS_LINKER_SCRIPT}"
+    SCRIPT_FILE "${ANIMS_LINKER_SCRIPT}"
 )

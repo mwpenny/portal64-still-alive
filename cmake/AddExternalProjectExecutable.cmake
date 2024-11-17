@@ -17,6 +17,10 @@ function(add_external_project_executable PROJECT_NAME)
             "${PROJECT_BINARY_DIR}/${PROJECT_NAME}"
         CMAKE_ARGS
             "-DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>"
+        BUILD_COMMAND
+            ${CMAKE_COMMAND} --build <BINARY_DIR> --config Release
+        INSTALL_COMMAND
+            ${CMAKE_COMMAND} --install <BINARY_DIR> --config Release
         BUILD_BYPRODUCTS
             # Needed for Ninja so we can depend on the executable before it exists
             "<INSTALL_DIR>/${RELATIVE_EXE_PATH}"

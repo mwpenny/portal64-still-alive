@@ -5,8 +5,8 @@
 set(CMAKE_SYSTEM_NAME Generic)
 set(N64 TRUE)
 
-set(N64_TOOLCHAIN_ROOT   ""            CACHE PATH   "Root directory of N64 toolchain")
-set(N64_TOOLCHAIN_PREFIX "mips64-elf-" CACHE STRING "File name prefix for toolchain programs")
+set(N64_TOOLCHAIN_ROOT   ""          CACHE PATH   "Root directory of N64 toolchain")
+set(N64_TOOLCHAIN_PREFIX "mips-n64-" CACHE STRING "File name prefix for toolchain programs")
 
 # Ensure CMake can find toolchain during compiler tests
 list(APPEND CMAKE_TRY_COMPILE_PLATFORM_VARIABLES
@@ -15,6 +15,7 @@ list(APPEND CMAKE_TRY_COMPILE_PLATFORM_VARIABLES
 )
 
 list(APPEND CMAKE_PREFIX_PATH
+    "/"
     "/usr"
 )
 
@@ -53,17 +54,34 @@ set(BUILD_TYPES
 foreach(LANG ASM C CXX)
     foreach(TYPE ${BUILD_TYPES})
         string(TOUPPER ${TYPE} TYPE_UPPER)
-        set("CMAKE_${LANG}_FLAGS_${TYPE_UPPER}" ${COMPILE_FLAGS_${TYPE_UPPER}})
+        set(FLAG_VAR "CMAKE_${LANG}_FLAGS_${TYPE_UPPER}")
+
+        set(${FLAG_VAR} ${COMPILE_FLAGS_${TYPE_UPPER}} CACHE STRING "${TYPE} flags")
+        mark_as_advanced(${FLAG_VAR})
     endforeach()
 endforeach()
 
 get_property(IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if (IS_MULTI_CONFIG)
-    set(CMAKE_CONFIGURATION_TYPES ${BUILD_TYPES})
+    set(CMAKE_CONFIGURATION_TYPES ${BUILD_TYPES} CACHE STRING "Supported build types" FORCE)
+    mark_as_advanced(CMAKE_CONFIGURATION_TYPES)
 else()
     set(CMAKE_BUILD_TYPE "DebugOptimized" CACHE STRING "Project build type")
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${BUILD_TYPES})
 endif()
+
+# Don't clutter GUI on success
+mark_as_advanced(
+    N64_TOOLCHAIN_ROOT
+    N64_TOOLCHAIN_PREFIX
+
+    CMAKE_ASM_COMPILER
+    CMAKE_C_COMPILER
+    CMAKE_CPP
+    CMAKE_CXX_COMPILER
+    CMAKE_OBJCOPY
+    Makemask_EXECUTABLE
+)
 
 # ROM generation
 

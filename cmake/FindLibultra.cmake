@@ -4,8 +4,8 @@
 
 include(FindPackageHandleStandardArgs)
 
-set(LIBULTRA_BOOT_CODE   "6102"             CACHE PATH   "Boot code to use")
-set(LIBULTRA_RSP_UCODE   "gspF3DEX2.fifo"   CACHE PATH   "RSP microcode to use")
+set(LIBULTRA_BOOT_CODE   "6102"             CACHE STRING   "Boot code to use")
+set(LIBULTRA_RSP_UCODE   "gspF3DEX2.fifo"   CACHE STRING   "RSP microcode to use")
 
 find_path   (Libultra_INCLUDE_DIR   ultra64.h           PATH_SUFFIXES "n64")
 find_library(Libultra_LIBRARY       ultra_rom           PATH_SUFFIXES "n64")
@@ -24,6 +24,7 @@ find_package_handle_standard_args(Libultra
     REQUIRED_VARS
         Libultra_INCLUDE_DIR
         Libultra_LIBRARY
+        Libultra_BOOT
         Libultra_RSP_BOOT
         Libultra_RSP_UCODE
         Libultra_ASP_UCODE
@@ -46,5 +47,18 @@ if (Libultra_FOUND AND NOT TARGET libultra::libultra)
     )
     target_link_libraries(libultra::libultra INTERFACE
         libgcc::libgcc
+    )
+
+    # Don't clutter GUI on success
+    mark_as_advanced(
+        LIBULTRA_BOOT_CODE
+        LIBULTRA_RSP_UCODE
+
+        Libultra_INCLUDE_DIR
+        Libultra_LIBRARY
+        Libultra_BOOT
+        Libultra_RSP_BOOT
+        Libultra_RSP_UCODE
+        Libultra_ASP_UCODE
     )
 endif()

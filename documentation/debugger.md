@@ -35,19 +35,20 @@ portal64/
         validator.h
 ```
 
-Next, you need to configure an environment variable. Put this in your `~/.bashrc` or `~/.profile`
+Next, you need to configure CMake with `DEBUGGER=ON`:
 
-```
+```sh
+cd portal64
+
+# Replace <build_directory> with build directory name
+cmake -DDEBUGGER=ON <build_directory>
 export PORTAL64_WITH_DEBUGGER=1
 ```
 
-Then to build the rom with the debugger in it, use ths make command
-
-```
-PORTAL64_WITH_GFX_VALIDATOR=1 make build/portal_debug.z64
-```
-
-This will build a version of the game that has a debugger installed. When the game boots, it will pause and wait for something to connect to the debugger before continuing. To connect the debugger with an everdrive, you will need to run the following script.
+Then build as normal. This will build a version of the game that has a debugger
+installed. When the game boots, it will pause and wait for something to connect
+to the debugger before continuing. To connect the debugger with an everdrive,
+you will need to run the following script.
 
 ```
 node /path/to/libultragdb/proxy/proxy.js /dev/ttyUSB0 8080

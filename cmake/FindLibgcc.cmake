@@ -38,4 +38,7 @@ if (Libgcc_FOUND AND NOT TARGET libgcc::libgcc)
     set_target_properties(libgcc::libgcc PROPERTIES
         IMPORTED_LOCATION ${Libgcc_LIBRARY}
     )
+
+    # Don't clutter GUI on success
+    mark_as_advanced(Libgcc_LIBRARY)
 endif()
