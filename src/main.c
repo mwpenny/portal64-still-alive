@@ -12,7 +12,7 @@
 #include "levels/intro.h"
 #include "levels/credits.h"
 #include "menu/main_menu.h"
-#include "menu/translations.h"
+#include "strings/translations.h"
 #include "savefile/savefile.h"
 #include "scene/dynamic_scene.h"
 #include "scene/portal_surface.h"
@@ -257,11 +257,11 @@ static void gameProc(void* arg) {
     initAudio(fps);
     timeSetFrameRate(fps);
     soundPlayerInit();
-    translationsLoad(gSaveData.controls.subtitleLanguage);
+    translationsLoad(gSaveData.controls.textLanguage);
     skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
     gSceneCallbacks->initCallback(gSceneCallbacks->data);
     // this prevents the intro from crashing
-    gGameMenu.currentRenderedLanguage = gSaveData.controls.subtitleLanguage;
+    gGameMenu.currentRenderedLanguage = gSaveData.controls.textLanguage;
 
     while (1) {
         OSScMsg *msg = NULL;
@@ -285,7 +285,7 @@ static void gameProc(void* arg) {
                         portalSurfaceCleanupQueueInit();
                         heapInit(_heapStart, memoryEnd);
                         profileClearAddressMap();
-                        translationsLoad(gSaveData.controls.subtitleLanguage);
+                        translationsLoad(gSaveData.controls.textLanguage);
                         levelLoadWithCallbacks(levelGetQueued());
                         rumblePakClipInit();
                         cutsceneRunnerReset();

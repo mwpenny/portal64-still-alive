@@ -66,7 +66,7 @@ void cutsceneRunnerReset() {
         gCutsceneSoundQueues[i] = NULL;
         gCutsceneCurrentSound[i] = SOUND_ID_NONE;
         gCutsceneCurrentSoundId[i] = SOUND_ID_NONE;
-        gCutsceneCurrentSubtitleId[i] = SubtitleKeyNone;
+        gCutsceneCurrentSubtitleId[i] = StringIdNone;
         gCutsceneCurrentVolume[i] = 0.0f;
     }
 
@@ -502,7 +502,7 @@ void cutscenesUpdateSounds() {
                 gCutsceneCurrentSoundId[i] = curr->soundId;
                 gCutsceneCurrentSubtitleId[i] = curr->subtitleId;
                 gCutsceneCurrentVolume[i] = curr->volume;
-                if (curr->subtitleId != SubtitleKeyNone){
+                if (curr->subtitleId != StringIdNone){
                     hudShowSubtitle(&gScene.hud, curr->subtitleId, subtitleType);
                 }
 
@@ -518,7 +518,7 @@ void cutscenesUpdateSounds() {
 
                 gCutsceneCurrentSound[i] = SOUND_ID_NONE;
                 gCutsceneCurrentSoundId[i] = SOUND_ID_NONE;
-                gCutsceneCurrentSubtitleId[i] = SubtitleKeyNone;
+                gCutsceneCurrentSubtitleId[i] = StringIdNone;
                 gCutsceneCurrentVolume[i] = 0.0f;
             }
         }

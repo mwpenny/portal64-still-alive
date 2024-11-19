@@ -1,11 +1,11 @@
 #include "menu_builder.h"
 
-#include "../util/memory.h"
-#include "../system/controller.h"
-#include "./translations.h"
-#include "../audio/soundplayer.h"
+#include "audio/soundplayer.h"
+#include "math/mathf.h"
+#include "strings/translations.h"
+#include "system/controller.h"
 #include "system/time.h"
-#include "../math/mathf.h"
+#include "util/memory.h"
 
 #include "../font/dejavu_sans.h"
 #include "../build/assets/materials/ui.h"

@@ -89,7 +89,6 @@ target_sources(engine INTERFACE
     menu/savefile_list.c
     menu/tabs.c
     menu/text_manipulation.c
-    menu/translations.c
     menu/video_options.c
     physics/collision.c
     physics/collision_box.c
@@ -152,6 +151,7 @@ target_sources(engine INTERFACE
     scene/trigger_listener.c
     sk64/skeletool_animator.c
     sk64/skeletool_armature.c
+    strings/translations.c
     util/assert.c
     util/dynamic_asset_loader.c
     util/memory.c
@@ -210,14 +210,10 @@ add_custom_target(version_header
 # Make sure version header is always up to date
 add_dependencies(engine version_header)
 
-# TODO: remove when makefile is no longer in use
-target_compile_definitions(engine INTERFACE CMAKE)
-
 ###########################
 ## Library-specific code ##
 ###########################
 
-# TODO: make this conditional
 target_sources(engine INTERFACE
     system/libultra/controller_libultra.c
     system/libultra/time_libultra.c

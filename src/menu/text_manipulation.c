@@ -2,10 +2,10 @@
 
 #include <ultra64.h>
 
-#include "translations.h"
+#include "strings/translations.h"
 #include "util/string.h"
 
-#include "../build/src/audio/subtitles.h"
+#include "../build/src/strings/strings.h"
 
 void textManipTestChamberMessage(char* result, int testChamber) {
     strCopy(result, translationsGet(PORTAL_CHAPTER1_TITLE));

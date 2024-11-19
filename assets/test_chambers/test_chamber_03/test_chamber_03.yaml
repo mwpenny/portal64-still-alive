@@ -2,7 +2,7 @@ operators:
   - not_on_piston = not on_piston
 cutscenes:
   START_BALL:
-    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
+    - q_sound AMBIENCE_BASE CH_AMBIENT StringIdNone 0.55
     - set_signal launch_ball
     - wait_for_signal exit_activate
     - label piston_loop

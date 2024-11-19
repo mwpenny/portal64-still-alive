@@ -28,13 +28,8 @@ function getSoundName(soundFile, stripPrefix) {
     return `SOUNDS_${sanitize(name).toUpperCase()}`;
 }
 
-function getSoundLanguage(soundFile, makefileHack) {
+function getSoundLanguage(soundFile) {
     const { name } = path.parse(soundFile);
-
-    // HACK: remove when makefile is no longer in use
-    if (makefileHack && soundFile.includes('assets/sound/vo/aperture_ai/')) {
-        return 'english';
-    }
 
     return Object.keys(SUPPORTED_LANGUAGES).find(lang => {
         return name.toLowerCase().startsWith(`${lang}_`);
@@ -45,11 +40,11 @@ function getSoundNameWithoutLanguage(soundFile, language) {
     return getSoundName(soundFile, language && `${language}_`);
 }
 
-function getProvidedLanguages(soundFiles, makefileHack) {
+function getProvidedLanguages(soundFiles) {
     const languageNames = new Set();
 
     for (const soundFile of soundFiles) {
-        const language = getSoundLanguage(soundFile, makefileHack);
+        const language = getSoundLanguage(soundFile);
         if (language) {
             languageNames.add(language);
         }
@@ -75,8 +70,8 @@ function validateLocalizedSounds(languages) {
     }
 }
 
-function parseSounds(soundFiles, makefileHack) {
-    const languageNames = getProvidedLanguages(soundFiles, makefileHack);
+function parseSounds(soundFiles) {
+    const languageNames = getProvidedLanguages(soundFiles);
     const defaultLanguage = languageNames[0];
 
     // Initialize in language order so output order is consistent
@@ -89,7 +84,7 @@ function parseSounds(soundFiles, makefileHack) {
     const unlocalized = new Map();
 
     for (const [i, soundFile] of soundFiles.entries()) {
-        const language = getSoundLanguage(soundFile, makefileHack);
+        const language = getSoundLanguage(soundFile);
         const canonicalName = getSoundNameWithoutLanguage(soundFile, language);
         const sound = {
             // The game references sounds by canonical name
@@ -217,24 +212,19 @@ const { values, positionals } = util.parseArgs({
     options: {
         'out-dir': {
             type: 'string'
-        },
-        // HACK: remove when makefile is no longer in use
-        'makefile-hack': {
-            type: 'boolean'
         }
     },
     allowPositionals: true
 });
 
 const outDir = values['out-dir'];
-const makefileHack = values['makefile-hack'];
 const soundFiles = positionals;
 
 if (!fs.existsSync(outDir)) {
     fs.mkdirSync(outDir, { recursive: true });
 }
 
-const soundInfo = parseSounds(soundFiles, makefileHack);
+const soundInfo = parseSounds(soundFiles);
 
 fs.writeFileSync(
     path.join(outDir, 'clips.h'),

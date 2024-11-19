@@ -1,16 +1,16 @@
 #include "controls.h"
 
-#include "../font/dejavu_sans.h"
-#include "../font/font.h"
-#include "../system/controller.h"
-#include "../audio/soundplayer.h"
-#include "../util/memory.h"
-#include "./translations.h"
+#include "audio/soundplayer.h"
+#include "font/dejavu_sans.h"
+#include "font/font.h"
+#include "strings/translations.h"
+#include "system/controller.h"
+#include "util/memory.h"
 
 #include "../build/assets/materials/ui.h"
 
 #include "../build/src/audio/clips.h"
-#include "../build/src/audio/subtitles.h"
+#include "../build/src/strings/strings.h"
 
 #define CONTROL_ROW_HEIGHT  14
 

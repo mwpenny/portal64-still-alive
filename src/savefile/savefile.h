@@ -52,7 +52,7 @@ struct ControlSaveState {
     unsigned short acceleration;
     unsigned short deadzone;
     unsigned char portalRenderDepth;
-    unsigned char subtitleLanguage;
+    unsigned char textLanguage;
 };
 
 struct AudioSettingsSaveState {

@@ -1,13 +1,11 @@
-#include "./confirmation_dialog.h"
+#include "confirmation_dialog.h"
 
-#include "../font/dejavu_sans.h"
-#include "../system/controller.h"
-#include "../audio/soundplayer.h"
-#include "./translations.h"
+#include "audio/soundplayer.h"
+#include "font/dejavu_sans.h"
+#include "system/controller.h"
 
 #include "../build/assets/materials/ui.h"
 #include "../build/src/audio/clips.h"
-#include "../build/src/audio/subtitles.h"
 
 #define DIALOG_LEFT       40
 #define DIALOG_WIDTH      (SCREEN_WD - (DIALOG_LEFT * 2))

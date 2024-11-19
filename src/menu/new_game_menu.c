@@ -1,24 +1,23 @@
 #include "new_game_menu.h"
 
-#include "./translations.h"
+#include "font/font.h"
+#include "font/dejavu_sans.h"
 
-#include "../font/font.h"
-#include "../font/dejavu_sans.h"
+#include "audio/soundplayer.h"
+#include "graphics/image.h"
+#include "levels/levels.h"
+#include "strings/translations.h"
+#include "savefile/savefile.h"
+#include "system/controller.h"
+#include "text_manipulation.h"
+#include "util/memory.h"
+#include "util/rom.h"
 
-#include "../graphics/image.h"
-#include "../util/memory.h"
-#include "../util/rom.h"
-#include "../audio/soundplayer.h"
-#include "./text_manipulation.h"
 
 #include "../build/assets/materials/ui.h"
 #include "../build/assets/materials/images.h"
 #include "../build/src/audio/clips.h"
-#include "../build/src/audio/subtitles.h"
-
-#include "../levels/levels.h"
-#include "../savefile/savefile.h"
-#include "../system/controller.h"
+#include "../build/src/strings/strings.h"
 
 struct Chapter gChapters[] = {
     {images_chapter1_rgba_16b, 0, 0},

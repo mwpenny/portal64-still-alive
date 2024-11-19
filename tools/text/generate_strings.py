@@ -1,5 +1,3 @@
-# TODO: rename file -> generate_strings.py
-
 #!/usr/bin/env python3
 import argparse
 import json
@@ -154,27 +152,27 @@ def generate_header(language_strings):
     )
 
     return (
-        f"#ifndef __SUBTITLES_H__\n"
-        f"#define __SUBTITLES_H__\n"
+        f"#ifndef __STRINGS_H__\n"
+        f"#define __STRINGS_H__\n"
         f"\n"
-        f"#define NUM_SUBTITLE_LANGUAGES {len(language_strings)}\n"
-        f"#define NUM_SUBTITLE_MESSAGES {len(language_strings[first_language].values()) + 1}\n"
-        f"#define MAX_SUBTITLE_LENGTH  {max_message_length}\n"
+        f"#define NUM_STRING_LANGUAGES   {len(language_strings)}\n"
+        f"#define NUM_TRANSLATED_STRINGS {len(language_strings[first_language].values()) + 1}\n"
+        f"#define MAX_STRING_LENGTH      {max_message_length}\n"
         f"\n"
-        f"struct SubtitleBlock {{\n"
+        f"struct StringBlock {{\n"
         f"    char* romStart;\n"
         f"    char* romEnd;\n"
         f"    char** values;\n"
         f"}};\n"
         f"\n"
-        f"extern char* SubtitleLanguages[];\n"
-        f"extern struct SubtitleBlock SubtitleLanguageBlocks[];\n"
+        f"extern char* StringLanguages[];\n"
+        f"extern struct StringBlock StringLanguageBlocks[];\n"
         f"\n"
         f"{language_defines}\n"
         f"\n"
-        f"enum SubtitleKey\n"
+        f"enum StringId\n"
         f"{{\n"
-        f"    SubtitleKeyNone,\n"
+        f"    StringIdNone,\n"
         f"{string_enum_entries}\n"
         f"}};\n"
         f"\n"
@@ -188,9 +186,9 @@ def generate_main_source_file(language_strings):
     )
 
     output = (
-        f'#include "subtitles.h"\n'
+        f'#include "strings.h"\n'
         f"\n"
-        f"char* SubtitleLanguages[] =\n"
+        f"char* StringLanguages[] =\n"
         f"{{\n"
         f"{language_name_entries}\n"
         f"}};\n"
@@ -199,20 +197,20 @@ def generate_main_source_file(language_strings):
 
     for language in language_strings:
         output += (
-            f"extern char _subtitles_{language}SegmentRomStart[];\n"
-            f"extern char _subtitles_{language}SegmentRomEnd[];\n"
-            f"extern char* gSubtitle{capitalize(language)}[NUM_SUBTITLE_MESSAGES];\n"
+            f"extern char _strings_{language}SegmentRomStart[];\n"
+            f"extern char _strings_{language}SegmentRomEnd[];\n"
+            f"extern char* gStrings{capitalize(language)}[NUM_TRANSLATED_STRINGS];\n"
             f"\n"
         )
 
-    output += f"struct SubtitleBlock SubtitleLanguageBlocks[] = {{\n"
+    output += f"struct StringBlock StringLanguageBlocks[] = {{\n"
 
     for language in language_strings:
         output += (
             f"    {{\n"
-            f"        _subtitles_{language}SegmentRomStart,\n"
-            f"        _subtitles_{language}SegmentRomEnd,\n"
-            f"        gSubtitle{capitalize(language)},\n"
+            f"        _strings_{language}SegmentRomStart,\n"
+            f"        _strings_{language}SegmentRomEnd,\n"
+            f"        gStrings{capitalize(language)},\n"
             f"    }},\n"
         )
 
@@ -230,12 +228,12 @@ def generate_language_source_file(language, strings, default_strings):
     )
 
     return (
-        f'#include "subtitles.h"\n'
+        f'#include "strings.h"\n'
         f"\n"
         f"{string_declarations}\n"
         f"\n"
-        f"char* gSubtitle{capitalize(language)}[NUM_SUBTITLE_MESSAGES] = {{\n"
-        f'    "",\n'  # SubtitleKeyNone
+        f"char* gStrings{capitalize(language)}[NUM_TRANSLATED_STRINGS] = {{\n"
+        f'    "",\n'  # StringIdNone
         f"{string_table_entries}\n"
         f"}};"
     )
@@ -399,18 +397,17 @@ if font_data:
 
 output_dir = args.output_dir
 write_string(
-    os.path.join(output_dir, "subtitles.h"),
+    os.path.join(output_dir, "strings.h"),
     generate_header(language_strings)
 )
 write_string(
-    os.path.join(output_dir, "subtitles.c"),
+    os.path.join(output_dir, "strings.c"),
     generate_main_source_file(language_strings)
 )
 
-# TODO: strings_*.c
 default_strings = language_strings[list(language_strings)[0]]
 for language, strings in language_strings.items():
     write_string(
-        os.path.join(output_dir, f"subtitles_{language}.c"),
+        os.path.join(output_dir, f"strings_{language}.c"),
         generate_language_source_file(language, strings, default_strings)
     )

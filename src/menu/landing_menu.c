@@ -1,20 +1,17 @@
 #include "landing_menu.h"
 
-#include "../font/font.h"
-#include "../font/dejavu_sans.h"
-#include "../system/controller.h"
-#include "../util/memory.h"
-#include "../audio/soundplayer.h"
+#include "audio/soundplayer.h"
+#include "cheat_codes.h"
+#include "font/font.h"
+#include "font/dejavu_sans.h"
+#include "strings/translations.h"
+#include "system/controller.h"
+#include "util/memory.h"
 
 #include "../build/assets/materials/ui.h"
 #include "../build/src/audio/clips.h"
-#include "cheat_codes.h"
-#include "./translations.h"
 
-// TODO: remove when makefile is no longer in use
-#ifdef CMAKE
 #include "../build/version.h"
-#endif
 
 #define PORTAL_LOGO_X               30
 #define PORTAL_LOGO_Y               74

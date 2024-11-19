@@ -1,14 +1,14 @@
-#include "./save_game_menu.h"
+#include "save_game_menu.h"
 
-#include "../savefile/savefile.h"
-#include "../levels/levels.h"
-#include "../system/controller.h"
-#include "../util/memory.h"
-#include "../audio/soundplayer.h"
-#include "./translations.h"
+#include "audio/soundplayer.h"
+#include "levels/levels.h"
+#include "savefile/savefile.h"
+#include "strings/translations.h"
+#include "system/controller.h"
+#include "util/memory.h"
 
 #include "../build/src/audio/clips.h"
-#include "../build/src/audio/subtitles.h"
+#include "../build/src/strings/strings.h"
 
 void saveGameMenuInit(struct SaveGameMenu* saveGame, struct SavefileListMenu* savefileList) {
     saveGame->savefileList = savefileList;

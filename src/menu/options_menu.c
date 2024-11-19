@@ -9,7 +9,7 @@
 
 #include "../system/controller.h"
 #include "../build/src/audio/clips.h"
-#include "../build/src/audio/subtitles.h"
+#include "../build/src/strings/strings.h"
 
 
 struct Tab gOptionTabs[] = {

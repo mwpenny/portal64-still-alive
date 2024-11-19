@@ -1,6 +1,6 @@
 cutscenes:
   START:
-    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
+    - q_sound AMBIENCE_BASE CH_AMBIENT StringIdNone 0.55
     - start_cutscene CHECK_STAIRS
     - start_cutscene CHECK_CUBE_ON_PISTON
     - start_cutscene CHECK_CUBE_OFF_BUTTON

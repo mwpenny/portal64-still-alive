@@ -1,7 +1,7 @@
-set(BUILD_AUDIO_DIR "${PROJECT_BINARY_DIR}/src/audio")
+set(BUILD_STRINGS_DIR "${PROJECT_BINARY_DIR}/src/strings")
 
-set(FONT_DEF         "${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_all.json")
-set(GENERATE_STRINGS "${PROJECT_SOURCE_DIR}/tools/text/subtitle_generate.py")
+set(FONT_DEF          "${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_all.json")
+set(GENERATE_STRINGS  "${PROJECT_SOURCE_DIR}/tools/text/generate_strings.py")
 
 ##################
 ## Translations ##
@@ -9,11 +9,11 @@ set(GENERATE_STRINGS "${PROJECT_SOURCE_DIR}/tools/text/subtitle_generate.py")
 
 set(STRING_INPUT_FILES "")
 
-set(SUBTITLES_H "${BUILD_AUDIO_DIR}/subtitles.h")
-set(SUBTITLES_C "${BUILD_AUDIO_DIR}/subtitles.c")
+set(STRINGS_H "${BUILD_STRINGS_DIR}/strings.h")
+set(STRINGS_C "${BUILD_STRINGS_DIR}/strings.c")
 set(STRING_LOOKUP_TABLE_FILES
-    ${SUBTITLES_H}
-    ${SUBTITLES_C}
+    ${STRINGS_H}
+    ${STRINGS_C}
 )
 set(STRING_DATA_TABLE_FILES "")
 
@@ -27,7 +27,7 @@ foreach(LANGUAGE ${TEXT_LANGUAGES_LIST})
     )
 
     list(APPEND STRING_DATA_TABLE_FILES
-        "${BUILD_AUDIO_DIR}/subtitles_${LANGUAGE}.c"
+        "${BUILD_STRINGS_DIR}/strings_${LANGUAGE}.c"
     )
 endforeach()
 
@@ -42,7 +42,7 @@ add_custom_command(
         --languages ${TEXT_LANGUAGES}
         --game-root-dir ${VPK_DIR}
         --extra-translations-dir ${CMAKE_CURRENT_SOURCE_DIR}
-        --output-dir ${BUILD_AUDIO_DIR}
+        --output-dir ${BUILD_STRINGS_DIR}
         --check-font ${FONT_DEF}
     COMMENT
         "Generating strings"
@@ -69,7 +69,7 @@ target_sources(string_lookup_tables INTERFACE
 
 # Add command for generating strings linker script fragment
 
-set(STRING_LINKER_SCRIPT "${LINKER_SCRIPT_DIR}/subtitles.ld")
+set(STRING_LINKER_SCRIPT "${LINKER_SCRIPT_DIR}/strings.ld")
 add_custom_command(
     DEPENDS
         ${GEN_SEGMENT_LD}

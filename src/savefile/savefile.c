@@ -5,16 +5,9 @@
 #include "system/controller.h"
 
 #include "../controls/controller_actions.h"
-#include "../build/src/audio/subtitles.h"
 
 struct SaveData __attribute__((aligned(8))) gSaveData;
 int gCurrentTestSubject = -1;
-
-#ifdef DEBUG
-#define UNLOCK_ALL  1
-#else
-#define UNLOCK_ALL  1
-#endif
 
 OSPiHandle gSramHandle;
 
@@ -94,7 +87,7 @@ void savefileNew() {
     gSaveData.controls.acceleration = 0x4000;
     gSaveData.controls.deadzone = 0x4000;
     gSaveData.controls.portalRenderDepth = 2;
-    gSaveData.controls.subtitleLanguage = 0;
+    gSaveData.controls.textLanguage = 0;
 
     gSaveData.audio.soundVolume = 0xFFFF;
     gSaveData.audio.musicVolume = 0x8000;

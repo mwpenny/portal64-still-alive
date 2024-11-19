@@ -1,18 +1,18 @@
-#include "./savefile_list.h"
+#include "savefile_list.h"
 
-#include "../font/dejavu_sans.h"
-#include "../system/controller.h"
-#include "../util/rom.h"
-#include "../graphics/image.h"
-#include "../audio/soundplayer.h"
-#include "./text_manipulation.h"
-#include "./controls.h"
-#include "./translations.h"
+#include "audio/soundplayer.h"
+#include "controls.h"
+#include "font/dejavu_sans.h"
+#include "graphics/image.h"
+#include "strings/translations.h"
+#include "system/controller.h"
+#include "text_manipulation.h"
+#include "util/rom.h"
+#include "util/string.h"
 
 #include "../build/assets/materials/ui.h"
 #include "../build/src/audio/clips.h"
-
-#include "../util/string.h"
+#include "../build/src/strings/strings.h"
 
 #define SAVE_SLOT_RENDER_W  (SAVE_SLOT_IMAGE_W * 2)
 #define SAVE_SLOT_RENDER_H  (SAVE_SLOT_IMAGE_H * 2)

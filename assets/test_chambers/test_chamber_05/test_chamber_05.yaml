@@ -2,7 +2,7 @@ operators:
   []
 cutscenes:
   START:
-    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
+    - q_sound AMBIENCE_BASE CH_AMBIENT StringIdNone 0.55
   INTRO_CUTSCENE:
     - activate_signage 9
     - set_signal cube_dropper

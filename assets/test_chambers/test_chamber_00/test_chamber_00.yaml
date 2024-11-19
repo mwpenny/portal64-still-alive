@@ -2,7 +2,7 @@ operators:
   []
 cutscenes:
   INTRO:
-    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
+    - q_sound AMBIENCE_BASE CH_AMBIENT StringIdNone 0.55
     - play_animation player player_intro
     - play_animation glass_cover_0 glass_cover_0_open
     - play_animation glass_cover_1 glass_cover_1_open

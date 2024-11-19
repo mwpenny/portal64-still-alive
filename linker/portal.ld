@@ -93,7 +93,7 @@ SECTIONS
 #include "levels.ld"
 #include "dynamic_models.ld"
 #include "anims.ld"
-#include "subtitles.ld"
+#include "strings.ld"
 
    /* Discard standard sections not mentioned above, keep debug info */
    /DISCARD/ :

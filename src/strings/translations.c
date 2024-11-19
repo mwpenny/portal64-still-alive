@@ -1,16 +1,16 @@
 #include "translations.h"
 
-#include "../util/memory.h"
-#include "../util/rom.h"
+#include "util/memory.h"
+#include "util/rom.h"
 
-#include "../build/src/audio/subtitles.h"
+#include "../build/src/strings/strings.h"
 
 char* gLoadedLanugageBlock = NULL;
 char** gCurrentTranslations = NULL;
 int gCurrentLoadedLanguage = 0;
 
 void translationsLoad(int language) {
-    if (NUM_SUBTITLE_LANGUAGES == 0) {
+    if (NUM_STRING_LANGUAGES == 0) {
         gCurrentTranslations = NULL;
         return;
     }
@@ -19,11 +19,11 @@ void translationsLoad(int language) {
         language = 0;
     }
 
-    if (language >= NUM_SUBTITLE_LANGUAGES) {
-        language = NUM_SUBTITLE_LANGUAGES - 1;
+    if (language >= NUM_STRING_LANGUAGES) {
+        language = NUM_STRING_LANGUAGES - 1;
     }
 
-    struct SubtitleBlock* block = &SubtitleLanguageBlocks[language];
+    struct StringBlock* block = &StringLanguageBlocks[language];
 
     int blockSize = (int)block->romEnd - (int)block->romStart;
     gLoadedLanugageBlock = malloc(blockSize);
@@ -32,7 +32,7 @@ void translationsLoad(int language) {
     gCurrentTranslations = CALC_RAM_POINTER(block->values, gLoadedLanugageBlock);
     gCurrentLoadedLanguage = language;
 
-    for (int i = 0; i < NUM_SUBTITLE_MESSAGES; ++i) {
+    for (int i = 0; i < NUM_TRANSLATED_STRINGS; ++i) {
         gCurrentTranslations[i] = CALC_RAM_POINTER(gCurrentTranslations[i], gLoadedLanugageBlock);
     }
 }
@@ -51,7 +51,7 @@ int translationsCurrentLanguage() {
 }
 
 char* translationsGet(int message) {
-    if (message < 0 || message >= NUM_SUBTITLE_MESSAGES || !gCurrentTranslations) {
+    if (message < 0 || message >= NUM_TRANSLATED_STRINGS || !gCurrentTranslations) {
         return "";
     }
 

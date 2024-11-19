@@ -1,13 +1,10 @@
 #include "gameplay_options.h"
 
-#include "../system/controller.h"
-#include "../font/dejavu_sans.h"
-#include "../audio/soundplayer.h"
-#include "../savefile/savefile.h"
-
-#include "../build/src/audio/subtitles.h"
-
-#include "../main.h"
+#include "audio/soundplayer.h"
+#include "font/dejavu_sans.h"
+#include "main.h"
+#include "savefile/savefile.h"
+#include "system/controller.h"
 
 #define MENU_Y      54
 #define MENU_WIDTH  252
