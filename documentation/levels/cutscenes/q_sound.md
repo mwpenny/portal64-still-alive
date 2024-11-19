@@ -10,12 +10,12 @@ q_sound SOUND_ID CHANNEL_NAME SUBTITLE_ID [VOLUME]
 
 ## Arguments
 
-| Name                | Description                                                                                                                                         |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SOUND_ID`          | The ID of the sound to queue. `SOUNDS_` prefix can be omitted.                                                                                      |
-| `CHANNEL_NAME`      | The name of the channel to queue the sound on                                                                                                       |
-| `SUBTITLE_ID`       | The ID of the string to display as a subtitle when playing the sound with subtitles enabled, or `StringIdNone`. Only shown for `CH_GLADOS` channel. |
-| `VOLUME` (optional) | The volume multiplier for playback. 0 is muted and 1 is normal volume. Defaults to 1.                                                               |
+| Name                | Description                                                                                                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SOUND_ID`          | The ID of the sound to queue. `SOUNDS_` prefix can be omitted.                                                                                                                       |
+| `CHANNEL_NAME`      | The name of the channel to queue the sound on                                                                                                                                        |
+| `SUBTITLE_ID` (optional) | The ID of the string to display as a subtitle when playing the sound with subtitles enabled, or `StringIdNone`. Only shown for `CH_GLADOS` channel. Defaults to `StringIdNone`. |
+| `VOLUME` (optional) | The volume multiplier for playback. 0 is muted and 1 is normal volume. Defaults to 1.                                                                                                |
 
 ## Notes
 

@@ -71,6 +71,7 @@ _add_extract_video_audio_command(
 
 set(SOUND_SCRIPTS
     ambient/alarms/portal_elevator_chime.sox
+    ambient/atmosphere/ambience_base.sox
     ambient/dinosaur_fizzle.sox
     ambient/machines/portalgun_rotate1.sox
     ambient/machines/ticktock1.sox
@@ -98,6 +99,7 @@ set(SOUND_SCRIPTS
     ui/buttonrollover.sox
     vehicles/apc/apc_shutdown.sox
     vehicles/apc/apc_start_loop3.jsox
+    vehicles/tank_turret_loop1.sox
     vehicles/tank_turret_start1.sox
     vo/aperture_ai/ding_off.sox
     vo/aperture_ai/ding_on.sox
@@ -196,13 +198,12 @@ set(LOCALIZED_SOUND_SCRIPTS
     vo/aperture_ai/generic_security_camera_destroyed-5.sox
 )
 
-# TODO: rename to .sox after makefile is no longer in use
 set(MUSIC_SCRIPTS
-    music/portal_procedural_jiggle_bone.msox
-    music/portal_self_esteem_fund.msox
-    music/portal_still_alive.msox
-    music/portal_subject_name_here.msox
-    music/portal_taste_of_blood.msox
+    music/portal_procedural_jiggle_bone.sox
+    music/portal_self_esteem_fund.sox
+    music/portal_still_alive.sox
+    music/portal_subject_name_here.sox
+    music/portal_taste_of_blood.sox
 )
 
 set(INSTRUMENT_BANKS
@@ -214,36 +215,6 @@ set(INSTRUMENT_BANKS
     vehicles/tank_turret_loop1.ins
     weapons/physcannon/energy_sing_loop4.ins
 )
-
-# TODO: remove
-function(_add_sound_transform_command_direct SOUND_NAME ARGS OUTPUT_LIST)
-    set(INPUT_FILE "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
-    string(REPLACE " " ";" ARGS ${ARGS})
-
-    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.wav")
-
-    cmake_path(
-        GET OUTPUT_FILE PARENT_PATH
-        OUTPUT_DIR
-    )
-
-    add_custom_command(
-        DEPENDS
-            extract_vpks ${INPUT_FILE}
-        OUTPUT
-            ${OUTPUT_FILE}
-        COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
-        COMMAND
-            ${Sox_EXECUTABLE} ${INPUT_FILE} ${ARGS} ${OUTPUT_FILE} -V1
-        COMMENT
-            "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
-        VERBATIM
-    )
-
-    list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILE})
-    return(PROPAGATE ${OUTPUT_LIST})
-endfunction()
 
 function(_add_sound_transform_command_sox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
     cmake_path(
@@ -287,10 +258,8 @@ function(_add_sound_transform_command_jsox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
 endfunction()
 
 function(_add_sound_transform_command SOUND_SCRIPT INPUT_FILE OUTPUT_NAME OUTPUT_LIST)
-    # TODO: change output to PAK_MODIFIED_SOUND_DIR once makefile is no longer in use
-    #   Better place for it, and also allows .ins to not depend on hard-coded build path
     set(SOUND_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/${SOUND_SCRIPT}")
-    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${OUTPUT_NAME}.wav")
+    set(OUTPUT_FILE "${PAK_MODIFIED_SOUND_DIR}/${OUTPUT_NAME}.wav")
 
     if (SOUND_SCRIPT MATCHES ".*\.jsox")
         _add_sound_transform_command_jsox(${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE})
@@ -308,11 +277,10 @@ function(_add_music_transform_command MUSIC_SCRIPT OUTPUT_LIST)
         OUTPUT_VARIABLE MUSIC_NAME
     )
 
-    # TODO: change output to PAK_MODIFIED_SOUND_DIR once makefile is no longer in use
     set(MUSIC_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/${MUSIC_SCRIPT}")
     set(INPUT_FILE "${PAK_SOUND_DIR}/${MUSIC_NAME}.mp3")
     set(CONVERTED_FILE "${PAK_SOUND_DIR}/${MUSIC_NAME}.wav")
-    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${MUSIC_NAME}.wav")
+    set(OUTPUT_FILE "${PAK_MODIFIED_SOUND_DIR}/${MUSIC_NAME}.wav")
 
     # First convert to WAV
     add_custom_command(
@@ -340,18 +308,6 @@ endfunction()
 
 set(SOUNDS_TRANSFORMED "")
 
-# TODO: remove this special casing once makefile is no longer in use (just use .sox)
-_add_sound_transform_command_direct(
-    vehicles/tank_turret_loop1
-    "-b 16"
-    SOUNDS_TRANSFORMED
-)
-_add_sound_transform_command_direct(
-    ambient/atmosphere/ambience_base
-    "-c 1 -r 22050"
-    SOUNDS_TRANSFORMED
-)
-
 foreach(SOUND_SCRIPT ${SOUND_SCRIPTS})
     cmake_path(
         REMOVE_EXTENSION SOUND_SCRIPT
@@ -359,7 +315,6 @@ foreach(SOUND_SCRIPT ${SOUND_SCRIPTS})
     )
 
     set(INPUT_FILE "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
-    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.wav")
     _add_sound_transform_command(${SOUND_SCRIPT} ${INPUT_FILE} ${SOUND_NAME} SOUNDS_TRANSFORMED)
 endforeach()
 
@@ -391,9 +346,15 @@ endforeach()
 
 function(_add_sound_convert_command INPUT_FILE OUTPUT_LIST)
     cmake_path(
-        REPLACE_EXTENSION INPUT_FILE ".aifc"
-        OUTPUT_VARIABLE OUTPUT_FILE
+        RELATIVE_PATH INPUT_FILE
+        BASE_DIRECTORY "${PAK_MODIFIED_SOUND_DIR}"
+        OUTPUT_VARIABLE SOUND_NAME
     )
+    cmake_path(
+        REMOVE_EXTENSION SOUND_NAME
+        OUTPUT_VARIABLE SOUND_NAME
+    )
+    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.aifc")
 
     add_custom_command(
         DEPENDS
