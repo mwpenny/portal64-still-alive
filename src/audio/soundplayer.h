@@ -13,11 +13,6 @@
 
 #define SOUND_ID_NONE -1
 
-extern char _soundsSegmentRomStart[];
-extern char _soundsSegmentRomEnd[];
-extern char _soundsTblSegmentRomStart[];
-extern char _soundsTblSegmentRomEnd[];
-
 enum SoundType{
     SoundTypeNone,
     SoundTypeMusic,

@@ -30,11 +30,11 @@ find_program(VTF2PNG_EXECUTABLE     vtf2png     REQUIRED)
 add_external_project_executable(skeletool64)
 
 # Source and asset file directories
-set(ASM_DIR           "${PROJECT_SOURCE_DIR}/asm")
-set(ASSETS_DIR        "${PROJECT_SOURCE_DIR}/assets")
-set(LINKER_DIR        "${PROJECT_SOURCE_DIR}/linker")
-set(SRC_DIR           "${PROJECT_SOURCE_DIR}/src")
-set(VPK_DIR           "${PROJECT_SOURCE_DIR}/vpk")
+set(ASM_DIR            "${PROJECT_SOURCE_DIR}/asm")
+set(ASSETS_DIR         "${PROJECT_SOURCE_DIR}/assets")
+set(LINKER_DIR         "${PROJECT_SOURCE_DIR}/linker")
+set(SRC_DIR            "${PROJECT_SOURCE_DIR}/src")
+set(VPK_DIR            "${PROJECT_SOURCE_DIR}/vpk")
 
 # Extracted/generated file output directories
 set(GENERATED_CODE_DIR "${PROJECT_BINARY_DIR}/codegen")

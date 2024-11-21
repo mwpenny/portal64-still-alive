@@ -1,13 +1,19 @@
-#include "audio.h"
 #include "soundplayer.h"
-#include "soundarray.h"
-#include "util/rom.h"
-#include "system/time.h"
-#include "math/mathf.h"
+
+#include "audio.h"
 #include "clips.h"
-#include "../physics/collision_scene.h"
-#include "../math/transform.h"
-#include "../savefile/savefile.h"
+#include "math/mathf.h"
+#include "math/transform.h"
+#include "physics/collision_scene.h"
+#include "savefile/savefile.h"
+#include "soundarray.h"
+#include "system/time.h"
+#include "util/rom.h"
+
+extern char _soundsSegmentRomStart[];
+extern char _soundsSegmentRomEnd[];
+extern char _soundsTblSegmentRomStart[];
+extern char _soundsTblSegmentRomEnd[];
 
 struct SoundArray* gSoundClipArray;
 ALSndPlayer gSoundPlayer;
