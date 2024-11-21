@@ -106,8 +106,6 @@ STRINGS_PORTAL = {
     "VALVE_SECONDARY_ATTACK",
 }
 
-# TODO: whitelist captions
-
 # Validation
 
 def check_font(language_strings, font_data):
@@ -122,13 +120,13 @@ def check_font(language_strings, font_data):
     )
     unused_chars = supported_chars - used_chars
 
-    # TODO: add missing characters to font and make this an error
+    print(f"Used characters ({len(used_chars)})\n{''.join(sorted(used_chars))}\n")
+    print(f"Unused characters ({len(unused_chars)})\n{''.join(sorted(unused_chars))}\n")
+
     invalid_chars = used_chars - supported_chars
     if len(invalid_chars) > 0:
         print(f"Invalid characters ({len(invalid_chars)})\n{''.join(sorted(invalid_chars))}\n")
-
-    print(f"Used characters ({len(used_chars)})\n{''.join(sorted(used_chars))}\n")
-    print(f"Unused characters ({len(unused_chars)})\n{''.join(sorted(unused_chars))}\n")
+        raise RuntimeError("Font is missing required characters")
 
 # Code generation
 
@@ -281,6 +279,7 @@ def parse_strings_file(filepath, whitelist={}, encoding="utf-16-le"):
                 .replace('"', "") \
                 .replace("\n", "") \
                 .replace("\\n", " ") \
+                .replace("\xA0", "") \
                 .replace("\\", "") \
                 .strip()
             value = re.sub(r"\<clr.+\>", "", value)

@@ -4,7 +4,7 @@
 // Usage:
 // 1. Use fontbuilder to generate multiple font files
 //  - Settings used by game fonts: layout=optimized box, padding=1px right
-//  - Each image must be smaller than 4 KB
+//  - Each image must fit in tmem (e.g., up to 128x64 when using 4 bits per texel)
 //  - Name each JSON file <font>_0.json, <font>_1.json, ..., <font>_N.json
 //  - Name the font directory the same as the font
 //

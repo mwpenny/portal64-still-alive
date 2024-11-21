@@ -263,7 +263,6 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
             ${TEXTURE_SCRIPT}
             ${OUTPUT_FILE}
         WORKING_DIRECTORY
-            # TODO: Change this to PAK_MODIFIED_MATERIALS_DIR and update .ims files with relative path
             ${PROJECT_SOURCE_DIR}
         COMMENT
             "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"

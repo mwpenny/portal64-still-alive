@@ -70,7 +70,7 @@ add_executable(portal)
 target_link_libraries(portal PRIVATE
     platform
 
-    asm_sources
+    asm
     code_segment
     materials_images
     levels
