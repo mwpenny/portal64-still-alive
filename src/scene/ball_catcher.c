@@ -1,16 +1,15 @@
 #include "ball_catcher.h"
 
-#include "system/time.h"
-
-#include "../physics/collision_box.h"
-#include "../physics/collision_scene.h"
 #include "dynamic_scene.h"
+#include "physics/collision_box.h"
+#include "physics/collision_scene.h"
 #include "signals.h"
-#include "../util/dynamic_asset_loader.h"
+#include "system/time.h"
+#include "util/dynamic_asset_loader.h"
 
-#include "../build/assets/models/props/combine_ball_catcher.h"
-#include "../build/assets/materials/static.h"
-#include "../../build/assets/models/dynamic_animated_model_list.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/dynamic_animated_model_list.h"
+#include "codegen/assets/models/props/combine_ball_catcher.h"
 
 struct CollisionBox gBallCatcherBox = {
     {0.5f, 0.5f, 0.5f},

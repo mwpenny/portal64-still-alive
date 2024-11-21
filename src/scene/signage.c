@@ -1,14 +1,14 @@
 #include "signage.h"
 
-#include "../scene/dynamic_scene.h"
-#include "../levels/levels.h"
-#include "../defs.h"
-#include "../graphics/color.h"
+#include "defs.h"
+#include "graphics/color.h"
+#include "levels/levels.h"
+#include "scene/dynamic_scene.h"
 #include "system/time.h"
 
-#include "../build/assets/models/props/signage.h"
-#include "../build/assets/models/props/cylinder_test.h"
-#include "../../build/assets/materials/static.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/props/cylinder_test.h"
+#include "codegen/assets/models/props/signage.h"
 
 
 struct SignStateFrame {

@@ -1,15 +1,14 @@
 #include "options_menu.h"
 
-#include "../font/font.h"
-#include "../font/dejavu_sans.h"
+#include "font/font.h"
+#include "font/dejavu_sans.h"
+#include "savefile/savefile.h"
+#include "system/controller.h"
 
-#include "../savefile/savefile.h"
+#include "codegen/assets/materials/ui.h"
 
-#include "../build/assets/materials/ui.h"
-
-#include "../system/controller.h"
-#include "../build/src/audio/clips.h"
-#include "../build/src/strings/strings.h"
+#include "codegen/src/audio/clips.h"
+#include "codegen/src/strings/strings.h"
 
 
 struct Tab gOptionTabs[] = {

@@ -8,10 +8,10 @@
 #include "system/controller.h"
 #include "util/memory.h"
 
-#include "../build/assets/materials/ui.h"
-#include "../build/src/audio/clips.h"
+#include "codegen/assets/materials/ui.h"
+#include "codegen/src/audio/clips.h"
 
-#include "../build/version.h"
+#include "codegen/version.h"
 
 #define PORTAL_LOGO_X               30
 #define PORTAL_LOGO_Y               74

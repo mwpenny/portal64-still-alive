@@ -22,11 +22,11 @@ configuration time (`make`, `ninja`, etc.).
 Configure the build system with the following command. Portal 64 is
 cross-compiled for the N64, and so a toolchain file must be specified.
 
-**Note:** Currently, the build directory must be named `build`.
-
 ```sh
 cd portal64
-cmake -G "Ninja" -B build -S . -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-N64.cmake
+
+# Replace <build_directory> with build directory name
+cmake -G "Ninja" -B <build_directory> -S . -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-N64.cmake
 ```
 
 ### Changing the CMake Generator

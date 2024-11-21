@@ -1,11 +1,11 @@
 #include "portal_render.h"
 
-#include "../defs.h"
-#include "../graphics/graphics.h"
+#include "defs.h"
+#include "graphics/graphics.h"
 #include "render_plan.h"
 
-#include "../build/assets/models/portal/portal_blue_filled.h"
-#include "../build/assets/models/portal/portal_orange_filled.h"
+#include "codegen/assets/models/portal/portal_blue_filled.h"
+#include "codegen/assets/models/portal/portal_orange_filled.h"
 
 struct Quaternion gVerticalFlip = {0.0f, 1.0f, 0.0f, 0.0f};
 

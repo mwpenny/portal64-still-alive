@@ -3,7 +3,7 @@
 #include "util/memory.h"
 #include "util/rom.h"
 
-#include "../build/src/strings/strings.h"
+#include "codegen/src/strings/strings.h"
 
 char* gLoadedLanugageBlock = NULL;
 char** gCurrentTranslations = NULL;

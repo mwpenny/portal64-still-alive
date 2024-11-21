@@ -7,10 +7,10 @@
 #include "system/controller.h"
 #include "util/memory.h"
 
-#include "../build/assets/materials/ui.h"
+#include "codegen/assets/materials/ui.h"
 
-#include "../build/src/audio/clips.h"
-#include "../build/src/strings/strings.h"
+#include "codegen/src/audio/clips.h"
+#include "codegen/src/strings/strings.h"
 
 #define CONTROL_ROW_HEIGHT  14
 

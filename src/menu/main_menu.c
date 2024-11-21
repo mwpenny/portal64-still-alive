@@ -6,10 +6,10 @@
 #include "util/memory.h"
 #include "util/rom.h"
 
-#include "../build/assets/materials/ui.h"
+#include "codegen/assets/materials/ui.h"
 
-#include "../build/assets/test_chambers/test_chamber_00/test_chamber_00.h"
-#include "../build/src/audio/clips.h"
+#include "codegen/assets/test_chambers/test_chamber_00/test_chamber_00.h"
+#include "codegen/src/audio/clips.h"
 
 struct LandingMenuOption gMainMenuOptions[] = {
     {GAMEUI_NEWGAME, GameMenuStateNewGame},

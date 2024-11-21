@@ -1,17 +1,15 @@
 #include "portal_gun.h"
 
-#include "../physics/collision_scene.h"
-#include "../physics/collision_cylinder.h"
-#include "./scene.h"
+#include "effects/effect_definitions.h"
+#include "levels/material_state.h"
+#include "physics/collision_scene.h"
+#include "physics/collision_cylinder.h"
+#include "render_plan.h"
+#include "scene.h"
 
-#include "../levels/material_state.h"
-
-#include "../effects/effect_definitions.h"
-#include "./render_plan.h"
-
-#include "../../build/assets/models/grav_flare.h"
-#include "../../build/assets/models/portal_gun/v_portalgun.h"
-#include "../../build/assets/materials/static.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/grav_flare.h"
+#include "codegen/assets/models/portal_gun/v_portalgun.h"
 
 // the portal gun is rendered with a different field of view than the scene
 #define FIRST_PERSON_POV_FOV    42.45f

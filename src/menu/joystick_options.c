@@ -1,12 +1,12 @@
 #include "joystick_options.h"
 
-#include "../system/controller.h"
-#include "../font/dejavu_sans.h"
-#include "../audio/soundplayer.h"
-#include "../savefile/savefile.h"
+#include "audio/soundplayer.h"
+#include "font/dejavu_sans.h"
+#include "savefile/savefile.h"
+#include "system/controller.h"
 
-#include "../build/assets/materials/ui.h"
-#include "../build/src/audio/clips.h"
+#include "codegen/src/audio/clips.h"
+#include "codegen/assets/materials/ui.h"
 
 #define MENU_Y      54
 #define MENU_WIDTH  252

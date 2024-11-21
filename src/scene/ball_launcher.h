@@ -1,13 +1,12 @@
 #ifndef __SCENE_BALL_LAUNCHER_H__
 #define __SCENE_BALL_LAUNCHER_H__
 
-#include "../sk64/skeletool_armature.h"
-#include "../sk64/skeletool_animator.h"
-#include "../physics/collision_object.h"
+#include "ball.h"
 
-#include "../levels/level_definition.h"
-
-#include "./ball.h"
+#include "levels/level_definition.h"
+#include "physics/collision_object.h"
+#include "sk64/skeletool_armature.h"
+#include "sk64/skeletool_animator.h"
 
 struct BallLauncher {
     struct CollisionObject collisionObject;

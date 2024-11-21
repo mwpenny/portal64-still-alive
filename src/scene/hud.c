@@ -8,7 +8,7 @@
 #include "strings/translations.h"
 #include "system/time.h"
 
-#include "../../build/assets/materials/hud.h"
+#include "codegen/assets/materials/hud.h"
 
 #define HUD_CENTER_WIDTH 6
 #define HUD_CENTER_HEIGHT 8

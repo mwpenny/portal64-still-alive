@@ -1,6 +1,6 @@
 #include "effect_definitions.h"
 
-#include "../build/assets/materials/static.h"
+#include "codegen/assets/materials/static.h"
 
 struct SplashParticleDefinition gFailPortalSplash[2] = {
     {

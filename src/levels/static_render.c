@@ -1,14 +1,14 @@
 #include "static_render.h"
 
-#include "levels.h"
-#include "util/memory.h"
 #include "defs.h"
-#include "../graphics/render_scene.h"
-#include "../math/mathf.h"
-#include "../math/rotated_box.h"
-#include "../scene/signals.h"
+#include "graphics/render_scene.h"
+#include "levels.h"
+#include "math/mathf.h"
+#include "math/rotated_box.h"
+#include "scene/signals.h"
+#include "util/memory.h"
 
-#include "../build/assets/materials/static.h"
+#include "codegen/assets/materials/static.h"
 
 void staticRenderTraverseIndex(
     struct StaticContentBox* box,

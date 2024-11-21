@@ -1,16 +1,16 @@
 #include "pedestal.h"
 
-#include "../scene/dynamic_scene.h"
-#include "../defs.h"
+#include "defs.h"
+#include "scene/dynamic_scene.h"
+#include "scene/hud.h"
+#include "scene/scene.h"
 #include "system/time.h"
-#include "../util/dynamic_asset_loader.h"
+#include "util/dynamic_asset_loader.h"
 
-#include "../build/assets/materials/static.h"
-#include "../build/assets/models/pedestal.h"
-#include "../../build/assets/models/dynamic_animated_model_list.h"
-#include "../../build/assets/models/portal_gun/w_portalgun.h"
-#include "../scene/hud.h"
-#include "../scene/scene.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/dynamic_animated_model_list.h"
+#include "codegen/assets/models/pedestal.h"
+#include "codegen/assets/models/portal_gun/w_portalgun.h"
 
 struct Vector2 gMaxPedistalRotation;
 #define MAX_PEDISTAL_ROTATION_DEGREES_PER_SEC   (M_PI / 3.0f)

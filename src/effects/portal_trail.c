@@ -1,14 +1,13 @@
 #include "portal_trail.h"
 
-#include "../math/vector2.h"
-#include "../math/mathf.h"
-#include "../defs.h"
-
-#include "../build/assets/models/portal_gun/ball_trail.h"
-#include "../build/assets/materials/static.h"
-#include "../graphics/color.h"
-
+#include "defs.h"
+#include "graphics/color.h"
+#include "math/vector2.h"
+#include "math/mathf.h"
 #include "system/time.h"
+
+#include "codegen/assets/models/portal_gun/ball_trail.h"
+#include "codegen/assets/materials/static.h"
 
 #define TRAIL_LENGTH    8.0f
 #define FADE_IN_LENGTH  4.0f

@@ -7,8 +7,8 @@
 #include "util/memory.h"
 #include "util/rom.h"
 
-#include "../build/assets/materials/ui.h"
-#include "../build/src/strings/strings.h"
+#include "codegen/assets/materials/ui.h"
+#include "codegen/src/strings/strings.h"
 
 void gameMenuInit(struct GameMenu* gameMenu, struct LandingMenuOption* options, int optionCount, int darkenBackground) {
     landingMenuInit(&gameMenu->landingMenu, options, optionCount, darkenBackground);

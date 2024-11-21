@@ -30,7 +30,7 @@ function(_add_convert_font_command FONT_NAME INPUT_FILES OUTPUT_LIST)
         GET FONT_DIR_NAME PARENT_PATH
         FONT_DIR_NAME
     )
-    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${FONT_DIR_NAME}.c")
+    set(OUTPUT_FILE "${GENERATED_CODE_DIR}/${RELATIVE_CURRENT_DIR}/${FONT_DIR_NAME}.c")
 
     add_custom_command(
         DEPENDS

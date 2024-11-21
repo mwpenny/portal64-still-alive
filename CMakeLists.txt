@@ -37,14 +37,16 @@ set(SRC_DIR           "${PROJECT_SOURCE_DIR}/src")
 set(VPK_DIR           "${PROJECT_SOURCE_DIR}/vpk")
 
 # Extracted/generated file output directories
-set(LINKER_SCRIPT_DIR "${PROJECT_BINARY_DIR}/ld")
-set(PAK_DIR           "${PROJECT_SOURCE_DIR}/portal_pak_dir")
-set(PAK_MODIFIED_DIR  "${PROJECT_SOURCE_DIR}/portal_pak_modified")
+set(GENERATED_CODE_DIR "${PROJECT_BINARY_DIR}/codegen")
+set(LINKER_SCRIPT_DIR  "${PROJECT_BINARY_DIR}/ld")
+set(PAK_DIR            "${PROJECT_SOURCE_DIR}/portal_pak_dir")
+set(PAK_MODIFIED_DIR   "${PROJECT_SOURCE_DIR}/portal_pak_modified")
 
 add_library(platform INTERFACE)
 find_package(Libultra REQUIRED)
 target_link_libraries(platform INTERFACE libultra::libultra)
 target_include_directories(platform INTERFACE
+    "${PROJECT_BINARY_DIR}"
     "${PROJECT_SOURCE_DIR}/src"
 )
 

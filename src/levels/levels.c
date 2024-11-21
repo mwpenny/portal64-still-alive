@@ -1,17 +1,16 @@
 #include "levels.h"
 
-#include "../build/assets/test_chambers/level_list.h"
-#include "../build/assets/materials/static.h"
-
-#include "physics/collision_scene.h"
-#include "static_render.h"
 #include "cutscene_runner.h"
-#include "../graphics/graphics.h"
-#include "../player/player.h"
-#include "../savefile/checkpoint.h"
+#include "graphics/graphics.h"
+#include "physics/collision_scene.h"
+#include "player/player.h"
+#include "savefile/checkpoint.h"
+#include "static_render.h"
+#include "util/rom.h"
+#include "util/memory.h"
 
-#include "../util/rom.h"
-#include "../util/memory.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/test_chambers/level_list.h"
 
 struct LevelDefinition* gCurrentLevel;
 int gCurrentLevelIndex;

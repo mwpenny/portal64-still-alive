@@ -16,7 +16,6 @@ target_link_libraries(engine INTERFACE
     platform
 )
 
-# TODO: file sets, headers
 target_sources(engine INTERFACE
     audio/audio.c
     audio/audiomgr.c
@@ -192,7 +191,7 @@ endif()
 #########################
 
 set(GEN_VERSION_HEADER "${PROJECT_SOURCE_DIR}/cmake/GenVersionHeader.cmake")
-set(VERSION_H "${PROJECT_BINARY_DIR}/version.h")
+set(VERSION_H          "${GENERATED_CODE_DIR}/version.h")
 
 add_custom_target(version_header
     DEPENDS

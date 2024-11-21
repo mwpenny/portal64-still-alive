@@ -1,17 +1,18 @@
 #include "credits.h"
 
+#include "audio/soundplayer.h"
+#include "font/font.h"
+#include "font/liberation_mono.h"
+#include "graphics/image.h"
+#include "levels.h"
+#include "system/controller.h"
 #include "system/time.h"
-#include "./levels.h"
-#include "../audio/soundplayer.h"
-#include "../build/src/audio/clips.h"
-#include "../util/memory.h"
-#include "../util/rom.h"
-#include "../graphics/image.h"
-#include "../build/assets/materials/static.h"
-#include "../build/assets/materials/ui.h"
-#include "../system/controller.h"
-#include "../font/font.h"
-#include "../font/liberation_mono.h"
+#include "util/memory.h"
+#include "util/rom.h"
+
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/materials/ui.h"
+#include "codegen/src/audio/clips.h"
 
 #define FADE_IN_TIME  1.0f
 

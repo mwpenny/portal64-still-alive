@@ -1,15 +1,15 @@
 #include "menu_builder.h"
 
 #include "audio/soundplayer.h"
+#include "font/dejavu_sans.h"
 #include "math/mathf.h"
 #include "strings/translations.h"
 #include "system/controller.h"
 #include "system/time.h"
 #include "util/memory.h"
 
-#include "../font/dejavu_sans.h"
-#include "../build/assets/materials/ui.h"
-#include "../build/src/audio/clips.h"
+#include "codegen/assets/materials/ui.h"
+#include "codegen/src/audio/clips.h"
 
 #include <stdbool.h>
 

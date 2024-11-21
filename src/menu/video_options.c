@@ -5,7 +5,7 @@
 #include "savefile/savefile.h"
 #include "strings/translations.h"
 
-#include "../build/src/strings/strings.h"
+#include "codegen/src/strings/strings.h"
 
 #define MENU_Y      54
 #define MENU_WIDTH  252

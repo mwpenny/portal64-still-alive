@@ -1,6 +1,6 @@
 #include "dejavu_sans.h"
 
-#include "../build/assets/materials/ui.h"
+#include "codegen/assets/materials/ui.h"
 
 Gfx* gDejaVuSansImages[] = {
     ui_dejavu_sans_0,

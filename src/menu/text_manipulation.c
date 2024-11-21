@@ -5,7 +5,7 @@
 #include "strings/translations.h"
 #include "util/string.h"
 
-#include "../build/src/strings/strings.h"
+#include "codegen/src/strings/strings.h"
 
 void textManipTestChamberMessage(char* result, int testChamber) {
     strCopy(result, translationsGet(PORTAL_CHAPTER1_TITLE));

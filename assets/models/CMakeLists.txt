@@ -87,8 +87,8 @@ set(MODELS
     ${STATIC_MODELS}
 )
 
-# Most models depend on both of these. Some only depend on one or the other,
-# but use both for simplicity. Otherwise there would be many special cases.
+# Most models depend on both of these. Some only depend on one or the other.
+# Use both here for simplicity. Otherwise there would be many special cases.
 set(MODEL_DEFAULT_MATERIALS
     ${ASSETS_DIR}/materials/static.skm.yaml
     ${ASSETS_DIR}/materials/objects.skm.yaml
@@ -131,10 +131,7 @@ function(_add_model_generate_command MODEL_NAME MODEL_FBX MODEL_OUTPUT_LIST ANIM
         list(APPEND MODEL_MATERIALS ${FILE_MATERIALS})
     endif()
 
-    cmake_path(
-        REMOVE_EXTENSION MODEL_FBX
-        OUTPUT_VARIABLE OUTPUT_FILE_NO_EXTENSION
-    )
+    set(OUTPUT_FILE_NO_EXTENSION "${GENERATED_CODE_DIR}/${RELATIVE_CURRENT_DIR}/${MODEL_NAME}")
     cmake_path(
        GET OUTPUT_FILE_NO_EXTENSION PARENT_PATH
        OUTPUT_DIR
@@ -274,7 +271,7 @@ set(DYNAMIC_ANIMATED_MODEL_HEADERS "")
 foreach(GENERATED_HEADER ${DYNAMIC_MODEL_GENERATED_HEADERS})
     cmake_path(
         RELATIVE_PATH GENERATED_HEADER
-        BASE_DIRECTORY "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}"
+        BASE_DIRECTORY "${GENERATED_CODE_DIR}/${RELATIVE_CURRENT_DIR}"
         OUTPUT_VARIABLE MODEL_NAME
     )
     cmake_path(
@@ -289,7 +286,7 @@ foreach(GENERATED_HEADER ${DYNAMIC_MODEL_GENERATED_HEADERS})
     endif()
 endforeach()
 
-set(DYNAMIC_MODEL_LIST_OUT_DIR "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}")
+set(DYNAMIC_MODEL_LIST_OUT_DIR "${GENERATED_CODE_DIR}/${RELATIVE_CURRENT_DIR}")
 
 set(DYNAMIC_MODEL_LIST_H "${DYNAMIC_MODEL_LIST_OUT_DIR}/dynamic_model_list.h")
 set(DYNAMIC_MODEL_LIST_C "${DYNAMIC_MODEL_LIST_OUT_DIR}/dynamic_model_list.c")

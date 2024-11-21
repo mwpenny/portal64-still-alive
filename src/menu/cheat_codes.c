@@ -1,11 +1,12 @@
 #include "cheat_codes.h"
 
-#include "../build/src/audio/clips.h"
-#include "../audio/soundplayer.h"
-#include "../scene/scene.h"
-#include "../build/src/audio/clips.h"
-#include "../savefile/savefile.h"
-#include "../levels/levels.h"
+#include "audio/soundplayer.h"
+#include "levels/levels.h"
+#include "savefile/savefile.h"
+#include "scene/scene.h"
+
+#include "codegen/src/audio/clips.h"
+#include "codegen/src/audio/clips.h"
 
 struct CheatCodePattern gCheatCodes[CheatCodeCount] = {
     [CheatCodeUnlockGun] = {

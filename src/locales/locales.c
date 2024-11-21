@@ -1,6 +1,8 @@
 #include "locales.h"
-#include "../build/src/audio/languages.h"
-#include "../savefile/savefile.h"
+
+#include "savefile/savefile.h"
+
+#include "codegen/src/audio/languages.h"
 
 int mapLocaleSound(int soundId) {
     // Is this a localized sound?

@@ -1,18 +1,17 @@
 #include "switch.h"
 
-#include "../physics/collision_cylinder.h"
-#include "../physics/collision_scene.h"
 #include "dynamic_scene.h"
+#include "physics/collision_cylinder.h"
+#include "physics/collision_scene.h"
+#include "scene/hud.h"
+#include "scene/scene.h"
 #include "signals.h"
-#include "../util/dynamic_asset_loader.h"
-
-#include "../build/assets/models/props/switch001.h"
-#include "../build/assets/materials/static.h"
-#include "../../build/assets/models/dynamic_animated_model_list.h"
-
+#include "util/dynamic_asset_loader.h"
 #include "system/time.h"
-#include "../scene/hud.h"
-#include "../scene/scene.h"
+
+#include "codegen/assets/models/props/switch001.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/dynamic_animated_model_list.h"
 
 #define COLLIDER_HEIGHT   0.7f
 #define TICKTOCK_PAUSE_LENGTH  0.25f

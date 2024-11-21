@@ -1,7 +1,7 @@
 
 #include "clips.h"
 
-#include "../../build/src/audio/clips.h"
+#include "codegen/src/audio/clips.h"
 
 unsigned short soundsSkippable[8] = {
     SOUNDS_PORTAL_ENTER1,

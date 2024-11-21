@@ -10,9 +10,9 @@
 #include "util/rom.h"
 #include "util/string.h"
 
-#include "../build/assets/materials/ui.h"
-#include "../build/src/audio/clips.h"
-#include "../build/src/strings/strings.h"
+#include "codegen/assets/materials/ui.h"
+#include "codegen/src/audio/clips.h"
+#include "codegen/src/strings/strings.h"
 
 #define SAVE_SLOT_RENDER_W  (SAVE_SLOT_IMAGE_W * 2)
 #define SAVE_SLOT_RENDER_H  (SAVE_SLOT_IMAGE_H * 2)

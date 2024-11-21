@@ -1,4 +1,4 @@
-set(BUILD_STRINGS_DIR "${PROJECT_BINARY_DIR}/src/strings")
+set(BUILD_STRINGS_DIR "${GENERATED_CODE_DIR}/src/strings")
 
 set(FONT_DEF          "${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_all.json")
 set(GENERATE_STRINGS  "${PROJECT_SOURCE_DIR}/tools/text/generate_strings.py")

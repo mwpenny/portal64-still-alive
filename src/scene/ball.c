@@ -1,22 +1,18 @@
-#include "./ball.h"
+#include "ball.h"
 
+#include "audio/soundplayer.h"
+#include "audio/clips.h"
+#include "defs.h"
 #include "dynamic_scene.h"
-#include "../defs.h"
-
-#include "../physics/collision_scene.h"
-#include "../physics/collision_box.h"
-
+#include "effects/effect_definitions.h"
+#include "physics/collision_scene.h"
+#include "physics/collision_box.h"
+#include "scene.h"
 #include "system/time.h"
 
-#include "../build/assets/models/grav_flare.h"
-#include "../build/assets/models/fleck_ash2.h"
-#include "../build/assets/materials/static.h"
-
-#include "../audio/soundplayer.h"
-#include "../audio/clips.h"
-
-#include "../effects/effect_definitions.h"
-#include "./scene.h"
+#include "codegen/assets/models/grav_flare.h"
+#include "codegen/assets/models/fleck_ash2.h"
+#include "codegen/assets/materials/static.h"
 
 #define BALL_RADIUS 0.1f
 

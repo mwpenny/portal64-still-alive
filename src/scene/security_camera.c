@@ -1,19 +1,19 @@
 #include "security_camera.h"
 
+#include "decor/decor_object.h"
 #include "defs.h"
-#include "../physics/collision_box.h"
-#include "../physics/collision_scene.h"
 #include "dynamic_scene.h"
+#include "levels/cutscene_runner.h"
+#include "physics/collision_box.h"
+#include "physics/collision_scene.h"
 #include "scene.h"
 #include "system/time.h"
-#include "../levels/cutscene_runner.h"
-#include "../decor/decor_object.h"
-#include "../util/dynamic_asset_loader.h"
+#include "util/dynamic_asset_loader.h"
 
-#include "../build/assets/materials/static.h"
-#include "../build/src/audio/clips.h"
-#include "../../build/assets/models/dynamic_animated_model_list.h"
-#include "../../build/assets/models/props/security_camera.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/src/audio/clips.h"
+#include "codegen/assets/models/dynamic_animated_model_list.h"
+#include "codegen/assets/models/props/security_camera.h"
 
 struct CollisionBox gSecurityCameraCollisionBox = {
     {0.15, 0.3f, 0.35f}

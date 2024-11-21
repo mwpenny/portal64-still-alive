@@ -5,8 +5,8 @@
 #include "savefile/savefile.h"
 #include "system/controller.h"
 
-#include "../build/src/audio/languages.h"
-#include "../build/src/strings/strings.h"
+#include "codegen/src/audio/languages.h"
+#include "codegen/src/strings/strings.h"
 
 #define GAMEPLAY_Y      54
 #define GAMEPLAY_WIDTH  252
