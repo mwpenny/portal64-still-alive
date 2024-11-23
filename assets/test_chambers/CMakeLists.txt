@@ -61,18 +61,13 @@ function(_add_level_export_command LEVEL_NAME OUTPUT_VARIABLE)
     set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${LEVEL_NAME}/${LEVEL_NAME}.blend")
     set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${LEVEL_NAME}/${LEVEL_NAME}.fbx")
 
-    cmake_path(
-        GET OUTPUT_FILE PARENT_PATH
-        OUTPUT_DIR
-    )
-
     add_custom_command(
         DEPENDS
             ${EXPORT_FBX} ${INPUT_FILE}
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
         COMMAND
             ${Blender_EXECUTABLE}
             ${INPUT_FILE} --background --python ${EXPORT_FBX} -- ${OUTPUT_FILE}
@@ -120,6 +115,8 @@ function(_add_level_generate_command LEVEL_NAME LEVEL_FBX LEVEL_OUTPUT_LIST ANIM
         OUTPUT
             ${LEVEL_OUTPUT_FILES}
             ${ANIM_OUTPUT_FILES}
+        COMMAND
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE_NO_EXTENSION}>"
         COMMAND
             skeletool64::skeletool64
             --script ${EXPORT_LEVEL}

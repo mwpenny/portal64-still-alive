@@ -98,18 +98,13 @@ function(_add_model_export_command MODEL_NAME OUTPUT_VARIABLE)
     set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${MODEL_NAME}.blend")
     set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${MODEL_NAME}.fbx")
 
-    cmake_path(
-       GET OUTPUT_FILE PARENT_PATH
-       OUTPUT_DIR
-    )
-
     add_custom_command(
         DEPENDS
             ${EXPORT_FBX} ${INPUT_FILE}
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
-           ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
+           ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
         COMMAND
             ${Blender_EXECUTABLE}
             ${INPUT_FILE} --background --python ${EXPORT_FBX} -- ${OUTPUT_FILE}
@@ -132,11 +127,6 @@ function(_add_model_generate_command MODEL_NAME MODEL_FBX MODEL_OUTPUT_LIST ANIM
     endif()
 
     set(OUTPUT_FILE_NO_EXTENSION "${GENERATED_CODE_DIR}/${RELATIVE_CURRENT_DIR}/${MODEL_NAME}")
-    cmake_path(
-       GET OUTPUT_FILE_NO_EXTENSION PARENT_PATH
-       OUTPUT_DIR
-    )
-
     set(OUTPUT_FILE_H "${OUTPUT_FILE_NO_EXTENSION}.h")
     set(OUTPUT_FILE_GEO_C "${OUTPUT_FILE_NO_EXTENSION}_geo.c")
     set(MODEL_OUTPUT_FILES
@@ -162,7 +152,7 @@ function(_add_model_generate_command MODEL_NAME MODEL_FBX MODEL_OUTPUT_LIST ANIM
             ${MODEL_OUTPUT_FILES}
             ${ANIM_OUTPUT_FILES}
         COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE_NO_EXTENSION}>"
         COMMAND
             ${Python3_EXECUTABLE} ${CONVERT_ASSET}
             $<TARGET_FILE:skeletool64::skeletool64>

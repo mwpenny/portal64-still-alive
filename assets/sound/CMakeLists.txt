@@ -39,18 +39,13 @@ endfunction()
 #################
 
 function(_add_extract_video_audio_command INPUT_FILE OUTPUT_FILE)
-    cmake_path(
-        GET OUTPUT_FILE PARENT_PATH
-        OUTPUT_DIR
-    )
-
     add_custom_command(
         DEPENDS
             ${INPUT_FILE}
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
         COMMAND
             ${FFmpeg_EXECUTABLE}
             -i ${INPUT_FILE} -vn -loglevel error -y ${OUTPUT_FILE}
@@ -217,11 +212,6 @@ set(INSTRUMENT_BANKS
 )
 
 function(_add_sound_transform_command_sox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
-    cmake_path(
-        GET OUTPUT_FILE PARENT_PATH
-        OUTPUT_DIR
-    )
-
     add_custom_command(
         DEPENDS
             extract_vpks ${INPUT_FILE}
@@ -230,7 +220,7 @@ function(_add_sound_transform_command_sox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
         COMMAND
             ${Python3_EXECUTABLE} ${CONVERT_ASSET}
             ${Sox_EXECUTABLE} ${INPUT_FILE} ${SOUND_SCRIPT} ${OUTPUT_FILE} -V1

@@ -161,18 +161,13 @@ endforeach()
 ################
 
 function(_add_extract_frame_command INPUT_FILE OUTPUT_FILE SECONDS)
-    cmake_path(
-        GET OUTPUT_FILE PARENT_PATH
-        OUTPUT_DIR
-    )
-
     add_custom_command(
         DEPENDS
             ${INPUT_FILE}
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
         COMMAND
             ${FFmpeg_EXECUTABLE}
             -ss 00:00:${SECONDS}
@@ -238,11 +233,6 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
     set(INPUT_FILE "${PAK_MATERIALS_DIR}/${TEXTURE_NAME}.png")
     set(OUTPUT_FILE "${PAK_MODIFIED_MATERIALS_DIR}/${TEXTURE_NAME}.png")
 
-    cmake_path(
-        GET OUTPUT_FILE PARENT_PATH
-        OUTPUT_DIR
-    )
-
     set(DEPENDENCY_FILES ${INPUT_FILE} ${TEXTURE_SCRIPT})
     _get_texture_script_file_list(${TEXTURE_SCRIPT} ADDITIONAL_DEPS ${PAK_MATERIALS_DIR} DEPENDENCY_FILES)
 
@@ -255,7 +245,7 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
         OUTPUT
             ${OUTPUT_FILES}
         COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
         COMMAND
             ${Python3_EXECUTABLE} ${CONVERT_ASSET}
             ${ImageMagickConvert_EXECUTABLE}
@@ -407,8 +397,9 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
     )
 
     set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${INPUT_FILE}")
-    set(OUTPUT_FILE_H "${GENERATED_CODE_DIR}/${RELATIVE_DIR}/${MATERIAL_NAME}.h")
-    set(OUTPUT_FILE_C "${GENERATED_CODE_DIR}/${RELATIVE_DIR}/${MATERIAL_NAME}_mat.c")
+    set(OUTPUT_FILE_NO_EXTENSION "${GENERATED_CODE_DIR}/${RELATIVE_DIR}/${MATERIAL_NAME}")
+    set(OUTPUT_FILE_H "${OUTPUT_FILE_NO_EXTENSION}.h")
+    set(OUTPUT_FILE_C "${OUTPUT_FILE_NO_EXTENSION}_mat.c")
 
     # Depend on all textures for simplicity
     set(DEPENDENCY_FILES ${INPUT_FILE} ${TEXTURES_TRANSFORMED})
@@ -424,6 +415,8 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
             skeletool64::skeletool64
         OUTPUT
             ${OUTPUT_FILE_H} ${OUTPUT_FILE_C}
+        COMMAND
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE_NO_EXTENSION}>"
         COMMAND
             skeletool64::skeletool64
             --name ${MATERIAL_NAME}
