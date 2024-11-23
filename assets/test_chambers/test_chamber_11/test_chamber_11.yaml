@@ -1,0 +1,3 @@
+cutscenes: []
+operators:
+  - entry_door = not entry_door

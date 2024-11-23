@@ -122,6 +122,7 @@ short gLevelWarnings[] = {
     LevelWarningsCubeHit | LevelWarningsBallHit | LevelWarningsBallCollect,
     LevelWarningsCubeHit | LevelWarningsBallHit | LevelWarningsBallCollect | LevelWarningsLiquid | LevelWarningsDrinking | LevelWarningsSpeedyIn | LevelWarningsSpeedyOut,
     LevelWarningsBallHit | LevelWarningsBallCollect | LevelWarningsLiquid | LevelWarningsSpeedyIn | LevelWarningsSpeedyOut | LevelWarningsDrinking,
+    LevelWarningsCubeDispense | LevelWarningsCubeHit | LevelWarningsTurret,
 };
 
 static struct Coloru8 gBacklightColors[] = {

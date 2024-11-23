@@ -222,7 +222,7 @@ struct Location* levelGetLocation(short index) {
     return &gCurrentLevel->locations[index];
 }
 
-int getChamberDisplayNumberFromLevelIndex(int levelIndex, int roomIndex){
+int getChamberDisplayNumberFromLevelIndex(int levelIndex, int roomIndex) {
     switch(levelIndex){
         case 0:
             if (roomIndex <= 2)
@@ -261,6 +261,8 @@ int getChamberDisplayNumberFromLevelIndex(int levelIndex, int roomIndex){
             return 14;
         case 10:
             return 15;
+        case 11:
+            return 16;
         default:
             return 0;
     }
@@ -295,6 +297,8 @@ int getLevelIndexFromChamberDisplayNumber(int chamberNumber) {
             return 9;
         case 15:
             return 10;
+        case 16:
+            return 11;
         default:
             return 0;
     }
