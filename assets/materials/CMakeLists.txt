@@ -77,6 +77,7 @@ set(TEXTURES
     signage/signage_overlay_midair1
     signage/signage_overlay_midair2
     signage/signage_overlay_toxic
+    signage/signage_overlay_turret
     sprites/grav_flare
     sprites/hud/portal_crosshairs
     tile/observation_tilefloor001a
@@ -355,6 +356,7 @@ set_property(SOURCE signage/signage_overlay_fling1.ims
 set_property(SOURCE signage/signage_overlay_midair1.ims
     PROPERTY ADDITIONAL_DEPS
         signage/signage_overlay_midair2
+        signage/signage_overlay_turret
 )
 
 set(TEXTURES_TRANSFORMED "")
