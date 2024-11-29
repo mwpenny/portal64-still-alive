@@ -144,7 +144,7 @@ function(_add_model_generate_command MODEL_NAME MODEL_FBX MODEL_OUTPUT_LIST ANIM
         DEPENDS
             textures "$<TARGET_PROPERTY:textures,OUTPUTS>"
             skeletool64::skeletool64
-            ${CONVERT_ASSET}
+            ${RUN_COMMAND}
             ${MODEL_FBX}
             ${MODEL_FLAGS}
             ${MODEL_MATERIALS}
@@ -154,14 +154,14 @@ function(_add_model_generate_command MODEL_NAME MODEL_FBX MODEL_OUTPUT_LIST ANIM
         COMMAND
             ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE_NO_EXTENSION}>"
         COMMAND
-            ${Python3_EXECUTABLE} ${CONVERT_ASSET}
+            ${Python3_EXECUTABLE} ${RUN_COMMAND}
             $<TARGET_FILE:skeletool64::skeletool64>
             ${MODEL_FBX}
-            ${MODEL_FLAGS}
             --fixed-point-scale ${SCENE_SCALE}
             --model-scale ${MODEL_SCALE}
             --name ${MODEL_NAME}
             --output ${OUTPUT_FILE_H}
+            @${MODEL_FLAGS}
         WORKING_DIRECTORY
             ${PROJECT_SOURCE_DIR}
         COMMENT

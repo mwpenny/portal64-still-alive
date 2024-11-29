@@ -242,16 +242,16 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
 
     add_custom_command(
         DEPENDS
-            ${CONVERT_ASSET} ${DEPENDENCY_FILES}
+            ${RUN_COMMAND} ${DEPENDENCY_FILES}
         OUTPUT
             ${OUTPUT_FILES}
         COMMAND
             ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
         COMMAND
-            ${Python3_EXECUTABLE} ${CONVERT_ASSET}
+            ${Python3_EXECUTABLE} ${RUN_COMMAND}
             ${ImageMagickConvert_EXECUTABLE}
             ${INPUT_FILE}
-            ${TEXTURE_SCRIPT}
+            @${TEXTURE_SCRIPT}
             ${OUTPUT_FILE}
         WORKING_DIRECTORY
             ${PROJECT_SOURCE_DIR}

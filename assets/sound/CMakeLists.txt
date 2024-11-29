@@ -215,15 +215,15 @@ function(_add_sound_transform_command_sox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
     add_custom_command(
         DEPENDS
             extract_vpks ${INPUT_FILE}
-            ${CONVERT_ASSET}
+            ${RUN_COMMAND}
             ${SOUND_SCRIPT}
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
             ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
         COMMAND
-            ${Python3_EXECUTABLE} ${CONVERT_ASSET}
-            ${Sox_EXECUTABLE} ${INPUT_FILE} ${SOUND_SCRIPT} ${OUTPUT_FILE} -V1
+            ${Python3_EXECUTABLE} ${RUN_COMMAND}
+            ${Sox_EXECUTABLE} ${INPUT_FILE} @${SOUND_SCRIPT} ${OUTPUT_FILE} -V1
         COMMENT
             "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
