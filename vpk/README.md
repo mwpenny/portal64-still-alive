@@ -18,7 +18,7 @@ vpk/
     ├── hl2/
     │   ├── media/
     │   │   └── valve.bik
-    │   |── resource/
+    │   ├── resource/
     │   ├── hl2_misc_000.vpk
     │   ├── hl2_misc_001.vpk
     │   ├── hl2_misc_002.vpk

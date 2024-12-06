@@ -212,9 +212,12 @@ set(INSTRUMENT_BANKS
 )
 
 function(_add_sound_transform_command_sox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
+    get_source_file_property(IS_GENERATED_INPUT ${INPUT_FILE} GENERATED)
+
     add_custom_command(
         DEPENDS
-            extract_vpks ${INPUT_FILE}
+            extract_vpks "$<TARGET_PROPERTY:extract_vpks,OUTPUTS>"
+            "$<$<BOOL:${IS_GENERATED_INPUT}>:${INPUT_FILE}>"
             ${RUN_COMMAND}
             ${SOUND_SCRIPT}
         OUTPUT
@@ -233,7 +236,7 @@ endfunction()
 function(_add_sound_transform_command_jsox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
     add_custom_command(
         DEPENDS
-            extract_vpks ${INPUT_FILE}
+            extract_vpks "$<TARGET_PROPERTY:extract_vpks,OUTPUTS>"
             ${JSOX}
             ${SOUND_SCRIPT}
         OUTPUT
@@ -275,7 +278,7 @@ function(_add_music_transform_command MUSIC_SCRIPT OUTPUT_LIST)
     # First convert to WAV
     add_custom_command(
         DEPENDS
-            extract_vpks ${INPUT_FILE}
+            extract_vpks "$<TARGET_PROPERTY:extract_vpks,OUTPUTS>"
         OUTPUT
             ${CONVERTED_FILE}
         COMMAND
@@ -378,21 +381,16 @@ add_custom_target(sounds
 ## Sound table generation ##
 ############################
 
+# The dependency on extract_vpks covers unconverted sounds,
+# so we only need to explicitly specify converted ones
 set(SOUND_TABLE_DEPENDENCIES ${SOUNDS_CONVERTED})
 set(SOUND_TABLE_INPUTS "")
 
 foreach(INS_BANK ${INSTRUMENT_BANKS})
-    cmake_path(
-        REMOVE_EXTENSION INS_BANK
-        OUTPUT_VARIABLE SOUND_NAME
-    )
+    set(INS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${INS_BANK}")
 
-    # Each bank references a WAV. Keep track of the dependency.
-    #
-    # Some banks depend on converted sounds instead of unmodified.
-    # That dependency is taken care of via SOUNDS_CONVERTED.
-    list(APPEND SOUND_TABLE_DEPENDENCIES "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
-    list(APPEND SOUND_TABLE_INPUTS "${CMAKE_CURRENT_SOURCE_DIR}/${INS_BANK}")
+    list(APPEND SOUND_TABLE_DEPENDENCIES ${INS_PATH})
+    list(APPEND SOUND_TABLE_INPUTS       ${INS_PATH})
 endforeach()
 
 foreach(CONVERTED_SOUND ${SOUNDS_CONVERTED})
@@ -425,7 +423,8 @@ set(SOUND_DATA_TABLE_FILES
 )
 add_custom_command(
     DEPENDS
-        extract_vpks sounds ${SOUND_TABLE_DEPENDENCIES}
+        extract_vpks "$<TARGET_PROPERTY:extract_vpks,OUTPUTS>"
+        sounds ${SOUND_TABLE_DEPENDENCIES}
     OUTPUT
         ${SOUND_DATA_TABLE_FILES}
     COMMAND
@@ -448,7 +447,8 @@ set(SOUND_LOOKUP_TABLE_FILES
 )
 add_custom_command(
     DEPENDS
-        extract_vpks sounds ${SOUND_TABLE_DEPENDENCIES}
+        extract_vpks "$<TARGET_PROPERTY:extract_vpks,OUTPUTS>"
+        sounds ${SOUND_TABLE_DEPENDENCIES}
         ${GEN_SOUND_IDS}
     OUTPUT
         ${SOUND_LOOKUP_TABLE_FILES}

@@ -108,7 +108,7 @@ function(_add_texture_convert_command INPUT_FILE OUTPUT_FILE)
 
     add_custom_command(
         DEPENDS
-            extract_vpks ${INPUT_FILE}
+            extract_vpks "$<TARGET_PROPERTY:extract_vpks,OUTPUTS>"
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
