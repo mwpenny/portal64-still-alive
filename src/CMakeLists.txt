@@ -196,6 +196,8 @@ set(VERSION_H          "${GENERATED_CODE_DIR}/version.h")
 add_custom_target(version_header
     DEPENDS
         ${GEN_VERSION_HEADER}
+    BYPRODUCTS
+        ${VERSION_H}
     COMMAND
         ${CMAKE_COMMAND}
         -D Git_EXECUTABLE=${Git_EXECUTABLE}
