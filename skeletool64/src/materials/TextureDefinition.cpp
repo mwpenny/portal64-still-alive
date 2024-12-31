@@ -231,6 +231,13 @@ bool convertPixel(cimg_library::CImg<unsigned char>& input, int x, int y, DataCh
         }
         case G_IM_FMT::G_IM_FMT_CI: {
             PixelIu8 pixel = pallete ? pallete->FindIndex(readRGBAPixel(input, x, y)) : readIPixel(input, x, y);
+            if (siz == G_IM_SIZ::G_IM_SIZ_4b) {
+                // WriteToStream() chops off bottom 4 bits, which is fine when
+                // writing out actual intensity values. But palette indices
+                // must be preserved, so shift left to counteract truncation.
+                pixel.i <<= 4;
+            }
+
             return pixel.WriteToStream(output, siz);
         }
         default:
