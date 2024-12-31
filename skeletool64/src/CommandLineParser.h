@@ -23,7 +23,7 @@ struct CommandLineArguments {
     std::vector<std::string> mScriptFiles;
     std::string mDefaultMaterial;
     std::string mForceMaterialName;
-    std::string mForcePallete;
+    std::string mForcePalette;
     float mFixedPointScale;
     float mModelScale;
     float mFPS;

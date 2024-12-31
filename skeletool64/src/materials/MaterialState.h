@@ -44,7 +44,7 @@ public:
     // 1 line is a 64 bit offset in TMEM
     int line;
     int tmem;
-    int pallete;
+    int palette;
     struct TextureCoordinateState sCoord;
     struct TextureCoordinateState tCoord;
 };

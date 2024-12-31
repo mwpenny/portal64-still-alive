@@ -46,7 +46,7 @@ bool parseMaterials(const std::string& filename, DisplayListSettings& output) {
     std::fstream file(filename, std::ios::in);
 
     struct ParseResult parseResult(DirectoryName(filename));
-    parseResult.mForcePallete = output.mForcePallete;
+    parseResult.mForcePalette = output.mForcePalette;
     parseResult.mTargetCIBuffer = output.mTargetCIBuffer;
     parseMaterialFile(file, parseResult);
     output.mMaterials.insert(parseResult.mMaterialFile.mMaterials.begin(), parseResult.mMaterialFile.mMaterials.end());
@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
     settings.mExportAnimation = args.mExportAnimation;
     settings.mExportGeometry = args.mExportGeometry;
     settings.mBonesAsVertexGroups = args.mBonesAsVertexGroups;
-    settings.mForcePallete = args.mForcePallete;
+    settings.mForcePalette = args.mForcePalette;
     settings.mTargetCIBuffer = args.mTargetCIBuffer;
     settings.mTicksPerSecond = args.mFPS;
     settings.mSortDirection = args.mSortDirection;

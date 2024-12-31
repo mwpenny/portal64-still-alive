@@ -20,7 +20,7 @@ struct ParseError {
 struct ParseResult {
     ParseResult(const std::string& insideFolder);
     std::string mInsideFolder;
-    std::string mForcePallete;
+    std::string mForcePalette;
     bool mTargetCIBuffer;
     MaterialFile mMaterialFile;
     std::vector<ParseError> mErrors;

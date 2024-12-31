@@ -61,7 +61,7 @@ TileState::TileState():
     size(G_IM_SIZ::G_IM_SIZ_16b),
     line(0),
     tmem(0),
-    pallete(0) {
+    palette(0) {
 
 }
 
@@ -70,7 +70,7 @@ bool TileState::IsTileStateEqual(const TileState& other) const {
         size == other.size &&
         line == other.line &&
         tmem == other.tmem &&
-        pallete == other.pallete &&
+        palette == other.palette &&
         sCoord.wrap == other.sCoord.wrap &&
         sCoord.mirror == other.sCoord.mirror &&
         sCoord.mask == other.sCoord.mask &&
@@ -429,35 +429,35 @@ void generateTile(CFileDefinition& fileDef, const MaterialState& from, const Til
 
     bool needsToLoadImage = to.texture != nullptr;
 
-    std::shared_ptr<PalleteDefinition> palleteToLoad = (to.texture && !targetCIBuffer) ? to.texture->GetPallete() : nullptr;
+    std::shared_ptr<PaletteDefinition> paletteToLoad = (to.texture && !targetCIBuffer) ? to.texture->GetPalette() : nullptr;
 
     for (int i = 0; i < MAX_TILE_COUNT && needsToLoadImage; ++i) {
         if (from.tiles[i].texture == to.texture && from.tiles[i].tmem == to.tmem) {
             needsToLoadImage = false;
         }
 
-        if (from.tiles[i].texture && from.tiles[i].texture->GetPallete() == palleteToLoad) {
-            palleteToLoad = nullptr;
+        if (from.tiles[i].texture && from.tiles[i].texture->GetPalette() == paletteToLoad) {
+            paletteToLoad = nullptr;
         }
     }
 
-    if (palleteToLoad) {
-        std::string palleteName;
-        if (!fileDef.GetResourceName(palleteToLoad.get(), palleteName)) {
-            std::cerr << "Texture " << palleteToLoad->Name() << " needs to be added to the file definition before being used in a material" << std::endl;
+    if (paletteToLoad) {
+        std::string paletteName;
+        if (!fileDef.GetResourceName(paletteToLoad.get(), paletteName)) {
+            std::cerr << "Texture " << paletteToLoad->Name() << " needs to be added to the file definition before being used in a material" << std::endl;
             return;
         }
 
         output.Add(std::unique_ptr<MacroDataChunk>(new MacroDataChunk("gsDPTileSync")));
 
         std::unique_ptr<MacroDataChunk> loadTLUT;
-        if (palleteToLoad->ColorCount() <= 16) {
+        if (paletteToLoad->ColorCount() <= 16) {
             loadTLUT = std::make_unique<MacroDataChunk>("gsDPLoadTLUT_pal16");
-            loadTLUT->AddPrimitive(to.pallete);
-            loadTLUT->AddPrimitive(palleteName);
+            loadTLUT->AddPrimitive(to.palette);
+            loadTLUT->AddPrimitive(paletteName);
         } else {
             loadTLUT = std::make_unique<MacroDataChunk>("gsDPLoadTLUT_pal256");
-            loadTLUT->AddPrimitive(palleteName);
+            loadTLUT->AddPrimitive(paletteName);
         }
 
         output.Add(std::move(loadTLUT));
@@ -485,7 +485,7 @@ void generateTile(CFileDefinition& fileDef, const MaterialState& from, const Til
         setTile->AddPrimitive(0);
         setTile->AddPrimitive(to.tmem);
         setTile->AddPrimitive<const char*>("G_TX_LOADTILE");
-        setTile->AddPrimitive(to.pallete);
+        setTile->AddPrimitive(to.palette);
         setTile->AddPrimitive(buildClampAndWrap(to.tCoord.wrap, to.tCoord.mirror));
         setTile->AddPrimitive(to.tCoord.mask);
         setTile->AddPrimitive(to.tCoord.shift);
@@ -516,7 +516,7 @@ void generateTile(CFileDefinition& fileDef, const MaterialState& from, const Til
         setTile->AddPrimitive(to.line);
         setTile->AddPrimitive(to.tmem);
         setTile->AddPrimitive(tileIndex);
-        setTile->AddPrimitive(to.pallete);
+        setTile->AddPrimitive(to.palette);
 
         setTile->AddPrimitive(buildClampAndWrap(to.tCoord.wrap, to.tCoord.mirror));
         setTile->AddPrimitive(to.tCoord.mask);
@@ -772,14 +772,14 @@ double materialTileTime(const MaterialState& from, const TileState& toTile) {
         result += TIMING_DP_PIPE_SYNC;
     }
 
-    if (toTile.texture != nullptr && toTile.texture->GetPallete() != nullptr && (
-        existingTile == -1 || from.tiles[existingTile].texture == nullptr || from.tiles[existingTile].texture->GetPallete() != toTile.texture->GetPallete())
+    if (toTile.texture != nullptr && toTile.texture->GetPalette() != nullptr && (
+        existingTile == -1 || from.tiles[existingTile].texture == nullptr || from.tiles[existingTile].texture->GetPalette() != toTile.texture->GetPalette())
     ) {
         result += TIMING_DP_TILE_SYNC;
         result += TIMING_DP_TEXTURE_IMAGE;
         result += TIMING_DP_SET_TILE;
         result += TIMING_DP_LOAD_SYNC;
-        result += TIMING_DP_LOAD_BLOCK(toTile.texture->GetPallete()->NBytes());
+        result += TIMING_DP_LOAD_BLOCK(toTile.texture->GetPalette()->NBytes());
         result += TIMING_DP_PIPE_SYNC;
     }
 
