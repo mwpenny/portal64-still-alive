@@ -69,6 +69,7 @@ Gfx* dynamicAssetFixModelPointers(Gfx* gfx, u32 pointerOffset, u32 segmentStart,
                 gfx->dma.addr = (u32)dynamicAssetFixModelPointers((Gfx*)gfx->dma.addr, pointerOffset, segmentStart, segmentEnd);
                 break;
             case G_VTX:
+            case G_SETTIMG:
                 gfx->dma.addr = (u32)ADJUST_POINTER_POS(gfx->dma.addr, pointerOffset);
                 break;
         };
