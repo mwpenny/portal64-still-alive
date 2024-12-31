@@ -258,6 +258,12 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
         securityCameraInit(&scene->securityCameras[i], &gCurrentLevel->securityCameras[i]);
     }
 
+    scene->turretCount = gCurrentLevel->turretCount;
+    scene->turrets = malloc(sizeof(struct Turret) * scene->turretCount);
+    for (int i = 0; i < scene->turretCount; ++i) {
+        turretInit(&scene->turrets[i], &gCurrentLevel->turrets[i]);
+    }
+
     scene->continuouslyAttemptingPortalOpen=0;
     scene->boolCutsceneIsRunning=0;
     scene->checkpointState = SceneCheckpointStateSaved;
@@ -646,6 +652,10 @@ void sceneUpdate(struct Scene* scene) {
 
     for (int i = 0; i < scene->securityCameraCount; ++i) {
         securityCameraUpdate(&scene->securityCameras[i]);
+    }
+
+    for (int i = 0; i < scene->turretCount; ++i) {
+        turretUpdate(&scene->turrets[i]);
     }
 
     playerUpdate(&scene->player);

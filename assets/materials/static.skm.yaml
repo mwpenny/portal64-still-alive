@@ -3,6 +3,7 @@ materials:
     gDPSetRenderMode: G_RM_ZB_OPA_SURF
     gDPSetTextureFilter: G_TF_BILERP
     gDPSetTexturePersp: G_TP_PERSP
+    gDPSetTextureLUT: G_TT_NONE
     gDPSetCycleType: G_CYC_1CYCLE
     gDPSetAlphaCompare: G_AC_NONE
     gSPGeometryMode:
@@ -1343,3 +1344,27 @@ materials:
   transparent_portal_surface:
     gSPGeometryMode:
       set: [G_CULL_BACK, G_CULL_FRONT]
+
+  turret:
+    gDPSetTile:
+      - filename: ../images/turret1.png
+        usePalette: ../images/turret1.png
+        fmt: G_IM_FMT_CI
+        siz: G_IM_SIZ_4b
+        palette: 0
+        tmem: 0
+      - filename: ../images/turret2.png
+        usePalette: ../images/turret2.png
+        fmt: G_IM_FMT_CI
+        siz: G_IM_SIZ_4b
+        palette: 1
+        tmem: 128
+
+    gDPSetTextureLUT: G_TT_RGBA16
+
+    gDPSetCombineMode: G_CC_MODULATEI
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE, G_CULL_BACK]
+      clear: [G_LIGHTING]

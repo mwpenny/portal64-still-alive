@@ -24,6 +24,7 @@
 #include "portal_gun.h"
 #include "clock.h"
 #include "security_camera.h"
+#include "turret.h"
 #include "trigger_listener.h"
 #include "../effects/effects.h"
 
@@ -62,6 +63,7 @@ struct Scene {
     struct BallCatcher* ballCatchers;
     struct Clock* clocks;
     struct SecurityCamera* securityCameras;
+    struct Turret* turrets;
     struct SavedPortal savedPortal;
     struct Effects effects;
     struct Hud hud;
@@ -82,6 +84,7 @@ struct Scene {
     u8 ballCatcherCount;
     u8 clockCount;
     u8 securityCameraCount;
+    u8 turretCount;
     u8 boolCutsceneIsRunning;
 
     u8 continuouslyAttemptingPortalOpen;

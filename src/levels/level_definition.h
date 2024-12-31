@@ -323,6 +323,12 @@ struct SecurityCameraDefinition {
     short roomIndex;
 };
 
+struct TurretDefinition {
+    struct Vector3 position;
+    struct Quaternion rotation;
+    short roomIndex;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement* staticContent;
@@ -357,6 +363,7 @@ struct LevelDefinition {
     struct BallCatcherDefinition* ballCatchers;
     struct ClockDefinition* clocks;
     struct SecurityCameraDefinition* securityCameras;
+    struct TurretDefinition* turrets;
     short collisionQuadCount;
     short staticContentCount;
     short signalToStaticCount;
@@ -380,6 +387,7 @@ struct LevelDefinition {
     short ballCatcherCount;
     short clockCount;
     short securityCameraCount;
+    short turretCount;
     short startLocation;
     short playerAnimatorIndex;
 };

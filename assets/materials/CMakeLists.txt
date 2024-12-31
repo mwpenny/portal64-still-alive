@@ -437,6 +437,12 @@ endfunction()
 # Add commands for generating materials
 # There are some special cases for materials which use non-VPK textures
 
+set_property(SOURCE static.skm.yaml
+    PROPERTY ADDITIONAL_DEPS
+        ${PROJECT_SOURCE_DIR}/assets/images/turret1.png
+        ${PROJECT_SOURCE_DIR}/assets/images/turret2.png
+)
+
 set_property(SOURCE hud.skm.yaml
     PROPERTY ADDITIONAL_DEPS
         ${PROJECT_SOURCE_DIR}/assets/images/center_reticle.png

@@ -148,6 +148,7 @@ target_sources(engine INTERFACE
     scene/static_scene.c
     scene/switch.c
     scene/trigger_listener.c
+    scene/turret.c
     sk64/skeletool_animator.c
     sk64/skeletool_armature.c
     strings/translations.c

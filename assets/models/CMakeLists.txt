@@ -57,6 +57,7 @@ set(DYNAMIC_MODELS
     props/radio
     props/security_camera
     props/switch001
+    props/turret_01
     signage/clock
     signage/clock_digits
 )
@@ -72,6 +73,7 @@ set(KEYFRAMED_ANIMATED_MODELS
     props/door_01
     props/door_02
     props/switch001
+    props/turret_01
 )
 
 # All animated models, including those which are only procedurally animated
