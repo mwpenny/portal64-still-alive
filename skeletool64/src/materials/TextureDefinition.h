@@ -32,20 +32,21 @@ struct PixelRGBAu8 {
     PixelRGBAu8(uint8_t rVal, uint8_t gVal, uint8_t bVal, uint8_t aVal);
 
     bool operator==(const PixelRGBAu8& other) const;
+    bool operator<(const PixelRGBAu8& other) const;
     
     uint8_t r;
     uint8_t g;
     uint8_t b;
     uint8_t a;
 
-    bool WriteToStream(DataChunkStream& output, G_IM_SIZ size);
+    bool WriteToStream(DataChunkStream& output, G_IM_SIZ size) const;
 };
 
 struct PixelIu8 {
     PixelIu8(uint8_t i);
     uint8_t i;
 
-    bool WriteToStream(DataChunkStream& output, G_IM_SIZ size);
+    bool WriteToStream(DataChunkStream& output, G_IM_SIZ size) const;
 };
 
 struct PixelIAu8 {
@@ -53,7 +54,7 @@ struct PixelIAu8 {
     uint8_t i;
     uint8_t a;
 
-    bool WriteToStream(DataChunkStream& output, G_IM_SIZ size);
+    bool WriteToStream(DataChunkStream& output, G_IM_SIZ size) const;
 };
 
 enum class TextureDefinitionEffect {

@@ -62,7 +62,11 @@ bool PixelRGBAu8::operator==(const PixelRGBAu8& other) const {
     return r == other.r && g == other.g && b == other.b && a == other.a;
 }
 
-bool PixelRGBAu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) {
+bool PixelRGBAu8::operator<(const PixelRGBAu8& other) const {
+    return std::tie(r, g, b) < std::tie(other.r, other.g, other.b);
+}
+
+bool PixelRGBAu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) const {
     switch (size) {
         case G_IM_SIZ::G_IM_SIZ_32b:
             output.WriteBytes((const char*)this, sizeof(PixelRGBAu8));
@@ -81,7 +85,7 @@ bool PixelRGBAu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) {
 
 PixelIu8::PixelIu8(uint8_t i) : i(i) {}
 
-bool PixelIu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) {
+bool PixelIu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) const {
     switch (size) {
         case G_IM_SIZ::G_IM_SIZ_8b:
             output.WriteBits(i, 8);
@@ -96,7 +100,7 @@ bool PixelIu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) {
 
 PixelIAu8::PixelIAu8(uint8_t i, uint8_t a) : i(i), a(a) {}
 
-bool PixelIAu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) {
+bool PixelIAu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) const {
     switch (size) {
         case G_IM_SIZ::G_IM_SIZ_16b:
             output.WriteBits(i, 8);
@@ -396,15 +400,21 @@ PalleteDefinition::PalleteDefinition(const std::string& filename):
     mName(getBaseName(replaceExtension(filename, "")) + "_tlut") {
     cimg_library::CImg<unsigned char> imageData(filename.c_str());
 
-    DataChunkStream dataStream;
+    std::set<PixelRGBAu8> uniqueColors;
     
     for (int y = 0; y < imageData.height(); ++y) {
         for (int x = 0; x < imageData.width(); ++x) {
             PixelRGBAu8 colorValue = readRGBAPixel(imageData, x, y);
-            mColors.push_back(colorValue);
-
-            colorValue.WriteToStream(dataStream, G_IM_SIZ::G_IM_SIZ_16b);
+            uniqueColors.insert(colorValue);
         }
+    }
+
+    DataChunkStream dataStream;
+
+    for (auto& colorValue : uniqueColors) {
+        mColors.push_back(colorValue);
+
+        colorValue.WriteToStream(dataStream, G_IM_SIZ::G_IM_SIZ_16b);
     }
 
     auto data = dataStream.GetData();

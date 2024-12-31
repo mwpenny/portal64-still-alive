@@ -304,7 +304,7 @@ std::shared_ptr<TextureDefinition> parseTextureDefinition(const YAML::Node& node
 
         if (usePallete.IsDefined()) {
             if (usePallete.IsScalar()) {
-                palleteFilename = usePallete.as<std::string>();
+                palleteFilename = Join(output.mInsideFolder, usePallete.as<std::string>());
             } else {
                 output.mErrors.push_back(ParseError(formatError(std::string("usePallete should be a file path to a pallete") + filename, usePallete.Mark())));
             }

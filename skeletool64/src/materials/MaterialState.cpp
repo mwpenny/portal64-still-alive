@@ -613,8 +613,12 @@ void generateMaterial(CFileDefinition& fileDef, const MaterialState& from, const
 
     generateTexture(from.textureState, to.textureState, output);
 
+    MaterialState fromCopy = from;
     for (int i = 0; i < MAX_TILE_COUNT; ++i) {
-        generateTile(fileDef, from, to.tiles[i], i, output, targetCIBuffer);
+        generateTile(fileDef, fromCopy, to.tiles[i], i, output, targetCIBuffer);
+
+        // Keep track of tile changes to avoid unnecessary work
+        fromCopy.tiles[i] = to.tiles[i];
     }
 
     // TODO fill color
