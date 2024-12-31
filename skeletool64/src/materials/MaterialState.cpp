@@ -453,7 +453,7 @@ void generateTile(CFileDefinition& fileDef, const MaterialState& from, const Til
         std::unique_ptr<MacroDataChunk> loadTLUT;
         if (palleteToLoad->ColorCount() <= 16) {
             loadTLUT = std::make_unique<MacroDataChunk>("gsDPLoadTLUT_pal16");
-            loadTLUT->AddPrimitive(0);
+            loadTLUT->AddPrimitive(to.pallete);
             loadTLUT->AddPrimitive(palleteName);
         } else {
             loadTLUT = std::make_unique<MacroDataChunk>("gsDPLoadTLUT_pal256");
