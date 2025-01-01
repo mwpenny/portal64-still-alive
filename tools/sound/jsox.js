@@ -14,7 +14,7 @@ const fileContents = fs.readFileSync(argsFile);
 const fileJSON = JSON.parse(fileContents);
 
 fileJSON.forEach((command) => {
-    const commandText = `${soxPath} -V1 ${inputFile} ${command.flags || ''} ${outputFile} ${command.filters || ''}`;
+    const commandText = `"${soxPath}" -V1 "${inputFile}" ${command.flags || ''} "${outputFile}" ${command.filters || ''}`;
 
     const outputParentDir = path.dirname(outputFile);
     if (!fs.existsSync(outputParentDir)) {
