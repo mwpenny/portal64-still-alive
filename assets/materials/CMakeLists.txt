@@ -370,7 +370,7 @@ add_custom_target(textures
 )
 set_target_properties(textures PROPERTIES
     # Enable dependents to easily depend on transformed textures
-    OUTPUTS ${TEXTURES_TRANSFORMED}
+    OUTPUTS "${TEXTURES_TRANSFORMED}"
 )
 
 #########################

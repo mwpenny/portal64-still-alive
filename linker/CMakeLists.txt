@@ -31,5 +31,5 @@ add_custom_target(linker_script
     DEPENDS ${OUTPUT_LINKER_SCRIPT}
 )
 set_target_properties(linker_script PROPERTIES
-    SCRIPT_FILE ${OUTPUT_LINKER_SCRIPT}
+    SCRIPT_FILE "${OUTPUT_LINKER_SCRIPT}"
 )

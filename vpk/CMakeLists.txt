@@ -84,5 +84,5 @@ add_custom_target(extract_vpks
     DEPENDS ${VPK_STAMP_FILES}
 )
 set_target_properties(extract_vpks PROPERTIES
-    OUTPUTS ${VPK_STAMP_FILES}
+    OUTPUTS "${VPK_STAMP_FILES}"
 )
