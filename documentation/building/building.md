@@ -17,10 +17,24 @@ Build time is when the code is actually compiled/linked. This amounts to running
 the build tool corresponding to the files CMake previously generated at
 configuration time (`make`, `ninja`, etc.).
 
+## CMake Generators
+
+In CMake, a generator is what creates the files for a particular target build
+system. Ninja is optional but recommended due to its speed. You may need to
+install it. For example, on Debian/Ubuntu:
+
+```sh
+apt install ninja-build
+```
+
 ## Configuration
 
 Configure the build system with the following command. Portal 64 is
 cross-compiled for the N64, and so a toolchain file must be specified.
+
+The default CMake generator is system dependent. We specify an exact generator
+with the `-G` argument for consistency across platforms. You can use "Unix
+Makefiles" in the configuration command instead of "Ninja" to use `make`.
 
 ```sh
 cd portal64
@@ -28,19 +42,6 @@ cd portal64
 # Replace <build_directory> with build directory name
 cmake -G "Ninja" -B <build_directory> -S . -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-N64.cmake
 ```
-
-### Changing the CMake Generator
-
-The default CMake generator is system dependent. We specify an exact generator
-with the `-G` argument for consistency across platforms. Ninja is recommended
-due to its speed. You may need to install it. For example, on Debian/Ubuntu:
-
-```sh
-apt install ninja-build
-```
-
-Alternatively, use "Unix Makefiles" in the configuration command instead of
-"Ninja" to use `make`.
 
 ### Manually Specifying Missing Dependencies
 
@@ -84,6 +85,32 @@ ninja
 
 # If using make
 make
+```
+
+## Clean
+
+You can use the following commands to remove generated files and get back to a
+clean state.
+
+```sh
+cd portal64
+
+# Generator independent
+# Replace <build_directory> with build directory name
+cmake --build <build_directory> --target clean
+```
+
+or
+
+```sh
+# Replace <build_directory> with build directory name
+cd portal64/<build_directory>
+
+# If using ninja
+ninja clean
+
+# If using make
+make clean
 ```
 
 ## Optional Settings
