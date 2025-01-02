@@ -8,7 +8,10 @@ include(GNUInstallDirs)
 # Adds a local external project and creates an imported executable target
 # Assumes the project's directory and executable have the same name
 function(add_external_project_executable PROJECT_NAME)
-    set(RELATIVE_EXE_PATH "${CMAKE_INSTALL_BINDIR}/${PROJECT_NAME}${CMAKE_EXECUTABLE_SUFFIX}")
+    if (CMAKE_HOST_WIN32)
+        set(HOST_EXECUTABLE_SUFFIX ".exe")
+    endif()
+    set(RELATIVE_EXE_PATH "${CMAKE_INSTALL_BINDIR}/${PROJECT_NAME}${HOST_EXECUTABLE_SUFFIX}")
 
     ExternalProject_Add(${PROJECT_NAME}
         SOURCE_DIR
@@ -21,7 +24,7 @@ function(add_external_project_executable PROJECT_NAME)
             ${CMAKE_COMMAND} --build <BINARY_DIR> --config Release
         INSTALL_COMMAND
             ${CMAKE_COMMAND} --install <BINARY_DIR> --config Release
-        BUILD_BYPRODUCTS
+        INSTALL_BYPRODUCTS
             # Needed for Ninja so we can depend on the executable before it exists
             "<INSTALL_DIR>/${RELATIVE_EXE_PATH}"
         BUILD_ALWAYS
