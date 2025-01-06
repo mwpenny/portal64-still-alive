@@ -178,9 +178,6 @@ function(_add_extract_frame_command INPUT_FILE OUTPUT_FILE SECONDS)
             -q:v 2
             -loglevel error
             -y ${OUTPUT_FILE}
-        COMMAND
-            ${ImageMagickConvert_EXECUTABLE}
-            ${OUTPUT_FILE} -crop 491x369+265+202 -resize 160x120 ${OUTPUT_FILE}
         COMMENT
             "Extracting frame from $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -189,13 +186,13 @@ endfunction()
 
 _add_extract_frame_command(
     ${VALVE_INTRO_VIDEO}
-    ${PAK_MODIFIED_DIR}/images/valve.png
+    ${PAK_MATERIALS_DIR}/gamepadui/valve.png
     4
 )
 
 _add_extract_frame_command(
     ${VALVE_INTRO_VIDEO}
-    ${PAK_MODIFIED_DIR}/images/valve-no-logo.png
+    ${PAK_MATERIALS_DIR}/gamepadui/valve-no-logo.png
     1
 )
 
@@ -435,7 +432,7 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
 endfunction()
 
 # Add commands for generating materials
-# There are some special cases for materials which use non-VPK textures
+# There are some special cases for materials which use textures not in the original game
 
 set_property(SOURCE static.skm.yaml
     PROPERTY ADDITIONAL_DEPS
@@ -446,11 +443,6 @@ set_property(SOURCE static.skm.yaml
 set_property(SOURCE hud.skm.yaml
     PROPERTY ADDITIONAL_DEPS
         ${PROJECT_SOURCE_DIR}/assets/images/center_reticle.png
-)
-
-set_property(SOURCE images.skm.yaml
-    PROPERTY ADDITIONAL_DEPS
-        ${PAK_MODIFIED_DIR}/images/valve.png
 )
 
 set_property(SOURCE ui.skm.yaml

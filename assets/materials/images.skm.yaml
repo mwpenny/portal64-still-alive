@@ -35,4 +35,4 @@ materials:
       filename: "../../portal_pak_modified/materials/vgui/chapters/chapter11.png"
   valve:
     gDPSetTile:
-      filename: "../../portal_pak_modified/images/valve.png"
+      filename: "../../portal_pak_modified/materials/gamepadui/valve.png"
