@@ -13,7 +13,7 @@
 //  - This file is only needed to extract the kerning
 //
 // 3. Use this tool as follows:
-//  - node font_converter.js FontName /path/to/font_dir /path/to/output_dir
+//  - node font_converter.js FontName /path/to/font_dir /path/to/output_file
 
 const fs = require('fs');
 const path = require('path');
