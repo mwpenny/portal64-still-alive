@@ -3,8 +3,8 @@
 #include "physics/collision_cylinder.h"
 #include "physics/collision_box.h"
 
+#include "codegen/assets/audio/clips.h"
 #include "codegen/assets/materials/static.h"
-#include "codegen/src/audio/clips.h"
 #include "codegen/assets/models/dynamic_model_list.h"
 #include "codegen/assets/models/props/light_rail_endcap.h"
 

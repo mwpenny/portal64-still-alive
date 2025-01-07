@@ -10,9 +10,9 @@
 #include "util/memory.h"
 #include "util/rom.h"
 
+#include "codegen/assets/audio/clips.h"
 #include "codegen/assets/materials/static.h"
 #include "codegen/assets/materials/ui.h"
-#include "codegen/src/audio/clips.h"
 
 #define FADE_IN_TIME  1.0f
 

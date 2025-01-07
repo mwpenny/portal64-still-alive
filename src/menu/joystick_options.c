@@ -5,7 +5,7 @@
 #include "savefile/savefile.h"
 #include "system/controller.h"
 
-#include "codegen/src/audio/clips.h"
+#include "codegen/assets/audio/clips.h"
 #include "codegen/assets/materials/ui.h"
 
 #define MENU_Y      54

@@ -14,10 +14,10 @@
 #include "util/rom.h"
 
 
+#include "codegen/assets/audio/clips.h"
 #include "codegen/assets/materials/ui.h"
 #include "codegen/assets/materials/images.h"
-#include "codegen/src/audio/clips.h"
-#include "codegen/src/strings/strings.h"
+#include "codegen/assets/strings/strings.h"
 
 struct Chapter gChapters[] = {
     {images_chapter1_rgba_16b, 0, 0},

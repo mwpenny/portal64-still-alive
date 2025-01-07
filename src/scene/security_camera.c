@@ -10,8 +10,8 @@
 #include "system/time.h"
 #include "util/dynamic_asset_loader.h"
 
+#include "codegen/assets/audio/clips.h"
 #include "codegen/assets/materials/static.h"
-#include "codegen/src/audio/clips.h"
 #include "codegen/assets/models/dynamic_animated_model_list.h"
 #include "codegen/assets/models/props/security_camera.h"
 

@@ -4,8 +4,8 @@
 #include "font/dejavu_sans.h"
 #include "system/controller.h"
 
+#include "codegen/assets/audio/clips.h"
 #include "codegen/assets/materials/ui.h"
-#include "codegen/src/audio/clips.h"
 
 #define DIALOG_LEFT       40
 #define DIALOG_WIDTH      (SCREEN_WD - (DIALOG_LEFT * 2))

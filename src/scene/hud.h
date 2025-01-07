@@ -5,7 +5,7 @@
 #include "graphics/renderstate.h"
 #include "player/player.h"
 
-#include "codegen/src/strings/strings.h"
+#include "codegen/assets/strings/strings.h"
 
 #define INTRO_BLACK_TIME 3.0f
 #define INTRO_FADE_TIME  1.0f

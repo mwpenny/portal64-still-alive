@@ -8,8 +8,8 @@
 #include "system/time.h"
 #include "util/memory.h"
 
+#include "codegen/assets/audio/clips.h"
 #include "codegen/assets/materials/ui.h"
-#include "codegen/src/audio/clips.h"
 
 #include <stdbool.h>
 

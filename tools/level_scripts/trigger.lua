@@ -7,7 +7,7 @@ local animation = require('tools.level_scripts.animation')
 local yaml_loader = require('tools.level_scripts.yaml_loader')
 local util = require('tools.level_scripts.util')
 
-sk_definition_writer.add_header('"codegen/src/audio/clips.h"')
+sk_definition_writer.add_header('"codegen/assets/audio/clips.h"')
 
 local function cutscene_index(cutscenes, name)
     for _, cutscene in pairs(cutscenes) do

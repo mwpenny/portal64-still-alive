@@ -436,7 +436,7 @@ add_custom_command(
     VERBATIM
 )
 
-set(BUILD_AUDIO_DIR "${GENERATED_CODE_DIR}/src/audio")
+set(BUILD_AUDIO_DIR "${GENERATED_CODE_DIR}/assets/audio")
 set(CLIPS_H "${BUILD_AUDIO_DIR}/clips.h")
 set(LANGUAGES_H "${BUILD_AUDIO_DIR}/languages.h")
 set(LANGUAGES_C "${BUILD_AUDIO_DIR}/languages.c")

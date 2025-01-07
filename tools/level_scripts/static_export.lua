@@ -10,7 +10,7 @@ local animation = require('tools.level_scripts.animation')
 local signals = require('tools.level_scripts.signals')
 
 sk_definition_writer.add_header('"codegen/assets/materials/static.h"')
-sk_definition_writer.add_header('"codegen/src/strings/strings.h"')
+sk_definition_writer.add_header('"codegen/assets/strings/strings.h"')
 sk_definition_writer.add_header('"levels/level_definition.h"')
 
 local portalable_surfaces = {

@@ -8,8 +8,8 @@
 #include "util/memory.h"
 #include "util/rom.h"
 
+#include "codegen/assets/audio/clips.h"
 #include "codegen/assets/materials/images.h"
-#include "codegen/src/audio/clips.h"
 
 #define INTRO_TIME  9.0f
 

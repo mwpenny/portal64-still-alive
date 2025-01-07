@@ -6,7 +6,7 @@
 #include "system/time.h"
 #include "util/memory.h"
 
-#include "codegen/src/audio/clips.h"
+#include "codegen/assets/audio/clips.h"
 
 struct AnimatedAudioInfo {
     short startSoundId;

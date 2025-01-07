@@ -5,8 +5,7 @@
 #include "savefile/savefile.h"
 #include "scene/scene.h"
 
-#include "codegen/src/audio/clips.h"
-#include "codegen/src/audio/clips.h"
+#include "codegen/assets/audio/clips.h"
 
 struct CheatCodePattern gCheatCodes[CheatCodeCount] = {
     [CheatCodeUnlockGun] = {

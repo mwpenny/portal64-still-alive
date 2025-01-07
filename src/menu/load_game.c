@@ -7,8 +7,8 @@
 #include "system/controller.h"
 #include "util/memory.h"
 
-#include "codegen/src/audio/clips.h"
-#include "codegen/src/strings/strings.h"
+#include "codegen/assets/audio/clips.h"
+#include "codegen/assets/strings/strings.h"
 
 void loadGameMenuInit(struct LoadGameMenu* loadGame, struct SavefileListMenu* savefileList) {
     loadGame->savefileList = savefileList;

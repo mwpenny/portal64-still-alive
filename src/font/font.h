@@ -6,7 +6,7 @@
 #include "graphics/color.h"
 #include "math/vector2s16.h"
 
-#include "codegen/src/strings/strings.h"
+#include "codegen/assets/strings/strings.h"
 
 struct FontKerning {
     char amount;

@@ -35,8 +35,8 @@
 #include "system/time.h"
 #include "util/memory.h"
 
-#include "codegen/src/audio/clips.h"
-#include "codegen/src/strings/strings.h"
+#include "codegen/assets/audio/clips.h"
+#include "codegen/assets/strings/strings.h"
 
 extern struct GameMenu gGameMenu;
 

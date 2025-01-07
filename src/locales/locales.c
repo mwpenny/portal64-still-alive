@@ -2,7 +2,7 @@
 
 #include "savefile/savefile.h"
 
-#include "codegen/src/audio/languages.h"
+#include "codegen/assets/audio/languages.h"
 
 int mapLocaleSound(int soundId) {
     // Is this a localized sound?

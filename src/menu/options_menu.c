@@ -5,10 +5,9 @@
 #include "savefile/savefile.h"
 #include "system/controller.h"
 
+#include "codegen/assets/audio/clips.h"
+#include "codegen/assets/strings/strings.h"
 #include "codegen/assets/materials/ui.h"
-
-#include "codegen/src/audio/clips.h"
-#include "codegen/src/strings/strings.h"
 
 
 struct Tab gOptionTabs[] = {
