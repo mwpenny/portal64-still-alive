@@ -55,7 +55,6 @@ apply them and also get a reasonable visual approximation while editing.
 
 ## TODO
 
-* Asset pipeline
 * Blender scripts
 * Skeletool
 * Exporter scripts
