@@ -3,7 +3,7 @@
 A 3D box which defines a portion of a level. Used for culling and broad phase
 collision.
 
-## Name structure
+## Name Structure
 
 ```
 @room INDEX [can_see R1,R2,...,RN]

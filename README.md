@@ -3,9 +3,13 @@
 A demake *(remake for an older platform)* of Portal for the Nintendo 64.
 Originally created by [James Lambert](https://github.com/lambertjamesd).
 
-The original repository was taken down by James at Valve's request, due to the build requirement on Nintendo's proprietary libultra and its consequent inclusion in ROM files.
+The original repository was taken down by James at Valve's request, due to the
+build requirement on Nintendo's proprietary libultra and its consequent
+inclusion in ROM files.
 
-The [original](https://github.com/mwpenny/portal64/tree/original) branch contains the version history of the original repository. Active development occurs in the [master](https://github.com/mwpenny/portal64/tree/master) branch.
+The [original](https://github.com/mwpenny/portal64/tree/original) branch
+contains the version history of the original repository. Active development
+occurs in the [master](https://github.com/mwpenny/portal64/tree/master) branch.
 
 The main goals of this fork are:
 1. Remove proprietary code requirement (see [N64 Libraries](./documentation/n64_library_usage.md))
@@ -19,15 +23,24 @@ We do what we must because we can.
 
 This project is not affiliated with Nintendo or Valve.
 
-This repository contains no material owned by Nintendo. However, Nintendo's tools are currently required to build the game. **No form of compiled ROM will be distributed while this dependency is required** since the built game would contain Nintendo's intellectual property. One goal of this project is to remove the requirement on proprietary code.
+This repository contains no material owned by Nintendo. However, Nintendo's
+tools are currently required to build the game. **No form of compiled ROM will
+be distributed while this dependency is required** since the built game would
+contain Nintendo's intellectual property. One goal of this project is to remove
+the requirement on proprietary code.
 
-Game assets from Portal are sourced from the original game's files, which must be supplied separately at build time. In other words, **this repository cannot be used to compile the game without legally owning Portal and providing its files**. Legal ownership of Portal will be required regardless of tool or library changes.
+Game assets from Portal are sourced from the original game's files, which must
+be supplied separately at build time. In other words, **this repository cannot
+be used to compile the game without legally owning Portal and providing its
+files**. Legal ownership of Portal will be required regardless of tool or
+library changes. You can buy the game [here](https://store.steampowered.com/app/400/Portal/).
 
 ## Overview
 
 This project aims to reproduce Valve's original Portal, playable on the N64.
 
-Because this demake has been in development for some time, it has made significant progress in both gameplay systems and fidelity including:
+Because this demake has been in development for some time, it has made
+significant progress in both gameplay systems and fidelity including:
 
 - Twelve+ test chambers completed
 - Fully functioning portals, and gun
@@ -40,9 +53,10 @@ Because this demake has been in development for some time, it has made significa
 - Eye-Candy (Reflections, ...)
 - Much more!
 
-This is a community driven project that welcomes any and all game testers and or [Contributors](./documentation/contributing.md). 
+This is a community driven project that welcomes any and all game testers and or
+[Contributors](./documentation/contributing.md).
 
-## How to build
+## How to Build
 
 ### Get the Code
 

@@ -3,7 +3,7 @@
 A portal gun holder which can be scripted to move, fire portals, and give the
 player the portal gun.
 
-## Name structure
+## Name Structure
 
 ```
 @pedestal

@@ -1,7 +1,8 @@
 # Source Portal Files
 
-Game assets from Portal are sourced from the original game's files, which must be supplied separately. Copy the entire Portal folder to this directory
-(`vpk/`).
+Game assets from Portal are sourced from the original game's files, which must
+be supplied separately. You can buy the game [here](https://store.steampowered.com/app/400/Portal/).
+Copy the entire Portal folder to this directory (`vpk/`).
 
 If you are not using Docker, you can use a symbolic link.
 

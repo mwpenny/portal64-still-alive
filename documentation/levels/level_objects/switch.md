@@ -3,7 +3,7 @@
 A button on a cylindrical pedestal which, on press, emits a
 [signal](../signals.md) until a specified period of time has elapsed.
 
-## Name structure
+## Name Structure
 
 ```
 @switch PRESS_SIGNAL_NAME DURATION_SECONDS

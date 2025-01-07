@@ -3,7 +3,7 @@
 Dynamic level collision geometry. Useful for moving platforms.
 Must be a child of an [animation bone](./anim.md).
 
-## Name structure
+## Name Structure
 
 ```
 @dynamic_box

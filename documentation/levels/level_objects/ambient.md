@@ -3,7 +3,7 @@
 A 3D box whose vertex colors allow ambient lighting to be calculated for
 [static geometry](./static.md).
 
-## Name structure
+## Name Structure
 
 ```
 @ambient

@@ -3,7 +3,7 @@
 A spawner for high energy pellets, which can be caught by a
 [ball catcher](./ball_catcher.md) to emit a [signal](../signals.md).
 
-## Name structure
+## Name Structure
 
 ```
 @ball_launcher ACTIVE_SIGNAL_NAME [BALL_LIFETIME_SECONDS] [TARGET_BALL_VELOCITY]

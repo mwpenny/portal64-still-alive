@@ -2,7 +2,7 @@
 
 An animatable bone of an armature.
 
-## Name structure
+## Name Structure
 
 ```
 @anim ARMATURE_NAME [sound_type SOUND_TYPE_NAME]

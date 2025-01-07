@@ -2,7 +2,7 @@
 
 The start/end of level elevator that takes the player between test chambers.
 
-## Name structure
+## Name Structure
 
 ```
 @elevator NAME DESTINATION

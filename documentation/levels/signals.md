@@ -21,7 +21,7 @@ level export time by the Lua scripts in `tools/level_scripts/`, initiated by
 The code for sending and receiving signals is in `src/scene/signals.c`. The
 engine uses this to wire up the various emitters and listeners.
 
-## Level objects
+## Level Objects
 
 Level objects which send or receive signals have the relevant signal name as
 part of their object name in the level's `.blend` file.
@@ -84,7 +84,7 @@ clear_signal door_activate
 [...]
 ```
 
-## Signal operators
+## Signal Operators
 
 Level definition YAML files can optionally contain an array property named
 `operators`. Each array entry must be an equation matching one of the following

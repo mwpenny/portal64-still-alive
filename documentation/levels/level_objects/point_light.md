@@ -4,7 +4,7 @@ A point in space which allows omnidirectional light to be calculated for
 [static geometry](./static.md).
 
 
-## Name structure
+## Name Structure
 
 ```
 @point_light

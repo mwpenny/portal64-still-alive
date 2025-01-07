@@ -2,7 +2,7 @@
 
 A simple countdown clock, as seen in Test Chamber 00.
 
-## Name structure
+## Name Structure
 
 ```
 @clock DURATION_SECONDS

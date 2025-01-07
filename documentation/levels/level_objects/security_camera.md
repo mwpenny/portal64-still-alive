@@ -2,7 +2,7 @@
 
 A wall-mounted camera which points toward the player.
 
-## Name structure
+## Name Structure
 
 ```
 @security_camera

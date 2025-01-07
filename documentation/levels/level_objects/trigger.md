@@ -3,7 +3,7 @@
 A 3D box that can set [signals](../signals.md) and start
 [cutscenes](../cutscenes/README.md) in response to object collision.
 
-## Name structure
+## Name Structure
 
 ```
 @trigger PLAYER_CUTSCENE_NAME PLAYER_SIGNAL_NAME CUBE_CUTSCENE_NAME CUBE_SIGNAL_NAME

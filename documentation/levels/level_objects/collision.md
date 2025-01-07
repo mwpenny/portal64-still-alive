@@ -2,7 +2,7 @@
 
 Static level collision geometry. Must be a quad.
 
-## Name structure
+## Name Structure
 
 ```
 @collision [transparent] [thickness DEPTH] [CL_X]...
