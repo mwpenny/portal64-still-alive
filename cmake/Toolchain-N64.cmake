@@ -37,7 +37,7 @@ find_program(Makemask_EXECUTABLE    makemask                        REQUIRED)  #
 set(COMPILE_FLAGS                   "-mabi=32 -mfix4300 -G 0 -Wall -Werror")
 set(COMPILE_FLAGS_DEBUG             "-g")
 set(COMPILE_FLAGS_DEBUGOPTIMIZED    "-g -Os")
-set(COMPILE_FLAGS_RELEASE           "-DNDEBUG -Os")
+set(COMPILE_FLAGS_RELEASE           "-g -DNDEBUG -Os")
 
 # Program-specific flags
 set(CMAKE_ASM_FLAGS_INIT            "${COMPILE_FLAGS} -x assembler-with-cpp -Wa,-I\"${PROJECT_BINARY_DIR}\"")
