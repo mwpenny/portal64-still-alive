@@ -138,7 +138,7 @@ debugging experience. The
 extension includes support for both the C programming language and debugging
 with GDB. Example launch configuration:
 
-```json
+```jsonc
 // .vscode/launch.json
 {
     "name": "Debug with GDB",
@@ -160,7 +160,7 @@ Debugging with VSCode once it is connected is beyond the scope of this document.
 It is also possible to define tasks to launch Ares or UNFLoader before starting
 GDB. For example:
 
-```json
+```jsonc
 // .vscode/tasks.json
 {
     "label": "Run in Ares",
