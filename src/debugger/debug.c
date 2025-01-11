@@ -191,6 +191,9 @@ https://github.com/buu342/N64-UNFLoader
     #endif
     static inline void debug_handle_64drivebutton();
 
+    static int strncmp(const char *s1, const char *s2, size_t len);
+    static char *strtok(char *str, const char *delim);
+
 
     /*********************************
                  Globals
@@ -1044,7 +1047,7 @@ https://github.com/buu342/N64-UNFLoader
                 while (entry != NULL)
                 {
                     // If we found the command
-                    if (!strnCmp(debug_buffer, entry->command, debug_command_incoming_size[0]))
+                    if (!strncmp(debug_buffer, entry->command, debug_command_incoming_size[0]))
                     {
                         // Execute the command function and exit the while loop
                         debug_command_error = entry->execute();
@@ -1406,7 +1409,7 @@ https://github.com/buu342/N64-UNFLoader
                     // Run a function based on what we received
                     for (i=0; i<(sizeof(lut_rdbpackets)/sizeof(lut_rdbpackets[0])); i++)
                     {
-                        if (!strnCmp(lut_rdbpackets[i].command, debug_buffer, strLength(lut_rdbpackets[i].command)))
+                        if (!strncmp(lut_rdbpackets[i].command, debug_buffer, strLength(lut_rdbpackets[i].command)))
                         {
                             found = TRUE;
                             lut_rdbpackets[i].func(affected);
@@ -1810,11 +1813,11 @@ https://github.com/buu342/N64-UNFLoader
             commandp++;
 
             // Extract the address value
-            strTok(commandp, ",");
+            strtok(commandp, ",");
             addr = (u32)hex2u64(commandp);
 
             // Extract the size value
-            commandp = strTok(NULL, ",");
+            commandp = strtok(NULL, ",");
             size = (u32)hex2u64(commandp);
             chunkcount = 2+size/128;
 
@@ -1882,15 +1885,15 @@ https://github.com/buu342/N64-UNFLoader
             commandp++;
 
             // Extract the address value
-            strTok(commandp, ",");
+            strtok(commandp, ",");
             addr = (u32)hex2u64(commandp);
 
             // Extract the size value
-            commandp = strTok(NULL, ":");
+            commandp = strtok(NULL, ":");
             size = (u32)hex2u64(commandp);
 
             // Finally, point to the data we're actually gonna write
-            commandp = strTok(NULL, "\0");
+            commandp = strtok(NULL, "\0");
 
             // We need to translate the address before trying to read it
             addr = debug_rdb_translateaddr(addr);
@@ -1941,10 +1944,10 @@ https://github.com/buu342/N64-UNFLoader
             strCopy(command, debug_buffer);
 
             // Skip the Z0 at the start
-            token = strTok(command, ",");
+            token = strtok(command, ",");
 
             // Extract the address value
-            token = strTok(NULL, ",");
+            token = strtok(NULL, ",");
             addr = (u32)hex2u64(token);
 
             // There's still one more byte left (the breakpoint kind) which we can ignore
@@ -2013,10 +2016,10 @@ https://github.com/buu342/N64-UNFLoader
             strCopy(commandp, debug_buffer);
 
             // Skip the Z0 at the start
-            strTok(commandp, ",");
+            strtok(commandp, ",");
 
             // Extract the address value
-            commandp = strTok(NULL, ",");
+            commandp = strtok(NULL, ",");
             addr = (u32)hex2u64(commandp);
 
             // There's still one more byte left (the breakpoint kind) which we can ignore
@@ -2094,4 +2097,99 @@ https://github.com/buu342/N64-UNFLoader
             #endif
         }
     #endif
+
+
+    /*==============================
+        strncmp
+        Compares two strings
+        @param The first string
+        @param The second string
+        @param The maximum number of characters to compare
+        @returns Negative value if s1 compares before s2 lexicographically,
+                 positive value if s1 compares after s2 lexicographically,
+                 zero if the strings compare equal
+    ==============================*/
+
+    static int strncmp(const char *s1, const char *s2, size_t len)
+    {
+        while (len-- > 0)
+        {
+            unsigned char c1 = (unsigned char)*s1++;
+            unsigned char c2 = (unsigned char)*s2++;
+
+            if (c1 != c2 || c1 == '\0')
+            {
+                return c1 - c2;
+            }
+        }
+
+        return 0;
+    }
+
+
+    /*==============================
+        strtok
+        Tokenizes a string using supplied delimiters
+        @param The string to tokenize, or NULL to resume from the previous call
+        @param The token delimiters
+        @returns Pointer to the next token string, or NULL if there are none.
+    ==============================*/
+
+    static char *strtok(char *str, const char *delim)
+    {
+        static char *curr_str;
+
+        if (str == NULL)
+        {
+            if (curr_str == NULL)
+            {
+                return NULL;
+            }
+
+            str = curr_str;
+        }
+
+        // Find start of token (strip leading delimiters)
+        char *token = NULL;
+        for (char c = *str++; c != '\0' && !token; c = *str++)
+        {
+            const char *d;
+            for (d = delim; *d != '\0'; ++d)
+            {
+                if (c == *d)
+                {
+                    break;
+                }
+            }
+
+            if (*d == '\0')
+            {
+                token = str - 1;
+            }
+        }
+
+        if (token == NULL)
+        {
+            // No tokens
+            curr_str = NULL;
+            return token;
+        }
+
+        // Find end of token
+        for (char c = *str; c != '\0'; c = *++str)
+        {
+            for (const char* d = delim; *d != '\0'; ++d)
+            {
+                if (c == *d)
+                {
+                    *str = '\0';
+                    curr_str = str + 1;
+                    return token;
+                }
+            }
+        }
+
+        curr_str = NULL;
+        return token;
+    }
 #endif
