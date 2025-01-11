@@ -121,8 +121,8 @@ There are several settings you can change which affect the build. Most notably:
 | ----------------- | -------------------- | --- |
 | `AUDIO_LANGUAGES` | Comma-separated list | Specify which audio languages to include. Supported values are any combination of `english`, `french`, `german`, `russian`, or `spanish` - or just `all`, to include everything. Ensure relevant audio VPKs have been copied (see [vpk/README.md](../../vpk/README.md#add-multiple-audio-languages)). Only English audio is included by default. |
 | `TEXT_LANGUAGES`  | Comma-separated list | Specify which text languages to include. Supported values are any combination of `english`, `brazilian`, `bulgarian`, `czech`, `danish`, `german`, `spanish`, `latam`, `greek`, `french`, `italian`, `polish`, `hungarian`, `dutch`, `norwegian`, `portuguese`, `russian`, `romanian`, `finnish`, `swedish`, `turkish`, or `ukrainian` - or just `all`, to include everything. All supported text languages are included by default. |
-| `DEBUGGER`        | Boolean              | Build with support for hardware debugging. See [debugger.md](../debugger.md) for more information. Defaults to `OFF`. |
-| `GFX_VALIDATOR`   | Boolean              | Build with display list validator. Defaults to `OFF`. |
+| `DEBUGGER`        | Boolean              | Build with support for hardware debugging. See [documentation/debugging.md](../debugging.md) for more information. Defaults to `OFF`. |
+| `GFX_VALIDATOR`   | Boolean              | Build with display list validator. See [documentation/debugging.md](../debugging.md) for more information. Defaults to `OFF`. |
 | `RSP_PROFILER`    | Boolean              | Build with RSP performance profiler. Defaults to `OFF`. |
 
 You can see a list of all project CMake variables using the following commands.
