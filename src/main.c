@@ -31,7 +31,7 @@
 #include "main.h"
 
 #ifdef PORTAL64_WITH_DEBUGGER
-#include "../debugger/debugger.h"
+#include "debugger/debug.h"
 #endif
 
 static OSThread gameThread;
@@ -237,9 +237,7 @@ static void gameProc(void* arg) {
     romInit();
 
 #ifdef PORTAL64_WITH_DEBUGGER
-    OSThread* debugThreads[2];
-    debugThreads[0] = &gameThread;
-    gdbInitDebugger(gPiHandle, &dmaMessageQ, debugThreads, 1);
+    debug_initialize();
 #endif
 
     dynamicSceneInit();

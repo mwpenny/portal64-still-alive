@@ -162,8 +162,8 @@ target_sources(engine INTERFACE
 
 if (DEBUGGER)
     target_sources(engine INTERFACE
-        debugger/debugger.c
-        debugger/serial.c
+        debugger/debug.c
+        debugger/usb.c
     )
     target_compile_definitions(engine INTERFACE
         PORTAL64_WITH_DEBUGGER

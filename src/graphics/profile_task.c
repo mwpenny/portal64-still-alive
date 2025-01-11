@@ -2,14 +2,13 @@
 
 #include "../defs.h"
 
-
 #ifdef PORTAL64_WITH_DEBUGGER
-#include "../debugger/serial.h"
+#include "debugger/debug.h"
 #include "system/time.h"
 #endif
 
-#include "../graphics/graphics.h"
-#include "../util/memory.h"
+#include "graphics/graphics.h"
+#include "util/memory.h"
 
 extern u16 __attribute__((aligned(64))) zbuffer[SCREEN_HT * SCREEN_WD];
 
@@ -38,15 +37,12 @@ void printDisplayList(Gfx* dl, int depth, int* segments) {
     }
 
     for (int i = 0; i < 1000; ++i) {
-        char message[64];
-        int messageLen = sprintf(
-            message, 
-            "dl d %d 0x%08x%08x", 
+        debug_printf(
+            "dl d %d 0x%08x%08x\n",
             depth,
             dl->words.w0,
             dl->words.w1
         );
-        gdbSendMessage(GDBDataTypeText, message, messageLen);
 
         int command = _SHIFTR(dl->words.w0, 24, 8);
 
@@ -155,18 +151,15 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task, u16*
             osWritebackDCacheAll();
             
 #ifdef PORTAL64_WITH_DEBUGGER
-            char message[64];
-            int messageLen = sprintf(
-                message, 
-                "%d/%d 0x%08x%08x ms %d.%d", 
-                curr - (Gfx*)task->t.data_ptr, 
+            debug_printf(
+                "%d/%d 0x%08x%08x ms %d.%d\n",
+                curr - (Gfx*)task->t.data_ptr,
                 total,
                 curr->words.w0,
                 curr->words.w1,
                 (int)(ns / 1000000),
                 (int)(ns % 1000000)
             );
-            gdbSendMessage(GDBDataTypeText, message, messageLen);
 #endif
         }
 
@@ -189,24 +182,18 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task, u16*
 
 void profileMapAddress(void* ramAddress, const char* name) {
 #ifdef PORTAL64_WITH_DEBUGGER
-    char message[64];
-    int messageLen = sprintf(
-        message, 
-        "addr 0x%08x -> %s", 
+    debug_printf(
+        "addr 0x%08x -> %s\n",
         (int)ramAddress, 
         name
     );
-    gdbSendMessage(GDBDataTypeText, message, messageLen);
 #endif
 }
 
 void profileClearAddressMap() {
 #ifdef PORTAL64_WITH_DEBUGGER
-    char message[64];
-    int messageLen = sprintf(
-        message, 
-        "addr clearall"
+    debug_printf(
+        "addr clearall\n"
     );
-    gdbSendMessage(GDBDataTypeText, message, messageLen);
 #endif
 }

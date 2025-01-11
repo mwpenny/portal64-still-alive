@@ -1,7 +1,7 @@
 #include "profile.h"
 
 #ifdef PORTAL64_WITH_DEBUGGER
-#include "../debugger/serial.h"
+#include "debugger/debug.h"
 #endif
 
 struct ProfileData {
@@ -20,7 +20,7 @@ void profileReport() {
     uint64_t reportStartTime = timeMicroseconds(timeGetTime());
 
     gProfileData.lastReportStart = reportStartTime - gProfileData.lastReportStart;
-    // gdbSendMessage(GDBDataTypeRawBinary, (char*)&gProfileData, sizeof(struct ProfileData));
+    // debug_dumpbinary(&gProfileData, sizeof(struct ProfileData));
 
     for (int i = 0; i < MAX_PROFILE_BINS; ++i) {
         gProfileData.timeAccumulation[i] = 0;
