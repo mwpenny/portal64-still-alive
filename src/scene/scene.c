@@ -292,6 +292,7 @@ void sceneRenderPerformanceMetrics(struct Scene* scene, struct RenderState* rend
 
     float memoryUsage = renderStateMemoryUsage(renderState);
 
+    gDPPipeSync(renderState->dl++);
     gDPSetCycleType(renderState->dl++, G_CYC_1CYCLE);
     gDPSetFillColor(renderState->dl++, (GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1)));
     gDPSetCombineMode(renderState->dl++, SOLID_COLOR, SOLID_COLOR);
