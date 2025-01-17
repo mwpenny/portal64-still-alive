@@ -86,6 +86,9 @@ mark_as_advanced(
 # ROM generation
 
 function(target_linker_script TARGET SCRIPT_FILE)
+    set_target_properties(${TARGET} PROPERTIES
+        LINK_DEPENDS "${SCRIPT_FILE}"
+    )
     target_link_options(${TARGET} PRIVATE
         -T "${SCRIPT_FILE}"
         -Wl,-Map=$<PATH:REPLACE_EXTENSION,$<TARGET_FILE:${TARGET}>,map>
