@@ -95,6 +95,12 @@ SECTIONS
 #include "anims.ld"
 #include "strings.ld"
 
+   .padding :
+   {
+      BYTE(0);
+      . = ALIGN(__romPos + 1, 512) - __romPos;
+   }
+
    /* Discard standard sections not mentioned above, keep debug info */
    /DISCARD/ :
    {

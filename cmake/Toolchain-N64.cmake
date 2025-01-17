@@ -101,7 +101,7 @@ function(add_n64_rom TARGET)
 
     add_custom_command(TARGET portal POST_BUILD
         COMMAND
-            ${CMAKE_OBJCOPY} --pad-to=0x100000 --gap-fill=0xFF -O binary
+            ${CMAKE_OBJCOPY} -O binary
             ${INPUT_FILE}
             ${OUTPUT_ROM}
         COMMAND
