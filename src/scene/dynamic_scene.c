@@ -51,6 +51,18 @@ int dynamicSceneAddViewDependant(void* data, DynamicViewRender renderCallback, s
     return INVALID_DYNAMIC_OBJECT;
 }
 
+int dynamicSceneObjectCount() {
+    int count = 0;
+
+    for (int i = 0; i < MAX_DYNAMIC_SCENE_OBJECTS; ++i) {
+        if (gDynamicScene.objects[count].flags & DYNAMIC_SCENE_OBJECT_FLAGS_USED) {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
 void dynamicSceneRemove(int id) {
     if (id < 0) {
         return;

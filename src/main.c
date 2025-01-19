@@ -329,7 +329,7 @@ static void gameProc(void* arg) {
                 }
     
 #if PORTAL64_WITH_RSP_PROFILER
-                if (controllerGetButtonDown(2, BUTTON_RIGHT)) {
+                if (controllerGetButtonDown(2, BUTTON_DOWN)) {
                     struct GraphicsTask* task = &gGraphicsTasks[drawBufferIndex];
                     profileTask(&scheduler, &gameThread, &task->task.list, task->framebuffer);
                 }

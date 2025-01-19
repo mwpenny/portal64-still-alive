@@ -27,7 +27,7 @@
 #define SCENE_SCALE 128
 #endif
 
-#define MAX_DYNAMIC_OBJECTS     64
+#define MAX_DYNAMIC_COLLISION   64
 
 #define MAX_RENDER_COUNT        256
 

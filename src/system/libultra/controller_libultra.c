@@ -12,7 +12,7 @@
 #define CONTROLLER_LOG_CONTROLLER_DATA  0
 
 #if CONTROLLER_LOG_CONTROLLER_DATA
-    #include "../../debugger/serial.h"
+    #include "debugger/debug.h"
 #endif
 
 #define MAX_PLAYERS 4
@@ -148,7 +148,7 @@ void controllerHandlePlayback() {
 #if CONTROLLER_LOG_CONTROLLER_DATA == 1
     struct ControllerData data;
     data.contPad = gControllerData[0];
-    gdbSendMessage(GDBDataTypeControllerData, (char*)&data, sizeof(struct ControllerData));
+    debug_dumpbinary(&data, sizeof(struct ControllerData));
 #elif CONTROLLER_LOG_CONTROLLER_DATA == 2
     if (currentFrame < sizeof(gRecordedControllerData) / sizeof(*gRecordedControllerData)) {
         gControllerData[0] = gRecordedControllerData[currentFrame].contPad;

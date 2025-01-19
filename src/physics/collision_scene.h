@@ -21,7 +21,7 @@ struct CollisionScene {
     struct Transform* portalTransforms[2];
     struct Transform toOtherPortalTransform[2];
     struct Vector3 portalVelocity[2];
-    struct CollisionObject* dynamicObjects[MAX_DYNAMIC_OBJECTS];
+    struct CollisionObject* dynamicObjects[MAX_DYNAMIC_COLLISION];
     u16 dynamicObjectCount;
     u16 quadCount;
 };
@@ -52,6 +52,7 @@ void collisionSceneGetPortalTransform(int fromPortal, struct Transform* out);
 
 void collisionSceneAddDynamicObject(struct CollisionObject* object);
 void collisionSceneRemoveDynamicObject(struct CollisionObject* object);
+int collisionSceneDynamicObjectCount();
 
 void collisionSceneUpdateDynamics();
 

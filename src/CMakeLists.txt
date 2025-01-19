@@ -123,6 +123,7 @@ target_sources(engine INTERFACE
     scene/button.c
     scene/camera.c
     scene/clock.c
+    scene/debug_scene.c
     scene/door.c
     scene/dynamic_render_list.c
     scene/dynamic_scene.c

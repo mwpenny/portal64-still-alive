@@ -49,6 +49,8 @@ void dynamicSceneInit();
 
 int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Vector3* position, float radius);
 int dynamicSceneAddViewDependant(void* data, DynamicViewRender renderCallback, struct Vector3* position, float radius);
+int dynamicSceneObjectCount();
+
 void dynamicSceneRemove(int id);
 void dynamicSceneSetFlags(int id, int flags);
 void dynamicSceneClearFlags(int id, int flags);

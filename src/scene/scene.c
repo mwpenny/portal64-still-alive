@@ -7,6 +7,7 @@
 #include "audio/soundplayer.h"
 #include "controls/controller_actions.h"
 #include "controls/rumble_pak.h"
+#include "debug_scene.h"
 #include "decor/decor_object_list.h"
 #include "dynamic_scene.h"
 #include "effects/effect_definitions.h"
@@ -85,7 +86,7 @@ void sceneInitDynamicColliders(struct Scene* scene) {
 
 void sceneInit(struct Scene* scene) {
     sceneInitNoPauseMenu(scene, 0);
-    
+
     gameMenuInit(&gGameMenu, gPauseMenuOptions, sizeof(gPauseMenuOptions) / sizeof(*gPauseMenuOptions), 1);
 
     if (!checkpointExists()) {
@@ -198,7 +199,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
         fizzlerTransform.position = fizzlerDef->position;
         fizzlerTransform.rotation = fizzlerDef->rotation;
         fizzlerTransform.scale = gOneVec;
-        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height, 
+        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height,
 		            fizzlerDef->roomIndex, fizzlerDef->cubeSignalIndex);
     }
 
@@ -269,7 +270,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     scene->checkpointState = SceneCheckpointStateSaved;
     scene->mainMenuMode = mainMenuMode;
 
-    scene->freeCameraOffset = gZeroVec;
+    debugSceneInit(scene);
 
     effectsInit(&scene->effects);
 
@@ -279,32 +280,8 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     hudInit(&scene->hud);
 
-    playerUpdateFooting(&scene->player, PLAYER_HEAD_HEIGHT);  
+    playerUpdateFooting(&scene->player, PLAYER_HEAD_HEIGHT);
     scene->player.lookTransform.position = scene->player.body.transform.position;
-} 
-
-#define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
-
-void sceneRenderPerformanceMetrics(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
-    if (!scene->lastFrameTime) {
-        return;
-    }
-
-    float memoryUsage = renderStateMemoryUsage(renderState);
-
-    gDPPipeSync(renderState->dl++);
-    gDPSetCycleType(renderState->dl++, G_CYC_1CYCLE);
-    gDPSetFillColor(renderState->dl++, (GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1)));
-    gDPSetCombineMode(renderState->dl++, SOLID_COLOR, SOLID_COLOR);
-    gDPSetEnvColor(renderState->dl++, 32, 32, 32, 255);
-    gSPTextureRectangle(renderState->dl++, 32 << 2, 32 << 2, (32 + 256) << 2, (32 + 8) << 2, 0, 0, 0, 1, 1);
-    gSPTextureRectangle(renderState->dl++, 32 << 2, 44 << 2, (32 + 256) << 2, (44 + 8) << 2, 0, 0, 0, 1, 1);
-    gDPPipeSync(renderState->dl++);
-    gDPSetEnvColor(renderState->dl++, 32, 255, 32, 255);
-    gSPTextureRectangle(renderState->dl++, 33 << 2, 33 << 2, (32 + 254 * scene->cpuTime / scene->lastFrameTime) << 2, (32 + 6) << 2, 0, 0, 0, 1, 1);
-    gSPTextureRectangle(renderState->dl++, 33 << 2, 45 << 2, (int)(32 + 254 * memoryUsage * 4.0f), (44 + 6) << 2, 0, 0, 0, 1, 1);
-    gDPPipeSync(renderState->dl++);
-
 }
 
 LookAt gLookAt = gdSPDefLookAt(127, 0, 0, 0, 127, 0);
@@ -319,7 +296,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     if (!lookAt) {
         return;
     }
-    
+
     *lookAt = gLookAt;
     gSPLookAt(renderState->dl++, lookAt);
 
@@ -332,12 +309,14 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     renderPlanBuild(&renderPlan, scene, renderState);
     renderPlanExecute(&renderPlan, scene, staticMatrices, scene->animator.transforms, renderState, task);
 
-    // contactSolverDebugDraw(&gContactSolver, renderState);
+    if (scene->showCollisionContacts) {
+        contactSolverDebugDraw(&gContactSolver, renderState);
+    }
 
     portalGunRenderReal(
-        &scene->portalGun, 
-        renderState, 
-        &scene->camera, 
+        &scene->portalGun,
+        renderState,
+        &scene->camera,
         scene->hud.lastPortalIndexShot
     );
 
@@ -347,15 +326,12 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 
     if (gGameMenu.state == GameMenuStateResumeGame || scene->hud.fadeInTimer > 0.0f) {
         hudRender(&scene->hud, &scene->player, renderState);
+        debugSceneRender(scene, renderState, &renderPlan);
     }
 
     if (gGameMenu.state != GameMenuStateResumeGame) {
         gameMenuRender(&gGameMenu, renderState, task);
     }
-        
-
-    // sceneRenderPerformanceMetrics(scene, renderState, task);
-
 }
 
 u8 gFireGunRumbleWaveData[] = {
@@ -544,7 +520,7 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
 
         struct Transform baseTransform;
 
-        sceneAnimatorTransformForIndex(&scene->animator, boxDef->transformIndex, &baseTransform);  
+        sceneAnimatorTransformForIndex(&scene->animator, boxDef->transformIndex, &baseTransform);
 
         struct Transform relativeTransform;
         relativeTransform.position = boxDef->position;
@@ -576,8 +552,6 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
     }
 }
 
-#define FREE_CAM_VELOCITY   2.0f
-
 void sceneUpdate(struct Scene* scene) {
     scene->boolCutsceneIsRunning = cutsceneIsSoundQueued();
 
@@ -585,10 +559,10 @@ void sceneUpdate(struct Scene* scene) {
         checkpointSave(scene);
         scene->checkpointState = SceneCheckpointStateSaved;
     }
-    
+
     Time frameStart = timeGetTime();
     scene->lastFrameTime = frameStart - scene->lastFrameStart;
-    
+
     if (gGameMenu.state != GameMenuStateResumeGame) {
         if (gGameMenu.state == GameMenuStateLanding && (controllerGetButtonDown(0, BUTTON_B) || controllerActionGet(ControllerActionPause))) {
             gGameMenu.state = GameMenuStateResumeGame;
@@ -665,16 +639,16 @@ void sceneUpdate(struct Scene* scene) {
     sceneCheckPortals(scene);
 
     if ((playerIsDead(&scene->player) && (
-        controllerActionGet(ControllerActionPause) || 
-        controllerActionGet(ControllerActionJump) || 
-        controllerActionGet(ControllerActionUseItem) || 
-        controllerActionGet(ControllerActionOpenPortal0) || 
+        controllerActionGet(ControllerActionPause) ||
+        controllerActionGet(ControllerActionJump) ||
+        controllerActionGet(ControllerActionUseItem) ||
+        controllerActionGet(ControllerActionOpenPortal0) ||
         controllerActionGet(ControllerActionOpenPortal1)
     )) ||
         scene->player.lookTransform.position.y < KILL_PLANE_Y) {
         levelLoadLastCheckpoint();
     }
-    
+
     for (int i = 0; i < scene->buttonCount; ++i) {
         buttonUpdate(&scene->buttons[i]);
     }
@@ -690,7 +664,7 @@ void sceneUpdate(struct Scene* scene) {
     for (int i = 0; i < scene->triggerListenerCount; ++i) {
         triggerListenerUpdate(&scene->triggerListeners[i]);
     }
-    
+
     signalsEvaluateSignals(gCurrentLevel->signalOperators, gCurrentLevel->signalOperatorCount);
 
     for (int i = 0; i < scene->doorCount; ++i) {
@@ -700,7 +674,7 @@ void sceneUpdate(struct Scene* scene) {
     for (int i = 0; i < scene->fizzlerCount; ++i) {
         fizzlerUpdate(&scene->fizzlers[i]);
     }
-    
+
     for (int i = 0; i < scene->elevatorCount; ++i) {
         int teleportTo = elevatorUpdate(&scene->elevators[i], &scene->player);
 
@@ -756,7 +730,7 @@ void sceneUpdate(struct Scene* scene) {
     sceneUpdateAnimatedObjects(scene);
 
     staticRenderCheckSignalMaterials();
-    
+
     collisionSceneUpdateDynamics();
 
     cutscenesUpdate();
@@ -764,42 +738,7 @@ void sceneUpdate(struct Scene* scene) {
     scene->cpuTime = timeGetTime() - frameStart;
     scene->lastFrameStart = frameStart;
 
-    ControllerStick freecam_stick = controllerGetStick(2);
-
-    struct Vector3 lookDir;
-    struct Vector3 rightDir;
-
-    playerGetMoveBasis(&scene->camera.transform.rotation, &lookDir, &rightDir);
-
-    if (freecam_stick.y) {
-        if (controllerGetButton(2, BUTTON_Z)) {
-            vector3AddScaled(
-                &scene->freeCameraOffset, 
-                &lookDir, 
-                -freecam_stick.y * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f), 
-                &scene->freeCameraOffset
-            );
-        } else {
-            scene->freeCameraOffset.y += freecam_stick.y * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f);
-        }
-    }
-
-    if (freecam_stick.x) {
-        vector3AddScaled(
-            &scene->freeCameraOffset, 
-            &rightDir, 
-            freecam_stick.x * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f), 
-            &scene->freeCameraOffset
-        );
-    }
-
-    if (controllerGetButtonDown(2, BUTTON_START)) {
-        scene->freeCameraOffset = gZeroVec;
-    }
-
-    if (controllerGetButtonDown(2, BUTTON_L)) {
-        levelQueueLoad(NEXT_LEVEL, NULL, NULL);
-    }
+    debugSceneUpdate(scene);
 
     hudUpdate(&scene->hud);
 
@@ -820,7 +759,7 @@ int sceneCheckIsTouchingPortal(struct Scene* scene, int portalIndex, struct Tran
     if (!gCollisionScene.portalTransforms[portalIndex] || surfaceIndex != scene->portals[portalIndex].portalSurfaceIndex) {
         return 0;
     }
-    
+
     portalCalculateBB(at, &transformBB);
 
     return box3DHasOverlap(&scene->portals[portalIndex].collisionObject.boundingBox, &transformBB);
@@ -830,7 +769,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
     struct Transform finalAt;
 
     struct Transform relativeToTransform;
-    
+
     if (transformIndex != NO_TRANSFORM_INDEX) {
         sceneAnimatorTransformForIndex(&scene->animator, transformIndex, &relativeToTransform);
         struct Transform relativeInverse;
@@ -865,7 +804,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
             } else {
                 portal->rigidBody.transform = finalAt;
             }
-            
+
             gCollisionScene.portalVelocity[portalIndex] = gZeroVec;
             portal->transformIndex = transformIndex;
             portal->rigidBody.currentRoom = roomIndex;
@@ -937,7 +876,7 @@ int sceneDetermineSurfaceMapping(struct Scene* scene, struct CollisionObject* hi
         *mappingRangeOut = gCurrentLevel->portalSurfaceMappingRange[quadIndex];
         *relativeToOut = NO_TRANSFORM_INDEX;
         return mappingRangeOut->minPortalIndex != mappingRangeOut->maxPortalIndex;
-    } 
+    }
 
     int dynamicBoxIndex = sceneDynamicBoxIndex(scene, hitObject);
 

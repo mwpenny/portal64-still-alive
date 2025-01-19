@@ -531,7 +531,7 @@ void collisionSceneGetPortalTransform(int fromPortal, struct Transform* out) {
 }
 
 void collisionSceneAddDynamicObject(struct CollisionObject* object) {
-    if (gCollisionScene.dynamicObjectCount < MAX_DYNAMIC_OBJECTS) {
+    if (gCollisionScene.dynamicObjectCount < MAX_DYNAMIC_COLLISION) {
         gCollisionScene.dynamicObjects[gCollisionScene.dynamicObjectCount] = object;
         ++gCollisionScene.dynamicObjectCount;
     }
@@ -553,6 +553,10 @@ void collisionSceneRemoveDynamicObject(struct CollisionObject* object) {
     if (found) {
         --gCollisionScene.dynamicObjectCount;
     }
+}
+
+int collisionSceneDynamicObjectCount() {
+    return gCollisionScene.dynamicObjectCount;
 }
 
 #define BROADPHASE_SCALE    16.0f
