@@ -1,0 +1,192 @@
+#include "debug_scene.h"
+
+#include <ultra64.h>
+
+#include "dynamic_scene.h"
+#include "font/font.h"
+#include "font/liberation_mono.h"
+#include "levels/levels.h"
+#include "physics/collision_scene.h"
+#include "player/player.h"
+#include "system/controller.h"
+#include "system/time.h"
+
+#define FREE_CAM_VELOCITY        (2.0f / 80.0f)
+
+#define PERF_METRICS_MARGIN      33
+#define PERF_METRIC_ROW_PADDING  4
+#define PERF_BAR_WIDTH           (SCREEN_WD - (PERF_METRICS_MARGIN * 2))
+#define PERF_BAR_HEIGHT          6
+
+static void debugSceneUpdateFreeCamera(struct Scene* scene) {
+    ControllerStick freecam_stick = controllerGetStick(2);
+
+    if (freecam_stick.x || freecam_stick.y) {
+        struct Vector3 lookDir;
+        struct Vector3 rightDir;
+        playerGetMoveBasis(&scene->camera.transform.rotation, &lookDir, &rightDir);
+
+        if (freecam_stick.y) {
+            if (controllerGetButton(2, BUTTON_Z)) {
+                vector3AddScaled(
+                    &scene->freeCameraOffset,
+                    &lookDir,
+                    -freecam_stick.y * FREE_CAM_VELOCITY * FIXED_DELTA_TIME,
+                    &scene->freeCameraOffset
+                );
+            } else {
+                scene->freeCameraOffset.y += freecam_stick.y * FREE_CAM_VELOCITY * FIXED_DELTA_TIME;
+            }
+        }
+
+        if (freecam_stick.x) {
+            vector3AddScaled(
+                &scene->freeCameraOffset,
+                &rightDir,
+                freecam_stick.x * FREE_CAM_VELOCITY * FIXED_DELTA_TIME,
+                &scene->freeCameraOffset
+            );
+        }
+    }
+
+    if (controllerGetButtonDown(2, BUTTON_START)) {
+        scene->freeCameraOffset = gZeroVec;
+    }
+}
+
+static void debugSceneRenderTextMetric(struct FontRenderer* renderer, char* text, int y, struct RenderState* renderState) {
+    fontRendererLayout(renderer, &gLiberationMonoFont, text, SCREEN_WD);
+
+    renderState->dl = fontRendererBuildGfx(
+        renderer,
+        gLiberationMonoImages,
+        PERF_METRICS_MARGIN,
+        y - renderer->height,
+        &gColorWhite,
+        renderState->dl
+    );
+}
+
+static int debugSceneVisibleRoomCount(struct RenderPlan* renderPlan) {
+    uint64_t visibleRooms = 0;
+
+    // Account for rooms visible from player POV and through portals
+    for (int i = 0; i < renderPlan->stageCount; ++i) {
+        visibleRooms |= renderPlan->stageProps[i].visiblerooms;
+    }
+
+    int roomCount = 0;
+    while (visibleRooms) {
+        ++roomCount;
+        visibleRooms &= visibleRooms - 1;
+    }
+
+    return roomCount;
+}
+
+static void debugSceneRenderPerformanceMetrics(struct Scene* scene, struct RenderState* renderState, struct RenderPlan* renderPlan) {
+    if (!scene->lastFrameTime) {
+        return;
+    }
+
+    gDPPipeSync(renderState->dl++);
+    gDPSetCycleType(renderState->dl++, G_CYC_1CYCLE);
+    gDPSetFillColor(renderState->dl++, (GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1)));
+    gDPSetCombineLERP(
+        renderState->dl++,
+        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT,
+        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
+    );
+    gDPSetEnvColor(renderState->dl++, 32, 32, 32, 255);
+    gSPTextureRectangle(renderState->dl++, 32 << 2, 32 << 2, (32 + 256) << 2, (32 + 8) << 2, 0, 0, 0, 1, 1);
+    gSPTextureRectangle(renderState->dl++, 32 << 2, 44 << 2, (32 + 256) << 2, (44 + 8) << 2, 0, 0, 0, 1, 1);
+    gDPPipeSync(renderState->dl++);
+    gDPSetEnvColor(renderState->dl++, 32, 255, 32, 255);
+
+    float cpuTime = scene->cpuTime / (float)scene->lastFrameTime;
+    gSPTextureRectangle(
+        renderState->dl++,
+        PERF_METRICS_MARGIN << 2,
+        PERF_METRICS_MARGIN << 2,
+        (int)(PERF_METRICS_MARGIN + (PERF_BAR_WIDTH * cpuTime)) << 2,
+        (PERF_METRICS_MARGIN + PERF_BAR_HEIGHT) << 2,
+        0,
+        0, 0,
+        1, 1
+    );
+
+    float memoryUsage = renderStateMemoryUsage(renderState);
+    gSPTextureRectangle(
+        renderState->dl++,
+        PERF_METRICS_MARGIN << 2,
+        (PERF_METRICS_MARGIN + (PERF_BAR_HEIGHT * 2)) << 2,
+        (int)(32 + 254 * memoryUsage) << 2,
+        (PERF_METRICS_MARGIN + (PERF_BAR_HEIGHT * 3)) << 2,
+        0,
+        0, 0,
+        1, 1
+    );
+    gDPPipeSync(renderState->dl++);
+
+    struct FontRenderer fontRenderer;
+    char metricText[16];
+    int textY = SCREEN_HT - PERF_METRICS_MARGIN;
+
+    float dt = timeMicroseconds(scene->lastFrameTime) / 1000.0f;
+
+    sprintf(metricText, "COL: %d/%d", collisionSceneDynamicObjectCount(), MAX_DYNAMIC_COLLISION);
+    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+
+    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    sprintf(metricText, "OBJ: %d/%d", dynamicSceneObjectCount(), MAX_DYNAMIC_SCENE_OBJECTS);
+    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+
+    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    sprintf(metricText, "RMS: %d", debugSceneVisibleRoomCount(renderPlan));
+    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+
+    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    sprintf(metricText, " DT: %2.2f", dt);
+    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+
+    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    sprintf(metricText, "FPS: %2.2f", 1000.0f / dt);
+    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+}
+
+void debugSceneInit(struct Scene* scene) {
+    scene->freeCameraOffset = gZeroVec;
+    scene->showPerformanceMetrics = 0;
+    scene->showCollisionContacts = 0;
+    scene->hideCurrentRoom = 0;
+}
+
+void debugSceneUpdate(struct Scene* scene) {
+    if (!controllerIsConnected(2)) {
+        return;
+    }
+
+    debugSceneUpdateFreeCamera(scene);
+
+    if (controllerGetButtonDown(2, BUTTON_L)) {
+        levelQueueLoad(NEXT_LEVEL, NULL, NULL);
+    }
+
+    if (controllerGetButtonDown(2, BUTTON_R)) {
+        scene->hideCurrentRoom ^= 1;
+    }
+
+    if (controllerGetButtonDown(2, BUTTON_LEFT)) {
+        scene->showPerformanceMetrics ^= 1;
+    }
+
+    if (controllerGetButtonDown(2, BUTTON_RIGHT)) {
+        scene->showCollisionContacts ^= 1;
+    }
+}
+
+void debugSceneRender(struct Scene* scene, struct RenderState* renderState, struct RenderPlan* renderPlan) {
+    if (scene->showPerformanceMetrics) {
+        debugSceneRenderPerformanceMetrics(scene, renderState, renderPlan);
+    }
+}
