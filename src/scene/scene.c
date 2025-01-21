@@ -282,6 +282,9 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     playerUpdateFooting(&scene->player, PLAYER_HEAD_HEIGHT);
     scene->player.lookTransform.position = scene->player.body.transform.position;
+
+    scene->cpuTime = 0;
+    scene->updateTime = 0;
 }
 
 LookAt gLookAt = gdSPDefLookAt(127, 0, 0, 0, 127, 0);
@@ -560,8 +563,7 @@ void sceneUpdate(struct Scene* scene) {
         scene->checkpointState = SceneCheckpointStateSaved;
     }
 
-    Time frameStart = timeGetTime();
-    scene->lastFrameTime = frameStart - scene->lastFrameStart;
+    Time startTime = timeGetTime();
 
     if (gGameMenu.state != GameMenuStateResumeGame) {
         if (gGameMenu.state == GameMenuStateLanding && (controllerGetButtonDown(0, BUTTON_B) || controllerActionGet(ControllerActionPause))) {
@@ -735,13 +737,11 @@ void sceneUpdate(struct Scene* scene) {
 
     cutscenesUpdate();
 
-    scene->cpuTime = timeGetTime() - frameStart;
-    scene->lastFrameStart = frameStart;
-
     debugSceneUpdate(scene);
 
     hudUpdate(&scene->hud);
 
+    scene->updateTime = timeGetTime() - startTime;
 }
 
 void sceneQueueCheckpoint(struct Scene* scene) {

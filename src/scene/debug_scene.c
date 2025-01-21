@@ -11,12 +11,18 @@
 #include "system/controller.h"
 #include "system/time.h"
 
+#include "codegen/assets/materials/ui.h"
+
 #define FREE_CAM_VELOCITY        (2.0f / 80.0f)
 
 #define PERF_METRICS_MARGIN      33
 #define PERF_METRIC_ROW_PADDING  4
 #define PERF_BAR_WIDTH           (SCREEN_WD - (PERF_METRICS_MARGIN * 2))
 #define PERF_BAR_HEIGHT          6
+
+static float lastFrameTimeMs     = 0.0f;
+static float lastCpuTimeMs       = 0.0f;
+static float lastUpdateTimeMs    = 0.0f;
 
 static void debugSceneUpdateFreeCamera(struct Scene* scene) {
     ControllerStick freecam_stick = controllerGetStick(2);
@@ -84,12 +90,22 @@ static int debugSceneVisibleRoomCount(struct RenderPlan* renderPlan) {
     return roomCount;
 }
 
+// Average time-based metrics over 2 frames for more stable output
+static float debugSceneAveragedTimeMs(float value, float* prevValue) {
+    float ms = timeMicroseconds(value) / 1000.0f;
+    float averaged = (ms + *prevValue) / 2.0f;
+    *prevValue = ms;
+
+    return averaged;
+}
+
 static void debugSceneRenderPerformanceMetrics(struct Scene* scene, struct RenderState* renderState, struct RenderPlan* renderPlan) {
-    if (!scene->lastFrameTime) {
+    if (!gLastFrameTime) {
         return;
     }
 
-    gDPPipeSync(renderState->dl++);
+    gSPDisplayList(renderState->dl++, ui_material_list[DEFAULT_UI_INDEX]);
+
     gDPSetCycleType(renderState->dl++, G_CYC_1CYCLE);
     gDPSetFillColor(renderState->dl++, (GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1)));
     gDPSetCombineLERP(
@@ -103,12 +119,12 @@ static void debugSceneRenderPerformanceMetrics(struct Scene* scene, struct Rende
     gDPPipeSync(renderState->dl++);
     gDPSetEnvColor(renderState->dl++, 32, 255, 32, 255);
 
-    float cpuTime = scene->cpuTime / (float)scene->lastFrameTime;
+    float cpuUsage = scene->cpuTime / (float)gLastFrameTime;
     gSPTextureRectangle(
         renderState->dl++,
         PERF_METRICS_MARGIN << 2,
         PERF_METRICS_MARGIN << 2,
-        (int)(PERF_METRICS_MARGIN + (PERF_BAR_WIDTH * cpuTime)) << 2,
+        (int)(PERF_METRICS_MARGIN + (PERF_BAR_WIDTH * cpuUsage)) << 2,
         (PERF_METRICS_MARGIN + PERF_BAR_HEIGHT) << 2,
         0,
         0, 0,
@@ -132,7 +148,7 @@ static void debugSceneRenderPerformanceMetrics(struct Scene* scene, struct Rende
     char metricText[16];
     int textY = SCREEN_HT - PERF_METRICS_MARGIN;
 
-    float dt = timeMicroseconds(scene->lastFrameTime) / 1000.0f;
+    float dt = debugSceneAveragedTimeMs(gLastFrameTime, &lastFrameTimeMs);
 
     sprintf(metricText, "COL: %d/%d", collisionSceneDynamicObjectCount(), MAX_DYNAMIC_COLLISION);
     debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
@@ -143,6 +159,14 @@ static void debugSceneRenderPerformanceMetrics(struct Scene* scene, struct Rende
 
     textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
     sprintf(metricText, "RMS: %d", debugSceneVisibleRoomCount(renderPlan));
+    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+
+    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    sprintf(metricText, "UPD: %2.2f", debugSceneAveragedTimeMs(scene->updateTime, &lastUpdateTimeMs));
+    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+
+    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    sprintf(metricText, "CPU: %2.2f", debugSceneAveragedTimeMs(scene->cpuTime, &lastCpuTimeMs));
     debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
 
     textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;

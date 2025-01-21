@@ -69,8 +69,7 @@ struct Scene {
     struct Effects effects;
     struct Hud hud;
     Time cpuTime;
-    Time lastFrameStart;
-    Time lastFrameTime;
+    Time updateTime;
     u8 buttonCount;
     u8 decorCount;
     u8 triggerListenerCount;

@@ -306,6 +306,8 @@ static void gameProc(void* arg) {
                     break;
                 }
 
+                Time startTime = timeGetTime();
+
                 if (pendingGFX < 2 && drawingEnabled) {
                     Time renderStart = profileStart();
                     graphicsCreateTask(&gGraphicsTasks[drawBufferIndex], gSceneCallbacks->graphicsCallback, gSceneCallbacks->data);
@@ -334,11 +336,13 @@ static void gameProc(void* arg) {
                     profileTask(&scheduler, &gameThread, &task->task.list, task->framebuffer);
                 }
 #endif
-                timeUpdateDelta();
+
                 soundPlayerUpdate();
                 controllersSavePreviousState();
 
                 profileReport();
+
+                gScene.cpuTime = timeGetTime() - startTime;
 
                 break;
 
@@ -350,6 +354,8 @@ static void gameProc(void* arg) {
                 if (gScene.checkpointState == SceneCheckpointStatePendingRender) {
                     gScene.checkpointState = SceneCheckpointStateReady;
                 }
+
+                timeUpdateFrameTime();
                 break;
             case (OS_SC_PRE_NMI_MSG):
                 pendingGFX += 2;
