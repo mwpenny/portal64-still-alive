@@ -7,7 +7,9 @@
 #include "codegen/assets/materials/static.h"
 #include "codegen/assets/models/dynamic_animated_model_list.h"
 
-void turretRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
+static struct Vector3 laserOffset = { 0.0f, 0.6f, 0.0f };
+
+static void turretRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Turret* turret = (struct Turret*)data;
 
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
@@ -42,17 +44,18 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     // * Physics (collidable and grabbable)
     // * Fizzleable
 
-    struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_TURRET_01_DYNAMIC_ANIMATED_MODEL);
-    skArmatureInit(&turret->armature, armature->armature);
-
     turret->rigidBody.transform.position = definition->position;
     turret->rigidBody.transform.rotation = definition->rotation;
     turret->rigidBody.transform.scale = gOneVec;
     turret->rigidBody.currentRoom = definition->roomIndex;
 
+    struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_TURRET_01_DYNAMIC_ANIMATED_MODEL);
+    skArmatureInit(&turret->armature, armature->armature);
+
+    laserInit(&turret->laser, &turret->rigidBody.transform, &laserOffset);
+
     // TODO: radius
     turret->dynamicId = dynamicSceneAdd(turret, turretRender, &turret->rigidBody.transform.position, 1.5f);
-
     dynamicSceneSetRoomFlags(turret->dynamicId, ROOM_FLAG_FROM_INDEX(turret->rigidBody.currentRoom));
 }
 

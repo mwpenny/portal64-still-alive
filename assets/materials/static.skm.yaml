@@ -1368,3 +1368,11 @@ materials:
     gSPGeometryMode:
       set: [G_SHADE, G_CULL_BACK]
       clear: [G_LIGHTING]
+
+  laser:
+    gDPSetCombineMode: G_CC_SHADE
+    gDPSetRenderMode: G_RM_ZB_XLU_SURF
+
+    gSPGeometryMode:
+      set: [G_SHADE, G_CULL_BACK]
+      clear: [G_LIGHTING]

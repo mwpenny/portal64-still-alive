@@ -11,8 +11,8 @@ struct DynamicRenderDataList;
 typedef void (*DynamicRender)(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState);
 typedef void (*DynamicViewRender)(void* data, struct RenderScene* renderScene, struct Transform* fromView);
 
-#define MAX_DYNAMIC_SCENE_OBJECTS 64
-#define MAX_VIEW_DEPENDANT_OBJECTS 8
+#define MAX_DYNAMIC_SCENE_OBJECTS  64
+#define MAX_VIEW_DEPENDANT_OBJECTS 16
 
 #define DYNAMIC_SCENE_OBJECT_FLAGS_USED                 (1 << 0)
 #define DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE               (1 << 1)
