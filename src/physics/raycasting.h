@@ -1,9 +1,11 @@
 #ifndef __RAY_TRACING_H__
 #define __RAY_TRACING_H__
 
-#include "collision_quad.h"
+#include <stdint.h>
+
 #include "collision_object.h"
-#include "../math/ray.h"
+#include "collision_quad.h"
+#include "math/ray.h"
 
 struct RaycastHit {
     struct Vector3 at;
@@ -12,6 +14,7 @@ struct RaycastHit {
     struct CollisionObject* object;
     struct Transform* throughPortal;
     short roomIndex;
+    uint64_t passedRooms;
     short numPortalsPassed;
 };
 

@@ -8,6 +8,7 @@
 
 struct Turret {
     //struct CollisionObject collisionObject;
+    struct TurretDefinition* definition;
     struct RigidBody rigidBody;
     struct SKArmature armature;
     struct Laser laser;

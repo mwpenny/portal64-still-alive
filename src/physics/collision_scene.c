@@ -416,13 +416,13 @@ int collisionSceneRaycastDoorways(struct CollisionScene* scene, struct Room* roo
     return nextRoom;
 }
 
-void collisionSceneRaycastDynamic(struct CollisionScene* scene, struct Ray* ray, int collisionLayers, struct RaycastHit* hit, u64* rayRooms) {
+void collisionSceneRaycastDynamic(struct CollisionScene* scene, struct Ray* ray, int collisionLayers, struct RaycastHit* hit) {
     for (int i = 0; i < scene->dynamicObjectCount; ++i) {
         struct RaycastHit hitTest;
 
         struct CollisionObject* object = scene->dynamicObjects[i];
 
-        if (object->body->currentRoom != RIGID_BODY_NO_ROOM && ((1LL << object->body->currentRoom) & *rayRooms) == 0) {
+        if (object->body->currentRoom != RIGID_BODY_NO_ROOM && ((1LL << object->body->currentRoom) & hit->passedRooms) == 0) {
             continue;
         }
 
@@ -444,10 +444,10 @@ void collisionSceneRaycastDynamic(struct CollisionScene* scene, struct Ray* ray,
 
 int collisionSceneRaycastOnlyDynamic(struct CollisionScene* scene, struct Ray* ray, int collisionLayers, float maxDistance, struct RaycastHit* hit) {
     hit->distance = maxDistance;
+    hit->passedRooms = 1LL << hit->roomIndex;
     hit->throughPortal = NULL;
 
-    u64 rayRooms = 1LL << hit->roomIndex;
-    collisionSceneRaycastDynamic(scene, ray, collisionLayers, hit, &rayRooms);
+    collisionSceneRaycastDynamic(scene, ray, collisionLayers, hit);
 
     return hit->distance != maxDistance;
 }
@@ -456,10 +456,10 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
     hit->distance = maxDistance;
     hit->throughPortal = NULL;
     hit->roomIndex = roomIndex;
+    hit->passedRooms = 1LL << roomIndex;
     hit->numPortalsPassed = 0;
 
     int roomsToCheck = 5;
-    u64 rayRooms = 1LL << roomIndex;
 
     while (roomsToCheck && roomIndex != -1) {
         struct Room* room = &scene->world->rooms[roomIndex];
@@ -477,13 +477,13 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
         // even on a miss, the raycast should report which room it ended up in
         if (roomIndex != -1) {
             hit->roomIndex = roomIndex;
-            rayRooms |= 1LL << roomIndex;
+            hit->passedRooms |= 1LL << roomIndex;
         }
 
         --roomsToCheck;
     }
 
-    collisionSceneRaycastDynamic(scene, ray, collisionLayers, hit, &rayRooms);
+    collisionSceneRaycastDynamic(scene, ray, collisionLayers, hit);
 
     if (passThroughPortals && 
         hit->distance != maxDistance &&

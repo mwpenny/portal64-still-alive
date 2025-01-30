@@ -8,7 +8,6 @@
 #include "codegen/assets/materials/static.h"
 
 #define LASER_HALF_WIDTH       0.009375f
-#define LASER_RAYCAST_DISTANCE 1000000.0f
 
 #define LASER_COLLISION_LAYERS (COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
 
@@ -67,19 +66,25 @@ static void laserRender(void* data, struct RenderScene* renderScene, struct Tran
     );
     gSPEndDisplayList(dl++);
 
-    // TODO: proper position for geometry sorting
-    renderSceneAdd(renderScene, displayList, NULL, LASER_INDEX, &laser->parent->position, NULL);
+    renderSceneAdd(renderScene, displayList, NULL, LASER_INDEX, &laser->startPosition, NULL);
 }
 
 void laserInit(struct Laser* laser, struct Transform* parent, struct Vector3* offset) {
     laser->parent = parent;
     laser->parentOffset = *offset;
+    laser->startPosition = gZeroVec;
+    laser->endPosition = gZeroVec;
 
-    // TODO (culling): proper position and radius, set room flags
-    laser->dynamicId = dynamicSceneAddViewDependant(laser, laserRender, &laser->parent->position, 20.0f);
+    // The laser could traverse multiple rooms and pass through portals.
+    //
+    // To avoid a dynamic object per fragment, this single object renders
+    // them all, and so efficiently deriving a meaningful culling radius is
+    // difficult. Given typical turret gameplay and the low rendering cost,
+    // rely solely on room flags.
+    laser->dynamicId = dynamicSceneAddViewDependant(laser, laserRender, &laser->parent->position, 1000000.0f);
 }
 
-void laserUpdate(struct Laser* laser, int room) {
+void laserUpdate(struct Laser* laser, int currentRoom) {
     struct Ray ray = {
         .origin = laser->parentOffset,
         .dir    = gForward
@@ -91,10 +96,10 @@ void laserUpdate(struct Laser* laser, int room) {
     struct RaycastHit hit;
     if (!collisionSceneRaycast(
             &gCollisionScene,
-            room,
+            currentRoom,
             &ray,
             LASER_COLLISION_LAYERS,
-            LASER_RAYCAST_DISTANCE,
+            1000000.0f,
             0,
             &hit)
     ) {
@@ -103,7 +108,9 @@ void laserUpdate(struct Laser* laser, int room) {
         laser->endPosition = hit.at;
     }
 
-    // TODO: update room, pass through portals, etc.
+    dynamicSceneSetRoomFlags(laser->dynamicId, hit.passedRooms);
+
+    // TODO: pass through portals, etc.
 }
 
 void laserRemove(struct Laser* laser) {

@@ -13,7 +13,7 @@ struct Laser {
 };
 
 void laserInit(struct Laser* laser, struct Transform* parent, struct Vector3* offset);
-void laserUpdate(struct Laser* laser, int room);
+void laserUpdate(struct Laser* laser, int currentRoom);
 void laserRemove(struct Laser* laser);
 
 #endif
