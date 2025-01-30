@@ -26,20 +26,24 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
 `BLOCK_BALL`. The possible layers and their uses are as follows.
 
 * `STATIC`: Used for portal raycasts, and by:
-    * [Doors](./door.md)
+    * [Doors](./door.md) (when closed)
+    * [Dynamic boxes](./dynamic_box.md)
     * [Elevators](./elevator.md)
+    * [Fizzler](./fizzler.md) frames
+    * Portals
+    * [Turret](./turret.md) shots
 * `TRANSPARENT`: Unused
 * `TANGIBLE`: Used to check grabbing and walking, and by:
     * [Ball catchers](./ball_catcher.md)
     * [Ball launchers](./ball_launcher.md)
     * [Buttons](./button.md)
     * [Decor](./decor.md) (with collision)
-    * [Doors](./door.md) (when open)
+    * [Doors](./door.md) (when closed)
     * [Dynamic boxes](./dynamic_box.md)
     * [Elevators](./elevator.md)
     * [Fizzler](./fizzler.md) frames
     * Player
-    * Portals
+    * Portals (but not portal projectiles)
     * [Security cameras](./security_camera.md)
     * [Switches](./switch.md)
     * [Triggers](./trigger.md)
@@ -56,11 +60,18 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
     * [Fizzlers](./fizzler.md)
     * [Switches](./switch.md)
 * `BLOCK_BALL`: Used by:
+    * [Doors](./door.md) (when closed)
     * Energy balls
     * [Ball launchers](./ball_launcher.md)
     * [Dynamic boxes](./dynamic_box.md)
     * [Elevators](./elevator.md)
+    * [Fizzler](./fizzler.md) frames
     * Player
+* `BLOCK_TURRET_SHOTS`: Used to block turret shots, and by:
+    * [Decor](./decor.md) (with collision)
+    * Player
+    * [Security cameras](./security_camera.md) (when detached)
+    * [Switches](./switch.md)
 
 ## TODO
 

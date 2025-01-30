@@ -1,12 +1,12 @@
 #include "collision_scene.h"
 
-#include "math/mathf.h"
-#include "gjk.h"
-#include "epa.h"
 #include "contact_solver.h"
-#include "../util/memory.h"
-#include "../scene/portal.h"
-#include "../levels/levels.h"
+#include "epa.h"
+#include "gjk.h"
+#include "levels/levels.h"
+#include "math/mathf.h"
+#include "scene/portal.h"
+#include "util/memory.h"
 
 struct CollisionScene gCollisionScene;
 

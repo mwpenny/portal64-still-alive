@@ -27,8 +27,10 @@ struct ColliderTypeData gSecurityCameraCollider = {
     &gCollisionBoxCallbacks
 };
 
-#define CAMERA_RANGE           10.0f
-#define CAMERA_RIGID_BODY_MASS 1.0f
+#define CAMERA_RANGE            10.0f
+#define CAMERA_RIGID_BODY_MASS  1.0f
+
+#define CAMERA_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
 
 struct Quaternion gBarBoneRelative = {1.0f, 0.0f, 0.0f, 0.0f};
 
@@ -120,7 +122,7 @@ void securityCameraRender(void* data, struct DynamicRenderDataList* renderList, 
 void securityCameraInit(struct SecurityCamera* securityCamera, struct SecurityCameraDefinition* definition) {
     struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_SECURITY_CAMERA_DYNAMIC_ANIMATED_MODEL);
 
-    collisionObjectInit(&securityCamera->collisionObject, &gSecurityCameraCollider, &securityCamera->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER);
+    collisionObjectInit(&securityCamera->collisionObject, &gSecurityCameraCollider, &securityCamera->rigidBody, 1.0f, CAMERA_COLLISION_LAYERS);
     rigidBodyMarkKinematic(&securityCamera->rigidBody);
     collisionSceneAddDynamicObject(&securityCamera->collisionObject);
 

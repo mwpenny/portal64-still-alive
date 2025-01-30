@@ -13,8 +13,10 @@
 #include "codegen/assets/materials/static.h"
 #include "codegen/assets/models/dynamic_animated_model_list.h"
 
-#define COLLIDER_HEIGHT   0.7f
-#define TICKTOCK_PAUSE_LENGTH  0.25f
+#define COLLIDER_HEIGHT         0.7f
+#define TICKTOCK_PAUSE_LENGTH   0.25f
+
+#define SWITCH_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_BLOCK_PORTAL | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
 
 struct Vector2 gSwitchCylinderEdgeVectors[] = {
     {0.0f, 1.0f},
@@ -76,7 +78,7 @@ void switchRender(void* data, struct DynamicRenderDataList* renderList, struct R
 void switchInit(struct Switch* switchObj, struct SwitchDefinition* definition) {
     struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_SWITCH001_DYNAMIC_ANIMATED_MODEL);
 
-    collisionObjectInit(&switchObj->collisionObject, &gSwitchCollider, &switchObj->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_BLOCK_PORTAL);
+    collisionObjectInit(&switchObj->collisionObject, &gSwitchCollider, &switchObj->rigidBody, 1.0f, SWITCH_COLLISION_LAYERS);
     rigidBodyMarkKinematic(&switchObj->rigidBody);
     collisionSceneAddDynamicObject(&switchObj->collisionObject);
 

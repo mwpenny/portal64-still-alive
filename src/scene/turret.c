@@ -60,5 +60,5 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
 }
 
 void turretUpdate(struct Turret* turret) {
-    // TODO
+    laserUpdate(&turret->laser, turret->rigidBody.currentRoom);
 }

@@ -7,8 +7,10 @@
 #include "system/time.h"
 #include "../util/dynamic_asset_loader.h"
 
-#define TIME_TO_FIZZLE      2.0f
-#define FIZZLE_TIME_STEP    (FIXED_DELTA_TIME / TIME_TO_FIZZLE)
+#define TIME_TO_FIZZLE         2.0f
+#define FIZZLE_TIME_STEP       (FIXED_DELTA_TIME / TIME_TO_FIZZLE)
+
+#define DECOR_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
 
 Gfx* decorBuildFizzleGfx(Gfx* gfxToRender, float fizzleTime, struct RenderState* renderState) {
     if (fizzleTime <= 0.0f) {
@@ -73,7 +75,7 @@ void decorObjectReset(struct DecorObject* object) {
 
 void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* definition, struct Transform* at, int room) {
     if (definition->colliderType.type != CollisionShapeTypeNone) {
-        collisionObjectInit(&object->collisionObject, &definition->colliderType, &object->rigidBody, definition->mass, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_FIZZLER);
+        collisionObjectInit(&object->collisionObject, &definition->colliderType, &object->rigidBody, definition->mass, DECOR_COLLISION_LAYERS);
         collisionSceneAddDynamicObject(&object->collisionObject);
     } else {
         rigidBodyInit(&object->rigidBody, 1.0f, 1.0f);

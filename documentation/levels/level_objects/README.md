@@ -56,3 +56,4 @@ See the linked pages below for details on specific level objects.
 | [@static](./static.md)                   | Static geometry                                      |
 | [@switch](./switch.md)                   | Button on pedestal                                   |
 | [@trigger](./trigger.md)                 | Signal and cutscene activating volume                |
+| [@turret](./turret.md)                   | Sentry turret enemy                                  |
