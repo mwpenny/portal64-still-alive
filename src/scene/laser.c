@@ -101,7 +101,10 @@ void laserInit(struct Laser* laser, struct Transform* parent, struct Vector3* of
 }
 
 void laserUpdate(struct Laser* laser, int currentRoom) {
-    struct Vector3* startPosition = &laser->parentOffset;
+    struct Ray startPosition = {
+        .origin = laser->parentOffset,
+        .dir    = gForward
+    };
     struct Transform startTransform = *laser->parent;
     uint64_t beamRooms = 0;
 
@@ -109,9 +112,8 @@ void laserUpdate(struct Laser* laser, int currentRoom) {
 
     for (short i = 0; i < LASER_MAX_BEAMS; ++i) {
         struct LaserBeam* beam = &laser->beams[i];
-        beam->startPosition.origin = *startPosition;
-        beam->startPosition.dir = gForward;
-        rayTransform(&startTransform, &beam->startPosition, &beam->startPosition);
+        rayTransform(&startTransform, &startPosition, &startPosition);
+        beam->startPosition = startPosition;
 
         struct RaycastHit hit;
         if (!collisionSceneRaycast(
@@ -137,7 +139,7 @@ void laserUpdate(struct Laser* laser, int currentRoom) {
             int portalIndex = (touchingPortals & RigidBodyIsTouchingPortalA) ? 0 : 1;
             collisionSceneGetPortalTransform(portalIndex, &startTransform);
 
-            startPosition = &beam->endPosition;
+            startPosition.origin = beam->endPosition;
             currentRoom = gCollisionScene.portalRooms[1 - portalIndex];
         }
     }

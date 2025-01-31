@@ -16,7 +16,7 @@
 #include "codegen/assets/models/props/security_camera.h"
 
 struct CollisionBox gSecurityCameraCollisionBox = {
-    {0.15, 0.3f, 0.35f}
+    {0.15f, 0.3f, 0.35f}
 };
 
 struct ColliderTypeData gSecurityCameraCollider = {
