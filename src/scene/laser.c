@@ -51,6 +51,11 @@ static void laserBeamBuildVtx(Vtx* vtx, struct LaserBeam* beam, struct Vector3* 
 
 static void laserRender(void* data, struct RenderScene* renderScene, struct Transform* fromView) {
     struct Laser* laser = (struct Laser*)data;
+
+    // Update here (in the render callback) so that it is after game logic.
+    // Otherwise the beam positions could be incorrect (parent may have moved).
+    // The update function only affects rendering.
+    laserUpdate(laser);
     if (laser->beamCount == 0) {
         return;
     }
@@ -83,10 +88,17 @@ static void laserRender(void* data, struct RenderScene* renderScene, struct Tran
 
     gSPEndDisplayList(dl++);
 
-    renderSceneAdd(renderScene, displayList, NULL, LASER_INDEX, &laser->parent->position, NULL);
+    renderSceneAdd(
+        renderScene,
+        displayList,
+        NULL,
+        LASER_INDEX,
+        &laser->parent->transform.position,
+        NULL
+    );
 }
 
-void laserInit(struct Laser* laser, struct Transform* parent, struct Vector3* offset) {
+void laserInit(struct Laser* laser, struct RigidBody* parent, struct Vector3* offset) {
     laser->parent = parent;
     laser->parentOffset = *offset;
     laser->beamCount = 0;
@@ -97,15 +109,21 @@ void laserInit(struct Laser* laser, struct Transform* parent, struct Vector3* of
     // and so efficiently deriving a meaningful culling radius is difficult.
     // Given typical turret gameplay and the low rendering cost (each beam is
     // just a quad), rely solely on room flags.
-    laser->dynamicId = dynamicSceneAddViewDependant(laser, laserRender, &laser->parent->position, 1000000.0f);
+    laser->dynamicId = dynamicSceneAddViewDependant(
+        laser,
+        laserRender,
+        &parent->transform.position,
+        1000000.0f
+    );
 }
 
-void laserUpdate(struct Laser* laser, int currentRoom) {
+void laserUpdate(struct Laser* laser) {
     struct Ray startPosition = {
         .origin = laser->parentOffset,
         .dir    = gForward
     };
-    struct Transform startTransform = *laser->parent;
+    struct Transform startTransform = laser->parent->transform;
+    int currentRoom = laser->parent->currentRoom;
     uint64_t beamRooms = 0;
 
     laser->beamCount = 0;
@@ -139,7 +157,7 @@ void laserUpdate(struct Laser* laser, int currentRoom) {
             int portalIndex = (touchingPortals & RigidBodyIsTouchingPortalA) ? 0 : 1;
             collisionSceneGetPortalTransform(portalIndex, &startTransform);
 
-            startPosition.origin = beam->endPosition;
+            startPosition.origin = hit.at;
             currentRoom = gCollisionScene.portalRooms[1 - portalIndex];
         }
     }

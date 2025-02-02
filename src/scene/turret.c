@@ -97,6 +97,4 @@ void turretUpdate(struct Turret* turret) {
     }
 
     dynamicSceneSetRoomFlags(turret->dynamicId, ROOM_FLAG_FROM_INDEX(turret->rigidBody.currentRoom));
-
-    laserUpdate(&turret->laser, turret->rigidBody.currentRoom);
 }

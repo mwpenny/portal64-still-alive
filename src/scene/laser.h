@@ -12,7 +12,7 @@ struct LaserBeam {
 };
 
 struct Laser {
-    struct Transform* parent;
+    struct RigidBody* parent;
     struct Vector3 parentOffset;
     short dynamicId;
 
@@ -20,8 +20,8 @@ struct Laser {
     short beamCount;
 };
 
-void laserInit(struct Laser* laser, struct Transform* parent, struct Vector3* offset);
-void laserUpdate(struct Laser* laser, int currentRoom);
+void laserInit(struct Laser* laser, struct RigidBody* parent, struct Vector3* offset);
+void laserUpdate(struct Laser* laser);
 void laserRemove(struct Laser* laser);
 
 #endif
