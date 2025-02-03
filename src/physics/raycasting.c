@@ -7,7 +7,7 @@
 
 #define NEAR_EDGE_ZERO      0.001f
 #define NEAR_DOT_ZERO       0.00001f
-#define MIN_RAY_LENGTH      0.05f
+#define MIN_RAY_LENGTH      0.0001f
 
 int raycastQuadShape(struct CollisionQuad* quad, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
     float normalDot = vector3Dot(&ray->dir, &quad->plane.normal);
