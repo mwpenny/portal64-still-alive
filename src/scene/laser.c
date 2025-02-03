@@ -124,7 +124,7 @@ void laserUpdate(struct Laser* laser) {
     };
     struct Transform startTransform = laser->parent->transform;
     int currentRoom = laser->parent->currentRoom;
-    uint64_t beamRooms = 0;
+    uint64_t beamRooms = ROOM_FLAG_FROM_INDEX(currentRoom);
 
     laser->beamCount = 0;
 

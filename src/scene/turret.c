@@ -85,7 +85,7 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_TURRET_01_DYNAMIC_ANIMATED_MODEL);
     skArmatureInit(&turret->armature, armature->armature);
 
-    laserInit(&turret->laser, &turret->rigidBody.transform, &gTurretLaserOffset);
+    laserInit(&turret->laser, &turret->rigidBody, &gTurretLaserOffset);
 
     turret->dynamicId = dynamicSceneAdd(turret, turretRender, &turret->rigidBody.transform.position, 0.75f);
     dynamicSceneSetRoomFlags(turret->dynamicId, ROOM_FLAG_FROM_INDEX(turret->rigidBody.currentRoom));

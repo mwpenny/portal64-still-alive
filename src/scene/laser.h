@@ -3,6 +3,7 @@
 
 #include "math/ray.h"
 #include "math/vector3.h"
+#include "physics/rigid_body.h"
 
 #define LASER_MAX_BEAMS 4
 
