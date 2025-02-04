@@ -169,12 +169,10 @@ enum InputCapture newGameUpdate(struct NewGameMenu* newGameMenu) {
     }
 
     if ((controllerGetDirectionDown(0) & ControllerDirectionRight) != 0) {
-        if (newGameMenu->selectedChapter + 1 < newGameMenu->chapterCount) {
-            if (gChapters[newGameMenu->selectedChapter + 1].imageData)
-                newGameMenu->selectedChapter = newGameMenu->selectedChapter + 1;
-        } else {
+        if (newGameMenu->selectedChapter + 1 < newGameMenu->chapterCount)
+            newGameMenu->selectedChapter = newGameMenu->selectedChapter + 1;
+        else
             newGameMenu->selectedChapter = 0;
-        }
     }
     
     if ((controllerGetDirectionDown(0) & ControllerDirectionLeft) != 0) {
