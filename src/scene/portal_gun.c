@@ -47,12 +47,9 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at, int isFres
 
     if (isFreshStart) {
         skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_draw_clip, 0.0f, 0);
-        // the first time the scene renders, the animation clip hasn't started yet
-        // this just hides the gun offscreen so it doesn't show up for a single frame
-        portalGun->armature.pose[0].position.y = -1.0f;
     } else {
         skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_idle_clip, 0.0f, 0);
-    } 
+    }
 }
 
 #define PORTAL_PROJECTILE_RADIUS    0.15f

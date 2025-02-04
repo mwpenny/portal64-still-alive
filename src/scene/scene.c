@@ -122,24 +122,27 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     playerInit(&scene->player, &combinedLocation, &startVelocity);
 
+    if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_0) {
+        playerGivePortalGun(&scene->player, PlayerHasFirstPortalGun);
+    }
+
+    if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_1) {
+        playerGivePortalGun(&scene->player, PlayerHasSecondPortalGun);
+    }
+
     struct Vector3* startPosition = &levelRelativeTransform()->position;
 
     portalGunInit(&scene->portalGun, &scene->player.lookTransform, startPosition->x == 0.0f && startPosition->y == 1.0f && startPosition->z == 0.0f);
+
+    // A frame will be rendered in between initialization and the first update.
+    // Update the portal gun to prevent inaccuracies (visibility flicker, wrong
+    // armature position, etc.)
+    portalGunUpdate(&scene->portalGun, &scene->player);
 
     scene->camera.transform.rotation = scene->player.lookTransform.rotation;
     scene->camera.transform.position = scene->player.lookTransform.position;
 
     sceneUpdateListeners(scene);
-
-    if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_0) {
-        playerGivePortalGun(&scene->player, PlayerHasFirstPortalGun);
-        scene->portalGun.portalGunVisible = 1;
-    }
-
-    if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_1) {
-        playerGivePortalGun(&scene->player, PlayerHasSecondPortalGun);
-        scene->portalGun.portalGunVisible = 1;
-    }
 
     portalInit(&scene->portals[0], 0);
     portalInit(&scene->portals[1], PortalFlagsOddParity);

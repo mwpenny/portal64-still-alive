@@ -596,7 +596,6 @@ void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
     scene->hud.fadeInTimer = 0.0f;
 
     if (scene->player.flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
-        scene->portalGun.portalGunVisible = 1;
         scene->portalGun.rotation = scene->player.lookTransform.rotation;
     }
 }

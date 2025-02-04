@@ -162,7 +162,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->grabConstraint.object = NULL;
     player->pitchVelocity = 0.0f;
     player->yawVelocity = 0.0f;
-    player->flags = 0;
+    player->flags = PlayerFlagsGrounded;
     player->stepTimer = STEP_TIME;
     player->shakeTimer = 0.0f;
     player->currentFoot = 0;
@@ -709,7 +709,7 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
     
     // Stand on collision
     float penetration = hitDistance - PLAYER_HEAD_HEIGHT;
-    if (penetration < 0.0f) {
+    if (penetration < 0.00001f) {
         vector3AddScaled(&player->body.transform.position, &gUp, MIN(-penetration, maxStandDistance), &player->body.transform.position);
         if (player->body.velocity.y < 0.0f) {
             playerHandleLandingRumble(-player->body.velocity.y);
