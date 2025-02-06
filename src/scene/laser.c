@@ -166,5 +166,6 @@ void laserUpdate(struct Laser* laser) {
 }
 
 void laserRemove(struct Laser* laser) {
-    // TODO
+    dynamicSceneRemove(laser->dynamicId);
+    laser->dynamicId = INVALID_DYNAMIC_OBJECT;
 }

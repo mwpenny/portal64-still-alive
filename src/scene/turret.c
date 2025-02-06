@@ -1,10 +1,12 @@
 #include "turret.h"
 
+#include "decor/decor_object.h"
 #include "defs.h"
 #include "physics/collision_scene.h"
 #include "scene/dynamic_scene.h"
 #include "util/dynamic_asset_loader.h"
 
+#include "codegen/assets/audio/clips.h"
 #include "codegen/assets/materials/static.h"
 #include "codegen/assets/models/dynamic_animated_model_list.h"
 
@@ -53,9 +55,9 @@ static void turretRender(void* data, struct DynamicRenderDataList* renderList, s
 
     dynamicRenderListAddDataTouchingPortal(
         renderList,
-        turret->armature.displayList,
+        decorBuildFizzleGfx(turret->armature.displayList, turret->fizzleTime, renderState),
         matrix,
-        TURRET_INDEX,
+        turret->fizzleTime > 0.0f ? TURRET_FIZZLED_INDEX : TURRET_INDEX,
         &turret->rigidBody.transform.position,
         armature,
         turret->rigidBody.flags
@@ -63,9 +65,6 @@ static void turretRender(void* data, struct DynamicRenderDataList* renderList, s
 }
 
 void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
-    // TODO:
-    // * Fizzleable
-
     turret->definition = definition;
 
     collisionObjectInit(&turret->collisionObject, &gTurretCollider, &turret->rigidBody, TURRET_MASS, TURRET_COLLISION_LAYERS);
@@ -89,11 +88,37 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
 
     turret->dynamicId = dynamicSceneAdd(turret, turretRender, &turret->rigidBody.transform.position, 0.75f);
     dynamicSceneSetRoomFlags(turret->dynamicId, ROOM_FLAG_FROM_INDEX(turret->rigidBody.currentRoom));
+
+    turret->fizzleTime = 0.0f;
+    turret->currentSound = SOUND_ID_NONE;
 }
 
 void turretUpdate(struct Turret* turret) {
+    if (turret->dynamicId == INVALID_DYNAMIC_OBJECT) {
+        return;
+    }
+
     if (turret->collisionObject.flags & COLLISION_OBJECT_PLAYER_STANDING) {
         turret->collisionObject.flags &= ~COLLISION_OBJECT_PLAYER_STANDING;
+    }
+
+    enum FizzleCheckResult fizzleStatus = decorObjectUpdateFizzler(&turret->collisionObject, &turret->fizzleTime);
+    if (fizzleStatus == FizzleCheckResultStart) {
+        laserRemove(&turret->laser);
+
+        turret->currentSound = soundPlayerPlay(
+            SOUNDS_TURRET_FIZZLER_1,
+            2.0f,
+            0.5f,
+            &turret->rigidBody.transform.position,
+            &turret->rigidBody.velocity,
+            SoundTypeAll
+        );
+    } else if (fizzleStatus == FizzleCheckResultEnd && !soundPlayerIsPlaying(turret->currentSound)) {
+        dynamicSceneRemove(turret->dynamicId);
+        collisionSceneRemoveDynamicObject(&turret->collisionObject);
+        turret->dynamicId = INVALID_DYNAMIC_OBJECT;
+        turret->currentSound = SOUND_ID_NONE;
     }
 
     dynamicSceneSetRoomFlags(turret->dynamicId, ROOM_FLAG_FROM_INDEX(turret->rigidBody.currentRoom));

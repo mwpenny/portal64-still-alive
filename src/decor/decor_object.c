@@ -136,13 +136,13 @@ enum FizzleCheckResult decorObjectUpdateFizzler(struct CollisionObject* collisio
             result = FizzleCheckResultStart;
 
             collisionObject->collisionLayers = 0;
+            collisionObject->body->flags &= ~RigidBodyFlagsGrabbable;
+            collisionObject->body->flags |= RigidBodyDisableGravity;
         }
 
-        *fizzleTime += FIZZLE_TIME_STEP;
-        collisionObject->body->flags &= ~RigidBodyFlagsGrabbable;
-        collisionObject->body->flags |= RigidBodyDisableGravity;
-
-        if (*fizzleTime > 1.0f) {
+        if (*fizzleTime < 1.0f) {
+            *fizzleTime += FIZZLE_TIME_STEP;
+        } else {
             result = FizzleCheckResultEnd;
         }
     }

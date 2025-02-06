@@ -1,6 +1,7 @@
 #ifndef __TURRET_H__
 #define __TURRET_H__
 
+#include "audio/soundplayer.h"
 #include "levels/level_definition.h"
 #include "physics/collision_object.h"
 #include "scene/laser.h"
@@ -12,7 +13,8 @@ struct Turret {
     struct SKArmature armature;
     struct Laser laser;
     short dynamicId;
-    //float fizzleTime;
+    float fizzleTime;
+    SoundId currentSound;
 };
 
 void turretInit(struct Turret* turret, struct TurretDefinition* definition);

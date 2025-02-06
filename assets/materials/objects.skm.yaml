@@ -261,13 +261,6 @@ materials:
     gSPTexture:
       tile: 0
 
-    gDPSetCombineMode: G_CC_MODULATEI
-    gDPSetCycleType: G_CYC_1CYCLE
-
-    gSPGeometryMode:
-      set: [G_SHADE, G_CULL_BACK]
-      clear: [G_LIGHTING]
-
   turret2:
     gDPSetTile:
       - null
@@ -279,10 +272,3 @@ materials:
         tmem: 128
     gSPTexture:
       tile: 1
-
-    gDPSetCombineMode: G_CC_MODULATEI
-    gDPSetCycleType: G_CYC_1CYCLE
-
-    gSPGeometryMode:
-      set: [G_SHADE, G_CULL_BACK]
-      clear: [G_LIGHTING]

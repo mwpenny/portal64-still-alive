@@ -20,6 +20,8 @@ enum SoundType{
     SoundTypeVoice,
 };
 
+typedef ALSndId SoundId;
+
 void soundPlayerInit();
 void soundPlayerGameVolumeUpdate();
 void soundPlayerUpdate();

@@ -79,6 +79,7 @@ set(SOUND_SCRIPTS
     doors/door_metal_thin_close2.sox
     doors/doormove1.jsox
     doors/doormove2.sox
+    npc/turret_floor/turret_fizzler_1.sox
     plats/elevator_move_loop1.sox
     plats/elevator_stop1.sox
     player/footsteps/concrete1.sox

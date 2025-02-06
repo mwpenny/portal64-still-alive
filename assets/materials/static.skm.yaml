@@ -477,29 +477,23 @@ materials:
       t:
         mirror: true
 
-    gDPSetRenderMode: 
-      - blend: ["G_BL_CLR_IN", "G_BL_A_IN", "G_BL_CLR_FOG", "G_BL_1MA"]
-      - G_RM_ZB_XLU_SURF
-
     gDPSetCycleType: G_CYC_2CYCLE
-    gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
-    gDPSetCombineMode: 
+    gDPSetCombineMode:
       - color: ["SHADE", "0", "TEXEL0", "0"]
         alpha: ["0", "0", "0", "PRIMITIVE"]
       - color: ["NOISE", "COMBINED", "PRIMITIVE", "COMBINED"]
         alpha: ["0", "0", "0", "PRIMITIVE"]
+    gDPSetRenderMode:
+      - blend: ["G_BL_CLR_IN", "G_BL_A_IN", "G_BL_CLR_FOG", "G_BL_1MA"]
+      - G_RM_ZB_XLU_SURF
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
 
     gDPSetFogColor:
       r: 0
       g: 0
       b: 0
-
-    gDPSetPrimColor:
-      r: 100
-      g: 100
-      b: 200
-      a: 128
 
   door_01:
     gDPSetTile: 
@@ -635,29 +629,23 @@ materials:
       t:
         wrap: false
 
-    gDPSetRenderMode: 
-      - blend: ["G_BL_CLR_IN", "G_BL_A_IN", "G_BL_CLR_FOG", "G_BL_1MA"]
-      - G_RM_ZB_XLU_SURF
-
     gDPSetCycleType: G_CYC_2CYCLE
-    gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
-    gDPSetCombineMode: 
+    gDPSetCombineMode:
       - color: ["SHADE", "0", "TEXEL0", "0"]
         alpha: ["0", "0", "0", "PRIMITIVE"]
       - color: ["NOISE", "COMBINED", "PRIMITIVE", "COMBINED"]
         alpha: ["0", "0", "0", "PRIMITIVE"]
+    gDPSetRenderMode:
+      - blend: ["G_BL_CLR_IN", "G_BL_A_IN", "G_BL_CLR_FOG", "G_BL_1MA"]
+      - G_RM_ZB_XLU_SURF
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
 
     gDPSetFogColor:
       r: 0
       g: 0
       b: 0
-
-    gDPSetPrimColor:
-      r: 100
-      g: 100
-      b: 200
-      a: 128
 
   newsignage_back02:
     gDPSetTile: 
@@ -798,30 +786,23 @@ materials:
       siz: G_IM_SIZ_16b
       fmt: G_IM_FMT_RGBA
 
-    gDPSetRenderMode: 
-      - blend: ["G_BL_CLR_IN", "G_BL_A_IN", "G_BL_CLR_FOG", "G_BL_1MA"]
-      - G_RM_ZB_XLU_SURF
-
     gDPSetCycleType: G_CYC_2CYCLE
-    gSPGeometryMode:
-      set: [G_LIGHTING, G_SHADE]
-    gDPSetCombineMode: 
+    gDPSetCombineMode:
       - color: ["SHADE", "0", "TEXEL0", "0"]
         alpha: ["0", "0", "0", "PRIMITIVE"]
       - color: ["NOISE", "COMBINED", "PRIMITIVE", "COMBINED"]
         alpha: ["0", "0", "0", "PRIMITIVE"]
+    gDPSetRenderMode:
+      - blend: ["G_BL_CLR_IN", "G_BL_A_IN", "G_BL_CLR_FOG", "G_BL_1MA"]
+      - G_RM_ZB_XLU_SURF
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
 
     gDPSetFogColor:
       r: 0
       g: 0
       b: 0
-
-    gDPSetPrimColor:
-      r: 100
-      g: 100
-      b: 200
-      a: 128
-    
 
   portal_cleanser:
     gDPSetTile:
@@ -1366,13 +1347,49 @@ materials:
     gDPSetCycleType: G_CYC_1CYCLE
 
     gSPGeometryMode:
-      set: [G_SHADE, G_CULL_BACK]
+      set: [G_SHADE]
       clear: [G_LIGHTING]
+
+  turret_fizzled:
+    gDPSetTile:
+      - filename: ../images/turret1.png
+        usePalette: ../images/turret1.png
+        fmt: G_IM_FMT_CI
+        siz: G_IM_SIZ_4b
+        palette: 0
+        tmem: 0
+      - filename: ../images/turret2.png
+        usePalette: ../images/turret2.png
+        fmt: G_IM_FMT_CI
+        siz: G_IM_SIZ_4b
+        palette: 1
+        tmem: 128
+
+    gDPSetTextureLUT: G_TT_RGBA16
+
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode:
+      - color: ["SHADE", "0", "TEXEL0", "0"]
+        alpha: ["0", "0", "0", "PRIMITIVE"]
+      - color: ["NOISE", "COMBINED", "PRIMITIVE", "COMBINED"]
+        alpha: ["0", "0", "0", "PRIMITIVE"]
+    gDPSetRenderMode:
+      - blend: ["G_BL_CLR_IN", "G_BL_A_IN", "G_BL_CLR_FOG", "G_BL_1MA"]
+      - G_RM_ZB_XLU_SURF
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+    gDPSetFogColor:
+      r: 0
+      g: 0
+      b: 0
 
   laser:
     gDPSetCombineMode: G_CC_SHADE
     gDPSetRenderMode: G_RM_ZB_XLU_SURF
 
     gSPGeometryMode:
-      set: [G_SHADE, G_CULL_BACK]
+      set: [G_SHADE]
       clear: [G_LIGHTING]
