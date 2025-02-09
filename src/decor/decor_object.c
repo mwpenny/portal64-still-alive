@@ -67,10 +67,11 @@ void decorObjectReset(struct DecorObject* object) {
     object->rigidBody.transform.rotation = object->originalRotation;
     object->rigidBody.velocity = gZeroVec;
     object->rigidBody.angularVelocity = gZeroVec;
-    object->fizzleTime = 0.0f;
     object->rigidBody.flags &= ~(RigidBodyFizzled | RigidBodyDisableGravity);
     object->rigidBody.flags |= RigidBodyFlagsGrabbable;
     object->rigidBody.currentRoom = object->originalRoom;
+    object->fizzleTime = 0.0f;
+    object->collisionObject.collisionLayers = DECOR_COLLISION_LAYERS;
 }
 
 void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* definition, struct Transform* at, int room) {
