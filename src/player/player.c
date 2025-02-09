@@ -338,7 +338,7 @@ int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPa
         player->grabConstraint.object->collisionLayers = prevCollisionLayers;
     }
     else{
-        result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit);
+        result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE, GRAB_RAYCAST_DISTANCE, 1, hit);
     }
 
     player->collisionObject.collisionLayers = PLAYER_COLLISION_LAYERS;
@@ -364,12 +364,10 @@ void playerUpdateGrabbedObject(struct Player* player) {
                     player->flags |= PlayerJustSelect;
                     player->grabbingThroughPortal = hit.numPortalsPassed;
                     playerSetGrabbing(player, hit.object);
-                }
-                else if ((hit.object->body)){
+                } else if (hit.object->body) {
                     player->flags |= PlayerJustSelect;
                     hudResolvePrompt(&gScene.hud, CutscenePromptTypeUse);
-                }
-                else{
+                } else {
                     player->flags |= PlayerJustDeniedSelect;
                 }
             }

@@ -33,7 +33,7 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
     * Portals
     * [Turret](./turret.md) shots
 * `TRANSPARENT`: Unused
-* `TANGIBLE`: Used to check grabbing and walking, and by:
+* `TANGIBLE`: Used to check grabbing distance, walking, and by:
     * [Ball catchers](./ball_catcher.md)
     * [Ball launchers](./ball_launcher.md)
     * [Buttons](./button.md)
@@ -47,9 +47,10 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
     * [Security cameras](./security_camera.md)
     * [Switches](./switch.md)
     * [Triggers](./trigger.md)
-* `GRABBABLE`: Used to check grabbing, and by:
+* `GRABBABLE`: Used to check grabbable and interactable objects, and by:
     * [Decor](./decor.md) (with collision)
     * [Security cameras](./security_camera.md) (when detached)
+    * [Switches](./switch.md)
 * `FIZZLER`: Used to block portal raycasts, and by:
     * [Decor](./decor.md) (with collision)
     * [Fizzlers](./fizzler.md)
