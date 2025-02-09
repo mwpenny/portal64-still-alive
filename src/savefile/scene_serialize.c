@@ -1,13 +1,9 @@
 #include "./scene_serialize.h"
 
-#include "../physics/collision_scene.h"
-#include "../decor/decor_object_list.h"
-#include "../util/memory.h"
-#include "../levels/levels.h"
-
-#ifdef PORTAL64_WITH_DEBUGGER
-#include "../debugger/debugger.h"
-#endif
+#include "decor/decor_object_list.h"
+#include "levels/levels.h"
+#include "physics/collision_scene.h"
+#include "util/memory.h"
 
 void playerSerialize(struct Serializer* serializer, SerializeAction action, struct Player* player) {
     action(serializer, &player->lookTransform, sizeof(struct PartialTransform));
@@ -162,6 +158,8 @@ void decorSerialize(struct Serializer* serializer, SerializeAction action, struc
         action(serializer, &entry->rigidBody.flags, sizeof(enum RigidBodyFlags));
         action(serializer, &entry->rigidBody.currentRoom, sizeof(short));
 
+        action(serializer, &entry->fizzleTime, sizeof(float));
+
         entry->rigidBody.flags &= ~RigidBodyIsSleeping;
         entry->rigidBody.sleepFrames = IDLE_SLEEP_FRAMES;
     }
@@ -205,6 +203,8 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
         serializeRead(serializer, &entry->rigidBody.flags, sizeof(enum RigidBodyFlags));
         serializeRead(serializer, &entry->rigidBody.currentRoom, sizeof(short));
 
+        serializeRead(serializer, &entry->fizzleTime, sizeof(float));
+
         scene->decor[i] = entry;
 
         if (heldObject == i) {
@@ -246,6 +246,7 @@ void boxDropperSerialize(struct Serializer* serializer, SerializeAction action, 
     for (int i = 0; i < scene->boxDropperCount; ++i) {
         struct BoxDropper* dropper = &scene->boxDroppers[i];
         action(serializer, &dropper->flags, sizeof(short));
+        action(serializer, &dropper->reloadTimer, sizeof(float));
 
         if (!(dropper->flags & BoxDropperFlagsCubeIsActive)) {
             continue;
@@ -256,6 +257,7 @@ void boxDropperSerialize(struct Serializer* serializer, SerializeAction action, 
         action(serializer, &dropper->activeCube.rigidBody.velocity, sizeof(struct Vector3));
         action(serializer, &dropper->activeCube.rigidBody.angularVelocity, sizeof(struct Vector3));
         action(serializer, &dropper->activeCube.rigidBody.flags, sizeof(enum RigidBodyFlags));
+        action(serializer, &dropper->activeCube.fizzleTime, sizeof(float));
     }
 }
 
@@ -266,6 +268,7 @@ void boxDropperDeserialize(struct Serializer* serializer, struct Scene* scene) {
     for (int i = 0; i < scene->boxDropperCount; ++i) {
         struct BoxDropper* dropper = &scene->boxDroppers[i];
         serializeRead(serializer, &dropper->flags, sizeof(short));
+        serializeRead(serializer, &dropper->reloadTimer, sizeof(float));
 
         if (!(dropper->flags & BoxDropperFlagsCubeIsActive)) {
             continue;
@@ -282,6 +285,7 @@ void boxDropperDeserialize(struct Serializer* serializer, struct Scene* scene) {
         serializeRead(serializer, &dropper->activeCube.rigidBody.velocity, sizeof(struct Vector3));
         serializeRead(serializer, &dropper->activeCube.rigidBody.angularVelocity, sizeof(struct Vector3));
         serializeRead(serializer, &dropper->activeCube.rigidBody.flags, sizeof(enum RigidBodyFlags));
+        serializeRead(serializer, &dropper->activeCube.fizzleTime, sizeof(float));
 
         dropper->activeCube.rigidBody.flags &= ~RigidBodyIsSleeping;
         dropper->activeCube.rigidBody.sleepFrames = IDLE_SLEEP_FRAMES;
@@ -478,6 +482,8 @@ void securityCameraSerialize(struct Serializer* serializer, SerializeAction acti
             action(serializer, &cam->rigidBody.angularVelocity, sizeof(struct Vector3));
             action(serializer, &cam->rigidBody.flags, sizeof(enum RigidBodyFlags));
             action(serializer, &cam->rigidBody.currentRoom, sizeof(short));
+
+            action(serializer, &cam->fizzleTime, sizeof(float));
         }
     }
 }
@@ -505,6 +511,8 @@ void securityCameraDeserialize(struct Serializer* serializer, struct Scene* scen
         serializeRead(serializer, &cam->rigidBody.angularVelocity, sizeof(struct Vector3));
         serializeRead(serializer, &cam->rigidBody.flags, sizeof(enum RigidBodyFlags));
         serializeRead(serializer, &cam->rigidBody.currentRoom, sizeof(short));
+
+        serializeRead(serializer, &cam->fizzleTime, sizeof(float));
         
         cam->rigidBody.flags &= ~RigidBodyIsSleeping;
         cam->rigidBody.sleepFrames = IDLE_SLEEP_FRAMES;
@@ -519,7 +527,7 @@ void securityCameraDeserialize(struct Serializer* serializer, struct Scene* scen
 
 #if INCLUDE_SAVEFILE_ALIGN_CHECKS
 #define WRITE_ALIGN_CHECK   {action(serializer, &currentAlign, 1); ++currentAlign;}
-#define READ_ALIGN_CHECK {serializeRead(serializer, &currentAlign, 1); if (currentAlign != expectedAlign) gdbBreak(); ++expectedAlign;}
+#define READ_ALIGN_CHECK {serializeRead(serializer, &currentAlign, 1); if (currentAlign != expectedAlign) debug_assert(0); ++expectedAlign;}
 #else
 #define WRITE_ALIGN_CHECK
 #define READ_ALIGN_CHECK

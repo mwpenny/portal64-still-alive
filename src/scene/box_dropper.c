@@ -146,7 +146,7 @@ void boxDropperUpdate(struct BoxDropper* dropper) {
         dropper->flags |= BoxDropperFlagsCubeRequested;
     }
 
-    if (((dropper->flags & (BoxDropperFlagsCubeIsActive | BoxDropperFlagsCubeRequested)) == BoxDropperFlagsCubeRequested)) {
+    if (dropper->reloadTimer == 0.0f && ((dropper->flags & (BoxDropperFlagsCubeIsActive | BoxDropperFlagsCubeRequested)) == BoxDropperFlagsCubeRequested)) {
         struct Transform pendingCubePos;
         boxDropperFakePos(dropper, &pendingCubePos);
 

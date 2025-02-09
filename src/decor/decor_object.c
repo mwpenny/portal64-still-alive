@@ -1,11 +1,11 @@
 #include "decor_object.h"
 
-#include "../physics/collision_scene.h"
-#include "../scene/dynamic_scene.h"
-#include "../util/memory.h"
-#include "../audio/soundplayer.h"
+#include "audio/soundplayer.h"
+#include "physics/collision_scene.h"
+#include "scene/dynamic_scene.h"
 #include "system/time.h"
-#include "../util/dynamic_asset_loader.h"
+#include "util/dynamic_asset_loader.h"
+#include "util/memory.h"
 
 #define TIME_TO_FIZZLE         2.0f
 #define FIZZLE_TIME_STEP       (FIXED_DELTA_TIME / TIME_TO_FIZZLE)
@@ -135,10 +135,11 @@ enum FizzleCheckResult decorObjectUpdateFizzler(struct CollisionObject* collisio
 
             result = FizzleCheckResultStart;
 
-            collisionObject->collisionLayers = 0;
             collisionObject->body->flags &= ~RigidBodyFlagsGrabbable;
             collisionObject->body->flags |= RigidBodyDisableGravity;
         }
+
+        collisionObject->collisionLayers = 0;
 
         if (*fizzleTime < 1.0f) {
             *fizzleTime += FIZZLE_TIME_STEP;
@@ -169,10 +170,10 @@ int decorObjectUpdate(struct DecorObject* decorObject) {
         if (decorObject->playingSound != SOUND_ID_NONE) {
             soundPlayerStop(decorObject->playingSound);
             decorObject->playingSound = SOUND_ID_NONE;
-            
-            if (decorObject->definition->soundFizzleId != SOUND_ID_NONE) {
-                decorObject->playingSound = soundPlayerPlay(decorObject->definition->soundFizzleId, 2.0f, 0.5f, &decorObject->rigidBody.transform.position, &decorObject->rigidBody.velocity, SoundTypeAll);
-            }
+        }
+
+        if (decorObject->definition->soundFizzleId != SOUND_ID_NONE) {
+            decorObject->playingSound = soundPlayerPlay(decorObject->definition->soundFizzleId, 2.0f, 0.5f, &decorObject->rigidBody.transform.position, &decorObject->rigidBody.velocity, SoundTypeAll);
         }
     } else if (fizzleResult == FizzleCheckResultEnd) {
         if (decorObject->definition->flags & DecorObjectFlagsImportant) {

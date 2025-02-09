@@ -1,14 +1,13 @@
 #ifndef _SCENE_BOX_DROPPER_H__
 #define _SCENE_BOX_DROPPER_H__
 
-#include "../math/transform.h"
-#include "../sk64/skeletool_armature.h"
-#include "../sk64/skeletool_animator.h"
-#include "../levels/level_definition.h"
-#include "../audio/clips.h"
-#include "../audio/soundplayer.h"
-
-#include "../decor/decor_object.h"
+#include "audio/clips.h"
+#include "audio/soundplayer.h"
+#include "decor/decor_object.h"
+#include "levels/level_definition.h"
+#include "math/transform.h"
+#include "sk64/skeletool_armature.h"
+#include "sk64/skeletool_animator.h"
 
 enum BoxDropperFlags {
     BoxDropperFlagsCubeRequested = (1 << 0),
