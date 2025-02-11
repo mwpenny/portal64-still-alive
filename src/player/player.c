@@ -338,7 +338,7 @@ int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPa
         player->grabConstraint.object->collisionLayers = prevCollisionLayers;
     }
     else{
-        result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE, GRAB_RAYCAST_DISTANCE, 1, hit);
+        result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit);
     }
 
     player->collisionObject.collisionLayers = PLAYER_COLLISION_LAYERS;
@@ -360,18 +360,26 @@ void playerUpdateGrabbedObject(struct Player* player) {
             if (playerRaycastGrab(player, &hit, 0)) {
                 hit.object->flags |= COLLISION_OBJECT_INTERACTED;
 
-                if (hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable) && !(hit.object->flags & COLLISION_OBJECT_PLAYER_STANDING)) {
+                // Raycasts only check portals if something else was hit first
+                // (i.e., a wall), so grab casts also check the TANGIBLE layer.
+                //
+                // Make sure we actually found something to interact with.
+                if (hit.object->body && (hit.object->collisionLayers & COLLISION_LAYERS_GRABBABLE)) {
                     player->flags |= PlayerJustSelect;
-                    player->grabbingThroughPortal = hit.numPortalsPassed;
-                    playerSetGrabbing(player, hit.object);
-                } else if (hit.object->body) {
-                    player->flags |= PlayerJustSelect;
-                    hudResolvePrompt(&gScene.hud, CutscenePromptTypeUse);
+
+                    if ((hit.object->body->flags & RigidBodyFlagsGrabbable) &&
+                        !(hit.object->flags & COLLISION_OBJECT_PLAYER_STANDING)) {
+                        // Grabbable object
+                        player->grabbingThroughPortal = hit.numPortalsPassed;
+                        playerSetGrabbing(player, hit.object);
+                    } else if (!(hit.object->body->flags & RigidBodyFlagsGrabbable)) {
+                        // Usable object
+                        hudResolvePrompt(&gScene.hud, CutscenePromptTypeUse);
+                    }
                 } else {
                     player->flags |= PlayerJustDeniedSelect;
                 }
-            }
-            else{
+            } else {
                 player->flags |= PlayerJustDeniedSelect;
             }
         }

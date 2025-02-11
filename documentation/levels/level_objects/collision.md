@@ -33,7 +33,7 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
     * Portals
     * [Turret](./turret.md) shots
 * `TRANSPARENT`: Unused
-* `TANGIBLE`: Used to check grabbing distance, walking, and by:
+* `TANGIBLE`: Used to check grabbing and walking, and by:
     * [Ball catchers](./ball_catcher.md)
     * [Ball launchers](./ball_launcher.md)
     * [Buttons](./button.md)
