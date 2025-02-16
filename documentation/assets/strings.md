@@ -6,17 +6,18 @@ optional localization.
 
 ## String Sources
 
-There are four sources of strings from the original game:
+There are five sources of strings from the original game:
 
-1. `vpk/Portal/hl2/resource/gameui_<language>.txt`: Strings related to menus.
-2. `vpk/Portal/hl2/resource/valve_<language>.txt`: Miscellaneous non-game-specific strings.
-3. `vpk/Portal/portal/resource/closecaption_<language>.txt`: Captions for portal dialogue and sounds.
-4. `vpk/Portal/portal/resource/portal_<language>.txt`: Miscellaneous Portal strings (UI and credits).
+1. `vpk/Portal/hl2/resource/closecaption_<language>.txt`: Captions re-used from Half-Life 2.
+2. `vpk/Portal/hl2/resource/gameui_<language>.txt`: Strings related to menus.
+3. `vpk/Portal/hl2/resource/valve_<language>.txt`: Miscellaneous non-game-specific strings.
+4. `vpk/Portal/portal/resource/closecaption_<language>.txt`: Captions for Portal dialogue and sounds.
+5. `vpk/Portal/portal/resource/portal_<language>.txt`: Miscellaneous Portal strings (UI and credits).
 
 Strings unique to Portal 64 are stored in `assets/translations/extra_<language>.txt`.
 
-All "caption" and "extra" strings are included in the game. Other strings are
-manually specified in the
+All Portal "caption" and "extra" strings are included in the game. Other strings
+are manually specified in the
 [`tools/text/generate_strings.py`](../../tools/text/generate_strings.py) script.
 
 Strings are localized. The build-time text language configuration determines

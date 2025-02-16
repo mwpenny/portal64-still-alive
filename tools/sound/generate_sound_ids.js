@@ -128,9 +128,9 @@ ${soundIndices.join('\n')}
 
 // languages.h
 
-function generateLanguageEnumEntries(languages) {
-    return [...languages.keys()].map(k => {
-        return `\tAUDIO_LANGUAGE_${k.toUpperCase()}`;
+function generateLanguageConstants(languages) {
+    return [...languages.keys()].map((k, i) => {
+        return `#define AUDIO_LANGUAGE_${k.toUpperCase()} ${i}`;
     });
 }
 
@@ -141,17 +141,14 @@ function generateLanguagesHeaderFile(soundInfo) {
     return `#ifndef __LANGUAGES_H__
 #define __LANGUAGES_H__
 
+${generateLanguageConstants(languages).join('\n')}
 #define NUM_AUDIO_LANGUAGES ${languages.size}
+
 #define FIRST_LOCALIZED_SOUND ${[...defaultLanguageSounds.values()][0].index}
 #define NUM_LOCALIZED_SOUNDS ${defaultLanguageSounds.size}
 
 extern char* AudioLanguages[];
 extern int AudioLanguageValues[][NUM_LOCALIZED_SOUNDS];
-
-enum AudioLanguagesKey
-{
-${generateLanguageEnumEntries(languages).join(',\n')}
-};
 
 #endif`;
 }

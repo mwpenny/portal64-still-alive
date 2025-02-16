@@ -255,6 +255,29 @@ void quatLerp(struct Quaternion* a, struct Quaternion* b, float t, struct Quater
     quatNormalize(out, out);
 }
 
+int quatRotateTowards(struct Quaternion* from, struct Quaternion* towards, float maxDistance, struct Quaternion* out) {
+    float dx = towards->x - from->x;
+    float dy = towards->y - from->y;
+    float dz = towards->z - from->z;
+    float dw = towards->w - from->w;
+    float distSqrd = dx * dx + dy * dy + dz * dz + dw * dw;
+
+    if (distSqrd < maxDistance * maxDistance) {
+        *out = *towards;
+        return 1;
+    } else {
+        float scale = maxDistance / sqrtf(distSqrd);
+
+        out->x = dx * scale + from->x;
+        out->y = dy * scale + from->y;
+        out->z = dz * scale + from->z;
+        out->w = dw * scale + from->w;
+
+        quatNormalize(out, out);
+        return 0;
+    }
+}
+
 void quatApplyAngularVelocity(struct Quaternion* input, struct Vector3* w, float timeStep, struct Quaternion* output) {
     struct Quaternion velocityAsQuat;
     velocityAsQuat.w = 0.0f;

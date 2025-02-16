@@ -103,6 +103,9 @@ void hudUpdate(struct Hud* hud) {
                 hud->subtitleExpireTimer = CAPTION_EXPIRE_TIME;
             }
         }
+    } else if (hud->subtitleOpacity <= 0.0f && !(hud->flags & HudFlagsSubtitleQueued)) {
+        // Allow queuing same subtitle again
+        hud->subtitleId = StringIdNone;
     }
 
     if (hud->subtitleExpireTimer <= 0.0f && hud->subtitleType == SubtitleTypeCaption){

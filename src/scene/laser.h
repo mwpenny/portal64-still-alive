@@ -14,14 +14,15 @@ struct LaserBeam {
 
 struct Laser {
     struct RigidBody* parent;
-    struct Vector3 parentOffset;
+    struct Vector3* parentOffset;
+    struct Quaternion* parentRotation;
     short dynamicId;
 
     struct LaserBeam beams[LASER_MAX_BEAMS];
     short beamCount;
 };
 
-void laserInit(struct Laser* laser, struct RigidBody* parent, struct Vector3* offset);
+void laserInit(struct Laser* laser, struct RigidBody* parent, struct Vector3* offset, struct Quaternion* rotation);
 void laserUpdate(struct Laser* laser);
 void laserRemove(struct Laser* laser);
 

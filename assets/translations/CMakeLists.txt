@@ -19,6 +19,7 @@ set(STRING_DATA_TABLE_FILES "")
 
 foreach(LANGUAGE ${TEXT_LANGUAGES_LIST})
     list(APPEND STRING_INPUT_FILES
+        "${VPK_DIR}/Portal/hl2/resource/closecaption_${LANGUAGE}.txt"
         "${VPK_DIR}/Portal/hl2/resource/gameui_${LANGUAGE}.txt"
         "${VPK_DIR}/Portal/hl2/resource/valve_${LANGUAGE}.txt"
         "${VPK_DIR}/Portal/portal/resource/closecaption_${LANGUAGE}.txt"

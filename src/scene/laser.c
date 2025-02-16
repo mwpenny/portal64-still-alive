@@ -98,9 +98,10 @@ static void laserRender(void* data, struct RenderScene* renderScene, struct Tran
     );
 }
 
-void laserInit(struct Laser* laser, struct RigidBody* parent, struct Vector3* offset) {
+void laserInit(struct Laser* laser, struct RigidBody* parent, struct Vector3* offset, struct Quaternion* rotation) {
     laser->parent = parent;
-    laser->parentOffset = *offset;
+    laser->parentOffset = offset;
+    laser->parentRotation = rotation;
     laser->beamCount = 0;
 
     // The laser could traverse multiple rooms and pass through portals.
@@ -119,9 +120,11 @@ void laserInit(struct Laser* laser, struct RigidBody* parent, struct Vector3* of
 
 void laserUpdate(struct Laser* laser) {
     struct Ray startPosition = {
-        .origin = laser->parentOffset,
+        .origin = *laser->parentOffset,
         .dir    = gForward
     };
+    quatMultVector(laser->parentRotation, &startPosition.dir, &startPosition.dir);
+
     struct Transform startTransform = laser->parent->transform;
     int currentRoom = laser->parent->currentRoom;
     uint64_t beamRooms = ROOM_FLAG_FROM_INDEX(currentRoom);
@@ -166,6 +169,8 @@ void laserUpdate(struct Laser* laser) {
 }
 
 void laserRemove(struct Laser* laser) {
-    dynamicSceneRemove(laser->dynamicId);
-    laser->dynamicId = INVALID_DYNAMIC_OBJECT;
+    if (laser->dynamicId != INVALID_DYNAMIC_OBJECT) {
+        dynamicSceneRemove(laser->dynamicId);
+        laser->dynamicId = INVALID_DYNAMIC_OBJECT;
+    }
 }

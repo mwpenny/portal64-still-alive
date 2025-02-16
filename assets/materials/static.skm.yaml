@@ -1334,12 +1334,20 @@ materials:
         siz: G_IM_SIZ_4b
         palette: 0
         tmem: 0
+        s:
+          mirror: true
+        t:
+          mirror: true
       - filename: ../images/turret2.png
         usePalette: ../images/turret2.png
         fmt: G_IM_FMT_CI
         siz: G_IM_SIZ_4b
         palette: 1
         tmem: 128
+        s:
+          mirror: true
+        t:
+          mirror: true
 
     gDPSetTextureLUT: G_TT_RGBA16
 
@@ -1358,12 +1366,20 @@ materials:
         siz: G_IM_SIZ_4b
         palette: 0
         tmem: 0
+        s:
+          mirror: true
+        t:
+          mirror: true
       - filename: ../images/turret2.png
         usePalette: ../images/turret2.png
         fmt: G_IM_FMT_CI
         siz: G_IM_SIZ_4b
         palette: 1
         tmem: 128
+        s:
+          mirror: true
+        t:
+          mirror: true
 
     gDPSetTextureLUT: G_TT_RGBA16
 

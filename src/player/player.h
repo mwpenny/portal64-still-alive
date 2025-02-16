@@ -74,6 +74,7 @@ int playerIsDead(struct Player* player);
 void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing);
 void playerSignalPortalChanged(struct Player* player);
 int playerIsGrabbing(struct Player* player);
+int playerIsGrabbingObject(struct Player* player, struct CollisionObject* object);
 void playerThrowObject(struct Player* player);
 
 void playerToggleJumpImpulse(struct Player* player, float newJumpImpulse);

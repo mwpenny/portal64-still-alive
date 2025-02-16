@@ -635,7 +635,7 @@ void sceneUpdate(struct Scene* scene) {
     }
 
     for (int i = 0; i < scene->turretCount; ++i) {
-        turretUpdate(&scene->turrets[i]);
+        turretUpdate(&scene->turrets[i], &scene->player);
     }
 
     playerUpdate(&scene->player);

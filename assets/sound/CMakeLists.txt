@@ -9,6 +9,7 @@ cmake_path(
     BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
     OUTPUT_VARIABLE RELATIVE_CURRENT_DIR
 )
+set(OUTPUT_DIR "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}")
 
 function(_get_localized_pak_sound_dir LANGUAGE DIR_OUT)
     if (LANGUAGE STREQUAL "english")
@@ -79,7 +80,9 @@ set(SOUND_SCRIPTS
     doors/door_metal_thin_close2.sox
     doors/doormove1.jsox
     doors/doormove2.sox
-    npc/turret_floor/turret_fizzler_1.sox
+    npc/turret_floor/active.sox
+    npc/turret_floor/deploy.sox
+    npc/turret_floor/retract.sox
     plats/elevator_move_loop1.sox
     plats/elevator_stop1.sox
     player/footsteps/concrete1.sox
@@ -112,6 +115,20 @@ set(SOUND_SCRIPTS
 )
 
 set(LOCALIZED_SOUND_SCRIPTS
+    npc/turret_floor/turret_fizzler_1.sox
+    npc/turret_floor/turret_pickup_1.sox
+    npc/turret_floor/turret_pickup_3.sox
+    npc/turret_floor/turret_pickup_6.sox
+    npc/turret_floor/turret_pickup_7.sox
+    npc/turret_floor/turret_pickup_8.sox
+    npc/turret_floor/turret_pickup_9.sox
+    npc/turret_floor/turret_pickup_10.sox
+    npc/turret_floor/turret_retire_1.sox
+    npc/turret_floor/turret_retire_2.sox
+    npc/turret_floor/turret_retire_4.sox
+    npc/turret_floor/turret_retire_5.sox
+    npc/turret_floor/turret_retire_6.sox
+    npc/turret_floor/turret_retire_7.sox
     vo/aperture_ai/00_part1_entry-1.sox
     vo/aperture_ai/00_part1_entry-2.sox
     vo/aperture_ai/00_part1_entry-3.sox
@@ -192,6 +209,21 @@ set(LOCALIZED_SOUND_SCRIPTS
     vo/aperture_ai/generic_security_camera_destroyed-3.sox
     vo/aperture_ai/generic_security_camera_destroyed-4.sox
     vo/aperture_ai/generic_security_camera_destroyed-5.sox
+)
+
+# Localized sounds which are not localized in this language
+set(RUSSIAN_EXCLUDED_LOCALIZED_SOUND_SCRIPTS
+    npc/turret_floor/turret_pickup_3.sox
+    npc/turret_floor/turret_pickup_6.sox
+    npc/turret_floor/turret_pickup_7.sox
+    npc/turret_floor/turret_pickup_8.sox
+    npc/turret_floor/turret_pickup_9.sox
+    npc/turret_floor/turret_pickup_10.sox
+    npc/turret_floor/turret_retire_2.sox
+    npc/turret_floor/turret_retire_4.sox
+    npc/turret_floor/turret_retire_5.sox
+    npc/turret_floor/turret_retire_6.sox
+    npc/turret_floor/turret_retire_7.sox
 )
 
 set(MUSIC_SCRIPTS
@@ -316,6 +348,11 @@ endforeach()
 # Sounds within a language must be contiguous, so loop over languages first
 foreach(LANGUAGE ${AUDIO_LANGUAGES_LIST})
     foreach(SOUND_SCRIPT ${LOCALIZED_SOUND_SCRIPTS})
+        string(TOUPPER "${LANGUAGE}_EXCLUDED_LOCALIZED_SOUND_SCRIPTS" EXCLUDED_SOUNDS)
+        if (EXCLUDED_SOUNDS AND (${SOUND_SCRIPT} IN_LIST ${EXCLUDED_SOUNDS}))
+            continue()
+        endif()
+
         cmake_path(
             REMOVE_EXTENSION SOUND_SCRIPT
             OUTPUT_VARIABLE SOUND_NAME
@@ -348,7 +385,7 @@ function(_add_sound_convert_command INPUT_FILE OUTPUT_LIST)
         REMOVE_EXTENSION SOUND_NAME
         OUTPUT_VARIABLE SOUND_NAME
     )
-    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.aifc")
+    set(OUTPUT_FILE "${OUTPUT_DIR}/${SOUND_NAME}.aifc")
 
     add_custom_command(
         DEPENDS
@@ -397,7 +434,7 @@ endforeach()
 foreach(CONVERTED_SOUND ${SOUNDS_CONVERTED})
     cmake_path(
         RELATIVE_PATH CONVERTED_SOUND
-        BASE_DIRECTORY "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}"
+        BASE_DIRECTORY ${OUTPUT_DIR}
         OUTPUT_VARIABLE INS_BANK
     )
     cmake_path(
@@ -412,12 +449,12 @@ foreach(CONVERTED_SOUND ${SOUNDS_CONVERTED})
 endforeach()
 
 # Avoid extremely long argument list (MSYS2 has low ARG_MAX)
-list(TRANSFORM SOUND_TABLE_INPUTS REPLACE "${PROJECT_SOURCE_DIR}/" "" OUTPUT_VARIABLE SOUND_TABLE_INPUTS)
+list(TRANSFORM SOUND_TABLE_INPUTS REPLACE "${OUTPUT_DIR}/" "" OUTPUT_VARIABLE SOUND_TABLE_INPUTS)
 
 # Add commands for generating sound tables
 
-set(SOUND_TABLE_SOUNDS "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/sounds.sounds")
-set(SOUND_TABLE_TBL "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/sounds.sounds.tbl")
+set(SOUND_TABLE_SOUNDS "${OUTPUT_DIR}/sounds.sounds")
+set(SOUND_TABLE_TBL "${OUTPUT_DIR}/sounds.sounds.tbl")
 set(SOUND_DATA_TABLE_FILES
     ${SOUND_TABLE_SOUNDS}
     ${SOUND_TABLE_TBL}
@@ -431,7 +468,7 @@ add_custom_command(
     COMMAND
         ${SFZ2N64_EXECUTABLE} -o ${SOUND_TABLE_SOUNDS} ${SOUND_TABLE_INPUTS}
     WORKING_DIRECTORY
-        ${PROJECT_SOURCE_DIR}
+        ${OUTPUT_DIR}
     COMMENT
         "Generating sound data tables"
     VERBATIM

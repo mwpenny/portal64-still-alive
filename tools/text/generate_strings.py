@@ -37,6 +37,12 @@ SUPPORTED_LANGUAGES = {
     "ukrainian":  "Українська мова",
 }
 
+STRINGS_CLOSECAPTION_HL2 = {
+    "NPC_FLOORTURRET_ACTIVATE",
+    "NPC_FLOORTURRET_DEPLOY",
+    "NPC_FLOORTURRET_RETRACT",
+}
+
 STRINGS_GAMEUI = {
     "GAMEUI_ASPECTWIDE",
     "GAMEUI_AUDIO",
@@ -297,6 +303,12 @@ def parse_all_languages(game_root_dir, extra_translations_dir, languages):
 
     for language in languages:
         strings = {
+            # Captions (HL2)
+            **parse_strings_file(
+                os.path.join(game_root_dir, HL2_RESOURCE_DIR, f"closecaption_{language}.txt"),
+                whitelist=STRINGS_CLOSECAPTION_HL2
+            ),
+
             # Game UI
             **parse_strings_file(
                 os.path.join(game_root_dir, HL2_RESOURCE_DIR, f"gameui_{language}.txt"),
@@ -309,7 +321,7 @@ def parse_all_languages(game_root_dir, extra_translations_dir, languages):
                 whitelist=STRINGS_VALVE
             ),
 
-            # Captions
+            # Captions (Portal)
             **parse_strings_file(
                 os.path.join(game_root_dir, PORTAL_RESOURCE_DIR, f"closecaption_{language}.txt")
             ),

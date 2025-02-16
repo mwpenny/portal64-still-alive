@@ -58,6 +58,34 @@ function(_add_vpk_extract_command VPK_LIST OUTPUT_DIR OUTPUT_LIST)
     return(PROPAGATE ${OUTPUT_LIST})
 endfunction()
 
+function(_add_normalize_localized_audio_command STAMP_FILE_LIST)
+    if ("russian" IN_LIST AUDIO_LANGUAGES_LIST)
+        set(AUDIO_FIX_STAMP "${PAK_DIR}/localized_audio_normalization.stamp")
+        set(RU_SOUND_DIR "${PAK_DIR}/localized/russian/sound")
+
+        add_custom_command(
+            DEPENDS
+                ${${STAMP_FILE_LIST}}
+            OUTPUT
+                ${AUDIO_FIX_STAMP}
+            COMMAND
+                ${CMAKE_COMMAND} -E rename
+                "${RU_SOUND_DIR}/npc/turret_floor/turret_dissolved_1.wav"
+                "${RU_SOUND_DIR}/npc/turret_floor/turret_fizzler_1.wav"
+            COMMAND
+                ${CMAKE_COMMAND} -E touch ${AUDIO_FIX_STAMP}
+            WORKING_DIRECTORY
+                "${CMAKE_CURRENT_SOURCE_DIR}"
+            COMMENT
+                "Normalizing localized audio file names"
+            VERBATIM
+        )
+
+        list(APPEND ${STAMP_FILE_LIST} ${AUDIO_FIX_STAMP})
+        return(PROPAGATE ${STAMP_FILE_LIST})
+    endif()
+endfunction()
+
 set(VPK_STAMP_FILES "")
 
 _add_vpk_extract_command("${VPKS_PORTAL}"         ${PAK_DIR} VPK_STAMP_FILES)
@@ -79,6 +107,8 @@ foreach(LANGUAGE ${AUDIO_LANGUAGES_LIST})
 
     _add_vpk_extract_command("${LANGUAGE_VPKS}" ${OUTPUT_DIR} VPK_STAMP_FILES)
 endforeach()
+
+_add_normalize_localized_audio_command(VPK_STAMP_FILES)
 
 add_custom_target(extract_vpks
     DEPENDS ${VPK_STAMP_FILES}

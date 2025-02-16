@@ -127,7 +127,7 @@ void decorSerialize(struct Serializer* serializer, SerializeAction action, struc
             continue;
         }
 
-        if (scene->player.grabConstraint.object == &entry->collisionObject) {
+        if (playerIsGrabbingObject(&scene->player, &entry->collisionObject)) {
             heldObject = countAsShort;
         }
         
@@ -235,7 +235,7 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
 void boxDropperSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     short heldCube = -1;
     for (int i = 0; i < scene->boxDropperCount; ++i) {
-        if (&scene->boxDroppers[i].activeCube.collisionObject == scene->player.grabConstraint.object) {
+        if (playerIsGrabbingObject(&scene->player, &scene->boxDroppers[i].activeCube.collisionObject)) {
             heldCube = i;
             break;
         }
@@ -462,7 +462,7 @@ void securityCameraSerialize(struct Serializer* serializer, SerializeAction acti
     for (int i = 0; i < scene->securityCameraCount; ++i) {
         struct SecurityCamera* cam = &scene->securityCameras[i];
         if (securityCameraIsDetached(cam)) {
-            if (&cam->collisionObject == scene->player.grabConstraint.object) {
+            if (playerIsGrabbingObject(&scene->player, &cam->collisionObject)) {
                 heldCam = serializedCount;
             }
             ++serializedCount;

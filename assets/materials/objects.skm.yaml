@@ -258,6 +258,10 @@ materials:
       siz: G_IM_SIZ_4b
       palette: 0
       tmem: 0
+      s:
+        mirror: true
+      t:
+        mirror: true
     gSPTexture:
       tile: 0
 
@@ -270,5 +274,9 @@ materials:
         siz: G_IM_SIZ_4b
         palette: 1
         tmem: 128
+        s:
+          mirror: true
+        t:
+          mirror: true
     gSPTexture:
       tile: 1

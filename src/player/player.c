@@ -303,6 +303,10 @@ int playerIsGrabbing(struct Player* player) {
     return player->grabConstraint.object != NULL;
 }
 
+int playerIsGrabbingObject(struct Player* player, struct CollisionObject* object) {
+    return player->grabConstraint.object == object;
+}
+
 void playerThrowObject(struct Player* player) {
     if (!playerIsGrabbing(player)) {
         return;
