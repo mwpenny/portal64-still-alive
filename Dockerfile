@@ -2,9 +2,9 @@ FROM ubuntu:24.04
 
 WORKDIR /usr/src/app
 
-ENV PATH /opt/crashsdk/bin:$PATH
-ENV PATH /root/.local/bin:$PATH
-ENV ROOT /etc/n64
+ENV PATH=/opt/crashsdk/bin:$PATH
+ENV PATH=/root/.local/bin:$PATH
+ENV ROOT=/etc/n64
 
 RUN apt-get update -y
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
