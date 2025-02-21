@@ -82,6 +82,7 @@ set(SOUND_SCRIPTS
     doors/doormove2.sox
     npc/turret_floor/active.sox
     npc/turret_floor/deploy.sox
+    npc/turret_floor/ping.sox
     npc/turret_floor/retract.sox
     plats/elevator_move_loop1.sox
     plats/elevator_stop1.sox
@@ -115,6 +116,9 @@ set(SOUND_SCRIPTS
 )
 
 set(LOCALIZED_SOUND_SCRIPTS
+    npc/turret_floor/turret_search_1.sox
+    npc/turret_floor/turret_search_2.sox
+    npc/turret_floor/turret_search_4.sox
     npc/turret_floor/turret_fizzler_1.sox
     npc/turret_floor/turret_pickup_1.sox
     npc/turret_floor/turret_pickup_3.sox
@@ -213,6 +217,8 @@ set(LOCALIZED_SOUND_SCRIPTS
 
 # Localized sounds which are not localized in this language
 set(RUSSIAN_EXCLUDED_LOCALIZED_SOUND_SCRIPTS
+    npc/turret_floor/turret_search_2.sox
+    npc/turret_floor/turret_search_4.sox
     npc/turret_floor/turret_pickup_3.sox
     npc/turret_floor/turret_pickup_6.sox
     npc/turret_floor/turret_pickup_7.sox

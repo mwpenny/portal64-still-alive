@@ -23,6 +23,20 @@ enum TurretSoundType {
     TurretSoundTypeCount,
 };
 
+union TurretStateData {
+    struct SearchingStateData {
+        float yawAmount;
+        float pitchAmount;
+        u8 yawDirection   : 1;
+        u8 pitchDirection : 1;
+    } searching;
+
+    struct GrabbedStateData {
+        float yawAmount;
+        float pitchAmount;
+    } grabbed;
+};
+
 struct Turret {
     struct TurretDefinition* definition;
     struct CollisionObject collisionObject;
@@ -35,7 +49,8 @@ struct Turret {
     enum TurretState state;
     enum TurretFlags flags;
     struct Quaternion targetRotation;
-    float rotationDelayTimer;
+    union TurretStateData stateData;
+    float stateTimer;
     float openAmount;
 
     SoundId currentSounds[TurretSoundTypeCount];

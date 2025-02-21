@@ -7,6 +7,7 @@
 #include "savefile/savefile.h"
 #include "scene/dynamic_scene.h"
 #include "util/dynamic_asset_loader.h"
+#include "util/memory.h"
 
 #include "codegen/assets/audio/clips.h"
 #include "codegen/assets/audio/languages.h"
@@ -26,8 +27,13 @@ static struct ColliderTypeData gTurretCollider = {
     &gCollisionBoxCallbacks
 };
 
-static struct Vector3 gTurretOriginOffset = { 0.0f, 0.554f, 0.0f };
-static struct Vector3 gTurretLaserOffset = { 0.0f, 0.0425f, 0.11f };
+static struct Vector3 sTurretOriginOffset = { 0.0f, 0.554f, 0.0f };
+static struct Vector3 sTurretLaserOffset = { 0.0f, 0.0425f, 0.11f };
+
+static struct Quaternion sTurretMinYaw = { 0.0f, -0.189f, 0.0f, 0.982f };
+static struct Quaternion sTurretMaxYaw = { 0.0f, 0.189f, 0.0f, 0.982f };
+static struct Quaternion sTurretMinPitch = { -0.23f, 0.0f, 0.0f, 0.973f };
+static struct Quaternion sTurretMaxPitch = { 0.23f, 0.0f, 0.0f, 0.973f };
 
 static short sTurretPickupSounds[] = {
     SOUNDS_TURRET_PICKUP_1,
@@ -48,21 +54,28 @@ static short sTurretRetireSounds[] = {
     SOUNDS_TURRET_RETIRE_7,
 };
 
-#define TURRET_MASS               3.0f
-#define TURRET_COLLISION_LAYERS   (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
+static short sTurretSearchSounds[] = {
+    SOUNDS_TURRET_SEARCH_1,
+    SOUNDS_TURRET_SEARCH_2,
+    SOUNDS_TURRET_SEARCH_4
+};
 
-#define TURRET_OPEN_POSITION      46.0f
-#define TURRET_CLOSE_POSITION     22.0f
-#define TURRET_OPEN_SPEED         4.0f
-#define TURRET_CLOSE_SPEED        2.0f
+#define TURRET_MASS                3.0f
+#define TURRET_COLLISION_LAYERS    (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
 
-#define TURRET_ROTATE_SPEED       2.0f
-#define TURRET_MIN_ROTATION_DELAY 0.1f
-#define TURRET_MAX_ROTATION_DELAY 0.75f
+#define TURRET_OPEN_POSITION       46.0f
+#define TURRET_CLOSE_POSITION      22.0f
+#define TURRET_OPEN_SPEED          4.0f
+#define TURRET_CLOSE_SPEED         2.0f
 
-#define TURRET_LOOK_RANGE_X       0.4f
-#define TURRET_LOOK_RANGE_Y       0.5f
-#define TURRET_LOOK_Z             1.0f
+#define TURRET_SEARCH_PITCH_SPEED  0.5f
+#define TURRET_SEARCH_YAW_SPEED    TURRET_SEARCH_PITCH_SPEED * 1.5f
+#define TURRET_SEARCH_DURATION     5.0f
+#define TURRET_SEARCH_DIALOG_DELAY 2.0f
+
+#define TURRET_ROTATE_SPEED        2.0f
+#define TURRET_MIN_ROTATION_DELAY  0.1f
+#define TURRET_MAX_ROTATION_DELAY  0.75f
 
 #define RANDOM_TURRET_SOUND(list) turretRandomSoundId(list, sizeof(list) / sizeof(*list))
 
@@ -108,7 +121,7 @@ static void turretRender(void* data, struct DynamicRenderDataList* renderList, s
 
     // Render without origin offset
     struct Vector3 transformedOriginOffset;
-    quatMultVector(&turret->rigidBody.transform.rotation, &gTurretOriginOffset, &transformedOriginOffset);
+    quatMultVector(&turret->rigidBody.transform.rotation, &sTurretOriginOffset, &transformedOriginOffset);
 
     struct Transform transform = turret->rigidBody.transform;
     vector3Sub(&transform.position, &transformedOriginOffset, &transform.position);
@@ -145,7 +158,7 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     turret->rigidBody.currentRoom = definition->roomIndex;
 
     struct Vector3 originOffset;
-    quatMultVector(&turret->rigidBody.transform.rotation, &gTurretOriginOffset, &originOffset);
+    quatMultVector(&turret->rigidBody.transform.rotation, &sTurretOriginOffset, &originOffset);
     vector3Add(&definition->position, &originOffset, &turret->rigidBody.transform.position);
 
     collisionObjectUpdateBB(&turret->collisionObject);
@@ -156,7 +169,7 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     laserInit(
         &turret->laser,
         &turret->rigidBody,
-        &gTurretLaserOffset,
+        &sTurretLaserOffset,
         &turret->armature.pose[PROPS_TURRET_01_ARM_C_BONE].rotation
     );
 
@@ -166,10 +179,12 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     quatIdent(&turret->targetRotation);
 
     turret->fizzleTime = 0.0f;
-    turret->state = TurretStateIdle;
     turret->flags = 0;
     turret->openAmount = 0.0f;
-    turret->rotationDelayTimer = 0.0f;
+
+    turret->state = TurretStateIdle;
+    turret->stateTimer = 0.0f;
+    zeroMemory(&turret->stateData, sizeof(turret->stateData));
 
     for (enum TurretSoundType t = 0; t < TurretSoundTypeCount; ++t) {
         turret->currentSounds[t] = SOUND_ID_NONE;
@@ -230,7 +245,7 @@ static void turretUpdateRotation(struct Turret* turret) {
     }
 }
 
-static void turretSetOpen(struct Turret* turret, uint8_t shouldOpen) {
+static void turretUpdateOpen(struct Turret* turret, uint8_t shouldOpen) {
     if (turret->openAmount == shouldOpen) {
         return;
     }
@@ -266,21 +281,7 @@ static void turretSetOpen(struct Turret* turret, uint8_t shouldOpen) {
     turret->armature.pose[PROPS_TURRET_01_ARM_R_BONE].position.x = -armPosition;
 }
 
-static void turretSetLookOffset(struct Turret* turret, struct Vector3* lookOffset) {
-    if (lookOffset == NULL) {
-        quatIdent(&turret->targetRotation);
-    } else {
-        struct Vector3 finalOffset;
-        vector3Negate(lookOffset, &finalOffset);
-        quatLook(&finalOffset, &gUp, &turret->targetRotation);
-    }
-
-    turret->flags |= TurretFlagsRotating;
-}
-
-static void turretUpdateIdle(struct Turret* turret, struct Player* player) {
-    turretSetOpen(turret, 0);
-
+static void turretCheckGrabbed(struct Turret* turret,  struct Player* player) {
     if (playerIsGrabbingObject(player, &turret->collisionObject)) {
         turretPlaySound(
             turret,
@@ -290,36 +291,91 @@ static void turretUpdateIdle(struct Turret* turret, struct Player* player) {
         );
         hudShowSubtitle(&gScene.hud, NPC_FLOORTURRET_ACTIVATE, SubtitleTypeCaption);
 
-        turret->rotationDelayTimer = 0.0f;
+        turret->stateTimer = 0.0f;
         turret->state = TurretStateGrabbed;
     }
 }
 
-static void turretUpdateSearching(struct Turret* turret) {
-    // TODO
+static void turretUpdateIdle(struct Turret* turret, struct Player* player) {
+    turretUpdateOpen(turret, 0);
+    turretCheckGrabbed(turret, player);
+}
 
-    turretPlaySound(
-        turret,
-        TurretSoundTypeDialog,
-        RANDOM_TURRET_SOUND(sTurretRetireSounds),
-        NPC_FLOORTURRET_TALKRETIRE
-    );
+static void turretUpdateSearching(struct Turret* turret, struct Player* player) {
+    struct SearchingStateData* state = &turret->stateData.searching;
 
-    turret->state = TurretStateIdle;
+    // Rotate back and forth on each axis at different speeds
+    // Done without keyframed animation since it's smaller and smoother
+    if (state->yawAmount <= 0.0f || state->yawAmount >= 1.0f) {
+        state->yawDirection ^= 1;
+    }
+    if (state->pitchAmount <= 0.0f || state->pitchAmount >= 1.0f) {
+        state->pitchDirection ^= 1;
+    }
+    state->yawAmount += (state->yawDirection ? 1 : -1) * TURRET_SEARCH_YAW_SPEED * FIXED_DELTA_TIME;
+    state->pitchAmount += (state->pitchDirection ? 1 : -1) * TURRET_SEARCH_PITCH_SPEED * FIXED_DELTA_TIME;
+
+    struct Quaternion* currentRotation = &turret->armature.pose[PROPS_TURRET_01_ARM_C_BONE].rotation;
+    struct Quaternion yaw, pitch;
+    quatLerp(&sTurretMinYaw, &sTurretMaxYaw, state->yawAmount, &yaw);
+    quatLerp(&sTurretMinPitch, &sTurretMaxPitch, state->pitchAmount, &pitch);
+    quatMultiply(&yaw, &pitch, currentRotation);
+    quatNormalize(currentRotation, currentRotation);
+
+    // Crossed second boundary?
+    int currentSecond = (int)turret->stateTimer;
+    if (currentSecond < (int)(turret->stateTimer + FIXED_DELTA_TIME)) {
+        turretPlaySound(
+            turret,
+            TurretSoundTypeSfx,
+            SOUNDS_PING,
+            StringIdNone  // Don't spam
+        );
+
+        if (currentSecond == (int)(TURRET_SEARCH_DURATION - TURRET_SEARCH_DIALOG_DELAY)) {
+            turretPlaySound(
+                turret,
+                TurretSoundTypeDialog,
+                RANDOM_TURRET_SOUND(sTurretSearchSounds),
+                NPC_FLOORTURRET_TALKSEARCH
+            );
+        }
+    }
+
+    if (turret->stateTimer == 0.0f) {
+        turretPlaySound(
+            turret,
+            TurretSoundTypeDialog,
+            RANDOM_TURRET_SOUND(sTurretRetireSounds),
+            NPC_FLOORTURRET_TALKRETIRE
+        );
+
+        quatIdent(&turret->targetRotation);
+        turret->flags |= TurretFlagsRotating;
+
+        turret->state = TurretStateIdle;
+    }
+
+    turretCheckGrabbed(turret, player);
 }
 
 static void turretUpdateGrabbed(struct Turret* turret, struct Player* player) {
-    turretSetOpen(turret, 1);
+    turretUpdateOpen(turret, 1);
 
     // Look in a random direction, pause, repeat
     if (!(turret->flags & TurretFlagsRotating)) {
-        if (turret->rotationDelayTimer <= 0.0f) {
-            struct Vector3 lookTarget = {
-                randomInRangef(-TURRET_LOOK_RANGE_X, TURRET_LOOK_RANGE_X),
-                randomInRangef(-TURRET_LOOK_RANGE_Y, TURRET_LOOK_RANGE_Y),
-                TURRET_LOOK_Z
-            };
-            turretSetLookOffset(turret, &lookTarget);
+        if (turret->stateTimer == 0.0f) {
+            // Save so we can enter the searching state at the same rotation
+            // Not critical, but the searching state uses them regardless
+            struct GrabbedStateData* state = &turret->stateData.grabbed;
+            state->yawAmount = mathfRandomFloat();
+            state->pitchAmount = mathfRandomFloat();
+
+            struct Quaternion yaw, pitch;
+            quatLerp(&sTurretMinYaw, &sTurretMaxYaw, state->yawAmount, &yaw);
+            quatLerp(&sTurretMinPitch, &sTurretMaxPitch, state->pitchAmount, &pitch);
+            quatMultiply(&yaw, &pitch, &turret->targetRotation);
+            turret->flags |= TurretFlagsRotating;
 
             turretPlaySound(
                 turret,
@@ -328,18 +384,17 @@ static void turretUpdateGrabbed(struct Turret* turret, struct Player* player) {
                 StringIdNone  // Don't spam
             );
 
-            turret->rotationDelayTimer = randomInRangef(
+            turret->stateTimer = randomInRangef(
                 TURRET_MIN_ROTATION_DELAY,
                 TURRET_MAX_ROTATION_DELAY
             );
-        } else {
-            turret->rotationDelayTimer -= FIXED_DELTA_TIME;
         }
     }
 
     if (!playerIsGrabbingObject(player, &turret->collisionObject)) {
-        turretSetLookOffset(turret, NULL);
-
+        turret->stateTimer = TURRET_SEARCH_DURATION;
+        turret->stateData.searching.yawDirection = 1;
+        turret->stateData.searching.pitchDirection = 1;
         turret->state = TurretStateSearching;
     }
 }
@@ -363,7 +418,7 @@ void turretUpdate(struct Turret* turret, struct Player* player) {
 
     switch (turret->state) {
         case TurretStateSearching:
-            turretUpdateSearching(turret);
+            turretUpdateSearching(turret, player);
             break;
         case TurretStateGrabbed:
             turretUpdateGrabbed(turret, player);
@@ -376,5 +431,9 @@ void turretUpdate(struct Turret* turret, struct Player* player) {
 
     if (turret->flags & TurretFlagsRotating) {
         turretUpdateRotation(turret);
+    }
+
+    if (turret->stateTimer > 0.0f) {
+        turret->stateTimer = MAX(0.0f, turret->stateTimer - FIXED_DELTA_TIME);
     }
 }

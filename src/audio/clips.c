@@ -3,7 +3,7 @@
 
 #include "codegen/assets/audio/clips.h"
 
-unsigned short soundsSkippable[10] = {
+unsigned short soundsSkippable[11] = {
     SOUNDS_PORTAL_ENTER1,
     SOUNDS_PORTAL_ENTER2,
     SOUNDS_PORTAL_EXIT1,
@@ -12,8 +12,11 @@ unsigned short soundsSkippable[10] = {
     SOUNDS_CONCRETE2, //right foot
     SOUNDS_CONCRETE3, //land
     SOUNDS_CONCRETE4, //jump
+
+    // Turret
     SOUNDS_DEPLOY,
     SOUNDS_RETRACT,
+    SOUNDS_PING,
 };
 
 unsigned short soundsPortalEnter[2] = {
