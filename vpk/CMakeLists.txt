@@ -1,3 +1,5 @@
+set(NORMALIZE_SOUND_PATHS  "${PROJECT_SOURCE_DIR}/tools/sound/normalize_sound_paths.js")
+
 ####################
 ## VPK extraction ##
 ####################
@@ -59,31 +61,28 @@ function(_add_vpk_extract_command VPK_LIST OUTPUT_DIR OUTPUT_LIST)
 endfunction()
 
 function(_add_normalize_localized_audio_command STAMP_FILE_LIST)
-    if ("russian" IN_LIST AUDIO_LANGUAGES_LIST)
-        set(AUDIO_FIX_STAMP "${PAK_DIR}/localized_audio_normalization.stamp")
-        set(RU_SOUND_DIR "${PAK_DIR}/localized/russian/sound")
+    set(AUDIO_FIX_STAMP "${PAK_DIR}/sound_path_normalization.stamp")
 
-        add_custom_command(
-            DEPENDS
-                ${${STAMP_FILE_LIST}}
-            OUTPUT
-                ${AUDIO_FIX_STAMP}
-            COMMAND
-                ${CMAKE_COMMAND} -E rename
-                "${RU_SOUND_DIR}/npc/turret_floor/turret_dissolved_1.wav"
-                "${RU_SOUND_DIR}/npc/turret_floor/turret_fizzler_1.wav"
-            COMMAND
-                ${CMAKE_COMMAND} -E touch ${AUDIO_FIX_STAMP}
-            WORKING_DIRECTORY
-                "${CMAKE_CURRENT_SOURCE_DIR}"
-            COMMENT
-                "Normalizing localized audio file names"
-            VERBATIM
-        )
+    add_custom_command(
+        DEPENDS
+            ${NORMALIZE_SOUND_PATHS}
+            ${${STAMP_FILE_LIST}}
+        OUTPUT
+            ${AUDIO_FIX_STAMP}
+        COMMAND
+            ${NodeJs_EXECUTABLE}
+            ${NORMALIZE_SOUND_PATHS} ${PAK_DIR}
+        COMMAND
+            ${CMAKE_COMMAND} -E touch ${AUDIO_FIX_STAMP}
+        WORKING_DIRECTORY
+            "${CMAKE_CURRENT_SOURCE_DIR}"
+        COMMENT
+            "Normalizing localized audio file names"
+        VERBATIM
+    )
 
-        list(APPEND ${STAMP_FILE_LIST} ${AUDIO_FIX_STAMP})
-        return(PROPAGATE ${STAMP_FILE_LIST})
-    endif()
+    list(APPEND ${STAMP_FILE_LIST} ${AUDIO_FIX_STAMP})
+    return(PROPAGATE ${STAMP_FILE_LIST})
 endfunction()
 
 set(VPK_STAMP_FILES "")

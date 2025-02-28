@@ -84,6 +84,7 @@ set(SOUND_SCRIPTS
     npc/turret_floor/deploy.sox
     npc/turret_floor/ping.sox
     npc/turret_floor/retract.sox
+    npc/turret_floor/shoot1.jsox
     plats/elevator_move_loop1.sox
     plats/elevator_stop1.sox
     player/footsteps/concrete1.sox
@@ -116,6 +117,12 @@ set(SOUND_SCRIPTS
 )
 
 set(LOCALIZED_SOUND_SCRIPTS
+    npc/turret_floor/turret_disabled_2.sox
+    npc/turret_floor/turret_disabled_4.sox
+    npc/turret_floor/turret_disabled_5.sox
+    npc/turret_floor/turret_disabled_6.sox
+    npc/turret_floor/turret_disabled_7.sox
+    npc/turret_floor/turret_disabled_8.sox
     npc/turret_floor/turret_search_1.sox
     npc/turret_floor/turret_search_2.sox
     npc/turret_floor/turret_search_4.sox
@@ -133,6 +140,10 @@ set(LOCALIZED_SOUND_SCRIPTS
     npc/turret_floor/turret_retire_5.sox
     npc/turret_floor/turret_retire_6.sox
     npc/turret_floor/turret_retire_7.sox
+    npc/turret_floor/turret_tipped_2.sox
+    npc/turret_floor/turret_tipped_4.sox
+    npc/turret_floor/turret_tipped_5.sox
+    npc/turret_floor/turret_tipped_6.sox
     vo/aperture_ai/00_part1_entry-1.sox
     vo/aperture_ai/00_part1_entry-2.sox
     vo/aperture_ai/00_part1_entry-3.sox
@@ -217,6 +228,11 @@ set(LOCALIZED_SOUND_SCRIPTS
 
 # Localized sounds which are not localized in this language
 set(RUSSIAN_EXCLUDED_LOCALIZED_SOUND_SCRIPTS
+    npc/turret_floor/turret_disabled_4.sox
+    npc/turret_floor/turret_disabled_5.sox
+    npc/turret_floor/turret_disabled_6.sox
+    npc/turret_floor/turret_disabled_7.sox
+    npc/turret_floor/turret_disabled_8.sox
     npc/turret_floor/turret_search_2.sox
     npc/turret_floor/turret_search_4.sox
     npc/turret_floor/turret_pickup_3.sox
@@ -230,6 +246,9 @@ set(RUSSIAN_EXCLUDED_LOCALIZED_SOUND_SCRIPTS
     npc/turret_floor/turret_retire_5.sox
     npc/turret_floor/turret_retire_6.sox
     npc/turret_floor/turret_retire_7.sox
+    npc/turret_floor/turret_tipped_4.sox
+    npc/turret_floor/turret_tipped_5.sox
+    npc/turret_floor/turret_tipped_6.sox
 )
 
 set(MUSIC_SCRIPTS
@@ -245,6 +264,7 @@ set(INSTRUMENT_BANKS
     ambient/machines/beam_platform_loop1.ins
     ambient/music/looping_radio_mix.ins
     doors/door_metal_medium_open1.ins
+    npc/turret_floor/shoot1.ins
     vehicles/fast_windloop1.ins
     vehicles/tank_turret_loop1.ins
     weapons/physcannon/energy_sing_loop4.ins
@@ -261,6 +281,9 @@ function(_add_sound_transform_command_sox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
             ${SOUND_SCRIPT}
         OUTPUT
             ${OUTPUT_FILE}
+        WORKING_DIRECTORY
+            # Allow scripts to easily reference other sounds
+            "$<PATH:GET_PARENT_PATH,${INPUT_FILE}>"
         COMMAND
             ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
         COMMAND
@@ -280,6 +303,9 @@ function(_add_sound_transform_command_jsox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
             ${SOUND_SCRIPT}
         OUTPUT
             ${OUTPUT_FILE}
+        WORKING_DIRECTORY
+            # Allow scripts to easily reference other sounds
+            "$<PATH:GET_PARENT_PATH,${INPUT_FILE}>"
         COMMAND
             ${NodeJs_EXECUTABLE} ${JSOX}
             ${Sox_EXECUTABLE} ${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE}

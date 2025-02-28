@@ -13,7 +13,7 @@ const [soxPath, argsFile, inputFile, outputFile] = process.argv.slice(2);
 const fileContents = fs.readFileSync(argsFile);
 const fileJSON = JSON.parse(fileContents);
 
-fileJSON.forEach((command) => {
+for (const command of fileJSON) {
     const commandText = `"${soxPath}" -V1 "${inputFile}" ${command.flags || ''} "${outputFile}" ${command.filters || ''}`;
 
     const outputParentDir = path.dirname(outputFile);
@@ -21,15 +21,15 @@ fileJSON.forEach((command) => {
         fs.mkdirSync(outputParentDir, { recursive: true });
     }
 
-    //process.stdout.write(commandText);
-    //process.stdout.write('\n');
     const script = child_process.exec(commandText);
 
-    script.stdout.on('data', function(data){
+    script.stdout.on('data', function(data) {
         process.stdout.write(data.toString());
     });
-    // what to do with data coming from the standard error
-    script.stderr.on('data', function(data){
+    script.stderr.on('data', function(data) {
         process.stderr.write(data.toString());
     });
-});
+    script.on('exit', function(code) {
+        process.exit(code);
+    });
+}

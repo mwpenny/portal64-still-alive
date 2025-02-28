@@ -10,11 +10,16 @@
 enum TurretState {
     TurretStateIdle,
     TurretStateSearching,
-    TurretStateGrabbed
+    TurretStateGrabbed,
+    TurretStateTipped,
+    TurretStateClosing,
+    TurretStateDying,
+    TurretStateDead
 };
 
 enum TurretFlags {
-    TurretFlagsRotating = (1 << 0)
+    TurretFlagsOpen = (1 << 0),
+    TurretFlagsRotating = (1 << 1)
 };
 
 enum TurretSoundType {
@@ -35,6 +40,12 @@ union TurretStateData {
         float yawAmount;
         float pitchAmount;
     } grabbed;
+
+    struct ClosingStateData {
+        enum TurretState nextState;
+        short soundId;
+        short subtitleId;
+    } closing;
 };
 
 struct Turret {
@@ -46,10 +57,11 @@ struct Turret {
     short dynamicId;
     float fizzleTime;
 
-    enum TurretState state;
     enum TurretFlags flags;
-    struct Quaternion targetRotation;
+    enum TurretState state;
     union TurretStateData stateData;
+    struct Quaternion targetRotation;
+    float rotationSpeed;
     float stateTimer;
     float openAmount;
 

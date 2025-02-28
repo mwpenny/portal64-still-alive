@@ -35,6 +35,15 @@ static struct Quaternion sTurretMaxYaw = { 0.0f, 0.189f, 0.0f, 0.982f };
 static struct Quaternion sTurretMinPitch = { -0.23f, 0.0f, 0.0f, 0.973f };
 static struct Quaternion sTurretMaxPitch = { 0.23f, 0.0f, 0.0f, 0.973f };
 
+static short sTurretDisabledSounds[] = {
+    SOUNDS_TURRET_DISABLED_2,
+    SOUNDS_TURRET_DISABLED_4,
+    SOUNDS_TURRET_DISABLED_5,
+    SOUNDS_TURRET_DISABLED_6,
+    SOUNDS_TURRET_DISABLED_7,
+    SOUNDS_TURRET_DISABLED_8
+};
+
 static short sTurretPickupSounds[] = {
     SOUNDS_TURRET_PICKUP_1,
     SOUNDS_TURRET_PICKUP_3,
@@ -60,6 +69,13 @@ static short sTurretSearchSounds[] = {
     SOUNDS_TURRET_SEARCH_4
 };
 
+static short sTurretTippedSounds[] = {
+    SOUNDS_TURRET_TIPPED_2,
+    SOUNDS_TURRET_TIPPED_4,
+    SOUNDS_TURRET_TIPPED_5,
+    SOUNDS_TURRET_TIPPED_6,
+};
+
 #define TURRET_MASS                3.0f
 #define TURRET_COLLISION_LAYERS    (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
 
@@ -67,15 +83,19 @@ static short sTurretSearchSounds[] = {
 #define TURRET_CLOSE_POSITION      22.0f
 #define TURRET_OPEN_SPEED          4.0f
 #define TURRET_CLOSE_SPEED         2.0f
+#define TURRET_CLOSE_DELAY         0.25f
+#define TURRET_ROTATE_SPEED        2.0f
 
 #define TURRET_SEARCH_PITCH_SPEED  0.5f
 #define TURRET_SEARCH_YAW_SPEED    TURRET_SEARCH_PITCH_SPEED * 1.5f
 #define TURRET_SEARCH_DURATION     5.0f
 #define TURRET_SEARCH_DIALOG_DELAY 2.0f
 
-#define TURRET_ROTATE_SPEED        2.0f
-#define TURRET_MIN_ROTATION_DELAY  0.1f
-#define TURRET_MAX_ROTATION_DELAY  0.75f
+#define TURRET_GRAB_MIN_ROT_DELAY  0.1f
+#define TURRET_GRAB_MAX_ROT_DELAY  0.75f
+
+#define TURRET_TIPPED_DURATION     3.0f
+#define TURRET_TIPPED_ROTATE_SPEED 8.0f
 
 #define RANDOM_TURRET_SOUND(list) turretRandomSoundId(list, sizeof(list) / sizeof(*list))
 
@@ -107,6 +127,36 @@ static void turretPlaySound(struct Turret* turret, enum TurretSoundType soundTyp
 
     if (subtitleId != StringIdNone) {
         hudShowSubtitle(&gScene.hud, subtitleId, SubtitleTypeCaption);
+    }
+}
+
+static void turretStopAllSounds(struct Turret* turret) {
+    for (enum TurretSoundType t = 0; t < TurretSoundTypeCount; ++t) {
+        SoundId soundId = turret->currentSounds[t];
+        if (soundId == SOUND_ID_NONE) {
+            continue;
+        }
+
+        soundPlayerStop(soundId);
+    }
+}
+
+static void turretUpdateSounds(struct Turret* turret) {
+    for (enum TurretSoundType t = 0; t < TurretSoundTypeCount; ++t) {
+        SoundId soundId = turret->currentSounds[t];
+        if (soundId == SOUND_ID_NONE) {
+            continue;
+        }
+
+        if (soundPlayerIsPlaying(soundId)) {
+            soundPlayerUpdatePosition(
+                soundId,
+                &turret->rigidBody.transform.position,
+                &turret->rigidBody.velocity
+            );
+        } else {
+            turret->currentSounds[t] = SOUND_ID_NONE;
+        }
     }
 }
 
@@ -177,6 +227,7 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     dynamicSceneSetRoomFlags(turret->dynamicId, ROOM_FLAG_FROM_INDEX(turret->rigidBody.currentRoom));
 
     quatIdent(&turret->targetRotation);
+    turret->rotationSpeed = TURRET_ROTATE_SPEED;
 
     turret->fizzleTime = 0.0f;
     turret->flags = 0;
@@ -193,37 +244,19 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
 
 // State handler functions
 
-static void turretUpdateSounds(struct Turret* turret) {
-    for (enum TurretSoundType t = 0; t < TurretSoundTypeCount; ++t) {
-        SoundId soundId = turret->currentSounds[t];
-        if (soundId == SOUND_ID_NONE) {
-            continue;
-        }
-
-        soundPlayerUpdatePosition(
-            soundId,
-            &turret->rigidBody.transform.position,
-            &turret->rigidBody.velocity
-        );
-
-        if (!soundPlayerIsPlaying(soundId)) {
-            turret->currentSounds[t] = SOUND_ID_NONE;
-        }
-    }
-}
-
 static uint8_t turretUpdateFizzled(struct Turret* turret) {
     enum FizzleCheckResult fizzleStatus = decorObjectUpdateFizzler(&turret->collisionObject, &turret->fizzleTime);
     if (fizzleStatus == FizzleCheckResultStart) {
         laserRemove(&turret->laser);
 
+        turretStopAllSounds(turret);
         turretPlaySound(
             turret,
             TurretSoundTypeDialog,
             SOUNDS_TURRET_FIZZLER_1,
             NPC_FLOORTURRET_TALKDISSOLVED
         );
-    } else if (fizzleStatus == FizzleCheckResultEnd && !soundPlayerIsPlaying(turret->currentSounds[TurretSoundTypeDialog])) {
+    } else if (fizzleStatus == FizzleCheckResultEnd && turret->currentSounds[TurretSoundTypeDialog] == SOUND_ID_NONE) {
         dynamicSceneRemove(turret->dynamicId);
         collisionSceneRemoveDynamicObject(&turret->collisionObject);
         turret->dynamicId = INVALID_DYNAMIC_OBJECT;
@@ -232,45 +265,66 @@ static uint8_t turretUpdateFizzled(struct Turret* turret) {
     return (turret->rigidBody.flags & RigidBodyFizzled) != 0;
 }
 
+static void turretRotationFromYawPitch(float yawAmount, float pitchAmount, struct Quaternion* rotation) {
+    struct Quaternion yaw, pitch;
+    quatLerp(&sTurretMinYaw, &sTurretMaxYaw, yawAmount, &yaw);
+    quatLerp(&sTurretMinPitch, &sTurretMaxPitch, pitchAmount, &pitch);
+    quatMultiply(&yaw, &pitch, rotation);
+}
+
+static void turretStartRotation(struct Turret* turret, float rotationSpeed) {
+    turret->rotationSpeed = rotationSpeed;
+    turret->flags |= TurretFlagsRotating;
+}
+
 static void turretUpdateRotation(struct Turret* turret) {
     struct Quaternion* currentRotation = &turret->armature.pose[PROPS_TURRET_01_ARM_C_BONE].rotation;
 
     if (quatRotateTowards(
         currentRotation,
         &turret->targetRotation,
-        TURRET_ROTATE_SPEED * FIXED_DELTA_TIME,
+        turret->rotationSpeed * FIXED_DELTA_TIME,
         currentRotation
     )) {
         turret->flags &= ~TurretFlagsRotating;
     }
 }
 
-static void turretUpdateOpen(struct Turret* turret, uint8_t shouldOpen) {
+static void turretStartClose(struct Turret* turret, enum TurretState nextState, short soundId, short subtitleId) {
+    quatIdent(&turret->targetRotation);
+    turretStartRotation(turret, TURRET_ROTATE_SPEED);
+
+    struct ClosingStateData* state = &turret->stateData.closing;
+    state->nextState = nextState;
+    state->soundId = soundId;
+    state->subtitleId = subtitleId;
+
+    turret->stateTimer = TURRET_CLOSE_DELAY;
+    turret->state = TurretStateClosing;
+}
+
+static void turretUpdateOpenAmount(struct Turret* turret) {
+    uint8_t shouldOpen = (turret->flags & TurretFlagsOpen) != 0;
+
     if (turret->openAmount == shouldOpen) {
         return;
     }
 
-    short soundId = SOUND_ID_NONE;
-    short subtitleId = StringIdNone;
-    if (turret->openAmount == 0.0f && shouldOpen) {
-        soundId = SOUNDS_DEPLOY;
-        subtitleId = NPC_FLOORTURRET_DEPLOY;
-    } else if (turret->openAmount == 1.0f && !shouldOpen) {
-        soundId = SOUNDS_RETRACT;
-        subtitleId = NPC_FLOORTURRET_RETRACT;
-    }
-
-    if (soundId != SOUND_ID_NONE) {
+    if (turret->openAmount == 0.0f || turret->openAmount == 1.0f) {
         // Don't use turretPlaySound(), to allow others to play over top of this
         soundPlayerPlay(
-            soundId,
+            shouldOpen ? SOUNDS_DEPLOY : SOUNDS_RETRACT,
             1.0f,
             0.5f,
             &turret->rigidBody.transform.position,
             &turret->rigidBody.velocity,
             SoundTypeAll
         );
-        hudShowSubtitle(&gScene.hud, subtitleId, SubtitleTypeCaption);
+        hudShowSubtitle(
+            &gScene.hud,
+            shouldOpen ? NPC_FLOORTURRET_DEPLOY : NPC_FLOORTURRET_RETRACT,
+            SubtitleTypeCaption
+        );
     }
 
     float speed = shouldOpen ? TURRET_OPEN_SPEED : -TURRET_CLOSE_SPEED;
@@ -281,7 +335,7 @@ static void turretUpdateOpen(struct Turret* turret, uint8_t shouldOpen) {
     turret->armature.pose[PROPS_TURRET_01_ARM_R_BONE].position.x = -armPosition;
 }
 
-static void turretCheckGrabbed(struct Turret* turret,  struct Player* player) {
+static void turretCheckGrabbed(struct Turret* turret, struct Player* player) {
     if (playerIsGrabbingObject(player, &turret->collisionObject)) {
         turretPlaySound(
             turret,
@@ -291,13 +345,46 @@ static void turretCheckGrabbed(struct Turret* turret,  struct Player* player) {
         );
         hudShowSubtitle(&gScene.hud, NPC_FLOORTURRET_ACTIVATE, SubtitleTypeCaption);
 
+        turret->flags |= TurretFlagsOpen;
         turret->stateTimer = 0.0f;
         turret->state = TurretStateGrabbed;
     }
 }
 
+static void turretCheckTipped(struct Turret* turret) {
+    if (turret->rigidBody.flags & RigidBodyIsSleeping) {
+        return;
+    }
+
+    struct Vector3 turretUp;
+    quatMultVector(&turret->rigidBody.transform.rotation, &gUp, &turretUp);
+
+    if (vector3Dot(&turretUp, &gUp) <= 0.0f) {
+        turretPlaySound(
+            turret,
+            TurretSoundTypeDialog,
+            RANDOM_TURRET_SOUND(sTurretTippedSounds),
+            NPC_FLOORTURRET_TALKTIPPED
+        );
+
+        // Looped
+        turret->currentSounds[TurretSoundTypeSfx] = soundPlayerPlay(
+            SOUNDS_SHOOT1,
+            5.0f,
+            0.5f,
+            &turret->rigidBody.transform.position,
+            &turret->rigidBody.velocity,
+            SoundTypeAll
+        );
+
+        turret->flags = (turret->flags & ~TurretFlagsRotating) | TurretFlagsOpen;
+        turret->stateTimer = TURRET_TIPPED_DURATION;
+        turret->state = TurretStateTipped;
+    }
+}
+
 static void turretUpdateIdle(struct Turret* turret, struct Player* player) {
-    turretUpdateOpen(turret, 0);
+    turretCheckTipped(turret);
     turretCheckGrabbed(turret, player);
 }
 
@@ -316,11 +403,7 @@ static void turretUpdateSearching(struct Turret* turret, struct Player* player) 
     state->pitchAmount += (state->pitchDirection ? 1 : -1) * TURRET_SEARCH_PITCH_SPEED * FIXED_DELTA_TIME;
 
     struct Quaternion* currentRotation = &turret->armature.pose[PROPS_TURRET_01_ARM_C_BONE].rotation;
-    struct Quaternion yaw, pitch;
-    quatLerp(&sTurretMinYaw, &sTurretMaxYaw, state->yawAmount, &yaw);
-    quatLerp(&sTurretMinPitch, &sTurretMaxPitch, state->pitchAmount, &pitch);
-    quatMultiply(&yaw, &pitch, currentRotation);
-    quatNormalize(currentRotation, currentRotation);
+    turretRotationFromYawPitch(state->yawAmount, state->pitchAmount, currentRotation);
 
     // Crossed second boundary?
     int currentSecond = (int)turret->stateTimer;
@@ -342,40 +425,33 @@ static void turretUpdateSearching(struct Turret* turret, struct Player* player) 
         }
     }
 
-    if (turret->stateTimer == 0.0f) {
-        turretPlaySound(
+    if (turret->stateTimer <= 0.0f) {
+        turretStartClose(
             turret,
-            TurretSoundTypeDialog,
+            TurretStateIdle,
             RANDOM_TURRET_SOUND(sTurretRetireSounds),
             NPC_FLOORTURRET_TALKRETIRE
         );
-
-        quatIdent(&turret->targetRotation);
-        turret->flags |= TurretFlagsRotating;
-
-        turret->state = TurretStateIdle;
+    } else {
+        turret->stateTimer -= FIXED_DELTA_TIME;
     }
 
+    turretCheckTipped(turret);
     turretCheckGrabbed(turret, player);
 }
 
 static void turretUpdateGrabbed(struct Turret* turret, struct Player* player) {
-    turretUpdateOpen(turret, 1);
-
     // Look in a random direction, pause, repeat
     if (!(turret->flags & TurretFlagsRotating)) {
-        if (turret->stateTimer == 0.0f) {
+        if (turret->stateTimer <= 0.0f) {
             // Save so we can enter the searching state at the same rotation
             // Not critical, but the searching state uses them regardless
             struct GrabbedStateData* state = &turret->stateData.grabbed;
             state->yawAmount = mathfRandomFloat();
             state->pitchAmount = mathfRandomFloat();
 
-            struct Quaternion yaw, pitch;
-            quatLerp(&sTurretMinYaw, &sTurretMaxYaw, state->yawAmount, &yaw);
-            quatLerp(&sTurretMinPitch, &sTurretMaxPitch, state->pitchAmount, &pitch);
-            quatMultiply(&yaw, &pitch, &turret->targetRotation);
-            turret->flags |= TurretFlagsRotating;
+            turretRotationFromYawPitch(state->yawAmount, state->pitchAmount, &turret->targetRotation);
+            turretStartRotation(turret, TURRET_ROTATE_SPEED);
 
             turretPlaySound(
                 turret,
@@ -385,9 +461,11 @@ static void turretUpdateGrabbed(struct Turret* turret, struct Player* player) {
             );
 
             turret->stateTimer = randomInRangef(
-                TURRET_MIN_ROTATION_DELAY,
-                TURRET_MAX_ROTATION_DELAY
+                TURRET_GRAB_MIN_ROT_DELAY,
+                TURRET_GRAB_MAX_ROT_DELAY
             );
+        } else {
+            turret->stateTimer -= FIXED_DELTA_TIME;
         }
     }
 
@@ -396,6 +474,61 @@ static void turretUpdateGrabbed(struct Turret* turret, struct Player* player) {
         turret->stateData.searching.yawDirection = 1;
         turret->stateData.searching.pitchDirection = 1;
         turret->state = TurretStateSearching;
+    }
+}
+
+static void turretUpdateTipped(struct Turret* turret) {
+    if (!(turret->flags & TurretFlagsRotating)) {
+        turretRotationFromYawPitch(mathfRandomFloat(), mathfRandomFloat(), &turret->targetRotation);
+        turretStartRotation(turret, TURRET_TIPPED_ROTATE_SPEED);
+    }
+
+    if (turret->stateTimer <= 0.0f) {
+        soundPlayerStop(turret->currentSounds[TurretSoundTypeSfx]);
+        turretStartClose(
+            turret,
+            TurretStateDying,
+            RANDOM_TURRET_SOUND(sTurretDisabledSounds),
+            NPC_FLOORTURRET_TALKDISABLED
+        );
+    } else {
+        turret->stateTimer -= FIXED_DELTA_TIME;
+    }
+}
+
+static void turretUpdateClosing(struct Turret* turret, struct Player* player) {
+    if (turret->stateTimer >= 0.0f) {
+        turret->stateTimer -= FIXED_DELTA_TIME;
+        return;
+    }
+
+    struct ClosingStateData* state = &turret->stateData.closing;
+
+    if (turret->flags & TurretFlagsOpen) {
+        turretPlaySound(
+            turret,
+            TurretSoundTypeDialog,
+            state->soundId,
+            state->subtitleId
+        );
+
+        turret->flags &= ~TurretFlagsOpen;
+    } else if (turret->openAmount == 0.0f) {
+        turret->state = state->nextState;
+    }
+
+    if (state->nextState == TurretStateIdle) {
+        turretCheckTipped(turret);
+        turretCheckGrabbed(turret, player);
+    }
+}
+
+static void turretUpdateDying(struct Turret* turret) {
+    // TODO: fade eye
+
+    if (turret->currentSounds[TurretSoundTypeDialog] == SOUND_ID_NONE) {
+        laserRemove(&turret->laser);
+        turret->state = TurretStateDead;
     }
 }
 
@@ -417,23 +550,32 @@ void turretUpdate(struct Turret* turret, struct Player* player) {
     }
 
     switch (turret->state) {
+        case TurretStateIdle:
+            turretUpdateIdle(turret, player);
+            break;
         case TurretStateSearching:
             turretUpdateSearching(turret, player);
             break;
         case TurretStateGrabbed:
             turretUpdateGrabbed(turret, player);
             break;
+        case TurretStateTipped:
+            turretUpdateTipped(turret);
+            break;
+        case TurretStateClosing:
+            turretUpdateClosing(turret, player);
+            break;
+        case TurretStateDying:
+            turretUpdateDying(turret);
+            break;
         default:
-        case TurretStateIdle:
-            turretUpdateIdle(turret, player);
+        case TurretStateDead:
             break;
     }
 
+    turretUpdateOpenAmount(turret);
+
     if (turret->flags & TurretFlagsRotating) {
         turretUpdateRotation(turret);
-    }
-
-    if (turret->stateTimer > 0.0f) {
-        turret->stateTimer = MAX(0.0f, turret->stateTimer - FIXED_DELTA_TIME);
     }
 }

@@ -13,7 +13,9 @@ extracted to `portal_pak_dir/`. See the page on
 
 Some sounds are localized. Depending on the audio language configuration at
 build time, addional sounds will be extracted to `portal_pak_dir/localized/` for
-inclusion in the game. See
+inclusion in the game. As part of this process some may be renamed by the
+[`tools/sound/normalize_sound_paths.js`](../../tools/sound/normalize_sound_paths.js)
+script for consistency across languages. See
 [vpk/README.md](../../vpk/README.md#add-multiple-audio-languages)
 for more information on non-English audio.
 
