@@ -124,23 +124,32 @@ void laserUpdate(struct Laser* laser) {
         .dir    = gForward
     };
     quatMultVector(laser->parentRotation, &startPosition.dir, &startPosition.dir);
+    rayTransform(&laser->parent->transform, &startPosition, &startPosition);
 
-    struct Transform startTransform = laser->parent->transform;
-    int currentRoom = laser->parent->currentRoom;
+    // Handle laser and parent in different rooms
+    int doorwayMask = worldCheckDoorwaySides(
+        gCollisionScene.world,
+        &laser->parent->transform.position,
+        laser->parent->currentRoom
+    );
+    int currentRoom = worldCheckDoorwayCrossings(
+        gCollisionScene.world,
+        &startPosition.origin,
+        laser->parent->currentRoom,
+        doorwayMask
+    );
+
     uint64_t beamRooms = ROOM_FLAG_FROM_INDEX(currentRoom);
-
     laser->beamCount = 0;
 
     for (short i = 0; i < LASER_MAX_BEAMS; ++i) {
         struct LaserBeam* beam = &laser->beams[i];
-        rayTransform(&startTransform, &startPosition, &startPosition);
-        beam->startPosition = startPosition;
 
         struct RaycastHit hit;
         if (!collisionSceneRaycast(
                 &gCollisionScene,
                 currentRoom,
-                &beam->startPosition,
+                &startPosition,
                 LASER_COLLISION_LAYERS,
                 1000000.0f,
                 0,
@@ -149,6 +158,7 @@ void laserUpdate(struct Laser* laser) {
             break;
         }
 
+        beam->startPosition = startPosition;
         beam->endPosition = hit.at;
         beamRooms |= hit.passedRooms;
         ++laser->beamCount;
@@ -158,10 +168,13 @@ void laserUpdate(struct Laser* laser) {
             break;
         } else {
             int portalIndex = (touchingPortals & RigidBodyIsTouchingPortalA) ? 0 : 1;
-            collisionSceneGetPortalTransform(portalIndex, &startTransform);
 
             startPosition.origin = hit.at;
             currentRoom = gCollisionScene.portalRooms[1 - portalIndex];
+
+            struct Transform portalTransform;
+            collisionSceneGetPortalTransform(portalIndex, &portalTransform);
+            rayTransform(&portalTransform, &startPosition, &startPosition);
         }
     }
 
