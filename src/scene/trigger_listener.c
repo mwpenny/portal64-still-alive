@@ -23,8 +23,8 @@ enum ObjectTriggerType triggerDetermineType(struct CollisionObject* objectEnteri
     return ObjectTriggerTypeNone;
 }
 
-void triggerTrigger(void* data, struct CollisionObject* objectEnteringTrigger) {
-    struct TriggerListener* listener = data;
+void triggerTrigger(struct CollisionObject* collisionObject, struct CollisionObject* objectEnteringTrigger) {
+    struct TriggerListener* listener = collisionObject->data;
 
     struct Vector3 offset;
     vector3Sub(
