@@ -10,8 +10,8 @@ void dynamicSceneInit() {
         gDynamicScene.objects[i].flags = 0;
     }
 
-    for (int i = 0; i < MAX_VIEW_DEPENDANT_OBJECTS; ++i) {
-        gDynamicScene.viewDependantObjects[i].flags = 0;
+    for (int i = 0; i < MAX_VIEW_DEPENDENT_OBJECTS; ++i) {
+        gDynamicScene.viewDependentObjects[i].flags = 0;
     }
 }
 
@@ -33,9 +33,9 @@ int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Vector3* po
     return INVALID_DYNAMIC_OBJECT;
 }
 
-int dynamicSceneAddViewDependant(void* data, DynamicViewRender renderCallback, struct Vector3* position, float radius) {
-    for (int i = 0; i < MAX_VIEW_DEPENDANT_OBJECTS; ++i) {
-        struct DynamicSceneViewDependantObject* object = &gDynamicScene.viewDependantObjects[i];
+int dynamicSceneAddViewDependent(void* data, DynamicViewRender renderCallback, struct Vector3* position, float radius) {
+    for (int i = 0; i < MAX_VIEW_DEPENDENT_OBJECTS; ++i) {
+        struct DynamicSceneViewDependentObject* object = &gDynamicScene.viewDependentObjects[i];
         if (!(object->flags & DYNAMIC_SCENE_OBJECT_FLAGS_USED)) {
 
             object->flags = DYNAMIC_SCENE_OBJECT_FLAGS_USED | DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE;
@@ -63,6 +63,18 @@ int dynamicSceneObjectCount() {
     return count;
 }
 
+int dynamicSceneViewDependentObjectCount() {
+    int count = 0;
+
+    for (int i = 0; i < MAX_VIEW_DEPENDENT_OBJECTS; ++i) {
+        if (gDynamicScene.viewDependentObjects[count].flags & DYNAMIC_SCENE_OBJECT_FLAGS_USED) {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
 void dynamicSceneRemove(int id) {
     if (id < 0) {
         return;
@@ -74,8 +86,8 @@ void dynamicSceneRemove(int id) {
 
     id -= MAX_DYNAMIC_SCENE_OBJECTS;
 
-    if (id < MAX_VIEW_DEPENDANT_OBJECTS) {
-        gDynamicScene.viewDependantObjects[id].flags = 0;
+    if (id < MAX_VIEW_DEPENDENT_OBJECTS) {
+        gDynamicScene.viewDependentObjects[id].flags = 0;
     }
 }
 
@@ -90,8 +102,8 @@ void dynamicSceneSetFlags(int id, int flags) {
 
     id -= MAX_DYNAMIC_SCENE_OBJECTS;
 
-    if (id < MAX_VIEW_DEPENDANT_OBJECTS) {
-        gDynamicScene.viewDependantObjects[id].flags |= flags;
+    if (id < MAX_VIEW_DEPENDENT_OBJECTS) {
+        gDynamicScene.viewDependentObjects[id].flags |= flags;
     }
 }
 
@@ -106,8 +118,8 @@ void dynamicSceneClearFlags(int id, int flags) {
 
     id -= MAX_DYNAMIC_SCENE_OBJECTS;
 
-    if (id < MAX_VIEW_DEPENDANT_OBJECTS) {
-        gDynamicScene.viewDependantObjects[id].flags &= ~flags;
+    if (id < MAX_VIEW_DEPENDENT_OBJECTS) {
+        gDynamicScene.viewDependentObjects[id].flags &= ~flags;
     }
 }
 
@@ -122,7 +134,7 @@ void dynamicSceneSetRoomFlags(int id, u64 roomFlags) {
 
     id -= MAX_DYNAMIC_SCENE_OBJECTS;
 
-    if (id < MAX_VIEW_DEPENDANT_OBJECTS) {
-        gDynamicScene.viewDependantObjects[id].roomFlags = roomFlags;
+    if (id < MAX_VIEW_DEPENDENT_OBJECTS) {
+        gDynamicScene.viewDependentObjects[id].roomFlags = roomFlags;
     }
 }

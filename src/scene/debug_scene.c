@@ -154,6 +154,10 @@ static void debugSceneRenderPerformanceMetrics(struct Scene* scene, struct Rende
     debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
 
     textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    sprintf(metricText, "VDO: %d/%d", dynamicSceneViewDependentObjectCount(), MAX_VIEW_DEPENDENT_OBJECTS);
+    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+
+    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
     sprintf(metricText, "OBJ: %d/%d", dynamicSceneObjectCount(), MAX_DYNAMIC_SCENE_OBJECTS);
     debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
 

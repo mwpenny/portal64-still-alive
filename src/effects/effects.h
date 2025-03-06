@@ -3,7 +3,7 @@
 
 #include "splash_particle_effect.h"
 
-#define MAX_ACTIVE_SPLASH_EFFECTS  3
+#define MAX_ACTIVE_SPLASH_EFFECTS  16
 
 struct Effects {
     struct SplashParticleEffect splashParticleEffects[MAX_ACTIVE_SPLASH_EFFECTS];

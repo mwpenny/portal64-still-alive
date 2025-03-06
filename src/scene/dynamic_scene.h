@@ -12,7 +12,7 @@ typedef void (*DynamicRender)(void* data, struct DynamicRenderDataList* renderLi
 typedef void (*DynamicViewRender)(void* data, struct RenderScene* renderScene, struct Transform* fromView);
 
 #define MAX_DYNAMIC_SCENE_OBJECTS  64
-#define MAX_VIEW_DEPENDANT_OBJECTS 16
+#define MAX_VIEW_DEPENDENT_OBJECTS 24
 
 #define DYNAMIC_SCENE_OBJECT_FLAGS_USED                 (1 << 0)
 #define DYNAMIC_SCENE_OBJECT_FLAGS_ACTIVE               (1 << 1)
@@ -31,7 +31,7 @@ struct DynamicSceneObject {
     u64 roomFlags;
 };
 
-struct DynamicSceneViewDependantObject {
+struct DynamicSceneViewDependentObject {
     void* data;
     DynamicViewRender renderCallback;
     struct Vector3* position;
@@ -42,14 +42,15 @@ struct DynamicSceneViewDependantObject {
 
 struct DynamicScene {
     struct DynamicSceneObject objects[MAX_DYNAMIC_SCENE_OBJECTS];
-    struct DynamicSceneViewDependantObject viewDependantObjects[MAX_VIEW_DEPENDANT_OBJECTS];
+    struct DynamicSceneViewDependentObject viewDependentObjects[MAX_VIEW_DEPENDENT_OBJECTS];
 };
 
 void dynamicSceneInit();
 
 int dynamicSceneAdd(void* data, DynamicRender renderCallback, struct Vector3* position, float radius);
-int dynamicSceneAddViewDependant(void* data, DynamicViewRender renderCallback, struct Vector3* position, float radius);
+int dynamicSceneAddViewDependent(void* data, DynamicViewRender renderCallback, struct Vector3* position, float radius);
 int dynamicSceneObjectCount();
+int dynamicSceneViewDependentObjectCount();
 
 void dynamicSceneRemove(int id);
 void dynamicSceneSetFlags(int id, int flags);

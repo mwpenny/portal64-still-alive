@@ -4,6 +4,11 @@
 #include "../math/vector3.h"
 #include "../graphics/color.h"
 
+enum SplashParticleFlags {
+    SplashParticleFlagsBillboarded = (1 << 0),
+    SplashParticleFlagsNoGravity   = (1 << 1)
+};
+
 struct SplashParticleDefinition {
     float particleLifetime;
     float fadeStartTime;
@@ -17,6 +22,7 @@ struct SplashParticleDefinition {
     short materialIndex;
     float particleHalfWidth;
     struct Coloru8 particleColor;
+    enum SplashParticleFlags flags;
 };
 
 struct SplashParticle {

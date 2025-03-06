@@ -108,7 +108,7 @@ void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* veloc
 
     ball->targetSpeed = sqrtf(vector3MagSqrd(&ball->rigidBody.velocity));
 
-    ball->dynamicId = dynamicSceneAddViewDependant(ball, ballRender, &ball->rigidBody.transform.position, BALL_RADIUS);
+    ball->dynamicId = dynamicSceneAddViewDependent(ball, ballRender, &ball->rigidBody.transform.position, BALL_RADIUS);
 
     dynamicSceneSetRoomFlags(ball->dynamicId, ROOM_FLAG_FROM_INDEX(startingRoom));
 

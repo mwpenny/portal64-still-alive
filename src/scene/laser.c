@@ -15,7 +15,7 @@
 
 static struct Coloru8 laserColor = { 255, 0, 0, 100 };
 
-static void laserBeamBuildVtx(Vtx* vtx, struct LaserBeam* beam, struct Vector3* cameraPosition) {
+static void laserBeamBuildVertices(Vtx* vtx, struct LaserBeam* beam, struct Vector3* cameraPosition) {
     // Determine screen-space up direction for billboard
     struct Vector3 tmp;
     struct Vector3 laserUp;
@@ -24,11 +24,9 @@ static void laserBeamBuildVtx(Vtx* vtx, struct LaserBeam* beam, struct Vector3* 
     vector3Normalize(&laserUp, &laserUp);
 
     // Create vertices for quad
-    struct Vector3* vertexOrigin;
-    for (int i = 0; i < 4; ++i, ++vtx) {
-        vertexOrigin = (i >> 1) ? &beam->endPosition : &beam->startPosition.origin;
+    for (short i = 0; i < 4; ++i, ++vtx) {
         vector3AddScaled(
-            vertexOrigin,
+            (i >> 1) ? &beam->endPosition : &beam->startPosition.origin,
             &laserUp,
             (i & 1) ? -LASER_HALF_WIDTH : LASER_HALF_WIDTH,
             &tmp
@@ -64,7 +62,7 @@ static void laserRender(void* data, struct RenderScene* renderScene, struct Tran
     Vtx* vertices = renderStateRequestVertices(renderScene->renderState, laser->beamCount * 4);
     Vtx* curr = vertices;
     for (short i = 0; i < laser->beamCount; ++i, curr += 4) {
-        laserBeamBuildVtx(curr, &laser->beams[i], &fromView->position);
+        laserBeamBuildVertices(curr, &laser->beams[i], &fromView->position);
     }
 
     // Render quads
@@ -110,7 +108,7 @@ void laserInit(struct Laser* laser, struct RigidBody* parent, struct Vector3* of
     // and so efficiently deriving a meaningful culling radius is difficult.
     // Given typical turret gameplay and the low rendering cost (each beam is
     // just a quad), rely solely on room flags.
-    laser->dynamicId = dynamicSceneAddViewDependant(
+    laser->dynamicId = dynamicSceneAddViewDependent(
         laser,
         laserRender,
         &parent->transform.position,

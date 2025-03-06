@@ -224,8 +224,8 @@ void dynamicRenderPopulateRenderScene(
         renderSceneAdd(renderScene, current->model, current->transform, current->materialIndex, &current->position, current->armature);
     }
 
-    for (int i = 0; i < MAX_VIEW_DEPENDANT_OBJECTS; ++i) {
-        struct DynamicSceneViewDependantObject* object = &gDynamicScene.viewDependantObjects[i];
+    for (int i = 0; i < MAX_VIEW_DEPENDENT_OBJECTS; ++i) {
+        struct DynamicSceneViewDependentObject* object = &gDynamicScene.viewDependentObjects[i];
 
         if ((object->flags & FLAG_MASK) != FLAG_MASK) {
             continue;
