@@ -15,8 +15,8 @@ void effectsUpdate(struct Effects* effects) {
     }
 }
 
-void effectsSplashPlay(struct Effects* effects, struct SplashParticleDefinition* definition, struct Vector3* origin, struct Vector3* normal) {
-    splashParticleEffectPlay(&effects->splashParticleEffects[effects->nextSplashEffect], definition, origin, normal);
+void effectsSplashPlay(struct Effects* effects, struct SplashParticleDefinition* definition, struct Vector3* origin, struct Vector3* normal, struct Transform* parent) {
+    splashParticleEffectPlay(&effects->splashParticleEffects[effects->nextSplashEffect], definition, origin, normal, parent);
 
     ++effects->nextSplashEffect;
 

@@ -31,6 +31,12 @@ void splashParticleEffectBuildVerticesBillboarded(Vtx* vtx, struct SplashParticl
         vector3Sub(&tmp, &heightOffset, &startPosition);
         vector3Add(&tmp, &heightOffset, &endPosition);
 
+        if (effect->parent) {
+            transformPointNoScale(effect->parent, &startPosition, &startPosition);
+            transformPointNoScale(effect->parent, &endPosition, &endPosition);
+            quatMultVector(&effect->parent->rotation, &widthOffset, &widthOffset);
+        }
+
         for (short i = 0; i < 4; ++i, ++vtx) {
             short posIndex = i >> 1;
             short widthSign = i & 0x1;
@@ -73,6 +79,10 @@ static void splashParticleEffectBuildVertices(Vtx* vtx, struct SplashParticleEff
                 widthSign ? widthScalar : -widthScalar,
                 &finalPos
             );
+
+            if (effect->parent) {
+                transformPointNoScale(effect->parent, &finalPos, &finalPos);
+            }
 
             vtx->v.ob[0] = finalPos.x * SCENE_SCALE;
             vtx->v.ob[1] = finalPos.y * SCENE_SCALE;
@@ -160,7 +170,7 @@ static void splashParticleEffectRender(void* data, struct DynamicRenderDataList*
         splashParticleEffectBuildDisplayList(renderState, effect, NULL),
         NULL,
         effect->def->materialIndex,
-        &effect->startPosition,
+        effect->position,
         NULL
     );
 }
@@ -168,12 +178,23 @@ static void splashParticleEffectRender(void* data, struct DynamicRenderDataList*
 void splashParticleEffectRenderBillboarded(void* data, struct RenderScene* renderScene, struct Transform* fromView) {
     struct SplashParticleEffect* effect = (struct SplashParticleEffect*)data;
 
+    Gfx* gfx;
+    if (effect->parent) {
+        // Presence of a parent implies a parent-local particle position,
+        // which necessitates a parent-local camera position as well
+        struct Vector3 localCamPos;
+        transformPointInverseNoScale(effect->parent, &fromView->position, &localCamPos);
+        gfx = splashParticleEffectBuildDisplayList(renderScene->renderState, effect, &localCamPos);
+    } else {
+        gfx = splashParticleEffectBuildDisplayList(renderScene->renderState, effect, &fromView->position);
+    }
+
     renderSceneAdd(
         renderScene,
-        splashParticleEffectBuildDisplayList(renderScene->renderState, effect, &fromView->position),
+        gfx,
         NULL,
         effect->def->materialIndex,
-        &effect->startPosition,
+        effect->position,
         NULL
     );
 }
@@ -183,13 +204,14 @@ void splashParticleEffectInit(struct SplashParticleEffect* effect) {
     effect->dynamicId = INVALID_DYNAMIC_OBJECT;
 }
 
-void splashParticleEffectPlay(struct SplashParticleEffect* effect, struct SplashParticleDefinition* definiton, struct Vector3* origin, struct Vector3* normal) {
+void splashParticleEffectPlay(struct SplashParticleEffect* effect, struct SplashParticleDefinition* definiton, struct Vector3* origin, struct Vector3* normal, struct Transform* parent) {
     if (effect->dynamicId != INVALID_DYNAMIC_OBJECT) {
         dynamicSceneRemove(effect->dynamicId);
     }
 
     effect->def = definiton;
     effect->time = 0.0f;
+    effect->parent = parent;
 
     struct Vector3 right;
     struct Vector3 up;
@@ -225,19 +247,20 @@ void splashParticleEffectPlay(struct SplashParticleEffect* effect, struct Splash
     }
 
     effect->startPosition = *origin;
+    effect->position = (effect->parent) ? &effect->parent->position : &effect->startPosition;
 
     if (effect->def->flags & SplashParticleFlagsBillboarded) {
         effect->dynamicId = dynamicSceneAddViewDependent(
             effect,
             splashParticleEffectRenderBillboarded,
-            &effect->startPosition,
+            effect->position,
             3.0f
         );
     } else {
         effect->dynamicId = dynamicSceneAdd(
             effect,
             splashParticleEffectRender,
-            &effect->startPosition,
+            effect->position,
             3.0f
         );
     }

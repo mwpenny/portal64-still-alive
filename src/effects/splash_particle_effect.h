@@ -37,12 +37,14 @@ struct SplashParticleEffect {
     struct SplashParticleDefinition* def;
     struct SplashParticle particles[MAX_SPLASH_PARTICLES];
     struct Vector3 startPosition;
+    struct Vector3* position;
+    struct Transform* parent;
     float time;
     short dynamicId;
 };
 
 void splashParticleEffectInit(struct SplashParticleEffect* effect);
-void splashParticleEffectPlay(struct SplashParticleEffect* effect, struct SplashParticleDefinition* definition, struct Vector3* origin, struct Vector3* normal);
+void splashParticleEffectPlay(struct SplashParticleEffect* effect, struct SplashParticleDefinition* definition, struct Vector3* origin, struct Vector3* normal, struct Transform* parent);
 void splashParticleEffectUpdate(struct SplashParticleEffect* effect);
 
 #endif

@@ -130,7 +130,7 @@ void ballInitBurn(struct Ball* ball, struct ContactManifold* manifold) {
         if (&ball->collisionObject == manifold->shapeA) {
             vector3Negate(&normal, &normal);
         }
-        effectsSplashPlay(&gScene.effects, &gBallBounce, &ball->rigidBody.transform.position, &manifold->normal);
+        effectsSplashPlay(&gScene.effects, &gBallBounce, &ball->rigidBody.transform.position, &manifold->normal, NULL);
         struct Vector3 position = manifold->contacts[0].contactAWorld;
         if (manifold->shapeA->body) {
             transformPoint(&manifold->shapeA->body->transform, &position, &position);
@@ -213,7 +213,7 @@ void ballUpdate(struct Ball* ball) {
             soundPlayerStop(ball->soundLoopId);
             soundPlayerPlay(soundsBallExplode, 2.0f, 1.0f, &ball->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             hudShowSubtitle(&gScene.hud, ENERGYBALL_EXPLOSION, SubtitleTypeCaption);
-            effectsSplashPlay(&gScene.effects, &gBallBurst, &ball->rigidBody.transform.position, &gUp);
+            effectsSplashPlay(&gScene.effects, &gBallBurst, &ball->rigidBody.transform.position, &gUp, NULL);
             ball->soundLoopId = SOUND_ID_NONE;
         }
     }

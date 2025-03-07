@@ -13,6 +13,6 @@ struct Effects {
 void effectsInit(struct Effects* effects);
 void effectsUpdate(struct Effects* effects);
 
-void effectsSplashPlay(struct Effects* effects, struct SplashParticleDefinition* definition, struct Vector3* origin, struct Vector3* normal);
+void effectsSplashPlay(struct Effects* effects, struct SplashParticleDefinition* definition, struct Vector3* origin, struct Vector3* normal, struct Transform* parent);
 
 #endif
