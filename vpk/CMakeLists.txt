@@ -30,6 +30,22 @@ set(VPKS_HL2_SOUND_MISC
     Portal/hl2/hl2_sound_misc_002.vpk
 )
 
+set(VPKS_HL2_TEXTURES
+    Portal/hl2/hl2_textures_dir.vpk
+    Portal/hl2/hl2_textures_000.vpk
+    Portal/hl2/hl2_textures_001.vpk
+    Portal/hl2/hl2_textures_002.vpk
+    Portal/hl2/hl2_textures_003.vpk
+    Portal/hl2/hl2_textures_004.vpk
+    Portal/hl2/hl2_textures_005.vpk
+    Portal/hl2/hl2_textures_006.vpk
+    Portal/hl2/hl2_textures_007.vpk
+    Portal/hl2/hl2_textures_008.vpk
+    Portal/hl2/hl2_textures_009.vpk
+    Portal/hl2/hl2_textures_010.vpk
+    Portal/hl2/hl2_textures_011.vpk
+)
+
 function(_add_vpk_extract_command VPK_LIST OUTPUT_DIR OUTPUT_LIST)
     # First VPK is the one to extract
     list(GET VPK_LIST 0 MAIN_VPK)
@@ -46,7 +62,7 @@ function(_add_vpk_extract_command VPK_LIST OUTPUT_DIR OUTPUT_LIST)
         OUTPUT
             ${MAIN_VPK_STAMP}
         COMMAND
-            ${VPK_EXECUTABLE} -x ${OUTPUT_DIR} ${MAIN_VPK}
+            ${VPK_EXECUTABLE} -x ${OUTPUT_DIR} ${ARGN} ${MAIN_VPK}
         COMMAND
             ${CMAKE_COMMAND} -E touch ${MAIN_VPK_STAMP}
         WORKING_DIRECTORY
@@ -90,6 +106,10 @@ set(VPK_STAMP_FILES "")
 _add_vpk_extract_command("${VPKS_PORTAL}"         ${PAK_DIR} VPK_STAMP_FILES)
 _add_vpk_extract_command("${VPKS_HL2_MISC}"       ${PAK_DIR} VPK_STAMP_FILES)
 _add_vpk_extract_command("${VPKS_HL2_SOUND_MISC}" ${PAK_DIR} VPK_STAMP_FILES)
+_add_vpk_extract_command("${VPKS_HL2_TEXTURES}"   ${PAK_DIR} VPK_STAMP_FILES
+    # Don't overwrite chapter thumbnails
+    -re "^(?!materials\/vgui\/chapters).*"
+)
 
 # Extract audio for each selected additional non-English locale
 foreach(LANGUAGE ${AUDIO_LANGUAGES_LIST})

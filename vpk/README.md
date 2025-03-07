@@ -28,7 +28,20 @@ vpk/
     │   ├── hl2_sound_misc_000.vpk
     │   ├── hl2_sound_misc_001.vpk
     │   ├── hl2_sound_misc_002.vpk
-    │   └── hl2_sound_misc_dir.vpk
+    │   ├── hl2_sound_misc_dir.vpk
+    │   ├── hl2_textures_000.vpk
+    │   ├── hl2_textures_001.vpk
+    │   ├── hl2_textures_002.vpk
+    │   ├── hl2_textures_003.vpk
+    │   ├── hl2_textures_004.vpk
+    │   ├── hl2_textures_005.vpk
+    │   ├── hl2_textures_006.vpk
+    │   ├── hl2_textures_007.vpk
+    │   ├── hl2_textures_008.vpk
+    │   ├── hl2_textures_009.vpk
+    │   ├── hl2_textures_010.vpk
+    │   ├── hl2_textures_011.vpk
+    │   └── hl2_textures_dir.vpk
     └── portal/
         ├── resource/
         ├── portal_pak_000.vpk
