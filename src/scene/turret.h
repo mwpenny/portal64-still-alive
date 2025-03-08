@@ -18,8 +18,9 @@ enum TurretState {
 };
 
 enum TurretFlags {
-    TurretFlagsOpen = (1 << 0),
-    TurretFlagsRotating = (1 << 1)
+    TurretFlagsOpen     = (1 << 0),
+    TurretFlagsRotating = (1 << 1),
+    TurretFlagsShooting = (1 << 2),
 };
 
 enum TurretSoundType {
@@ -64,6 +65,7 @@ struct Turret {
     float rotationSpeed;
     float stateTimer;
     float openAmount;
+    float shootTimer;
 
     SoundId currentSounds[TurretSoundTypeCount];
 };

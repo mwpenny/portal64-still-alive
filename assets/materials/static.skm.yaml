@@ -1255,6 +1255,27 @@ materials:
       clear: [G_CULL_BACK, G_CULL_FRONT, G_LIGHTING]
       set: [G_SHADE]
 
+  muzzleflash2:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/sprites/muzzleflash2.png
+      fmt: G_IM_FMT_I
+      siz: G_IM_SIZ_4b
+
+    gDPSetRenderMode:
+      - G_RM_PASS
+      - G_RM_ZB_XLU_SURF
+
+    gDPSetCycleType: G_CYC_2CYCLE
+
+    gDPSetCombineMode:
+      - color: ["0", "0", "0", "TEXEL0"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["TEXEL1", "0", "SHADE", "COMBINED"]
+        alpha: ["SHADE", "0", "TEXEL1", "0"]
+    gSPGeometryMode:
+      clear: [G_CULL_BACK, G_CULL_FRONT, G_LIGHTING]
+      set: [G_SHADE]
+
   brightglow_y:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/effects/brightglow_y.png

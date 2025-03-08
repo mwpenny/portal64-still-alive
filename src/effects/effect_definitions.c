@@ -67,3 +67,19 @@ struct SplashParticleDefinition gBallBounce = {
     .particleColor = {255, 255, 255, 255},
     .flags = 0,
 };
+
+struct SplashParticleDefinition gMuzzleFlash = {
+    .particleLifetime = 0.1f,
+    .fullWidthTime = 0.075f,
+    .fadeStartTime = 0.025f,
+    .particleTailDelay = 0.4f,
+    .minNormalVelocity = 0.25f,
+    .maxNormalVelocity = 0.75f,
+    .minTangentVelocity = 0.125,
+    .maxTangentVelocity = 0.15f,
+    .particleCount = 4,
+    .materialIndex = MUZZLEFLASH2_INDEX,
+    .particleHalfWidth = 0.15f,
+    .particleColor = {210, 135, 50, 255},
+    .flags = SplashParticleFlagsBillboarded | SplashParticleFlagsNoGravity
+};

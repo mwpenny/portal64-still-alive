@@ -2,6 +2,7 @@
 
 #include "decor/decor_object.h"
 #include "defs.h"
+#include "effects/effect_definitions.h"
 #include "locales/locales.h"
 #include "physics/collision_scene.h"
 #include "savefile/savefile.h"
@@ -15,13 +16,13 @@
 #include "codegen/assets/models/dynamic_animated_model_list.h"
 #include "codegen/assets/models/props/turret_01.h"
 
-static struct CollisionBox gTurretCollisionBox = {
+static struct CollisionBox sTurretCollisionBox = {
     {0.2f, 0.554f, 0.4f}
 };
 
-static struct ColliderTypeData gTurretCollider = {
+static struct ColliderTypeData sTurretCollider = {
     CollisionShapeTypeBox,
-    &gTurretCollisionBox,
+    &sTurretCollisionBox,
     0.0f,
     1.0f,
     &gCollisionBoxCallbacks
@@ -29,6 +30,10 @@ static struct ColliderTypeData gTurretCollider = {
 
 static struct Vector3 sTurretOriginOffset = { 0.0f, 0.554f, 0.0f };
 static struct Vector3 sTurretLaserOffset = { 0.0f, 0.0425f, 0.11f };
+static struct Vector3 sTurretMuzzleOffsets[2] = {
+    { 0.15f, 0.0425f, 0.05f },  // Left
+    { -0.15f, 0.0425f, 0.05f }  // Right
+};
 
 static struct Quaternion sTurretMinYaw = { 0.0f, -0.189f, 0.0f, 0.982f };
 static struct Quaternion sTurretMaxYaw = { 0.0f, 0.189f, 0.0f, 0.982f };
@@ -85,6 +90,7 @@ static short sTurretTippedSounds[] = {
 #define TURRET_CLOSE_SPEED         2.0f
 #define TURRET_CLOSE_DELAY         0.25f
 #define TURRET_ROTATE_SPEED        2.0f
+#define TURRET_SHOT_PERIOD         0.025f
 
 #define TURRET_SEARCH_PITCH_SPEED  0.5f
 #define TURRET_SEARCH_YAW_SPEED    TURRET_SEARCH_PITCH_SPEED * 1.5f
@@ -199,7 +205,7 @@ static void turretRender(void* data, struct DynamicRenderDataList* renderList, s
 void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     turret->definition = definition;
 
-    collisionObjectInit(&turret->collisionObject, &gTurretCollider, &turret->rigidBody, TURRET_MASS, TURRET_COLLISION_LAYERS);
+    collisionObjectInit(&turret->collisionObject, &sTurretCollider, &turret->rigidBody, TURRET_MASS, TURRET_COLLISION_LAYERS);
     collisionSceneAddDynamicObject(&turret->collisionObject);
 
     turret->rigidBody.transform.rotation = definition->rotation;
@@ -232,6 +238,7 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     turret->fizzleTime = 0.0f;
     turret->flags = 0;
     turret->openAmount = 0.0f;
+    turret->shootTimer = 0.0f;
 
     turret->state = TurretStateIdle;
     turret->stateTimer = 0.0f;
@@ -335,6 +342,53 @@ static void turretUpdateOpenAmount(struct Turret* turret) {
     turret->armature.pose[PROPS_TURRET_01_ARM_R_BONE].position.x = -armPosition;
 }
 
+static void turretStartShooting(struct Turret* turret) {
+    // Looped
+    turret->currentSounds[TurretSoundTypeSfx] = soundPlayerPlay(
+        SOUNDS_SHOOT1,
+        5.0f,
+        0.5f,
+        &turret->rigidBody.transform.position,
+        &turret->rigidBody.velocity,
+        SoundTypeAll
+    );
+
+    turret->shootTimer = 0.0f;
+    turret->flags |= TurretFlagsShooting;
+}
+
+static void turretStopShooting(struct Turret* turret) {
+    soundPlayerStop(turret->currentSounds[TurretSoundTypeSfx]);
+    turret->flags &= ~TurretFlagsShooting;
+}
+
+static void turretUpdateShots(struct Turret* turret) {
+    if (turret->shootTimer >= 0.0f) {
+        turret->shootTimer -= FIXED_DELTA_TIME;
+        return;
+    }
+
+    struct Quaternion* currentRotation = &turret->armature.pose[PROPS_TURRET_01_ARM_C_BONE].rotation;
+
+    struct Vector3 lookDir;
+    quatMultVector(currentRotation, &gForward, &lookDir);
+
+    for (short i = 0; i < 2; ++i) {
+        struct Vector3 muzzleOffset;
+        quatMultVector(currentRotation, &sTurretMuzzleOffsets[i], &muzzleOffset);
+
+        effectsSplashPlay(
+            &gScene.effects,
+            &gMuzzleFlash,
+            &muzzleOffset,
+            &lookDir,
+            &turret->rigidBody.transform
+        );
+    }
+
+    turret->shootTimer = TURRET_SHOT_PERIOD;
+}
+
 static void turretCheckGrabbed(struct Turret* turret, struct Player* player) {
     if (playerIsGrabbingObject(player, &turret->collisionObject)) {
         turretPlaySound(
@@ -366,16 +420,7 @@ static void turretCheckTipped(struct Turret* turret) {
             RANDOM_TURRET_SOUND(sTurretTippedSounds),
             NPC_FLOORTURRET_TALKTIPPED
         );
-
-        // Looped
-        turret->currentSounds[TurretSoundTypeSfx] = soundPlayerPlay(
-            SOUNDS_SHOOT1,
-            5.0f,
-            0.5f,
-            &turret->rigidBody.transform.position,
-            &turret->rigidBody.velocity,
-            SoundTypeAll
-        );
+        turretStartShooting(turret);
 
         turret->flags = (turret->flags & ~TurretFlagsRotating) | TurretFlagsOpen;
         turret->stateTimer = TURRET_TIPPED_DURATION;
@@ -484,7 +529,7 @@ static void turretUpdateTipped(struct Turret* turret) {
     }
 
     if (turret->stateTimer <= 0.0f) {
-        soundPlayerStop(turret->currentSounds[TurretSoundTypeSfx]);
+        turretStopShooting(turret);
         turretStartClose(
             turret,
             TurretStateDying,
@@ -577,5 +622,8 @@ void turretUpdate(struct Turret* turret, struct Player* player) {
 
     if (turret->flags & TurretFlagsRotating) {
         turretUpdateRotation(turret);
+    }
+    if (turret->flags & TurretFlagsShooting) {
+        turretUpdateShots(turret);
     }
 }

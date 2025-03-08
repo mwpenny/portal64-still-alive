@@ -80,6 +80,7 @@ set(TEXTURES
     signage/signage_overlay_turret
     sprites/grav_flare
     sprites/hud/portal_crosshairs
+    sprites/muzzleflash2
     tile/observation_tilefloor001a
     vgui/chapters/chapter1
     vgui/chapters/chapter2

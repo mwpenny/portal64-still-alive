@@ -7,5 +7,6 @@ extern struct SplashParticleDefinition gFailPortalSplash[2];
 
 extern struct SplashParticleDefinition gBallBurst;
 extern struct SplashParticleDefinition gBallBounce;
+extern struct SplashParticleDefinition gMuzzleFlash;
 
 #endif
