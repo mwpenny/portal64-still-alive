@@ -9,7 +9,9 @@
 
 enum TurretState {
     TurretStateIdle,
+    TurretStateDeploying,
     TurretStateSearching,
+    TurretStateAttacking,
     TurretStateGrabbed,
     TurretStateTipped,
     TurretStateClosing,
@@ -46,6 +48,7 @@ union TurretStateData {
         enum TurretState nextState;
         short soundId;
         short subtitleId;
+        float nextStateTimer;
     } closing;
 };
 
@@ -66,6 +69,7 @@ struct Turret {
     float stateTimer;
     float openAmount;
     float shootTimer;
+    float playerDetectTimer;
 
     SoundId currentSounds[TurretSoundTypeCount];
 };

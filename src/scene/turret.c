@@ -40,6 +40,22 @@ static struct Quaternion sTurretMaxYaw = { 0.0f, 0.189f, 0.0f, 0.982f };
 static struct Quaternion sTurretMinPitch = { -0.23f, 0.0f, 0.0f, 0.973f };
 static struct Quaternion sTurretMaxPitch = { 0.23f, 0.0f, 0.0f, 0.973f };
 
+static short sTurretAutosearchSounds[] = {
+    SOUNDS_TURRET_AUTOSEARCH_1,
+    SOUNDS_TURRET_AUTOSEARCH_2,
+    SOUNDS_TURRET_AUTOSEARCH_4,
+    SOUNDS_TURRET_AUTOSEARCH_5,
+    SOUNDS_TURRET_AUTOSEARCH_6
+};
+
+static short sTurretDeploySounds[] = {
+    SOUNDS_TURRET_DEPLOY_1,
+    SOUNDS_TURRET_DEPLOY_2,
+    SOUNDS_TURRET_DEPLOY_4,
+    SOUNDS_TURRET_DEPLOY_5,
+    SOUNDS_TURRET_DEPLOY_6
+};
+
 static short sTurretDisabledSounds[] = {
     SOUNDS_TURRET_DISABLED_2,
     SOUNDS_TURRET_DISABLED_4,
@@ -92,10 +108,19 @@ static short sTurretTippedSounds[] = {
 #define TURRET_ROTATE_SPEED        2.0f
 #define TURRET_SHOT_PERIOD         0.025f
 
+#define TURRET_IDLE_DIALOG_DELAY   3.0f
+
+#define TURRET_DETECT_RANGE        20.0f
+#define TURRET_DETECT_FOV_DOT      0.5f   // acos(0.5) * 2 = 120 degree FOV
+#define TURRET_DETECT_DELAY        0.75f
+
 #define TURRET_SEARCH_PITCH_SPEED  0.5f
 #define TURRET_SEARCH_YAW_SPEED    TURRET_SEARCH_PITCH_SPEED * 1.5f
 #define TURRET_SEARCH_DURATION     5.0f
 #define TURRET_SEARCH_DIALOG_DELAY 2.0f
+
+#define TURRET_ATTACK_SNAP_SPEED   1.5f
+#define TURRET_ATTACK_TRACK_SPEED  0.75f
 
 #define TURRET_GRAB_MIN_ROT_DELAY  0.1f
 #define TURRET_GRAB_MAX_ROT_DELAY  0.75f
@@ -239,6 +264,7 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     turret->flags = 0;
     turret->openAmount = 0.0f;
     turret->shootTimer = 0.0f;
+    turret->playerDetectTimer = 0.0f;
 
     turret->state = TurretStateIdle;
     turret->stateTimer = 0.0f;
@@ -248,8 +274,6 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
         turret->currentSounds[t] = SOUND_ID_NONE;
     }
 }
-
-// State handler functions
 
 static uint8_t turretUpdateFizzled(struct Turret* turret) {
     enum FizzleCheckResult fizzleStatus = decorObjectUpdateFizzler(&turret->collisionObject, &turret->fizzleTime);
@@ -295,19 +319,6 @@ static void turretUpdateRotation(struct Turret* turret) {
     )) {
         turret->flags &= ~TurretFlagsRotating;
     }
-}
-
-static void turretStartClose(struct Turret* turret, enum TurretState nextState, short soundId, short subtitleId) {
-    quatIdent(&turret->targetRotation);
-    turretStartRotation(turret, TURRET_ROTATE_SPEED);
-
-    struct ClosingStateData* state = &turret->stateData.closing;
-    state->nextState = nextState;
-    state->soundId = soundId;
-    state->subtitleId = subtitleId;
-
-    turret->stateTimer = TURRET_CLOSE_DELAY;
-    turret->state = TurretStateClosing;
 }
 
 static void turretUpdateOpenAmount(struct Turret* turret) {
@@ -363,7 +374,7 @@ static void turretStopShooting(struct Turret* turret) {
 }
 
 static void turretUpdateShots(struct Turret* turret) {
-    if (turret->shootTimer >= 0.0f) {
+    if (turret->shootTimer > 0.0f) {
         turret->shootTimer -= FIXED_DELTA_TIME;
         return;
     }
@@ -389,6 +400,92 @@ static void turretUpdateShots(struct Turret* turret) {
     turret->shootTimer = TURRET_SHOT_PERIOD;
 }
 
+static uint_fast8_t turretFindPlayerLineOfSight(struct Turret* turret, struct Player* player, struct Vector3* direction) {
+    struct Vector3 turretForward;
+    quatMultVector(&turret->rigidBody.transform.rotation, &gForward, &turretForward);
+
+    // TODO: check through portals
+
+    struct Vector3 target = player->body.transform.position;
+    target.y -= PLAYER_HEAD_HEIGHT / 2.0f;
+
+    vector3Sub(&target, &turret->rigidBody.transform.position, direction);
+    if (vector3Dot(&turretForward, direction) < 0.0f ||
+        vector3MagSqrd(direction) > TURRET_DETECT_RANGE * TURRET_DETECT_RANGE) {
+        return 0;
+    }
+
+    vector3Normalize(direction, direction);
+    if (vector3Dot(&turretForward, direction) < TURRET_DETECT_FOV_DOT) {
+        return 0;
+    }
+
+    // TODO: ensure raycast hits player. Need to write line/capsule intersection code.
+
+    // struct Ray ray;
+    // ray.origin = turret->rigidBody.transform.position;
+    // ray.dir = *direction;
+
+    // struct RaycastHit hit;
+    // if (!collisionSceneRaycast(
+    //         &gCollisionScene,
+    //         turret->rigidBody.currentRoom,
+    //         &ray,
+    //         COLLISION_LAYERS_TANGIBLE,
+    //         TURRET_DETECT_RANGE,
+    //         0,
+    //         &hit) || hit.object != &player->collisionObject
+    // ) {
+    //     return 0;
+    // }
+
+    struct Quaternion rotationInv;
+    quatConjugate(&turret->rigidBody.transform.rotation, &rotationInv);
+    quatMultVector(&rotationInv, direction, direction);
+
+    vector3Negate(direction, direction);
+
+    return 1;
+}
+
+// State transition functions
+
+static void turretEnterSearching(struct Turret* turret) {
+    turret->stateTimer = TURRET_SEARCH_DURATION;
+    turret->stateData.searching.yawDirection = 1;
+    turret->stateData.searching.pitchDirection = 1;
+    turret->state = TurretStateSearching;
+}
+
+static void turretEnterClosing(struct Turret* turret, enum TurretState nextState, float nextStateTimer, short soundId, short subtitleId) {
+    quatIdent(&turret->targetRotation);
+    turretStartRotation(turret, TURRET_ROTATE_SPEED);
+
+    struct ClosingStateData* state = &turret->stateData.closing;
+    state->nextState = nextState;
+    state->nextStateTimer = nextStateTimer;
+    state->soundId = soundId;
+    state->subtitleId = subtitleId;
+
+    turret->stateTimer = TURRET_CLOSE_DELAY;
+    turret->state = TurretStateClosing;
+}
+
+static void turretCheckPlayerDetected(struct Turret* turret, struct Player* player, enum TurretState nextState) {
+    if (turret->playerDetectTimer >= TURRET_DETECT_DELAY) {
+        turret->playerDetectTimer = 0.0f;
+        turret->state = nextState;
+        return;
+    }
+
+    struct Vector3 direction;
+    if (turretFindPlayerLineOfSight(turret, player, &direction)) {
+        turret->playerDetectTimer += FIXED_DELTA_TIME;
+    } else {
+        turret->playerDetectTimer = 0.0f;
+    }
+}
+
 static void turretCheckGrabbed(struct Turret* turret, struct Player* player) {
     if (playerIsGrabbingObject(player, &turret->collisionObject)) {
         turretPlaySound(
@@ -398,6 +495,8 @@ static void turretCheckGrabbed(struct Turret* turret, struct Player* player) {
             NPC_FLOORTURRET_TALKPICKUP
         );
         hudShowSubtitle(&gScene.hud, NPC_FLOORTURRET_ACTIVATE, SubtitleTypeCaption);
+
+        turretStopShooting(turret);
 
         turret->flags |= TurretFlagsOpen;
         turret->stateTimer = 0.0f;
@@ -428,7 +527,41 @@ static void turretCheckTipped(struct Turret* turret) {
     }
 }
 
+// State handler functions
+
 static void turretUpdateIdle(struct Turret* turret, struct Player* player) {
+    if (turret->stateTimer > 0.0f) {
+        turret->stateTimer -= FIXED_DELTA_TIME;
+
+        if (turret->stateTimer <= 0.0f) {
+            turretPlaySound(
+                turret,
+                TurretSoundTypeDialog,
+                RANDOM_TURRET_SOUND(sTurretAutosearchSounds),
+                NPC_FLOORTURRET_TALKAUTOSEARCH
+            );
+        }
+    }
+
+    turretCheckPlayerDetected(turret, player, TurretStateDeploying);
+    turretCheckTipped(turret);
+    turretCheckGrabbed(turret, player);
+}
+
+static void turretUpdateDeploying(struct Turret* turret, struct Player* player) {
+    if (!(turret->flags & TurretFlagsOpen)) {
+        turret->flags |= TurretFlagsOpen;
+    } else if (turret->openAmount == 1.0f) {
+        turretPlaySound(
+            turret,
+            TurretSoundTypeDialog,
+            RANDOM_TURRET_SOUND(sTurretDeploySounds),
+            NPC_FLOORTURRET_TALKDEPLOY
+        );
+
+        turret->state = TurretStateAttacking;
+    }
+
     turretCheckTipped(turret);
     turretCheckGrabbed(turret, player);
 }
@@ -436,19 +569,21 @@ static void turretUpdateIdle(struct Turret* turret, struct Player* player) {
 static void turretUpdateSearching(struct Turret* turret, struct Player* player) {
     struct SearchingStateData* state = &turret->stateData.searching;
 
-    // Rotate back and forth on each axis at different speeds
-    // Done without keyframed animation since it's smaller and smoother
-    if (state->yawAmount <= 0.0f || state->yawAmount >= 1.0f) {
-        state->yawDirection ^= 1;
-    }
-    if (state->pitchAmount <= 0.0f || state->pitchAmount >= 1.0f) {
-        state->pitchDirection ^= 1;
-    }
-    state->yawAmount += (state->yawDirection ? 1 : -1) * TURRET_SEARCH_YAW_SPEED * FIXED_DELTA_TIME;
-    state->pitchAmount += (state->pitchDirection ? 1 : -1) * TURRET_SEARCH_PITCH_SPEED * FIXED_DELTA_TIME;
+    if (!(turret->flags & TurretFlagsRotating)) {
+        // Rotate back and forth on each axis at different speeds
+        // Done without keyframed animation since it's smaller and smoother
+        if (state->yawAmount <= 0.0f || state->yawAmount >= 1.0f) {
+            state->yawDirection ^= 1;
+        }
+        if (state->pitchAmount <= 0.0f || state->pitchAmount >= 1.0f) {
+            state->pitchDirection ^= 1;
+        }
+        state->yawAmount += (state->yawDirection ? 1 : -1) * TURRET_SEARCH_YAW_SPEED * FIXED_DELTA_TIME;
+        state->pitchAmount += (state->pitchDirection ? 1 : -1) * TURRET_SEARCH_PITCH_SPEED * FIXED_DELTA_TIME;
 
-    struct Quaternion* currentRotation = &turret->armature.pose[PROPS_TURRET_01_ARM_C_BONE].rotation;
-    turretRotationFromYawPitch(state->yawAmount, state->pitchAmount, currentRotation);
+        struct Quaternion* currentRotation = &turret->armature.pose[PROPS_TURRET_01_ARM_C_BONE].rotation;
+        turretRotationFromYawPitch(state->yawAmount, state->pitchAmount, currentRotation);
+    }
 
     // Crossed second boundary?
     int currentSecond = (int)turret->stateTimer;
@@ -471,14 +606,52 @@ static void turretUpdateSearching(struct Turret* turret, struct Player* player) 
     }
 
     if (turret->stateTimer <= 0.0f) {
-        turretStartClose(
+        turretEnterClosing(
             turret,
             TurretStateIdle,
+            TURRET_IDLE_DIALOG_DELAY,
             RANDOM_TURRET_SOUND(sTurretRetireSounds),
             NPC_FLOORTURRET_TALKRETIRE
         );
     } else {
         turret->stateTimer -= FIXED_DELTA_TIME;
+    }
+
+    turretCheckPlayerDetected(turret, player, TurretStateAttacking);
+    turretCheckTipped(turret);
+    turretCheckGrabbed(turret, player);
+}
+
+static void turretUpdateAttacking(struct Turret* turret, struct Player* player) {
+    // TODO: active sounds
+
+    if (!(turret->flags & TurretFlagsRotating)) {
+        struct Vector3 playerDirection;
+        if (turretFindPlayerLineOfSight(turret, player, &playerDirection)) {
+            float rotationSpeed;
+            if (turret->flags & TurretFlagsShooting) {
+                rotationSpeed = TURRET_ATTACK_TRACK_SPEED;
+            } else {
+                rotationSpeed = TURRET_ATTACK_SNAP_SPEED;
+
+                // TODO: shoot only when raycast hits player
+                //  - Looks like original either checks player capsule or narrow FOV
+                turretStartShooting(turret);
+            }
+
+            quatLook(&playerDirection, &gUp, &turret->targetRotation);
+            turretStartRotation(turret, rotationSpeed);
+        } else {
+            turretStopShooting(turret);
+
+            // Recenter
+            turret->stateData.searching.yawAmount = 0.5f;
+            turret->stateData.searching.pitchAmount = 0.5f;
+            quatIdent(&turret->targetRotation);
+            turretStartRotation(turret, TURRET_ROTATE_SPEED);
+
+            turretEnterSearching(turret);
+        }
     }
 
     turretCheckTipped(turret);
@@ -515,10 +688,7 @@ static void turretUpdateGrabbed(struct Turret* turret, struct Player* player) {
     }
 
     if (!playerIsGrabbingObject(player, &turret->collisionObject)) {
-        turret->stateTimer = TURRET_SEARCH_DURATION;
-        turret->stateData.searching.yawDirection = 1;
-        turret->stateData.searching.pitchDirection = 1;
-        turret->state = TurretStateSearching;
+        turretEnterSearching(turret);
     }
 }
 
@@ -530,9 +700,10 @@ static void turretUpdateTipped(struct Turret* turret) {
 
     if (turret->stateTimer <= 0.0f) {
         turretStopShooting(turret);
-        turretStartClose(
+        turretEnterClosing(
             turret,
             TurretStateDying,
+            0.0f,
             RANDOM_TURRET_SOUND(sTurretDisabledSounds),
             NPC_FLOORTURRET_TALKDISABLED
         );
@@ -542,24 +713,24 @@ static void turretUpdateTipped(struct Turret* turret) {
 }
 
 static void turretUpdateClosing(struct Turret* turret, struct Player* player) {
-    if (turret->stateTimer >= 0.0f) {
-        turret->stateTimer -= FIXED_DELTA_TIME;
-        return;
-    }
-
     struct ClosingStateData* state = &turret->stateData.closing;
 
-    if (turret->flags & TurretFlagsOpen) {
-        turretPlaySound(
-            turret,
-            TurretSoundTypeDialog,
-            state->soundId,
-            state->subtitleId
-        );
+    if (turret->stateTimer <= 0.0f) {
+        if (turret->flags & TurretFlagsOpen) {
+            turretPlaySound(
+                turret,
+                TurretSoundTypeDialog,
+                state->soundId,
+                state->subtitleId
+            );
 
-        turret->flags &= ~TurretFlagsOpen;
-    } else if (turret->openAmount == 0.0f) {
-        turret->state = state->nextState;
+            turret->flags &= ~TurretFlagsOpen;
+        } else if (turret->openAmount == 0.0f) {
+            turret->stateTimer = state->nextStateTimer;
+            turret->state = state->nextState;
+        }
+    } else {
+        turret->stateTimer -= FIXED_DELTA_TIME;
     }
 
     if (state->nextState == TurretStateIdle) {
@@ -598,8 +769,14 @@ void turretUpdate(struct Turret* turret, struct Player* player) {
         case TurretStateIdle:
             turretUpdateIdle(turret, player);
             break;
+        case TurretStateDeploying:
+            turretUpdateDeploying(turret, player);
+            break;
         case TurretStateSearching:
             turretUpdateSearching(turret, player);
+            break;
+        case TurretStateAttacking:
+            turretUpdateAttacking(turret, player);
             break;
         case TurretStateGrabbed:
             turretUpdateGrabbed(turret, player);
