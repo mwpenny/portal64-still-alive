@@ -497,13 +497,6 @@ static void turretEnterClosing(struct Turret* turret, enum TurretState nextState
 }
 
 static void turretCheckPlayerDetected(struct Turret* turret, struct Player* player, enum TurretState nextState) {
-    if (turret->playerDetectTimer >= TURRET_DETECT_DELAY) {
-        turret->playerDetectTimer = 0.0f;
-        turret->stateData.attacking.rotatedToPlayer = 0;
-        turret->state = nextState;
-        return;
-    }
-
     if (!turretFindPlayerLineOfSight(turret, player, NULL)) {
         turret->playerDetectTimer = 0.0f;
     } else if (turret->playerDetectTimer < TURRET_DETECT_DELAY) {
