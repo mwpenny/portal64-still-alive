@@ -118,3 +118,29 @@ int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDist
 
     return contact->distance != maxDistance;
 }
+
+int raycastSphere(struct Vector3* position, float radius, struct Ray* ray, float maxDistance, float* rayDistance) {
+    struct Vector3 hyp;
+    vector3Sub(position, &ray->origin, &hyp);
+
+    // Distance along ray to sphere origin
+    float distance = vector3Dot(&hyp, &ray->dir);
+    if (distance < 0.0f || (distance - radius) > maxDistance) {
+        return 0;
+    }
+
+    // Distance from sphere origin to projected point
+    float normDist = vector3MagSqrd(&hyp) - (distance * distance);
+    if (normDist > (radius * radius)) {
+        return 0;
+    }
+
+    // Subtract distance from projected point to sphere edge
+    distance -= sqrtf((radius * radius) - normDist);
+    if (distance < 0.0f || distance > maxDistance) {
+        return 0;
+    }
+
+    *rayDistance = distance;
+    return 1;
+}

@@ -21,5 +21,6 @@ struct RaycastHit {
 int raycastQuadShape(struct CollisionQuad* quad, struct Ray* ray, float maxDistance, struct RaycastHit* contact);
 int raycastQuad(struct CollisionObject* quadObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact);
 int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact);
+int raycastSphere(struct Vector3* position, float radius, struct Ray* ray, float maxDistance, float* rayDistance);
 
 #endif

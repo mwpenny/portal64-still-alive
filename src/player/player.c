@@ -78,7 +78,7 @@ struct CollisionCapsule gPlayerCollider = {
 };
 
 struct ColliderTypeData gPlayerColliderData = {
-    CollisionShapeTypeSphere,
+    CollisionShapeTypeCapsule,
     &gPlayerCollider,
     0.0f,
     0.6f,
@@ -703,6 +703,8 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
 
     struct RigidBody* anchor = NULL;
 
+    player->collisionObject.collisionLayers = 0;
+
     if (collisionSceneRaycastOnlyDynamic(&gCollisionScene, &ray, COLLISION_LAYERS_TANGIBLE, hitDistance, &hit)) {
         hitDistance = hit.distance;
 
@@ -716,6 +718,8 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
             anchor = hit.object->body;
         }
     }
+
+    player->collisionObject.collisionLayers = PLAYER_COLLISION_LAYERS;
     
     // Stand on collision
     float penetration = hitDistance - PLAYER_HEAD_HEIGHT;

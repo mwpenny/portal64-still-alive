@@ -1,6 +1,8 @@
 #ifndef __TURRET_H__
 #define __TURRET_H__
 
+#include <stdint.h>
+
 #include "audio/soundplayer.h"
 #include "levels/level_definition.h"
 #include "physics/collision_object.h"
@@ -35,9 +37,13 @@ union TurretStateData {
     struct SearchingStateData {
         float yawAmount;
         float pitchAmount;
-        u8 yawDirection   : 1;
-        u8 pitchDirection : 1;
+        uint8_t yawDirection    : 1;
+        uint8_t pitchDirection  : 1;
     } searching;
+
+    struct AttackingStateData {
+        uint8_t rotatedToPlayer : 1;
+    } attacking;
 
     struct GrabbedStateData {
         float yawAmount;
