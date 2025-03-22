@@ -136,6 +136,9 @@ int raycastSphere(struct Vector3* position, float radius, struct Ray* ray, float
     }
 
     // Subtract distance from projected point to sphere edge
+    //
+    // Allow hitting behind the ray origin to handle spheres
+    // next to portals being cast through
     distance -= sqrtf((radius * radius) - normDist);
     if (/*distance < 0.0f || */distance > maxDistance) {
         return 0;

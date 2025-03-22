@@ -314,7 +314,8 @@ local room_grids = {}
 local default_collision_layers = {
     'COLLISION_LAYERS_STATIC',
     'COLLISION_LAYERS_BLOCK_BALL',
-    'COLLISION_LAYERS_TANGIBLE'
+    'COLLISION_LAYERS_TANGIBLE',
+    'COLLISION_LAYERS_BLOCK_TURRET_SIGHT',
 }
 
 local function add_collider(collider, collision_layers, room_index)

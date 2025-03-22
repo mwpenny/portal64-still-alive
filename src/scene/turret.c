@@ -400,7 +400,7 @@ static void turretUpdateShots(struct Turret* turret) {
     turret->shootTimer = TURRET_SHOT_PERIOD;
 }
 
-static uint8_t turretRaycastPlayer(struct Turret* turret, struct Player* player, struct Vector3* target, int checkPortals, struct Vector3* direction) {
+static uint8_t turretRaycastTarget(struct Turret* turret, struct Vector3* target, int checkPortals, struct Vector3* direction) {
     struct Vector3 turretToTarget;
     vector3Sub(target, &turret->rigidBody.transform.position, &turretToTarget);
     if (vector3MagSqrd(&turretToTarget) > (TURRET_DETECT_RANGE * TURRET_DETECT_RANGE) ||
@@ -417,31 +417,22 @@ static uint8_t turretRaycastPlayer(struct Turret* turret, struct Player* player,
     ray.origin = turret->rigidBody.transform.position;
 
     struct RaycastHit hit;
-    if (!collisionSceneRaycast(
+    if (collisionSceneRaycast(
             &gCollisionScene,
             turret->rigidBody.currentRoom,
             &ray,
-            COLLISION_LAYERS_TANGIBLE,
-            TURRET_DETECT_RANGE,
+            COLLISION_LAYERS_BLOCK_TURRET_SIGHT,
+            vector3Dot(&turretToTarget, &ray.dir),
             checkPortals,
-            &hit) || hit.object != &player->collisionObject
+            &hit)
     ) {
         return 0;
     }
 
     if (direction != NULL) {
-        // Look at center of player
-        //
-        // This needs to be done after raycasting because the shape of the player's
-        // collision can change (e.g., temporarily gets shorter after teleporting).
-        // Subtracting before raycasting will cause the ray to miss in these cases,
-        // and we want the turret to immediately find the new position.
-        vector3AddScaled(&turretToTarget, &player->body.rotationBasis.y, -PLAYER_HEAD_HEIGHT / 2.0f, direction);
-        vector3Normalize(direction, direction);
-
         struct Quaternion rotationInv;
         quatConjugate(&turret->rigidBody.transform.rotation, &rotationInv);
-        quatMultVector(&rotationInv, direction, direction);
+        quatMultVector(&rotationInv, &turretToTarget, direction);
         vector3Negate(direction, direction);
     }
 
@@ -454,7 +445,9 @@ static uint8_t turretFindPlayerLineOfSight(struct Turret* turret, struct Player*
     }
 
     struct Vector3 target = player->body.transform.position;
-    if (turretRaycastPlayer(turret, player, &target, 0, direction)) {
+    vector3AddScaled(&target, &turret->rigidBody.rotationBasis.y, -PLAYER_HEAD_HEIGHT / 2.0f, &target);
+
+    if (turretRaycastTarget(turret, &target, 0, direction)) {
         return 1;
     }
 
@@ -464,7 +457,7 @@ static uint8_t turretFindPlayerLineOfSight(struct Turret* turret, struct Player*
             transformPointInverseNoScale(gCollisionScene.portalTransforms[i], &target, &portalTarget);
             transformPointNoScale(gCollisionScene.portalTransforms[1 - i], &portalTarget, &portalTarget);
 
-            if (turretRaycastPlayer(turret, player, &portalTarget, 1, direction)) {
+            if (turretRaycastTarget(turret, &portalTarget, 1, direction)) {
                 return 1;
             }
         }

@@ -22,8 +22,9 @@ Game objects can collide if they share a collision layer. Some layers are also
 used for certain checks by the game. Static collision is only collidable if it
 is in the same [room](./room.md)
 
-If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
-`BLOCK_BALL`. The possible layers and their uses are as follows.
+If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`,
+`BLOCK_BALL`, and `BLOCK_TURRET_SIGHT`. The possible layers and their uses are
+as follows.
 
 * `STATIC`: Used for portal raycasts, and by:
     * [Doors](./door.md) (when closed)
@@ -47,15 +48,18 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
     * [Security cameras](./security_camera.md)
     * [Switches](./switch.md)
     * [Triggers](./trigger.md)
+    * [Turrets](./turret.md)
 * `GRABBABLE`: Used to check grabbable and interactable objects, and by:
     * [Decor](./decor.md) (with collision)
     * [Security cameras](./security_camera.md) (when detached)
     * [Switches](./switch.md)
+    * [Turrets](./turret.md)
 * `FIZZLER`: Used to block portal raycasts, and by:
     * [Decor](./decor.md) (with collision)
     * [Fizzlers](./fizzler.md)
     * Player
     * [Security cameras](./security_camera.md)
+    * [Turrets](./turret.md)
 * `BLOCK_PORTAL`: Used for portal raycasts, and by:
     * [Buttons](./button.md)
     * [Fizzlers](./fizzler.md)
@@ -68,6 +72,7 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`, and
     * [Elevators](./elevator.md)
     * [Fizzler](./fizzler.md) frames
     * Player
+* `BLOCK_TURRET_SIGHT`: Used to block turret line of sight
 * `BLOCK_TURRET_SHOTS`: Used to block turret shots, and by:
     * [Decor](./decor.md) (with collision)
     * Player
