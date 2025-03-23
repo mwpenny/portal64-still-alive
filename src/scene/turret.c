@@ -119,6 +119,7 @@ static short sTurretTippedSounds[] = {
 #define TURRET_SEARCH_DURATION     5.0f
 #define TURRET_SEARCH_DIALOG_DELAY 2.0f
 
+#define TURRET_ATTACK_FOV_DOT      0.9f   // acos(0.9) * 2 = ~50 degree FOV
 #define TURRET_ATTACK_SNAP_SPEED   1.5f
 #define TURRET_ATTACK_TRACK_SPEED  0.75f
 
@@ -442,6 +443,7 @@ static uint8_t turretRaycastTarget(struct Turret* turret, struct Vector3* target
         quatConjugate(&turret->rigidBody.transform.rotation, &rotationInv);
         quatMultVector(&rotationInv, &turretToTarget, direction);
         vector3Negate(direction, direction);
+        vector3Normalize(direction, direction);
     }
 
     return 1;
@@ -656,14 +658,14 @@ static void turretUpdateAttacking(struct Turret* turret, struct Player* player) 
 
             // Only shoot if aiming near player
             float rotationSpeed;
-            if (vector3Dot(&lookDir, &playerDirection) > -0.9f) {
-                rotationSpeed = TURRET_ATTACK_SNAP_SPEED;
-                turretStopShooting(turret);
-            } else {
+            if (vector3Dot(&lookDir, &playerDirection) <= -TURRET_ATTACK_FOV_DOT) {
                 rotationSpeed = TURRET_ATTACK_TRACK_SPEED;
                 if (!(turret->flags & TurretFlagsShooting)) {
                     turretStartShooting(turret);
                 }
+            } else {
+                rotationSpeed = TURRET_ATTACK_SNAP_SPEED;
+                turretStopShooting(turret);
             }
 
             quatLook(&playerDirection, &gUp, &turret->targetRotation);
