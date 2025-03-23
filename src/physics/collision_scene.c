@@ -444,8 +444,9 @@ void collisionSceneRaycastDynamic(struct CollisionScene* scene, struct Ray* ray,
 
 int collisionSceneRaycastOnlyDynamic(struct CollisionScene* scene, struct Ray* ray, int collisionLayers, float maxDistance, struct RaycastHit* hit) {
     hit->distance = maxDistance;
-    hit->passedRooms = 1LL << hit->roomIndex;
     hit->throughPortal = NULL;
+    hit->passedRooms = 1LL << hit->roomIndex;
+    hit->numPortalsPassed = 0;
 
     collisionSceneRaycastDynamic(scene, ray, collisionLayers, hit);
 
@@ -512,9 +513,10 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
                 if (result) {
                     newHit.distance += hit->distance;
                     newHit.throughPortal = gCollisionScene.portalTransforms[i];
-                    newHit.numPortalsPassed += numPortalsPassed;
                     *hit = newHit;
                 }
+
+                hit->numPortalsPassed += numPortalsPassed;
 
                 return result;
             }

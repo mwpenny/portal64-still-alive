@@ -403,13 +403,17 @@ static void turretUpdateShots(struct Turret* turret) {
 static uint8_t turretRaycastTarget(struct Turret* turret, struct Vector3* target, int checkPortals, struct Vector3* direction) {
     struct Vector3 turretToTarget;
     vector3Sub(target, &turret->rigidBody.transform.position, &turretToTarget);
-    if (vector3MagSqrd(&turretToTarget) > (TURRET_DETECT_RANGE * TURRET_DETECT_RANGE) ||
-        vector3Dot(&turret->rigidBody.rotationBasis.z, &turretToTarget) < 0.0f) {
+
+    float targetDistance = vector3MagSqrd(&turretToTarget);
+    if (targetDistance > (TURRET_DETECT_RANGE * TURRET_DETECT_RANGE) ||
+        vector3Dot(&turret->rigidBody.rotationBasis.z, &turretToTarget) <= 0.0f) {
         return 0;
     }
 
+    targetDistance = sqrtf(targetDistance);
+
     struct Ray ray;
-    vector3Normalize(&turretToTarget, &ray.dir);
+    vector3Scale(&turretToTarget, &ray.dir, 1.0f / targetDistance);
     if (vector3Dot(&turret->rigidBody.rotationBasis.z, &ray.dir) < TURRET_DETECT_FOV_DOT) {
         return 0;
     }
@@ -422,10 +426,14 @@ static uint8_t turretRaycastTarget(struct Turret* turret, struct Vector3* target
             turret->rigidBody.currentRoom,
             &ray,
             COLLISION_LAYERS_BLOCK_TURRET_SIGHT,
-            vector3Dot(&turretToTarget, &ray.dir),
+            targetDistance,
             checkPortals,
             &hit)
     ) {
+        return 0;
+    }
+
+    if (checkPortals && hit.numPortalsPassed == 0) {
         return 0;
     }
 
