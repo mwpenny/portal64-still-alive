@@ -41,10 +41,6 @@ static struct Coloru8 sCrosshairBlue = { 0, 128, 255, 255 };
 #define SUBTITLE_FAST_FADE_TIME        0.25f
 #define CAPTION_EXPIRE_TIME            1.5f
 
-#define INTRO_BLACK_TIME               3.0f
-#define INTRO_FADE_TIME                1.0f
-#define INTRO_TOTAL_TIME               (INTRO_BLACK_TIME + INTRO_FADE_TIME)
-
 void hudInit(struct Hud* hud) {
     hud->promptType = CutscenePromptTypeNone;
     hud->subtitleId = StringIdNone;
@@ -59,10 +55,6 @@ void hudInit(struct Hud* hud) {
     hud->resolvedPrompts = 0;
     hud->lastPortalIndexShot = -1;
     hud->overlayTimer = 0.0f;
-
-    if (gCurrentLevelIndex == 0) {
-        hudShowColoredOverlay(hud, &gColorBlack, INTRO_TOTAL_TIME, INTRO_FADE_TIME);
-    }
 }
 
 void hudUpdate(struct Hud* hud) {
@@ -355,7 +347,8 @@ void hudRender(struct Hud* hud, struct Player* player, struct RenderState* rende
         }
     }
 
-    if (hud->overlayTimer <= 0.0f && !playerIsDead(player) && !(player->flags & PlayerInCutscene)) {
+    if ((!playerIsDead(player) && !(player->flags & PlayerInCutscene)) &&
+        (gCurrentLevelIndex > 0 || hud->overlayTimer <= 0.0f)) {
         // Center reticle is drawn over top everything
         gSPDisplayList(renderState->dl++, hud_material_list[CENTER_RETICLE_INDEX]);
         gDPSetPrimColor(renderState->dl++, 255, 255, 210, 210, 210, 255);

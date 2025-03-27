@@ -55,6 +55,9 @@ Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 #define LEVEL_INDEX_WITH_GUN_0  2
 #define LEVEL_INDEX_WITH_GUN_1  8
 
+#define INTRO_BLACK_TIME        3.0f
+#define INTRO_FADE_TIME         1.0f
+#define INTRO_TOTAL_TIME        (INTRO_BLACK_TIME + INTRO_FADE_TIME)
 
 void sceneUpdateListeners(struct Scene* scene);
 
@@ -128,6 +131,12 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_1) {
         playerGivePortalGun(&scene->player, PlayerHasSecondPortalGun);
+    }
+
+    hudInit(&scene->hud);
+
+    if (gCurrentLevelIndex == 0) {
+        hudShowColoredOverlay(&scene->hud, &gColorBlack, INTRO_TOTAL_TIME, INTRO_FADE_TIME);
     }
 
     struct Vector3* startPosition = &levelRelativeTransform()->position;
@@ -280,8 +289,6 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     sceneInitDynamicColliders(scene);
 
     sceneAnimatorInit(&scene->animator, gCurrentLevel->animations, gCurrentLevel->animationInfoCount);
-
-    hudInit(&scene->hud);
 
     playerUpdateFooting(&scene->player, PLAYER_HEAD_HEIGHT);
     scene->player.lookTransform.position = scene->player.body.transform.position;

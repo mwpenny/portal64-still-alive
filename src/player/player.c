@@ -599,12 +599,12 @@ void playerUpdateHealth(struct Player* player) {
     }
 }
 
-void playerDamage(struct Player* player, float amount, enum PlayerDamageType damage_type) {
+void playerDamage(struct Player* player, float amount, enum PlayerDamageType damageType) {
     if ((player->flags & PlayerIsInvincible) || player->health <= 0.0f) {
         return;
     }
 
-    if (damage_type == PlayerDamageTypeEnvironment) {
+    if (damageType == PlayerDamageTypeEnvironment) {
         hudShowColoredOverlay(
             &gScene.hud,
             &gColorWhite,

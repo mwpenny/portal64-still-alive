@@ -71,7 +71,7 @@ void playerInitGrabRotationBase(struct Player* player);
 void playerGivePortalGun(struct Player* player, int flags);
 void playerSetLocation(struct Player* player, struct Location* location);
 
-void playerDamage(struct Player* player, float amount, enum PlayerDamageType damage_type);
+void playerDamage(struct Player* player, float amount, enum PlayerDamageType damageType);
 
 int playerIsDead(struct Player* player);
 void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing);
