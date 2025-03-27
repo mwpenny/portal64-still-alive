@@ -1013,8 +1013,7 @@ void playerMove(struct Player* player, struct Vector2* moveInput, struct Vector3
         // Follow moving platform
         struct Vector3 anchorOffset;
         vector3Sub(&player->anchoredTo->transform.position, &player->anchorLastPosition, &anchorOffset);
-        player->body.transform.position.x += anchorOffset.x;
-        player->body.transform.position.z += anchorOffset.z;
+        vector3Add(&player->body.transform.position, &anchorOffset, &player->body.transform.position);
     }
 
     vector3AddScaled(&player->body.transform.position, &player->body.velocity, FIXED_DELTA_TIME, &player->body.transform.position);
