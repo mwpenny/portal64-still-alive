@@ -54,7 +54,11 @@ cutscenes:
   DOOR_ROOM:
     - save_checkpoint
   DROWN_PLAYER:
-    - kill_player water
+    - label drown_loop
+    - wait_for_signal player_in_goo
+    - damage_player 25
+    - delay 0.5
+    - goto drown_loop
 operators:
   - not_on_piston = not on_piston
   - not_cube_near_button = not cube_near_button

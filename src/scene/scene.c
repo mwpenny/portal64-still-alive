@@ -330,7 +330,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
 
-    if (gGameMenu.state == GameMenuStateResumeGame || scene->hud.fadeInTimer > 0.0f) {
+    if (gGameMenu.state == GameMenuStateResumeGame || hudOverlayVisible(&scene->hud, &scene->player)) {
         hudRender(&scene->hud, &scene->player, renderState);
         debugSceneRender(scene, renderState, &renderPlan);
     }

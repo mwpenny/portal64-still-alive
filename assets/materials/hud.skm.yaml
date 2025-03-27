@@ -39,7 +39,7 @@ materials:
       b: 255
       a: 255
 
-  death_overlay:
+  overlay:
     gDPSetRenderMode: G_RM_XLU_SURF
     gSPGeometryMode:
       clear: [G_ZBUFFER]

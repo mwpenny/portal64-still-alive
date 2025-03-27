@@ -1,4 +1,4 @@
-#include "./scene_serialize.h"
+#include "scene_serialize.h"
 
 #include "decor/decor_object_list.h"
 #include "levels/levels.h"
@@ -10,6 +10,7 @@ void playerSerialize(struct Serializer* serializer, SerializeAction action, stru
     action(serializer, &player->body.velocity, sizeof(player->body.velocity));
     action(serializer, &player->body.currentRoom, sizeof(player->body.currentRoom));
     action(serializer, &player->flags, sizeof(player->flags));
+    action(serializer, &player->health, sizeof(player->health));
     action(serializer, &player->grabbingThroughPortal, sizeof(player->grabbingThroughPortal));
 }
 
@@ -21,6 +22,7 @@ void playerDeserialize(struct Serializer* serializer, struct Player* player) {
     serializeRead(serializer, &player->body.velocity, sizeof(player->body.velocity));
     serializeRead(serializer, &location.roomIndex, sizeof(location.roomIndex));
     serializeRead(serializer, &player->flags, sizeof(player->flags));
+    serializeRead(serializer, &player->health, sizeof(player->health));
     serializeRead(serializer, &player->grabbingThroughPortal, sizeof(player->grabbingThroughPortal));
 
     playerSetLocation(player, &location);
@@ -601,7 +603,7 @@ void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
         doorCheckForOpenState(&scene->doors[i]);
     }
 
-    scene->hud.fadeInTimer = 0.0f;
+    scene->hud.overlayTimer = 0.0f;
 
     if (scene->player.flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
         scene->portalGun.rotation = scene->player.lookTransform.rotation;

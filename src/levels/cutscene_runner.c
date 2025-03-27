@@ -314,8 +314,8 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         case CutsceneStepSaveCheckpoint:
             sceneQueueCheckpoint(&gScene);
             break;
-        case CutsceneStepKillPlayer:
-            playerKill(&gScene.player, step->killPlayer.isWater);
+        case CutsceneStepDamagePlayer:
+            playerDamage(&gScene.player, step->damagePlayer.amount, PlayerDamageTypeEnvironment);
             break;
         case CutsceneStepRumble:
             rumblePakClipPlay(&gCutsceneRumbleWaves[step->rumble.rumbleLevel]);

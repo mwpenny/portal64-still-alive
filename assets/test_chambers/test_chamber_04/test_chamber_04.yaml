@@ -9,7 +9,11 @@ cutscenes:
   SUCCESS:
     - q_sound SOUNDS_04_PART1_SUCCESS_1 CH_GLADOS PORTAL_04_PART1_SUCCESS_1
   DROWN_PLAYER:
-    - kill_player water
+    - label drown_loop
+    - wait_for_signal player_in_goo
+    - damage_player 25
+    - delay 0.5
+    - goto drown_loop
   OPEN_PORTAL:
     - save_checkpoint
     - delay 1

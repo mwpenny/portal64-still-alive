@@ -27,13 +27,16 @@
 #define GRAB_MIN_OFFSET_Y      -1.1f
 #define GRAB_MAX_OFFSET_Y       1.25f
 
-#define DROWN_TIME              2.0f
 #define STEP_TIME               0.35f
 
 #define STAND_SPEED             1.5f
 #define SHAKE_DISTANCE          0.02f
 
-#define DEAD_OFFSET -0.4f
+#define ENV_DAMAGE_OVERLAY_TIME 0.5f
+#define ENV_DAMAGE_OVERLAY_FADE 0.75f
+#define HEALTH_REGEN_DELAY      1.0f
+#define HEALTH_REGEN_SPEED      60.0f
+#define DEAD_OFFSET             -0.4f
 
 #define PLAYER_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_BALL | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
 
@@ -64,6 +67,8 @@
 
 #define JUMP_IMPULSE            2.5f
 #define THROW_IMPULSE           1.25f
+
+#define PLAYER_GRABBING_THROUGH_NOTHING 0
 
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
@@ -163,6 +168,8 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->pitchVelocity = 0.0f;
     player->yawVelocity = 0.0f;
     player->flags = PlayerFlagsGrounded;
+    player->health = PLAYER_MAX_HEALTH;
+    player->healthRegenTimer = HEALTH_REGEN_DELAY;
     player->stepTimer = STEP_TIME;
     player->shakeTimer = 0.0f;
     player->currentFoot = 0;
@@ -219,7 +226,7 @@ void playerHandleCollision(struct Player* player) {
         }
 
         if (((isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB)) && !playerIsDead(player))) {
-            playerKill(player, 0);
+            playerDamage(player, PLAYER_MAX_HEALTH, PlayerDamageTypeEnemy);
             soundPlayerPlay(soundsBallKill, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         }
     }
@@ -577,26 +584,51 @@ void playerUpdateSounds(struct Player* player) {
     }
 }
 
-void playerKill(struct Player* player, int isUnderwater) {
-    if (player->flags & PlayerIsInvincible){
+void playerUpdateHealth(struct Player* player) {
+    if (player->health <= 0.0f || player->health >= PLAYER_MAX_HEALTH) {
         return;
     }
 
-    if (isUnderwater) {
-        player->flags |= PlayerIsUnderwater;
-        player->drownTimer = DROWN_TIME;
+    if (player->healthRegenTimer > 0.0f) {
+        player->healthRegenTimer -= FIXED_DELTA_TIME;
+    }
+
+    if (player->healthRegenTimer <= 0.0f) {
+        player->healthRegenTimer = 0.0f;
+        player->health = MIN(player->health + (HEALTH_REGEN_SPEED * FIXED_DELTA_TIME), PLAYER_MAX_HEALTH);
+    }
+}
+
+void playerDamage(struct Player* player, float amount, enum PlayerDamageType damage_type) {
+    if ((player->flags & PlayerIsInvincible) || player->health <= 0.0f) {
         return;
     }
 
-    player->flags |= PlayerIsDead;
-    // drop the portal gun
-    player->flags &= ~(PlayerHasFirstPortalGun | PlayerHasSecondPortalGun);
-    playerSetGrabbing(player, NULL);
-    rumblePakClipPlay(&gPlayerDieRumbleWave);
+    if (damage_type == PlayerDamageTypeEnvironment) {
+        hudShowColoredOverlay(
+            &gScene.hud,
+            &gColorWhite,
+            ENV_DAMAGE_OVERLAY_TIME,
+            ENV_DAMAGE_OVERLAY_FADE
+        );
+    }
+
+    player->health -= amount;
+    player->healthRegenTimer = HEALTH_REGEN_DELAY;
+
+    if (player->health <= 0.0f) {
+        player->health = 0.0f;
+
+        // Drop the portal gun
+        player->flags &= ~(PlayerHasFirstPortalGun | PlayerHasSecondPortalGun);
+        playerSetGrabbing(player, NULL);
+
+        rumblePakClipPlay(&gPlayerDieRumbleWave);
+    }
 }
 
 int playerIsDead(struct Player* player) {
-    return (player->flags & PlayerIsDead) != 0;
+    return player->health <= 0.0f;
 }
 
 struct SKAnimationClip* gPlayerIdleClips[] = {
@@ -1125,24 +1157,16 @@ void playerUpdate(struct Player* player) {
     if (clip != player->animator.from.currentClip) {
         skAnimatorRunClip(&player->animator.from, clip, startTime, SKAnimatorFlagsLoop);
     }
-
-    if (player->flags & PlayerIsUnderwater) {
-        player->drownTimer -= FIXED_DELTA_TIME;
-
-        if (player->drownTimer < 0.0f) {
-            player->flags &= ~PlayerIsUnderwater;
-            playerKill(player, 0);
-        }
-    }
     
+    playerUpdateHealth(player);
     playerUpdateSounds(player);
 }
 
 void playerApplyCameraTransform(struct Player* player, struct Transform* cameraTransform) {
     cameraTransform->rotation = player->lookTransform.rotation;
     cameraTransform->position = player->lookTransform.position;
-    
-    if (player->flags & PlayerIsDead) {
+
+    if (playerIsDead(player)) {
         cameraTransform->position.y += DEAD_OFFSET;
     }
 }
@@ -1156,9 +1180,5 @@ void playerToggleJumpImpulse(struct Player* player, float newJumpImpulse){
 }
 
 void playerToggleInvincibility(struct Player* player){
-    if (player->flags & PlayerIsInvincible){
-        player->flags &= ~PlayerIsInvincible;
-    }else{
-        player->flags |= PlayerIsInvincible;
-    }
+    player->flags ^= PlayerIsInvincible;
 }

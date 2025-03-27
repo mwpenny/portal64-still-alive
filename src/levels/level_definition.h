@@ -63,7 +63,7 @@ enum CutsceneStepType {
     CutsceneStepSetAnimationSpeed,
     CutsceneStepWaitForAnimation,
     CutsceneStepSaveCheckpoint,
-    CutsceneStepKillPlayer,
+    CutsceneStepDamagePlayer,
     CutsceneStepTypeClosePortal,
     CutsceneStepShowPrompt,
     CutsceneStepRumble,
@@ -157,8 +157,8 @@ struct CutsceneStep {
             u8 armatureIndex;
         } waitForAnimation;
         struct {
-            u8 isWater;
-        } killPlayer;
+            float amount;
+        } damagePlayer;
         struct {
             u8 actionPromptType;
         } showPrompt;
@@ -190,10 +190,16 @@ struct ObjectTriggerInfo {
     short signalIndex;
 };
 
+enum TriggerType {
+    TriggerTypeContain,
+    TriggerTypeTouch
+};
+
 struct Trigger {
     struct Box3D box;
     struct ObjectTriggerInfo* triggers;
     short triggerCount;
+    enum TriggerType type;
 };
 
 struct Location {
