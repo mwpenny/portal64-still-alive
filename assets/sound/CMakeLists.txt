@@ -85,6 +85,11 @@ set(SOUND_SCRIPTS
     npc/turret_floor/ping.sox
     npc/turret_floor/retract.sox
     npc/turret_floor/shoot1.jsox
+    physics/flesh/flesh_impact_bullet1.sox
+    physics/flesh/flesh_impact_bullet2.sox
+    physics/flesh/flesh_impact_bullet3.sox
+    physics/flesh/flesh_impact_bullet4.sox
+    physics/flesh/flesh_impact_bullet5.sox
     plats/elevator_move_loop1.sox
     plats/elevator_stop1.sox
     player/footsteps/concrete1.sox

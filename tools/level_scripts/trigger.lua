@@ -306,7 +306,7 @@ local function generate_cutscenes()
 end
 
 local function signal_type_index(index, is_hover)
-    if index == 3 then
+    if index >= 3 then
         if is_hover then
             return sk_definition_writer.raw('ObjectTriggerTypeCubeHover')
         end

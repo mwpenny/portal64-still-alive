@@ -40,6 +40,14 @@ static struct Quaternion sTurretMaxYaw = { 0.0f, 0.189f, 0.0f, 0.982f };
 static struct Quaternion sTurretMinPitch = { -0.23f, 0.0f, 0.0f, 0.973f };
 static struct Quaternion sTurretMaxPitch = { 0.23f, 0.0f, 0.0f, 0.973f };
 
+static short sTurretPlayerBulletHitSounds[] = {
+    SOUNDS_FLESH_IMPACT_BULLET1,
+    SOUNDS_FLESH_IMPACT_BULLET2,
+    SOUNDS_FLESH_IMPACT_BULLET3,
+    SOUNDS_FLESH_IMPACT_BULLET4,
+    SOUNDS_FLESH_IMPACT_BULLET5
+};
+
 static short sTurretAutosearchSounds[] = {
     SOUNDS_TURRET_AUTOSEARCH_1,
     SOUNDS_TURRET_AUTOSEARCH_2,
@@ -108,6 +116,11 @@ static short sTurretTippedSounds[] = {
 #define TURRET_ROTATE_SPEED        2.0f
 #define TURRET_SHOT_PERIOD         0.025f
 
+#define TURRET_BULLET_DAMAGE       4.0f
+#define TURRET_BULLET_IMPULSE      5.0f
+#define TURRET_BULLET_PUSH_HITS    8
+#define TURRET_BULLET_SOUND_HITS   4
+
 #define TURRET_IDLE_DIALOG_DELAY   3.0f
 
 #define TURRET_DETECT_RANGE        20.0f
@@ -129,7 +142,8 @@ static short sTurretTippedSounds[] = {
 #define TURRET_TIPPED_DURATION     3.0f
 #define TURRET_TIPPED_ROTATE_SPEED 8.0f
 
-#define RANDOM_TURRET_SOUND(list) turretRandomSoundId(list, sizeof(list) / sizeof(*list))
+#define LIST_SIZE(list) (sizeof(list) / sizeof(*list))
+#define RANDOM_TURRET_SOUND(list) turretRandomSoundId(list, LIST_SIZE(list))
 
 static short turretRandomSoundId(short* list, short listSize) {
 #ifdef AUDIO_LANGUAGE_RUSSIAN
@@ -261,6 +275,7 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     quatIdent(&turret->targetRotation);
     turret->rotationSpeed = TURRET_ROTATE_SPEED;
 
+    turret->playerHitCount = 0;
     turret->fizzleTime = 0.0f;
     turret->flags = 0;
     turret->openAmount = 0.0f;
@@ -374,7 +389,34 @@ static void turretStopShooting(struct Turret* turret) {
     turret->flags &= ~TurretFlagsShooting;
 }
 
-static void turretUpdateShots(struct Turret* turret) {
+static void turretHitPlayer(struct Turret* turret, struct Player* player, struct Vector3* lookDir) {
+    playerDamage(player, TURRET_BULLET_DAMAGE, PlayerDamageTypeEnemy);
+
+    float velocityTowardTurret = vector3Dot(&player->body.velocity, lookDir);
+    if (velocityTowardTurret < 0.0f ||
+        (velocityTowardTurret < 0.001f && (turret->playerHitCount % TURRET_BULLET_PUSH_HITS) == 0)) {
+
+        // Always push if player is moving toward turret, otherwise periodically
+        struct Vector3 push;
+        vector3Scale(lookDir, &push, player->body.mass * TURRET_BULLET_IMPULSE);
+        rigidBodyAppyImpulse(&player->body, &player->body.transform.position, &push);
+    }
+
+    if ((turret->playerHitCount % TURRET_BULLET_SOUND_HITS) == 0) {
+        soundPlayerPlay(
+            sTurretPlayerBulletHitSounds[randomInRange(0, LIST_SIZE(sTurretPlayerBulletHitSounds))],
+            1.0f,
+            0.5f,
+            NULL,
+            NULL,
+            SoundTypeAll
+        );
+    }
+
+    ++turret->playerHitCount;
+}
+
+static void turretUpdateShots(struct Turret* turret, struct Player* player) {
     if (turret->shootTimer > 0.0f) {
         turret->shootTimer -= FIXED_DELTA_TIME;
         return;
@@ -396,6 +438,13 @@ static void turretUpdateShots(struct Turret* turret) {
             &lookDir,
             &turret->rigidBody.transform
         );
+    }
+
+    // TODO: bullet trails, bullet holes on objects, blood, friendly fire, etc.
+
+    if (turret->laser.lastObjectHit == &player->collisionObject) {
+        struct Vector3* laserDir = &turret->laser.beams[turret->laser.beamCount - 1].startPosition.dir;
+        turretHitPlayer(turret, player, laserDir);
     }
 
     turret->shootTimer = TURRET_SHOT_PERIOD;
@@ -830,6 +879,6 @@ void turretUpdate(struct Turret* turret, struct Player* player) {
         turretUpdateRotation(turret);
     }
     if (turret->flags & TurretFlagsShooting) {
-        turretUpdateShots(turret);
+        turretUpdateShots(turret, player);
     }
 }

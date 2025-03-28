@@ -67,6 +67,7 @@ struct Turret {
     enum TurretState state;
     union TurretStateData stateData;
     struct Quaternion targetRotation;
+    uint8_t playerHitCount;
     float rotationSpeed;
     float stateTimer;
     float openAmount;

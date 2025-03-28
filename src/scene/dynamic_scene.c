@@ -55,7 +55,7 @@ int dynamicSceneObjectCount() {
     int count = 0;
 
     for (int i = 0; i < MAX_DYNAMIC_SCENE_OBJECTS; ++i) {
-        if (gDynamicScene.objects[count].flags & DYNAMIC_SCENE_OBJECT_FLAGS_USED) {
+        if (gDynamicScene.objects[i].flags & DYNAMIC_SCENE_OBJECT_FLAGS_USED) {
             ++count;
         }
     }
@@ -67,7 +67,7 @@ int dynamicSceneViewDependentObjectCount() {
     int count = 0;
 
     for (int i = 0; i < MAX_VIEW_DEPENDENT_OBJECTS; ++i) {
-        if (gDynamicScene.viewDependentObjects[count].flags & DYNAMIC_SCENE_OBJECT_FLAGS_USED) {
+        if (gDynamicScene.viewDependentObjects[i].flags & DYNAMIC_SCENE_OBJECT_FLAGS_USED) {
             ++count;
         }
     }
