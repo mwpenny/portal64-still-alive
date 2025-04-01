@@ -48,6 +48,16 @@ static short sTurretPlayerBulletHitSounds[] = {
     SOUNDS_FLESH_IMPACT_BULLET5
 };
 
+static short sTurretActiveSounds[] = {
+    SOUNDS_TURRET_ACTIVE_1,
+    SOUNDS_TURRET_ACTIVE_2,
+    SOUNDS_TURRET_ACTIVE_4,
+    SOUNDS_TURRET_ACTIVE_5,
+    SOUNDS_TURRET_ACTIVE_6,
+    SOUNDS_TURRET_ACTIVE_7,
+    SOUNDS_TURRET_ACTIVE_8
+};
+
 static short sTurretAutosearchSounds[] = {
     SOUNDS_TURRET_AUTOSEARCH_1,
     SOUNDS_TURRET_AUTOSEARCH_2,
@@ -135,6 +145,7 @@ static short sTurretTippedSounds[] = {
 #define TURRET_SEARCH_DURATION     5.0f
 #define TURRET_SEARCH_DIALOG_DELAY 2.0f
 
+#define TURRET_ATTACK_DIALOG_DELAY 2.0f
 #define TURRET_ATTACK_FOV_DOT      0.9f   // acos(0.9) * 2 = ~50 degree FOV
 #define TURRET_ATTACK_SNAP_SPEED   1.5f
 #define TURRET_ATTACK_TRACK_SPEED  0.75f
@@ -715,8 +726,24 @@ static void turretUpdateSearching(struct Turret* turret, struct Player* player) 
 }
 
 static void turretUpdateAttacking(struct Turret* turret, struct Player* player) {
-    // TODO: active sounds
+    // Talk while shooting
+    if (turret->currentSounds[TurretSoundTypeDialog] == SOUND_ID_NONE &&
+        (turret->flags & TurretFlagsShooting)) {
+        if (turret->stateTimer <= 0.0f) {
+            turretPlaySound(
+                turret,
+                TurretSoundTypeDialog,
+                RANDOM_TURRET_SOUND(sTurretActiveSounds),
+                NPC_FLOORTURRET_TALKACTIVE
+            );
 
+            turret->stateTimer = TURRET_ATTACK_DIALOG_DELAY;
+        } else {
+            turret->stateTimer -= FIXED_DELTA_TIME;
+        }
+    }
+
+    // Rotate to player
     if (!(turret->flags & TurretFlagsRotating)) {
         struct Vector3 playerDirection;
         if (turretFindPlayerLineOfSight(turret, player, &playerDirection)) {

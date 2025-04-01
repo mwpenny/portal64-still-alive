@@ -122,6 +122,13 @@ set(SOUND_SCRIPTS
 )
 
 set(LOCALIZED_SOUND_SCRIPTS
+    npc/turret_floor/turret_active_1.sox
+    npc/turret_floor/turret_active_2.sox
+    npc/turret_floor/turret_active_4.sox
+    npc/turret_floor/turret_active_5.sox
+    npc/turret_floor/turret_active_6.sox
+    npc/turret_floor/turret_active_7.sox
+    npc/turret_floor/turret_active_8.sox
     npc/turret_floor/turret_autosearch_1.sox
     npc/turret_floor/turret_autosearch_2.sox
     npc/turret_floor/turret_autosearch_4.sox
@@ -243,6 +250,12 @@ set(LOCALIZED_SOUND_SCRIPTS
 
 # Localized sounds which are not localized in this language
 set(RUSSIAN_EXCLUDED_LOCALIZED_SOUND_SCRIPTS
+    npc/turret_floor/turret_active_2.sox
+    npc/turret_floor/turret_active_4.sox
+    npc/turret_floor/turret_active_5.sox
+    npc/turret_floor/turret_active_6.sox
+    npc/turret_floor/turret_active_7.sox
+    npc/turret_floor/turret_active_8.sox
     npc/turret_floor/turret_autosearch_2.sox
     npc/turret_floor/turret_autosearch_4.sox
     npc/turret_floor/turret_autosearch_5.sox
