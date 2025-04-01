@@ -111,6 +111,7 @@ static short sTurretTippedSounds[] = {
 #define TURRET_OPEN_POSITION       46.0f
 #define TURRET_CLOSE_POSITION      22.0f
 #define TURRET_OPEN_SPEED          4.0f
+#define TURRET_SLOW_OPEN_SPEED     2.5f
 #define TURRET_CLOSE_SPEED         2.0f
 #define TURRET_CLOSE_DELAY         0.25f
 #define TURRET_ROTATE_SPEED        2.0f
@@ -125,7 +126,9 @@ static short sTurretTippedSounds[] = {
 
 #define TURRET_DETECT_RANGE        20.0f
 #define TURRET_DETECT_FOV_DOT      0.5f   // acos(0.5) * 2 = 120 degree FOV
-#define TURRET_DETECT_DELAY        0.75f
+#define TURRET_DETECT_DELAY        0.5f
+
+#define TURRET_DEPLOY_DELAY        0.5f
 
 #define TURRET_SEARCH_PITCH_SPEED  0.5f
 #define TURRET_SEARCH_YAW_SPEED    TURRET_SEARCH_PITCH_SPEED * 1.5f
@@ -361,7 +364,17 @@ static void turretUpdateOpenAmount(struct Turret* turret) {
         );
     }
 
-    float speed = shouldOpen ? TURRET_OPEN_SPEED : -TURRET_CLOSE_SPEED;
+    float speed;
+    if (shouldOpen) {
+        if (turret->state == TurretStateDeploying) {
+            speed = TURRET_SLOW_OPEN_SPEED;
+        } else {
+            speed = TURRET_OPEN_SPEED;
+        }
+    } else {
+        speed = -TURRET_CLOSE_SPEED;
+    }
+
     turret->openAmount = clampf(turret->openAmount + (speed * FIXED_DELTA_TIME), 0.0f, 1.0f);
 
     float armPosition = mathfLerp(TURRET_CLOSE_POSITION, TURRET_OPEN_POSITION, turret->openAmount);
@@ -555,6 +568,7 @@ static void turretCheckPlayerDetected(struct Turret* turret, struct Player* play
         turret->playerDetectTimer += FIXED_DELTA_TIME;
     } else {
         turret->playerDetectTimer = 0.0f;
+        turret->stateTimer = TURRET_DEPLOY_DELAY;
         turret->state = nextState;
     }
 }
@@ -622,17 +636,22 @@ static void turretUpdateIdle(struct Turret* turret, struct Player* player) {
 }
 
 static void turretUpdateDeploying(struct Turret* turret, struct Player* player) {
-    if (!(turret->flags & TurretFlagsOpen)) {
-        turret->flags |= TurretFlagsOpen;
-    } else if (turret->openAmount == 1.0f) {
-        turretPlaySound(
-            turret,
-            TurretSoundTypeDialog,
-            RANDOM_TURRET_SOUND(sTurretDeploySounds),
-            NPC_FLOORTURRET_TALKDEPLOY
-        );
+    if (turret->stateTimer <= 0.0f) {
+        if (!(turret->flags & TurretFlagsOpen)) {
+            turretPlaySound(
+                turret,
+                TurretSoundTypeDialog,
+                RANDOM_TURRET_SOUND(sTurretDeploySounds),
+                NPC_FLOORTURRET_TALKDEPLOY
+            );
 
-        turret->state = TurretStateAttacking;
+            turret->flags |= TurretFlagsOpen;
+        } else if (turret->openAmount == 1.0f) {
+            turret->stateTimer = 0.0f;
+            turret->state = TurretStateAttacking;
+        }
+    } else {
+        turret->stateTimer -= FIXED_DELTA_TIME;
     }
 
     turretCheckTipped(turret);
