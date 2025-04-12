@@ -55,7 +55,6 @@ union TurretStateData {
 };
 
 struct Turret {
-    struct TurretDefinition* definition;
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
     struct SKArmature armature;
@@ -82,5 +81,9 @@ int turretUpdate(struct Turret* turret, struct Player* player);
 
 struct Turret* turretNew(struct TurretDefinition* definition);
 void turretDelete(struct Turret* turret);
+
+// For serialization
+struct Quaternion* turretGetLookRotation(struct Turret* turret);
+void turretOnDeserialize(struct Turret* turret);
 
 #endif

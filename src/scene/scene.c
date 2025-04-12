@@ -164,9 +164,12 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     }
 
     if (checkpointExists()) {
-        // if a checkpoint exists it will load the decor
+        // If a checkpoint exists it will load these
         scene->decorCount = 0;
         scene->decor = NULL;
+
+        scene->turretCount = 0;
+        scene->turrets = NULL;
     } else {
         scene->decorCount = gCurrentLevel->decorCount;
         scene->decor = malloc(sizeof(struct DecorObject*) * scene->decorCount);
@@ -184,6 +187,12 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
             } else {
                 scene->decor[i]->definition->flags &= ~(DecorObjectFlagsMuted);
             }
+        }
+
+        scene->turretCount = gCurrentLevel->turretCount;
+        scene->turrets = malloc(sizeof(struct Turret*) * scene->turretCount);
+        for (int i = 0; i < scene->turretCount; ++i) {
+            scene->turrets[i] = turretNew(&gCurrentLevel->turrets[i]);
         }
     }
 
@@ -269,12 +278,6 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     scene->securityCameras = malloc(sizeof(struct SecurityCamera) * scene->securityCameraCount);
     for (int i = 0 ; i < scene->securityCameraCount; ++i) {
         securityCameraInit(&scene->securityCameras[i], &gCurrentLevel->securityCameras[i]);
-    }
-
-    scene->turretCount = gCurrentLevel->turretCount;
-    scene->turrets = malloc(sizeof(struct Turret*) * scene->turretCount);
-    for (int i = 0; i < scene->turretCount; ++i) {
-        scene->turrets[i] = turretNew(&gCurrentLevel->turrets[i]);
     }
 
     scene->continuouslyAttemptingPortalOpen=0;
@@ -565,7 +568,9 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
     }
 }
 
-static void sceneUpdateFizzlableList(struct Scene* scene, void** list, uint8_t* count, int (*updater)(struct Scene*, void*)) {
+typedef int (*FizzlableObjectUpdater)(struct Scene* scene, void* object);
+
+static void sceneUpdateFizzlableList(struct Scene* scene, void** list, uint8_t* count, FizzlableObjectUpdater updater) {
     int writeIndex = 0;
 
     for (int i = 0; i < *count; ++i) {

@@ -1,5 +1,7 @@
 #include "scene_serialize.h"
 
+#include <assert.h>
+
 #include "decor/decor_object_list.h"
 #include "levels/levels.h"
 #include "physics/collision_scene.h"
@@ -168,14 +170,8 @@ void decorSerialize(struct Serializer* serializer, SerializeAction action, struc
 }
 
 void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
-    if (scene->decor) {
-        for (int i = 0; i < scene->decorCount; ++i) {
-            decorObjectDelete(scene->decor[i]);
-        }
-        free(scene->decor);
-    }
-
-    scene->decorCount = 0;
+    assert(scene->decorCount == 0);
+    assert(scene->decor == NULL);
 
     short countAsShort;
     serializeRead(serializer, &countAsShort, sizeof(short));
@@ -204,6 +200,7 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
         serializeRead(serializer, &entry->rigidBody.angularVelocity, sizeof(struct Vector3));
         serializeRead(serializer, &entry->rigidBody.flags, sizeof(enum RigidBodyFlags));
         serializeRead(serializer, &entry->rigidBody.currentRoom, sizeof(short));
+        collisionObjectUpdateBB(&entry->collisionObject);
 
         serializeRead(serializer, &entry->fizzleTime, sizeof(float));
 
@@ -513,6 +510,7 @@ void securityCameraDeserialize(struct Serializer* serializer, struct Scene* scen
         serializeRead(serializer, &cam->rigidBody.angularVelocity, sizeof(struct Vector3));
         serializeRead(serializer, &cam->rigidBody.flags, sizeof(enum RigidBodyFlags));
         serializeRead(serializer, &cam->rigidBody.currentRoom, sizeof(short));
+        collisionObjectUpdateBB(&cam->collisionObject);
 
         serializeRead(serializer, &cam->fizzleTime, sizeof(float));
         
@@ -523,6 +521,103 @@ void securityCameraDeserialize(struct Serializer* serializer, struct Scene* scen
             playerSetGrabbing(&scene->player, &cam->collisionObject);
         }
     }
+}
+
+void turretSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+    short heldObject = -1;
+
+    for (int i = 0; i < scene->turretCount; ++i) {
+        struct Turret* turret = scene->turrets[i];
+
+        if (playerIsGrabbingObject(&scene->player, &turret->collisionObject)) {
+            heldObject = i;
+            break;
+        }
+    }
+
+    action(serializer, &scene->turretCount, sizeof(u8));
+    action(serializer, &heldObject, sizeof(short));
+
+    for (int i = 0; i < scene->turretCount; ++i) {
+        struct Turret* turret = scene->turrets[i];
+
+        action(serializer, &turret->rigidBody.transform, sizeof(struct PartialTransform));
+        action(serializer, &turret->rigidBody.velocity, sizeof(struct Vector3));
+        action(serializer, &turret->rigidBody.angularVelocity, sizeof(struct Vector3));
+        action(serializer, &turret->rigidBody.flags, sizeof(enum RigidBodyFlags));
+        action(serializer, &turret->rigidBody.currentRoom, sizeof(short));
+
+        action(serializer, &turret->state, sizeof(enum TurretState));
+        action(serializer, &turret->fizzleTime, sizeof(float));
+
+        if (turret->state != TurretStateDead) {
+            action(serializer, &turret->stateTimer, sizeof(float));
+            action(serializer, &turret->playerDetectTimer, sizeof(float));
+
+            if (turret->state != TurretStateIdle) {
+                action(serializer, turretGetLookRotation(turret), sizeof(struct Quaternion));
+                action(serializer, &turret->targetRotation, sizeof(struct Quaternion));
+                action(serializer, &turret->rotationSpeed, sizeof(float));
+
+                action(serializer, &turret->flags, sizeof(enum TurretFlags));
+                action(serializer, &turret->openAmount, sizeof(float));
+                action(serializer, &turret->stateData, sizeof(union TurretStateData));
+            }
+        }
+    }
+}
+
+void turretDeserialize(struct Serializer* serializer, struct Scene* scene) {
+    assert(scene->turretCount == 0);
+    assert(scene->turrets == NULL);
+
+    u8 count;
+    serializeRead(serializer, &count, sizeof(u8));
+    short heldObject;
+    serializeRead(serializer, &heldObject, sizeof(short));
+
+    scene->turrets = malloc(sizeof(struct Turret*) * count);
+
+    for (int i = 0; i < count; ++i) {
+        struct Turret* turret = turretNew(NULL);
+
+        serializeRead(serializer, &turret->rigidBody.transform, sizeof(struct PartialTransform));
+        serializeRead(serializer, &turret->rigidBody.velocity, sizeof(struct Vector3));
+        serializeRead(serializer, &turret->rigidBody.angularVelocity, sizeof(struct Vector3));
+        serializeRead(serializer, &turret->rigidBody.flags, sizeof(enum RigidBodyFlags));
+        serializeRead(serializer, &turret->rigidBody.currentRoom, sizeof(short));
+
+        serializeRead(serializer, &turret->state, sizeof(enum TurretState));
+        serializeRead(serializer, &turret->fizzleTime, sizeof(float));
+
+        collisionObjectUpdateBB(&turret->collisionObject);
+        turret->rigidBody.flags &= ~RigidBodyIsSleeping;
+        turret->rigidBody.sleepFrames = IDLE_SLEEP_FRAMES;
+
+        if (heldObject == i) {
+            playerSetGrabbing(&scene->player, &turret->collisionObject);
+        }
+
+        if (turret->state != TurretStateDead) {
+            serializeRead(serializer, &turret->stateTimer, sizeof(float));
+            serializeRead(serializer, &turret->playerDetectTimer, sizeof(float));
+
+            if (turret->state != TurretStateIdle) {
+                serializeRead(serializer, turretGetLookRotation(turret), sizeof(struct Quaternion));
+                serializeRead(serializer, &turret->targetRotation, sizeof(struct Quaternion));
+                serializeRead(serializer, &turret->rotationSpeed, sizeof(float));
+
+                serializeRead(serializer, &turret->flags, sizeof(enum TurretFlags));
+                serializeRead(serializer, &turret->openAmount, sizeof(float));
+                serializeRead(serializer, &turret->stateData, sizeof(union TurretStateData));
+            }
+        }
+
+        turretOnDeserialize(turret);
+        scene->turrets[i] = turret;
+    }
+
+    scene->turretCount = count;
 }
 
 #define INCLUDE_SAVEFILE_ALIGN_CHECKS   0
@@ -565,6 +660,8 @@ void sceneSerialize(struct Serializer* serializer, SerializeAction action, struc
     WRITE_ALIGN_CHECK;
     securityCameraSerialize(serializer, action, scene);
     WRITE_ALIGN_CHECK;
+    turretSerialize(serializer, action, scene);
+    WRITE_ALIGN_CHECK;
 }
 
 void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
@@ -597,6 +694,8 @@ void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
     switchSerialize(serializer, serializeRead, scene);
     READ_ALIGN_CHECK;
     securityCameraDeserialize(serializer, scene);
+    READ_ALIGN_CHECK;
+    turretDeserialize(serializer, scene);
     READ_ALIGN_CHECK;
 
     for (int i = 0; i < scene->doorCount; ++i) {

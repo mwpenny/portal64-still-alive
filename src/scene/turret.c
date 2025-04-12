@@ -257,19 +257,20 @@ static void turretRender(void* data, struct DynamicRenderDataList* renderList, s
 }
 
 void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
-    turret->definition = definition;
-
     collisionObjectInit(&turret->collisionObject, &sTurretCollider, &turret->rigidBody, TURRET_MASS, TURRET_COLLISION_LAYERS);
     collisionSceneAddDynamicObject(&turret->collisionObject);
 
-    turret->rigidBody.transform.rotation = definition->rotation;
     turret->rigidBody.transform.scale = gOneVec;
     turret->rigidBody.flags |= RigidBodyFlagsGrabbable;
-    turret->rigidBody.currentRoom = definition->roomIndex;
 
-    struct Vector3 originOffset;
-    quatMultVector(&turret->rigidBody.transform.rotation, &sTurretOriginOffset, &originOffset);
-    vector3Add(&definition->position, &originOffset, &turret->rigidBody.transform.position);
+    if (definition) {
+        turret->rigidBody.transform.rotation = definition->rotation;
+        turret->rigidBody.currentRoom = definition->roomIndex;
+
+        struct Vector3 originOffset;
+        quatMultVector(&turret->rigidBody.transform.rotation, &sTurretOriginOffset, &originOffset);
+        vector3Add(&definition->position, &originOffset, &turret->rigidBody.transform.position);
+    }
 
     collisionObjectUpdateBB(&turret->collisionObject);
 
@@ -351,6 +352,12 @@ static void turretUpdateRotation(struct Turret* turret) {
     }
 }
 
+static void turretApplyOpenAmount(struct Turret* turret) {
+    float armPosition = mathfLerp(TURRET_CLOSE_POSITION, TURRET_OPEN_POSITION, turret->openAmount);
+    turret->armature.pose[PROPS_TURRET_01_ARM_L_BONE].position.x = armPosition;
+    turret->armature.pose[PROPS_TURRET_01_ARM_R_BONE].position.x = -armPosition;
+}
+
 static void turretUpdateOpenAmount(struct Turret* turret) {
     uint8_t shouldOpen = (turret->flags & TurretFlagsOpen) != 0;
 
@@ -387,10 +394,7 @@ static void turretUpdateOpenAmount(struct Turret* turret) {
     }
 
     turret->openAmount = clampf(turret->openAmount + (speed * FIXED_DELTA_TIME), 0.0f, 1.0f);
-
-    float armPosition = mathfLerp(TURRET_CLOSE_POSITION, TURRET_OPEN_POSITION, turret->openAmount);
-    turret->armature.pose[PROPS_TURRET_01_ARM_L_BONE].position.x = armPosition;
-    turret->armature.pose[PROPS_TURRET_01_ARM_R_BONE].position.x = -armPosition;
+    turretApplyOpenAmount(turret);
 }
 
 static void turretStartShooting(struct Turret* turret) {
@@ -940,4 +944,22 @@ void turretDelete(struct Turret* turret) {
     // We only delete if the turret was fizzled, in which case it cleans up itself
     // Just need to delete
     free(turret);
+}
+
+struct Quaternion* turretGetLookRotation(struct Turret* turret) {
+    return &turret->armature.pose[PROPS_TURRET_01_ARM_C_BONE].rotation;
+}
+
+void turretOnDeserialize(struct Turret* turret) {
+    turretApplyOpenAmount(turret);
+
+    if (turret->flags & TurretFlagsShooting) {
+        // Restart looped shooting sound
+        turretStartShooting(turret);
+    }
+
+    if ((turret->rigidBody.flags & RigidBodyFizzled) ||
+        turret->state == TurretStateDead) {
+        laserRemove(&turret->laser);
+    }
 }

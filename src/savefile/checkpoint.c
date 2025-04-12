@@ -10,7 +10,7 @@
 char gHasCheckpoint = 0;
 char __attribute__((aligned(8))) gCheckpoint[MAX_CHECKPOINT_SIZE];
 
-void ckeckpointSerialize(struct Serializer* serializer, SerializeAction action, void* data) {
+void checkpointSerialize(struct Serializer* serializer, SerializeAction action, void* data) {
     struct Scene* scene = data;
 
     signalsSerializeRW(serializer, action);
@@ -28,7 +28,7 @@ void checkpointDeserialize(struct Serializer* serializer, void* data) {
 
 int checkpointEstimateSize(struct Scene* scene) {
     struct Serializer serializer = {NULL};
-    ckeckpointSerialize(&serializer, serializeCount, scene);
+    checkpointSerialize(&serializer, serializeCount, scene);
     return (int)serializer.curr;
 }
 
@@ -71,7 +71,7 @@ int checkpointSaveInto(struct Scene* scene, Checkpoint into) {
     }
 
     struct Serializer serializer = {into};
-    ckeckpointSerialize(&serializer, serializeWrite, scene);
+    checkpointSerialize(&serializer, serializeWrite, scene);
 
     return 1;
 }

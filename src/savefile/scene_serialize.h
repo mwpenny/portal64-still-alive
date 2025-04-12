@@ -1,8 +1,8 @@
 #ifndef __SCENE_SERIALIZE_H__
 #define __SCENE_SERIALIZE_H__
 
-#include "../scene/scene.h"
-#include "./serializer.h"
+#include "scene/scene.h"
+#include "serializer.h"
 
 struct PartialTransform {
     struct Vector3 position;
