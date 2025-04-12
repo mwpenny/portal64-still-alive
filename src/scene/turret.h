@@ -78,6 +78,9 @@ struct Turret {
 };
 
 void turretInit(struct Turret* turret, struct TurretDefinition* definition);
-void turretUpdate(struct Turret* turret, struct Player* player);
+int turretUpdate(struct Turret* turret, struct Player* player);
+
+struct Turret* turretNew(struct TurretDefinition* definition);
+void turretDelete(struct Turret* turret);
 
 #endif

@@ -872,10 +872,9 @@ static void turretUpdateDying(struct Turret* turret) {
     }
 }
 
-void turretUpdate(struct Turret* turret, struct Player* player) {
+int turretUpdate(struct Turret* turret, struct Player* player) {
     if (turret->dynamicId == INVALID_DYNAMIC_OBJECT) {
-        // TODO: delete, like decor
-        return;
+        return 0;
     }
 
     if (turret->collisionObject.flags & COLLISION_OBJECT_PLAYER_STANDING) {
@@ -886,7 +885,7 @@ void turretUpdate(struct Turret* turret, struct Player* player) {
     turretUpdateSounds(turret);
 
     if (turretUpdateFizzled(turret)) {
-        return;
+        return 1;
     }
 
     switch (turret->state) {
@@ -927,4 +926,18 @@ void turretUpdate(struct Turret* turret, struct Player* player) {
     if (turret->flags & TurretFlagsShooting) {
         turretUpdateShots(turret, player);
     }
+
+    return 1;
+}
+
+struct Turret* turretNew(struct TurretDefinition* definition) {
+    struct Turret* turret = malloc(sizeof(struct Turret));
+    turretInit(turret, definition);
+    return turret;
+}
+
+void turretDelete(struct Turret* turret) {
+    // We only delete if the turret was fizzled, in which case it cleans up itself
+    // Just need to delete
+    free(turret);
 }

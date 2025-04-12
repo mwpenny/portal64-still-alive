@@ -64,7 +64,7 @@ struct Scene {
     struct BallCatcher* ballCatchers;
     struct Clock* clocks;
     struct SecurityCamera* securityCameras;
-    struct Turret* turrets;
+    struct Turret** turrets;
     struct SavedPortal savedPortal;
     struct Effects effects;
     struct Hud hud;

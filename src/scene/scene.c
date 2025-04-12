@@ -272,9 +272,9 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     }
 
     scene->turretCount = gCurrentLevel->turretCount;
-    scene->turrets = malloc(sizeof(struct Turret) * scene->turretCount);
+    scene->turrets = malloc(sizeof(struct Turret*) * scene->turretCount);
     for (int i = 0; i < scene->turretCount; ++i) {
-        turretInit(&scene->turrets[i], &gCurrentLevel->turrets[i]);
+        scene->turrets[i] = turretNew(&gCurrentLevel->turrets[i]);
     }
 
     scene->continuouslyAttemptingPortalOpen=0;
@@ -565,6 +565,46 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
     }
 }
 
+static void sceneUpdateFizzlableList(struct Scene* scene, void** list, uint8_t* count, int (*updater)(struct Scene*, void*)) {
+    int writeIndex = 0;
+
+    for (int i = 0; i < *count; ++i) {
+        if (!updater(scene, list[i])) {
+            continue;
+        }
+
+        if (writeIndex != i) {
+            list[writeIndex] = list[i];
+        }
+
+        ++writeIndex;
+    }
+
+    *count = writeIndex;
+}
+
+static int sceneUpdateDecorObject(struct Scene* scene, void* object) {
+    struct DecorObject* decorObject = (struct DecorObject*)object;
+
+    if (!decorObjectUpdate(decorObject)) {
+        decorObjectDelete(decorObject);
+        return 0;
+    }
+
+    return 1;
+}
+
+static int sceneUpdateTurret(struct Scene* scene, void* object) {
+    struct Turret* turret = (struct Turret*)object;
+
+    if (!turretUpdate(turret, &scene->player)) {
+        turretDelete(turret);
+        return 0;
+    }
+
+    return 1;
+}
+
 void sceneUpdate(struct Scene* scene) {
     scene->boolCutsceneIsRunning = cutsceneIsSoundQueued();
 
@@ -615,23 +655,9 @@ void sceneUpdate(struct Scene* scene) {
         scene->player.flags &= ~PlayerInCutscene;
     }
 
-    // objects that can fizzle need to update before the player
-    int decorWriteIndex = 0;
-
-    for (int i = 0; i < scene->decorCount; ++i) {
-        if (!decorObjectUpdate(scene->decor[i])) {
-            decorObjectDelete(scene->decor[i]);
-            continue;;
-        }
-
-        if (decorWriteIndex != i) {
-            scene->decor[decorWriteIndex] = scene->decor[i];
-        }
-
-        ++decorWriteIndex;
-    }
-
-    scene->decorCount = decorWriteIndex;
+    // Objects that can fizzle need to update before the player so they become ungrabbable instantly
+    sceneUpdateFizzlableList(scene, (void**)scene->decor,   &scene->decorCount,  sceneUpdateDecorObject);
+    sceneUpdateFizzlableList(scene, (void**)scene->turrets, &scene->turretCount, sceneUpdateTurret);
 
     for (int i = 0; i < scene->clockCount; ++i) {
         clockUpdate(&scene->clocks[i]);
@@ -639,10 +665,6 @@ void sceneUpdate(struct Scene* scene) {
 
     for (int i = 0; i < scene->securityCameraCount; ++i) {
         securityCameraUpdate(&scene->securityCameras[i]);
-    }
-
-    for (int i = 0; i < scene->turretCount; ++i) {
-        turretUpdate(&scene->turrets[i], &scene->player);
     }
 
     playerUpdate(&scene->player);
