@@ -1167,6 +1167,66 @@ materials:
       g: 28
       b: 31
 
+  overlay_handprint:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/overlays/overlay_handprint.png
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+
+    gDPSetRenderMode: G_RM_ZB_XLU_DECAL
+    gDPSetCombineMode:
+      color: ["0", "0", "0", "PRIMITIVE"]
+      alpha: ["0", "0", "0", "TEXEL0"]
+
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+      set: [G_SHADE]
+
+    gDPSetPrimColor:
+      r: 25
+      g: 31
+      b: 33
+
+  overlay_scrawlings003a:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/overlays/overlay_scrawlings003a.png
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+
+    gDPSetRenderMode: G_RM_ZB_XLU_DECAL
+    gDPSetCombineMode:
+      color: ["0", "0", "0", "PRIMITIVE"]
+      alpha: ["0", "0", "0", "TEXEL0"]
+
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+      set: [G_SHADE]
+
+    gDPSetPrimColor:
+      r: 79
+      g: 16
+      b: 15
+
+  overlay_scrawlings004a:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/overlays/overlay_scrawlings004a.png
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+
+    gDPSetRenderMode: G_RM_ZB_XLU_DECAL
+    gDPSetCombineMode:
+      color: ["0", "0", "0", "PRIMITIVE"]
+      alpha: ["0", "0", "0", "TEXEL0"]
+
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+      set: [G_SHADE]
+
+    gDPSetPrimColor:
+      r: 79
+      g: 16
+      b: 15
+
   signage_overlay_fling1:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/signage/signage_overlay_fling1.png

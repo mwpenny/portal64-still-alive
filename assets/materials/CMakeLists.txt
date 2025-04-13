@@ -52,6 +52,9 @@ set(TEXTURES
     models/props_c17/door01a_skin6
     models/weapons/v_models/v_portalgun/v_portalgun
     nature/hazard_liquid
+    overlays/overlay_handprint
+    overlays/overlay_scrawlings003a
+    overlays/overlay_scrawlings004a
     plastic/plasticwall003a
     plastic/plasticwall004a
     signage/clock/clock_dots
