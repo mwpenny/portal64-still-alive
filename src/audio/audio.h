@@ -7,7 +7,7 @@
 
 #define MAX_UPDATES             64
 #define MAX_EVENTS              128
-#define AUDIO_HEAP_SIZE         300000
+#define AUDIO_HEAP_SIZE         500000 // TODO: only load lookup table for current language
 
 #define MAX_VOICES              64
 #define EXTRA_SAMPLES           80

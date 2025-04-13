@@ -238,6 +238,10 @@ set(LOCALIZED_SOUND_SCRIPTS
     vo/aperture_ai/10_part1_entry-2.sox
     vo/aperture_ai/10_part1_entry-3.sox
     vo/aperture_ai/10_part1_success-1.sox
+    vo/aperture_ai/11_part1_entry-1.sox
+    vo/aperture_ai/11_part1_entry-2.sox
+    vo/aperture_ai/11_part1_entry-3.sox
+    vo/aperture_ai/11_part1_success-1.sox
     vo/aperture_ai/escape_01_part1_nag01-1.sox
     vo/aperture_ai/generic_crate_vaporized_in_emancipation_grid-1.sox
     vo/aperture_ai/generic_crate_vaporized_in_emancipation_grid-2.sox
