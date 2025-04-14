@@ -4,10 +4,10 @@ const util = require('util')
 
 const SUPPORTED_LANGUAGES = {
     "english": "English",
-    "french":  "Français",
     "german":  "Deutsch",
-    "russian": "Русский язык",
-    "spanish": "Español"
+    "spanish": "Español",
+    "french":  "Français",
+    "russian": "Русский язык"
 };
 
 const INVALID_TOKEN_CHARACTER = /[^A-Za-z0-9_]/gim;
