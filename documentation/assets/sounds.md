@@ -79,7 +79,7 @@ generated.
 
 Sound data tables are generated using sfz2n64, which packs all audio data into
 `<build directory>/assets/sound/sounds.sounds.tbl` and playback information
-(enevelope, pan, loop, etc.) into `sounds.sounds`.
+(envelope, pan, loop, etc.) into `sounds.sounds`.
 
 ### Instrument Bank Configuration
 
