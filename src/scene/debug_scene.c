@@ -73,7 +73,7 @@ static void debugSceneRenderTextMetric(struct FontRenderer* renderer, char* text
     );
 }
 
-static int debugSceneVisibleRoomCount(struct RenderPlan* renderPlan) {
+static uint64_t debugSceneVisibleRooms(struct RenderPlan* renderPlan) {
     uint64_t visibleRooms = 0;
 
     // Account for rooms visible from player POV and through portals
@@ -81,6 +81,10 @@ static int debugSceneVisibleRoomCount(struct RenderPlan* renderPlan) {
         visibleRooms |= renderPlan->stageProps[i].visiblerooms;
     }
 
+    return visibleRooms;
+}
+
+static int debugSceneVisibleRoomCount(uint64_t visibleRooms) {
     int roomCount = 0;
     while (visibleRooms) {
         ++roomCount;
@@ -150,6 +154,9 @@ static void debugSceneRenderPerformanceMetrics(struct Scene* scene, struct Rende
 
     float dt = debugSceneAveragedTimeMs(gLastFrameTime, &lastFrameTimeMs);
 
+    uint64_t visibleRooms = debugSceneVisibleRooms(renderPlan);
+    int roomCount = debugSceneVisibleRoomCount(visibleRooms);
+
     sprintf(metricText, "COL: %d/%d", collisionSceneDynamicObjectCount(), MAX_DYNAMIC_COLLISION);
     debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
 
@@ -162,7 +169,7 @@ static void debugSceneRenderPerformanceMetrics(struct Scene* scene, struct Rende
     debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
 
     textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
-    sprintf(metricText, "RMS: %d", debugSceneVisibleRoomCount(renderPlan));
+    sprintf(metricText, "RMS: %d %llx", roomCount, visibleRooms);
     debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
 
     textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
