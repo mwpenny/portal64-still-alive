@@ -164,7 +164,7 @@ void soundPlayerInit() {
 
     ALSndpConfig sndConfig;
     sndConfig.maxEvents = MAX_EVENTS;
-    sndConfig.maxSounds = MAX_SOUNDS;
+    sndConfig.maxSounds = MAX_ACTIVE_SOUNDS;
     sndConfig.heap = &gAudioHeap;
     alSndpNew(&gSoundPlayer, &sndConfig);
 

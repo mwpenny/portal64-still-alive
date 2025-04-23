@@ -5,7 +5,7 @@
 #include "math/vector3.h"
 #include "math/quaternion.h"
 
-#define MAX_SOUNDS 128
+#define MAX_SOUNDS 32
 
 #define MAX_SOUND_LISTENERS 3
 
