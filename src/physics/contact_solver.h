@@ -1,7 +1,7 @@
 #ifndef __CONTACT_SOLVER_H__
 #define __CONTACT_SOLVER_H__
 
-#include "../math/vector3.h"
+#include "math/vector3.h"
 
 struct CollisionObject;
 

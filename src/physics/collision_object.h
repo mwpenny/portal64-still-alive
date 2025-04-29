@@ -1,9 +1,9 @@
 #ifndef __COLLISION_OBJECT_H__
 #define __COLLISION_OBJECT_H__
 
-#include "rigid_body.h"
 #include "collision.h"
-#include "../math/box3d.h"
+#include "math/box3d.h"
+#include "rigid_body.h"
 
 #define COLLISION_LAYERS_STATIC             (1 << 0)
 #define COLLISION_LAYERS_TRANSPARENT        (1 << 1)
@@ -78,13 +78,13 @@ enum SweptCollideResult collisionObjectSweptCollide(
 void collisionObjectUpdateBB(struct CollisionObject* object);
 
 // data should be of type struct CollisionQuad
-int minkowsiSumAgainstQuad(void* data, struct Vector3* direction, struct Vector3* output);
+int quadMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output);
 
 // data should be of type struct CollisionObject
-int minkowsiSumAgainstObject(void* data, struct Vector3* direction, struct Vector3* output);
+int objectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output);
 
 // data should be of type struct SweptCollisionObject
-int minkowsiSumAgainstSweptObject(void* data, struct Vector3* direction, struct Vector3* output);
+int sweptObjectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output);
 
 void collisionObjectLocalRay(struct CollisionObject* cylinderObject, struct Ray* ray, struct Ray* localRay);
 

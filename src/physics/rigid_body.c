@@ -1,9 +1,10 @@
 #include "rigid_body.h"
-#include "system/time.h"
-#include "../physics/config.h"
-#include "contact_solver.h"
+
 #include "collision_scene.h"
+#include "contact_solver.h"
 #include "defs.h"
+#include "physics/config.h"
+#include "system/time.h"
 
 #define VELOCITY_SLEEP_THRESHOLD      0.001f
 #define ANGULAR_VELOCITY_SLEEP_THRESHOLD  0.001f

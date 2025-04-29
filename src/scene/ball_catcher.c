@@ -96,11 +96,11 @@ void ballCatcherCheckBalls(struct BallCatcher* catcher, struct BallLauncher* bal
 
         struct Simplex simplex;
         if (!gjkCheckForOverlap(
-            &simplex, 
-            &catcher->collisionObject, 
-            minkowsiSumAgainstObject, 
-            &launcher->currentBall.collisionObject, 
-            minkowsiSumAgainstObject, 
+            &simplex,
+            &catcher->collisionObject,
+            objectMinkowskiSupport,
+            &launcher->currentBall.collisionObject,
+            objectMinkowskiSupport,
             &launcher->currentBall.rigidBody.velocity)) {
             continue;
         }

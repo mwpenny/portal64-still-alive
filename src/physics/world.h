@@ -2,9 +2,9 @@
 #define __WORLD_H___
 
 #include "collision_object.h"
-#include "../math/range.h"
-#include "../math/box3d.h"
-#include "../math/ray.h"
+#include "math/box3d.h"
+#include "math/range.h"
+#include "math/ray.h"
 
 enum DoorwayFlags {
     DoorwayFlagsOpen = (1 << 0),

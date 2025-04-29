@@ -1,19 +1,11 @@
 #include "collision_cylinder.h"
 
-#include "../math/mathf.h"
-#include "contact_solver.h"
 #include "collision_quad.h"
-#include "raycasting.h"
+#include "contact_solver.h"
 #include "line.h"
-#include "../math/vector2.h"
-#include "./raycasting.h"
-
-struct ColliderCallbacks gCollisionCylinderCallbacks = {
-    collisionCylinderRaycast,
-    collisionCylinderSolidMofI,
-    collisionCylinderBoundingBox,
-    collisionCylinderMinkowsiSum,
-};
+#include "math/mathf.h"
+#include "math/vector2.h"
+#include "raycasting.h"
 
 void collisionCylinderBoxCheckForFaces(struct CollisionCylinder* cylinder) {
     if (cylinder->outsideFaces[0].edgeALength > 0.0f) {
@@ -89,7 +81,7 @@ void collisionCylinderBoundingBox(struct ColliderTypeData* typeData, struct Tran
     vector3Add(&transform->position, &halfSize, &box->max);
 }
 
-int collisionCylinderMinkowsiSum(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output) {
+int collisionCylinderMinkowskiSupport(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output) {
     struct CollisionCylinder* cylinder = (struct CollisionCylinder*)data;
     int centerDir = vector3Dot(&basis->y, direction) > 0.0f;
 
@@ -232,3 +224,10 @@ int collisionCylinderRaycast(struct CollisionObject* cylinderObject, struct Ray*
 
     return collisionCylinderRaycastCap(cylinderObject, ray, &localRay, maxDistance, contact);
 }
+
+struct ColliderCallbacks gCollisionCylinderCallbacks = {
+    collisionCylinderRaycast,
+    collisionCylinderSolidMofI,
+    collisionCylinderBoundingBox,
+    collisionCylinderMinkowskiSupport,
+};

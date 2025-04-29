@@ -1,9 +1,8 @@
-
 #include "collision_quad.h"
 
 #include "collision_box.h"
-#include "../math/mathf.h"
-#include "./line.h"
+#include "line.h"
+#include "math/mathf.h"
 
 #define EDGE_ZERO_BIAS  0.001f
 

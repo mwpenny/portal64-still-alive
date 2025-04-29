@@ -1,8 +1,8 @@
 #include "collision_sphere.h"
 
+#include "collision_quad.h"
 #include "math/plane.h"
 #include "math/mathf.h"
-#include "collision_quad.h"
 
 int collisionSphereCollideQuad(void* data, struct Transform* boxTransform, struct CollisionQuad* quad, struct ContactManifold* output) {
     struct CollisionSphere* sphere = (struct CollisionSphere*)data;
@@ -81,7 +81,7 @@ void collisionSphereBoundingBox(struct ColliderTypeData* typeData, struct Transf
 
 #define SQRT_3  0.577350269f
 
-int collisionSphereMinkowsiSum(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output) {
+int collisionSphereMinkowskiSupport(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output) {
     struct CollisionSphere* sphere = (struct CollisionSphere*)data;
 
     float distance = fabsf(direction->x);
@@ -139,13 +139,6 @@ int collisionSphereMinkowsiSum(void* data, struct Basis* basis, struct Vector3* 
     return result;
 }
 
-struct ColliderCallbacks gCollisionSphereCallbacks = {
-    NULL, // TODO
-    collisionSphereSolidMofI,
-    collisionSphereBoundingBox,
-    collisionSphereMinkowsiSum,
-};
-
 int collisionSphereCheckWithNearestPoint(struct Vector3* nearestPoint, struct CollisionSphere* otherSphere, struct Vector3* spherePos, struct ContactManifold* contact) {
     vector3Sub(spherePos, nearestPoint, &contact->normal);
 
@@ -181,3 +174,10 @@ int collisionSphereCheckWithNearestPoint(struct Vector3* nearestPoint, struct Co
 
     return 1;
 }
+
+struct ColliderCallbacks gCollisionSphereCallbacks = {
+    NULL, // TODO
+    collisionSphereSolidMofI,
+    collisionSphereBoundingBox,
+    collisionSphereMinkowskiSupport,
+};

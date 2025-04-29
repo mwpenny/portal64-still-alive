@@ -1,14 +1,7 @@
 #include "collision_box.h"
 
+#include "math/mathf.h"
 #include "raycasting.h"
-#include "../math/mathf.h"
-
-struct ColliderCallbacks gCollisionBoxCallbacks = {
-    raycastBox,
-    collisionBoxSolidMofI,
-    collisionBoxBoundingBox,
-    collisionBoxMinkowsiSum,
-};
 
 float collisionBoxSolidMofI(struct ColliderTypeData* typeData, float mass) {
     struct CollisionBox* collisionBox = (struct CollisionBox*)typeData->data;
@@ -43,7 +36,7 @@ void collisionBoxBoundingBox(struct ColliderTypeData* typeData, struct Transform
     vector3Add(&transform->position, &halfSize, &box->max);
 }
 
-int collisionBoxMinkowsiSum(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output) {
+int collisionBoxMinkowskiSupport(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output) {
     struct CollisionBox* collisionBox = (struct CollisionBox*)data;
     int xDir = vector3Dot(&basis->x, direction) > 0.0f;
     int yDir = vector3Dot(&basis->y, direction) > 0.0f;
@@ -55,3 +48,10 @@ int collisionBoxMinkowsiSum(void* data, struct Basis* basis, struct Vector3* dir
 
     return (xDir ? 0x1 : 0x2) | (yDir ? 0x4 : 0x8) | (zDir ? 0x10 : 0x20);
 }
+
+struct ColliderCallbacks gCollisionBoxCallbacks = {
+    raycastBox,
+    collisionBoxSolidMofI,
+    collisionBoxBoundingBox,
+    collisionBoxMinkowskiSupport,
+};

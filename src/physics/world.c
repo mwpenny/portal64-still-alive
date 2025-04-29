@@ -29,7 +29,7 @@ int worldCheckDoorwayCrossings(struct World* world, struct Vector3* position, in
         struct Doorway* doorway = &world->doorways[room->doorwayIndices[i]];
 
         int prevSide = (sideMask & (1 << i)) != 0;
-        int currSide = planePointDistance(&doorway->quad.plane, position) > 0;
+        int currSide = planePointDistance(&doorway->quad.plane, position) > 0.0f;
 
         if (prevSide != currSide) {
             struct Vector3 posOnFace;

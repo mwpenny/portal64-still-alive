@@ -1,11 +1,11 @@
-
 #include "contact_solver.h"
-#include "system/time.h"
-#include "util/memory.h"
-#include "../math/mathf.h"
-#include "rigid_body.h"
+
 #include "collision_object.h"
 #include "collision_scene.h"
+#include "system/time.h"
+#include "math/mathf.h"
+#include "rigid_body.h"
+#include "util/memory.h"
 
 #define Q3_BAUMGARTE 0.15f
 

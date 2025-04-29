@@ -37,7 +37,7 @@ static struct Vector2 gUnitCircle[] = {
 
 #define OFFSET_IN_CIRCLE(current, amount)  (((current) + (amount)) & 0x7)
 
-int collisionCapsuleMinkowsiSum(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output) {
+int collisionCapsuleMinkowskiSupport(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output) {
     struct CollisionCapsule* capsule = (struct CollisionCapsule*)data;
 
     float directionY = vector3Dot(&basis->y, direction);
@@ -207,5 +207,5 @@ struct ColliderCallbacks gCollisionCapsuleCallbacks = {
     collisionCapsuleRaycast,
     collisionCapsuleSolidMofI,
     collisionCapsuleBoundingBox,
-    collisionCapsuleMinkowsiSum,
+    collisionCapsuleMinkowskiSupport,
 };

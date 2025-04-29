@@ -5,25 +5,15 @@
 #include "contact_insertion.h"
 #include "raycasting.h"
 
-float meshColliderMofI(struct ColliderTypeData* typeData, float mass);
-void meshColliderBoundingBox(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box);
-
-struct ColliderCallbacks gMeshColliderCallbacks = {
-    meshColliderRaycast,
-    meshColliderMofI,
-    meshColliderBoundingBox,
-    NULL,
-};
-
 struct CollisionObjectWithTransform {
     struct CollisionObject* object;
     struct Transform relativeTransform;
     struct Basis relativeBasis;
 };
 
-int minkowsiSumAgainstRelativeObject(void* data, struct Vector3* direction, struct Vector3* output) {
+int relativeObjectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output) {
     struct CollisionObjectWithTransform* relativeObject = (struct CollisionObjectWithTransform*)data;
-    int result = relativeObject->object->collider->callbacks->minkowsiSum(relativeObject->object->collider->data, &relativeObject->relativeBasis, direction, output);
+    int result = relativeObject->object->collider->callbacks->minkowskiSupport(relativeObject->object->collider->data, &relativeObject->relativeBasis, direction, output);
     vector3Add(output, &relativeObject->relativeTransform.position, output);
     return result;
 }
@@ -37,17 +27,17 @@ int meshColliderCollideObjectWithSingleQuad(struct CollisionObject* quadObject, 
 
     struct CollisionQuad* quad = (struct CollisionQuad*)quadObject->collider->data;
 
-    if (!gjkCheckForOverlap(&simplex, 
-                quad, minkowsiSumAgainstQuad, 
-                other, minkowsiSumAgainstRelativeObject, 
+    if (!gjkCheckForOverlap(&simplex,
+                quad, quadMinkowskiSupport,
+                other, relativeObjectMinkowskiSupport,
                 &quad->plane.normal)) {
         return 0;
     }
 
     epaSolve(
         &simplex,
-        quad, minkowsiSumAgainstQuad,
-        other, minkowsiSumAgainstRelativeObject,
+        quad, quadMinkowskiSupport,
+        other, relativeObjectMinkowskiSupport,
         result
     );
 
@@ -153,7 +143,7 @@ int meshColliderRaycast(struct CollisionObject* object, struct Ray* ray, float m
     return 1;
 }
 
-// mesh collider should be kinematic 
+// mesh collider should be kinematic
 float meshColliderMofI(struct ColliderTypeData* typeData, float mass) {
     return 1.0f;
 }
@@ -167,3 +157,10 @@ void meshColliderBoundingBox(struct ColliderTypeData* typeData, struct Transform
     vector3Add(&center, &halfSize, &box->max);
     vector3Sub(&center, &halfSize, &box->min);
 }
+
+struct ColliderCallbacks gMeshColliderCallbacks = {
+    meshColliderRaycast,
+    meshColliderMofI,
+    meshColliderBoundingBox,
+    NULL,
+};

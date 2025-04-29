@@ -1,9 +1,9 @@
 #include "raycasting.h"
 
-#include "math/mathf.h"
 #include "collision_box.h"
 #include "collision_cylinder.h"
 #include "line.h"
+#include "math/mathf.h"
 
 #define NEAR_EDGE_ZERO      0.001f
 #define NEAR_DOT_ZERO       0.00001f

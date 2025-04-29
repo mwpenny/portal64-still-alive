@@ -215,7 +215,7 @@ void portalCheckForHoles(struct Portal* portals) {
     }
 }
 
-int minkowsiSumAgainstPortal(void* data, struct Vector3* direction, struct Vector3* output) {
+int portalMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output) {
     struct Transform* transform = (struct Transform*)data;
     struct Vector3 localDir;
     struct Quaternion inverseRotation;

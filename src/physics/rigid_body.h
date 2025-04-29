@@ -1,10 +1,10 @@
 #ifndef __RIGID_BODY_H__
 #define __RIGID_BODY_H__
 
-#include "../math/basis.h"
-#include "../math/transform.h"
-#include "../math/mathf.h"
-#include "./collision.h"
+#include "collision.h"
+#include "math/basis.h"
+#include "math/mathf.h"
+#include "math/transform.h"
 
 
 #define IDLE_SLEEP_FRAMES   ((int)(0.5f / FIXED_DELTA_TIME))

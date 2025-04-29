@@ -1,13 +1,14 @@
 #include "collision_object.h"
+
+#include "collision_scene.h"
+#include "contact_insertion.h"
 #include "epa.h"
 #include "gjk.h"
-#include "contact_insertion.h"
-#include "collision_scene.h"
-#include "../math/mathf.h"
+#include "math/mathf.h"
 #include "mesh_collider.h"
-#include "../player/player_rumble_clips.h"
 
-// 0x807572ac
+#include "player/player_rumble_clips.h"
+
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers) {
     object->collider = collider;
     object->body = body;
@@ -55,9 +56,9 @@ struct ContactManifold* collisionObjectCollideWithQuad(struct CollisionObject* o
 
     struct CollisionQuad* quad = (struct CollisionQuad*)quadObject->collider->data;
 
-    if (!gjkCheckForOverlap(&simplex, 
-                quad, minkowsiSumAgainstQuad, 
-                object, minkowsiSumAgainstObject, 
+    if (!gjkCheckForOverlap(&simplex,
+                quad, quadMinkowskiSupport,
+                object, objectMinkowskiSupport,
                 &quad->plane.normal)) {
         return NULL;
     }
@@ -74,9 +75,9 @@ struct ContactManifold* collisionObjectCollideWithQuad(struct CollisionObject* o
 
     struct EpaResult result;
     epaSolve(
-        &simplex, 
-        quad, minkowsiSumAgainstQuad, 
-        object, minkowsiSumAgainstObject, 
+        &simplex,
+        quad, quadMinkowskiSupport,
+        object, objectMinkowskiSupport,
         &result
     );
 
@@ -156,9 +157,9 @@ enum SweptCollideResult collisionObjectSweptCollide(
     sweptObject.object = object;
     sweptObject.prevPos = objectPrevPos;
 
-    if (!gjkCheckForOverlap(&simplex, 
-                quad, minkowsiSumAgainstQuad, 
-                &sweptObject, minkowsiSumAgainstSweptObject, 
+    if (!gjkCheckForOverlap(&simplex,
+                quad, quadMinkowskiSupport,
+                &sweptObject, sweptObjectMinkowskiSupport,
                 &quad->plane.normal)) {
         return SweptCollideResultMiss;
     }
@@ -176,9 +177,9 @@ enum SweptCollideResult collisionObjectSweptCollide(
     *objectEnd = object->body->transform.position;
 
     if (!epaSolveSwept(
-        &simplex, 
-        quad, minkowsiSumAgainstQuad, 
-        &sweptObject, minkowsiSumAgainstSweptObject,
+        &simplex,
+        quad, quadMinkowskiSupport,
+        &sweptObject, sweptObjectMinkowskiSupport,
         objectPrevPos,
         objectEnd,
         result
@@ -263,9 +264,9 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
 
     vector3Sub(&b->body->transform.position, &a->body->transform.position, &offset);
 
-    if (!gjkCheckForOverlap(&simplex, 
-                a, minkowsiSumAgainstObject, 
-                b, minkowsiSumAgainstObject, 
+    if (!gjkCheckForOverlap(&simplex,
+                a, objectMinkowskiSupport,
+                b, objectMinkowskiSupport,
                 &offset)) {
         return;
     }
@@ -282,9 +283,9 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
 
     struct EpaResult result;
     epaSolve(
-        &simplex, 
-        a, minkowsiSumAgainstObject, 
-        b, minkowsiSumAgainstObject, 
+        &simplex,
+        a, objectMinkowskiSupport,
+        b, objectMinkowskiSupport,
         &result
     );
 
@@ -364,9 +365,9 @@ void collisionObjectCollideTwoObjectsSwept(
     sweptObject.object = b;
     sweptObject.prevPos = prevBPos;
 
-    if (!gjkCheckForOverlap(&simplex, 
-                a, minkowsiSumAgainstObject, 
-                &sweptObject, minkowsiSumAgainstSweptObject, 
+    if (!gjkCheckForOverlap(&simplex,
+                a, objectMinkowskiSupport,
+                &sweptObject, sweptObjectMinkowskiSupport,
                 &relativePrevPos)) {
         return;
     }
@@ -386,9 +387,9 @@ void collisionObjectCollideTwoObjectsSwept(
     struct Vector3 objectEnd = b->body->transform.position;
     
     if (!epaSolveSwept(
-        &simplex, 
-        a, minkowsiSumAgainstObject, 
-        &sweptObject, minkowsiSumAgainstSweptObject,
+        &simplex,
+        a, objectMinkowskiSupport,
+        &sweptObject, sweptObjectMinkowskiSupport,
         &relativePrevPos,
         &objectEnd,
         &result
@@ -476,7 +477,7 @@ void collisionObjectUpdateBB(struct CollisionObject* object) {
     }
 }
 
-int minkowsiSumAgainstQuad(void* data, struct Vector3* direction, struct Vector3* output) {
+int quadMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output) {
     struct CollisionQuad* quad = (struct CollisionQuad*)data;
     *output = quad->corner;
 
@@ -510,13 +511,13 @@ int minkowsiSumAgainstQuad(void* data, struct Vector3* direction, struct Vector3
     return result;
 }
 
-int minkowsiSumAgainstSweptObject(void* data, struct Vector3* direction, struct Vector3* output) {
+int sweptObjectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output) {
     struct SweptCollisionObject* sweptObject = (struct SweptCollisionObject*)data;
 
     struct ColliderTypeData* collider = sweptObject->object->collider;
     struct RigidBody* body = sweptObject->object->body;
 
-    int result = collider->callbacks->minkowsiSum(
+    int result = collider->callbacks->minkowskiSupport(
         collider->data, 
         &body->rotationBasis, 
         direction, 
@@ -532,9 +533,9 @@ int minkowsiSumAgainstSweptObject(void* data, struct Vector3* direction, struct 
     return result;
 }
 
-int minkowsiSumAgainstObject(void* data, struct Vector3* direction, struct Vector3* output) {
+int objectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output) {
     struct CollisionObject* object = (struct CollisionObject*)data;
-    int result = object->collider->callbacks->minkowsiSum(object->collider->data, &object->body->rotationBasis, direction, output);
+    int result = object->collider->callbacks->minkowskiSupport(object->collider->data, &object->body->rotationBasis, direction, output);
     vector3Add(output, &object->body->transform.position, output);
     return result;
 }

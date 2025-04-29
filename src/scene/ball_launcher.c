@@ -106,9 +106,9 @@ void ballLauncherUpdate(struct BallLauncher* launcher) {
         if (!gjkCheckForOverlap(
             &simplex, 
             &launcher->collisionObject, 
-            minkowsiSumAgainstObject,
+            objectMinkowskiSupport,
             &launcher->currentBall.collisionObject,
-            minkowsiSumAgainstObject,
+            objectMinkowskiSupport,
             &launcher->currentBall.rigidBody.velocity)) {
             ballTurnOnCollision(&launcher->currentBall);
         }

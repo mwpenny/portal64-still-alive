@@ -224,8 +224,8 @@ int collisionSceneObjectIsTouchingPortal(struct CollisionObject* object, int por
     struct Vector3 direction;
     quatMultVector(&gCollisionScene.portalTransforms[portalIndex]->rotation, &gRight, &direction);
     return gjkCheckForOverlap(&simplex,
-        object, minkowsiSumAgainstObject,
-        gCollisionScene.portalTransforms[portalIndex], minkowsiSumAgainstPortal,
+        object, objectMinkowskiSupport,
+        gCollisionScene.portalTransforms[portalIndex], portalMinkowskiSupport,
         &direction
     );
 }
@@ -274,7 +274,7 @@ void collisionScenePushObjectsOutOfPortal(int portalIndex) {
         }
 
         struct Vector3 colliderPoint;
-        minkowsiSumAgainstObject(object, &reversePortalNormal, &colliderPoint);
+        objectMinkowskiSupport(object, &reversePortalNormal, &colliderPoint);
 
         struct Vector3 offset;
         vector3Sub(&portalTransform->position, &colliderPoint, &offset);
