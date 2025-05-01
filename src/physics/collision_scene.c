@@ -1,5 +1,6 @@
 #include "collision_scene.h"
 
+#include "compound_collider.h"
 #include "contact_solver.h"
 #include "epa.h"
 #include "gjk.h"
@@ -105,7 +106,7 @@ int collisionObjectRoomColliders(struct Room* room, struct Box3D* box, short out
     return result;
 }
 
-void collisionObjectCollideMixed(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionScene* scene, struct ContactSolver* contactSolver) {    
+void collisionObjectCollidePrimitiveMixed(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionScene* scene, struct ContactSolver* contactSolver) {
     short colliderIndices[MAX_COLLIDERS];
     int quadCount = collisionObjectRoomColliders(&scene->world->rooms[object->body->currentRoom], sweptBB, colliderIndices);
 
@@ -119,6 +120,22 @@ void collisionObjectCollideMixed(struct CollisionObject* object, struct Vector3*
         } else {
             collisionObjectCollideWithQuadSwept(object, objectPrevPos, sweptBB, quad, contactSolver, shouldCheckPortals);
         }
+    }
+}
+
+void collisionObjectCollideMixed(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionScene* scene, struct ContactSolver* contactSolver) {
+    if (object->collider->type != CollisionShapeTypeCompound) {
+        collisionObjectCollidePrimitiveMixed(object, objectPrevPos, sweptBB, scene, contactSolver);
+        return;
+    }
+
+    struct CompoundCollider* collider = (struct CompoundCollider*)object->collider->data;
+
+    for (short i = 0; i < collider->childrenCount; ++i) {
+        struct CollisionObject* childObj = &collider->children[i];
+
+        // TODO: per-child sweptBB
+        collisionObjectCollidePrimitiveMixed(childObj, objectPrevPos, sweptBB, scene, contactSolver);
     }
 }
 
@@ -220,6 +237,11 @@ int collisionSceneObjectIsTouchingPortal(struct CollisionObject* object, int por
         return 0;
     }
 
+    // TODO
+    if (object->collider->type == CollisionShapeTypeCompound) {
+        return 0;
+    }
+
     struct Simplex simplex;
     struct Vector3 direction;
     quatMultVector(&gCollisionScene.portalTransforms[portalIndex]->rotation, &gRight, &direction);
@@ -270,6 +292,11 @@ void collisionScenePushObjectsOutOfPortal(int portalIndex) {
         struct CollisionObject* object = gCollisionScene.dynamicObjects[i];
 
         if (!(object->body->flags & ((RigidBodyIsTouchingPortalA | RigidBodyWasTouchingPortalA) << portalIndex))) {
+            continue;
+        }
+
+        // TODO
+        if (object->collider->type == CollisionShapeTypeCompound) {
             continue;
         }
 
@@ -649,6 +676,7 @@ void collisionObjectCollidePairMixed(struct CollisionObject* a, struct Vector3* 
 }
 
 void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct DynamicBroadphase* broadphase, struct Vector3* prevPos, struct Box3D* sweptBB) {
+    // Sweep and prune
     int broadphaseEdgeCount = collisionScene->dynamicObjectCount * 2;
     for (int i = 0; i < broadphaseEdgeCount; ++i) {
         union DynamicBroadphaseEdge edge;

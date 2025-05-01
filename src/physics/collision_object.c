@@ -1,6 +1,9 @@
 #include "collision_object.h"
 
+#include <assert.h>
+
 #include "collision_scene.h"
+#include "compound_collider.h"
 #include "contact_insertion.h"
 #include "epa.h"
 #include "gjk.h"
@@ -247,14 +250,23 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
         return;
     }
 
+    // Mesh collider can have multiple contacts, which it handles itself
     if (a->collider->type == CollisionShapeTypeMesh) {
-        if (b->collider->type != CollisionShapeTypeMesh) {
-            meshColliderCollideObject(a, b, contactSolver);
-        }
-
+        assert(a->collider->type != b->collider->type);
+        meshColliderCollideObject(a, b, contactSolver);
         return;
     } else if (b->collider->type == CollisionShapeTypeMesh) {
+        assert(a->collider->type != b->collider->type);
         meshColliderCollideObject(b, a, contactSolver);
+        return;
+    }
+
+    // Compound colliders delegate to child collision
+    if (a->collider->type == CollisionShapeTypeCompound) {
+        compoundColliderCollideObject(a, b, contactSolver);
+        return;
+    } else if (b->collider->type == CollisionShapeTypeCompound) {
+        compoundColliderCollideObject(b, a, contactSolver);
         return;
     }
 
@@ -344,14 +356,23 @@ void collisionObjectCollideTwoObjectsSwept(
         return;
     }
 
+    // Mesh collider can have multiple contacts, which it handles itself
     if (a->collider->type == CollisionShapeTypeMesh) {
-        if (b->collider->type != CollisionShapeTypeMesh) {
-            meshColliderCollideObject(a, b, contactSolver);
-        }
-
+        assert(a->collider->type != b->collider->type);
+        meshColliderCollideObject(a, b, contactSolver);
         return;
     } else if (b->collider->type == CollisionShapeTypeMesh) {
+        assert(a->collider->type != b->collider->type);
         meshColliderCollideObject(b, a, contactSolver);
+        return;
+    }
+
+    // Compound colliders delegate to child collision
+    if (a->collider->type == CollisionShapeTypeCompound) {
+        compoundColliderCollideObject(a, b, contactSolver);
+        return;
+    } else if (b->collider->type == CollisionShapeTypeCompound) {
+        compoundColliderCollideObject(b, a, contactSolver);
         return;
     }
 

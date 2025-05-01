@@ -18,6 +18,7 @@ enum CollisionShapeType {
     CollisionShapeTypeSphere,
     CollisionShapeTypeCapsule,
     CollisionShapeTypeCylinder,
+    CollisionShapeTypeCompound,
     CollisionShapeTypeMesh,
 };
 

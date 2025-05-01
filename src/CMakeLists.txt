@@ -104,6 +104,7 @@ target_sources(engine INTERFACE
     physics/epa.c
     physics/gjk.c
     physics/line.c
+    physics/compound_collider.c
     physics/mesh_collider.c
     physics/point_constraint.c
     physics/raycasting.c
