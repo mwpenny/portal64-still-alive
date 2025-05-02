@@ -2,6 +2,7 @@
 
 #include "epa.h"
 #include "gjk.h"
+#include "compound_collider.h"
 #include "contact_insertion.h"
 #include "raycasting.h"
 
@@ -44,7 +45,7 @@ int meshColliderCollideObjectWithSingleQuad(struct CollisionObject* quadObject, 
     return 1;
 }
 
-void meshColliderCollideObject(struct CollisionObject* meshColliderObject, struct CollisionObject* other, struct ContactSolver* contactSolver) {
+void meshColliderCollidePrimitiveObject(struct CollisionObject* meshColliderObject, struct CollisionObject* other, struct ContactSolver* contactSolver) {
     struct Transform meshInverse;
     transformInvert(&meshColliderObject->body->transform, &meshInverse);
 
@@ -89,6 +90,25 @@ void meshColliderCollideObject(struct CollisionObject* meshColliderObject, struc
         contact->restitution = MIN(quadObject->collider->bounce, other->collider->bounce);
 
         contactInsert(contact, &result);
+    }
+}
+
+void meshColliderCollideObject(struct CollisionObject* meshColliderObject, struct CollisionObject* other, struct ContactSolver* contactSolver) {
+    if (other->collider->type != CollisionShapeTypeCompound) {
+        meshColliderCollidePrimitiveObject(meshColliderObject, other, contactSolver);
+        return;
+    }
+
+    struct CompoundCollider* collider = (struct CompoundCollider*)other->collider->data;
+
+    for (short i = 0; i < collider->childrenCount; ++i) {
+        struct CollisionObject* childObj = &collider->children[i];
+
+        if (!box3DHasOverlap(&meshColliderObject->boundingBox, &childObj->boundingBox)) {
+            continue;
+        }
+
+        meshColliderCollidePrimitiveObject(meshColliderObject, childObj, contactSolver);
     }
 }
 

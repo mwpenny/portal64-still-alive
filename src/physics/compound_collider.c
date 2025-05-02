@@ -35,6 +35,11 @@ int compoundColliderRaycast(struct CollisionObject* object, struct Ray* ray, flo
         }
     }
 
+    if (found) {
+        // Return compound collider, not child
+        contact->object = object;
+    }
+
     return found;
 }
 
@@ -65,6 +70,10 @@ void compoundColliderBoundingBox(struct ColliderTypeData* typeData, struct Trans
         struct ColliderTypeData* childCollider = childObj->collider;
 
         childCollider->callbacks->boundingBoxCalculator(childCollider, transform, &childObj->boundingBox);
+
+        if (i == 0) {
+            *box = childObj->boundingBox;
+        }
         box3DUnion(box, &childObj->boundingBox, box);
     }
 }
@@ -72,7 +81,7 @@ void compoundColliderBoundingBox(struct ColliderTypeData* typeData, struct Trans
 void compoundColliderCollideObject(struct CollisionObject* compoundColliderObject, struct CollisionObject* other, struct ContactSolver* contactSolver) {
     struct CompoundCollider* compoundCollider = (struct CompoundCollider*)compoundColliderObject->collider->data;
 
-    for (int i = 0; i < compoundCollider->childrenCount; ++i) {
+    for (short i = 0; i < compoundCollider->childrenCount; ++i) {
         struct CollisionObject* childObj = &compoundCollider->children[i];
         collisionObjectCollideTwoObjects(childObj, other, contactSolver);
     }
