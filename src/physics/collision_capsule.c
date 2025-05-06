@@ -113,6 +113,8 @@ static int collisionCapsuleRaycastCap(struct CollisionObject* capsuleObject, str
     struct CollisionCapsule* capsule = (struct CollisionCapsule*)capsuleObject->collider->data;
     struct Vector3* position = &capsuleObject->body->transform.position;
 
+    contact->distance = maxDistance;
+
     if (checkTop) {
         raycastSphere(position, capsule->radius, ray, maxDistance, &contact->distance);
     } else {
@@ -185,9 +187,7 @@ int collisionCapsuleRaycast(struct CollisionObject* capsuleObject, struct Ray* r
     vector3Sub(&contact->at, capsulePos, &capsuleToHit);
 
     float hitHeight = vector3Dot(&capsuleToHit, capsuleUp);
-    if (hitHeight > capsule->radius || hitHeight < (-capsule->extendDownward - capsule->radius)) {
-        return 0;
-    } else if (hitHeight < 0.0f && hitHeight > -capsule->extendDownward) {
+    if (hitHeight < 0.0f && hitHeight > -capsule->extendDownward) {
         // In range of cylinder
         finishContact(capsuleObject, ray, contact);
         return 1;
