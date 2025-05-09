@@ -26,7 +26,7 @@ int compoundColliderRaycast(struct CollisionObject* object, struct Ray* ray, flo
     int found = 0;
 
     for (short i = 0; i < collider->childrenCount; ++i) {
-        struct CollisionObject* childObj = &collider->children[i];
+        struct CollisionObject* childObj = collider->children[i];
         struct ColliderTypeData* childCollider = childObj->collider;
 
         if (childCollider->callbacks->raycast(childObj, ray, maxDistance, contact)) {
@@ -50,7 +50,7 @@ float compoundColliderSolidMofI(struct ColliderTypeData* typeData, float mass) {
     float mofi = 0.0f;
 
     for (short i = 0; i < collider->childrenCount; ++i) {
-        struct CollisionObject* childObj = &collider->children[i];
+        struct CollisionObject* childObj = collider->children[i];
         struct ColliderTypeData* childCollider = childObj->collider;
 
         mofi += childCollider->callbacks->mofICalculator(childCollider, childMass);
@@ -62,19 +62,29 @@ float compoundColliderSolidMofI(struct ColliderTypeData* typeData, float mass) {
 void compoundColliderBoundingBox(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box) {
     struct CompoundCollider* collider = (struct CompoundCollider*)typeData->data;
 
-    box->min = gZeroVec;
-    box->max = gZeroVec;
-
     for (short i = 0; i < collider->childrenCount; ++i) {
-        struct CollisionObject* childObj = &collider->children[i];
+        struct CollisionObject* childObj = collider->children[i];
         struct ColliderTypeData* childCollider = childObj->collider;
 
-        childCollider->callbacks->boundingBoxCalculator(childCollider, transform, &childObj->boundingBox);
+        struct Transform* childTransform = transform;
+
+        struct Transform offsetTransform;
+        if (childObj->bodyOffset) {
+            offsetTransform = *transform;
+
+            struct Vector3 offset;
+            quatMultVector(&offsetTransform.rotation, childObj->bodyOffset, &offset);
+            vector3Add(&offsetTransform.position, &offset, &offsetTransform.position);
+            childTransform = &offsetTransform;
+        }
+
+        childCollider->callbacks->boundingBoxCalculator(childCollider, childTransform, &childObj->boundingBox);
 
         if (i == 0) {
             *box = childObj->boundingBox;
+        } else {
+            box3DUnion(box, &childObj->boundingBox, box);
         }
-        box3DUnion(box, &childObj->boundingBox, box);
     }
 }
 
@@ -82,7 +92,7 @@ void compoundColliderCollideObject(struct CollisionObject* compoundColliderObjec
     struct CompoundCollider* compoundCollider = (struct CompoundCollider*)compoundColliderObject->collider->data;
 
     for (short i = 0; i < compoundCollider->childrenCount; ++i) {
-        struct CollisionObject* childObj = &compoundCollider->children[i];
+        struct CollisionObject* childObj = compoundCollider->children[i];
         collisionObjectCollideTwoObjects(childObj, other, contactSolver);
     }
 }

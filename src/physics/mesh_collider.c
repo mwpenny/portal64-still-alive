@@ -54,6 +54,12 @@ void meshColliderCollidePrimitiveObject(struct CollisionObject* meshColliderObje
     transformConcat(&meshInverse, &other->body->transform, &relativeObject.relativeTransform);
     basisFromQuat(&relativeObject.relativeBasis, &relativeObject.relativeTransform.rotation);
 
+    if (other->bodyOffset) {
+        struct Vector3 offset;
+        quatMultVector(&other->body->transform.rotation, other->bodyOffset, &offset);
+        vector3Add(&relativeObject.relativeTransform.position, &offset, &relativeObject.relativeTransform.position);
+    }
+
     struct MeshCollider* meshCollider = (struct MeshCollider*)meshColliderObject->collider->data;
 
     for (int i = 0; i < meshCollider->childrenCount; ++i) {
@@ -102,7 +108,7 @@ void meshColliderCollideObject(struct CollisionObject* meshColliderObject, struc
     struct CompoundCollider* collider = (struct CompoundCollider*)other->collider->data;
 
     for (short i = 0; i < collider->childrenCount; ++i) {
-        struct CollisionObject* childObj = &collider->children[i];
+        struct CollisionObject* childObj = collider->children[i];
 
         if (!box3DHasOverlap(&meshColliderObject->boundingBox, &childObj->boundingBox)) {
             continue;

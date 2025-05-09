@@ -4,7 +4,8 @@
 #include "collision_object.h"
 
 struct CompoundCollider {
-    struct CollisionObject* children;
+    // TODO
+    struct CollisionObject* children[4];
     short childrenCount;
 };
 

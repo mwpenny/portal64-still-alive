@@ -343,6 +343,7 @@ local function add_collider(collider, collision_layers, room_index)
     table.insert(collision_objects, {
         sk_definition_writer.reference_to(collider_type),
         sk_definition_writer.null_value,
+        sk_definition_writer.null_value,
         bb,
         sk_definition_writer.raw(table.concat(collision_layers, ' | '))
     })

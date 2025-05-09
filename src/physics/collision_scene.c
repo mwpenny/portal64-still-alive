@@ -132,7 +132,7 @@ void collisionObjectCollideMixed(struct CollisionObject* object, struct Vector3*
     struct CompoundCollider* collider = (struct CompoundCollider*)object->collider->data;
 
     for (short i = 0; i < collider->childrenCount; ++i) {
-        struct CollisionObject* childObj = &collider->children[i];
+        struct CollisionObject* childObj = collider->children[i];
 
         // TODO: per-child sweptBB
         collisionObjectCollidePrimitiveMixed(childObj, objectPrevPos, sweptBB, scene, contactSolver);

@@ -15,6 +15,7 @@
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers) {
     object->collider = collider;
     object->body = body;
+    object->bodyOffset = 0;
     rigidBodyInit(body, mass, collider->callbacks->mofICalculator(collider, mass));
     collisionObjectUpdateBB(object);
     object->collisionLayers = collisionLayers;
@@ -558,12 +559,26 @@ int objectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3
     struct CollisionObject* object = (struct CollisionObject*)data;
     int result = object->collider->callbacks->minkowskiSupport(object->collider->data, &object->body->rotationBasis, direction, output);
     vector3Add(output, &object->body->transform.position, output);
+
+    if (object->bodyOffset) {
+        struct Vector3 offset;
+        quatMultVector(&object->body->transform.rotation, object->bodyOffset, &offset);
+        vector3Add(output, &offset, output);
+    }
+
     return result;
 }
 
-void collisionObjectLocalRay(struct CollisionObject* cylinderObject, struct Ray* ray, struct Ray* localRay) {
+void collisionObjectLocalRay(struct CollisionObject* object, struct Ray* ray, struct Ray* localRay) {
     struct Vector3 offset;
-    vector3Sub(&ray->origin, &cylinderObject->body->transform.position, &offset);
-    basisUnRotate(&cylinderObject->body->rotationBasis, &ray->dir, &localRay->dir);
-    basisUnRotate(&cylinderObject->body->rotationBasis, &offset, &localRay->origin);
+    vector3Sub(&ray->origin, &object->body->transform.position, &offset);
+
+    if (object->bodyOffset) {
+        struct Vector3 offsetPos;
+        quatMultVector(&object->body->transform.rotation, object->bodyOffset, &offsetPos);
+        vector3Sub(&offset, &offsetPos, &offset);
+    }
+
+    basisUnRotate(&object->body->rotationBasis, &ray->dir, &localRay->dir);
+    basisUnRotate(&object->body->rotationBasis, &offset, &localRay->origin);
 }
