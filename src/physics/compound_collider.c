@@ -97,6 +97,32 @@ void compoundColliderCollideObject(struct CollisionObject* compoundColliderObjec
     }
 }
 
+void compoundColliderCollideObjectSwept(
+    struct CollisionObject* compoundColliderObject,
+    struct Vector3* prevCompoundColliderPos,
+    struct Box3D* sweptCompoundCollider,
+    struct CollisionObject* other,
+    struct Vector3* prevOtherPos,
+    struct Box3D* sweptOther,
+    struct ContactSolver* contactSolver
+) {
+    struct CompoundCollider* compoundCollider = (struct CompoundCollider*)compoundColliderObject->collider->data;
+
+    for (short i = 0; i < compoundCollider->childrenCount; ++i) {
+        struct CollisionObject* childObj = compoundCollider->children[i];
+
+        struct Vector3 childPrevPos;
+        quatMultVector(&compoundColliderObject->body->transform.rotation, childObj->bodyOffset, &childPrevPos);
+        vector3Add(prevCompoundColliderPos, &childPrevPos, &childPrevPos);
+
+        collisionObjectCollideTwoObjectsSwept(
+            childObj, &childPrevPos, sweptCompoundCollider,
+            other, prevOtherPos, sweptOther,
+            contactSolver
+        );
+    }
+}
+
 struct ColliderCallbacks gCompoundColliderCallbacks = {
     compoundColliderRaycast,
     compoundColliderSolidMofI,

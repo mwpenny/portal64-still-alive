@@ -134,8 +134,10 @@ void collisionObjectCollideMixed(struct CollisionObject* object, struct Vector3*
     for (short i = 0; i < collider->childrenCount; ++i) {
         struct CollisionObject* childObj = collider->children[i];
 
-        // TODO: per-child sweptBB
-        collisionObjectCollidePrimitiveMixed(childObj, objectPrevPos, sweptBB, scene, contactSolver);
+        struct Vector3 childPrevPos;
+        quatMultVector(&object->body->transform.rotation, childObj->bodyOffset, &childPrevPos);
+        vector3Add(objectPrevPos, &childPrevPos, &childPrevPos);
+        collisionObjectCollidePrimitiveMixed(childObj, &childPrevPos, sweptBB, scene, contactSolver);
     }
 }
 

@@ -370,10 +370,18 @@ void collisionObjectCollideTwoObjectsSwept(
 
     // Compound colliders delegate to child collision
     if (a->collider->type == CollisionShapeTypeCompound) {
-        compoundColliderCollideObject(a, b, contactSolver);
+        compoundColliderCollideObjectSwept(
+            a, prevAPos, sweptA,
+            b, prevBPos, sweptB,
+            contactSolver
+        );
         return;
     } else if (b->collider->type == CollisionShapeTypeCompound) {
-        compoundColliderCollideObject(b, a, contactSolver);
+        compoundColliderCollideObjectSwept(
+            b, prevBPos, sweptB,
+            a, prevAPos, sweptA,
+            contactSolver
+        );
         return;
     }
 
