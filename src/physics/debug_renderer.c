@@ -7,18 +7,22 @@
 
 Vtx vtx_contact_solver_debug[] = {
     {{{0, 0, -16}, 0, {0, 0}, {255, 0, 0, 255}}},
-    {{{0, 0, 16}, 0, {0, 0}, {255, 0, 0, 255}}},
-    {{{64, 0, 0}, 0, {0, 0}, {255, 0, 0, 255}}},
+    {{{0, 0, 16},  0, {0, 0}, {255, 0, 0, 255}}},
+    {{{64, 0, 0},  0, {0, 0}, {255, 0, 0, 255}}},
 
     {{{0, -16, 0}, 0, {0, 0}, {0, 255, 0, 255}}},
-    {{{64, 0, 0}, 0, {0, 0}, {0, 255, 0, 255}}},
-    {{{0, 16, 0}, 0, {0, 0}, {0, 255, 0, 255}}},
+    {{{64, 0, 0},  0, {0, 0}, {0, 255, 0, 255}}},
+    {{{0, 16, 0},  0, {0, 0}, {0, 255, 0, 255}}},
 };
 
-Gfx contact_solver_debug[] = {
-    gsSPVertex(vtx_contact_solver_debug, 6, 0),
-    gsSP2Triangles(0, 1, 2, 0, 3, 4, 5, 0),
-	gsSPEndDisplayList(),
+Vtx vtx_contact_solver_sleeping_debug[] = {
+    {{{0, 0, -16}, 0, {0, 0}, {0, 0, 255, 255}}},
+    {{{0, 0, 16},  0, {0, 0}, {0, 0, 255, 255}}},
+    {{{64, 0, 0},  0, {0, 0}, {0, 0, 255, 255}}},
+
+    {{{0, -16, 0}, 0, {0, 0}, {0, 255, 255, 255}}},
+    {{{64, 0, 0},  0, {0, 0}, {0, 255, 255, 255}}},
+    {{{0, 16, 0},  0, {0, 0}, {0, 255, 255, 255}}},
 };
 
 Gfx mat_contact_solver_debug[] = {
@@ -50,9 +54,14 @@ void contactConstraintStateDebugDraw(struct ContactManifold* constraintState, st
         mat[2][3] = 0.0f;
 
         struct Vector3 pos = contact->contactBWorld;
+        Vtx* vertices = vtx_contact_solver_debug;
 
         if (constraintState->shapeB->body) {
             vector3Add(&constraintState->shapeB->body->transform.position, &pos, &pos);
+
+            if (constraintState->shapeB->body->flags & RigidBodyIsSleeping) {
+                vertices = vtx_contact_solver_sleeping_debug;
+            }
         }
 
         mat[3][0] = pos.x * SCENE_SCALE;
@@ -69,7 +78,8 @@ void contactConstraintStateDebugDraw(struct ContactManifold* constraintState, st
         guMtxF2L(mat, mtx);
 
         gSPMatrix(renderState->dl++, mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-        gSPDisplayList(renderState->dl++, contact_solver_debug);
+        gSPVertex(renderState->dl++, vertices, 6, 0);
+        gSP2Triangles(renderState->dl++, 0, 1, 2, 0, 3, 4, 5, 0);
         gSPPopMatrix(renderState->dl++, G_MTX_MODELVIEW);
     }
 }

@@ -181,8 +181,6 @@ void contactSolverInit(struct ContactSolver* contactSolver) {
 	int solverSize = sizeof(struct ContactSolver);
 	zeroMemory(contactSolver, solverSize);
 
-	contactSolver->contactCapacity = MAX_CONTACT_COUNT;
-
 	contactSolver->unusedContacts = &contactSolver->contacts[0];
 
 	for (int i = 1; i < MAX_CONTACT_COUNT; ++i) {
@@ -551,6 +549,17 @@ struct ContactManifold* contactSolverNextManifold(struct ContactSolver* solver, 
 	return NULL;
 }
 
+int contactSolverActiveManifoldCount(struct ContactSolver* solver) {
+	int count = 0;
+
+	struct ContactManifold* curr = solver->activeContacts;
+	while (curr) {
+		++count;
+		curr = curr->next;
+	}
+
+	return count;
+}
 
 float contactPenetration(struct ContactManifold* contact) {
 	float result = 0;
