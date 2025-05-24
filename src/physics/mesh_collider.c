@@ -54,11 +54,7 @@ void meshColliderCollidePrimitiveObject(struct CollisionObject* meshColliderObje
     transformConcat(&meshInverse, &other->body->transform, &relativeObject.relativeTransform);
     basisFromQuat(&relativeObject.relativeBasis, &relativeObject.relativeTransform.rotation);
 
-    if (other->bodyOffset) {
-        struct Vector3 offset;
-        quatMultVector(&other->body->transform.rotation, other->bodyOffset, &offset);
-        vector3Add(&relativeObject.relativeTransform.position, &offset, &relativeObject.relativeTransform.position);
-    }
+    collisionObjectAddBodyOffset(other, &relativeObject.relativeTransform.position);
 
     struct MeshCollider* meshCollider = (struct MeshCollider*)meshColliderObject->collider->data;
 
@@ -108,7 +104,7 @@ void meshColliderCollideObject(struct CollisionObject* meshColliderObject, struc
     struct CompoundCollider* collider = (struct CompoundCollider*)other->collider->data;
 
     for (short i = 0; i < collider->childrenCount; ++i) {
-        struct CollisionObject* childObj = collider->children[i];
+        struct CollisionObject* childObj = &collider->children[i].object;
 
         if (!box3DHasOverlap(&meshColliderObject->boundingBox, &childObj->boundingBox)) {
             continue;
@@ -122,7 +118,7 @@ int meshColliderRaycast(struct CollisionObject* object, struct Ray* ray, float m
     struct MeshCollider* meshCollider = (struct MeshCollider*)object->collider->data;
     struct Ray localRay;
     struct Vector3 rayOffset;
-    vector3Sub(&ray->origin, &object->body->transform.position, &rayOffset);
+    vector3Sub(&ray->origin, object->position, &rayOffset);
     basisUnRotate(&object->body->rotationBasis, &rayOffset, &localRay.origin);
     basisUnRotate(&object->body->rotationBasis, &ray->dir, &localRay.dir);
 

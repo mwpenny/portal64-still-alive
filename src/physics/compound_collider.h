@@ -3,17 +3,53 @@
 
 #include "collision_object.h"
 
-struct CompoundCollider {
-    // TODO
-    struct CollisionObject* children[4];
+#define COMPOUND_COLLIDER_MAX_CHILD_COUNT 4
+
+struct CollisionScene;
+
+struct CompoundColliderComponentDefinition {
+    struct ColliderTypeData collider;
+    struct Vector3 parentOffset;
+};
+
+struct CompoundColliderDefinition {
+    struct CompoundColliderComponentDefinition* childDefinitions;
     short childrenCount;
+};
+
+struct CompoundColliderComponent {
+    struct CollisionObject object;
+    struct Vector3* parentOffset;
+    struct Vector3 position;
+};
+
+struct CompoundCollider {
+    struct CompoundColliderComponent children[COMPOUND_COLLIDER_MAX_CHILD_COUNT];
+    short childrenCount;
+
+    struct ColliderTypeData colliderType;
 };
 
 extern struct ColliderCallbacks gCompoundColliderCallbacks;
 
+void compoundColliderInit(
+    struct CompoundCollider* collider,
+    struct CompoundColliderDefinition* definition,
+    struct RigidBody* body,
+    int collisionLayers
+);
+
 void compoundColliderCollideObject(
     struct CollisionObject* compoundColliderObject,
     struct CollisionObject* other,
+    struct ContactSolver* contactSolver
+);
+
+void compoundColliderCollideMixed(
+    struct CollisionObject* compoundColliderObject,
+    struct Vector3* prevCompoundColliderPos,
+    struct Box3D* sweptCompoundCollider,
+    struct CollisionScene* scene,
     struct ContactSolver* contactSolver
 );
 

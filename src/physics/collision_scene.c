@@ -106,7 +106,16 @@ int collisionObjectRoomColliders(struct Room* room, struct Box3D* box, short out
     return result;
 }
 
-void collisionObjectCollidePrimitiveMixed(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionScene* scene, struct ContactSolver* contactSolver) {
+void collisionObjectCollideMixed(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionScene* scene, struct ContactSolver* contactSolver) {
+    // Compound colliders delegate to child collision
+    if (object->collider->type == CollisionShapeTypeCompound) {
+        compoundColliderCollideMixed(
+            object, objectPrevPos, sweptBB,
+            scene, contactSolver
+        );
+        return;
+    }
+
     short colliderIndices[MAX_COLLIDERS];
     int quadCount = collisionObjectRoomColliders(&scene->world->rooms[object->body->currentRoom], sweptBB, colliderIndices);
 
@@ -120,24 +129,6 @@ void collisionObjectCollidePrimitiveMixed(struct CollisionObject* object, struct
         } else {
             collisionObjectCollideWithQuadSwept(object, objectPrevPos, sweptBB, quad, contactSolver, shouldCheckPortals);
         }
-    }
-}
-
-void collisionObjectCollideMixed(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionScene* scene, struct ContactSolver* contactSolver) {
-    if (object->collider->type != CollisionShapeTypeCompound) {
-        collisionObjectCollidePrimitiveMixed(object, objectPrevPos, sweptBB, scene, contactSolver);
-        return;
-    }
-
-    struct CompoundCollider* collider = (struct CompoundCollider*)object->collider->data;
-
-    for (short i = 0; i < collider->childrenCount; ++i) {
-        struct CollisionObject* childObj = collider->children[i];
-
-        struct Vector3 childPrevPos;
-        quatMultVector(&object->body->transform.rotation, childObj->bodyOffset, &childPrevPos);
-        vector3Add(objectPrevPos, &childPrevPos, &childPrevPos);
-        collisionObjectCollidePrimitiveMixed(childObj, &childPrevPos, sweptBB, scene, contactSolver);
     }
 }
 

@@ -176,7 +176,7 @@ int collisionCylinderRaycast(struct CollisionObject* cylinderObject, struct Ray*
     struct CollisionCylinder* cylinder = (struct CollisionCylinder*)cylinderObject->collider->data;
     collisionCylinderBoxCheckForFaces(cylinder);
 
-    if (!lineNearestApproach(&ray->origin, &ray->dir, &cylinderObject->body->transform.position, &cylinderObject->body->rotationBasis.y, &rayLerp, &cylinderLerp)) {
+    if (!lineNearestApproach(&ray->origin, &ray->dir, cylinderObject->position, &cylinderObject->body->rotationBasis.y, &rayLerp, &cylinderLerp)) {
         struct Ray localRay;
         collisionObjectLocalRay(cylinderObject, ray, &localRay);
         return collisionCylinderRaycastCap(cylinderObject, ray, &localRay, maxDistance, contact);
@@ -198,7 +198,7 @@ int collisionCylinderRaycast(struct CollisionObject* cylinderObject, struct Ray*
     vector3AddScaled(&ray->origin, &ray->dir, rayLerp, &rayApproach);
 
     struct Vector3 cylinderApproach;
-    vector3AddScaled(&cylinderObject->body->transform.position, &cylinderObject->body->rotationBasis.y, cylinderLerp, &cylinderApproach);
+    vector3AddScaled(cylinderObject->position, &cylinderObject->body->rotationBasis.y, cylinderLerp, &cylinderApproach);
 
     if (vector3DistSqrd(&rayApproach, &cylinderApproach) > cylinder->radius * cylinder->radius) {
         return 0;

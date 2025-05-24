@@ -24,7 +24,7 @@ typedef void (*TriggerCallback)(void* data, struct CollisionObject* objectEnteri
 struct CollisionObject {
     struct ColliderTypeData *collider;
     struct RigidBody* body;
-    struct Vector3* bodyOffset;  // TODO: cache offset position
+    struct Vector3* position;
     struct Box3D boundingBox;
     short collisionLayers;
     short flags;
@@ -88,5 +88,8 @@ int objectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3
 int sweptObjectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output);
 
 void collisionObjectLocalRay(struct CollisionObject* object, struct Ray* ray, struct Ray* localRay);
+
+// Add object's body offset (if any) to output vector
+void collisionObjectAddBodyOffset(struct CollisionObject* object, struct Vector3* out);
 
 #endif

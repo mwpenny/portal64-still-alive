@@ -109,17 +109,18 @@ static void finishContact(struct CollisionObject* capsuleObject, struct Ray* ray
     contact->roomIndex = capsuleObject->body->currentRoom;
 }
 
-static int collisionCapsuleRaycastCap(struct CollisionObject* capsuleObject, struct Vector3* capsulePos, struct Ray* ray, uint8_t checkTop, float maxDistance, struct RaycastHit* contact) {
+static int collisionCapsuleRaycastCap(struct CollisionObject* capsuleObject, struct Ray* ray, uint8_t checkTop, float maxDistance, struct RaycastHit* contact) {
     struct CollisionCapsule* capsule = (struct CollisionCapsule*)capsuleObject->collider->data;
+    struct Vector3* position = capsuleObject->position;
 
     contact->distance = maxDistance;
 
     if (checkTop) {
-        raycastSphere(capsulePos, capsule->radius, ray, maxDistance, &contact->distance);
+        raycastSphere(position, capsule->radius, ray, maxDistance, &contact->distance);
     } else {
         struct Vector3 bottomSpherePos;
         vector3AddScaled(
-            capsulePos,
+            position,
             &capsuleObject->body->rotationBasis.y,
             -capsule->extendDownward,
             &bottomSpherePos
@@ -137,14 +138,7 @@ static int collisionCapsuleRaycastCap(struct CollisionObject* capsuleObject, str
 
 int collisionCapsuleRaycast(struct CollisionObject* capsuleObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
     struct CollisionCapsule* capsule = (struct CollisionCapsule*)capsuleObject->collider->data;
-    struct Vector3* capsulePos = &capsuleObject->body->transform.position;
-
-    struct Vector3 offsetPos;
-    if (capsuleObject->bodyOffset) {
-        quatMultVector(&capsuleObject->body->transform.rotation, capsuleObject->bodyOffset, &offsetPos);
-        vector3Add(capsulePos, &offsetPos, &offsetPos);
-        capsulePos = &offsetPos;
-    }
+    struct Vector3* capsulePos = capsuleObject->position;
 
     float distance = rayDetermineDistance(ray, capsulePos);
     if (distance < 0.0f) {
@@ -169,7 +163,6 @@ int collisionCapsuleRaycast(struct CollisionObject* capsuleObject, struct Ray* r
         // Ray passes through center of capsule
         return collisionCapsuleRaycastCap(
             capsuleObject,
-            capsulePos,
             ray,
             rayCapsuleDot < 0.0f,  // checkTop
             maxDistance,
@@ -202,7 +195,6 @@ int collisionCapsuleRaycast(struct CollisionObject* capsuleObject, struct Ray* r
         // In range of endcaps
         return collisionCapsuleRaycastCap(
             capsuleObject,
-            capsulePos,
             ray,
             hitHeight > 0.0f,  // checkTop
             maxDistance,

@@ -51,17 +51,8 @@ int raycastQuad(struct CollisionObject* quadObject, struct Ray* ray, float maxDi
 
 int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
     struct CollisionBox* box = (struct CollisionBox*)boxObject->collider->data;
-    struct Vector3* boxPos = &boxObject->body->transform.position;
 
-    struct Vector3 bodyOffset;
-    struct Vector3 offsetPos;
-    if (boxObject->bodyOffset) {
-        quatMultVector(&boxObject->body->transform.rotation, boxObject->bodyOffset, &bodyOffset);
-        vector3Add(boxPos, &bodyOffset, &offsetPos);
-        boxPos = &offsetPos;
-    }
-
-    float distance = rayDetermineDistance(ray, boxPos);
+    float distance = rayDetermineDistance(ray, boxObject->position);
 
     if (distance < 0.0f) {
         return 0;
@@ -71,7 +62,7 @@ int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDist
 
     vector3AddScaled(&ray->origin, &ray->dir, distance, &nearestPoint);
 
-    if (vector3DistSqrd(boxPos, &nearestPoint) > vector3MagSqrd(&box->sideLength)) {
+    if (vector3DistSqrd(boxObject->position, &nearestPoint) > vector3MagSqrd(&box->sideLength)) {
         return 0;
     }
 
@@ -120,10 +111,7 @@ int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDist
     if (contact->distance != maxDistance) {
         contact->object = boxObject;
         transformPoint(&boxObject->body->transform, &contact->at, &contact->at);
-
-        if (boxObject->bodyOffset) {
-            vector3Add(&contact->at, &bodyOffset, &contact->at);
-        }
+        collisionObjectAddBodyOffset(boxObject, &contact->at);
 
         quatMultVector(&boxObject->body->transform.rotation, &contact->normal, &contact->normal);
     }

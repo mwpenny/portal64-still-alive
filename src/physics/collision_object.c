@@ -15,7 +15,7 @@
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers) {
     object->collider = collider;
     object->body = body;
-    object->bodyOffset = 0;
+    object->position = &body->transform.position;
     rigidBodyInit(body, mass, collider->callbacks->mofICalculator(collider, mass));
     collisionObjectUpdateBB(object);
     object->collisionLayers = collisionLayers;
@@ -157,9 +157,12 @@ enum SweptCollideResult collisionObjectSweptCollide(
 
     struct CollisionQuad* quad = (struct CollisionQuad*)quadObject->collider->data;
 
+    struct Vector3 offsetPrevPos = *objectPrevPos;
+    collisionObjectAddBodyOffset(object, &offsetPrevPos);
+
     struct SweptCollisionObject sweptObject;
     sweptObject.object = object;
-    sweptObject.prevPos = objectPrevPos;
+    sweptObject.prevPos = &offsetPrevPos;
 
     if (!gjkCheckForOverlap(&simplex,
                 quad, quadMinkowskiSupport,
@@ -391,9 +394,12 @@ void collisionObjectCollideTwoObjectsSwept(
     vector3Sub(prevBPos, prevAPos, &relativePrevPos);
     vector3Add(&relativePrevPos, &a->body->transform.position, &relativePrevPos);
 
+    struct Vector3 offsetPrevBPos = *prevBPos;
+    collisionObjectAddBodyOffset(b, &offsetPrevBPos);
+
     struct SweptCollisionObject sweptObject;
     sweptObject.object = b;
-    sweptObject.prevPos = prevBPos;
+    sweptObject.prevPos = &offsetPrevBPos;
 
     if (!gjkCheckForOverlap(&simplex,
                 a, objectMinkowskiSupport,
@@ -543,19 +549,17 @@ int quadMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* 
 
 int sweptObjectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output) {
     struct SweptCollisionObject* sweptObject = (struct SweptCollisionObject*)data;
-
     struct ColliderTypeData* collider = sweptObject->object->collider;
-    struct RigidBody* body = sweptObject->object->body;
 
     int result = collider->callbacks->minkowskiSupport(
         collider->data, 
-        &body->rotationBasis, 
+        &sweptObject->object->body->rotationBasis,
         direction, 
         output
     );
 
-    if (vector3Dot(&body->transform.position, direction) > vector3Dot(sweptObject->prevPos, direction)) {
-        vector3Add(output, &body->transform.position, output);
+    if (vector3Dot(sweptObject->object->position, direction) > vector3Dot(sweptObject->prevPos, direction)) {
+        vector3Add(output, sweptObject->object->position, output);
     } else {
         vector3Add(output, sweptObject->prevPos, output);
     }
@@ -566,27 +570,22 @@ int sweptObjectMinkowskiSupport(void* data, struct Vector3* direction, struct Ve
 int objectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output) {
     struct CollisionObject* object = (struct CollisionObject*)data;
     int result = object->collider->callbacks->minkowskiSupport(object->collider->data, &object->body->rotationBasis, direction, output);
-    vector3Add(output, &object->body->transform.position, output);
-
-    if (object->bodyOffset) {
-        struct Vector3 offset;
-        quatMultVector(&object->body->transform.rotation, object->bodyOffset, &offset);
-        vector3Add(output, &offset, output);
-    }
+    vector3Add(output, object->position, output);
 
     return result;
 }
 
 void collisionObjectLocalRay(struct CollisionObject* object, struct Ray* ray, struct Ray* localRay) {
     struct Vector3 offset;
-    vector3Sub(&ray->origin, &object->body->transform.position, &offset);
-
-    if (object->bodyOffset) {
-        struct Vector3 offsetPos;
-        quatMultVector(&object->body->transform.rotation, object->bodyOffset, &offsetPos);
-        vector3Sub(&offset, &offsetPos, &offset);
-    }
-
+    vector3Sub(&ray->origin, object->position, &offset);
     basisUnRotate(&object->body->rotationBasis, &ray->dir, &localRay->dir);
     basisUnRotate(&object->body->rotationBasis, &offset, &localRay->origin);
+}
+
+void collisionObjectAddBodyOffset(struct CollisionObject* object, struct Vector3* out) {
+    if (object->position != &object->body->transform.position) {
+        struct Vector3 bodyOffset;
+        vector3Sub(object->position, &object->body->transform.position, &bodyOffset);
+        vector3Add(out, &bodyOffset, out);
+    }
 }
