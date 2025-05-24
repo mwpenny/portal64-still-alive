@@ -120,6 +120,53 @@ void compoundColliderBoundingBox(struct ColliderTypeData* typeData, struct Trans
     }
 }
 
+void compoundColliderFurthestPoint(
+    struct CollisionObject* compoundColliderObject,
+    struct Vector3* direction,
+    struct Vector3* point
+) {
+    struct CompoundCollider* compoundCollider = (struct CompoundCollider*)compoundColliderObject->collider->data;
+
+    float maxDistance = 0.0f;
+
+    for (short i = 0; i < compoundCollider->childrenCount; ++i) {
+        struct CollisionObject* childObj = &compoundCollider->children[i].object;
+
+        struct Vector3 currentPoint;
+        objectMinkowskiSupport(childObj, direction, &currentPoint);
+
+        float distance = vector3Dot(direction, &currentPoint);
+        if (distance > maxDistance) {
+            maxDistance = distance;
+            *point = currentPoint;
+        }
+    }
+}
+
+int compoundColliderHasOverlap(
+    struct CollisionObject* compoundColliderObject,
+    void* other,
+    MinkowskiSupport otherSupport,
+    struct Vector3* firstDirection
+) {
+    struct CompoundCollider* compoundCollider = (struct CompoundCollider*)compoundColliderObject->collider->data;
+
+    for (short i = 0; i < compoundCollider->childrenCount; ++i) {
+        struct CollisionObject* childObj = &compoundCollider->children[i].object;
+
+        struct Simplex simplex;
+        if (gjkCheckForOverlap(&simplex,
+            childObj, objectMinkowskiSupport,
+            other, otherSupport,
+            firstDirection
+        )) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 void compoundColliderCollideObject(
     struct CollisionObject* compoundColliderObject,
     struct CollisionObject* other,

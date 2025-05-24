@@ -230,17 +230,23 @@ int collisionSceneObjectIsTouchingPortal(struct CollisionObject* object, int por
         return 0;
     }
 
-    // TODO
+    struct Transform* portalTransform = gCollisionScene.portalTransforms[portalIndex];
+
+    struct Vector3 direction;
+    quatMultVector(&portalTransform->rotation, &gRight, &direction);
+
     if (object->collider->type == CollisionShapeTypeCompound) {
-        return 0;
+        return compoundColliderHasOverlap(
+            object,
+            portalTransform, portalMinkowskiSupport,
+            &direction
+        );
     }
 
     struct Simplex simplex;
-    struct Vector3 direction;
-    quatMultVector(&gCollisionScene.portalTransforms[portalIndex]->rotation, &gRight, &direction);
     return gjkCheckForOverlap(&simplex,
         object, objectMinkowskiSupport,
-        gCollisionScene.portalTransforms[portalIndex], portalMinkowskiSupport,
+        portalTransform, portalMinkowskiSupport,
         &direction
     );
 }
@@ -288,13 +294,12 @@ void collisionScenePushObjectsOutOfPortal(int portalIndex) {
             continue;
         }
 
-        // TODO
-        if (object->collider->type == CollisionShapeTypeCompound) {
-            continue;
-        }
-
         struct Vector3 colliderPoint;
-        objectMinkowskiSupport(object, &reversePortalNormal, &colliderPoint);
+        if (object->collider->type == CollisionShapeTypeCompound) {
+            compoundColliderFurthestPoint(object, &reversePortalNormal, &colliderPoint);
+        } else {
+            objectMinkowskiSupport(object, &reversePortalNormal, &colliderPoint);
+        }
 
         struct Vector3 offset;
         vector3Sub(&portalTransform->position, &colliderPoint, &offset);

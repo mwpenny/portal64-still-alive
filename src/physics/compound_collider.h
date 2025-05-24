@@ -39,6 +39,19 @@ void compoundColliderInit(
     int collisionLayers
 );
 
+void compoundColliderFurthestPoint(
+    struct CollisionObject* compoundColliderObject,
+    struct Vector3* direction,
+    struct Vector3* point
+);
+
+int compoundColliderHasOverlap(
+    struct CollisionObject* compoundColliderObject,
+    void* other,
+    MinkowskiSupport otherSupport,
+    struct Vector3* firstDirection
+);
+
 void compoundColliderCollideObject(
     struct CollisionObject* compoundColliderObject,
     struct CollisionObject* other,
