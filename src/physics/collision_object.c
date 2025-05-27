@@ -120,10 +120,10 @@ void collisionObjectHandleSweptCollision(struct CollisionObject* object, struct 
     if (velocityDot < 0.0f) {
         vector3AddScaled(&object->body->velocity, normal, (1 + restitution) * -velocityDot, &object->body->velocity);
         vector3AddScaled(&object->body->transform.position, normal, -0.01f, &object->body->transform.position);
-    }
 
-    if (object->sweptCollide) {
-        object->sweptCollide(object, velocityDot);
+        if (object->sweptCollide) {
+            object->sweptCollide(object, -velocityDot);
+        }
     }
 }
 
