@@ -1,21 +1,17 @@
 #include "clock.h"
 
-#include "../scene/dynamic_scene.h"
-#include "../defs.h"
-
-#include "../levels/levels.h"
-#include "../levels/cutscene_runner.h"
-#include "../build/assets/models/signage/clock_digits.h"
-#include "../util/memory.h"
+#include "defs.h"
+#include "levels/cutscene_runner.h"
+#include "levels/levels.h"
+#include "math/mathf.h"
+#include "scene/dynamic_scene.h"
 #include "system/time.h"
+#include "util/dynamic_asset_loader.h"
+#include "util/memory.h"
 
-#include "../build/assets/models/dynamic_model_list.h"
-
-#include "../../build/assets/materials/static.h"
-
-#include "../util/dynamic_asset_loader.h"
-
-#include "../math/mathf.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/dynamic_model_list.h"
+#include "codegen/assets/models/signage/clock_digits.h"
 
 #define DIGIT_WIDTH     512
 

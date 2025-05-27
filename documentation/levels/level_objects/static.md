@@ -2,7 +2,7 @@
 
 Static level geometry. Used to generate level mesh and portal surface data.
 
-## Name structure
+## Name Structure
 
 ```
 @static [no_portals] [indicator_lights SIGNAL_NAME] [uvtransx TRANS_X] [uvtransy TRANS_Y] [uvtransz TRANS_Z] [uvrotx ROT_X] [uvroty ROT_Y] [uvrotz ROT_Z] [uvscale SCALE] [precise_culling]

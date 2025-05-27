@@ -1,15 +1,21 @@
 #include "collision_object.h"
+
+#include <assert.h>
+
+#include "collision_scene.h"
+#include "compound_collider.h"
+#include "contact_insertion.h"
 #include "epa.h"
 #include "gjk.h"
-#include "contact_insertion.h"
-#include "collision_scene.h"
-#include "../math/mathf.h"
+#include "math/mathf.h"
 #include "mesh_collider.h"
 
-// 0x807572ac
+#include "player/player_rumble_clips.h"
+
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers) {
     object->collider = collider;
     object->body = body;
+    object->position = &body->transform.position;
     rigidBodyInit(body, mass, collider->callbacks->mofICalculator(collider, mass));
     collisionObjectUpdateBB(object);
     object->collisionLayers = collisionLayers;
@@ -34,7 +40,7 @@ int collisionObjectIsGrabbable(struct CollisionObject* object) {
     return object->body && ((object->body->flags & (RigidBodyFlagsGrabbable)) != 0);
 }
 
-int collisionObjectShouldGenerateConctacts(struct CollisionObject* object) {
+int collisionObjectShouldGenerateContacts(struct CollisionObject* object) {
     return collisionObjectIsActive(object) || (object->body->flags & RigidBodyIsPlayer) != 0;
 }
 
@@ -55,9 +61,9 @@ struct ContactManifold* collisionObjectCollideWithQuad(struct CollisionObject* o
 
     struct CollisionQuad* quad = (struct CollisionQuad*)quadObject->collider->data;
 
-    if (!gjkCheckForOverlap(&simplex, 
-                quad, minkowsiSumAgainstQuad, 
-                object, minkowsiSumAgainstObject, 
+    if (!gjkCheckForOverlap(&simplex,
+                quad, quadMinkowskiSupport,
+                object, objectMinkowskiSupport,
                 &quad->plane.normal)) {
         return NULL;
     }
@@ -74,9 +80,9 @@ struct ContactManifold* collisionObjectCollideWithQuad(struct CollisionObject* o
 
     struct EpaResult result;
     epaSolve(
-        &simplex, 
-        quad, minkowsiSumAgainstQuad, 
-        object, minkowsiSumAgainstObject, 
+        &simplex,
+        quad, quadMinkowskiSupport,
+        object, objectMinkowskiSupport,
         &result
     );
 
@@ -146,13 +152,16 @@ enum SweptCollideResult collisionObjectSweptCollide(
 
     struct CollisionQuad* quad = (struct CollisionQuad*)quadObject->collider->data;
 
+    struct Vector3 offsetPrevPos = *objectPrevPos;
+    collisionObjectAddBodyOffset(object, &offsetPrevPos);
+
     struct SweptCollisionObject sweptObject;
     sweptObject.object = object;
-    sweptObject.prevPos = objectPrevPos;
+    sweptObject.prevPos = &offsetPrevPos;
 
-    if (!gjkCheckForOverlap(&simplex, 
-                quad, minkowsiSumAgainstQuad, 
-                &sweptObject, minkowsiSumAgainstSweptObject, 
+    if (!gjkCheckForOverlap(&simplex,
+                quad, quadMinkowskiSupport,
+                &sweptObject, sweptObjectMinkowskiSupport,
                 &quad->plane.normal)) {
         return SweptCollideResultMiss;
     }
@@ -170,9 +179,9 @@ enum SweptCollideResult collisionObjectSweptCollide(
     *objectEnd = object->body->transform.position;
 
     if (!epaSolveSwept(
-        &simplex, 
-        quad, minkowsiSumAgainstQuad, 
-        &sweptObject, minkowsiSumAgainstSweptObject,
+        &simplex,
+        quad, quadMinkowskiSupport,
+        &sweptObject, sweptObjectMinkowskiSupport,
         objectPrevPos,
         objectEnd,
         result
@@ -240,14 +249,23 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
         return;
     }
 
+    // Mesh collider can have multiple contacts, which it handles itself
     if (a->collider->type == CollisionShapeTypeMesh) {
-        if (b->collider->type != CollisionShapeTypeMesh) {
-            meshColliderCollideObject(a, b, contactSolver);
-        }
-
+        assert(a->collider->type != b->collider->type);
+        meshColliderCollideObject(a, b, contactSolver);
         return;
     } else if (b->collider->type == CollisionShapeTypeMesh) {
+        assert(a->collider->type != b->collider->type);
         meshColliderCollideObject(b, a, contactSolver);
+        return;
+    }
+
+    // Compound colliders delegate to child collision
+    if (a->collider->type == CollisionShapeTypeCompound) {
+        compoundColliderCollideObject(a, b, contactSolver);
+        return;
+    } else if (b->collider->type == CollisionShapeTypeCompound) {
+        compoundColliderCollideObject(b, a, contactSolver);
         return;
     }
 
@@ -257,9 +275,9 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
 
     vector3Sub(&b->body->transform.position, &a->body->transform.position, &offset);
 
-    if (!gjkCheckForOverlap(&simplex, 
-                a, minkowsiSumAgainstObject, 
-                b, minkowsiSumAgainstObject, 
+    if (!gjkCheckForOverlap(&simplex,
+                a, objectMinkowskiSupport,
+                b, objectMinkowskiSupport,
                 &offset)) {
         return;
     }
@@ -276,9 +294,9 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
 
     struct EpaResult result;
     epaSolve(
-        &simplex, 
-        a, minkowsiSumAgainstObject, 
-        b, minkowsiSumAgainstObject, 
+        &simplex,
+        a, objectMinkowskiSupport,
+        b, objectMinkowskiSupport,
         &result
     );
 
@@ -337,14 +355,31 @@ void collisionObjectCollideTwoObjectsSwept(
         return;
     }
 
+    // Mesh collider can have multiple contacts, which it handles itself
     if (a->collider->type == CollisionShapeTypeMesh) {
-        if (b->collider->type != CollisionShapeTypeMesh) {
-            meshColliderCollideObject(a, b, contactSolver);
-        }
-
+        assert(a->collider->type != b->collider->type);
+        meshColliderCollideObject(a, b, contactSolver);
         return;
     } else if (b->collider->type == CollisionShapeTypeMesh) {
+        assert(a->collider->type != b->collider->type);
         meshColliderCollideObject(b, a, contactSolver);
+        return;
+    }
+
+    // Compound colliders delegate to child collision
+    if (a->collider->type == CollisionShapeTypeCompound) {
+        compoundColliderCollideObjectSwept(
+            a, prevAPos, sweptA,
+            b, prevBPos, sweptB,
+            contactSolver
+        );
+        return;
+    } else if (b->collider->type == CollisionShapeTypeCompound) {
+        compoundColliderCollideObjectSwept(
+            b, prevBPos, sweptB,
+            a, prevAPos, sweptA,
+            contactSolver
+        );
         return;
     }
 
@@ -354,13 +389,16 @@ void collisionObjectCollideTwoObjectsSwept(
     vector3Sub(prevBPos, prevAPos, &relativePrevPos);
     vector3Add(&relativePrevPos, &a->body->transform.position, &relativePrevPos);
 
+    struct Vector3 offsetPrevBPos = *prevBPos;
+    collisionObjectAddBodyOffset(b, &offsetPrevBPos);
+
     struct SweptCollisionObject sweptObject;
     sweptObject.object = b;
-    sweptObject.prevPos = prevBPos;
+    sweptObject.prevPos = &offsetPrevBPos;
 
-    if (!gjkCheckForOverlap(&simplex, 
-                a, minkowsiSumAgainstObject, 
-                &sweptObject, minkowsiSumAgainstSweptObject, 
+    if (!gjkCheckForOverlap(&simplex,
+                a, objectMinkowskiSupport,
+                &sweptObject, sweptObjectMinkowskiSupport,
                 &relativePrevPos)) {
         return;
     }
@@ -380,9 +418,9 @@ void collisionObjectCollideTwoObjectsSwept(
     struct Vector3 objectEnd = b->body->transform.position;
     
     if (!epaSolveSwept(
-        &simplex, 
-        a, minkowsiSumAgainstObject, 
-        &sweptObject, minkowsiSumAgainstSweptObject,
+        &simplex,
+        a, objectMinkowskiSupport,
+        &sweptObject, sweptObjectMinkowskiSupport,
         &relativePrevPos,
         &objectEnd,
         &result
@@ -470,7 +508,7 @@ void collisionObjectUpdateBB(struct CollisionObject* object) {
     }
 }
 
-int minkowsiSumAgainstQuad(void* data, struct Vector3* direction, struct Vector3* output) {
+int quadMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output) {
     struct CollisionQuad* quad = (struct CollisionQuad*)data;
     *output = quad->corner;
 
@@ -504,21 +542,19 @@ int minkowsiSumAgainstQuad(void* data, struct Vector3* direction, struct Vector3
     return result;
 }
 
-int minkowsiSumAgainstSweptObject(void* data, struct Vector3* direction, struct Vector3* output) {
+int sweptObjectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output) {
     struct SweptCollisionObject* sweptObject = (struct SweptCollisionObject*)data;
-
     struct ColliderTypeData* collider = sweptObject->object->collider;
-    struct RigidBody* body = sweptObject->object->body;
 
-    int result = collider->callbacks->minkowsiSum(
+    int result = collider->callbacks->minkowskiSupport(
         collider->data, 
-        &body->rotationBasis, 
+        &sweptObject->object->body->rotationBasis,
         direction, 
         output
     );
 
-    if (vector3Dot(&body->transform.position, direction) > vector3Dot(sweptObject->prevPos, direction)) {
-        vector3Add(output, &body->transform.position, output);
+    if (vector3Dot(sweptObject->object->position, direction) > vector3Dot(sweptObject->prevPos, direction)) {
+        vector3Add(output, sweptObject->object->position, output);
     } else {
         vector3Add(output, sweptObject->prevPos, output);
     }
@@ -526,16 +562,25 @@ int minkowsiSumAgainstSweptObject(void* data, struct Vector3* direction, struct 
     return result;
 }
 
-int minkowsiSumAgainstObject(void* data, struct Vector3* direction, struct Vector3* output) {
+int objectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output) {
     struct CollisionObject* object = (struct CollisionObject*)data;
-    int result = object->collider->callbacks->minkowsiSum(object->collider->data, &object->body->rotationBasis, direction, output);
-    vector3Add(output, &object->body->transform.position, output);
+    int result = object->collider->callbacks->minkowskiSupport(object->collider->data, &object->body->rotationBasis, direction, output);
+    vector3Add(output, object->position, output);
+
     return result;
 }
 
-void collisionObjectLocalRay(struct CollisionObject* cylinderObject, struct Ray* ray, struct Ray* localRay) {
+void collisionObjectLocalRay(struct CollisionObject* object, struct Ray* ray, struct Ray* localRay) {
     struct Vector3 offset;
-    vector3Sub(&ray->origin, &cylinderObject->body->transform.position, &offset);
-    basisUnRotate(&cylinderObject->body->rotationBasis, &ray->dir, &localRay->dir);
-    basisUnRotate(&cylinderObject->body->rotationBasis, &offset, &localRay->origin);
+    vector3Sub(&ray->origin, object->position, &offset);
+    basisUnRotate(&object->body->rotationBasis, &ray->dir, &localRay->dir);
+    basisUnRotate(&object->body->rotationBasis, &offset, &localRay->origin);
+}
+
+void collisionObjectAddBodyOffset(struct CollisionObject* object, struct Vector3* out) {
+    if (object->position != &object->body->transform.position) {
+        struct Vector3 bodyOffset;
+        vector3Sub(object->position, &object->body->transform.position, &bodyOffset);
+        vector3Add(out, &bodyOffset, out);
+    }
 }

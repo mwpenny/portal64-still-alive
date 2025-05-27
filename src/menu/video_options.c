@@ -1,11 +1,11 @@
 #include "video_options.h"
 
-#include "../font/dejavusans.h"
-#include "./translations.h"
-#include "../savefile/savefile.h"
-#include "../main.h"
+#include "font/dejavu_sans.h"
+#include "main.h"
+#include "savefile/savefile.h"
+#include "strings/translations.h"
 
-#include "../build/src/audio/subtitles.h"
+#include "codegen/assets/strings/strings.h"
 
 #define MENU_Y      54
 #define MENU_WIDTH  252
@@ -80,7 +80,7 @@ struct MenuElementParams gVideoMenuParams[] = {
         .params = {
             .slider = {
                 .width = 232,
-                .numberOfTicks = NUM_SUBTITLE_LANGUAGES,
+                .numberOfTicks = NUM_STRING_LANGUAGES,
                 .discrete = 1,
             },
         },
@@ -155,19 +155,19 @@ void videoOptionsAction(void* data, int selection, struct MenuAction* action) {
             }
             break;
         case VideoOptionTextLanguage:
-            gSaveData.controls.subtitleLanguage = action->state.iSlider.value;
-            gVideoMenuParams[LANGUAGE_TEXT_INDEX].params.text.message = SubtitleLanguages[gSaveData.controls.subtitleLanguage];
-            translationsReload(gSaveData.controls.subtitleLanguage);
+            gSaveData.controls.textLanguage = action->state.iSlider.value;
+            gVideoMenuParams[LANGUAGE_TEXT_INDEX].params.text.message = StringLanguages[gSaveData.controls.textLanguage];
+            translationsReload(gSaveData.controls.textLanguage);
             break;
     }
 }
 
 void videoOptionsInit(struct VideoOptions* videoOptions) {
-    if (gSaveData.controls.subtitleLanguage < 0 || gSaveData.controls.subtitleLanguage >= NUM_SUBTITLE_LANGUAGES) {
-        gSaveData.controls.subtitleLanguage = 0;
+    if (gSaveData.controls.textLanguage < 0 || gSaveData.controls.textLanguage >= NUM_STRING_LANGUAGES) {
+        gSaveData.controls.textLanguage = 0;
     }
 
-    gVideoMenuParams[LANGUAGE_TEXT_INDEX].params.text.message = SubtitleLanguages[gSaveData.controls.subtitleLanguage];
+    gVideoMenuParams[LANGUAGE_TEXT_INDEX].params.text.message = StringLanguages[gSaveData.controls.textLanguage];
 
     menuBuilderInit(
         &videoOptions->menuBuilder,
@@ -184,7 +184,7 @@ void videoOptionsInit(struct VideoOptions* videoOptions) {
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[CAPTIONS_INDEX], (gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled) != 0);
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[SUBTITLES_INDEX], (gSaveData.controls.flags & ControlSaveSubtitlesEnabled) != 0);
 
-    menuBuilderSetISlider(&videoOptions->menuBuilder.elements[LANGUAGE_SLIDER_INDEX], gSaveData.controls.subtitleLanguage);
+    menuBuilderSetISlider(&videoOptions->menuBuilder.elements[LANGUAGE_SLIDER_INDEX], gSaveData.controls.textLanguage);
 }
 
 void videoOptionsRebuildtext(struct VideoOptions* videoOptions) {

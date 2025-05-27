@@ -3,13 +3,11 @@
 
 #include "collision.h"
 
-extern struct ColliderCallbacks gCollisionCapsuleCallbacks;
-
 struct CollisionCapsule {
     float radius;
     float extendDownward;
 };
 
-float collisionCapsuleSolidMofI(struct ColliderTypeData* typeData, float mass);
+extern struct ColliderCallbacks gCollisionCapsuleCallbacks;
 
 #endif

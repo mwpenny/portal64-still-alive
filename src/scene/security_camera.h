@@ -1,9 +1,9 @@
 #ifndef __SECURITY_CAMERA_H__
 #define __SECURITY_CAMERA_H__
 
-#include "../physics/collision_object.h"
-#include "../levels/level_definition.h"
-#include "../sk64/skeletool_armature.h"
+#include "levels/level_definition.h"
+#include "physics/collision_object.h"
+#include "sk64/skeletool_armature.h"
 
 struct SecurityCamera {
     struct CollisionObject collisionObject;

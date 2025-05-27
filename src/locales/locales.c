@@ -1,21 +1,20 @@
 #include "locales.h"
-#include "../build/src/audio/languages.h"
-#include "../savefile/savefile.h"
 
-int getAudioLanguage() {
-  return (int)gSaveData.audio.audioLanguage;
-}
+#include "savefile/savefile.h"
+
+#include "codegen/assets/audio/languages.h"
 
 int mapLocaleSound(int soundId) {
-    int language = getAudioLanguage();
-    
-    switch(language) {
-        default:
-            soundId = AudioLanguageValues[(language-1)][soundId]; // -1 offset to save RAM
-            break;
-        case AUDIO_LANGUAGE_EN:       
-            break;
+    // Is this a localized sound?
+    if (soundId >= FIRST_LOCALIZED_SOUND &&
+        soundId < (FIRST_LOCALIZED_SOUND + NUM_LOCALIZED_SOUNDS)) {
+
+        int language = (int)gSaveData.audio.audioLanguage;
+        if (language > 0) {
+            // Non-default language
+            soundId = AudioLanguageValues[language - 1][soundId - FIRST_LOCALIZED_SOUND];
+        }
     }
-          
+
     return soundId;
 }

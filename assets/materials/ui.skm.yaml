@@ -12,7 +12,7 @@ materials:
 
   dejavu_sans_0:
     gDPSetTile:
-      filename: "../fonts/dejavu_sans_0.png"
+      filename: "../fonts/dejavu_sans/dejavu_sans_0.png"
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
     gDPSetCombineMode: 
@@ -27,7 +27,7 @@ materials:
 
   dejavu_sans_1:
     gDPSetTile:
-      filename: "../fonts/dejavu_sans_1.png"
+      filename: "../fonts/dejavu_sans/dejavu_sans_1.png"
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
     gDPSetCombineMode: 
@@ -42,7 +42,7 @@ materials:
 
   dejavu_sans_2:
     gDPSetTile:
-      filename: "../fonts/dejavu_sans_2.png"
+      filename: "../fonts/dejavu_sans/dejavu_sans_2.png"
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
     gDPSetCombineMode: 
@@ -57,7 +57,7 @@ materials:
 
   dejavu_sans_3:
     gDPSetTile:
-      filename: "../fonts/dejavu_sans_3.png"
+      filename: "../fonts/dejavu_sans/dejavu_sans_3.png"
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
     gDPSetCombineMode: 
@@ -72,7 +72,7 @@ materials:
 
   dejavu_sans_4:
     gDPSetTile:
-      filename: "../fonts/dejavu_sans_4.png"
+      filename: "../fonts/dejavu_sans/dejavu_sans_4.png"
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
     gDPSetCombineMode: 
@@ -87,7 +87,7 @@ materials:
 
   liberation_mono_0:
     gDPSetTile:
-      filename: "../fonts/liberation_mono_0.png"
+      filename: "../fonts/liberation_mono/liberation_mono_0.png"
       siz: G_IM_SIZ_4b
       fmt: G_IM_FMT_I
     gDPSetCombineMode: 

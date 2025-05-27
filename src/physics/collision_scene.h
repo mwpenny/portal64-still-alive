@@ -2,11 +2,11 @@
 #define __COLLISION_SCENE_H__
 
 #include "collision_object.h"
-#include "raycasting.h"
-#include "../math/ray.h"
-#include "world.h"
 #include "defs.h"
+#include "math/ray.h"
 #include "point_constraint.h"
+#include "raycasting.h"
+#include "world.h"
 
 #define PORTAL_COVER_HEIGHT_RADIUS 0.708084f
 #define PORTAL_COVER_WIDTH_RADIUS  0.420425f
@@ -21,7 +21,7 @@ struct CollisionScene {
     struct Transform* portalTransforms[2];
     struct Transform toOtherPortalTransform[2];
     struct Vector3 portalVelocity[2];
-    struct CollisionObject* dynamicObjects[MAX_DYNAMIC_OBJECTS];
+    struct CollisionObject* dynamicObjects[MAX_DYNAMIC_COLLISION];
     u16 dynamicObjectCount;
     u16 quadCount;
 };
@@ -52,6 +52,7 @@ void collisionSceneGetPortalTransform(int fromPortal, struct Transform* out);
 
 void collisionSceneAddDynamicObject(struct CollisionObject* object);
 void collisionSceneRemoveDynamicObject(struct CollisionObject* object);
+int collisionSceneDynamicObjectCount();
 
 void collisionSceneUpdateDynamics();
 

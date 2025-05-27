@@ -1,25 +1,25 @@
 #include "portal.h"
 
-#include "../graphics/screen_clipper.h"
-#include "../graphics/graphics.h"
-#include "../defs.h"
+#include "defs.h"
 #include "dynamic_scene.h"
-#include "../physics/collision_scene.h"
-#include "../math/mathf.h"
-#include "../math/vector2s16.h"
+#include "graphics/graphics.h"
+#include "graphics/screen_clipper.h"
+#include "levels/levels.h"
+#include "math/mathf.h"
+#include "math/vector2s16.h"
+#include "physics/collision_scene.h"
+#include "portal_surface_generator.h"
+#include "scene/dynamic_scene.h"
 #include "system/time.h"
-#include "../levels/levels.h"
-#include "./portal_surface_generator.h"
-#include "../scene/dynamic_scene.h"
 
-#include "../build/assets/models/portal/portal_blue.h"
-#include "../build/assets/models/portal/portal_blue_filled.h"
-#include "../build/assets/models/portal/portal_blue_face.h"
-#include "../build/assets/models/portal/portal_collider.h"
-#include "../build/assets/models/portal/portal_collider_vertical.h"
-#include "../build/assets/models/portal/portal_orange.h"
-#include "../build/assets/models/portal/portal_orange_face.h"
-#include "../build/assets/models/portal/portal_orange_filled.h"
+#include "codegen/assets/models/portal/portal_blue.h"
+#include "codegen/assets/models/portal/portal_blue_filled.h"
+#include "codegen/assets/models/portal/portal_blue_face.h"
+#include "codegen/assets/models/portal/portal_collider.h"
+#include "codegen/assets/models/portal/portal_collider_vertical.h"
+#include "codegen/assets/models/portal/portal_orange.h"
+#include "codegen/assets/models/portal/portal_orange_face.h"
+#include "codegen/assets/models/portal/portal_orange_filled.h"
 
 struct ColliderTypeData gPortalColliderType = {
     CollisionShapeTypeMesh,
@@ -215,7 +215,7 @@ void portalCheckForHoles(struct Portal* portals) {
     }
 }
 
-int minkowsiSumAgainstPortal(void* data, struct Vector3* direction, struct Vector3* output) {
+int portalMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output) {
     struct Transform* transform = (struct Transform*)data;
     struct Vector3 localDir;
     struct Quaternion inverseRotation;

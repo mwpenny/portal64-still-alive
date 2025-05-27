@@ -1,26 +1,23 @@
 #include "new_game_menu.h"
 
-#include <string.h>
+#include "font/font.h"
+#include "font/dejavu_sans.h"
 
-#include "./translations.h"
+#include "audio/soundplayer.h"
+#include "graphics/image.h"
+#include "levels/levels.h"
+#include "strings/translations.h"
+#include "savefile/savefile.h"
+#include "system/controller.h"
+#include "text_manipulation.h"
+#include "util/memory.h"
+#include "util/rom.h"
 
-#include "../font/font.h"
-#include "../font/dejavusans.h"
 
-#include "../graphics/image.h"
-#include "../util/memory.h"
-#include "../util/rom.h"
-#include "../audio/soundplayer.h"
-#include "./text_manipulation.h"
-
-#include "../build/assets/materials/ui.h"
-#include "../build/assets/materials/images.h"
-#include "../build/src/audio/clips.h"
-#include "../build/src/audio/subtitles.h"
-
-#include "../levels/levels.h"
-#include "../savefile/savefile.h"
-#include "../system/controller.h"
+#include "codegen/assets/audio/clips.h"
+#include "codegen/assets/materials/ui.h"
+#include "codegen/assets/materials/images.h"
+#include "codegen/assets/strings/strings.h"
 
 struct Chapter gChapters[] = {
     {images_chapter1_rgba_16b, 0, 0},
@@ -30,7 +27,7 @@ struct Chapter gChapters[] = {
     {images_chapter5_rgba_16b, 8, 13},
     {images_chapter6_rgba_16b, 9, 14},
     {images_chapter7_rgba_16b, 10, 15},
-    {images_chapter8_rgba_16b, -1, 16},
+    {images_chapter8_rgba_16b, 11, 16},
     {images_chapter9_rgba_16b, -1, 17},
     {images_chapter10_rgba_16b, -1, 18},
     {images_chapter11_rgba_16b, -1, 19},
@@ -171,14 +168,18 @@ enum InputCapture newGameUpdate(struct NewGameMenu* newGameMenu) {
         soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
-    if ((controllerGetDirectionDown(0) & ControllerDirectionRight) != 0 && 
-        newGameMenu->selectedChapter + 1 < newGameMenu->chapterCount &&
-        gChapters[newGameMenu->selectedChapter + 1].imageData) {
-        newGameMenu->selectedChapter = newGameMenu->selectedChapter + 1;
+    if ((controllerGetDirectionDown(0) & ControllerDirectionRight) != 0) {
+        if (newGameMenu->selectedChapter + 1 < newGameMenu->chapterCount)
+            newGameMenu->selectedChapter = newGameMenu->selectedChapter + 1;
+        else
+            newGameMenu->selectedChapter = 0;
     }
-
-    if ((controllerGetDirectionDown(0) & ControllerDirectionLeft) != 0 && newGameMenu->selectedChapter > 0) {
-        newGameMenu->selectedChapter = newGameMenu->selectedChapter - 1;
+    
+    if ((controllerGetDirectionDown(0) & ControllerDirectionLeft) != 0) {
+        if (newGameMenu->selectedChapter > 0)
+            newGameMenu->selectedChapter = newGameMenu->selectedChapter - 1;
+        else
+            newGameMenu->selectedChapter = newGameMenu->chapterCount - 1;
     }
     
     if ((controllerGetDirectionDown(0) & ControllerDirectionLeft) != 0 || (controllerGetDirectionDown(0) & ControllerDirectionRight) != 0)

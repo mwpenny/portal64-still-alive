@@ -60,8 +60,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
                 output.mDefaultMaterial = curr;
             } else if (lastParameter == "force-material") {
                 output.mForceMaterialName = curr;
-            } else if (lastParameter == "pallete") {
-                output.mForcePallete = curr;
+            } else if (lastParameter == "palette") {
+                output.mForcePalette = curr;
             } else if (lastParameter == "script") {
                 output.mScriptFiles.push_back(curr);
             } else if (lastParameter == "fps") {
@@ -96,8 +96,8 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
         } else if (strcmp(curr, "--sort-dir") == 0) {
             lastParameter = "sort-dir";
         } else if (
-            strcmp(curr, "--pallete") == 0) {
-            lastParameter = "pallete";
+            strcmp(curr, "--palette") == 0) {
+            lastParameter = "palette";
         } else if (
             strcmp(curr, "-a") == 0 || 
             strcmp(curr, "--animations-only") == 0) {

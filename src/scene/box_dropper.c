@@ -1,19 +1,19 @@
 #include "box_dropper.h"
 
-#include "../scene/dynamic_scene.h"
-#include "../defs.h"
-#include "../physics/config.h"
-#include "system/time.h"
-#include "signals.h"
-#include "../decor/decor_object_list.h"
-#include "../util/dynamic_asset_loader.h"
-
-#include "../../build/assets/materials/static.h"
-#include "../../build/assets/models/props/box_dropper.h"
-#include "../../build/assets/models/dynamic_model_list.h"
-#include "../../build/assets/models/dynamic_animated_model_list.h"
+#include "decor/decor_object_list.h"
+#include "defs.h"
 #include "hud.h"
+#include "physics/config.h"
 #include "scene.h"
+#include "scene/dynamic_scene.h"
+#include "signals.h"
+#include "system/time.h"
+#include "util/dynamic_asset_loader.h"
+
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/dynamic_model_list.h"
+#include "codegen/assets/models/dynamic_animated_model_list.h"
+#include "codegen/assets/models/props/box_dropper.h"
 
 #define DROPPER_RELOAD_TIME     2.0f
 #define DROPPER_DROP_TIME       0.5f
@@ -146,7 +146,7 @@ void boxDropperUpdate(struct BoxDropper* dropper) {
         dropper->flags |= BoxDropperFlagsCubeRequested;
     }
 
-    if (((dropper->flags & (BoxDropperFlagsCubeIsActive | BoxDropperFlagsCubeRequested)) == BoxDropperFlagsCubeRequested)) {
+    if (dropper->reloadTimer == 0.0f && ((dropper->flags & (BoxDropperFlagsCubeIsActive | BoxDropperFlagsCubeRequested)) == BoxDropperFlagsCubeRequested)) {
         struct Transform pendingCubePos;
         boxDropperFakePos(dropper, &pendingCubePos);
 

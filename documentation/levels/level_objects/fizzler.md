@@ -3,7 +3,7 @@
 An emancipation grill. When passing through, destroys [decor](./decor.md)
 objects and any player-placed portals.
 
-## Name structure
+## Name Structure
 
 ```
 @fizzler [CUBE_SIGNAL_NAME]

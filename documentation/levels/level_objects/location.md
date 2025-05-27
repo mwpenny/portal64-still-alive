@@ -3,7 +3,7 @@
 A point in the world, used for level spawn points and can be referenced in
 cutscenes.
 
-## Name structure
+## Name Structure
 
 ```
 @location NAME

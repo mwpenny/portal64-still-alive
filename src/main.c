@@ -12,14 +12,13 @@
 #include "levels/intro.h"
 #include "levels/credits.h"
 #include "menu/main_menu.h"
-#include "menu/translations.h"
+#include "strings/translations.h"
 #include "savefile/savefile.h"
 #include "scene/dynamic_scene.h"
 #include "scene/portal_surface.h"
 #include "scene/scene.h"
 #include "sk64/skeletool_animator.h"
 #include "sk64/skeletool_defs.h"
-#include "string.h"
 #include "util/dynamic_asset_loader.h"
 #include "util/memory.h"
 #include "util/profile.h"
@@ -32,7 +31,7 @@
 #include "main.h"
 
 #ifdef PORTAL64_WITH_DEBUGGER
-#include "../debugger/debugger.h"
+#include "debugger/debug.h"
 #endif
 
 static OSThread gameThread;
@@ -238,9 +237,7 @@ static void gameProc(void* arg) {
     romInit();
 
 #ifdef PORTAL64_WITH_DEBUGGER
-    OSThread* debugThreads[2];
-    debugThreads[0] = &gameThread;
-    gdbInitDebugger(gPiHandle, &dmaMessageQ, debugThreads, 1);
+    debug_initialize();
 #endif
 
     dynamicSceneInit();
@@ -258,11 +255,11 @@ static void gameProc(void* arg) {
     initAudio(fps);
     timeSetFrameRate(fps);
     soundPlayerInit();
-    translationsLoad(gSaveData.controls.subtitleLanguage);
+    translationsLoad(gSaveData.controls.textLanguage);
     skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
     gSceneCallbacks->initCallback(gSceneCallbacks->data);
     // this prevents the intro from crashing
-    gGameMenu.currentRenderedLanguage = gSaveData.controls.subtitleLanguage;
+    gGameMenu.currentRenderedLanguage = gSaveData.controls.textLanguage;
 
     while (1) {
         OSScMsg *msg = NULL;
@@ -286,7 +283,7 @@ static void gameProc(void* arg) {
                         portalSurfaceCleanupQueueInit();
                         heapInit(_heapStart, memoryEnd);
                         profileClearAddressMap();
-                        translationsLoad(gSaveData.controls.subtitleLanguage);
+                        translationsLoad(gSaveData.controls.textLanguage);
                         levelLoadWithCallbacks(levelGetQueued());
                         rumblePakClipInit();
                         cutsceneRunnerReset();
@@ -308,6 +305,8 @@ static void gameProc(void* arg) {
 
                     break;
                 }
+
+                Time startTime = timeGetTime();
 
                 if (pendingGFX < 2 && drawingEnabled) {
                     Time renderStart = profileStart();
@@ -332,16 +331,18 @@ static void gameProc(void* arg) {
                 }
     
 #if PORTAL64_WITH_RSP_PROFILER
-                if (controllerGetButtonDown(2, BUTTON_RIGHT)) {
+                if (controllerGetButtonDown(2, BUTTON_DOWN)) {
                     struct GraphicsTask* task = &gGraphicsTasks[drawBufferIndex];
                     profileTask(&scheduler, &gameThread, &task->task.list, task->framebuffer);
                 }
 #endif
-                timeUpdateDelta();
+
                 soundPlayerUpdate();
                 controllersSavePreviousState();
 
                 profileReport();
+
+                gScene.cpuTime = timeGetTime() - startTime;
 
                 break;
 
@@ -353,6 +354,8 @@ static void gameProc(void* arg) {
                 if (gScene.checkpointState == SceneCheckpointStatePendingRender) {
                     gScene.checkpointState = SceneCheckpointStateReady;
                 }
+
+                timeUpdateFrameTime();
                 break;
             case (OS_SC_PRE_NMI_MSG):
                 pendingGFX += 2;

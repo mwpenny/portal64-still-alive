@@ -1,13 +1,13 @@
 #include "raycasting.h"
 
-#include "math/mathf.h"
 #include "collision_box.h"
 #include "collision_cylinder.h"
 #include "line.h"
+#include "math/mathf.h"
 
 #define NEAR_EDGE_ZERO      0.001f
 #define NEAR_DOT_ZERO       0.00001f
-#define MIN_RAY_LENGTH      0.05f
+#define MIN_RAY_LENGTH      0.0001f
 
 int raycastQuadShape(struct CollisionQuad* quad, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
     float normalDot = vector3Dot(&ray->dir, &quad->plane.normal);
@@ -52,7 +52,7 @@ int raycastQuad(struct CollisionObject* quadObject, struct Ray* ray, float maxDi
 int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
     struct CollisionBox* box = (struct CollisionBox*)boxObject->collider->data;
 
-    float distance = rayDetermineDistance(ray, &boxObject->body->transform.position);
+    float distance = rayDetermineDistance(ray, boxObject->position);
 
     if (distance < 0.0f) {
         return 0;
@@ -62,7 +62,7 @@ int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDist
 
     vector3AddScaled(&ray->origin, &ray->dir, distance, &nearestPoint);
 
-    if (vector3DistSqrd(&boxObject->body->transform.position, &nearestPoint) > vector3MagSqrd(&box->sideLength)) {
+    if (vector3DistSqrd(boxObject->position, &nearestPoint) > vector3MagSqrd(&box->sideLength)) {
         return 0;
     }
 
@@ -111,10 +111,41 @@ int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDist
     if (contact->distance != maxDistance) {
         contact->object = boxObject;
         transformPoint(&boxObject->body->transform, &contact->at, &contact->at);
+        collisionObjectAddBodyOffset(boxObject, &contact->at);
+
         quatMultVector(&boxObject->body->transform.rotation, &contact->normal, &contact->normal);
     }
 
     contact->roomIndex = boxObject->body->currentRoom;
 
     return contact->distance != maxDistance;
+}
+
+int raycastSphere(struct Vector3* position, float radius, struct Ray* ray, float maxDistance, float* rayDistance) {
+    struct Vector3 hyp;
+    vector3Sub(position, &ray->origin, &hyp);
+
+    // Distance along ray to sphere origin
+    float distance = vector3Dot(&hyp, &ray->dir);
+    if (distance < 0.0f || (distance - radius) > maxDistance) {
+        return 0;
+    }
+
+    // Distance from sphere origin to projected point
+    float normDist = vector3MagSqrd(&hyp) - (distance * distance);
+    if (normDist > (radius * radius)) {
+        return 0;
+    }
+
+    // Subtract distance from projected point to sphere edge
+    //
+    // Allow hitting behind the ray origin to handle spheres
+    // next to portals being cast through
+    distance -= sqrtf((radius * radius) - normDist);
+    if (/*distance < 0.0f || */distance > maxDistance) {
+        return 0;
+    }
+
+    *rayDistance = distance;
+    return 1;
 }

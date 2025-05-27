@@ -1,0 +1,9 @@
+Below are the characters used in each of the font pages
+Note that the space character is intentionally left in the first group
+
+ !'()*,-./0123456789:;?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]abcdefghijklmnopqrstuvwxyz¡«°»¿
+ÀÁÂÃÄÅÆÇĆÈÉÊÍÎÑÓÔÖØÚÜÝßàáâãäåæçèéêëìíîïñòóôõöøùúûüýĂăĄąćČčďĘęĚěĞğİıŁł
+ŃńŇňŐÕőŘřŚśŞşŠšŢȚţťŮůűŹźŻżŽžȘșțΆΈΉΊΌΏΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΩάέήίΰ
+αβγδεζηθικλμνξοπρςστυφχψωϋόύώЄІЇАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩ
+ЪЫЬЭЮЯΨабвгдежзийклмнопрстуфхцчшщъыьэюяёєіїҐ–—’“”„…
+

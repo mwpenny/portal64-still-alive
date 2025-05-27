@@ -1,25 +1,24 @@
 #include "door.h"
 
-#include "../graphics/render_scene.h"
 #include "defs.h"
-#include "../scene/dynamic_scene.h"
-#include "signals.h"
-#include "../math/mathf.h"
-#include "system/time.h"
-#include "../physics/collision_box.h"
-#include "../physics/collision_scene.h"
-#include "../util/dynamic_asset_loader.h"
+#include "graphics/render_scene.h"
 #include "hud.h"
+#include "math/mathf.h"
+#include "physics/collision_box.h"
+#include "physics/collision_scene.h"
 #include "scene.h"
+#include "scene/dynamic_scene.h"
+#include "signals.h"
+#include "system/time.h"
+#include "util/dynamic_asset_loader.h"
 
-#include "../build/assets/materials/static.h"
-#include "../../build/assets/models/dynamic_animated_model_list.h"
-
-#include "../build/assets/models/props/door_01.h"
-#include "../build/assets/models/props/door_02.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/dynamic_animated_model_list.h"
+#include "codegen/assets/models/props/door_01.h"
+#include "codegen/assets/models/props/door_02.h"
 
 #define DOOR_COLLISION_Y_OFFSET 1.0f
-#define DOOR_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_BALL)
+#define DOOR_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_BALL | COLLISION_LAYERS_BLOCK_TURRET_SIGHT)
 
 struct CollisionBox gDoorCollisionBox = {
     {1.0f, 1.0f, 0.1125f}

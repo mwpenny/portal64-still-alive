@@ -3,8 +3,8 @@
 #include <ultra64.h>
 
 #include "defs.h"
-#include "../math/vector3.h"
-#include "../math/matrix.h"
+#include "math/vector3.h"
+#include "math/matrix.h"
 
 Vtx vtx_quad[] = {
     {{{0, 0, 0}, 0, {0, 0}, {200, 0, 0, 255}}},

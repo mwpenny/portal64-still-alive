@@ -7,7 +7,7 @@ void loadTextureFromAiMaterial(TextureCache& cache, Material& material, aiString
     G_IM_SIZ siz;
     TextureDefinition::DetermineIdealFormat(filename.C_Str(), fmt, siz);
     
-    std::shared_ptr<TextureDefinition> useTexture = cache.GetTexture(filename.C_Str(), fmt, siz, (TextureDefinitionEffect)0, settings.mForcePallete);
+    std::shared_ptr<TextureDefinition> useTexture = cache.GetTexture(filename.C_Str(), fmt, siz, (TextureDefinitionEffect)0, settings.mForcePalette);
 
     material.mState.textureState.isOn = 1;
     material.mState.textureState.level = 0;
@@ -212,10 +212,10 @@ void fillMissingMaterials(TextureCache& cache, const aiScene* fromScene, Display
             result->mState.primitiveColor.a = (uint8_t)(diffuseColor.a * 255.0f);
         }
 
-        if (result->mState.usePrimitiveColor && settings.mTargetCIBuffer && settings.mForcePallete.length()) {
-            std::shared_ptr<PalleteDefinition> pallete = gTextureCache.GetPallete(settings.mForcePallete);
+        if (result->mState.usePrimitiveColor && settings.mTargetCIBuffer && settings.mForcePalette.length()) {
+            std::shared_ptr<PaletteDefinition> palette = gTextureCache.GetPalette(settings.mForcePalette);
 
-            PixelIu8 index = pallete->FindIndex(result->mState.primitiveColor);
+            PixelIu8 index = palette->FindIndex(result->mState.primitiveColor);
 
             result->mState.primitiveColor.r = index.i;
             result->mState.primitiveColor.g = index.i;

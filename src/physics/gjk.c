@@ -166,7 +166,7 @@ int simplexCheck(struct Simplex* simplex, struct Vector3* nextDirection) {
 
 #define MAX_GJK_ITERATIONS  10
 
-int gjkCheckForOverlap(struct Simplex* simplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct Vector3* firstDirection) {
+int gjkCheckForOverlap(struct Simplex* simplex, void* objectA, MinkowskiSupport objectASupport, void* objectB, MinkowskiSupport objectBSupport, struct Vector3* firstDirection) {
     struct Vector3 aPoint;
     struct Vector3 bPoint;
     struct Vector3 nextDirection;
@@ -177,24 +177,24 @@ int gjkCheckForOverlap(struct Simplex* simplex, void* objectA, MinkowsiSum objec
     int bId;
 
     if (vector3IsZero(firstDirection)) {
-        aId = objectASum(objectA, &gRight, &aPoint);
+        aId = objectASupport(objectA, &gRight, &aPoint);
         vector3Negate(&gRight, &nextDirection);
 
-        bId = objectBSum(objectB, &nextDirection, &bPoint);
+        bId = objectBSupport(objectB, &nextDirection, &bPoint);
         simplexAddPoint(simplex, &aPoint, &bPoint, COMBINE_CONTACT_IDS(aId, bId));
     } else {
-        aId = objectASum(objectA, firstDirection, &aPoint);
+        aId = objectASupport(objectA, firstDirection, &aPoint);
         vector3Negate(firstDirection, &nextDirection);
 
-        bId = objectBSum(objectB, &nextDirection, &bPoint);
+        bId = objectBSupport(objectB, &nextDirection, &bPoint);
         simplexAddPoint(simplex, &aPoint, &bPoint, COMBINE_CONTACT_IDS(aId, bId));
     }
 
     for (int iteration = 0; iteration < MAX_GJK_ITERATIONS; ++iteration) {
         struct Vector3 reverseDirection;
         vector3Negate(&nextDirection, &reverseDirection);
-        aId = objectASum(objectA, &nextDirection, &aPoint);
-        bId = objectBSum(objectB, &reverseDirection, &bPoint);
+        aId = objectASupport(objectA, &nextDirection, &aPoint);
+        bId = objectBSupport(objectB, &reverseDirection, &bPoint);
 
         struct Vector3* addedPoint = simplexAddPoint(simplex, &aPoint, &bPoint, COMBINE_CONTACT_IDS(aId, bId));
 

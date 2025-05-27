@@ -1,26 +1,21 @@
-*.o
-.vscode/
+*.blend1
 *.elf
 *.map
+*.o
+*.obj
 *.z64
-*.blend1
 
+.vscode/
 build/
-debugger
-gfxvalidator
+gfxvalidator/
+
 assets_working/
-assets/locales/
-vpk/
 portal_pak_dir/
 portal_pak_modified/
-
 resource/closecaption_*
+vpk/
 
-tools/skeletool64*
 tools/vtf2png*
-
-src/controls/controller-data.h
-
 
 log.txt
 log_images/

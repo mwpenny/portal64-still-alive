@@ -34,7 +34,7 @@ int sortOrderForMaterial(const Material& material) {
 
 void MaterialGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinition& fileDefinition) {
     std::set<std::shared_ptr<TextureDefinition>> textures;
-    std::set<std::shared_ptr<PalleteDefinition>> palletes;
+    std::set<std::shared_ptr<PaletteDefinition>> palettes;
 
     for (auto& entry : mSettings.mMaterials) {
         if (entry.second->mExcludeFromOutut) {
@@ -46,8 +46,8 @@ void MaterialGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinitio
             if (texture) {
                 textures.insert(texture);
 
-                if (texture->GetPallete()) {
-                    palletes.insert(texture->GetPallete());
+                if (texture->GetPalette()) {
+                    palettes.insert(texture->GetPalette());
                 }
             }
         }
@@ -58,9 +58,9 @@ void MaterialGenerator::GenerateDefinitions(const aiScene* scene, CFileDefinitio
         fileDefinition.AddDefinition(std::move(textureDefinition));
     }
 
-    for (auto& pallete : palletes) {
-        auto palleteDefinition = pallete->GenerateDefinition(fileDefinition.GetUniqueName(pallete->Name()), "_mat");
-        fileDefinition.AddDefinition(std::move(palleteDefinition));
+    for (auto& palette : palettes) {
+        auto paletteDefinition = palette->GenerateDefinition(fileDefinition.GetUniqueName(palette->Name()), "_mat");
+        fileDefinition.AddDefinition(std::move(paletteDefinition));
     }
     
     int index = 0;

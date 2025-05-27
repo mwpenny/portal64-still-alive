@@ -5,7 +5,7 @@
 #include "math/vector3.h"
 #include "math/quaternion.h"
 
-#define MAX_SOUNDS 128
+#define MAX_SOUNDS 32
 
 #define MAX_SOUND_LISTENERS 3
 
@@ -13,17 +13,14 @@
 
 #define SOUND_ID_NONE -1
 
-extern char _soundsSegmentRomStart[];
-extern char _soundsSegmentRomEnd[];
-extern char _soundsTblSegmentRomStart[];
-extern char _soundsTblSegmentRomEnd[];
-
 enum SoundType{
     SoundTypeNone,
     SoundTypeMusic,
     SoundTypeAll,
     SoundTypeVoice,
 };
+
+typedef ALSndId SoundId;
 
 void soundPlayerInit();
 void soundPlayerGameVolumeUpdate();

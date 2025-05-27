@@ -1,19 +1,19 @@
 #include "button.h"
 
 #include "defs.h"
-#include "../graphics/renderstate.h"
 #include "dynamic_scene.h"
-#include "../physics/collision_cylinder.h"
-#include "../physics/collision_scene.h"
-#include "../physics/contact_solver.h"
+#include "graphics/renderstate.h"
+#include "physics/collision_cylinder.h"
+#include "physics/collision_scene.h"
+#include "physics/contact_solver.h"
+#include "scene/hud.h"
+#include "scene/scene.h"
 #include "system/time.h"
-#include "../util/dynamic_asset_loader.h"
+#include "util/dynamic_asset_loader.h"
 
-#include "../../build/assets/models/dynamic_animated_model_list.h"
-#include "../build/assets/materials/static.h"
-#include "../../build/assets/models/props/button.h"
-#include "../scene/hud.h"
-#include "../scene/scene.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/dynamic_animated_model_list.h"
+#include "codegen/assets/models/props/button.h"
 
 struct Vector2 gButtonCylinderEdgeVectors[] = {
     {0.0f, 1.0f},

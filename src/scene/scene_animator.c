@@ -1,12 +1,12 @@
 #include "scene_animator.h"
 
-#include "../util/memory.h"
+#include "audio/soundplayer.h"
+#include "defs.h"
+#include "math/mathf.h"
 #include "system/time.h"
-#include "../math/mathf.h"
-#include "../defs.h"
+#include "util/memory.h"
 
-#include "../audio/soundplayer.h"
-#include "../build/src/audio/clips.h"
+#include "codegen/assets/audio/clips.h"
 
 struct AnimatedAudioInfo {
     short startSoundId;

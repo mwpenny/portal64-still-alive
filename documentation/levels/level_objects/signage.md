@@ -2,7 +2,7 @@
 
 The large, illuminated informational sign at the beginning of each test chamber.
 
-## Name structure
+## Name Structure
 
 ```
 @signage TEST_CHAMBER_NUMBER

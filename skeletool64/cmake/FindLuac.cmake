@@ -6,7 +6,7 @@ include(FindPackageHandleStandardArgs)
 
 find_program(Luac_EXECUTABLE luac)
 
-if(Luac_EXECUTABLE)
+if (Luac_EXECUTABLE)
     execute_process(
         COMMAND
             ${Luac_EXECUTABLE} -v
@@ -20,7 +20,7 @@ if(Luac_EXECUTABLE)
 
     if (NOT VERSION_COMMAND_RC EQUAL 0)
         message(SEND_ERROR "Error getting luac version: ${VERSION_COMMAND_ERROR}")
-    elseif(VERSION_COMMAND_OUTPUT MATCHES "^Luac ([0-9\\.]+)")
+    elseif (VERSION_COMMAND_OUTPUT MATCHES "^Luac ([0-9\\.]+)")
         set(VERSION_NUMBER "${CMAKE_MATCH_1}")
     endif()
 endif()

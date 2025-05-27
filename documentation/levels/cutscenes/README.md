@@ -69,7 +69,7 @@ See the pages below for details on specific cutscene steps.
 | [resume_animation](./resume_animation.md)     | Resumes playback of an armature's animation |
 | [wait_for_animation](./wait_for_animation.md) | Waits until an armature is not animated     |
 | [save_checkpoint](./save_checkpoint.md)       | Creates an autosave                         |
-| [kill_player](./kill_player.md)               | Kills the player                            |
+| [damage_player](./damage_player.md)           | Damages the player                          |
 | [show_prompt](./show_prompt.md)               | Displays an action prompt                   |
 | [rumble](./rumble.md)                         | Activates the rumble pak                    |
 | [activate_signage](./activate_signage.md)     | Turns on test chamber signs                 |

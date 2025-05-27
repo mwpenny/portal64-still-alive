@@ -5,8 +5,6 @@
 #include "./menu.h"
 #include "../graphics/renderstate.h"
 
-#include <ctype.h>
-
 struct MenuBuilderElement;
 struct MenuElementParams;
 

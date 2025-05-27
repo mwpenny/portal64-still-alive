@@ -1,6 +1,6 @@
 cutscenes:
   INTRO:
-    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
+    - q_sound AMBIENCE_BASE CH_AMBIENT StringIdNone 0.55
   SIGNAGE:
     - activate_signage 15
     - q_sound 10_PART1_ENTRY_1 CH_GLADOS PORTAL_10_PART1_ENTRY_1
@@ -69,7 +69,11 @@ cutscenes:
     - wait_for_signal in_hazard_hallway_checkpoint
     - save_checkpoint
   DROWN_PLAYER:
-    - kill_player water
+    - label drown_loop
+    - wait_for_signal player_in_goo
+    - damage_player 25
+    - delay 0.5
+    - goto drown_loop
   ENTERED_FINAL_ROOM:
     - stop_cutscene HALLWAY_PLATFORM_1
     - stop_cutscene HALLWAY_PLATFORM_2

@@ -1,17 +1,16 @@
 #include "fizzler.h"
 
-#include "../util/memory.h"
-#include "../graphics/render_scene.h"
-#include "../scene/dynamic_scene.h"
-#include "../physics/collision_scene.h"
-#include "../util/dynamic_asset_loader.h"
-#include "../math/mathf.h"
-#include "../decor/decor_object_list.h"
+#include "decor/decor_object_list.h"
+#include "graphics/render_scene.h"
+#include "math/mathf.h"
+#include "physics/collision_scene.h"
+#include "scene/dynamic_scene.h"
 #include "signals.h"
+#include "util/dynamic_asset_loader.h"
+#include "util/memory.h"
 
-#include "../../build/assets/models/dynamic_model_list.h"
-
-#include "../build/assets/materials/static.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/dynamic_model_list.h"
 
 #define IMAGE_WIDTH         16
 #define IMAGE_HEIGHT        64

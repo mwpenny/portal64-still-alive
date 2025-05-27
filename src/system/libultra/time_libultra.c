@@ -2,9 +2,10 @@
 
 #include <ultra64.h>
 
-float gTimePassed = 0.0f;
-int gCurrentFrame = 0;
 float gFixedDeltaTime = ((1.0f + FRAME_SKIP) / 60.0f);
+
+static Time lastFrameStart;
+Time gLastFrameTime;
 
 OSMesgQueue timerQueue;
 OSMesg      timerQueueBuf;
@@ -33,10 +34,10 @@ void timeUSleep(uint64_t usec) {
     (void) osRecvMesg(&timerQueue, NULL, OS_MESG_BLOCK);
 }
 
-void timeUpdateDelta() {
+void timeUpdateFrameTime() {
     OSTime currTime = osGetTime();
-    gTimePassed = (float)OS_CYCLES_TO_USEC(currTime) / 1000000.0f;
-    ++gCurrentFrame;
+    gLastFrameTime = currTime - lastFrameStart;
+    lastFrameStart = currTime;
 }
 
 void timeSetFrameRate(int fps) {

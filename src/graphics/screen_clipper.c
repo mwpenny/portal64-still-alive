@@ -6,8 +6,6 @@
 #include "../math/mathf.h"
 #include "./graphics.h"
 
-#include <math.h>
-
 #include <ultra64.h>
 
 void screenClipperInit(struct ScreenClipper* clipper, float transform[4][4]) {

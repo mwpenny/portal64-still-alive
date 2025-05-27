@@ -1,7 +1,7 @@
 #ifndef __CONTACT_SOLVER_H__
 #define __CONTACT_SOLVER_H__
 
-#include "../math/vector3.h"
+#include "math/vector3.h"
 
 struct CollisionObject;
 
@@ -49,8 +49,6 @@ struct ContactSolver {
 	struct ContactManifold* unusedContacts;
 	struct ContactManifold* activeContacts;
     struct PointConstraint* firstPointConstraint;
-	int contactCapacity;
-	short currentContactFrame;
 };
 
 extern struct ContactSolver gContactSolver;
@@ -60,8 +58,8 @@ void contactSolverInit(struct ContactSolver* contactSolver);
 void contactSolverSolve(struct ContactSolver* solver);
 
 struct ContactManifold* contactSolverGetContactManifold(struct ContactSolver* solver, struct CollisionObject* shapeA, struct CollisionObject* shapeB);
-
 struct ContactManifold* contactSolverNextManifold(struct ContactSolver* solver, struct CollisionObject* forObject, struct ContactManifold* current);
+int contactSolverActiveManifoldCount(struct ContactSolver* solver);
 
 void contactSolverRemoveUnusedContacts(struct ContactSolver* contactSolver);
 void contactSolverCheckPortalContacts(struct ContactSolver* contactSolver);

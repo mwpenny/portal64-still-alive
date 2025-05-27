@@ -10,15 +10,14 @@ extern OSMesgQueue	*schedulerCommandQueue;
 void* gLevelSegment;
 
 #if PORTAL64_WITH_GFX_VALIDATOR
-#include "../../gfxvalidator/validator.h"
+#include "gfxvalidator/validator.h"
 #endif
 
 #if PORTAL64_WITH_DEBUGGER
-#include "../../debugger/debugger.h"
-#include "../../debugger/serial.h"
+#include "debugger/debug.h"
 
 void graphicsOutputMessageToDebugger(char* message, unsigned len) {
-    gdbSendMessage(GDBDataTypeText, message, len);
+    debug_printf(message);
 }
 
 #endif
@@ -123,7 +122,7 @@ void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callba
 
     if (gfxValidate(&scTask->list, renderStateMaxDLCount(renderState), &validationResult) != GFXValidatorErrorNone) {
         gfxGenerateReadableMessage(&validationResult, graphicsOutputMessageToDebugger);
-        gdbBreak();
+        debug_assert(0);
     }
 
 #endif // PORTAL64_WITH_DEBUGGER

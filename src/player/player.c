@@ -1,40 +1,44 @@
-#include <stdlib.h>
 #include "player.h"
-#include "player_rumble_clips.h"
-#include "../audio/clips.h"
-#include "../audio/soundplayer.h"
-#include "../controls/controller_actions.h"
-#include "../defs.h"
-#include "../levels/levels.h"
-#include "../math/mathf.h"
-#include "../physics/collision_capsule.h"
-#include "../physics/collision_scene.h"
-#include "../physics/collision.h"
-#include "../physics/config.h"
-#include "../physics/point_constraint.h"
-#include "system/time.h"
-#include "../physics/contact_insertion.h"
-#include "../scene/ball.h"
-#include "../savefile/savefile.h"
-#include "../player/grab_rotation.h"
 
-#include "../build/assets/models/player/chell.h"
-#include "../build/assets/materials/static.h"
-#include "../build/assets/models/portal_gun/w_portalgun.h"
+#include "player/grab_rotation.h"
+#include "player_rumble_clips.h"
+
+#include "audio/clips.h"
+#include "audio/soundplayer.h"
+#include "defs.h"
+#include "controls/controller_actions.h"
+#include "levels/levels.h"
+#include "math/mathf.h"
+#include "physics/collision_capsule.h"
+#include "physics/collision_scene.h"
+#include "physics/collision.h"
+#include "physics/config.h"
+#include "physics/contact_insertion.h"
+#include "physics/point_constraint.h"
+#include "savefile/savefile.h"
+#include "scene/ball.h"
+#include "system/time.h"
+
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/player/chell.h"
+#include "codegen/assets/models/portal_gun/w_portalgun.h"
 
 #define GRAB_RAYCAST_DISTANCE   2.5f
 #define GRAB_MIN_OFFSET_Y      -1.1f
 #define GRAB_MAX_OFFSET_Y       1.25f
 
-#define DROWN_TIME              2.0f
 #define STEP_TIME               0.35f
 
 #define STAND_SPEED             1.5f
 #define SHAKE_DISTANCE          0.02f
 
-#define DEAD_OFFSET -0.4f
+#define ENV_DAMAGE_OVERLAY_TIME 0.5f
+#define ENV_DAMAGE_OVERLAY_FADE 0.75f
+#define HEALTH_REGEN_DELAY      1.0f
+#define HEALTH_REGEN_SPEED      60.0f
+#define DEAD_OFFSET             -0.4f
 
-#define PLAYER_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_BALL)
+#define PLAYER_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_BALL | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
 
 #define FUNNEL_STRENGTH         5.0f
 #define FUNNEL_CENTER_TOLERANCE 0.1f
@@ -64,6 +68,8 @@
 #define JUMP_IMPULSE            2.5f
 #define THROW_IMPULSE           1.25f
 
+#define PLAYER_GRABBING_THROUGH_NOTHING 0
+
 struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
 
@@ -77,7 +83,7 @@ struct CollisionCapsule gPlayerCollider = {
 };
 
 struct ColliderTypeData gPlayerColliderData = {
-    CollisionShapeTypeSphere,
+    CollisionShapeTypeCapsule,
     &gPlayerCollider,
     0.0f,
     0.6f,
@@ -168,7 +174,9 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->grabConstraint.object = NULL;
     player->pitchVelocity = 0.0f;
     player->yawVelocity = 0.0f;
-    player->flags = 0;
+    player->flags = PlayerFlagsGrounded;
+    player->health = PLAYER_MAX_HEALTH;
+    player->healthRegenTimer = HEALTH_REGEN_DELAY;
     player->stepTimer = STEP_TIME;
     player->shakeTimer = 0.0f;
     player->currentFoot = 0;
@@ -225,7 +233,7 @@ void playerHandleCollision(struct Player* player) {
         }
 
         if (((isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB)) && !playerIsDead(player))) {
-            playerKill(player, 0);
+            playerDamage(player, PLAYER_MAX_HEALTH, PlayerDamageTypeEnemy);
             soundPlayerPlay(soundsBallKill, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         }
     }
@@ -309,6 +317,10 @@ int playerIsGrabbing(struct Player* player) {
     return player->grabConstraint.object != NULL;
 }
 
+int playerIsGrabbingObject(struct Player* player, struct CollisionObject* object) {
+    return player->grabConstraint.object == object;
+}
+
 void playerThrowObject(struct Player* player) {
     if (!playerIsGrabbing(player)) {
         return;
@@ -366,20 +378,26 @@ void playerUpdateGrabbedObject(struct Player* player) {
             if (playerRaycastGrab(player, &hit, 0)) {
                 hit.object->flags |= COLLISION_OBJECT_INTERACTED;
 
-                if (hit.object->body && (hit.object->body->flags & RigidBodyFlagsGrabbable) && !(hit.object->flags & COLLISION_OBJECT_PLAYER_STANDING)) {
+                // Raycasts only check portals if something else was hit first
+                // (i.e., a wall), so grab casts also check the TANGIBLE layer.
+                //
+                // Make sure we actually found something to interact with.
+                if (hit.object->body && (hit.object->collisionLayers & COLLISION_LAYERS_GRABBABLE)) {
                     player->flags |= PlayerJustSelect;
-                    player->grabbingThroughPortal = hit.numPortalsPassed;
-                    playerSetGrabbing(player, hit.object);
-                }
-                else if ((hit.object->body)){
-                    player->flags |= PlayerJustSelect;
-                    hudResolvePrompt(&gScene.hud, CutscenePromptTypeUse);
-                }
-                else{
+
+                    if ((hit.object->body->flags & RigidBodyFlagsGrabbable) &&
+                        !(hit.object->flags & COLLISION_OBJECT_PLAYER_STANDING)) {
+                        // Grabbable object
+                        player->grabbingThroughPortal = hit.numPortalsPassed;
+                        playerSetGrabbing(player, hit.object);
+                    } else if (!(hit.object->body->flags & RigidBodyFlagsGrabbable)) {
+                        // Usable object
+                        hudResolvePrompt(&gScene.hud, CutscenePromptTypeUse);
+                    }
+                } else {
                     player->flags |= PlayerJustDeniedSelect;
                 }
-            }
-            else{
+            } else {
                 player->flags |= PlayerJustDeniedSelect;
             }
         }
@@ -573,26 +591,51 @@ void playerUpdateSounds(struct Player* player) {
     }
 }
 
-void playerKill(struct Player* player, int isUnderwater) {
-    if (player->flags & PlayerIsInvincible){
+void playerUpdateHealth(struct Player* player) {
+    if (player->health <= 0.0f || player->health >= PLAYER_MAX_HEALTH) {
         return;
     }
 
-    if (isUnderwater) {
-        player->flags |= PlayerIsUnderwater;
-        player->drownTimer = DROWN_TIME;
+    if (player->healthRegenTimer > 0.0f) {
+        player->healthRegenTimer -= FIXED_DELTA_TIME;
+    }
+
+    if (player->healthRegenTimer <= 0.0f) {
+        player->healthRegenTimer = 0.0f;
+        player->health = MIN(player->health + (HEALTH_REGEN_SPEED * FIXED_DELTA_TIME), PLAYER_MAX_HEALTH);
+    }
+}
+
+void playerDamage(struct Player* player, float amount, enum PlayerDamageType damageType) {
+    if ((player->flags & PlayerIsInvincible) || player->health <= 0.0f) {
         return;
     }
 
-    player->flags |= PlayerIsDead;
-    // drop the portal gun
-    player->flags &= ~(PlayerHasFirstPortalGun | PlayerHasSecondPortalGun);
-    playerSetGrabbing(player, NULL);
-    rumblePakClipPlay(&gPlayerDieRumbleWave);
+    if (damageType == PlayerDamageTypeEnvironment) {
+        hudShowColoredOverlay(
+            &gScene.hud,
+            &gColorWhite,
+            ENV_DAMAGE_OVERLAY_TIME,
+            ENV_DAMAGE_OVERLAY_FADE
+        );
+    }
+
+    player->health -= amount;
+    player->healthRegenTimer = HEALTH_REGEN_DELAY;
+
+    if (player->health <= 0.0f) {
+        player->health = 0.0f;
+
+        // Drop the portal gun
+        player->flags &= ~(PlayerHasFirstPortalGun | PlayerHasSecondPortalGun);
+        playerSetGrabbing(player, NULL);
+
+        rumblePakClipPlay(&gPlayerDieRumbleWave);
+    }
 }
 
 int playerIsDead(struct Player* player) {
-    return (player->flags & PlayerIsDead) != 0;
+    return player->health <= 0.0f;
 }
 
 struct SKAnimationClip* gPlayerIdleClips[] = {
@@ -699,6 +742,8 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
 
     struct RigidBody* anchor = NULL;
 
+    player->collisionObject.collisionLayers = 0;
+
     if (collisionSceneRaycastOnlyDynamic(&gCollisionScene, &ray, COLLISION_LAYERS_TANGIBLE, hitDistance, &hit)) {
         hitDistance = hit.distance;
 
@@ -712,10 +757,12 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
             anchor = hit.object->body;
         }
     }
+
+    player->collisionObject.collisionLayers = PLAYER_COLLISION_LAYERS;
     
     // Stand on collision
     float penetration = hitDistance - PLAYER_HEAD_HEIGHT;
-    if (penetration < 0.0f) {
+    if (penetration < 0.00001f) {
         vector3AddScaled(&player->body.transform.position, &gUp, MIN(-penetration, maxStandDistance), &player->body.transform.position);
         if (player->body.velocity.y < 0.0f) {
             playerHandleLandingRumble(-player->body.velocity.y);
@@ -973,8 +1020,7 @@ void playerMove(struct Player* player, struct Vector2* moveInput, struct Vector3
         // Follow moving platform
         struct Vector3 anchorOffset;
         vector3Sub(&player->anchoredTo->transform.position, &player->anchorLastPosition, &anchorOffset);
-        player->body.transform.position.x += anchorOffset.x;
-        player->body.transform.position.z += anchorOffset.z;
+        vector3Add(&player->body.transform.position, &anchorOffset, &player->body.transform.position);
     }
 
     vector3AddScaled(&player->body.transform.position, &player->body.velocity, FIXED_DELTA_TIME, &player->body.transform.position);
@@ -1117,24 +1163,16 @@ void playerUpdate(struct Player* player) {
     if (clip != player->animator.from.currentClip) {
         skAnimatorRunClip(&player->animator.from, clip, startTime, SKAnimatorFlagsLoop);
     }
-
-    if (player->flags & PlayerIsUnderwater) {
-        player->drownTimer -= FIXED_DELTA_TIME;
-
-        if (player->drownTimer < 0.0f) {
-            player->flags &= ~PlayerIsUnderwater;
-            playerKill(player, 0);
-        }
-    }
     
+    playerUpdateHealth(player);
     playerUpdateSounds(player);
 }
 
 void playerApplyCameraTransform(struct Player* player, struct Transform* cameraTransform) {
     cameraTransform->rotation = player->lookTransform.rotation;
     cameraTransform->position = player->lookTransform.position;
-    
-    if (player->flags & PlayerIsDead) {
+
+    if (playerIsDead(player)) {
         cameraTransform->position.y += DEAD_OFFSET;
     }
 }
@@ -1148,9 +1186,5 @@ void playerToggleJumpImpulse(struct Player* player, float newJumpImpulse){
 }
 
 void playerToggleInvincibility(struct Player* player){
-    if (player->flags & PlayerIsInvincible){
-        player->flags &= ~PlayerIsInvincible;
-    }else{
-        player->flags |= PlayerIsInvincible;
-    }
+    player->flags ^= PlayerIsInvincible;
 }

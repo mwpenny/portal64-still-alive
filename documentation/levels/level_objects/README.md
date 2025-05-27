@@ -9,7 +9,7 @@ However, the game needs to be able to give each object the proper behavior.
 Buttons activate specific doors, triggers start relevant cutscenes, the floor
 stops the player from falling through, and so on.
 
-## Naming convention
+## Naming Convention
 
 At level export time, level definition C source files are generated using the
 Lua scripts in `tools/level_scripts/`, initiated by `export_level.lua`. The way
@@ -27,7 +27,7 @@ This could have been done with Blender's custom object properties feature, but
 one nice benefit of this approach is that it makes searching for related objects
 easy.
 
-## Object types
+## Object Types
 
 See the linked pages below for details on specific level objects.
 
@@ -56,3 +56,4 @@ See the linked pages below for details on specific level objects.
 | [@static](./static.md)                   | Static geometry                                      |
 | [@switch](./switch.md)                   | Button on pedestal                                   |
 | [@trigger](./trigger.md)                 | Signal and cutscene activating volume                |
+| [@turret](./turret.md)                   | Sentry turret enemy                                  |

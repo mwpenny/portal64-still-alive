@@ -2,7 +2,7 @@
 
 A spawner for cube [decor](./decor.md) objects.
 
-## Name structure
+## Name Structure
 
 ```
 @box_dropper ACTIVE_SIGNAL_NAME

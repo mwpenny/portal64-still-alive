@@ -448,7 +448,7 @@
                             "minimum": 0,
                             "maximum": 511
                         },
-                        "pallete": {
+                        "palette": {
                             "type": "number",
                             "minimum": 0,
                             "maximum": 15
@@ -471,7 +471,7 @@
                         "selectChannel": {
                             "enum": ["r", "g", "b"]
                         },
-                        "usePallete": {
+                        "usePalette": {
                             "type": "string"
                         },
                         "bypassEffects": {

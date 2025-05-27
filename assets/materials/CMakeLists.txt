@@ -52,6 +52,9 @@ set(TEXTURES
     models/props_c17/door01a_skin6
     models/weapons/v_models/v_portalgun/v_portalgun
     nature/hazard_liquid
+    overlays/overlay_handprint
+    overlays/overlay_scrawlings003a
+    overlays/overlay_scrawlings004a
     plastic/plasticwall003a
     plastic/plasticwall004a
     signage/clock/clock_dots
@@ -77,8 +80,10 @@ set(TEXTURES
     signage/signage_overlay_midair1
     signage/signage_overlay_midair2
     signage/signage_overlay_toxic
+    signage/signage_overlay_turret
     sprites/grav_flare
     sprites/hud/portal_crosshairs
+    sprites/muzzleflash2
     tile/observation_tilefloor001a
     vgui/chapters/chapter1
     vgui/chapters/chapter2
@@ -98,7 +103,7 @@ function(_add_texture_convert_command INPUT_FILE OUTPUT_FILE)
     set(OUTPUT_FILE "${PAK_MATERIALS_DIR}/${OUTPUT_FILE}.png")
     set(ARGS "${ARGN}")
 
-    if(NOT ARGS)
+    if (NOT ARGS)
         get_source_file_property(FILE_ARGS ${INPUT_FILE} ARGS)
         if (FILE_ARGS)
             set(ARGS "${FILE_ARGS}")
@@ -107,7 +112,7 @@ function(_add_texture_convert_command INPUT_FILE OUTPUT_FILE)
 
     add_custom_command(
         DEPENDS
-            extract_vpks ${INPUT_FILE}
+            extract_vpks "$<TARGET_PROPERTY:extract_vpks,OUTPUTS>"
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
@@ -161,18 +166,13 @@ endforeach()
 ################
 
 function(_add_extract_frame_command INPUT_FILE OUTPUT_FILE SECONDS)
-    cmake_path(
-        GET OUTPUT_FILE PARENT_PATH
-        OUTPUT_DIR
-    )
-
     add_custom_command(
         DEPENDS
             ${INPUT_FILE}
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
         COMMAND
             ${FFmpeg_EXECUTABLE}
             -ss 00:00:${SECONDS}
@@ -182,9 +182,6 @@ function(_add_extract_frame_command INPUT_FILE OUTPUT_FILE SECONDS)
             -q:v 2
             -loglevel error
             -y ${OUTPUT_FILE}
-        COMMAND
-            ${ImageMagickConvert_EXECUTABLE}
-            ${OUTPUT_FILE} -crop 491x369+265+202 -resize 160x120 ${OUTPUT_FILE}
         COMMENT
             "Extracting frame from $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -193,13 +190,13 @@ endfunction()
 
 _add_extract_frame_command(
     ${VALVE_INTRO_VIDEO}
-    ${PAK_MODIFIED_DIR}/images/valve.png
+    ${PAK_MATERIALS_DIR}/gamepadui/valve.png
     4
 )
 
 _add_extract_frame_command(
     ${VALVE_INTRO_VIDEO}
-    ${PAK_MODIFIED_DIR}/images/valve-no-logo.png
+    ${PAK_MATERIALS_DIR}/gamepadui/valve-no-logo.png
     1
 )
 
@@ -238,11 +235,6 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
     set(INPUT_FILE "${PAK_MATERIALS_DIR}/${TEXTURE_NAME}.png")
     set(OUTPUT_FILE "${PAK_MODIFIED_MATERIALS_DIR}/${TEXTURE_NAME}.png")
 
-    cmake_path(
-        GET OUTPUT_FILE PARENT_PATH
-        OUTPUT_DIR
-    )
-
     set(DEPENDENCY_FILES ${INPUT_FILE} ${TEXTURE_SCRIPT})
     _get_texture_script_file_list(${TEXTURE_SCRIPT} ADDITIONAL_DEPS ${PAK_MATERIALS_DIR} DEPENDENCY_FILES)
 
@@ -251,19 +243,18 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
 
     add_custom_command(
         DEPENDS
-            ${CONVERT_ASSET} ${DEPENDENCY_FILES}
+            ${RUN_COMMAND} ${DEPENDENCY_FILES}
         OUTPUT
             ${OUTPUT_FILES}
         COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
         COMMAND
-            ${Python3_EXECUTABLE} ${CONVERT_ASSET}
+            ${Python3_EXECUTABLE} ${RUN_COMMAND}
             ${ImageMagickConvert_EXECUTABLE}
             ${INPUT_FILE}
-            ${TEXTURE_SCRIPT}
+            @${TEXTURE_SCRIPT}
             ${OUTPUT_FILE}
         WORKING_DIRECTORY
-            # TODO: Change this to PAK_MODIFIED_MATERIALS_DIR and update .ims files with relative path
             ${PROJECT_SOURCE_DIR}
         COMMENT
             "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
@@ -366,6 +357,7 @@ set_property(SOURCE signage/signage_overlay_fling1.ims
 set_property(SOURCE signage/signage_overlay_midair1.ims
     PROPERTY ADDITIONAL_DEPS
         signage/signage_overlay_midair2
+        signage/signage_overlay_turret
 )
 
 set(TEXTURES_TRANSFORMED "")
@@ -379,18 +371,21 @@ add_custom_target(textures
 )
 set_target_properties(textures PROPERTIES
     # Enable dependents to easily depend on transformed textures
-    OUTPUTS ${TEXTURES_TRANSFORMED}
+    OUTPUTS "${TEXTURES_TRANSFORMED}"
 )
 
 #########################
 ## Material generation ##
 #########################
 
-set(MATERIALS
+set(CORE_MATERIALS
     hud.skm.yaml
-    images.skm.yaml
     static.skm.yaml
     ui.skm.yaml
+)
+
+set(IMAGE_MATERIALS
+    images.skm.yaml
 )
 
 function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
@@ -405,8 +400,9 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
     )
 
     set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${INPUT_FILE}")
-    set(OUTPUT_FILE_H "${PROJECT_BINARY_DIR}/${RELATIVE_DIR}/${MATERIAL_NAME}.h")
-    set(OUTPUT_FILE_C "${PROJECT_BINARY_DIR}/${RELATIVE_DIR}/${MATERIAL_NAME}_mat.c")
+    set(OUTPUT_FILE_NO_EXTENSION "${GENERATED_CODE_DIR}/${RELATIVE_DIR}/${MATERIAL_NAME}")
+    set(OUTPUT_FILE_H "${OUTPUT_FILE_NO_EXTENSION}.h")
+    set(OUTPUT_FILE_C "${OUTPUT_FILE_NO_EXTENSION}_mat.c")
 
     # Depend on all textures for simplicity
     set(DEPENDENCY_FILES ${INPUT_FILE} ${TEXTURES_TRANSFORMED})
@@ -423,6 +419,8 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
         OUTPUT
             ${OUTPUT_FILE_H} ${OUTPUT_FILE_C}
         COMMAND
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE_NO_EXTENSION}>"
+        COMMAND
             skeletool64::skeletool64
             --name ${MATERIAL_NAME}
             -m ${INPUT_FILE}
@@ -438,44 +436,58 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
 endfunction()
 
 # Add commands for generating materials
-# There are some special cases for materials which use non-VPK textures
+# There are some special cases for materials which use textures not in the original game
+
+set_property(SOURCE static.skm.yaml
+    PROPERTY ADDITIONAL_DEPS
+        ${PROJECT_SOURCE_DIR}/assets/images/turret1.png
+        ${PROJECT_SOURCE_DIR}/assets/images/turret2.png
+)
 
 set_property(SOURCE hud.skm.yaml
     PROPERTY ADDITIONAL_DEPS
         ${PROJECT_SOURCE_DIR}/assets/images/center_reticle.png
 )
 
-set_property(SOURCE images.skm.yaml
-    PROPERTY ADDITIONAL_DEPS
-        ${PAK_MODIFIED_DIR}/images/valve.png
-)
-
 set_property(SOURCE ui.skm.yaml
     PROPERTY ADDITIONAL_DEPS
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans_0.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans_1.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans_2.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans_3.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans_4.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/liberation_mono_0.png
+        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_0.png
+        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_1.png
+        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_2.png
+        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_3.png
+        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_4.png
+        ${PROJECT_SOURCE_DIR}/assets/fonts/liberation_mono/liberation_mono_0.png
         ${PROJECT_SOURCE_DIR}/assets/images/button_icons.png
         ${PROJECT_SOURCE_DIR}/assets/images/credits_icons.png
         ${PROJECT_SOURCE_DIR}/assets/images/github_qr.png
         ${PROJECT_SOURCE_DIR}/assets/images/rounded_corners.png
 )
 
-set(GENERATED_MATERIALS "")
+set(GENERATED_CORE_MATERIALS "")
+set(GENERATED_IMAGE_MATERIALS "")
 
-foreach(MATERIAL ${MATERIALS})
-    _add_material_generate_command(${MATERIAL} GENERATED_MATERIALS)
+foreach(MATERIAL ${CORE_MATERIALS})
+    _add_material_generate_command(${MATERIAL} GENERATED_CORE_MATERIALS)
 endforeach()
 
-add_custom_target(generated_materials
-    DEPENDS ${GENERATED_MATERIALS}
+foreach(MATERIAL ${IMAGE_MATERIALS})
+    _add_material_generate_command(${MATERIAL} GENERATED_IMAGE_MATERIALS)
+endforeach()
+
+add_custom_target(materials
+    DEPENDS
+        ${GENERATED_CORE_MATERIALS}
+        ${GENERATED_IMAGE_MATERIALS}
 )
 
-add_library(materials INTERFACE)
-add_dependencies(materials generated_materials)
-target_sources(materials INTERFACE
-    ${GENERATED_MATERIALS}
+add_library(materials_core INTERFACE)
+add_dependencies(materials_core materials)
+target_sources(materials_core INTERFACE
+    ${GENERATED_CORE_MATERIALS}
+)
+
+add_library(materials_images INTERFACE)
+add_dependencies(materials_images materials)
+target_sources(materials_images INTERFACE
+    ${GENERATED_IMAGE_MATERIALS}
 )

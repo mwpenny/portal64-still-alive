@@ -1,34 +1,52 @@
-# TODO: multiple languages
-
-set(PAK_SOUND_DIR "${PAK_DIR}/sound")
+set(PAK_SOUND_DIR          "${PAK_DIR}/sound")
 set(PAK_MODIFIED_SOUND_DIR "${PAK_MODIFIED_DIR}/sound")
 
-set(JSOX "${PROJECT_SOURCE_DIR}/tools/sound/jsox.js")
-set(GEN_SOUND_IDS "${PROJECT_SOURCE_DIR}/tools/sound/generate_sound_ids.js")
+set(JSOX                   "${PROJECT_SOURCE_DIR}/tools/sound/jsox.js")
+set(GEN_SOUND_IDS          "${PROJECT_SOURCE_DIR}/tools/sound/generate_sound_ids.js")
 
 cmake_path(
     RELATIVE_PATH CMAKE_CURRENT_SOURCE_DIR
     BASE_DIRECTORY "${PROJECT_SOURCE_DIR}"
     OUTPUT_VARIABLE RELATIVE_CURRENT_DIR
 )
+set(OUTPUT_DIR "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}")
+
+function(_get_localized_pak_sound_dir LANGUAGE DIR_OUT)
+    if (LANGUAGE STREQUAL "english")
+        set(${DIR_OUT} "${PAK_SOUND_DIR}")
+    else()
+        set(${DIR_OUT} "${PAK_DIR}/localized/${LANGUAGE}/sound")
+    endif()
+
+    return(PROPAGATE ${DIR_OUT})
+endfunction()
+
+function(_get_localized_sound_name SOUND_NAME LANGUAGE NAME_OUT)
+    cmake_path(
+        GET SOUND_NAME FILENAME
+        SOUND_FILENAME
+    )
+    cmake_path(
+        REPLACE_FILENAME SOUND_NAME
+        "${LANGUAGE}_${SOUND_FILENAME}"
+        OUTPUT_VARIABLE ${NAME_OUT}
+    )
+
+    return(PROPAGATE ${NAME_OUT})
+endfunction()
 
 #################
 ## Valve sound ##
 #################
 
 function(_add_extract_video_audio_command INPUT_FILE OUTPUT_FILE)
-    cmake_path(
-        GET OUTPUT_FILE PARENT_PATH
-        OUTPUT_DIR
-    )
-
     add_custom_command(
         DEPENDS
             ${INPUT_FILE}
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
         COMMAND
             ${FFmpeg_EXECUTABLE}
             -i ${INPUT_FILE} -vn -loglevel error -y ${OUTPUT_FILE}
@@ -49,6 +67,7 @@ _add_extract_video_audio_command(
 
 set(SOUND_SCRIPTS
     ambient/alarms/portal_elevator_chime.sox
+    ambient/atmosphere/ambience_base.sox
     ambient/dinosaur_fizzle.sox
     ambient/machines/portalgun_rotate1.sox
     ambient/machines/ticktock1.sox
@@ -61,6 +80,16 @@ set(SOUND_SCRIPTS
     doors/door_metal_thin_close2.sox
     doors/doormove1.jsox
     doors/doormove2.sox
+    npc/turret_floor/active.sox
+    npc/turret_floor/deploy.sox
+    npc/turret_floor/ping.sox
+    npc/turret_floor/retract.sox
+    npc/turret_floor/shoot1.jsox
+    physics/flesh/flesh_impact_bullet1.sox
+    physics/flesh/flesh_impact_bullet2.sox
+    physics/flesh/flesh_impact_bullet3.sox
+    physics/flesh/flesh_impact_bullet4.sox
+    physics/flesh/flesh_impact_bullet5.sox
     plats/elevator_move_loop1.sox
     plats/elevator_stop1.sox
     player/footsteps/concrete1.sox
@@ -76,7 +105,67 @@ set(SOUND_SCRIPTS
     ui/buttonrollover.sox
     vehicles/apc/apc_shutdown.sox
     vehicles/apc/apc_start_loop3.jsox
+    vehicles/tank_turret_loop1.sox
     vehicles/tank_turret_start1.sox
+    vo/aperture_ai/ding_off.sox
+    vo/aperture_ai/ding_on.sox
+    weapons/cguard/charging.sox
+    weapons/physcannon/energy_bounce1.sox
+    weapons/physcannon/energy_disintegrate4.sox
+    weapons/physcannon/energy_sing_explosion2.sox
+    weapons/physcannon/energy_sing_flyby1.sox
+    weapons/portalgun/portal_fizzle2.sox
+    weapons/portalgun/portal_open2.sox
+    weapons/portalgun/portalgun_shoot_blue1.sox
+    weapons/portalgun/portalgun_shoot_red1.sox
+    weapons/stunstick/alyx_stunner1.sox
+)
+
+set(LOCALIZED_SOUND_SCRIPTS
+    npc/turret_floor/turret_active_1.sox
+    npc/turret_floor/turret_active_2.sox
+    npc/turret_floor/turret_active_4.sox
+    npc/turret_floor/turret_active_5.sox
+    npc/turret_floor/turret_active_6.sox
+    npc/turret_floor/turret_active_7.sox
+    npc/turret_floor/turret_active_8.sox
+    npc/turret_floor/turret_autosearch_1.sox
+    npc/turret_floor/turret_autosearch_2.sox
+    npc/turret_floor/turret_autosearch_4.sox
+    npc/turret_floor/turret_autosearch_5.sox
+    npc/turret_floor/turret_autosearch_6.sox
+    npc/turret_floor/turret_deploy_1.sox
+    npc/turret_floor/turret_deploy_2.sox
+    npc/turret_floor/turret_deploy_4.sox
+    npc/turret_floor/turret_deploy_5.sox
+    npc/turret_floor/turret_deploy_6.sox
+    npc/turret_floor/turret_disabled_2.sox
+    npc/turret_floor/turret_disabled_4.sox
+    npc/turret_floor/turret_disabled_5.sox
+    npc/turret_floor/turret_disabled_6.sox
+    npc/turret_floor/turret_disabled_7.sox
+    npc/turret_floor/turret_disabled_8.sox
+    npc/turret_floor/turret_search_1.sox
+    npc/turret_floor/turret_search_2.sox
+    npc/turret_floor/turret_search_4.sox
+    npc/turret_floor/turret_fizzler_1.sox
+    npc/turret_floor/turret_pickup_1.sox
+    npc/turret_floor/turret_pickup_3.sox
+    npc/turret_floor/turret_pickup_6.sox
+    npc/turret_floor/turret_pickup_7.sox
+    npc/turret_floor/turret_pickup_8.sox
+    npc/turret_floor/turret_pickup_9.sox
+    npc/turret_floor/turret_pickup_10.sox
+    npc/turret_floor/turret_retire_1.sox
+    npc/turret_floor/turret_retire_2.sox
+    npc/turret_floor/turret_retire_4.sox
+    npc/turret_floor/turret_retire_5.sox
+    npc/turret_floor/turret_retire_6.sox
+    npc/turret_floor/turret_retire_7.sox
+    npc/turret_floor/turret_tipped_2.sox
+    npc/turret_floor/turret_tipped_4.sox
+    npc/turret_floor/turret_tipped_5.sox
+    npc/turret_floor/turret_tipped_6.sox
     vo/aperture_ai/00_part1_entry-1.sox
     vo/aperture_ai/00_part1_entry-2.sox
     vo/aperture_ai/00_part1_entry-3.sox
@@ -149,8 +238,10 @@ set(SOUND_SCRIPTS
     vo/aperture_ai/10_part1_entry-2.sox
     vo/aperture_ai/10_part1_entry-3.sox
     vo/aperture_ai/10_part1_success-1.sox
-    vo/aperture_ai/ding_off.sox
-    vo/aperture_ai/ding_on.sox
+    vo/aperture_ai/11_part1_entry-1.sox
+    vo/aperture_ai/11_part1_entry-2.sox
+    vo/aperture_ai/11_part1_entry-3.sox
+    vo/aperture_ai/11_part1_success-1.sox
     vo/aperture_ai/escape_01_part1_nag01-1.sox
     vo/aperture_ai/generic_crate_vaporized_in_emancipation_grid-1.sox
     vo/aperture_ai/generic_crate_vaporized_in_emancipation_grid-2.sox
@@ -159,25 +250,53 @@ set(SOUND_SCRIPTS
     vo/aperture_ai/generic_security_camera_destroyed-3.sox
     vo/aperture_ai/generic_security_camera_destroyed-4.sox
     vo/aperture_ai/generic_security_camera_destroyed-5.sox
-    weapons/cguard/charging.sox
-    weapons/physcannon/energy_bounce1.sox
-    weapons/physcannon/energy_disintegrate4.sox
-    weapons/physcannon/energy_sing_explosion2.sox
-    weapons/physcannon/energy_sing_flyby1.sox
-    weapons/portalgun/portal_fizzle2.sox
-    weapons/portalgun/portal_open2.sox
-    weapons/portalgun/portalgun_shoot_blue1.sox
-    weapons/portalgun/portalgun_shoot_red1.sox
-    weapons/stunstick/alyx_stunner1.sox
 )
 
-# TODO: rename to .sox after makefile is no longer in use
+# Localized sounds which are not localized in this language
+set(RUSSIAN_EXCLUDED_LOCALIZED_SOUND_SCRIPTS
+    npc/turret_floor/turret_active_2.sox
+    npc/turret_floor/turret_active_4.sox
+    npc/turret_floor/turret_active_5.sox
+    npc/turret_floor/turret_active_6.sox
+    npc/turret_floor/turret_active_7.sox
+    npc/turret_floor/turret_active_8.sox
+    npc/turret_floor/turret_autosearch_2.sox
+    npc/turret_floor/turret_autosearch_4.sox
+    npc/turret_floor/turret_autosearch_5.sox
+    npc/turret_floor/turret_autosearch_6.sox
+    npc/turret_floor/turret_deploy_2.sox
+    npc/turret_floor/turret_deploy_4.sox
+    npc/turret_floor/turret_deploy_5.sox
+    npc/turret_floor/turret_deploy_6.sox
+    npc/turret_floor/turret_disabled_4.sox
+    npc/turret_floor/turret_disabled_5.sox
+    npc/turret_floor/turret_disabled_6.sox
+    npc/turret_floor/turret_disabled_7.sox
+    npc/turret_floor/turret_disabled_8.sox
+    npc/turret_floor/turret_search_2.sox
+    npc/turret_floor/turret_search_4.sox
+    npc/turret_floor/turret_pickup_3.sox
+    npc/turret_floor/turret_pickup_6.sox
+    npc/turret_floor/turret_pickup_7.sox
+    npc/turret_floor/turret_pickup_8.sox
+    npc/turret_floor/turret_pickup_9.sox
+    npc/turret_floor/turret_pickup_10.sox
+    npc/turret_floor/turret_retire_2.sox
+    npc/turret_floor/turret_retire_4.sox
+    npc/turret_floor/turret_retire_5.sox
+    npc/turret_floor/turret_retire_6.sox
+    npc/turret_floor/turret_retire_7.sox
+    npc/turret_floor/turret_tipped_4.sox
+    npc/turret_floor/turret_tipped_5.sox
+    npc/turret_floor/turret_tipped_6.sox
+)
+
 set(MUSIC_SCRIPTS
-    music/portal_procedural_jiggle_bone.msox
-    music/portal_self_esteem_fund.msox
-    music/portal_still_alive.msox
-    music/portal_subject_name_here.msox
-    music/portal_taste_of_blood.msox
+    music/portal_procedural_jiggle_bone.sox
+    music/portal_self_esteem_fund.sox
+    music/portal_still_alive.sox
+    music/portal_subject_name_here.sox
+    music/portal_taste_of_blood.sox
 )
 
 set(INSTRUMENT_BANKS
@@ -185,59 +304,31 @@ set(INSTRUMENT_BANKS
     ambient/machines/beam_platform_loop1.ins
     ambient/music/looping_radio_mix.ins
     doors/door_metal_medium_open1.ins
+    npc/turret_floor/shoot1.ins
     vehicles/fast_windloop1.ins
     vehicles/tank_turret_loop1.ins
     weapons/physcannon/energy_sing_loop4.ins
 )
 
-# TODO: remove
-function(_add_sound_transform_command_direct SOUND_NAME ARGS OUTPUT_LIST)
-    set(INPUT_FILE "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
-    string(REPLACE " " ";" ARGS ${ARGS})
-
-    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.wav")
-
-    cmake_path(
-        GET OUTPUT_FILE PARENT_PATH
-        OUTPUT_DIR
-    )
-
-    add_custom_command(
-        DEPENDS
-            extract_vpks ${INPUT_FILE}
-        OUTPUT
-            ${OUTPUT_FILE}
-        COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
-        COMMAND
-            ${Sox_EXECUTABLE} ${INPUT_FILE} ${ARGS} ${OUTPUT_FILE} -V1
-        COMMENT
-            "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
-        VERBATIM
-    )
-
-    list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILE})
-    return(PROPAGATE ${OUTPUT_LIST})
-endfunction()
-
 function(_add_sound_transform_command_sox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
-    cmake_path(
-        GET OUTPUT_FILE PARENT_PATH
-        OUTPUT_DIR
-    )
+    get_source_file_property(IS_GENERATED_INPUT ${INPUT_FILE} GENERATED)
 
     add_custom_command(
         DEPENDS
-            extract_vpks ${INPUT_FILE}
-            ${CONVERT_ASSET}
+            extract_vpks "$<TARGET_PROPERTY:extract_vpks,OUTPUTS>"
+            "$<$<BOOL:${IS_GENERATED_INPUT}>:${INPUT_FILE}>"
+            ${RUN_COMMAND}
             ${SOUND_SCRIPT}
         OUTPUT
             ${OUTPUT_FILE}
+        WORKING_DIRECTORY
+            # Allow scripts to easily reference other sounds
+            "$<PATH:GET_PARENT_PATH,${INPUT_FILE}>"
         COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
         COMMAND
-            ${Python3_EXECUTABLE} ${CONVERT_ASSET}
-            ${Sox_EXECUTABLE} ${INPUT_FILE} ${SOUND_SCRIPT} ${OUTPUT_FILE} -V1
+            ${Python3_EXECUTABLE} ${RUN_COMMAND}
+            ${Sox_EXECUTABLE} ${INPUT_FILE} @${SOUND_SCRIPT} ${OUTPUT_FILE} -V1
         COMMENT
             "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
         VERBATIM
@@ -247,11 +338,14 @@ endfunction()
 function(_add_sound_transform_command_jsox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
     add_custom_command(
         DEPENDS
-            extract_vpks ${INPUT_FILE}
+            extract_vpks "$<TARGET_PROPERTY:extract_vpks,OUTPUTS>"
             ${JSOX}
             ${SOUND_SCRIPT}
         OUTPUT
             ${OUTPUT_FILE}
+        WORKING_DIRECTORY
+            # Allow scripts to easily reference other sounds
+            "$<PATH:GET_PARENT_PATH,${INPUT_FILE}>"
         COMMAND
             ${NodeJs_EXECUTABLE} ${JSOX}
             ${Sox_EXECUTABLE} ${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE}
@@ -261,18 +355,11 @@ function(_add_sound_transform_command_jsox SOUND_SCRIPT INPUT_FILE OUTPUT_FILE)
     )
 endfunction()
 
-function(_add_sound_transform_command SOUND_SCRIPT OUTPUT_LIST)
-    cmake_path(
-        REMOVE_EXTENSION SOUND_SCRIPT
-        OUTPUT_VARIABLE SOUND_NAME
-    )
-
-    # TODO: change output to PAK_MODIFIED_SOUND_DIR once makefile is no longer in use
+function(_add_sound_transform_command SOUND_SCRIPT INPUT_FILE OUTPUT_NAME OUTPUT_LIST)
     set(SOUND_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/${SOUND_SCRIPT}")
-    set(INPUT_FILE "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
-    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${SOUND_NAME}.wav")
+    set(OUTPUT_FILE "${PAK_MODIFIED_SOUND_DIR}/${OUTPUT_NAME}.wav")
 
-    if(SOUND_SCRIPT MATCHES ".*\.jsox")
+    if (SOUND_SCRIPT MATCHES ".*\.jsox")
         _add_sound_transform_command_jsox(${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE})
     else()
         _add_sound_transform_command_sox(${SOUND_SCRIPT} ${INPUT_FILE} ${OUTPUT_FILE})
@@ -288,16 +375,15 @@ function(_add_music_transform_command MUSIC_SCRIPT OUTPUT_LIST)
         OUTPUT_VARIABLE MUSIC_NAME
     )
 
-    # TODO: change output to PAK_MODIFIED_SOUND_DIR once makefile is no longer in use
     set(MUSIC_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/${MUSIC_SCRIPT}")
     set(INPUT_FILE "${PAK_SOUND_DIR}/${MUSIC_NAME}.mp3")
     set(CONVERTED_FILE "${PAK_SOUND_DIR}/${MUSIC_NAME}.wav")
-    set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${MUSIC_NAME}.wav")
+    set(OUTPUT_FILE "${PAK_MODIFIED_SOUND_DIR}/${MUSIC_NAME}.wav")
 
     # First convert to WAV
     add_custom_command(
         DEPENDS
-            extract_vpks ${INPUT_FILE}
+            extract_vpks "$<TARGET_PROPERTY:extract_vpks,OUTPUTS>"
         OUTPUT
             ${CONVERTED_FILE}
         COMMAND
@@ -320,22 +406,39 @@ endfunction()
 
 set(SOUNDS_TRANSFORMED "")
 
-# TODO: remove this special casing once makefile is no longer in use (just use .sox)
-_add_sound_transform_command_direct(
-    vehicles/tank_turret_loop1
-    "-b 16"
-    SOUNDS_TRANSFORMED
-)
-_add_sound_transform_command_direct(
-    ambient/atmosphere/ambience_base
-    "-c 1 -r 22050"
-    SOUNDS_TRANSFORMED
-)
-
 foreach(SOUND_SCRIPT ${SOUND_SCRIPTS})
-    _add_sound_transform_command(${SOUND_SCRIPT} SOUNDS_TRANSFORMED)
+    cmake_path(
+        REMOVE_EXTENSION SOUND_SCRIPT
+        OUTPUT_VARIABLE SOUND_NAME
+    )
+
+    set(INPUT_FILE "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
+    _add_sound_transform_command(${SOUND_SCRIPT} ${INPUT_FILE} ${SOUND_NAME} SOUNDS_TRANSFORMED)
 endforeach()
 
+# Localized sounds
+# Sounds within a language must be contiguous, so loop over languages first
+foreach(LANGUAGE ${AUDIO_LANGUAGES_LIST})
+    foreach(SOUND_SCRIPT ${LOCALIZED_SOUND_SCRIPTS})
+        string(TOUPPER "${LANGUAGE}_EXCLUDED_LOCALIZED_SOUND_SCRIPTS" EXCLUDED_SOUNDS)
+        if (EXCLUDED_SOUNDS AND (${SOUND_SCRIPT} IN_LIST ${EXCLUDED_SOUNDS}))
+            continue()
+        endif()
+
+        cmake_path(
+            REMOVE_EXTENSION SOUND_SCRIPT
+            OUTPUT_VARIABLE SOUND_NAME
+        )
+
+        _get_localized_pak_sound_dir(${LANGUAGE} INPUT_DIR)
+        _get_localized_sound_name(${SOUND_NAME} ${LANGUAGE} LOCALIZED_NAME)
+        set(INPUT_FILE "${INPUT_DIR}/${SOUND_NAME}.wav")
+
+        _add_sound_transform_command(${SOUND_SCRIPT} ${INPUT_FILE} ${LOCALIZED_NAME} SOUNDS_TRANSFORMED)
+    endforeach()
+endforeach()
+
+# Music
 foreach(MUSIC_SCRIPT ${MUSIC_SCRIPTS})
     _add_music_transform_command(${MUSIC_SCRIPT} SOUNDS_TRANSFORMED)
 endforeach()
@@ -346,9 +449,15 @@ endforeach()
 
 function(_add_sound_convert_command INPUT_FILE OUTPUT_LIST)
     cmake_path(
-        REPLACE_EXTENSION INPUT_FILE ".aifc"
-        OUTPUT_VARIABLE OUTPUT_FILE
+        RELATIVE_PATH INPUT_FILE
+        BASE_DIRECTORY "${PAK_MODIFIED_SOUND_DIR}"
+        OUTPUT_VARIABLE SOUND_NAME
     )
+    cmake_path(
+        REMOVE_EXTENSION SOUND_NAME
+        OUTPUT_VARIABLE SOUND_NAME
+    )
+    set(OUTPUT_FILE "${OUTPUT_DIR}/${SOUND_NAME}.aifc")
 
     add_custom_command(
         DEPENDS
@@ -382,27 +491,22 @@ add_custom_target(sounds
 ## Sound table generation ##
 ############################
 
+# The dependency on extract_vpks covers unconverted sounds,
+# so we only need to explicitly specify converted ones
 set(SOUND_TABLE_DEPENDENCIES ${SOUNDS_CONVERTED})
 set(SOUND_TABLE_INPUTS "")
 
 foreach(INS_BANK ${INSTRUMENT_BANKS})
-    cmake_path(
-        REMOVE_EXTENSION INS_BANK
-        OUTPUT_VARIABLE SOUND_NAME
-    )
+    set(INS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${INS_BANK}")
 
-    # Each bank references a WAV. Keep track of the dependency.
-    #
-    # Some banks depend on converted sounds instead of unmodified.
-    # That dependency is taken care of via SOUNDS_CONVERTED.
-    list(APPEND SOUND_TABLE_DEPENDENCIES "${PAK_SOUND_DIR}/${SOUND_NAME}.wav")
-    list(APPEND SOUND_TABLE_INPUTS "${CMAKE_CURRENT_SOURCE_DIR}/${INS_BANK}")
+    list(APPEND SOUND_TABLE_DEPENDENCIES ${INS_PATH})
+    list(APPEND SOUND_TABLE_INPUTS       ${INS_PATH})
 endforeach()
 
 foreach(CONVERTED_SOUND ${SOUNDS_CONVERTED})
     cmake_path(
         RELATIVE_PATH CONVERTED_SOUND
-        BASE_DIRECTORY "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}"
+        BASE_DIRECTORY ${OUTPUT_DIR}
         OUTPUT_VARIABLE INS_BANK
     )
     cmake_path(
@@ -411,32 +515,38 @@ foreach(CONVERTED_SOUND ${SOUNDS_CONVERTED})
     )
 
     # Only include the sound if an instrument bank doesn't already do so
-    if(NOT INS_BANK IN_LIST INSTRUMENT_BANKS)
+    if (NOT INS_BANK IN_LIST INSTRUMENT_BANKS)
         list(APPEND SOUND_TABLE_INPUTS ${CONVERTED_SOUND})
     endif()
 endforeach()
 
+# Avoid extremely long argument list (MSYS2 has low ARG_MAX)
+list(TRANSFORM SOUND_TABLE_INPUTS REPLACE "${OUTPUT_DIR}/" "" OUTPUT_VARIABLE SOUND_TABLE_INPUTS)
+
 # Add commands for generating sound tables
 
-set(SOUND_TABLE_SOUNDS "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/sounds.sounds")
-set(SOUND_TABLE_TBL "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/sounds.sounds.tbl")
+set(SOUND_TABLE_SOUNDS "${OUTPUT_DIR}/sounds.sounds")
+set(SOUND_TABLE_TBL "${OUTPUT_DIR}/sounds.sounds.tbl")
 set(SOUND_DATA_TABLE_FILES
     ${SOUND_TABLE_SOUNDS}
     ${SOUND_TABLE_TBL}
 )
 add_custom_command(
     DEPENDS
-        extract_vpks sounds ${SOUND_TABLE_DEPENDENCIES}
+        extract_vpks "$<TARGET_PROPERTY:extract_vpks,OUTPUTS>"
+        sounds ${SOUND_TABLE_DEPENDENCIES}
     OUTPUT
         ${SOUND_DATA_TABLE_FILES}
     COMMAND
         ${SFZ2N64_EXECUTABLE} -o ${SOUND_TABLE_SOUNDS} ${SOUND_TABLE_INPUTS}
+    WORKING_DIRECTORY
+        ${OUTPUT_DIR}
     COMMENT
         "Generating sound data tables"
     VERBATIM
 )
 
-set(BUILD_AUDIO_DIR "${PROJECT_BINARY_DIR}/src/audio")
+set(BUILD_AUDIO_DIR "${GENERATED_CODE_DIR}/assets/audio")
 set(CLIPS_H "${BUILD_AUDIO_DIR}/clips.h")
 set(LANGUAGES_H "${BUILD_AUDIO_DIR}/languages.h")
 set(LANGUAGES_C "${BUILD_AUDIO_DIR}/languages.c")
@@ -447,15 +557,15 @@ set(SOUND_LOOKUP_TABLE_FILES
 )
 add_custom_command(
     DEPENDS
-        extract_vpks sounds ${SOUND_TABLE_DEPENDENCIES}
+        extract_vpks "$<TARGET_PROPERTY:extract_vpks,OUTPUTS>"
+        sounds ${SOUND_TABLE_DEPENDENCIES}
         ${GEN_SOUND_IDS}
     OUTPUT
         ${SOUND_LOOKUP_TABLE_FILES}
     COMMAND
         ${NodeJs_EXECUTABLE} ${GEN_SOUND_IDS}
-        -o ${BUILD_AUDIO_DIR} -p SOUNDS_ ${SOUND_TABLE_INPUTS}
+        --out-dir ${BUILD_AUDIO_DIR} ${SOUND_TABLE_INPUTS}
     WORKING_DIRECTORY
-        # TODO: Update once script is refactored
         ${PROJECT_SOURCE_DIR}
     COMMENT
         "Generating sound lookup tables"
@@ -468,10 +578,13 @@ add_custom_target(sound_tables
         ${SOUND_LOOKUP_TABLE_FILES}
 )
 
-add_library(sound_data_tables INTERFACE)
-add_dependencies(sound_data_tables sound_tables)
-target_sources(sound_data_tables INTERFACE
-    ${SOUND_DATA_TABLE_FILES}
+add_custom_target(sound_data_tables
+    DEPENDS
+        sound_tables
+        ${SOUND_DATA_TABLE_FILES}
+)
+set_target_properties(sound_data_tables PROPERTIES
+    OUTPUTS "${SOUND_DATA_TABLE_FILES}"
 )
 
 add_library(sound_lookup_tables INTERFACE)

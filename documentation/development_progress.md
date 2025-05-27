@@ -1,10 +1,12 @@
 # Development Progress
 
-One major goal of this fork is to complete development of the game where James left off. This will involve understanding and documenting the tools and processes he used.
+One major goal of this fork is to complete development of the game where James
+left off. This will involve understanding and documenting the tools and
+processes he used.
 
 Progress is tracked below.
 
-## Game content
+## Game Content
 
 - [x] Chamber 00
 - [x] Chamber 01

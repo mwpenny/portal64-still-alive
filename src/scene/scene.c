@@ -2,40 +2,42 @@
 #include "scene.h"
 
 #include "defs.h"
+
+#include "audio/clips.h"
+#include "audio/soundplayer.h"
+#include "controls/controller_actions.h"
+#include "controls/rumble_pak.h"
+#include "debug_scene.h"
+#include "decor/decor_object_list.h"
+#include "dynamic_scene.h"
+#include "effects/effect_definitions.h"
 #include "graphics/graphics.h"
+#include "hud.h"
+#include "levels/cutscene_runner.h"
+#include "levels/levels.h"
+#include "levels/static_render.h"
 #include "materials/shadow_caster.h"
 #include "materials/subject.h"
 #include "materials/light.h"
 #include "materials/point_light_rendered.h"
-#include "system/time.h"
-#include "sk64/skeletool_defs.h"
-#include "shadow_map.h"
-#include "../physics/point_constraint.h"
-#include "../physics/debug_renderer.h"
-#include "../system/controller.h"
-#include "../controls/controller_actions.h"
-#include "../physics/collision_scene.h"
-#include "../levels/static_render.h"
-#include "../levels/levels.h"
-#include "../savefile/checkpoint.h"
-#include "../scene/portal_surface.h"
-#include "../math/mathf.h"
-#include "./hud.h"
-#include "dynamic_scene.h"
-#include "../audio/soundplayer.h"
-#include "../audio/clips.h"
-#include "../levels/cutscene_runner.h"
-#include "../util/memory.h"
-#include "../decor/decor_object_list.h"
-#include "signals.h"
+#include "math/mathf.h"
+#include "menu/game_menu.h"
+#include "physics/collision_scene.h"
+#include "physics/debug_renderer.h"
+#include "physics/point_constraint.h"
+#include "savefile/checkpoint.h"
+#include "player/player_rumble_clips.h"
 #include "render_plan.h"
-#include "../menu/game_menu.h"
-#include "../effects/effect_definitions.h"
-#include "../controls/rumble_pak.h"
-#include "../player/player_rumble_clips.h"
+#include "scene/portal_surface.h"
+#include "shadow_map.h"
+#include "signals.h"
+#include "sk64/skeletool_defs.h"
+#include "system/controller.h"
+#include "system/time.h"
+#include "util/memory.h"
 
-#include "../build/src/audio/subtitles.h"
-#include "../build/src/audio/clips.h"
+#include "codegen/assets/audio/clips.h"
+#include "codegen/assets/strings/strings.h"
 
 extern struct GameMenu gGameMenu;
 
@@ -53,6 +55,9 @@ Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 #define LEVEL_INDEX_WITH_GUN_0  2
 #define LEVEL_INDEX_WITH_GUN_1  8
 
+#define INTRO_BLACK_TIME        3.0f
+#define INTRO_FADE_TIME         1.0f
+#define INTRO_TOTAL_TIME        (INTRO_BLACK_TIME + INTRO_FADE_TIME)
 
 void sceneUpdateListeners(struct Scene* scene);
 
@@ -84,7 +89,7 @@ void sceneInitDynamicColliders(struct Scene* scene) {
 
 void sceneInit(struct Scene* scene) {
     sceneInitNoPauseMenu(scene, 0);
-    
+
     gameMenuInit(&gGameMenu, gPauseMenuOptions, sizeof(gPauseMenuOptions) / sizeof(*gPauseMenuOptions), 1);
 
     if (!checkpointExists()) {
@@ -120,24 +125,33 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     playerInit(&scene->player, &combinedLocation, &startVelocity);
 
+    if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_0) {
+        playerGivePortalGun(&scene->player, PlayerHasFirstPortalGun);
+    }
+
+    if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_1) {
+        playerGivePortalGun(&scene->player, PlayerHasSecondPortalGun);
+    }
+
+    hudInit(&scene->hud);
+
+    if (gCurrentLevelIndex == 0) {
+        hudShowColoredOverlay(&scene->hud, &gColorBlack, INTRO_TOTAL_TIME, INTRO_FADE_TIME);
+    }
+
     struct Vector3* startPosition = &levelRelativeTransform()->position;
 
     portalGunInit(&scene->portalGun, &scene->player.lookTransform, startPosition->x == 0.0f && startPosition->y == 1.0f && startPosition->z == 0.0f);
+
+    // A frame will be rendered in between initialization and the first update.
+    // Update the portal gun to prevent inaccuracies (visibility flicker, wrong
+    // armature position, etc.)
+    portalGunUpdate(&scene->portalGun, &scene->player);
 
     scene->camera.transform.rotation = scene->player.lookTransform.rotation;
     scene->camera.transform.position = scene->player.lookTransform.position;
 
     sceneUpdateListeners(scene);
-
-    if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_0) {
-        playerGivePortalGun(&scene->player, PlayerHasFirstPortalGun);
-        scene->portalGun.portalGunVisible = 1;
-    }
-
-    if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_1) {
-        playerGivePortalGun(&scene->player, PlayerHasSecondPortalGun);
-        scene->portalGun.portalGunVisible = 1;
-    }
 
     portalInit(&scene->portals[0], 0);
     portalInit(&scene->portals[1], PortalFlagsOddParity);
@@ -150,9 +164,12 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     }
 
     if (checkpointExists()) {
-        // if a checkpoint exists it will load the decor
+        // If a checkpoint exists it will load these
         scene->decorCount = 0;
         scene->decor = NULL;
+
+        scene->turretCount = 0;
+        scene->turrets = NULL;
     } else {
         scene->decorCount = gCurrentLevel->decorCount;
         scene->decor = malloc(sizeof(struct DecorObject*) * scene->decorCount);
@@ -170,6 +187,12 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
             } else {
                 scene->decor[i]->definition->flags &= ~(DecorObjectFlagsMuted);
             }
+        }
+
+        scene->turretCount = gCurrentLevel->turretCount;
+        scene->turrets = malloc(sizeof(struct Turret*) * scene->turretCount);
+        for (int i = 0; i < scene->turretCount; ++i) {
+            scene->turrets[i] = turretNew(&gCurrentLevel->turrets[i]);
         }
     }
 
@@ -197,7 +220,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
         fizzlerTransform.position = fizzlerDef->position;
         fizzlerTransform.rotation = fizzlerDef->rotation;
         fizzlerTransform.scale = gOneVec;
-        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height, 
+        fizzlerInit(&scene->fizzlers[i], &fizzlerTransform, fizzlerDef->width, fizzlerDef->height,
 		            fizzlerDef->roomIndex, fizzlerDef->cubeSignalIndex);
     }
 
@@ -262,7 +285,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     scene->checkpointState = SceneCheckpointStateSaved;
     scene->mainMenuMode = mainMenuMode;
 
-    scene->freeCameraOffset = gZeroVec;
+    debugSceneInit(scene);
 
     effectsInit(&scene->effects);
 
@@ -270,33 +293,11 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     sceneAnimatorInit(&scene->animator, gCurrentLevel->animations, gCurrentLevel->animationInfoCount);
 
-    hudInit(&scene->hud);
-
-    playerUpdateFooting(&scene->player, PLAYER_HEAD_HEIGHT);  
+    playerUpdateFooting(&scene->player, PLAYER_HEAD_HEIGHT);
     scene->player.lookTransform.position = scene->player.body.transform.position;
-} 
 
-#define SOLID_COLOR        0, 0, 0, ENVIRONMENT, 0, 0, 0, ENVIRONMENT
-
-void sceneRenderPerformanceMetrics(struct Scene* scene, struct RenderState* renderState, struct GraphicsTask* task) {
-    if (!scene->lastFrameTime) {
-        return;
-    }
-
-    float memoryUsage = renderStateMemoryUsage(renderState);
-
-    gDPSetCycleType(renderState->dl++, G_CYC_1CYCLE);
-    gDPSetFillColor(renderState->dl++, (GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1)));
-    gDPSetCombineMode(renderState->dl++, SOLID_COLOR, SOLID_COLOR);
-    gDPSetEnvColor(renderState->dl++, 32, 32, 32, 255);
-    gSPTextureRectangle(renderState->dl++, 32 << 2, 32 << 2, (32 + 256) << 2, (32 + 8) << 2, 0, 0, 0, 1, 1);
-    gSPTextureRectangle(renderState->dl++, 32 << 2, 44 << 2, (32 + 256) << 2, (44 + 8) << 2, 0, 0, 0, 1, 1);
-    gDPPipeSync(renderState->dl++);
-    gDPSetEnvColor(renderState->dl++, 32, 255, 32, 255);
-    gSPTextureRectangle(renderState->dl++, 33 << 2, 33 << 2, (32 + 254 * scene->cpuTime / scene->lastFrameTime) << 2, (32 + 6) << 2, 0, 0, 0, 1, 1);
-    gSPTextureRectangle(renderState->dl++, 33 << 2, 45 << 2, (int)(32 + 254 * memoryUsage * 4.0f), (44 + 6) << 2, 0, 0, 0, 1, 1);
-    gDPPipeSync(renderState->dl++);
-
+    scene->cpuTime = 0;
+    scene->updateTime = 0;
 }
 
 LookAt gLookAt = gdSPDefLookAt(127, 0, 0, 0, 127, 0);
@@ -311,7 +312,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     if (!lookAt) {
         return;
     }
-    
+
     *lookAt = gLookAt;
     gSPLookAt(renderState->dl++, lookAt);
 
@@ -324,12 +325,14 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     renderPlanBuild(&renderPlan, scene, renderState);
     renderPlanExecute(&renderPlan, scene, staticMatrices, scene->animator.transforms, renderState, task);
 
-    // contactSolverDebugDraw(&gContactSolver, renderState);
+    if (scene->showCollisionContacts) {
+        contactSolverDebugDraw(&gContactSolver, renderState);
+    }
 
     portalGunRenderReal(
-        &scene->portalGun, 
-        renderState, 
-        &scene->camera, 
+        &scene->portalGun,
+        renderState,
+        &scene->camera,
         scene->hud.lastPortalIndexShot
     );
 
@@ -337,17 +340,14 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
     gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
 
-    if (gGameMenu.state == GameMenuStateResumeGame || scene->hud.fadeInTimer > 0.0f) {
+    if (gGameMenu.state == GameMenuStateResumeGame || hudOverlayVisible(&scene->hud, &scene->player)) {
         hudRender(&scene->hud, &scene->player, renderState);
+        debugSceneRender(scene, renderState, &renderPlan);
     }
 
     if (gGameMenu.state != GameMenuStateResumeGame) {
         gameMenuRender(&gGameMenu, renderState, task);
     }
-        
-
-    // sceneRenderPerformanceMetrics(scene, renderState, task);
-
 }
 
 u8 gFireGunRumbleWaveData[] = {
@@ -536,7 +536,7 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
 
         struct Transform baseTransform;
 
-        sceneAnimatorTransformForIndex(&scene->animator, boxDef->transformIndex, &baseTransform);  
+        sceneAnimatorTransformForIndex(&scene->animator, boxDef->transformIndex, &baseTransform);
 
         struct Transform relativeTransform;
         relativeTransform.position = boxDef->position;
@@ -568,7 +568,47 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
     }
 }
 
-#define FREE_CAM_VELOCITY   2.0f
+typedef int (*FizzlableObjectUpdater)(struct Scene* scene, void* object);
+
+static void sceneUpdateFizzlableList(struct Scene* scene, void** list, uint8_t* count, FizzlableObjectUpdater updater) {
+    int writeIndex = 0;
+
+    for (int i = 0; i < *count; ++i) {
+        if (!updater(scene, list[i])) {
+            continue;
+        }
+
+        if (writeIndex != i) {
+            list[writeIndex] = list[i];
+        }
+
+        ++writeIndex;
+    }
+
+    *count = writeIndex;
+}
+
+static int sceneUpdateDecorObject(struct Scene* scene, void* object) {
+    struct DecorObject* decorObject = (struct DecorObject*)object;
+
+    if (!decorObjectUpdate(decorObject)) {
+        decorObjectDelete(decorObject);
+        return 0;
+    }
+
+    return 1;
+}
+
+static int sceneUpdateTurret(struct Scene* scene, void* object) {
+    struct Turret* turret = (struct Turret*)object;
+
+    if (!turretUpdate(turret, &scene->player)) {
+        turretDelete(turret);
+        return 0;
+    }
+
+    return 1;
+}
 
 void sceneUpdate(struct Scene* scene) {
     scene->boolCutsceneIsRunning = cutsceneIsSoundQueued();
@@ -577,10 +617,9 @@ void sceneUpdate(struct Scene* scene) {
         checkpointSave(scene);
         scene->checkpointState = SceneCheckpointStateSaved;
     }
-    
-    Time frameStart = timeGetTime();
-    scene->lastFrameTime = frameStart - scene->lastFrameStart;
-    
+
+    Time startTime = timeGetTime();
+
     if (gGameMenu.state != GameMenuStateResumeGame) {
         if (gGameMenu.state == GameMenuStateLanding && (controllerGetButtonDown(0, BUTTON_B) || controllerActionGet(ControllerActionPause))) {
             gGameMenu.state = GameMenuStateResumeGame;
@@ -621,23 +660,9 @@ void sceneUpdate(struct Scene* scene) {
         scene->player.flags &= ~PlayerInCutscene;
     }
 
-    // objects that can fizzle need to update before the player
-    int decorWriteIndex = 0;
-
-    for (int i = 0; i < scene->decorCount; ++i) {
-        if (!decorObjectUpdate(scene->decor[i])) {
-            decorObjectDelete(scene->decor[i]);
-            continue;;
-        }
-
-        if (decorWriteIndex != i) {
-            scene->decor[decorWriteIndex] = scene->decor[i];
-        }
-
-        ++decorWriteIndex;
-    }
-
-    scene->decorCount = decorWriteIndex;
+    // Objects that can fizzle need to update before the player so they become ungrabbable instantly
+    sceneUpdateFizzlableList(scene, (void**)scene->decor,   &scene->decorCount,  sceneUpdateDecorObject);
+    sceneUpdateFizzlableList(scene, (void**)scene->turrets, &scene->turretCount, sceneUpdateTurret);
 
     for (int i = 0; i < scene->clockCount; ++i) {
         clockUpdate(&scene->clocks[i]);
@@ -653,16 +678,16 @@ void sceneUpdate(struct Scene* scene) {
     sceneCheckPortals(scene);
 
     if ((playerIsDead(&scene->player) && (
-        controllerActionGet(ControllerActionPause) || 
-        controllerActionGet(ControllerActionJump) || 
-        controllerActionGet(ControllerActionUseItem) || 
-        controllerActionGet(ControllerActionOpenPortal0) || 
+        controllerActionGet(ControllerActionPause) ||
+        controllerActionGet(ControllerActionJump) ||
+        controllerActionGet(ControllerActionUseItem) ||
+        controllerActionGet(ControllerActionOpenPortal0) ||
         controllerActionGet(ControllerActionOpenPortal1)
     )) ||
         scene->player.lookTransform.position.y < KILL_PLANE_Y) {
         levelLoadLastCheckpoint();
     }
-    
+
     for (int i = 0; i < scene->buttonCount; ++i) {
         buttonUpdate(&scene->buttons[i]);
     }
@@ -678,7 +703,7 @@ void sceneUpdate(struct Scene* scene) {
     for (int i = 0; i < scene->triggerListenerCount; ++i) {
         triggerListenerUpdate(&scene->triggerListeners[i]);
     }
-    
+
     signalsEvaluateSignals(gCurrentLevel->signalOperators, gCurrentLevel->signalOperatorCount);
 
     for (int i = 0; i < scene->doorCount; ++i) {
@@ -688,7 +713,7 @@ void sceneUpdate(struct Scene* scene) {
     for (int i = 0; i < scene->fizzlerCount; ++i) {
         fizzlerUpdate(&scene->fizzlers[i]);
     }
-    
+
     for (int i = 0; i < scene->elevatorCount; ++i) {
         int teleportTo = elevatorUpdate(&scene->elevators[i], &scene->player);
 
@@ -744,53 +769,16 @@ void sceneUpdate(struct Scene* scene) {
     sceneUpdateAnimatedObjects(scene);
 
     staticRenderCheckSignalMaterials();
-    
+
     collisionSceneUpdateDynamics();
 
     cutscenesUpdate();
 
-    scene->cpuTime = timeGetTime() - frameStart;
-    scene->lastFrameStart = frameStart;
-
-    ControllerStick freecam_stick = controllerGetStick(2);
-
-    struct Vector3 lookDir;
-    struct Vector3 rightDir;
-
-    playerGetMoveBasis(&scene->camera.transform.rotation, &lookDir, &rightDir);
-
-    if (freecam_stick.y) {
-        if (controllerGetButton(2, BUTTON_Z)) {
-            vector3AddScaled(
-                &scene->freeCameraOffset, 
-                &lookDir, 
-                -freecam_stick.y * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f), 
-                &scene->freeCameraOffset
-            );
-        } else {
-            scene->freeCameraOffset.y += freecam_stick.y * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f);
-        }
-    }
-
-    if (freecam_stick.x) {
-        vector3AddScaled(
-            &scene->freeCameraOffset, 
-            &rightDir, 
-            freecam_stick.x * (FREE_CAM_VELOCITY * FIXED_DELTA_TIME / 80.0f), 
-            &scene->freeCameraOffset
-        );
-    }
-
-    if (controllerGetButtonDown(2, BUTTON_START)) {
-        scene->freeCameraOffset = gZeroVec;
-    }
-
-    if (controllerGetButtonDown(2, BUTTON_L)) {
-        levelQueueLoad(NEXT_LEVEL, NULL, NULL);
-    }
+    debugSceneUpdate(scene);
 
     hudUpdate(&scene->hud);
 
+    scene->updateTime = timeGetTime() - startTime;
 }
 
 void sceneQueueCheckpoint(struct Scene* scene) {
@@ -808,7 +796,7 @@ int sceneCheckIsTouchingPortal(struct Scene* scene, int portalIndex, struct Tran
     if (!gCollisionScene.portalTransforms[portalIndex] || surfaceIndex != scene->portals[portalIndex].portalSurfaceIndex) {
         return 0;
     }
-    
+
     portalCalculateBB(at, &transformBB);
 
     return box3DHasOverlap(&scene->portals[portalIndex].collisionObject.boundingBox, &transformBB);
@@ -818,7 +806,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
     struct Transform finalAt;
 
     struct Transform relativeToTransform;
-    
+
     if (transformIndex != NO_TRANSFORM_INDEX) {
         sceneAnimatorTransformForIndex(&scene->animator, transformIndex, &relativeToTransform);
         struct Transform relativeInverse;
@@ -853,7 +841,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
             } else {
                 portal->rigidBody.transform = finalAt;
             }
-            
+
             gCollisionScene.portalVelocity[portalIndex] = gZeroVec;
             portal->transformIndex = transformIndex;
             portal->rigidBody.currentRoom = roomIndex;
@@ -925,7 +913,7 @@ int sceneDetermineSurfaceMapping(struct Scene* scene, struct CollisionObject* hi
         *mappingRangeOut = gCurrentLevel->portalSurfaceMappingRange[quadIndex];
         *relativeToOut = NO_TRANSFORM_INDEX;
         return mappingRangeOut->minPortalIndex != mappingRangeOut->maxPortalIndex;
-    } 
+    }
 
     int dynamicBoxIndex = sceneDynamicBoxIndex(scene, hitObject);
 

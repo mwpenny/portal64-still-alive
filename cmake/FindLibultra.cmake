@@ -4,22 +4,35 @@
 
 include(FindPackageHandleStandardArgs)
 
-find_path(Libultra_INCLUDE_DIR ultra64.h
-    PATH_SUFFIXES
-        "n64"
+set(LIBULTRA_BOOT_CODE   "6102"             CACHE STRING   "Boot code to use")
+set(LIBULTRA_RSP_UCODE   "gspF3DEX2.fifo"   CACHE STRING   "RSP microcode to use")
+
+find_path   (Libultra_INCLUDE_DIR   ultra64.h           PATH_SUFFIXES "n64")
+find_library(Libultra_LIBRARY       ultra_rom           PATH_SUFFIXES "n64")
+find_package(Libgcc)
+
+cmake_path(GET Libultra_LIBRARY
+    PARENT_PATH Libultra_LIBRARY_DIR
 )
 
-find_library(Libultra_LIBRARY ultra_rom
-    PATH_SUFFIXES
-        "n64"
-)
+find_file   (Libultra_BOOT          boot.${LIBULTRA_BOOT_CODE}  HINTS ${Libultra_LIBRARY_DIR}   PATH_SUFFIXES "PR/bootcode")
+find_file   (Libultra_RSP_BOOT      rspboot.o                   HINTS ${Libultra_LIBRARY_DIR}   PATH_SUFFIXES "PR")
+find_file   (Libultra_RSP_UCODE     ${LIBULTRA_RSP_UCODE}.o     HINTS ${Libultra_LIBRARY_DIR}   PATH_SUFFIXES "PR")
+find_file   (Libultra_ASP_UCODE     aspMain.o                   HINTS ${Libultra_LIBRARY_DIR}   PATH_SUFFIXES "PR")
 
 find_package_handle_standard_args(Libultra
-    Libultra_INCLUDE_DIR
-    Libultra_LIBRARY
+    REQUIRED_VARS
+        Libultra_INCLUDE_DIR
+        Libultra_LIBRARY
+        Libultra_BOOT
+        Libultra_RSP_BOOT
+        Libultra_RSP_UCODE
+        Libultra_ASP_UCODE
+        Libgcc_LIBRARY
+    HANDLE_COMPONENTS
 )
 
-if(Libultra_FOUND AND NOT TARGET libultra::libultra)
+if (Libultra_FOUND AND NOT TARGET libultra::libultra)
     add_library(libultra::libultra STATIC IMPORTED)
     set_target_properties(libultra::libultra PROPERTIES
         IMPORTED_LOCATION ${Libultra_LIBRARY}
@@ -28,6 +41,24 @@ if(Libultra_FOUND AND NOT TARGET libultra::libultra)
         "${Libultra_INCLUDE_DIR}"
         "${Libultra_INCLUDE_DIR}/PR"
     )
-endif()
+    target_compile_definitions(libultra::libultra INTERFACE
+        F3DEX_GBI_2
+        BOOT_CODE=${Libultra_BOOT}
+    )
+    target_link_libraries(libultra::libultra INTERFACE
+        libgcc::libgcc
+    )
 
-# TODO: Boot, RSP, GSP, and ASP code
+    # Don't clutter GUI on success
+    mark_as_advanced(
+        LIBULTRA_BOOT_CODE
+        LIBULTRA_RSP_UCODE
+
+        Libultra_INCLUDE_DIR
+        Libultra_LIBRARY
+        Libultra_BOOT
+        Libultra_RSP_BOOT
+        Libultra_RSP_UCODE
+        Libultra_ASP_UCODE
+    )
+endif()

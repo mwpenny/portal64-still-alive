@@ -39,6 +39,7 @@ set(LEVELS
     test_chamber_08
     test_chamber_09
     test_chamber_10
+    test_chamber_11
 )
 
 set(ANIMATED_LEVELS
@@ -60,18 +61,13 @@ function(_add_level_export_command LEVEL_NAME OUTPUT_VARIABLE)
     set(INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${LEVEL_NAME}/${LEVEL_NAME}.blend")
     set(OUTPUT_FILE "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}/${LEVEL_NAME}/${LEVEL_NAME}.fbx")
 
-    cmake_path(
-        GET OUTPUT_FILE PARENT_PATH
-        OUTPUT_DIR
-    )
-
     add_custom_command(
         DEPENDS
             ${EXPORT_FBX} ${INPUT_FILE}
         OUTPUT
             ${OUTPUT_FILE}
         COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${OUTPUT_DIR}
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
         COMMAND
             ${Blender_EXECUTABLE}
             ${INPUT_FILE} --background --python ${EXPORT_FBX} -- ${OUTPUT_FILE}
@@ -84,24 +80,21 @@ function(_add_level_export_command LEVEL_NAME OUTPUT_VARIABLE)
     return(PROPAGATE ${OUTPUT_VARIABLE})
 endfunction()
 
-function(_add_level_generate_command LEVEL_NAME LEVEL_FBX OUTPUT_LIST)
+function(_add_level_generate_command LEVEL_NAME LEVEL_FBX LEVEL_OUTPUT_LIST ANIM_OUTPUT_LIST)
     set(LEVEL_YAML "${CMAKE_CURRENT_SOURCE_DIR}/${LEVEL_NAME}/${LEVEL_NAME}.yaml")
-
-    cmake_path(
-        REMOVE_EXTENSION LEVEL_FBX
-        OUTPUT_VARIABLE OUTPUT_FILE_NO_EXTENSION
-    )
+    set(OUTPUT_FILE_NO_EXTENSION "${GENERATED_CODE_DIR}/${RELATIVE_CURRENT_DIR}/${LEVEL_NAME}/${LEVEL_NAME}")
 
     set(OUTPUT_FILE_H "${OUTPUT_FILE_NO_EXTENSION}.h")
     set(OUTPUT_FILE_GEO_C "${OUTPUT_FILE_NO_EXTENSION}_geo.c")
-    set(OUTPUT_FILES
+    set(LEVEL_OUTPUT_FILES
         ${OUTPUT_FILE_H}
         ${OUTPUT_FILE_GEO_C}
     )
+    set(ANIM_OUTPUT_FILES "")
 
     if (LEVEL_NAME IN_LIST ANIMATED_LEVELS)
         set(OUTPUT_FILE_ANIM_C "${OUTPUT_FILE_NO_EXTENSION}_anim.c")
-        list(APPEND OUTPUT_FILES ${OUTPUT_FILE_ANIM_C})
+        list(APPEND ANIM_OUTPUT_FILES ${OUTPUT_FILE_ANIM_C})
     endif()
 
     set(MATERIAL_ARGS "")
@@ -120,7 +113,10 @@ function(_add_level_generate_command LEVEL_NAME LEVEL_FBX OUTPUT_LIST)
             ${LEVEL_YAML}
             ${LEVEL_MATERIALS}
         OUTPUT
-            ${OUTPUT_FILES}
+            ${LEVEL_OUTPUT_FILES}
+            ${ANIM_OUTPUT_FILES}
+        COMMAND
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE_NO_EXTENSION}>"
         COMMAND
             skeletool64::skeletool64
             --script ${EXPORT_LEVEL}
@@ -137,29 +133,58 @@ function(_add_level_generate_command LEVEL_NAME LEVEL_FBX OUTPUT_LIST)
         VERBATIM
     )
 
-    list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILES})
-    return(PROPAGATE ${OUTPUT_LIST})
+    list(APPEND ${LEVEL_OUTPUT_LIST} ${LEVEL_OUTPUT_FILES})
+    list(APPEND ${ANIM_OUTPUT_LIST} ${ANIM_OUTPUT_FILES})
+    return(PROPAGATE ${LEVEL_OUTPUT_LIST} ${ANIM_OUTPUT_LIST})
+endfunction()
+
+function(_add_level_lib LIB_NAME LIB_SOURCES)
+    add_library(${LIB_NAME} OBJECT)
+    add_dependencies(${LIB_NAME}
+        materials
+        sound_lookup_tables
+        string_lookup_tables
+        generated_levels
+    )
+    target_sources(${LIB_NAME} PRIVATE
+        ${LIB_SOURCES}
+    )
+    target_link_libraries(${LIB_NAME}
+        platform
+    )
 endfunction()
 
 # Add commands for exporting level files
 
 set(LEVEL_GENERATED_FILES "")
+set(ANIM_GENERATED_FILES "")
 
 foreach(LEVEL ${LEVELS})
     _add_level_export_command(${LEVEL} LEVEL_FBX)
-    _add_level_generate_command(${LEVEL} ${LEVEL_FBX} LEVEL_GENERATED_FILES)
+    _add_level_generate_command(${LEVEL} ${LEVEL_FBX}
+        LEVEL_GENERATED_FILES
+        ANIM_GENERATED_FILES
+    )
 endforeach()
 
 add_custom_target(generated_levels
-    DEPENDS ${LEVEL_GENERATED_FILES}
+    DEPENDS
+        ${LEVEL_GENERATED_FILES}
+        ${ANIM_GENERATED_FILES}
 )
+
+_add_level_lib(levels           "${LEVEL_GENERATED_FILES}")
+_add_level_lib(level_animations "${ANIM_GENERATED_FILES}")
 
 # Add command for generating level list header
 
 set(LEVEL_GENERATED_HEADERS ${LEVEL_GENERATED_FILES})
-list(FILTER LEVEL_GENERATED_HEADERS INCLUDE REGEX "\.h$")
+list(FILTER
+    LEVEL_GENERATED_HEADERS
+    INCLUDE REGEX "\.h$"
+)
 
-set(LEVEL_LIST_OUT_DIR "${PROJECT_BINARY_DIR}/${RELATIVE_CURRENT_DIR}")
+set(LEVEL_LIST_OUT_DIR "${GENERATED_CODE_DIR}/${RELATIVE_CURRENT_DIR}")
 set(LEVEL_LIST "${LEVEL_LIST_OUT_DIR}/level_list.h")
 
 add_custom_command(
@@ -178,16 +203,38 @@ add_custom_command(
     VERBATIM
 )
 
-add_custom_target(level_list
+add_custom_target(generated_level_list
     DEPENDS ${LEVEL_LIST}
 )
 
-add_library(levels INTERFACE)
-add_dependencies(levels
-    generated_levels
-    level_list
-)
-target_sources(levels INTERFACE
-    ${LEVEL_GENERATED_FILES}
+add_library(level_list INTERFACE)
+add_dependencies(level_list generated_level_list)
+target_sources(level_list INTERFACE
     ${LEVEL_LIST}
+)
+
+# Add command for generating level linker script fragment
+
+set(LEVEL_LINKER_SCRIPT "${LINKER_SCRIPT_DIR}/levels.ld")
+add_custom_command(
+    DEPENDS
+        ${GEN_SEGMENT_LD}
+    OUTPUT
+        ${LEVEL_LINKER_SCRIPT}
+    COMMAND
+        ${NodeJs_EXECUTABLE} ${GEN_SEGMENT_LD}
+        ${LEVEL_LINKER_SCRIPT}
+        0x02000000
+        "$<TARGET_OBJECTS:levels>"
+    COMMENT
+        "Generating $<PATH:RELATIVE_PATH,${LEVEL_LINKER_SCRIPT},${PROJECT_SOURCE_DIR}>"
+    COMMAND_EXPAND_LISTS
+    VERBATIM
+)
+
+add_custom_target(level_linker_script
+    DEPENDS ${LEVEL_LINKER_SCRIPT}
+)
+set_target_properties(level_linker_script PROPERTIES
+    SCRIPT_FILE "${LEVEL_LINKER_SCRIPT}"
 )

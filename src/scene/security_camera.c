@@ -1,22 +1,22 @@
 #include "security_camera.h"
 
+#include "decor/decor_object.h"
 #include "defs.h"
-#include "../physics/collision_box.h"
-#include "../physics/collision_scene.h"
 #include "dynamic_scene.h"
+#include "levels/cutscene_runner.h"
+#include "physics/collision_box.h"
+#include "physics/collision_scene.h"
 #include "scene.h"
 #include "system/time.h"
-#include "../levels/cutscene_runner.h"
-#include "../decor/decor_object.h"
-#include "../util/dynamic_asset_loader.h"
+#include "util/dynamic_asset_loader.h"
 
-#include "../build/assets/materials/static.h"
-#include "../build/src/audio/clips.h"
-#include "../../build/assets/models/dynamic_animated_model_list.h"
-#include "../../build/assets/models/props/security_camera.h"
+#include "codegen/assets/audio/clips.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/dynamic_animated_model_list.h"
+#include "codegen/assets/models/props/security_camera.h"
 
 struct CollisionBox gSecurityCameraCollisionBox = {
-    {0.15, 0.3f, 0.35f}
+    {0.15f, 0.3f, 0.35f}
 };
 
 struct ColliderTypeData gSecurityCameraCollider = {
@@ -27,8 +27,10 @@ struct ColliderTypeData gSecurityCameraCollider = {
     &gCollisionBoxCallbacks
 };
 
-#define CAMERA_RANGE           10.0f
-#define CAMERA_RIGID_BODY_MASS 1.0f
+#define CAMERA_RANGE            10.0f
+#define CAMERA_RIGID_BODY_MASS  1.0f
+
+#define CAMERA_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
 
 struct Quaternion gBarBoneRelative = {1.0f, 0.0f, 0.0f, 0.0f};
 
@@ -120,7 +122,7 @@ void securityCameraRender(void* data, struct DynamicRenderDataList* renderList, 
 void securityCameraInit(struct SecurityCamera* securityCamera, struct SecurityCameraDefinition* definition) {
     struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_SECURITY_CAMERA_DYNAMIC_ANIMATED_MODEL);
 
-    collisionObjectInit(&securityCamera->collisionObject, &gSecurityCameraCollider, &securityCamera->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER);
+    collisionObjectInit(&securityCamera->collisionObject, &gSecurityCameraCollider, &securityCamera->rigidBody, 1.0f, CAMERA_COLLISION_LAYERS);
     rigidBodyMarkKinematic(&securityCamera->rigidBody);
     collisionSceneAddDynamicObject(&securityCamera->collisionObject);
 
@@ -141,6 +143,10 @@ void securityCameraInit(struct SecurityCamera* securityCamera, struct SecurityCa
 }
 
 void securityCameraUpdate(struct SecurityCamera* securityCamera) {
+    if (securityCamera->dynamicId == INVALID_DYNAMIC_OBJECT) {
+        return;
+    }
+
     if (securityCamera->collisionObject.flags & COLLISION_OBJECT_PLAYER_STANDING) {
         securityCamera->collisionObject.flags &= ~COLLISION_OBJECT_PLAYER_STANDING;
     }
@@ -173,7 +179,7 @@ void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int came
 
             if (!cutsceneRunnerIsChannelPlaying(CH_GLADOS)) {
                 short clipIndex = randomInRange(0, sizeof(gCameraDestroyClips) / sizeof(*gCameraDestroyClips));
-                cutsceneQueueSoundInChannel(gCameraDestroyClips[clipIndex], 1.0f, CH_GLADOS, SubtitleKeyNone);
+                cutsceneQueueSoundInChannel(gCameraDestroyClips[clipIndex], 1.0f, CH_GLADOS, StringIdNone);
             }
         }
     }

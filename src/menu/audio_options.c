@@ -1,12 +1,12 @@
 #include "audio_options.h"
 
-#include "../system/controller.h"
-#include "../savefile/savefile.h"
-#include "../font/dejavusans.h"
-#include "../audio/soundplayer.h"
-#include "../build/src/audio/subtitles.h"
-#include "../build/src/audio/languages.h"
-#include "./translations.h"
+#include "audio/soundplayer.h"
+#include "font/dejavu_sans.h"
+#include "savefile/savefile.h"
+#include "system/controller.h"
+
+#include "codegen/assets/audio/languages.h"
+#include "codegen/assets/strings/strings.h"
 
 #define GAMEPLAY_Y      54
 #define GAMEPLAY_WIDTH  252

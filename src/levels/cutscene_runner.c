@@ -9,8 +9,6 @@
 #include "../locales/locales.h"
 #include "../controls/rumble_pak.h"
 
-#include <math.h>
-
 unsigned char gPortalOpenRumbleData[] = {
     0xFA, 0xA9,
 };
@@ -68,7 +66,7 @@ void cutsceneRunnerReset() {
         gCutsceneSoundQueues[i] = NULL;
         gCutsceneCurrentSound[i] = SOUND_ID_NONE;
         gCutsceneCurrentSoundId[i] = SOUND_ID_NONE;
-        gCutsceneCurrentSubtitleId[i] = SubtitleKeyNone;
+        gCutsceneCurrentSubtitleId[i] = StringIdNone;
         gCutsceneCurrentVolume[i] = 0.0f;
     }
 
@@ -316,8 +314,8 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         case CutsceneStepSaveCheckpoint:
             sceneQueueCheckpoint(&gScene);
             break;
-        case CutsceneStepKillPlayer:
-            playerKill(&gScene.player, step->killPlayer.isWater);
+        case CutsceneStepDamagePlayer:
+            playerDamage(&gScene.player, step->damagePlayer.amount, PlayerDamageTypeEnvironment);
             break;
         case CutsceneStepRumble:
             rumblePakClipPlay(&gCutsceneRumbleWaves[step->rumble.rumbleLevel]);
@@ -504,7 +502,7 @@ void cutscenesUpdateSounds() {
                 gCutsceneCurrentSoundId[i] = curr->soundId;
                 gCutsceneCurrentSubtitleId[i] = curr->subtitleId;
                 gCutsceneCurrentVolume[i] = curr->volume;
-                if (curr->subtitleId != SubtitleKeyNone){
+                if (curr->subtitleId != StringIdNone){
                     hudShowSubtitle(&gScene.hud, curr->subtitleId, subtitleType);
                 }
 
@@ -520,7 +518,7 @@ void cutscenesUpdateSounds() {
 
                 gCutsceneCurrentSound[i] = SOUND_ID_NONE;
                 gCutsceneCurrentSoundId[i] = SOUND_ID_NONE;
-                gCutsceneCurrentSubtitleId[i] = SubtitleKeyNone;
+                gCutsceneCurrentSubtitleId[i] = StringIdNone;
                 gCutsceneCurrentVolume[i] = 0.0f;
             }
         }

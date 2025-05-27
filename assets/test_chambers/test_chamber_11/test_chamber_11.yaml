@@ -1,0 +1,18 @@
+cutscenes:
+  START:
+    - q_sound AMBIENCE_BASE CH_AMBIENT StringIdNone 0.55
+  # INTRO:
+  #   - start_cutscene SIGNAGE
+  #   - q_sound 11_PART1_ENTRY_1 CH_GLADOS PORTAL_11_PART1_ENTRY_1
+  #   - q_sound 11_PART1_ENTRY_2 CH_GLADOS PORTAL_11_PART1_ENTRY_2
+  #   - q_sound 11_PART1_ENTRY_3 CH_GLADOS PORTAL_11_PART1_ENTRY_3
+  #   - wait_for_channel CH_GLADOS
+  #   - set_signal entry_door
+  #   - save_checkpoint
+  # SIGNAGE:
+  #   - delay 4
+  #   - activate_signage 16
+  # FINISH:
+  #   - q_sound 11_PART1_SUCCESS_1 CH_GLADOS PORTAL_11_PART1_SUCCESS_1
+operators:
+  - entry_door = not entry_door

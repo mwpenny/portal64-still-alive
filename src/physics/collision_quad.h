@@ -1,10 +1,10 @@
 #ifndef __COLLISION_QUAD_H__
 #define __COLLISION_QUAD_H__
 
-#include "../math/vector3.h"
-#include "../math/plane.h"
-#include "../math/transform.h"
 #include "contact_solver.h"
+#include "math/plane.h"
+#include "math/transform.h"
+#include "math/vector3.h"
 
 #define POINT_NO_OVERLAP    -1
 

@@ -33,11 +33,13 @@ void triggerTrigger(struct CollisionObject* collisionObject, struct CollisionObj
         &offset
     );
 
-    if (fabsf(offset.x) > listener->collisionData.sideLength.x ||
-        fabsf(offset.y) > listener->collisionData.sideLength.y ||
-        fabsf(offset.z) > listener->collisionData.sideLength.z) {
-        // only trigger when triggering object is contained
-        return;
+    if (listener->trigger->type == TriggerTypeContain) {
+        if (fabsf(offset.x) > listener->collisionData.sideLength.x ||
+            fabsf(offset.y) > listener->collisionData.sideLength.y ||
+            fabsf(offset.z) > listener->collisionData.sideLength.z) {
+            // Only trigger when triggering object is contained
+            return;
+        }
     }
 
     enum ObjectTriggerType triggerType = triggerDetermineType(objectEnteringTrigger);

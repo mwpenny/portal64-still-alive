@@ -10,7 +10,7 @@ Each level of the game is defined via two files:
 These files are located in the `assets/test_chambers/<level_name>/` directory
 corresponding to a given level.
 
-### Level layout (Blender file)
+### Level Layout (Blender File)
 
 A level's `.blend` file specifies fundamental 3D elements such as layout and
 collision as well as the objects contained within (e.g., cubes, doors,
@@ -27,7 +27,7 @@ material data can be looked up elsewhere. This naming convention is also what
 hooks the objects up to code. To learn more about what can appear in a level and
 how to configure it, see [Level Objects](./level_objects/README.md).
 
-### Level scripting (YAML file)
+### Level Scripting (YAML File)
 
 The second file that makes up a level is its `.yaml` file. This file contains
 its [cutscene steps](./cutscenes/README.md) and [signal operators](./signals.md).
@@ -55,7 +55,6 @@ apply them and also get a reasonable visual approximation while editing.
 
 ## TODO
 
-* Asset pipeline
 * Blender scripts
 * Skeletool
 * Exporter scripts

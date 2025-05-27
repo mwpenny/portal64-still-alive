@@ -1,13 +1,12 @@
 #ifndef __SWITCH_H__
 #define __SWITCH_H__
 
-#include "../sk64/skeletool_armature.h"
-#include "../sk64/skeletool_animator.h"
-#include "../physics/collision_object.h"
-#include "../audio/soundplayer.h"
-#include "../audio/clips.h"
-
-#include "../levels/level_definition.h"
+#include "audio/clips.h"
+#include "audio/soundplayer.h"
+#include "levels/level_definition.h"
+#include "physics/collision_object.h"
+#include "sk64/skeletool_animator.h"
+#include "sk64/skeletool_armature.h"
 
 enum SwitchFlags {
     SwitchFlagsDepressed = (1 << 0),
@@ -23,8 +22,9 @@ struct Switch {
     short flags;
     float duration;
     float timeLeft;
-    short ticktockSoundLoopId;
+    float buttonRaiseTimer;
     float ticktockPauseTimer;
+    short ticktockSoundLoopId;
 };
 
 void switchInit(struct Switch* switchObj, struct SwitchDefinition* definition);

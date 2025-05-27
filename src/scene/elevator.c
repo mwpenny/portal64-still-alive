@@ -1,21 +1,20 @@
 #include "elevator.h"
-#include "../physics/collision_scene.h"
-#include "../scene/dynamic_scene.h"
-#include "../physics/mesh_collider.h"
-#include "./signals.h"
-#include "../math/mathf.h"
+
+#include "audio/clips.h"
+#include "audio/soundplayer.h"
+#include "controls/rumble_pak.h"
+#include "math/mathf.h"
+#include "physics/collision_scene.h"
+#include "physics/mesh_collider.h"
+#include "savefile/checkpoint.h"
+#include "scene/dynamic_scene.h"
+#include "signals.h"
 #include "system/time.h"
-#include "../audio/soundplayer.h"
-#include "../audio/clips.h"
-#include "../controls/rumble_pak.h"
 
-#include "../savefile/checkpoint.h"
-
-#include "../../build/assets/models/props/round_elevator_collision.h"
-#include "../../build/assets/models/props/round_elevator_interior.h"
-#include "../../build/assets/models/props/round_elevator.h"
-
-#include "../../build/assets/materials/static.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/props/round_elevator_collision.h"
+#include "codegen/assets/models/props/round_elevator_interior.h"
+#include "codegen/assets/models/props/round_elevator.h"
 
 #define AUTO_OPEN_DISTANCE      4.0f
 #define INSIDE_DISTANCE         1.2f

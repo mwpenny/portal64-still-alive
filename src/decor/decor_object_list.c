@@ -1,12 +1,12 @@
 #include "decor_object_list.h"
 
-#include "../../build/assets/materials/static.h"
-#include "../../build/src/audio/clips.h"
-#include "../../build/assets/models/dynamic_model_list.h"
-#include "../../build/assets/models/props/light_rail_endcap.h"
+#include "physics/collision_cylinder.h"
+#include "physics/collision_box.h"
 
-#include "../physics/collision_cylinder.h"
-#include "../physics/collision_box.h"
+#include "codegen/assets/audio/clips.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/dynamic_model_list.h"
+#include "codegen/assets/models/props/light_rail_endcap.h"
 
 struct Vector2 gCylinderColliderEdgeVectors[] = {
     {0.0f, 1.0f},

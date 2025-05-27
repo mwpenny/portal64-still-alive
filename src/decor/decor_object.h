@@ -2,9 +2,10 @@
 #define __DECOR_OBJECT_H__
 
 #include <ultra64.h>
-#include "../physics/collision_object.h"
-#include "../math/transform.h"
-#include "../graphics/renderstate.h"
+
+#include "graphics/renderstate.h"
+#include "math/transform.h"
+#include "physics/collision_object.h"
 
 enum DecorObjectFlags {
     // important objects respawn at their original 

@@ -62,7 +62,11 @@ bool PixelRGBAu8::operator==(const PixelRGBAu8& other) const {
     return r == other.r && g == other.g && b == other.b && a == other.a;
 }
 
-bool PixelRGBAu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) {
+bool PixelRGBAu8::operator<(const PixelRGBAu8& other) const {
+    return std::tie(r, g, b) < std::tie(other.r, other.g, other.b);
+}
+
+bool PixelRGBAu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) const {
     switch (size) {
         case G_IM_SIZ::G_IM_SIZ_32b:
             output.WriteBytes((const char*)this, sizeof(PixelRGBAu8));
@@ -81,7 +85,7 @@ bool PixelRGBAu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) {
 
 PixelIu8::PixelIu8(uint8_t i) : i(i) {}
 
-bool PixelIu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) {
+bool PixelIu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) const {
     switch (size) {
         case G_IM_SIZ::G_IM_SIZ_8b:
             output.WriteBits(i, 8);
@@ -96,7 +100,7 @@ bool PixelIu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) {
 
 PixelIAu8::PixelIAu8(uint8_t i, uint8_t a) : i(i), a(a) {}
 
-bool PixelIAu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) {
+bool PixelIAu8::WriteToStream(DataChunkStream& output, G_IM_SIZ size) const {
     switch (size) {
         case G_IM_SIZ::G_IM_SIZ_16b:
             output.WriteBits(i, 8);
@@ -215,7 +219,7 @@ void writeIAPixel(cimg_library::CImg<unsigned char>& input, int x, int y, struct
     }
 }
 
-bool convertPixel(cimg_library::CImg<unsigned char>& input, int x, int y, DataChunkStream& output, G_IM_FMT fmt, G_IM_SIZ siz, const std::shared_ptr<PalleteDefinition>& pallete) {
+bool convertPixel(cimg_library::CImg<unsigned char>& input, int x, int y, DataChunkStream& output, G_IM_FMT fmt, G_IM_SIZ siz, const std::shared_ptr<PaletteDefinition>& palette) {
     switch (fmt) {
         case G_IM_FMT::G_IM_FMT_RGBA: {
             PixelRGBAu8 pixel = readRGBAPixel(input, x, y);
@@ -230,7 +234,14 @@ bool convertPixel(cimg_library::CImg<unsigned char>& input, int x, int y, DataCh
             return pixel.WriteToStream(output, siz);
         }
         case G_IM_FMT::G_IM_FMT_CI: {
-            PixelIu8 pixel = pallete ? pallete->FindIndex(readRGBAPixel(input, x, y)) : readIPixel(input, x, y);
+            PixelIu8 pixel = palette ? palette->FindIndex(readRGBAPixel(input, x, y)) : readIPixel(input, x, y);
+            if (siz == G_IM_SIZ::G_IM_SIZ_4b) {
+                // WriteToStream() chops off bottom 4 bits, which is fine when
+                // writing out actual intensity values. But palette indices
+                // must be preserved, so shift left to counteract truncation.
+                pixel.i <<= 4;
+            }
+
             return pixel.WriteToStream(output, siz);
         }
         default:
@@ -385,19 +396,25 @@ void selectChannel(cimg_library::CImg<unsigned char>& input, TextureDefinitionEf
     }
 }
 
-PalleteDefinition::PalleteDefinition(const std::string& filename):
+PaletteDefinition::PaletteDefinition(const std::string& filename):
     mName(getBaseName(replaceExtension(filename, "")) + "_tlut") {
     cimg_library::CImg<unsigned char> imageData(filename.c_str());
 
-    DataChunkStream dataStream;
+    std::set<PixelRGBAu8> uniqueColors;
     
     for (int y = 0; y < imageData.height(); ++y) {
         for (int x = 0; x < imageData.width(); ++x) {
             PixelRGBAu8 colorValue = readRGBAPixel(imageData, x, y);
-            mColors.push_back(colorValue);
-
-            colorValue.WriteToStream(dataStream, G_IM_SIZ::G_IM_SIZ_16b);
+            uniqueColors.insert(colorValue);
         }
+    }
+
+    DataChunkStream dataStream;
+
+    for (auto& colorValue : uniqueColors) {
+        mColors.push_back(colorValue);
+
+        colorValue.WriteToStream(dataStream, G_IM_SIZ::G_IM_SIZ_16b);
     }
 
     auto data = dataStream.GetData();
@@ -406,7 +423,7 @@ PalleteDefinition::PalleteDefinition(const std::string& filename):
     std::copy(data.begin(), data.end(), mData.begin());
 }
 
-PixelIu8 PalleteDefinition::FindIndex(PixelRGBAu8 color) const {
+PixelIu8 PaletteDefinition::FindIndex(PixelRGBAu8 color) const {
     unsigned result = 0;
     unsigned distance = ~0;
 
@@ -428,7 +445,7 @@ PixelIu8 PalleteDefinition::FindIndex(PixelRGBAu8 color) const {
 }
 
 
-std::unique_ptr<FileDefinition> PalleteDefinition::GenerateDefinition(const std::string& name, const std::string& location) const {
+std::unique_ptr<FileDefinition> PaletteDefinition::GenerateDefinition(const std::string& name, const std::string& location) const {
     std::unique_ptr<StructureDataChunk> dataChunk(new StructureDataChunk());
 
     for (unsigned chunkIndex = 0; chunkIndex < mData.size(); ++chunkIndex) {
@@ -440,7 +457,7 @@ std::unique_ptr<FileDefinition> PalleteDefinition::GenerateDefinition(const std:
     return std::unique_ptr<FileDefinition>(new DataFileDefinition("u64", name, true, location, std::move(dataChunk), this));
 }
 
-const std::string& PalleteDefinition::Name() const {
+const std::string& PaletteDefinition::Name() const {
     return mName;
 }
 
@@ -448,13 +465,13 @@ const std::string& PalleteDefinition::Name() const {
 int gSizeInc[] = {3, 1, 0, 0};
 int gSizeShift[] = {2, 1, 0, 0};
 
-int PalleteDefinition::LoadBlockSize() const {
+int PaletteDefinition::LoadBlockSize() const {
     return mColors.size() - 1;
 }
 
 #define	G_TX_DTX_FRAC	11
 
-int PalleteDefinition::DTX() const {
+int PaletteDefinition::DTX() const {
     int lineSize = mColors.size() / 4;
 
     if (!lineSize) {
@@ -463,21 +480,21 @@ int PalleteDefinition::DTX() const {
     return ((1 << G_TX_DTX_FRAC) + lineSize - 1) / lineSize;
 }
 
-int PalleteDefinition::NBytes() const {
+int PaletteDefinition::NBytes() const {
     return mColors.size() * 2;
 }
 
-unsigned PalleteDefinition::ColorCount() const {
+unsigned PaletteDefinition::ColorCount() const {
     return mColors.size();
 }
 
-TextureDefinition::TextureDefinition(const std::string& filename, G_IM_FMT fmt, G_IM_SIZ siz, TextureDefinitionEffect effects, std::shared_ptr<PalleteDefinition> pallete) :
+TextureDefinition::TextureDefinition(const std::string& filename, G_IM_FMT fmt, G_IM_SIZ siz, TextureDefinitionEffect effects, std::shared_ptr<PaletteDefinition> palette) :
     TextureDefinition(
         new CImgu8(filename),
         getBaseName(replaceExtension(filename, "")) + "_" + gFormatShortName[(int)fmt] + "_" + gSizeName[(int)siz],
         fmt,
         siz,
-        pallete,
+        palette,
         effects
     ) {
 }
@@ -492,10 +509,10 @@ TextureDefinition::TextureDefinition(
     const std::string& name, 
     G_IM_FMT fmt, 
     G_IM_SIZ siz, 
-    std::shared_ptr<PalleteDefinition> pallete,
+    std::shared_ptr<PaletteDefinition> palette,
     TextureDefinitionEffect effects
 ): mImg(std::move(img)), mName(name), mFmt(fmt), mSiz(siz), mWidth(img->mImg.width()), mHeight(img->mImg.height()),
-    mPallete(pallete), mEffects(effects) {
+    mPalette(palette), mEffects(effects) {
     if (HasEffect(TextureDefinitionEffect::TwoToneGrayscale)) {
         applyTwoToneEffect(mImg->mImg, mTwoToneMax, mTwoToneMin);
     }
@@ -521,7 +538,7 @@ TextureDefinition::TextureDefinition(
 
     for (int y = 0; y < mHeight; ++y) {
         for (int x = 0; x < mWidth; ++x) {
-            convertPixel(mImg->mImg, x, y, dataStream, fmt, siz, pallete);
+            convertPixel(mImg->mImg, x, y, dataStream, fmt, siz, palette);
         }
     }
 
@@ -530,9 +547,9 @@ TextureDefinition::TextureDefinition(
 
     std::copy(data.begin(), data.end(), mData.begin());
 
-    if (pallete) {
+    if (palette) {
         mFmt = G_IM_FMT::G_IM_FMT_CI;
-        mSiz = pallete->ColorCount() <= 16 ? G_IM_SIZ::G_IM_SIZ_4b : G_IM_SIZ::G_IM_SIZ_8b;
+        mSiz = palette->ColorCount() <= 16 ? G_IM_SIZ::G_IM_SIZ_4b : G_IM_SIZ::G_IM_SIZ_8b;
     }
     
 }
@@ -702,8 +719,8 @@ PixelRGBAu8 TextureDefinition::GetTwoToneMax() const {
     return mTwoToneMax;
 }
 
-std::shared_ptr<PalleteDefinition> TextureDefinition::GetPallete() const {
-    return mPallete;
+std::shared_ptr<PaletteDefinition> TextureDefinition::GetPalette() const {
+    return mPalette;
 }
 
 std::shared_ptr<TextureDefinition> TextureDefinition::Crop(int x, int y, int w, int h) const {
@@ -712,7 +729,7 @@ std::shared_ptr<TextureDefinition> TextureDefinition::Crop(int x, int y, int w, 
         mName,
         mFmt,
         mSiz,
-        mPallete,
+        mPalette,
         mEffects
     ));
 }
@@ -723,7 +740,7 @@ std::shared_ptr<TextureDefinition> TextureDefinition::Resize(int w, int h) const
         mName,
         mFmt,
         mSiz,
-        mPallete,
+        mPalette,
         mEffects
     ));
 }

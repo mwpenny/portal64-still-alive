@@ -73,7 +73,7 @@ target_include_directories(skeletool64 PRIVATE
     ${LUA_INCLUDE_DIR}
 )
 
-target_link_libraries(skeletool64
+target_link_libraries(skeletool64 PRIVATE
     assimp::assimp
     cimg::cimg
     PNG::PNG

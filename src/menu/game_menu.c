@@ -1,14 +1,14 @@
-#include "./game_menu.h"
+#include "game_menu.h"
 
-#include "../util/memory.h"
-#include "../util/rom.h"
 #include "menu.h"
-#include <string.h>
+#include "scene/render_plan.h"
+#include "strings/translations.h"
+#include "system/controller.h"
+#include "util/memory.h"
+#include "util/rom.h"
 
-#include "../build/assets/materials/ui.h"
-#include "../scene/render_plan.h"
-#include "../system/controller.h"
-#include "./translations.h"
+#include "codegen/assets/materials/ui.h"
+#include "codegen/assets/strings/strings.h"
 
 void gameMenuInit(struct GameMenu* gameMenu, struct LandingMenuOption* options, int optionCount, int darkenBackground) {
     landingMenuInit(&gameMenu->landingMenu, options, optionCount, darkenBackground);

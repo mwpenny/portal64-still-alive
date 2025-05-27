@@ -1,8 +1,9 @@
 #include "collision_capsule.h"
 
-#include "math/plane.h"
+#include "collision_object.h"
+#include "line.h"
 #include "math/mathf.h"
-#include "collision_quad.h"
+#include "raycasting.h"
 
 float collisionCapsuleSolidMofI(struct ColliderTypeData* typeData, float mass) {
     struct CollisionCapsule* capsule = (struct CollisionCapsule*)typeData->data;
@@ -36,7 +37,7 @@ static struct Vector2 gUnitCircle[] = {
 
 #define OFFSET_IN_CIRCLE(current, amount)  (((current) + (amount)) & 0x7)
 
-int collisionCapsuleMinkowsiSum(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output) {
+int collisionCapsuleMinkowskiSupport(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output) {
     struct CollisionCapsule* capsule = (struct CollisionCapsule*)data;
 
     float directionY = vector3Dot(&basis->y, direction);
@@ -101,9 +102,110 @@ int collisionCapsuleMinkowsiSum(void* data, struct Basis* basis, struct Vector3*
     }
 }
 
+static void finishContact(struct CollisionObject* capsuleObject, struct Ray* ray, struct RaycastHit* contact) {
+    vector3AddScaled(&ray->origin, &ray->dir, contact->distance, &contact->at);
+    vector3Negate(&ray->dir, &contact->normal);  // Approximate to save a sqrtf()
+    contact->object = capsuleObject;
+    contact->roomIndex = capsuleObject->body->currentRoom;
+}
+
+static int collisionCapsuleRaycastCap(struct CollisionObject* capsuleObject, struct Ray* ray, uint8_t checkTop, float maxDistance, struct RaycastHit* contact) {
+    struct CollisionCapsule* capsule = (struct CollisionCapsule*)capsuleObject->collider->data;
+    struct Vector3* position = capsuleObject->position;
+
+    contact->distance = maxDistance;
+
+    if (checkTop) {
+        raycastSphere(position, capsule->radius, ray, maxDistance, &contact->distance);
+    } else {
+        struct Vector3 bottomSpherePos;
+        vector3AddScaled(
+            position,
+            &capsuleObject->body->rotationBasis.y,
+            -capsule->extendDownward,
+            &bottomSpherePos
+        );
+        raycastSphere(&bottomSpherePos, capsule->radius, ray, maxDistance, &contact->distance);
+    }
+
+    if (contact->distance == maxDistance) {
+        return 0;
+    }
+
+    finishContact(capsuleObject, ray, contact);
+    return 1;
+}
+
+int collisionCapsuleRaycast(struct CollisionObject* capsuleObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
+    struct CollisionCapsule* capsule = (struct CollisionCapsule*)capsuleObject->collider->data;
+    struct Vector3* capsulePos = capsuleObject->position;
+
+    float distance = rayDetermineDistance(ray, capsulePos);
+    if (distance < 0.0f) {
+        return 0;
+    }
+
+    float coarseRadius = capsule->radius + capsule->extendDownward;
+    if ((distance - coarseRadius) > maxDistance) {
+        return 0;
+    }
+
+    struct Vector3 nearestPoint;
+    vector3AddScaled(&ray->origin, &ray->dir, distance, &nearestPoint);
+    if (vector3DistSqrd(capsulePos, &nearestPoint) > (coarseRadius * coarseRadius)) {
+        return 0;
+    }
+
+    struct Vector3* capsuleUp = &capsuleObject->body->rotationBasis.y;
+
+    float rayCapsuleDot = vector3Dot(&ray->dir, capsuleUp);
+    if (fabsf(rayCapsuleDot) > 0.999f) {
+        // Ray passes through center of capsule
+        return collisionCapsuleRaycastCap(
+            capsuleObject,
+            ray,
+            rayCapsuleDot < 0.0f,  // checkTop
+            maxDistance,
+            contact
+        );
+    }
+
+    // Check infinite cylinder using ray on same local XZ plane
+    struct Vector3 rayToCapsule;
+    struct Ray ray2d;
+    vector3Sub(capsulePos, &ray->origin, &rayToCapsule);
+    vector3AddScaled(&ray->origin, capsuleUp, vector3Dot(capsuleUp, &rayToCapsule), &ray2d.origin);
+    vector3ProjectPlane(&ray->dir, capsuleUp, &ray2d.dir);
+    vector3Normalize(&ray2d.dir, &ray2d.dir);
+    if (!raycastSphere(capsulePos, capsule->radius, &ray2d, maxDistance, &contact->distance)) {
+        return 0;
+    }
+
+    // Potential hit: check 3D intersection point
+    struct Vector3 capsuleToHit;
+    vector3AddScaled(&ray->origin, &ray->dir, contact->distance, &contact->at);
+    vector3Sub(&contact->at, capsulePos, &capsuleToHit);
+
+    float hitHeight = vector3Dot(&capsuleToHit, capsuleUp);
+    if (hitHeight < 0.0f && hitHeight > -capsule->extendDownward) {
+        // In range of cylinder
+        finishContact(capsuleObject, ray, contact);
+        return 1;
+    } else {
+        // In range of endcaps
+        return collisionCapsuleRaycastCap(
+            capsuleObject,
+            ray,
+            hitHeight > 0.0f,  // checkTop
+            maxDistance,
+            contact
+        );
+    }
+}
+
 struct ColliderCallbacks gCollisionCapsuleCallbacks = {
-    NULL, // TODO
+    collisionCapsuleRaycast,
     collisionCapsuleSolidMofI,
     collisionCapsuleBoundingBox,
-    collisionCapsuleMinkowsiSum,
+    collisionCapsuleMinkowskiSupport,
 };

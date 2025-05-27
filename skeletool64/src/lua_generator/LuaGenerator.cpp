@@ -13,7 +13,7 @@
 #include <lua.hpp>
 #include <iostream>
 
-#define EMIT(name) extern const char _binary_lua_##name##_out[]; extern const size_t _binary_lua_##name##_out_size[];
+#define EMIT(name) extern const char _binary_lua_##name##_luac[]; extern const size_t _binary_lua_##name##_luac_size[];
 #include "LuaFiles.h"
 #undef EMIT
 
@@ -25,7 +25,7 @@ struct LuaFile {
 };
 
 struct LuaFile luaFiles[] = {
-#define EMIT(name) {_binary_lua_##name##_out, *_binary_lua_##name##_out_size, "lua/" #name ".lua", #name},
+#define EMIT(name) {_binary_lua_##name##_luac, *_binary_lua_##name##_luac_size, "lua/" #name ".lua", #name},
 #include "LuaFiles.h"
 #undef EMIT
 };

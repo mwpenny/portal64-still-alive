@@ -2,18 +2,9 @@
 
 #include "epa.h"
 #include "gjk.h"
+#include "compound_collider.h"
 #include "contact_insertion.h"
 #include "raycasting.h"
-
-float meshColliderMofI(struct ColliderTypeData* typeData, float mass);
-void meshColliderBoundingBox(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box);
-
-struct ColliderCallbacks gMeshColliderCallbacks = {
-    meshColliderRaycast,
-    meshColliderMofI,
-    meshColliderBoundingBox,
-    NULL,
-};
 
 struct CollisionObjectWithTransform {
     struct CollisionObject* object;
@@ -21,9 +12,9 @@ struct CollisionObjectWithTransform {
     struct Basis relativeBasis;
 };
 
-int minkowsiSumAgainstRelativeObject(void* data, struct Vector3* direction, struct Vector3* output) {
+int relativeObjectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output) {
     struct CollisionObjectWithTransform* relativeObject = (struct CollisionObjectWithTransform*)data;
-    int result = relativeObject->object->collider->callbacks->minkowsiSum(relativeObject->object->collider->data, &relativeObject->relativeBasis, direction, output);
+    int result = relativeObject->object->collider->callbacks->minkowskiSupport(relativeObject->object->collider->data, &relativeObject->relativeBasis, direction, output);
     vector3Add(output, &relativeObject->relativeTransform.position, output);
     return result;
 }
@@ -37,24 +28,24 @@ int meshColliderCollideObjectWithSingleQuad(struct CollisionObject* quadObject, 
 
     struct CollisionQuad* quad = (struct CollisionQuad*)quadObject->collider->data;
 
-    if (!gjkCheckForOverlap(&simplex, 
-                quad, minkowsiSumAgainstQuad, 
-                other, minkowsiSumAgainstRelativeObject, 
+    if (!gjkCheckForOverlap(&simplex,
+                quad, quadMinkowskiSupport,
+                other, relativeObjectMinkowskiSupport,
                 &quad->plane.normal)) {
         return 0;
     }
 
     epaSolve(
         &simplex,
-        quad, minkowsiSumAgainstQuad,
-        other, minkowsiSumAgainstRelativeObject,
+        quad, quadMinkowskiSupport,
+        other, relativeObjectMinkowskiSupport,
         result
     );
 
     return 1;
 }
 
-void meshColliderCollideObject(struct CollisionObject* meshColliderObject, struct CollisionObject* other, struct ContactSolver* contactSolver) {
+void meshColliderCollidePrimitiveObject(struct CollisionObject* meshColliderObject, struct CollisionObject* other, struct ContactSolver* contactSolver) {
     struct Transform meshInverse;
     transformInvert(&meshColliderObject->body->transform, &meshInverse);
 
@@ -62,6 +53,8 @@ void meshColliderCollideObject(struct CollisionObject* meshColliderObject, struc
     relativeObject.object = other;
     transformConcat(&meshInverse, &other->body->transform, &relativeObject.relativeTransform);
     basisFromQuat(&relativeObject.relativeBasis, &relativeObject.relativeTransform.rotation);
+
+    collisionObjectAddBodyOffset(other, &relativeObject.relativeTransform.position);
 
     struct MeshCollider* meshCollider = (struct MeshCollider*)meshColliderObject->collider->data;
 
@@ -102,11 +95,30 @@ void meshColliderCollideObject(struct CollisionObject* meshColliderObject, struc
     }
 }
 
+void meshColliderCollideObject(struct CollisionObject* meshColliderObject, struct CollisionObject* other, struct ContactSolver* contactSolver) {
+    if (other->collider->type != CollisionShapeTypeCompound) {
+        meshColliderCollidePrimitiveObject(meshColliderObject, other, contactSolver);
+        return;
+    }
+
+    struct CompoundCollider* collider = (struct CompoundCollider*)other->collider->data;
+
+    for (short i = 0; i < collider->childrenCount; ++i) {
+        struct CollisionObject* childObj = &collider->children[i].object;
+
+        if (!box3DHasOverlap(&meshColliderObject->boundingBox, &childObj->boundingBox)) {
+            continue;
+        }
+
+        meshColliderCollidePrimitiveObject(meshColliderObject, childObj, contactSolver);
+    }
+}
+
 int meshColliderRaycast(struct CollisionObject* object, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
     struct MeshCollider* meshCollider = (struct MeshCollider*)object->collider->data;
     struct Ray localRay;
     struct Vector3 rayOffset;
-    vector3Sub(&ray->origin, &object->body->transform.position, &rayOffset);
+    vector3Sub(&ray->origin, object->position, &rayOffset);
     basisUnRotate(&object->body->rotationBasis, &rayOffset, &localRay.origin);
     basisUnRotate(&object->body->rotationBasis, &ray->dir, &localRay.dir);
 
@@ -153,7 +165,7 @@ int meshColliderRaycast(struct CollisionObject* object, struct Ray* ray, float m
     return 1;
 }
 
-// mesh collider should be kinematic 
+// mesh collider should be kinematic
 float meshColliderMofI(struct ColliderTypeData* typeData, float mass) {
     return 1.0f;
 }
@@ -167,3 +179,10 @@ void meshColliderBoundingBox(struct ColliderTypeData* typeData, struct Transform
     vector3Add(&center, &halfSize, &box->max);
     vector3Sub(&center, &halfSize, &box->min);
 }
+
+struct ColliderCallbacks gMeshColliderCallbacks = {
+    meshColliderRaycast,
+    meshColliderMofI,
+    meshColliderBoundingBox,
+    NULL,
+};

@@ -1,21 +1,25 @@
 #include "switch.h"
 
-#include "../physics/collision_cylinder.h"
-#include "../physics/collision_scene.h"
 #include "dynamic_scene.h"
+#include "physics/collision_cylinder.h"
+#include "physics/collision_scene.h"
+#include "scene/hud.h"
+#include "scene/scene.h"
 #include "signals.h"
-#include "../util/dynamic_asset_loader.h"
-
-#include "../build/assets/models/props/switch001.h"
-#include "../build/assets/materials/static.h"
-#include "../../build/assets/models/dynamic_animated_model_list.h"
-
+#include "util/dynamic_asset_loader.h"
 #include "system/time.h"
-#include "../scene/hud.h"
-#include "../scene/scene.h"
 
-#define COLLIDER_HEIGHT   0.7f
-#define TICKTOCK_PAUSE_LENGTH  0.25f
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/dynamic_animated_model_list.h"
+#include "codegen/assets/models/props/switch001.h"
+
+#define COLLIDER_HEIGHT                 0.7f
+
+#define TICKTOCK_INITIAL_PAUSE_LENGTH   1.0f
+#define TICKTOCK_PAUSE_LENGTH           0.25f
+#define BUTTON_RAISE_LENGTH             0.5f
+
+#define SWITCH_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_BLOCK_PORTAL | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
 
 struct Vector2 gSwitchCylinderEdgeVectors[] = {
     {0.0f, 1.0f},
@@ -77,7 +81,7 @@ void switchRender(void* data, struct DynamicRenderDataList* renderList, struct R
 void switchInit(struct Switch* switchObj, struct SwitchDefinition* definition) {
     struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_SWITCH001_DYNAMIC_ANIMATED_MODEL);
 
-    collisionObjectInit(&switchObj->collisionObject, &gSwitchCollider, &switchObj->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_BLOCK_PORTAL);
+    collisionObjectInit(&switchObj->collisionObject, &gSwitchCollider, &switchObj->rigidBody, 1.0f, SWITCH_COLLISION_LAYERS);
     rigidBodyMarkKinematic(&switchObj->rigidBody);
     collisionSceneAddDynamicObject(&switchObj->collisionObject);
 
@@ -99,20 +103,26 @@ void switchInit(struct Switch* switchObj, struct SwitchDefinition* definition) {
     switchObj->duration = definition->duration;
     switchObj->flags = 0;
     switchObj->timeLeft = 0.0f;
+    switchObj->buttonRaiseTimer = 0.0f;
+    switchObj->ticktockSoundLoopId = SOUND_ID_NONE;
     switchObj->ticktockPauseTimer = 0.0f;
 }
 
 void switchActivate(struct Switch* switchObj) {
-    if (switchObj->timeLeft > 0.0f) {
+    if ((switchObj->flags & SwitchFlagsDepressed) != 0 ||
+        skAnimatorIsRunning(&switchObj->animator)) {
         return;
     }
+
     soundPlayerPlay(soundsButton, 1.0f, 0.5f, &switchObj->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
     hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_DOWN, SubtitleTypeCaption);
-    switchObj->ticktockSoundLoopId = soundPlayerPlay(soundsTickTock, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
-    hudShowSubtitle(&gScene.hud, PORTAL_ROOM1_TICKTOCK, SubtitleTypeCaption);
-    switchObj->flags |= SwitchFlagsDepressed;
+
+    // Wait longer for first tick sound
     switchObj->timeLeft = switchObj->duration;
-    signalsSend(switchObj->signalIndex);
+    switchObj->ticktockPauseTimer = -(TICKTOCK_INITIAL_PAUSE_LENGTH - TICKTOCK_PAUSE_LENGTH);
+    switchObj->ticktockSoundLoopId = SOUND_ID_NONE;
+
+    switchObj->flags |= SwitchFlagsDepressed;
     skAnimatorRunClip(&switchObj->animator, dynamicAssetClip(PROPS_SWITCH001_DYNAMIC_ANIMATED_MODEL, PROPS_SWITCH001_ARMATURE_DOWN_CLIP_INDEX), 0.0f, 0);
 }
 
@@ -122,36 +132,42 @@ void switchUpdate(struct Switch* switchObj) {
     if (switchObj->collisionObject.flags & COLLISION_OBJECT_INTERACTED) {
         switchActivate(switchObj);
         switchObj->collisionObject.flags &= ~COLLISION_OBJECT_INTERACTED;
-    }   
+    }
 
-    if (switchObj->timeLeft <= 0.0f) {
-        if ((switchObj->flags & SwitchFlagsDepressed) != 0 && 
-            !skAnimatorIsRunning(&switchObj->animator)) {
+    if ((switchObj->flags & SwitchFlagsDepressed) != 0 &&
+        !skAnimatorIsRunning(&switchObj->animator)) {
+
+        if (switchObj->buttonRaiseTimer < BUTTON_RAISE_LENGTH) {
+            switchObj->buttonRaiseTimer += FIXED_DELTA_TIME;
+        } else {
+            switchObj->buttonRaiseTimer = 0.0f;
             switchObj->flags &= ~SwitchFlagsDepressed;
             skAnimatorRunClip(&switchObj->animator, dynamicAssetClip(PROPS_SWITCH001_DYNAMIC_ANIMATED_MODEL, PROPS_SWITCH001_ARMATURE_UP_CLIP_INDEX), 0.0f, 0);
         }
+    }
 
+    if (switchObj->timeLeft <= 0.0f) {
         return;
     }
 
     switchObj->timeLeft -= FIXED_DELTA_TIME;
 
-
-    
-
-    if (switchObj->timeLeft < 0.0f) {
+    if (switchObj->timeLeft <= 0.0f) {
         switchObj->timeLeft = 0.0f;
+
+        soundPlayerPlay(soundsButtonRelease, 1.0f, 0.5f, &switchObj->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+        hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_UP, SubtitleTypeCaption);
     } else {
         if (!soundPlayerIsPlaying(switchObj->ticktockSoundLoopId)){
-            if (switchObj->ticktockPauseTimer < TICKTOCK_PAUSE_LENGTH){
+            if (switchObj->ticktockPauseTimer < TICKTOCK_PAUSE_LENGTH) {
                 switchObj->ticktockPauseTimer += FIXED_DELTA_TIME;
-            }else{
-                switchObj->ticktockPauseTimer = 0; 
+            } else {
+                switchObj->ticktockPauseTimer = 0.0f;
                 switchObj->ticktockSoundLoopId = soundPlayerPlay(soundsTickTock, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
                 hudShowSubtitle(&gScene.hud, PORTAL_ROOM1_TICKTOCK, SubtitleTypeCaption);
             }
-        }else{
-            switchObj->ticktockPauseTimer = 0; 
+        } else {
+            switchObj->ticktockPauseTimer = 0.0f;
         }
 
         signalsSend(switchObj->signalIndex);

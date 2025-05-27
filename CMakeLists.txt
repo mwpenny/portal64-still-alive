@@ -3,11 +3,16 @@ project(portal64 C ASM)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(AddExternalProjectExecutable)
+include(ListOption)
 
-# TODO: remove when makefile is no longer in use
-add_compile_definitions(CMAKE)
-
-set(USING_LIBULTRA TRUE)
+list_option(AUDIO_LANGUAGES "english"
+    "Game audio languages to include"
+    "${SUPPORTED_AUDIO_LANGUAGES}"
+)
+list_option(TEXT_LANGUAGES "all"
+    "Text languages to include"
+    "${SUPPORTED_TEXT_LANGUAGES}"
+)
 
 # Programs used in build
 find_package(Blender                3.6 EXACT   REQUIRED)
@@ -24,16 +29,62 @@ find_program(VTF2PNG_EXECUTABLE     vtf2png     REQUIRED)
 # Add skeletool as external project to isolate from toolchain
 add_external_project_executable(skeletool64)
 
-# Directories
-set(ASM_DIR "${PROJECT_SOURCE_DIR}/asm")
-set(ASSETS_DIR "${PROJECT_SOURCE_DIR}/assets")
-set(SRC_DIR "${PROJECT_SOURCE_DIR}/src")
-set(VPK_DIR "${PROJECT_SOURCE_DIR}/vpk")
+# Source and asset file directories
+set(ASM_DIR            "${PROJECT_SOURCE_DIR}/asm")
+set(ASSETS_DIR         "${PROJECT_SOURCE_DIR}/assets")
+set(LINKER_DIR         "${PROJECT_SOURCE_DIR}/linker")
+set(SRC_DIR            "${PROJECT_SOURCE_DIR}/src")
+set(VPK_DIR            "${PROJECT_SOURCE_DIR}/vpk")
 
-set(PAK_DIR "${PROJECT_SOURCE_DIR}/portal_pak_dir")
-set(PAK_MODIFIED_DIR "${PROJECT_SOURCE_DIR}/portal_pak_modified")
+# Extracted/generated file output directories
+set(GENERATED_CODE_DIR "${PROJECT_BINARY_DIR}/codegen")
+set(LINKER_SCRIPT_DIR  "${PROJECT_BINARY_DIR}/ld")
+set(PAK_DIR            "${PROJECT_SOURCE_DIR}/portal_pak_dir")
+set(PAK_MODIFIED_DIR   "${PROJECT_SOURCE_DIR}/portal_pak_modified")
 
-add_subdirectory(${ASM_DIR})
+add_library(platform INTERFACE)
+find_package(Libultra REQUIRED)
+target_link_libraries(platform INTERFACE libultra::libultra)
+target_include_directories(platform INTERFACE
+    "${PROJECT_BINARY_DIR}"
+    "${PROJECT_SOURCE_DIR}/src"
+)
+
 add_subdirectory(${ASSETS_DIR})
+add_subdirectory(${ASM_DIR})
 add_subdirectory(${SRC_DIR})
+add_subdirectory(${LINKER_DIR})
 add_subdirectory(${VPK_DIR})
+
+add_library(code_segment STATIC)
+target_link_libraries(code_segment PRIVATE
+    engine
+    font_layout_tables
+    level_list
+    materials_core
+    model_lists
+    models_static
+    sound_lookup_tables
+    string_lookup_tables
+)
+
+add_executable(portal)
+target_link_libraries(portal PRIVATE
+    platform
+
+    asm
+    code_segment
+    materials_images
+    levels
+    level_animations
+    model_animations
+    models_dynamic
+    string_data_tables
+)
+
+if (N64)
+    add_dependencies(portal linker_script)
+    target_linker_script(portal "$<TARGET_PROPERTY:linker_script,SCRIPT_FILE>")
+
+    add_n64_rom(portal)
+endif()

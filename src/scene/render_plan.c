@@ -1,23 +1,20 @@
-
 #include "render_plan.h"
 
-#include "../graphics/screen_clipper.h"
-#include "../physics/collision_scene.h"
-#include "../levels/static_render.h"
-
-#include "../util/memory.h"
-#include "../math/mathf.h"
-#include "../math/matrix.h"
-
+#include "graphics/screen_clipper.h"
+#include "levels/static_render.h"
+#include "levels/levels.h"
+#include "math/mathf.h"
+#include "math/matrix.h"
+#include "physics/collision_scene.h"
 #include "portal_render.h"
-#include "../scene/dynamic_scene.h"
-#include "../levels/levels.h"
-#include "../savefile/savefile.h"
+#include "savefile/savefile.h"
+#include "scene/dynamic_scene.h"
+#include "util/memory.h"
 
-#include "../build/assets/models/portal/portal_blue.h"
-#include "../build/assets/models/portal/portal_blue_face.h"
-#include "../build/assets/models/portal/portal_orange.h"
-#include "../build/assets/models/portal/portal_orange_face.h"
+#include "codegen/assets/models/portal/portal_blue.h"
+#include "codegen/assets/models/portal/portal_blue_face.h"
+#include "codegen/assets/models/portal/portal_orange.h"
+#include "codegen/assets/models/portal/portal_orange_face.h"
 
 // if a portal takes up a small portion of the screen it is worth to clear
 // the zbuffer after drawing the contents instead of 
@@ -371,6 +368,10 @@ int renderShouldRenderOtherPortal(struct Scene* scene, int visiblePortal, struct
 
 void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderProps* properties, struct RenderState* renderState) {
     staticRenderDetermineVisibleRooms(&properties->cameraMatrixInfo.cullingInformation, properties->fromRoom, &properties->visiblerooms, 0);
+
+    if (scene->hideCurrentRoom) {
+        properties->visiblerooms &= ~(1LL << properties->fromRoom);
+    }
 
     struct Ray cameraRay;
     quatMultVector(&properties->camera.transform.rotation, &gForward, &cameraRay.dir);

@@ -1,14 +1,15 @@
 #include "intro.h"
 
+#include "audio/soundplayer.h"
+#include "graphics/image.h"
+#include "levels.h"
+#include "system/controller.h"
 #include "system/time.h"
-#include "./levels.h"
-#include "../audio/soundplayer.h"
-#include "../build/src/audio/clips.h"
-#include "../util/memory.h"
-#include "../util/rom.h"
-#include "../graphics/image.h"
-#include "../build/assets/materials/images.h"
-#include "../system/controller.h"
+#include "util/memory.h"
+#include "util/rom.h"
+
+#include "codegen/assets/audio/clips.h"
+#include "codegen/assets/materials/images.h"
 
 #define INTRO_TIME  9.0f
 

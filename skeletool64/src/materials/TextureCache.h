@@ -8,10 +8,10 @@
 
 class TextureCache {
 public:
-    std::shared_ptr<PalleteDefinition> GetPallete(const std::string& filename);
-    std::shared_ptr<TextureDefinition> GetTexture(const std::string& filename, G_IM_FMT format, G_IM_SIZ size, TextureDefinitionEffect effects, const std::string& palleteFilename);
+    std::shared_ptr<PaletteDefinition> GetPalette(const std::string& filename);
+    std::shared_ptr<TextureDefinition> GetTexture(const std::string& filename, G_IM_FMT format, G_IM_SIZ size, TextureDefinitionEffect effects, const std::string& paletteFilename);
 private:
-    std::map<std::string, std::shared_ptr<PalleteDefinition>> mPalletes;
+    std::map<std::string, std::shared_ptr<PaletteDefinition>> mPalettes;
     std::map<std::string, std::shared_ptr<TextureDefinition>> mCache;
 };
 

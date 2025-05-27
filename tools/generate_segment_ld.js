@@ -8,15 +8,20 @@ function sanitize(s) {
     return s.replace(INVALID_TOKEN_CHARACTER, '_');
 }
 
-function generateSegmentNameFromObject(objectPath) {
+function getObjectName(objectPath) {
     const { name } = path.parse(objectPath);
-    return sanitize(name);
+    return sanitize(name.split('.')[0]);
 }
 
 function generateSegmentContent(objectPath) {
+    // Use a wildcard so the linker script is configuration independent
+    // I.e., same script works for both debug and release
+    const objectMatch = `*/${getObjectName(objectPath)}.*`;
+
     return `
-        ${objectPath}(.data)
-        ${objectPath}(.bss)
+        ${objectMatch}(.data)
+        ${objectMatch}(.bss)
+        ${objectMatch}(.rodata*)
     `.trim();
 }
 
@@ -36,11 +41,12 @@ function generateSegment(segmentName, loadAddress, alignment, objectPaths) {
 
 function generateMultiSegments(loadAddress, alignment, objectPaths) {
     return objectPaths.map(objectPath => {
-        const segmentName = generateSegmentNameFromObject(objectPath);
+        const segmentName = getObjectName(objectPath);
         return generateSegment(segmentName, loadAddress, alignment, [objectPath]);
     }).join('\n');
 }
 
+// Main
 const { values, positionals } = util.parseArgs({
     options: {
         'single-segment-name': {
@@ -56,6 +62,11 @@ const { values, positionals } = util.parseArgs({
 const [outputLinkerScript, loadAddress, ...objectPaths] = positionals;
 const singleSegmentName = values['single-segment-name'];
 const alignment = values['alignment'];
+
+const outputParentDir = path.dirname(outputLinkerScript);
+if (!fs.existsSync(outputParentDir)) {
+    fs.mkdirSync(outputParentDir, { recursive: true });
+}
 
 const output = singleSegmentName ?
     generateSegment(singleSegmentName, loadAddress, alignment, objectPaths) :

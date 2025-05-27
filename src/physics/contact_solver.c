@@ -1,12 +1,11 @@
-
 #include "contact_solver.h"
-#include "system/time.h"
-#include "../math/mathf.h"
-#include "rigid_body.h"
+
 #include "collision_object.h"
 #include "collision_scene.h"
-
-#include <string.h>
+#include "system/time.h"
+#include "math/mathf.h"
+#include "rigid_body.h"
+#include "util/memory.h"
 
 #define Q3_BAUMGARTE 0.15f
 
@@ -180,9 +179,7 @@ void contactSolverCheckPortalContacts(struct ContactSolver* contactSolver) {
 
 void contactSolverInit(struct ContactSolver* contactSolver) {
 	int solverSize = sizeof(struct ContactSolver);
-	memset(contactSolver, 0, solverSize);
-
-	contactSolver->contactCapacity = MAX_CONTACT_COUNT;
+	zeroMemory(contactSolver, solverSize);
 
 	contactSolver->unusedContacts = &contactSolver->contacts[0];
 
@@ -552,6 +549,17 @@ struct ContactManifold* contactSolverNextManifold(struct ContactSolver* solver, 
 	return NULL;
 }
 
+int contactSolverActiveManifoldCount(struct ContactSolver* solver) {
+	int count = 0;
+
+	struct ContactManifold* curr = solver->activeContacts;
+	while (curr) {
+		++count;
+		curr = curr->next;
+	}
+
+	return count;
+}
 
 float contactPenetration(struct ContactManifold* contact) {
 	float result = 0;

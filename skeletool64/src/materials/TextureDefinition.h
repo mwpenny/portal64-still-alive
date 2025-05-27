@@ -32,20 +32,21 @@ struct PixelRGBAu8 {
     PixelRGBAu8(uint8_t rVal, uint8_t gVal, uint8_t bVal, uint8_t aVal);
 
     bool operator==(const PixelRGBAu8& other) const;
+    bool operator<(const PixelRGBAu8& other) const;
     
     uint8_t r;
     uint8_t g;
     uint8_t b;
     uint8_t a;
 
-    bool WriteToStream(DataChunkStream& output, G_IM_SIZ size);
+    bool WriteToStream(DataChunkStream& output, G_IM_SIZ size) const;
 };
 
 struct PixelIu8 {
     PixelIu8(uint8_t i);
     uint8_t i;
 
-    bool WriteToStream(DataChunkStream& output, G_IM_SIZ size);
+    bool WriteToStream(DataChunkStream& output, G_IM_SIZ size) const;
 };
 
 struct PixelIAu8 {
@@ -53,7 +54,7 @@ struct PixelIAu8 {
     uint8_t i;
     uint8_t a;
 
-    bool WriteToStream(DataChunkStream& output, G_IM_SIZ size);
+    bool WriteToStream(DataChunkStream& output, G_IM_SIZ size) const;
 };
 
 enum class TextureDefinitionEffect {
@@ -65,9 +66,9 @@ enum class TextureDefinitionEffect {
     SelectB = (1 << 5),
 };
 
-class PalleteDefinition {
+class PaletteDefinition {
 public:
-    PalleteDefinition(const std::string& filename);
+    PaletteDefinition(const std::string& filename);
 
     PixelIu8 FindIndex(PixelRGBAu8 color) const;
 
@@ -87,7 +88,7 @@ private:
 
 class TextureDefinition {
 public:
-    TextureDefinition(const std::string& filename, G_IM_FMT fmt, G_IM_SIZ siz, TextureDefinitionEffect effects, std::shared_ptr<PalleteDefinition> pallete);
+    TextureDefinition(const std::string& filename, G_IM_FMT fmt, G_IM_SIZ siz, TextureDefinitionEffect effects, std::shared_ptr<PaletteDefinition> palette);
     ~TextureDefinition();
 
     static void DetermineIdealFormat(const std::string& filename, G_IM_FMT& fmt, G_IM_SIZ& siz);
@@ -115,7 +116,7 @@ public:
     PixelRGBAu8 GetTwoToneMin() const;
     PixelRGBAu8 GetTwoToneMax() const;
 
-    std::shared_ptr<PalleteDefinition> GetPallete() const;
+    std::shared_ptr<PaletteDefinition> GetPalette() const;
 
     std::shared_ptr<TextureDefinition> Crop(int x, int y, int w, int h) const;
     std::shared_ptr<TextureDefinition> Resize(int w, int h) const;
@@ -125,7 +126,7 @@ private:
         const std::string& name, 
         G_IM_FMT fmt, 
         G_IM_SIZ siz, 
-        std::shared_ptr<PalleteDefinition> pallete,
+        std::shared_ptr<PaletteDefinition> palette,
         TextureDefinitionEffect effects
     );
 
@@ -136,7 +137,7 @@ private:
     int mWidth;
     int mHeight;
     std::vector<unsigned long long> mData;
-    std::shared_ptr<PalleteDefinition> mPallete;
+    std::shared_ptr<PaletteDefinition> mPalette;
     TextureDefinitionEffect mEffects;
 
     PixelRGBAu8 mTwoToneMin;

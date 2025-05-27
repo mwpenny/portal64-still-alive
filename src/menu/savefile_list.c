@@ -1,17 +1,18 @@
-#include "./savefile_list.h"
+#include "savefile_list.h"
 
-#include "../font/dejavusans.h"
-#include "../system/controller.h"
-#include "../util/rom.h"
-#include "../graphics/image.h"
-#include "../audio/soundplayer.h"
-#include "./text_manipulation.h"
-#include "./controls.h"
-#include "./translations.h"
-#include <string.h>
+#include "audio/soundplayer.h"
+#include "controls.h"
+#include "font/dejavu_sans.h"
+#include "graphics/image.h"
+#include "strings/translations.h"
+#include "system/controller.h"
+#include "text_manipulation.h"
+#include "util/rom.h"
+#include "util/string.h"
 
-#include "../build/assets/materials/ui.h"
-#include "../build/src/audio/clips.h"
+#include "codegen/assets/audio/clips.h"
+#include "codegen/assets/materials/ui.h"
+#include "codegen/assets/strings/strings.h"
 
 #define SAVE_SLOT_RENDER_W  (SAVE_SLOT_IMAGE_W * 2)
 #define SAVE_SLOT_RENDER_H  (SAVE_SLOT_IMAGE_H * 2)
@@ -38,7 +39,7 @@ void savefileListSlotUseInfo(struct SavefileListSlot* savefileListSlot, struct S
     savefileListSlot->testChamberText = menuBuildPrerenderedText(&gDejaVuSansFont, message, x + BORDER_WIDTH + 8, y, 120);
 
     if (savefileInfo->savefileName) {
-        strcpy(message, savefileInfo->savefileName);
+        strCopy(message, savefileInfo->savefileName);
     } else {
         textManipSubjectMessage(message, gSaveData.saveSlotMetadata[savefileInfo->slotIndex].testSubjectNumber);
     }

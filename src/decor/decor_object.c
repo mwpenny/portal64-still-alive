@@ -1,14 +1,16 @@
 #include "decor_object.h"
 
-#include "../physics/collision_scene.h"
-#include "../scene/dynamic_scene.h"
-#include "../util/memory.h"
-#include "../audio/soundplayer.h"
+#include "audio/soundplayer.h"
+#include "physics/collision_scene.h"
+#include "scene/dynamic_scene.h"
 #include "system/time.h"
-#include "../util/dynamic_asset_loader.h"
+#include "util/dynamic_asset_loader.h"
+#include "util/memory.h"
 
-#define TIME_TO_FIZZLE      2.0f
-#define FIZZLE_TIME_STEP    (FIXED_DELTA_TIME / TIME_TO_FIZZLE)
+#define TIME_TO_FIZZLE         2.0f
+#define FIZZLE_TIME_STEP       (FIXED_DELTA_TIME / TIME_TO_FIZZLE)
+
+#define DECOR_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
 
 Gfx* decorBuildFizzleGfx(Gfx* gfxToRender, float fizzleTime, struct RenderState* renderState) {
     if (fizzleTime <= 0.0f) {
@@ -65,15 +67,16 @@ void decorObjectReset(struct DecorObject* object) {
     object->rigidBody.transform.rotation = object->originalRotation;
     object->rigidBody.velocity = gZeroVec;
     object->rigidBody.angularVelocity = gZeroVec;
-    object->fizzleTime = 0.0f;
     object->rigidBody.flags &= ~(RigidBodyFizzled | RigidBodyDisableGravity);
     object->rigidBody.flags |= RigidBodyFlagsGrabbable;
     object->rigidBody.currentRoom = object->originalRoom;
+    object->fizzleTime = 0.0f;
+    object->collisionObject.collisionLayers = DECOR_COLLISION_LAYERS;
 }
 
 void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* definition, struct Transform* at, int room) {
     if (definition->colliderType.type != CollisionShapeTypeNone) {
-        collisionObjectInit(&object->collisionObject, &definition->colliderType, &object->rigidBody, definition->mass, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_FIZZLER);
+        collisionObjectInit(&object->collisionObject, &definition->colliderType, &object->rigidBody, definition->mass, DECOR_COLLISION_LAYERS);
         collisionSceneAddDynamicObject(&object->collisionObject);
     } else {
         rigidBodyInit(&object->rigidBody, 1.0f, 1.0f);
@@ -133,14 +136,15 @@ enum FizzleCheckResult decorObjectUpdateFizzler(struct CollisionObject* collisio
 
             result = FizzleCheckResultStart;
 
-            collisionObject->collisionLayers = 0;
+            collisionObject->body->flags &= ~RigidBodyFlagsGrabbable;
+            collisionObject->body->flags |= RigidBodyDisableGravity;
         }
 
-        *fizzleTime += FIZZLE_TIME_STEP;
-        collisionObject->body->flags &= ~RigidBodyFlagsGrabbable;
-        collisionObject->body->flags |= RigidBodyDisableGravity;
+        collisionObject->collisionLayers = 0;
 
-        if (*fizzleTime > 1.0f) {
+        if (*fizzleTime < 1.0f) {
+            *fizzleTime += FIZZLE_TIME_STEP;
+        } else {
             result = FizzleCheckResultEnd;
         }
     }
@@ -167,10 +171,10 @@ int decorObjectUpdate(struct DecorObject* decorObject) {
         if (decorObject->playingSound != SOUND_ID_NONE) {
             soundPlayerStop(decorObject->playingSound);
             decorObject->playingSound = SOUND_ID_NONE;
-            
-            if (decorObject->definition->soundFizzleId != SOUND_ID_NONE) {
-                decorObject->playingSound = soundPlayerPlay(decorObject->definition->soundFizzleId, 2.0f, 0.5f, &decorObject->rigidBody.transform.position, &decorObject->rigidBody.velocity, SoundTypeAll);
-            }
+        }
+
+        if (decorObject->definition->soundFizzleId != SOUND_ID_NONE) {
+            decorObject->playingSound = soundPlayerPlay(decorObject->definition->soundFizzleId, 2.0f, 0.5f, &decorObject->rigidBody.transform.position, &decorObject->rigidBody.velocity, SoundTypeAll);
         }
     } else if (fizzleResult == FizzleCheckResultEnd) {
         if (decorObject->definition->flags & DecorObjectFlagsImportant) {

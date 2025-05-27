@@ -1,6 +1,6 @@
 cutscenes:
   START:
-    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
+    - q_sound AMBIENCE_BASE CH_AMBIENT StringIdNone 0.55
     - start_cutscene CHECK_STAIRS
     - start_cutscene CHECK_CUBE_ON_PISTON
     - start_cutscene CHECK_CUBE_OFF_BUTTON
@@ -54,7 +54,11 @@ cutscenes:
   DOOR_ROOM:
     - save_checkpoint
   DROWN_PLAYER:
-    - kill_player water
+    - label drown_loop
+    - wait_for_signal player_in_goo
+    - damage_player 25
+    - delay 0.5
+    - goto drown_loop
 operators:
   - not_on_piston = not on_piston
   - not_cube_near_button = not cube_near_button

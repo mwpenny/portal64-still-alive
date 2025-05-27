@@ -1,17 +1,15 @@
 #include "signage.h"
 
-#include "../scene/dynamic_scene.h"
-#include "../levels/levels.h"
-#include "../defs.h"
-#include "../graphics/color.h"
+#include "defs.h"
+#include "graphics/color.h"
+#include "levels/levels.h"
+#include "scene/dynamic_scene.h"
 #include "system/time.h"
 
-#include "../build/assets/models/props/signage.h"
-#include "../build/assets/models/props/cylinder_test.h"
-#include "../../build/assets/materials/static.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/props/cylinder_test.h"
+#include "codegen/assets/models/props/signage.h"
 
-                                                            
-#include <stdlib.h>   
 
 struct SignStateFrame {
     u8 backlightColor:2;
@@ -123,6 +121,8 @@ short gLevelWarnings[] = {
     LevelWarningsCubeDispense | LevelWarningsCubeHit | LevelWarningsSpeedyIn | LevelWarningsSpeedyOut,
     LevelWarningsCubeHit | LevelWarningsBallHit | LevelWarningsBallCollect,
     LevelWarningsCubeHit | LevelWarningsBallHit | LevelWarningsBallCollect | LevelWarningsLiquid | LevelWarningsDrinking | LevelWarningsSpeedyIn | LevelWarningsSpeedyOut,
+    LevelWarningsBallHit | LevelWarningsBallCollect | LevelWarningsLiquid | LevelWarningsSpeedyIn | LevelWarningsSpeedyOut | LevelWarningsDrinking,
+    LevelWarningsCubeDispense | LevelWarningsCubeHit | LevelWarningsTurret,
 };
 
 static struct Coloru8 gBacklightColors[] = {

@@ -2,8 +2,11 @@
 #define __FONT_FONT_H__
 
 #include <ultra64.h>
-#include "../math/vector2s16.h"
-#include "../graphics/color.h"
+
+#include "graphics/color.h"
+#include "math/vector2s16.h"
+
+#include "codegen/assets/strings/strings.h"
 
 struct FontKerning {
     char amount;
@@ -46,7 +49,7 @@ struct SymbolLocation {
     char imageIndex;
 };
 
-#define FONT_RENDERER_MAX_SYBMOLS   340
+#define FONT_RENDERER_MAX_SYBMOLS   MAX_STRING_LENGTH
 
 struct FontRenderer {
     struct SymbolLocation symbols[FONT_RENDERER_MAX_SYBMOLS];

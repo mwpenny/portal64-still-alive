@@ -63,7 +63,7 @@ enum CutsceneStepType {
     CutsceneStepSetAnimationSpeed,
     CutsceneStepWaitForAnimation,
     CutsceneStepSaveCheckpoint,
-    CutsceneStepKillPlayer,
+    CutsceneStepDamagePlayer,
     CutsceneStepTypeClosePortal,
     CutsceneStepShowPrompt,
     CutsceneStepRumble,
@@ -157,8 +157,8 @@ struct CutsceneStep {
             u8 armatureIndex;
         } waitForAnimation;
         struct {
-            u8 isWater;
-        } killPlayer;
+            float amount;
+        } damagePlayer;
         struct {
             u8 actionPromptType;
         } showPrompt;
@@ -190,10 +190,16 @@ struct ObjectTriggerInfo {
     short signalIndex;
 };
 
+enum TriggerType {
+    TriggerTypeContain,
+    TriggerTypeTouch
+};
+
 struct Trigger {
     struct Box3D box;
     struct ObjectTriggerInfo* triggers;
     short triggerCount;
+    enum TriggerType type;
 };
 
 struct Location {
@@ -323,6 +329,12 @@ struct SecurityCameraDefinition {
     short roomIndex;
 };
 
+struct TurretDefinition {
+    struct Vector3 position;
+    struct Quaternion rotation;
+    short roomIndex;
+};
+
 struct LevelDefinition {
     struct CollisionObject* collisionQuads;
     struct StaticContentElement* staticContent;
@@ -357,6 +369,7 @@ struct LevelDefinition {
     struct BallCatcherDefinition* ballCatchers;
     struct ClockDefinition* clocks;
     struct SecurityCameraDefinition* securityCameras;
+    struct TurretDefinition* turrets;
     short collisionQuadCount;
     short staticContentCount;
     short signalToStaticCount;
@@ -380,6 +393,7 @@ struct LevelDefinition {
     short ballCatcherCount;
     short clockCount;
     short securityCameraCount;
+    short turretCount;
     short startLocation;
     short playerAnimatorIndex;
 };

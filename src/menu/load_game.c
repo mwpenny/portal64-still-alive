@@ -1,14 +1,14 @@
 #include "load_game.h"
 
-#include "../savefile/savefile.h"
-#include "../system/controller.h"
-#include "../levels/levels.h"
-#include "../util/memory.h"
-#include "../audio/soundplayer.h"
-#include "./translations.h"
+#include "audio/soundplayer.h"
+#include "levels/levels.h"
+#include "savefile/savefile.h"
+#include "strings/translations.h"
+#include "system/controller.h"
+#include "util/memory.h"
 
-#include "../build/src/audio/clips.h"
-#include "../build/src/audio/subtitles.h"
+#include "codegen/assets/audio/clips.h"
+#include "codegen/assets/strings/strings.h"
 
 void loadGameMenuInit(struct LoadGameMenu* loadGame, struct SavefileListMenu* savefileList) {
     loadGame->savefileList = savefileList;

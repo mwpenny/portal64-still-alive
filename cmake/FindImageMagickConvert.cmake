@@ -10,7 +10,7 @@ include(FindPackageHandleStandardArgs)
 
 find_program(ImageMagickConvert_EXECUTABLE convert)
 
-if(ImageMagickConvert_EXECUTABLE)
+if (ImageMagickConvert_EXECUTABLE)
     execute_process(
         COMMAND
             ${ImageMagickConvert_EXECUTABLE} -version
@@ -24,7 +24,7 @@ if(ImageMagickConvert_EXECUTABLE)
 
     if (NOT VERSION_COMMAND_RC EQUAL 0)
         message(SEND_ERROR "Error getting ImageMagick version: ${VERSION_COMMAND_ERROR}")
-    elseif(VERSION_COMMAND_OUTPUT MATCHES "^Version: ImageMagick ([-0-9\\.]+)")
+    elseif (VERSION_COMMAND_OUTPUT MATCHES "^Version: ImageMagick ([-0-9\\.]+)")
         set(VERSION_NUMBER "${CMAKE_MATCH_1}")
     endif()
 endif()

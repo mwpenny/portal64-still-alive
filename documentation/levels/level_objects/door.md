@@ -2,7 +2,7 @@
 
 A sliding door which can open or close in response to a [signal](../signals.md).
 
-## Name structure
+## Name Structure
 
 ```
 @door OPEN_SIGNAL_NAME [TYPE]

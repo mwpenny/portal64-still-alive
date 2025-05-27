@@ -1,10 +1,11 @@
 #include "dynamic_asset_loader.h"
+
+#include "graphics/profile_task.h"
 #include "memory.h"
 #include "rom.h"
-#include "../graphics/profile_task.h"
 
-#include "../build/assets/models/dynamic_model_list.h"
-#include "../build/assets/models/dynamic_animated_model_list.h"
+#include "codegen/assets/models/dynamic_model_list.h"
+#include "codegen/assets/models/dynamic_animated_model_list.h"
 
 Gfx* gLoadedModels[DYNAMIC_MODEL_COUNT];
 u32 gModelPointerOffset[DYNAMIC_MODEL_COUNT];
@@ -68,6 +69,7 @@ Gfx* dynamicAssetFixModelPointers(Gfx* gfx, u32 pointerOffset, u32 segmentStart,
                 gfx->dma.addr = (u32)dynamicAssetFixModelPointers((Gfx*)gfx->dma.addr, pointerOffset, segmentStart, segmentEnd);
                 break;
             case G_VTX:
+            case G_SETTIMG:
                 gfx->dma.addr = (u32)ADJUST_POINTER_POS(gfx->dma.addr, pointerOffset);
                 break;
         };

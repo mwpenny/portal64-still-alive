@@ -1,11 +1,9 @@
 #ifndef __SCENE_TRIGGER_LISTENER_H__
 #define __SCENE_TRIGGER_LISTENER_H__
 
-#include "../physics/collision_object.h"
-#include "../physics/collision_box.h"
-
-#include "../levels/level_definition.h"
-
+#include "levels/level_definition.h"
+#include "physics/collision_box.h"
+#include "physics/collision_object.h"
 
 struct TriggerListener {
     struct CollisionObject collisionObject;

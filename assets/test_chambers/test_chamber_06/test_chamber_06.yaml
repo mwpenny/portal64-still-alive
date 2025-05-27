@@ -2,7 +2,7 @@ operators:
   []
 cutscenes:
   OPEN_FIRST_DOOR:
-    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
+    - q_sound AMBIENCE_BASE CH_AMBIENT StringIdNone 0.55
     - set_signal room_0_exit
   FIRST_ROOM:
     - activate_signage 10
@@ -12,7 +12,7 @@ cutscenes:
     - delay 2
     - open_portal first_room_portal 0
     - wait_for_channel CH_GLADOS
-    - q_sound PORTAL_SELF_ESTEEM_FUND CH_MUSIC SubtitleKeyNone
+    - q_sound PORTAL_SELF_ESTEEM_FUND CH_MUSIC
   SECOND_ROOM:
     - close_portal 0
     - close_portal 1

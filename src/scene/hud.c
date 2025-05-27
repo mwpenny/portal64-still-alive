@@ -1,13 +1,17 @@
 #include "hud.h"
 
-#include "../../build/assets/materials/hud.h"
-#include "../menu/controls.h"
-#include "../graphics/graphics.h"
+#include "graphics/graphics.h"
+#include "levels/levels.h"
+#include "menu/controls.h"
+#include "savefile/savefile.h"
+#include "scene.h"
+#include "strings/translations.h"
 #include "system/time.h"
-#include "../levels/levels.h"
-#include "./scene.h"
-#include "../savefile/savefile.h"
-#include "../menu/translations.h"
+
+#include "codegen/assets/materials/hud.h"
+
+static struct Coloru8 sCrosshairOrange = { 255, 128, 0, 255 };
+static struct Coloru8 sCrosshairBlue = { 0, 128, 255, 255 };
 
 #define HUD_CENTER_WIDTH 6
 #define HUD_CENTER_HEIGHT 8
@@ -37,12 +41,10 @@
 #define SUBTITLE_FAST_FADE_TIME        0.25f
 #define CAPTION_EXPIRE_TIME            1.5f
 
-
-
 void hudInit(struct Hud* hud) {
     hud->promptType = CutscenePromptTypeNone;
-    hud->subtitleKey = SubtitleKeyNone;
-    hud->queuedSubtitleKey = SubtitleKeyNone;
+    hud->subtitleId = StringIdNone;
+    hud->queuedSubtitleId = StringIdNone;
     hud->subtitleType = SubtitleTypeNone;
     hud->queuedSubtitleType = SubtitleTypeNone;
     hud->promptOpacity = 0.0f;
@@ -52,21 +54,15 @@ void hudInit(struct Hud* hud) {
     hud->flags = 0;
     hud->resolvedPrompts = 0;
     hud->lastPortalIndexShot = -1;
-
-    if (gCurrentLevelIndex == 0) {
-        hud->fadeInTimer = INTRO_TOTAL_TIME;
-    } else {
-        hud->fadeInTimer = 0.0f;
-    }
+    hud->overlayTimer = 0.0f;
 }
 
-
 void hudUpdate(struct Hud* hud) {
-    if (hud->fadeInTimer > 0.0f) {
-        hud->fadeInTimer -= FIXED_DELTA_TIME;
+    if (hud->overlayTimer > 0.0f) {
+        hud->overlayTimer -= FIXED_DELTA_TIME;
 
-        if (hud->fadeInTimer < 0.0f) {
-            hud->fadeInTimer = 0.0f;
+        if (hud->overlayTimer < 0.0f) {
+            hud->overlayTimer = 0.0f;
         }
     }
 
@@ -94,14 +90,17 @@ void hudUpdate(struct Hud* hud) {
         if (!((hud->subtitleType == SubtitleTypeCaption) && (hud->queuedSubtitleType == SubtitleTypeCaption) && (hud->subtitleExpireTimer > 0.0))){
             hud->flags &= ~HudFlagsSubtitleQueued;
             hud->flags |= HudFlagsShowingSubtitle;
-            hud->subtitleKey = hud->queuedSubtitleKey;
-            hud->subtitleType= hud->queuedSubtitleType;
-            hud->queuedSubtitleKey = SubtitleKeyNone;
+            hud->subtitleId = hud->queuedSubtitleId;
+            hud->subtitleType = hud->queuedSubtitleType;
+            hud->queuedSubtitleId = StringIdNone;
             hud->queuedSubtitleType = SubtitleTypeNone;
             if (hud->subtitleType == SubtitleTypeCaption){
                 hud->subtitleExpireTimer = CAPTION_EXPIRE_TIME;
             }
         }
+    } else if (hud->subtitleOpacity <= 0.0f && !(hud->flags & HudFlagsSubtitleQueued)) {
+        // Allow queuing same subtitle again
+        hud->subtitleId = StringIdNone;
     }
 
     if (hud->subtitleExpireTimer <= 0.0f && hud->subtitleType == SubtitleTypeCaption){
@@ -177,11 +176,11 @@ void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType) {
     hud->promptType = promptType;
 }
 
-void hudShowSubtitle(struct Hud* hud, enum SubtitleKey subtitleKey, enum SubtitleType subtitleType) {
+void hudShowSubtitle(struct Hud* hud, enum StringId subtitleId, enum SubtitleType subtitleType) {
     if (!(gSaveData.controls.flags & ControlSaveSubtitlesEnabled || gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled)){
         return;
     }
-    if (subtitleKey == hud->subtitleKey){
+    if (subtitleId == hud->subtitleId) {
         return;
     }
 
@@ -189,7 +188,7 @@ void hudShowSubtitle(struct Hud* hud, enum SubtitleKey subtitleKey, enum Subtitl
         hud->flags &= ~HudFlagsShowingSubtitle;
         hud->flags &= ~HudFlagsSubtitleQueued;
         hud->queuedSubtitleType = SubtitleTypeNone;
-        hud->queuedSubtitleKey = SubtitleKeyNone;
+        hud->queuedSubtitleId = StringIdNone;
         hud->subtitleFadeTime = SUBTITLE_SLOW_FADE_TIME;
         return;
     }
@@ -202,16 +201,16 @@ void hudShowSubtitle(struct Hud* hud, enum SubtitleKey subtitleKey, enum Subtitl
         }
         else if ((hud->flags & HudFlagsShowingSubtitle) && (hud->subtitleType <= subtitleType)){
             hud->flags |= HudFlagsSubtitleQueued;
-            hud->queuedSubtitleKey = subtitleKey;
+            hud->queuedSubtitleId = subtitleId;
             hud->queuedSubtitleType = subtitleType;
             hud->subtitleFadeTime = SUBTITLE_FAST_FADE_TIME;
         }
         else{
             hud->flags |= HudFlagsShowingSubtitle;
-            hud->subtitleKey = subtitleKey;
+            hud->subtitleId = subtitleId;
             hud->subtitleType = subtitleType;
             hud->queuedSubtitleType = SubtitleTypeNone;
-            hud->queuedSubtitleKey = SubtitleKeyNone;
+            hud->queuedSubtitleId = StringIdNone;
             hud->subtitleFadeTime = SUBTITLE_SLOW_FADE_TIME;
             hud->subtitleExpireTimer = CAPTION_EXPIRE_TIME;
         }
@@ -220,17 +219,17 @@ void hudShowSubtitle(struct Hud* hud, enum SubtitleKey subtitleKey, enum Subtitl
     else if (subtitleType == SubtitleTypeCloseCaption) {
         if (hud->flags & HudFlagsShowingSubtitle){
             hud->flags |= HudFlagsSubtitleQueued;
-            hud->queuedSubtitleKey = subtitleKey;
+            hud->queuedSubtitleId = subtitleId;
             hud->queuedSubtitleType = subtitleType;
             hud->subtitleFadeTime = SUBTITLE_FAST_FADE_TIME;
         }
         else{
             hud->flags |= HudFlagsShowingSubtitle;
             hud->flags &= ~HudFlagsSubtitleQueued;
-            hud->subtitleKey = subtitleKey;
+            hud->subtitleId = subtitleId;
             hud->subtitleType = subtitleType;
             hud->queuedSubtitleType = SubtitleTypeNone;
-            hud->queuedSubtitleKey = SubtitleKeyNone;
+            hud->queuedSubtitleId = StringIdNone;
             hud->subtitleFadeTime = SUBTITLE_SLOW_FADE_TIME;
         }
         return;
@@ -247,122 +246,123 @@ void hudResolveSubtitle(struct Hud* hud) {
     hud->subtitleFadeTime = SUBTITLE_SLOW_FADE_TIME;
 }
 
+void hudShowColoredOverlay(struct Hud* hud, struct Coloru8* color, float duration, float fadeStartTime) {
+    hud->overlayColor = *color;
+    hud->overlayTimer = duration;
+    hud->overlayFadeStartTime = fadeStartTime;
+}
+
+int hudOverlayVisible(struct Hud* hud, struct Player* player) {
+    return hud->overlayTimer > 0.0f || player->health < PLAYER_MAX_HEALTH;
+}
+
 void hudRender(struct Hud* hud, struct Player* player, struct RenderState* renderState) {
-    if (player->flags & PlayerIsDead) {
-        gSPDisplayList(renderState->dl++, hud_death_overlay);
+    if (player->health < PLAYER_MAX_HEALTH) {
+        float alpha = 1.0f - (player->health * (1.0f / PLAYER_MAX_HEALTH));
+
+        gSPDisplayList(renderState->dl++, hud_overlay);
+        gDPSetPrimColor(renderState->dl++, 255, 255, 255, 0, 0, (u8)(128.0f * alpha));
         gDPFillRectangle(renderState->dl++, 0, 0, SCREEN_WD, SCREEN_HT);
-        gSPDisplayList(renderState->dl++, hud_death_overlay_revert);
+        gSPDisplayList(renderState->dl++, hud_overlay_revert);
     }
 
-    if (hud->fadeInTimer > 0.0f) {
+    if (hud->overlayTimer > 0.0f) {
         float alpha = 0.0f;
 
-        if (hud->fadeInTimer > INTRO_FADE_TIME) {
+        if (hud->overlayTimer > hud->overlayFadeStartTime) {
             alpha = 1.0f;
         } else {
-            alpha = hud->fadeInTimer * (1.0f / INTRO_FADE_TIME);
+            alpha = hud->overlayTimer * (1.0f / hud->overlayFadeStartTime);
         }
 
         if (alpha >= 0.0f) {
-            gSPDisplayList(renderState->dl++, hud_death_overlay);
-            gDPSetPrimColor(renderState->dl++, 0, 0, 0, 0, 0, (u8)(255.0f * alpha));
+            gSPDisplayList(renderState->dl++, hud_overlay);
+            gDPSetPrimColor(renderState->dl++, 0, 0, hud->overlayColor.r, hud->overlayColor.g, hud->overlayColor.b, (u8)(255.0f * alpha));
             gDPFillRectangle(renderState->dl++, 0, 0, SCREEN_WD, SCREEN_HT);
-            gSPDisplayList(renderState->dl++, hud_death_overlay_revert);
+            gSPDisplayList(renderState->dl++, hud_overlay_revert);
         }
     }
 
     gSPDisplayList(renderState->dl++, hud_material_list[PORTAL_CROSSHAIRS_INDEX]);
 
-    int position_of_left_asset = 0; // position from original image to clip out left hud asset
-    int position_of_right_asset = HUD_OUTER_WIDTH; // position from original image to clip out right hud asset
-    int position_of_portal_indicator = HUD_OUTER_WIDTH*4;
+    if (player->flags & PlayerHasFirstPortalGun) {
+        int leftTilePos = 0;
+        int rightTilePos = HUD_OUTER_WIDTH;
+        int indicatorScreenPos = -1;
 
-    // white hud because player is grabbing
-    if ((playerIsGrabbing(player)) && (player->flags & PlayerHasFirstPortalGun) ){
-        gDPSetPrimColor(renderState->dl++, 255, 255, 255, 255, 255, 255);
-        gSPTextureRectangle(renderState->dl++, 
+        struct Coloru8* leftColor;
+        struct Coloru8* rightColor;
+        struct Coloru8* indicatorColor;
+
+        if (playerIsGrabbing(player)) {
+            leftColor = &gColorWhite;
+            rightColor = &gColorWhite;
+        } else if (!(player->flags & PlayerHasSecondPortalGun)) {
+            // Unupgraded portal gun
+            leftColor = &sCrosshairBlue;
+            rightColor = &sCrosshairBlue;
+
+            if (hud->flags & HudFlagsLookedPortalable1) {
+                leftTilePos = HUD_OUTER_WIDTH * 2;
+                rightTilePos = HUD_OUTER_WIDTH * 3;
+            }
+        } else {
+            // Fully upgraded portal gun
+            leftColor = &sCrosshairOrange;
+            rightColor = &sCrosshairBlue;
+
+            if (hud->flags & HudFlagsLookedPortalable0) {
+                leftTilePos = HUD_OUTER_WIDTH * 2;
+            }
+            if (hud->flags & HudFlagsLookedPortalable1) {
+                rightTilePos = HUD_OUTER_WIDTH * 3;
+            }
+
+            if (hud->lastPortalIndexShot == 0) {
+                indicatorScreenPos = HUD_LOWER_X - 68;
+                indicatorColor = leftColor;
+            } else if (hud->lastPortalIndexShot == 1) {
+                indicatorScreenPos = HUD_UPPER_X + 100;
+                indicatorColor = rightColor;
+            }
+        }
+
+        gDPSetPrimColor(renderState->dl++, 255, 255, leftColor->r, leftColor->g, leftColor->b, leftColor->a);
+        gSPTextureRectangle(renderState->dl++,
             HUD_UPPER_X, HUD_UPPER_Y,
-            HUD_UPPER_X + (HUD_OUTER_WIDTH << 2), HUD_UPPER_Y + (HUD_OUTER_HEIGHT << 2), 
-            G_TX_RENDERTILE, position_of_left_asset << 5, 0 << 5, 1 << 10, 1 << 10);
-        gSPTextureRectangle(renderState->dl++, 
-                HUD_LOWER_X, HUD_LOWER_Y,
-                HUD_LOWER_X + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2), 
-                G_TX_RENDERTILE, position_of_right_asset << 5, 0 << 5, 1 << 10, 1 << 10);
-    }
-    // else blue and orange logic
-    else{
-        //blue drawing
-        if (player->flags & PlayerHasFirstPortalGun){
-            gDPSetPrimColor(renderState->dl++, 255, 255, 0, 128, 255, 255);
-            if (hud->flags & HudFlagsLookedPortalable1){
-                position_of_right_asset = (HUD_OUTER_WIDTH*3);
-            }
-            gSPTextureRectangle(renderState->dl++, 
-                HUD_LOWER_X, HUD_LOWER_Y,
-                HUD_LOWER_X + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2), 
-                G_TX_RENDERTILE, position_of_right_asset << 5, 0 << 5, 1 << 10, 1 << 10);
-            
-            // if the player has the first gun but not second both left and right are blue
-            if (!(player->flags & PlayerHasSecondPortalGun)){
-                if (hud->flags & HudFlagsLookedPortalable1){
-                    position_of_left_asset = (HUD_OUTER_WIDTH*2);
-                }   
-                gSPTextureRectangle(renderState->dl++, 
-                    HUD_UPPER_X, HUD_UPPER_Y,
-                    HUD_UPPER_X + (HUD_OUTER_WIDTH << 2), HUD_UPPER_Y + (HUD_OUTER_HEIGHT << 2),
-                    G_TX_RENDERTILE, position_of_left_asset << 5, 0 << 5, 1 << 10, 1 << 10);
-            }
-            
-        }
-        //orange drawing
-        if (player->flags & PlayerHasSecondPortalGun){
-            gDPSetPrimColor(renderState->dl++, 255, 255, 255, 128, 0, 255);
-            if (hud->flags & HudFlagsLookedPortalable0){
-                position_of_left_asset = (HUD_OUTER_WIDTH*2);
-            }
-            gSPTextureRectangle(renderState->dl++, 
-                HUD_UPPER_X, HUD_UPPER_Y,
-                HUD_UPPER_X + (HUD_OUTER_WIDTH << 2), HUD_UPPER_Y + (HUD_OUTER_HEIGHT << 2), 
-                G_TX_RENDERTILE, position_of_left_asset << 5, 0 << 5, 1 << 10, 1 << 10);
-        }
-    }
-    
+            HUD_UPPER_X + (HUD_OUTER_WIDTH << 2), HUD_UPPER_Y + (HUD_OUTER_HEIGHT << 2),
+            G_TX_RENDERTILE, leftTilePos << 5, 0 << 5, 1 << 10, 1 << 10);
+        gDPSetPrimColor(renderState->dl++, 255, 255, rightColor->r, rightColor->g, rightColor->b, rightColor->a);
+        gSPTextureRectangle(renderState->dl++,
+            HUD_LOWER_X, HUD_LOWER_Y,
+            HUD_LOWER_X + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2),
+            G_TX_RENDERTILE, rightTilePos << 5, 0 << 5, 1 << 10, 1 << 10);
 
-    // both portal guns owned is only time when the last shot portal indicator appears
-    if ((player->flags & PlayerHasSecondPortalGun) && (player->flags & PlayerHasFirstPortalGun) && hud->lastPortalIndexShot != -1){
-        //orange indicator
-        if (hud->lastPortalIndexShot == 0){
-            gDPSetPrimColor(renderState->dl++, 255, 255, 255, 128, 0, 255);
-            gSPTextureRectangle(renderState->dl++, 
-                HUD_LOWER_X - 68, HUD_LOWER_Y,
-                HUD_LOWER_X - 68 + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2), 
-                G_TX_RENDERTILE, position_of_portal_indicator << 5, 0 << 5, 1 << 10, 1 << 10);
-        }
-        //blue indicator
-        else if (hud->lastPortalIndexShot == 1){
-            gDPSetPrimColor(renderState->dl++, 255, 255, 0, 128, 255, 255);
-            gSPTextureRectangle(renderState->dl++, 
-                HUD_UPPER_X + 100, HUD_LOWER_Y,
-                HUD_UPPER_X + 100 + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2), 
-                G_TX_RENDERTILE, position_of_portal_indicator << 5, 0 << 5, 1 << 10, 1 << 10);
+        if (indicatorScreenPos != -1) {
+            gDPSetPrimColor(renderState->dl++, 255, 255, indicatorColor->r, indicatorColor->g, indicatorColor->b, indicatorColor->a);
+            gSPTextureRectangle(renderState->dl++,
+                indicatorScreenPos, HUD_LOWER_Y,
+                indicatorScreenPos + (HUD_OUTER_WIDTH << 2), HUD_LOWER_Y + (HUD_OUTER_HEIGHT << 2),
+                G_TX_RENDERTILE, (HUD_OUTER_WIDTH * 4) << 5, 0 << 5, 1 << 10, 1 << 10);
         }
     }
 
-    if (hud->fadeInTimer <= 0.0f) {
-        // center reticle is drawn over top everything
+    if ((!playerIsDead(player) && !(player->flags & PlayerInCutscene)) &&
+        (gCurrentLevelIndex > 0 || hud->overlayTimer <= 0.0f)) {
+        // Center reticle is drawn over top everything
         gSPDisplayList(renderState->dl++, hud_material_list[CENTER_RETICLE_INDEX]);
         gDPSetPrimColor(renderState->dl++, 255, 255, 210, 210, 210, 255);
-        gSPTextureRectangle(renderState->dl++, 
-                RETICLE_XMIN, RETICLE_YMIN,
-                RETICLE_XMIN + (RETICLE_WIDTH << 2), RETICLE_YMIN + (RETICLE_HEIGHT << 2), 
-                G_TX_RENDERTILE, 0 << 5, 0 << 5, 1 << 10, 1 << 10);
+        gSPTextureRectangle(renderState->dl++,
+            RETICLE_XMIN, RETICLE_YMIN,
+            RETICLE_XMIN + (RETICLE_WIDTH << 2), RETICLE_YMIN + (RETICLE_HEIGHT << 2),
+            G_TX_RENDERTILE, 0 << 5, 0 << 5, 1 << 10, 1 << 10);
     }
 
     if (hud->promptOpacity > 0.0f && hud->promptType != CutscenePromptTypeNone) {
         controlsRenderPrompt(gPromptActions[hud->promptType], translationsGet(gPromptText[hud->promptType]), hud->promptOpacity, renderState);
     }
 
-    if (hud->subtitleOpacity > 0.0f && (gSaveData.controls.flags & ControlSaveSubtitlesEnabled || gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled) && hud->subtitleKey != SubtitleKeyNone) {
-        controlsRenderSubtitle(translationsGet(hud->subtitleKey), hud->subtitleOpacity, hud->backgroundOpacity, renderState, hud->subtitleType);
+    if (hud->subtitleOpacity > 0.0f && (gSaveData.controls.flags & ControlSaveSubtitlesEnabled || gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled) && hud->subtitleId != StringIdNone) {
+        controlsRenderSubtitle(translationsGet(hud->subtitleId), hud->subtitleOpacity, hud->backgroundOpacity, renderState, hud->subtitleType);
     }
 }

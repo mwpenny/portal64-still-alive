@@ -1,29 +1,22 @@
-# TODO: generated code
-# TODO: linking
-add_executable(portal)
-
-set_target_properties(portal PROPERTIES COMPILE_WARNING_AS_ERROR ON)
-
-target_include_directories(portal PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-
-# Generated code
-target_link_libraries(portal
-    asm_sources
-    levels
-    materials
-    models
-    sound_lookup_tables
-    strings
-)
-
 ###############
 ## Game code ##
 ###############
 
-# TODO: file sets, headers
-target_sources(portal PRIVATE
+option(DEBUGGER      "Build with support for hardware debugging")
+option(GFX_VALIDATOR "Build with display list validator")
+option(RSP_PROFILER  "Build with RSP performance profiler")
+
+add_library(engine INTERFACE)
+
+target_include_directories(engine INTERFACE
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+target_link_libraries(engine INTERFACE
+    platform
+)
+
+target_sources(engine INTERFACE
     audio/audio.c
     audio/audiomgr.c
     audio/clips.c
@@ -37,10 +30,8 @@ target_sources(portal PRIVATE
     effects/effects.c
     effects/portal_trail.c
     effects/splash_particle_effect.c
-    font/dejavusans.c
-    font/dejavusans_images.c
+    font/dejavu_sans_images.c
     font/font.c
-    font/liberation_mono.c
     font/liberation_mono_images.c
     graphics/color.c
     graphics/debug_render.c
@@ -97,7 +88,6 @@ target_sources(portal PRIVATE
     menu/savefile_list.c
     menu/tabs.c
     menu/text_manipulation.c
-    menu/translations.c
     menu/video_options.c
     physics/collision.c
     physics/collision_box.c
@@ -114,6 +104,7 @@ target_sources(portal PRIVATE
     physics/epa.c
     physics/gjk.c
     physics/line.c
+    physics/compound_collider.c
     physics/mesh_collider.c
     physics/point_constraint.c
     physics/raycasting.c
@@ -133,12 +124,14 @@ target_sources(portal PRIVATE
     scene/button.c
     scene/camera.c
     scene/clock.c
+    scene/debug_scene.c
     scene/door.c
     scene/dynamic_render_list.c
     scene/dynamic_scene.c
     scene/elevator.c
     scene/fizzler.c
     scene/hud.c
+    scene/laser.c
     scene/pedestal.c
     scene/point_light.c
     scene/portal.c
@@ -158,25 +151,57 @@ target_sources(portal PRIVATE
     scene/static_scene.c
     scene/switch.c
     scene/trigger_listener.c
+    scene/turret.c
     sk64/skeletool_animator.c
     sk64/skeletool_armature.c
+    strings/translations.c
     util/assert.c
     util/dynamic_asset_loader.c
     util/memory.c
     util/profile.c
     util/rom.c
+    util/string.c
 )
+
+if (DEBUGGER)
+    target_sources(engine INTERFACE
+        debugger/debug.c
+        debugger/usb.c
+    )
+    target_compile_definitions(engine INTERFACE
+        PORTAL64_WITH_DEBUGGER
+    )
+endif()
+
+if (GFX_VALIDATOR)
+    target_sources(engine INTERFACE
+        gfxvalidator/command_printer.c
+        gfxvalidator/error_printer.c
+        gfxvalidator/validator.c
+    )
+    target_compile_definitions(engine INTERFACE
+        PORTAL64_WITH_GFX_VALIDATOR
+    )
+endif()
+
+if (RSP_PROFILER)
+    target_compile_definitions(engine INTERFACE
+        PORTAL64_WITH_RSP_PROFILER
+    )
+endif()
 
 #########################
 ## Version information ##
 #########################
 
 set(GEN_VERSION_HEADER "${PROJECT_SOURCE_DIR}/cmake/GenVersionHeader.cmake")
-set(VERSION_H "${PROJECT_BINARY_DIR}/version.h")
+set(VERSION_H          "${GENERATED_CODE_DIR}/version.h")
 
-add_custom_target(gen_version_header
+add_custom_target(version_header
     DEPENDS
         ${GEN_VERSION_HEADER}
+    BYPRODUCTS
+        ${VERSION_H}
     COMMAND
         ${CMAKE_COMMAND}
         -D Git_EXECUTABLE=${Git_EXECUTABLE}
@@ -188,26 +213,13 @@ add_custom_target(gen_version_header
 )
 
 # Make sure version header is always up to date
-add_dependencies(portal gen_version_header)
+add_dependencies(engine version_header)
 
 ###########################
 ## Library-specific code ##
 ###########################
 
-# TODO: move some of this into toolchain
-if (USING_LIBULTRA)
-    target_sources(portal PRIVATE
-        system/libultra/controller_libultra.c
-        system/libultra/time_libultra.c
-    )
-
-    target_compile_definitions(portal PRIVATE F3DEX_GBI_2)
-
-    find_package(Libultra REQUIRED)
-    target_link_libraries(portal libultra::libultra)
-
-    # Need explicit call for proper ordering
-    target_include_directories(portal BEFORE
-        PRIVATE $<TARGET_PROPERTY:libultra::libultra,INTERFACE_INCLUDE_DIRECTORIES>
-    )
-endif()
+target_sources(engine INTERFACE
+    system/libultra/controller_libultra.c
+    system/libultra/time_libultra.c
+)

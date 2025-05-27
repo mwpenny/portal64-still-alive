@@ -113,10 +113,10 @@ bool parseMaterialColor(const YAML::Node& node, PixelRGBAu8& color, ParseResult&
     
     bool bypass = bypassNode.IsDefined() && bypassNode.as<bool>();
 
-    if (!bypass && output.mForcePallete.length() && output.mTargetCIBuffer) {
-        std::shared_ptr<PalleteDefinition> pallete = gTextureCache.GetPallete(output.mForcePallete);
+    if (!bypass && output.mForcePalette.length() && output.mTargetCIBuffer) {
+        std::shared_ptr<PaletteDefinition> palette = gTextureCache.GetPalette(output.mForcePalette);
 
-        PixelIu8 colorindex = pallete->FindIndex(color);
+        PixelIu8 colorindex = palette->FindIndex(color);
 
         color.r = colorindex.i;
         color.g = colorindex.i;
@@ -241,7 +241,7 @@ std::shared_ptr<TextureDefinition> parseTextureDefinition(const YAML::Node& node
     }
 
     std::string filename;
-    std::string palleteFilename = output.mForcePallete;
+    std::string paletteFilename = output.mForcePalette;
 
     bool hasFormat = false;
     G_IM_FMT requestedFormat;
@@ -300,20 +300,20 @@ std::shared_ptr<TextureDefinition> parseTextureDefinition(const YAML::Node& node
             }
         }
 
-        auto usePallete = node["usePallete"];
+        auto usePalette = node["usePalette"];
 
-        if (usePallete.IsDefined()) {
-            if (usePallete.IsScalar()) {
-                palleteFilename = usePallete.as<std::string>();
+        if (usePalette.IsDefined()) {
+            if (usePalette.IsScalar()) {
+                paletteFilename = Join(output.mInsideFolder, usePalette.as<std::string>());
             } else {
-                output.mErrors.push_back(ParseError(formatError(std::string("usePallete should be a file path to a pallete") + filename, usePallete.Mark())));
+                output.mErrors.push_back(ParseError(formatError(std::string("usePalette should be a file path to a palette") + filename, usePalette.Mark())));
             }
         }
 
         auto bypassEffects = node["bypassEffects"];
 
         if (bypassEffects.IsDefined() && bypassEffects.as<bool>()) {
-            palleteFilename = "";
+            paletteFilename = "";
         }
     } else {
         output.mErrors.push_back(ParseError(formatError(std::string("Tile should be a file name or object") + filename, node.Mark())));
@@ -353,7 +353,7 @@ std::shared_ptr<TextureDefinition> parseTextureDefinition(const YAML::Node& node
         return NULL;
     }
 
-    return gTextureCache.GetTexture(filename, format, size, effects, palleteFilename);
+    return gTextureCache.GetTexture(filename, format, size, effects, paletteFilename);
 }
 
 int parseRenderModeFlags(const YAML::Node& node, ParseResult& output) {
@@ -686,7 +686,7 @@ bool parseSingleTile(const YAML::Node& node, TileState& state, ParseResult& outp
         }
 
         state.tmem = parseOptionalInteger(node["tmem"], output, 0, 511, 0);
-        state.pallete = parseOptionalInteger(node["pallete"], output, 0, 15, 0);
+        state.palette = parseOptionalInteger(node["palette"], output, 0, 15, 0);
     }
     
     parseTextureCoordinate(node["s"], state.sCoord, output);

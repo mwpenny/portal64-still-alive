@@ -5,7 +5,7 @@
 # First try getting the version from git
 execute_process(
     COMMAND
-        ${Git_EXECUTABLE} describe --tags HEAD
+        ${Git_EXECUTABLE} describe --tags --always HEAD
     RESULT_VARIABLE
         GIT_DESCRIBE_RC
     OUTPUT_VARIABLE
@@ -23,11 +23,12 @@ string(REPLACE "-" ";" GIT_DESCRIBE_COMPONENTS "${GIT_DESCRIBE_OUTPUT}")
 
 list(LENGTH GIT_DESCRIBE_COMPONENTS COMPONENT_COUNT)
 if (COMPONENT_COUNT GREATER_EQUAL 3)
-    # Not on a git tag, use commit hash (trim the "g" prefix)
+    # Tags exist and we are not on one. Use commit hash (trim the "g" prefix).
     list(GET GIT_DESCRIBE_COMPONENTS 2 GAME_VERSION)
     string(SUBSTRING "${GAME_VERSION}" 1 -1 GAME_VERSION)
 else()
-    # On a git tag, use it
+    # On a git tag, or no tags exist and we only have a hash.
+    # Either way the raw output is appropriate. Use it.
     list(GET GIT_DESCRIBE_COMPONENTS 0 GAME_VERSION)
 endif()
 

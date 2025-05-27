@@ -1,22 +1,18 @@
-#include "./ball.h"
+#include "ball.h"
 
+#include "audio/soundplayer.h"
+#include "audio/clips.h"
+#include "defs.h"
 #include "dynamic_scene.h"
-#include "../defs.h"
-
-#include "../physics/collision_scene.h"
-#include "../physics/collision_box.h"
-
+#include "effects/effect_definitions.h"
+#include "physics/collision_scene.h"
+#include "physics/collision_box.h"
+#include "scene.h"
 #include "system/time.h"
 
-#include "../build/assets/models/grav_flare.h"
-#include "../build/assets/models/fleck_ash2.h"
-#include "../build/assets/materials/static.h"
-
-#include "../audio/soundplayer.h"
-#include "../audio/clips.h"
-
-#include "../effects/effect_definitions.h"
-#include "./scene.h"
+#include "codegen/assets/models/grav_flare.h"
+#include "codegen/assets/models/fleck_ash2.h"
+#include "codegen/assets/materials/static.h"
 
 #define BALL_RADIUS 0.1f
 
@@ -112,7 +108,7 @@ void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* veloc
 
     ball->targetSpeed = sqrtf(vector3MagSqrd(&ball->rigidBody.velocity));
 
-    ball->dynamicId = dynamicSceneAddViewDependant(ball, ballRender, &ball->rigidBody.transform.position, BALL_RADIUS);
+    ball->dynamicId = dynamicSceneAddViewDependent(ball, ballRender, &ball->rigidBody.transform.position, BALL_RADIUS);
 
     dynamicSceneSetRoomFlags(ball->dynamicId, ROOM_FLAG_FROM_INDEX(startingRoom));
 
@@ -134,7 +130,7 @@ void ballInitBurn(struct Ball* ball, struct ContactManifold* manifold) {
         if (&ball->collisionObject == manifold->shapeA) {
             vector3Negate(&normal, &normal);
         }
-        effectsSplashPlay(&gScene.effects, &gBallBounce, &ball->rigidBody.transform.position, &manifold->normal);
+        effectsSplashPlay(&gScene.effects, &gBallBounce, &ball->rigidBody.transform.position, &manifold->normal, NULL);
         struct Vector3 position = manifold->contacts[0].contactAWorld;
         if (manifold->shapeA->body) {
             transformPoint(&manifold->shapeA->body->transform, &position, &position);
@@ -217,7 +213,7 @@ void ballUpdate(struct Ball* ball) {
             soundPlayerStop(ball->soundLoopId);
             soundPlayerPlay(soundsBallExplode, 2.0f, 1.0f, &ball->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             hudShowSubtitle(&gScene.hud, ENERGYBALL_EXPLOSION, SubtitleTypeCaption);
-            effectsSplashPlay(&gScene.effects, &gBallBurst, &ball->rigidBody.transform.position, &gUp);
+            effectsSplashPlay(&gScene.effects, &gBallBurst, &ball->rigidBody.transform.position, &gUp, NULL);
             ball->soundLoopId = SOUND_ID_NONE;
         }
     }

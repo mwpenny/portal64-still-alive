@@ -1,6 +1,6 @@
 #include "effect_definitions.h"
 
-#include "../build/assets/materials/static.h"
+#include "codegen/assets/materials/static.h"
 
 struct SplashParticleDefinition gFailPortalSplash[2] = {
     {
@@ -16,6 +16,7 @@ struct SplashParticleDefinition gFailPortalSplash[2] = {
         .materialIndex = PORTAL_1_PARTICLE_INDEX,
         .particleHalfWidth = 0.05f,
         .particleColor = {200, 100, 50, 255},
+        .flags = 0,
     },
     {
         .particleLifetime = 0.5f,
@@ -30,6 +31,7 @@ struct SplashParticleDefinition gFailPortalSplash[2] = {
         .materialIndex = PORTAL_1_PARTICLE_INDEX,
         .particleHalfWidth = 0.05f,
         .particleColor = {50, 70, 200, 255},
+        .flags = 0,
     },
 };
 
@@ -46,6 +48,7 @@ struct SplashParticleDefinition gBallBurst = {
     .materialIndex = SPARK_INDEX,
     .particleHalfWidth = 0.02f,
     .particleColor = {255, 255, 255, 255},
+    .flags = 0,
 };
 
 
@@ -62,4 +65,21 @@ struct SplashParticleDefinition gBallBounce = {
     .materialIndex = SPARK_INDEX,
     .particleHalfWidth = 0.02f,
     .particleColor = {255, 255, 255, 255},
+    .flags = 0,
+};
+
+struct SplashParticleDefinition gMuzzleFlash = {
+    .particleLifetime = 0.1f,
+    .fullWidthTime = 0.075f,
+    .fadeStartTime = 0.025f,
+    .particleTailDelay = 0.4f,
+    .minNormalVelocity = 0.25f,
+    .maxNormalVelocity = 0.75f,
+    .minTangentVelocity = 0.125,
+    .maxTangentVelocity = 0.15f,
+    .particleCount = 4,
+    .materialIndex = MUZZLEFLASH2_INDEX,
+    .particleHalfWidth = 0.15f,
+    .particleColor = {210, 135, 50, 255},
+    .flags = SplashParticleFlagsBillboarded | SplashParticleFlagsNoGravity
 };

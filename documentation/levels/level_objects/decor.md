@@ -2,7 +2,7 @@
 
 A generic dynamic object without its own dedicated logic.
 
-## Name structure
+## Name Structure
 
 ```
 @decor TYPE

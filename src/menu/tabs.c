@@ -1,8 +1,8 @@
 #include "tabs.h"
 
-#include "../util/memory.h"
-#include "./translations.h"
-#include "./menu.h"
+#include "menu.h"
+#include "strings/translations.h"
+#include "util/memory.h"
 
 #define LEFT_TEXT_PADDING  4
 #define RIGHT_TEXT_PADDING 16

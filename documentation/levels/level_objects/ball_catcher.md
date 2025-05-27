@@ -4,7 +4,7 @@ A receptacle for a high energy pellet launched by a
 [ball launcher](./ball_launcher.md). Emits a [signal](../signals.md) when a
 ball is caught.
 
-## Name structure
+## Name Structure
 
 ```
 @ball_catcher CATCH_SIGNAL_NAME

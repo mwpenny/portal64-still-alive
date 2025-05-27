@@ -1,17 +1,15 @@
 #include "portal_gun.h"
 
-#include "../physics/collision_scene.h"
-#include "../physics/collision_cylinder.h"
-#include "./scene.h"
+#include "effects/effect_definitions.h"
+#include "levels/material_state.h"
+#include "physics/collision_scene.h"
+#include "physics/collision_cylinder.h"
+#include "render_plan.h"
+#include "scene.h"
 
-#include "../levels/material_state.h"
-
-#include "../effects/effect_definitions.h"
-#include "./render_plan.h"
-
-#include "../../build/assets/models/grav_flare.h"
-#include "../../build/assets/models/portal_gun/v_portalgun.h"
-#include "../../build/assets/materials/static.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/grav_flare.h"
+#include "codegen/assets/models/portal_gun/v_portalgun.h"
 
 // the portal gun is rendered with a different field of view than the scene
 #define FIRST_PERSON_POV_FOV    42.45f
@@ -49,12 +47,9 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at, int isFres
 
     if (isFreshStart) {
         skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_draw_clip, 0.0f, 0);
-        // the first time the scene renders, the animation clip hasn't started yet
-        // this just hides the gun offscreen so it doesn't show up for a single frame
-        portalGun->armature.pose[0].position.y = -1.0f;
     } else {
         skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_idle_clip, 0.0f, 0);
-    } 
+    }
 }
 
 #define PORTAL_PROJECTILE_RADIUS    0.15f
@@ -248,7 +243,7 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
                 1,
                 0
             )) {
-                effectsSplashPlay(&gScene.effects, &gFailPortalSplash[i], &hit.at, &hit.normal);
+                effectsSplashPlay(&gScene.effects, &gFailPortalSplash[i], &hit.at, &hit.normal, NULL);
             }
             projectile->roomIndex = -1;
         } else {

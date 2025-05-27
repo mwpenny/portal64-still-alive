@@ -2,10 +2,9 @@ FROM ubuntu:24.04
 
 WORKDIR /usr/src/app
 
-ENV N64_LIBGCCDIR /opt/crashsdk/lib/gcc/mips64-elf/12.2.0
-ENV PATH /opt/crashsdk/bin:$PATH
-ENV PATH /root/.local/bin:$PATH
-ENV ROOT /etc/n64
+ENV PATH=/opt/crashsdk/bin:$PATH
+ENV PATH=/root/.local/bin:$PATH
+ENV ROOT=/etc/n64
 
 RUN apt-get update -y
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -40,6 +39,7 @@ RUN apt-get update -y && \
     lua5.4 \
     makemask \
     newlib-mips-n64 \
+    ninja-build \
     nodejs \
     n64sdk \
     pip \
@@ -58,7 +58,7 @@ RUN wget -P /opt/blender https://download.blender.org/release/Blender3.6/blender
 RUN tar -xf /opt/blender/blender-3.6.1-linux-x64.tar.xz -C /opt/blender
 RUN rm /opt/blender/blender-3.6.1-linux-x64.tar.xz
 
-ENV BLENDER_3_6 /opt/blender/blender-3.6.1-linux-x64/blender
+ENV PATH="$PATH:/opt/blender/blender-3.6.1-linux-x64"
 
 RUN pipx ensurepath --force
 RUN pipx install vpk

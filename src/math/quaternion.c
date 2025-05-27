@@ -3,7 +3,6 @@
 #include <ultra64.h>
 #include <assert.h>
 #include "mathf.h"
-#include <math.h>
 
 struct Quaternion gQuaternionZero = {0.0f, 0.0f, 0.0f, 0.0f};
 
@@ -210,31 +209,31 @@ void quatLook(struct Vector3* lookDir, struct Vector3* up, struct Quaternion* ou
     if (trace > 0) { 
         float sqrtResult = sqrtf(trace+1.0f) * 2.0f;
         float invSqrtResult = 1.0f / sqrtResult;
-        out->w = 0.25 * sqrtResult;
+        out->w = 0.25f * sqrtResult;
         out->x = (yDir.z - zDir.y) * invSqrtResult;
         out->y = (zDir.x - xDir.z) * invSqrtResult; 
         out->z = (xDir.y - yDir.x) * invSqrtResult; 
     } else if ((xDir.x > yDir.y) && (xDir.x > zDir.z)) { 
-        float sqrtResult = sqrtf(1.0 + xDir.x - yDir.y - zDir.z) * 2.0f;
+        float sqrtResult = sqrtf(1.0f + xDir.x - yDir.y - zDir.z) * 2.0f;
         float invSqrtResult = 1.0f / sqrtResult;
         out->w = (yDir.z - zDir.y) * invSqrtResult;
-        out->x = 0.25 * sqrtResult;
+        out->x = 0.25f * sqrtResult;
         out->y = (yDir.x + xDir.y) * invSqrtResult; 
         out->z = (zDir.x + xDir.z) * invSqrtResult; 
     } else if (yDir.y > zDir.z) { 
-        float sqrtResult = sqrtf(1.0 + yDir.y - xDir.x - zDir.z) * 2.0f;
+        float sqrtResult = sqrtf(1.0f + yDir.y - xDir.x - zDir.z) * 2.0f;
         float invSqrtResult = 1.0f / sqrtResult;
         out->w = (zDir.x - xDir.z) * invSqrtResult;
         out->x = (yDir.x + xDir.y) * invSqrtResult; 
-        out->y = 0.25 * sqrtResult;
+        out->y = 0.25f * sqrtResult;
         out->z = (zDir.y + yDir.z) * invSqrtResult; 
     } else { 
-        float sqrtResult = sqrtf(1.0 + zDir.z - xDir.x - yDir.y) * 2.0f;
+        float sqrtResult = sqrtf(1.0f + zDir.z - xDir.x - yDir.y) * 2.0f;
         float invSqrtResult = 1.0f / sqrtResult;
         out->w = (xDir.y - yDir.x) * invSqrtResult;
         out->x = (zDir.x + xDir.z) * invSqrtResult;
         out->y = (zDir.y + yDir.z) * invSqrtResult;
-        out->z = 0.25 * sqrtResult;
+        out->z = 0.25f * sqrtResult;
     }
 }
 
@@ -254,6 +253,29 @@ void quatLerp(struct Quaternion* a, struct Quaternion* b, float t, struct Quater
     }
 
     quatNormalize(out, out);
+}
+
+int quatRotateTowards(struct Quaternion* from, struct Quaternion* towards, float maxDistance, struct Quaternion* out) {
+    float dx = towards->x - from->x;
+    float dy = towards->y - from->y;
+    float dz = towards->z - from->z;
+    float dw = towards->w - from->w;
+    float distSqrd = dx * dx + dy * dy + dz * dz + dw * dw;
+
+    if (distSqrd < maxDistance * maxDistance) {
+        *out = *towards;
+        return 1;
+    } else {
+        float scale = maxDistance / sqrtf(distSqrd);
+
+        out->x = dx * scale + from->x;
+        out->y = dy * scale + from->y;
+        out->z = dz * scale + from->z;
+        out->w = dw * scale + from->w;
+
+        quatNormalize(out, out);
+        return 0;
+    }
 }
 
 void quatApplyAngularVelocity(struct Quaternion* input, struct Vector3* w, float timeStep, struct Quaternion* output) {

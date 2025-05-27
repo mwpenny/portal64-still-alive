@@ -1,9 +1,9 @@
 #ifndef __COLLISION_OBJECT_H__
 #define __COLLISION_OBJECT_H__
 
-#include "rigid_body.h"
 #include "collision.h"
-#include "../math/box3d.h"
+#include "math/box3d.h"
+#include "rigid_body.h"
 
 #define COLLISION_LAYERS_STATIC             (1 << 0)
 #define COLLISION_LAYERS_TRANSPARENT        (1 << 1)
@@ -12,6 +12,8 @@
 #define COLLISION_LAYERS_FIZZLER            (1 << 4)
 #define COLLISION_LAYERS_BLOCK_PORTAL       (1 << 5)
 #define COLLISION_LAYERS_BLOCK_BALL         (1 << 6)
+#define COLLISION_LAYERS_BLOCK_TURRET_SIGHT (1 << 7)
+#define COLLISION_LAYERS_BLOCK_TURRET_SHOTS (1 << 8)
 
 #define COLLISION_OBJECT_HAS_CONTACTS       (1 << 0)
 #define COLLISION_OBJECT_PLAYER_STANDING    (1 << 1)
@@ -23,6 +25,7 @@ typedef void (*SweptCollideCallback)(struct CollisionObject* collisionObject, fl
 struct CollisionObject {
     struct ColliderTypeData *collider;
     struct RigidBody* body;
+    struct Vector3* position;
     struct Box3D boundingBox;
     short collisionLayers;
     short flags;
@@ -39,7 +42,7 @@ struct SweptCollisionObject {
 
 int collisionObjectIsActive(struct CollisionObject* object);
 int collisionObjectIsGrabbable(struct CollisionObject* object);
-int collisionObjectShouldGenerateConctacts(struct CollisionObject* object);
+int collisionObjectShouldGenerateContacts(struct CollisionObject* object);
 
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers);
 void collisionObjectReInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers);
@@ -78,14 +81,17 @@ enum SweptCollideResult collisionObjectSweptCollide(
 void collisionObjectUpdateBB(struct CollisionObject* object);
 
 // data should be of type struct CollisionQuad
-int minkowsiSumAgainstQuad(void* data, struct Vector3* direction, struct Vector3* output);
+int quadMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output);
 
 // data should be of type struct CollisionObject
-int minkowsiSumAgainstObject(void* data, struct Vector3* direction, struct Vector3* output);
+int objectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output);
 
 // data should be of type struct SweptCollisionObject
-int minkowsiSumAgainstSweptObject(void* data, struct Vector3* direction, struct Vector3* output);
+int sweptObjectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output);
 
-void collisionObjectLocalRay(struct CollisionObject* cylinderObject, struct Ray* ray, struct Ray* localRay);
+void collisionObjectLocalRay(struct CollisionObject* object, struct Ray* ray, struct Ray* localRay);
+
+// Add object's body offset (if any) to output vector
+void collisionObjectAddBodyOffset(struct CollisionObject* object, struct Vector3* out);
 
 #endif

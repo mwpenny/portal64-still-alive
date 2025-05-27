@@ -1,18 +1,17 @@
 #include "ball_launcher.h"
 
-#include "system/time.h"
-
-#include "../physics/collision_box.h"
-#include "../physics/collision_scene.h"
+#include "audio/clips.h"
+#include "audio/soundplayer.h"
 #include "dynamic_scene.h"
+#include "physics/collision_box.h"
+#include "physics/collision_scene.h"
 #include "signals.h"
-#include "../audio/clips.h"
-#include "../audio/soundplayer.h"
-#include "../util/dynamic_asset_loader.h"
+#include "system/time.h"
+#include "util/dynamic_asset_loader.h"
 
-#include "../build/assets/models/props/combine_ball_launcher.h"
-#include "../build/assets/materials/static.h"
-#include "../../build/assets/models/dynamic_animated_model_list.h"
+#include "codegen/assets/materials/static.h"
+#include "codegen/assets/models/dynamic_animated_model_list.h"
+#include "codegen/assets/models/props/combine_ball_launcher.h"
 
 struct CollisionBox gBallLauncherBox = {
     {0.5f, 0.5f, 0.5f},
@@ -107,9 +106,9 @@ void ballLauncherUpdate(struct BallLauncher* launcher) {
         if (!gjkCheckForOverlap(
             &simplex, 
             &launcher->collisionObject, 
-            minkowsiSumAgainstObject,
+            objectMinkowskiSupport,
             &launcher->currentBall.collisionObject,
-            minkowsiSumAgainstObject,
+            objectMinkowskiSupport,
             &launcher->currentBall.rigidBody.velocity)) {
             ballTurnOnCollision(&launcher->currentBall);
         }

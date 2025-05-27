@@ -1,9 +1,9 @@
 #include "epa.h"
 
-#include "../util/assert.h"
-#include "../util/memory.h"
-#include "../math/plane.h"
-#include "../math/mathf.h"
+#include "math/mathf.h"
+#include "math/plane.h"
+#include "util/assert.h"
+#include "util/memory.h"
 
 #define MAX_ITERATIONS  10
 
@@ -434,7 +434,7 @@ void epaCalculateContact(struct ExpandingSimplex* simplex, struct SimplexTriangl
     result->id = simplex->ids[closestFace->indexData.indices[0]] & simplex->ids[closestFace->indexData.indices[1]] & simplex->ids[closestFace->indexData.indices[2]];
 }
 
-void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct EpaResult* result) {
+void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowskiSupport objectASupport, void* objectB, MinkowskiSupport objectBSupport, struct EpaResult* result) {
     struct ExpandingSimplex* simplex = stackMalloc(sizeof(struct ExpandingSimplex));
     expandingSimplexInit(simplex, startingSimplex, 0);
     struct SimplexTriangle* closestFace = NULL;
@@ -450,9 +450,9 @@ void epaSolve(struct Simplex* startingSimplex, void* objectA, MinkowsiSum object
         struct Vector3* aPoint = &simplex->aPoints[nextIndex];
         struct Vector3 bPoint;
 
-        int aId = objectASum(objectA, &closestFace->normal, aPoint);
+        int aId = objectASupport(objectA, &closestFace->normal, aPoint);
         vector3Negate(&closestFace->normal, &reverseNormal);
-        int bId = objectBSum(objectB, &reverseNormal, &bPoint);
+        int bId = objectBSupport(objectB, &reverseNormal, &bPoint);
 
         vector3Sub(aPoint, &bPoint, &simplex->points[nextIndex]);
 
@@ -510,7 +510,7 @@ void epaSweptFindFace(struct ExpandingSimplex* simplex, struct Vector3* directio
     }
 }
 
-int epaSolveSwept(struct Simplex* startingSimplex, void* objectA, MinkowsiSum objectASum, void* objectB, MinkowsiSum objectBSum, struct Vector3* bStart, struct Vector3* bEnd, struct EpaResult* result) {
+int epaSolveSwept(struct Simplex* startingSimplex, void* objectA, MinkowskiSupport objectASupport, void* objectB, MinkowskiSupport objectBSupport, struct Vector3* bStart, struct Vector3* bEnd, struct EpaResult* result) {
     struct ExpandingSimplex* simplex = stackMalloc(sizeof(struct ExpandingSimplex));
     expandingSimplexInit(simplex, startingSimplex, SimplexFlagsSkipDistance);
     struct SimplexTriangle* closestFace = NULL;
@@ -531,9 +531,9 @@ int epaSolveSwept(struct Simplex* startingSimplex, void* objectA, MinkowsiSum ob
         struct Vector3* aPoint = &simplex->aPoints[nextIndex];
         struct Vector3 bPoint;
 
-        int aId = objectASum(objectA, &closestFace->normal, aPoint);
+        int aId = objectASupport(objectA, &closestFace->normal, aPoint);
         vector3Negate(&closestFace->normal, &reverseNormal);
-        int bId = objectBSum(objectB, &reverseNormal, &bPoint);
+        int bId = objectBSupport(objectB, &reverseNormal, &bPoint);
 
         vector3Sub(aPoint, &bPoint, &simplex->points[nextIndex]);
 

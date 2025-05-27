@@ -9,7 +9,7 @@
 
 MaterialCollector::MaterialCollector(): mSceneCount(0) {}
 
-void useTexture(std::set<std::shared_ptr<TextureDefinition>>& usedTextures, std::set<std::shared_ptr<PalleteDefinition>>& usedPalletes, std::shared_ptr<TextureDefinition> texture, CFileDefinition& fileDefinition, const std::string& fileSuffix) {
+void useTexture(std::set<std::shared_ptr<TextureDefinition>>& usedTextures, std::set<std::shared_ptr<PaletteDefinition>>& usedPalettes, std::shared_ptr<TextureDefinition> texture, CFileDefinition& fileDefinition, const std::string& fileSuffix) {
     if (usedTextures.find(texture) != usedTextures.end()) {
         return;
     }
@@ -18,14 +18,14 @@ void useTexture(std::set<std::shared_ptr<TextureDefinition>>& usedTextures, std:
     auto textureDefinition = texture->GenerateDefinition(fileDefinition.GetUniqueName(texture->Name()), fileSuffix);
     fileDefinition.AddDefinition(std::move(textureDefinition));
 
-    std::shared_ptr<PalleteDefinition> pallete = texture->GetPallete();
-    if (!pallete || usedPalletes.find(pallete) != usedPalletes.end()) {
+    std::shared_ptr<PaletteDefinition> palette = texture->GetPalette();
+    if (!palette || usedPalettes.find(palette) != usedPalettes.end()) {
         return;
     }
 
-    usedPalletes.insert(pallete);
-    auto palleteDefinition = pallete->GenerateDefinition(fileDefinition.GetUniqueName(pallete->Name()), fileSuffix);
-    fileDefinition.AddDefinition(std::move(palleteDefinition));
+    usedPalettes.insert(palette);
+    auto paletteDefinition = palette->GenerateDefinition(fileDefinition.GetUniqueName(palette->Name()), fileSuffix);
+    fileDefinition.AddDefinition(std::move(paletteDefinition));
 }
 
 void MaterialCollector::UseMaterial(const std::string& material, DisplayListSettings& settings) {
@@ -59,7 +59,7 @@ void MaterialCollector::GenerateMaterials(DisplayListSettings& settings, CFileDe
             for (int i = 0; i < MAX_TILE_COUNT; ++i) {
                 auto tile = &material->second->mState.tiles[i];
                 if (tile->isOn && tile->texture && !settings.mDefaultMaterialState.IsTextureLoaded(tile->texture, tile->tmem)) {
-                    useTexture(mUsedTextures, mUsedPalletes, tile->texture, fileDefinition, fileSuffix);
+                    useTexture(mUsedTextures, mUsedPalettes, tile->texture, fileDefinition, fileSuffix);
                 }
             }
 
@@ -77,7 +77,7 @@ void MaterialCollector::GenerateMaterials(DisplayListSettings& settings, CFileDe
 void generateMeshIntoDLWithMaterials(const aiScene* scene, CFileDefinition& fileDefinition, MaterialCollector* materials, std::vector<RenderChunk>& renderChunks, DisplayListSettings& settings, DisplayList &displayList, const std::string& modelSuffix) {
     RCPState rcpState(settings.mDefaultMaterialState, settings.mVertexCacheSize, settings.mMaxMatrixDepth, settings.mCanPopMultipleMatrices);
     std::set<std::shared_ptr<TextureDefinition>> usedTextures;
-    std::set<std::shared_ptr<PalleteDefinition>> usedPalletes;
+    std::set<std::shared_ptr<PaletteDefinition>> usedPalettes;
 
     for (auto chunk = renderChunks.begin(); chunk != renderChunks.end(); ++chunk) {
         if (materials) {
@@ -96,7 +96,7 @@ void generateMeshIntoDLWithMaterials(const aiScene* scene, CFileDefinition& file
                     for (int i = 0; i < MAX_TILE_COUNT; ++i) {
                         auto tile = &material->second->mState.tiles[i];
                         if (tile->isOn && tile->texture && !materialState.IsTextureLoaded(tile->texture, tile->tmem)) {
-                            useTexture(usedTextures, usedPalletes, tile->texture, fileDefinition, modelSuffix);
+                            useTexture(usedTextures, usedPalettes, tile->texture, fileDefinition, modelSuffix);
                         }
                     }
 

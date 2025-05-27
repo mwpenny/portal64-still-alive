@@ -60,6 +60,6 @@ int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, 
 void portalCheckForHoles(struct Portal* portals);
 
 // data should be of type struct Transform
-int minkowsiSumAgainstPortal(void* data, struct Vector3* direction, struct Vector3* output);
+int portalMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output);
 
 #endif

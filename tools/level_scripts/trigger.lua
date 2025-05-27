@@ -7,7 +7,7 @@ local animation = require('tools.level_scripts.animation')
 local yaml_loader = require('tools.level_scripts.yaml_loader')
 local util = require('tools.level_scripts.util')
 
-sk_definition_writer.add_header('"../build/src/audio/clips.h"')
+sk_definition_writer.add_header('"codegen/assets/audio/clips.h"')
 
 local function cutscene_index(cutscenes, name)
     for _, cutscene in pairs(cutscenes) do
@@ -99,12 +99,12 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
             tonumber(step.args[2] or "1") * 255,
             math.floor(tonumber(step.args[3] or "1") * 64 + 0.5),
         }
-    elseif step.command == "q_sound" and #step.args >= 3 then
+    elseif step.command == "q_sound" and #step.args >= 2 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeQueueSound')
         result.queueSound = {
             sk_definition_writer.raw(string_starts_with(step.args[1], "SOUNDS_") and step.args[1] or ("SOUNDS_" .. step.args[1])),
             sk_definition_writer.raw(step.args[2]),
-            sk_definition_writer.raw(step.args[3]),
+            sk_definition_writer.raw(step.args[3] or "StringIdNone"),
             tonumber(step.args[4] or "1") * 255,
         }
     elseif step.command == "wait_for_channel" and #step.args >= 1 then
@@ -223,10 +223,10 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
         }
     elseif step.command == "save_checkpoint" then
         result.type = sk_definition_writer.raw('CutsceneStepSaveCheckpoint')
-    elseif step.command == "kill_player" then
-        result.type = sk_definition_writer.raw('CutsceneStepKillPlayer')
-        result.killPlayer = {
-            step.args[1] == 'water' and 1 or 0,
+    elseif step.command == "damage_player" then
+        result.type = sk_definition_writer.raw('CutsceneStepDamagePlayer')
+        result.damagePlayer = {
+            tonumber(step.args[1])
         }
     elseif step.command == "show_prompt" then
         result.type = sk_definition_writer.raw('CutsceneStepShowPrompt')
@@ -306,7 +306,7 @@ local function generate_cutscenes()
 end
 
 local function signal_type_index(index, is_hover)
-    if index == 3 then
+    if index >= 3 then
         if is_hover then
             return sk_definition_writer.raw('ObjectTriggerTypeCubeHover')
         end
@@ -317,6 +317,14 @@ local function signal_type_index(index, is_hover)
     return sk_definition_writer.raw('ObjectTriggerTypePlayer')
 end
 
+local function trigger_type(type_string)
+    if type_string == 'touch' then
+        return true, sk_definition_writer.raw('TriggerTypeTouch')
+    end
+
+    return false, sk_definition_writer.raw('TriggerTypeContain')
+end
+
 local function generate_triggers(cutscenes)
     local result = {}
     
@@ -324,8 +332,11 @@ local function generate_triggers(cutscenes)
         local first_mesh = trigger.node.meshes[1]
         
         local triggers = {}
+
+        local type_overridden, trigger_type = trigger_type(trigger.arguments[1])
+        local arg_idx = type_overridden and 2 or 1
         
-        for i = 1, #trigger.arguments, 2 do
+        for i = arg_idx, #trigger.arguments, 2 do
             local cutscene_name = trigger.arguments[i]
             local cutscene = cutscene_index(cutscenes, cutscene_name)
             table.insert(triggers, {
@@ -334,7 +345,6 @@ local function generate_triggers(cutscenes)
                 signals.optional_signal_index_for_name(trigger.arguments[i + 1]),
             })
         end
-
     
         if first_mesh then
             local transformed = first_mesh:transform(trigger.node.full_transformation)
@@ -343,6 +353,7 @@ local function generate_triggers(cutscenes)
                 transformed.bb,
                 sk_definition_writer.reference_to(triggers, 1),
                 #triggers,
+                trigger_type
             })
 
             sk_definition_writer.add_definition("trigger_targets", "struct ObjectTriggerInfo[]", "_geo", triggers)

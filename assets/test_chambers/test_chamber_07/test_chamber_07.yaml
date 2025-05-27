@@ -1,6 +1,6 @@
 cutscenes:
   START:
-    - q_sound AMBIENCE_BASE CH_AMBIENT SubtitleKeyNone 0.55
+    - q_sound AMBIENCE_BASE CH_AMBIENT StringIdNone 0.55
   INTRO:
     - delay 1
     - start_cutscene portal_loop
@@ -42,7 +42,11 @@ cutscenes:
   PROMPT_SWITCH:
     - show_prompt CutscenePromptTypeUse
   DROWN_PLAYER:
-    - kill_player water
+    - label drown_loop
+    - wait_for_signal player_in_goo
+    - damage_player 25
+    - delay 0.5
+    - goto drown_loop
   GET_GUN:
     - hide_pedestal
     - stop_cutscene portal_loop
@@ -55,7 +59,7 @@ cutscenes:
     - q_sound 07_PART1_GET_DEVICE_COMPONENT_2 CH_GLADOS PORTAL_07_PART1_GET_DEVICE_COMPONENT_2
     - q_sound 07_PART1_GET_DEVICE_COMPONENT_3 CH_GLADOS PORTAL_07_PART1_GET_DEVICE_COMPONENT_3
     - wait_for_channel CH_GLADOS
-    - q_sound PORTAL_SUBJECT_NAME_HERE CH_MUSIC SubtitleKeyNone
+    - q_sound PORTAL_SUBJECT_NAME_HERE CH_MUSIC
     - wait_for_signal trapped
     - q_sound 07_PART1_TRAPPED_1 CH_GLADOS PORTAL_07_PART1_TRAPPED_1
     - q_sound 07_PART1_TRAPPED_2 CH_GLADOS PORTAL_07_PART1_TRAPPED_2

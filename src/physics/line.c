@@ -1,5 +1,6 @@
 #include "line.h"
 
+// https://palitri.com/vault/stuff/maths/Rays%20closest%20point.pdf
 int lineNearestApproach(struct Vector3* aAt, struct Vector3* aDir, struct Vector3* bAt, struct Vector3* bDir, float* aOut, float* bOut) {
     float edgesDot = vector3Dot(aDir, bDir);
 

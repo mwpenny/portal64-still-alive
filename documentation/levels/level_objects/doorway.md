@@ -4,7 +4,7 @@ A connection between two [rooms](./room.md). Used for culling and broad phase
 collision purposes, to determine room visibility and movement of dynamic objects
 from one room to another.
 
-## Name structure
+## Name Structure
 
 ```
 @doorway

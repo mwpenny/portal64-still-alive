@@ -2,7 +2,7 @@
 
 A flat, circular button which emits a [signal](../signals.md) while pressed.
 
-## Name structure
+## Name Structure
 
 ```
 @button PRESS_SIGNAL_NAME [OBJECT_PRESS_SIGNAL_NAME]

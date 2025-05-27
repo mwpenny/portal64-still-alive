@@ -1,17 +1,14 @@
 #include "main_menu.h"
 
-#include "../util/memory.h"
-#include "../util/rom.h"
 #include "menu.h"
-#include <string.h>
+#include "scene/render_plan.h"
+#include "system/controller.h"
+#include "util/memory.h"
+#include "util/rom.h"
 
-#include "../build/assets/materials/ui.h"
-#include "../scene/render_plan.h"
-#include "../system/controller.h"
-
-#include "../build/assets/test_chambers/test_chamber_00/test_chamber_00.h"
-#include "../build/src/audio/clips.h"
-#include "../build/src/audio/subtitles.h"
+#include "codegen/assets/audio/clips.h"
+#include "codegen/assets/materials/ui.h"
+#include "codegen/assets/test_chambers/test_chamber_00/test_chamber_00.h"
 
 struct LandingMenuOption gMainMenuOptions[] = {
     {GAMEUI_NEWGAME, GameMenuStateNewGame},
