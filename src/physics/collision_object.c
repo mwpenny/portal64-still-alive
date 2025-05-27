@@ -10,8 +10,6 @@
 #include "math/mathf.h"
 #include "mesh_collider.h"
 
-#include "player/player_rumble_clips.h"
-
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers) {
     object->collider = collider;
     object->body = body;
@@ -20,8 +18,9 @@ void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData
     collisionObjectUpdateBB(object);
     object->collisionLayers = collisionLayers;
     object->flags = 0;
-    object->data = 0;
-    object->trigger = 0;
+    object->data = NULL;
+    object->trigger = NULL;
+    object->sweptCollide = NULL;
     object->manifoldIds = 0;
 }
 
@@ -68,12 +67,12 @@ struct ContactManifold* collisionObjectCollideWithQuad(struct CollisionObject* o
     }
 
     if (object->trigger) {
-        object->trigger(object->data, quadObject);
+        object->trigger(object, quadObject);
         return NULL;
     }
 
     if (quadObject->trigger) {
-        quadObject->trigger(quadObject->data, object);
+        quadObject->trigger(quadObject, object);
         return NULL;
     }
 
@@ -120,14 +119,8 @@ void collisionObjectHandleSweptCollision(struct CollisionObject* object, struct 
         vector3AddScaled(&object->body->velocity, normal, (1 + restitution) * -velocityDot, &object->body->velocity);
         vector3AddScaled(&object->body->transform.position, normal, -0.01f, &object->body->transform.position);
 
-        // I don't love that player specific code
-        // is in the general collision code but 
-        // that is how it is for now
-        // a better general solution may be to allow any
-        // object to determine if it had any impacts
-        // and respond dynamically
-        if (object->body->flags & RigidBodyIsPlayer) {
-            playerHandleLandingRumble(-velocityDot);
+        if (object->sweptCollide) {
+            object->sweptCollide(object, -velocityDot);
         }
     }
 }

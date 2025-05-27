@@ -147,10 +147,15 @@ void playerRender(void* data, struct DynamicRenderDataList* renderList, struct R
     );
 }
 
+void playerHandleSweptCollision(struct CollisionObject* object, float velocityMag) {
+    playerHandleLandingRumble(velocityMag);
+}
+
 void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity) {
     player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, 0.0f, 0.5f, NULL, NULL, SoundTypeAll);
 
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
+    player->collisionObject.sweptCollide = playerHandleSweptCollision;
 
     // rigidBodyMarkKinematic(&player->body);
     player->body.flags |= RigidBodyIsKinematic | RigidBodyIsPlayer;
