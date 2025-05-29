@@ -147,8 +147,10 @@ void playerRender(void* data, struct DynamicRenderDataList* renderList, struct R
     );
 }
 
-void playerHandleSweptCollision(struct CollisionObject* object, float velocityMag) {
-    playerHandleLandingRumble(velocityMag);
+void playerHandleSweptCollision(struct CollisionObject* object, struct CollisionObject* other, struct Vector3* normal, float normalVelocity) {
+    if (normalVelocity < 0.0f) {
+        playerHandleLandingRumble(-normalVelocity);
+    }
 }
 
 void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity) {
@@ -1175,14 +1177,14 @@ void playerApplyCameraTransform(struct Player* player, struct Transform* cameraT
     }
 }
 
-void playerToggleJumpImpulse(struct Player* player, float newJumpImpulse){
-    if (player->jumpImpulse == JUMP_IMPULSE){
+void playerToggleJumpImpulse(struct Player* player, float newJumpImpulse) {
+    if (player->jumpImpulse == JUMP_IMPULSE) {
         player->jumpImpulse = newJumpImpulse;
-    }else{
+    } else {
         player->jumpImpulse = JUMP_IMPULSE;
     }
 }
 
-void playerToggleInvincibility(struct Player* player){
+void playerToggleInvincibility(struct Player* player) {
     player->flags ^= PlayerIsInvincible;
 }

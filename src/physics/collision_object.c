@@ -112,16 +112,16 @@ struct ContactManifold* collisionObjectCollideWithQuad(struct CollisionObject* o
     return contact;
 }
 
-void collisionObjectHandleSweptCollision(struct CollisionObject* object, struct Vector3* normal, float restitution) {
-    float velocityDot = vector3Dot(normal, &object->body->velocity);
+void collisionObjectHandleSweptCollision(struct CollisionObject* object, struct CollisionObject* other, struct Vector3* normal, float restitution) {
+    float normalVelocity = vector3Dot(normal, &object->body->velocity);
 
-    if (velocityDot < 0.0f) {
-        vector3AddScaled(&object->body->velocity, normal, (1 + restitution) * -velocityDot, &object->body->velocity);
+    if (normalVelocity < 0.0f) {
+        vector3AddScaled(&object->body->velocity, normal, (1 + restitution) * -normalVelocity, &object->body->velocity);
         vector3AddScaled(&object->body->transform.position, normal, -0.01f, &object->body->transform.position);
+    }
 
-        if (object->sweptCollide) {
-            object->sweptCollide(object, -velocityDot);
-        }
+    if (object->sweptCollide) {
+        object->sweptCollide(object, other, normal, normalVelocity);
     }
 }
 
@@ -232,7 +232,7 @@ struct ContactManifold* collisionObjectCollideWithQuadSwept(struct CollisionObje
     transformPointInverseNoScale(&object->body->transform, &result.contactB, &result.contactB);
     contactInsert(contact, &result);
 
-    collisionObjectHandleSweptCollision(object, &contact->normal, contact->restitution);
+    collisionObjectHandleSweptCollision(object, quadObject, &contact->normal, contact->restitution);
 
     return contact;
 }
@@ -469,8 +469,8 @@ void collisionObjectCollideTwoObjectsSwept(
 
     struct Vector3 normalReverse;
     vector3Negate(&contact->normal, &normalReverse);
-    collisionObjectHandleSweptCollision(a, &normalReverse, contact->restitution);
-    collisionObjectHandleSweptCollision(b, &contact->normal, contact->restitution);
+    collisionObjectHandleSweptCollision(a, b, &normalReverse, contact->restitution);
+    collisionObjectHandleSweptCollision(b, a, &contact->normal, contact->restitution);
 }
 
 void collisionObjectUpdateBB(struct CollisionObject* object) {

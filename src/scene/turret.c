@@ -329,8 +329,53 @@ static void turretRender(void* data, struct DynamicRenderDataList* renderList, s
     );
 }
 
+static void turretHandleSweptCollision(struct CollisionObject* object, struct CollisionObject* other, struct Vector3* normal, float normalVelocity) {
+    struct Turret* turret = object->data;
+
+    // Even with rounded collision, it's difficult to knock
+    // a turret over with an object dropped directly on top.
+    //
+    // Amplify horizontal movement to make it easier.
+
+    if (other->body == NULL || (other->body->flags & RigidBodyIsKinematic)) {
+        // Only amplify hits from free-moving physics objects
+        return;
+    }
+
+    if (turret->state == TurretStateGrabbed ||
+        (turret->flags & TurretFlagsTipped) ||
+        normalVelocity > (TURRET_AUTOTIP_MAX_VEL * TURRET_AUTOTIP_MAX_VEL)
+    ) {
+        // Only amplify when undisturbed
+        return;
+    }
+
+    struct Vector3 horizontalMovement;
+    vector3ProjectPlane(normal, &object->body->rotationBasis.y, &horizontalMovement);
+    vector3Normalize(&horizontalMovement, &horizontalMovement);
+
+    // Ensure push is not too far front/back
+    float rightDot = vector3Dot(&horizontalMovement, &object->body->rotationBasis.x);
+    if (fabsf(rightDot) < TURRET_AUTOTIP_DIR_MAX_DOT) {
+        struct Vector3 sideDir = object->body->rotationBasis.x;
+
+        if (rightDot < 0.0f) {
+            vector3Negate(&sideDir, &sideDir);
+        }
+
+        vector3Lerp(&horizontalMovement, &sideDir, 0.5f, &horizontalMovement);
+        vector3Normalize(&horizontalMovement, &horizontalMovement);
+    }
+
+    vector3Scale(&horizontalMovement, &horizontalMovement, object->body->mass * TURRET_AUTOTIP_IMPULSE);
+    rigidBodyApplyImpulse(object->body, &object->body->transform.position, &horizontalMovement);
+}
+
 void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     compoundColliderInit(&turret->compoundCollider, &sTurretCollider, &turret->rigidBody, TURRET_COLLISION_LAYERS);
+    turret->compoundCollider.children[TURRET_COLLISION_BODY].object.sweptCollide = turretHandleSweptCollision;
+    turret->compoundCollider.children[TURRET_COLLISION_BODY].object.data = turret;
+
     collisionObjectInit(&turret->collisionObject, &turret->compoundCollider.colliderType, &turret->rigidBody, TURRET_MASS, TURRET_COLLISION_LAYERS);
     collisionSceneAddDynamicObject(&turret->collisionObject);
 
@@ -697,7 +742,7 @@ static void turretCheckTipped(struct Turret* turret) {
             turretStartShooting(turret);
         }
 
-        turret->flags = (turret->flags & ~TurretFlagsRotating) | TurretFlagsOpen;
+        turret->flags = (turret->flags & ~TurretFlagsRotating) | TurretFlagsOpen | TurretFlagsTipped;
         turret->stateTimer = TURRET_TIPPED_DURATION;
         turret->state = TurretStateTipped;
     }

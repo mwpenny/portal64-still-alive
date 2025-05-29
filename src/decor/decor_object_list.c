@@ -73,7 +73,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
             0.5f,
             &gCollisionBoxCallbacks,  
         },
-        2.0f,
+        2.5f,
         0.55f,
         CUBE_CUBE_DYNAMIC_MODEL,
         .materialIndex = CUBE_INDEX,
