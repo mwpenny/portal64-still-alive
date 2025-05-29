@@ -46,7 +46,7 @@ void rigidBodyUnmarkKinematic(struct RigidBody* rigidBody, float mass, float mom
     rigidBody->momentOfInertiaInv = 1.0f / rigidBody->momentOfInertia;
 }
 
-void rigidBodyAppyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* impulse) {
+void rigidBodyApplyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* impulse) {
     struct Vector3 offset;
     vector3Sub(worldPoint, &rigidBody->transform.position, &offset);
 

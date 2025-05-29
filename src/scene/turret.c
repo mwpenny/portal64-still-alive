@@ -443,7 +443,7 @@ static void turretHitPlayer(struct Turret* turret, struct Player* player, struct
         // Always push if player is moving toward turret, otherwise periodically
         struct Vector3 push;
         vector3Scale(lookDir, &push, player->body.mass * TURRET_BULLET_IMPULSE);
-        rigidBodyAppyImpulse(&player->body, &player->body.transform.position, &push);
+        rigidBodyApplyImpulse(&player->body, &player->body.transform.position, &push);
     }
 
     if ((turret->playerHitCount % TURRET_BULLET_SOUND_HITS) == 0) {

@@ -334,7 +334,7 @@ void playerThrowObject(struct Player* player) {
     
     // scale impulse with mass to throw each object the same distance
     vector3Scale(&forward, &forward, -1.0f * THROW_IMPULSE * object->body->mass);
-    rigidBodyAppyImpulse(object->body, &object->body->transform.position, &forward);
+    rigidBodyApplyImpulse(object->body, &object->body->transform.position, &forward);
 }
 
 int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPastObject) {
