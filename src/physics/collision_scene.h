@@ -32,6 +32,7 @@ extern struct CollisionScene gCollisionScene;
 
 void collisionSceneInit(struct CollisionScene* scene, struct CollisionObject* quads, int quadCount, struct World* world);
 void collisionObjectCollideMixed(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionScene* scene, struct ContactSolver* contactSolver);
+void collisionObjectCollidePairMixed(struct CollisionObject* a, struct Vector3* aPrevPos, struct Box3D* sweptA, struct CollisionObject* b, struct Vector3* bPrevPos, struct Box3D* sweptB, struct ContactSolver* contactSolver);
 
 int collisionObjectCollideShapeCast(struct CollisionObject* object, struct Vector3* offset, struct CollisionScene* scene, struct Vector3* finalLocation);
 

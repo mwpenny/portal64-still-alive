@@ -167,19 +167,6 @@ int compoundColliderHasOverlap(
     return 0;
 }
 
-void compoundColliderCollideObject(
-    struct CollisionObject* compoundColliderObject,
-    struct CollisionObject* other,
-    struct ContactSolver* contactSolver
-) {
-    struct CompoundCollider* compoundCollider = (struct CompoundCollider*)compoundColliderObject->collider->data;
-
-    for (short i = 0; i < compoundCollider->childrenCount; ++i) {
-        struct CollisionObject* childObj = &compoundCollider->children[i].object;
-        collisionObjectCollideTwoObjects(childObj, other, contactSolver);
-    }
-}
-
 void compoundColliderCollideMixed(
     struct CollisionObject* compoundColliderObject,
     struct Vector3* prevCompoundColliderPos,
@@ -199,7 +186,7 @@ void compoundColliderCollideMixed(
     }
 }
 
-void compoundColliderCollideObjectSwept(
+void compoundColliderCollidePairMixed(
     struct CollisionObject* compoundColliderObject,
     struct Vector3* prevCompoundColliderPos,
     struct Box3D* sweptCompoundCollider,
@@ -210,10 +197,14 @@ void compoundColliderCollideObjectSwept(
 ) {
     struct CompoundCollider* compoundCollider = (struct CompoundCollider*)compoundColliderObject->collider->data;
 
+    if (!box3DHasOverlap(sweptCompoundCollider, sweptOther)) {
+        return;
+    }
+
     for (short i = 0; i < compoundCollider->childrenCount; ++i) {
         struct CollisionObject* childObj = &compoundCollider->children[i].object;
 
-        collisionObjectCollideTwoObjectsSwept(
+        collisionObjectCollidePairMixed(
             childObj, prevCompoundColliderPos, sweptCompoundCollider,
             other, prevOtherPos, sweptOther,
             contactSolver

@@ -52,12 +52,6 @@ int compoundColliderHasOverlap(
     struct Vector3* firstDirection
 );
 
-void compoundColliderCollideObject(
-    struct CollisionObject* compoundColliderObject,
-    struct CollisionObject* other,
-    struct ContactSolver* contactSolver
-);
-
 void compoundColliderCollideMixed(
     struct CollisionObject* compoundColliderObject,
     struct Vector3* prevCompoundColliderPos,
@@ -66,7 +60,7 @@ void compoundColliderCollideMixed(
     struct ContactSolver* contactSolver
 );
 
-void compoundColliderCollideObjectSwept(
+void compoundColliderCollidePairMixed(
     struct CollisionObject* compoundColliderObject,
     struct Vector3* prevCompoundColliderPos,
     struct Box3D* sweptCompoundCollider,

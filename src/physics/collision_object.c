@@ -258,15 +258,6 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
         return;
     }
 
-    // Compound colliders delegate to child collision
-    if (a->collider->type == CollisionShapeTypeCompound) {
-        compoundColliderCollideObject(a, b, contactSolver);
-        return;
-    } else if (b->collider->type == CollisionShapeTypeCompound) {
-        compoundColliderCollideObject(b, a, contactSolver);
-        return;
-    }
-
     struct Simplex simplex;
 
     struct Vector3 offset;
@@ -361,23 +352,6 @@ void collisionObjectCollideTwoObjectsSwept(
     } else if (b->collider->type == CollisionShapeTypeMesh) {
         assert(a->collider->type != b->collider->type);
         meshColliderCollideObject(b, a, contactSolver);
-        return;
-    }
-
-    // Compound colliders delegate to child collision
-    if (a->collider->type == CollisionShapeTypeCompound) {
-        compoundColliderCollideObjectSwept(
-            a, prevAPos, sweptA,
-            b, prevBPos, sweptB,
-            contactSolver
-        );
-        return;
-    } else if (b->collider->type == CollisionShapeTypeCompound) {
-        compoundColliderCollideObjectSwept(
-            b, prevBPos, sweptB,
-            a, prevAPos, sweptA,
-            contactSolver
-        );
         return;
     }
 
