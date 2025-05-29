@@ -6,6 +6,7 @@
 #include "audio/soundplayer.h"
 #include "levels/level_definition.h"
 #include "physics/collision_object.h"
+#include "physics/compound_collider.h"
 #include "player/player.h"
 #include "scene/laser.h"
 
@@ -55,7 +56,9 @@ union TurretStateData {
 };
 
 struct Turret {
+    struct CompoundCollider compoundCollider;
     struct CollisionObject collisionObject;
+
     struct RigidBody rigidBody;
     struct SKArmature armature;
     struct Laser laser;

@@ -23,4 +23,4 @@ player's body).
 
 Although intended for cubes, the secondary signal will be emitted when any
 grabbable object over the button's threshold of `1.9` is placed on it. Currently
-cubes are the only objects that satisfy this criterion with a mass of `2.0`.
+cubes and turrets are the only objects that satisfy this criterion.

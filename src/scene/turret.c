@@ -5,6 +5,7 @@
 #include "effects/effect_definitions.h"
 #include "locales/locales.h"
 #include "physics/collision_scene.h"
+#include "physics/collision_capsule.h"
 #include "savefile/savefile.h"
 #include "scene/dynamic_scene.h"
 #include "util/dynamic_asset_loader.h"
@@ -16,16 +17,113 @@
 #include "codegen/assets/models/dynamic_animated_model_list.h"
 #include "codegen/assets/models/props/turret_01.h"
 
-static struct CollisionBox sTurretCollisionBox = {
-    {0.2f, 0.554f, 0.4f}
+#define TURRET_MASS                2.0f
+#define TURRET_COLLISION_LAYERS    (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
+
+#define TURRET_OPEN_POSITION       46.0f
+#define TURRET_CLOSE_POSITION      22.0f
+#define TURRET_OPEN_SPEED          4.0f
+#define TURRET_SLOW_OPEN_SPEED     2.5f
+#define TURRET_CLOSE_SPEED         2.0f
+#define TURRET_CLOSE_DELAY         0.25f
+#define TURRET_ROTATE_SPEED        2.0f
+#define TURRET_SHOT_PERIOD         0.025f
+
+#define TURRET_BULLET_DAMAGE       4.0f
+#define TURRET_BULLET_IMPULSE      5.0f
+#define TURRET_BULLET_PUSH_HITS    8
+#define TURRET_BULLET_SOUND_HITS   4
+
+#define TURRET_IDLE_DIALOG_DELAY   3.0f
+
+#define TURRET_DETECT_RANGE        20.0f
+#define TURRET_DETECT_FOV_DOT      0.5f   // acos(0.5) * 2 = 120 degree FOV
+#define TURRET_DETECT_DELAY        0.5f
+
+#define TURRET_DEPLOY_DELAY        0.5f
+
+#define TURRET_SEARCH_PITCH_SPEED  0.5f
+#define TURRET_SEARCH_YAW_SPEED    TURRET_SEARCH_PITCH_SPEED * 1.5f
+#define TURRET_SEARCH_DURATION     5.0f
+#define TURRET_SEARCH_DIALOG_DELAY 2.0f
+
+#define TURRET_ATTACK_DIALOG_DELAY 2.0f
+#define TURRET_ATTACK_FOV_DOT      0.9f   // acos(0.9) * 2 = ~50 degree FOV
+#define TURRET_ATTACK_SNAP_SPEED   1.5f
+#define TURRET_ATTACK_TRACK_SPEED  0.75f
+
+#define TURRET_GRAB_MIN_ROT_DELAY  0.1f
+#define TURRET_GRAB_MAX_ROT_DELAY  0.75f
+
+#define TURRET_TIPPED_DURATION     3.0f
+#define TURRET_TIPPED_ROTATE_SPEED 8.0f
+
+#define TURRET_AUTOTIP_MAX_VEL     1.0f
+#define TURRET_AUTOTIP_DIR_MAX_DOT 0.5f   // acos(0.5) * 2 = 120 degree range
+#define TURRET_AUTOTIP_IMPULSE     2.5f
+
+#define TURRET_COLLISION_LEG_L     0
+#define TURRET_COLLISION_LEG_R     1
+#define TURRET_COLLISION_LEG_B     2
+#define TURRET_COLLISION_BODY      3
+
+static struct CollisionBox sTurretFrontLegBox = {
+    {0.05f, 0.175f, 0.075f}
+};
+static struct CollisionBox sTurretBackLegBox = {
+    {0.05f, 0.25f, 0.075f}
+};
+struct CollisionCapsule sTurretBodyCapsule = {
+    0.2f,
+    0.25f
 };
 
-static struct ColliderTypeData sTurretCollider = {
-    CollisionShapeTypeBox,
-    &sTurretCollisionBox,
-    0.0f,
-    1.0f,
-    &gCollisionBoxCallbacks
+static struct CompoundColliderComponentDefinition sTurretColliderComponents[] = {
+    [TURRET_COLLISION_LEG_L] = {
+        {
+            CollisionShapeTypeBox,
+            &sTurretFrontLegBox,
+            0.0f,
+            1.0f,
+            &gCollisionBoxCallbacks
+        },
+        { 0.15f, -0.32625f,  0.175f }
+    },
+    [TURRET_COLLISION_LEG_R] = {
+        {
+            CollisionShapeTypeBox,
+            &sTurretFrontLegBox,
+            0.0f,
+            1.0f,
+            &gCollisionBoxCallbacks
+        },
+        { -0.15f, -0.32625f,  0.175f }
+    },
+    [TURRET_COLLISION_LEG_B] = {
+        {
+            CollisionShapeTypeBox,
+            &sTurretBackLegBox,
+            0.0f,
+            1.0f,
+            &gCollisionBoxCallbacks
+        },
+        { 0.0f, -0.25f, -0.32675f }
+    },
+    [TURRET_COLLISION_BODY] = {
+        {
+            CollisionShapeTypeCapsule,
+            &sTurretBodyCapsule,
+            0.0f,
+            1.0f,
+            &gCollisionCapsuleCallbacks
+        },
+        { 0.0f, 0.25f, 0.0f }
+    }
+};
+
+static struct CompoundColliderDefinition sTurretCollider = {
+    sTurretColliderComponents,
+    sizeof(sTurretColliderComponents) / sizeof(*sTurretColliderComponents)
 };
 
 static struct Vector3 sTurretOriginOffset = { 0.0f, 0.554f, 0.0f };
@@ -131,47 +229,6 @@ static short sTurretTippedSounds[] = {
 #endif
 };
 
-#define TURRET_MASS                3.0f
-#define TURRET_COLLISION_LAYERS    (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
-
-#define TURRET_OPEN_POSITION       46.0f
-#define TURRET_CLOSE_POSITION      22.0f
-#define TURRET_OPEN_SPEED          4.0f
-#define TURRET_SLOW_OPEN_SPEED     2.5f
-#define TURRET_CLOSE_SPEED         2.0f
-#define TURRET_CLOSE_DELAY         0.25f
-#define TURRET_ROTATE_SPEED        2.0f
-#define TURRET_SHOT_PERIOD         0.025f
-
-#define TURRET_BULLET_DAMAGE       4.0f
-#define TURRET_BULLET_IMPULSE      5.0f
-#define TURRET_BULLET_PUSH_HITS    8
-#define TURRET_BULLET_SOUND_HITS   4
-
-#define TURRET_IDLE_DIALOG_DELAY   3.0f
-
-#define TURRET_DETECT_RANGE        20.0f
-#define TURRET_DETECT_FOV_DOT      0.5f   // acos(0.5) * 2 = 120 degree FOV
-#define TURRET_DETECT_DELAY        0.5f
-
-#define TURRET_DEPLOY_DELAY        0.5f
-
-#define TURRET_SEARCH_PITCH_SPEED  0.5f
-#define TURRET_SEARCH_YAW_SPEED    TURRET_SEARCH_PITCH_SPEED * 1.5f
-#define TURRET_SEARCH_DURATION     5.0f
-#define TURRET_SEARCH_DIALOG_DELAY 2.0f
-
-#define TURRET_ATTACK_DIALOG_DELAY 2.0f
-#define TURRET_ATTACK_FOV_DOT      0.9f   // acos(0.9) * 2 = ~50 degree FOV
-#define TURRET_ATTACK_SNAP_SPEED   1.5f
-#define TURRET_ATTACK_TRACK_SPEED  0.75f
-
-#define TURRET_GRAB_MIN_ROT_DELAY  0.1f
-#define TURRET_GRAB_MAX_ROT_DELAY  0.75f
-
-#define TURRET_TIPPED_DURATION     3.0f
-#define TURRET_TIPPED_ROTATE_SPEED 8.0f
-
 #define LIST_SIZE(list) (sizeof(list) / sizeof(*list))
 #define RANDOM_TURRET_SOUND(list) turretRandomSoundId(list, LIST_SIZE(list))
 
@@ -273,7 +330,8 @@ static void turretRender(void* data, struct DynamicRenderDataList* renderList, s
 }
 
 void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
-    collisionObjectInit(&turret->collisionObject, &sTurretCollider, &turret->rigidBody, TURRET_MASS, TURRET_COLLISION_LAYERS);
+    compoundColliderInit(&turret->compoundCollider, &sTurretCollider, &turret->rigidBody, TURRET_COLLISION_LAYERS);
+    collisionObjectInit(&turret->collisionObject, &turret->compoundCollider.colliderType, &turret->rigidBody, TURRET_MASS, TURRET_COLLISION_LAYERS);
     collisionSceneAddDynamicObject(&turret->collisionObject);
 
     turret->rigidBody.transform.scale = gOneVec;
