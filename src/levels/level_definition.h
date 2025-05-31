@@ -224,7 +224,7 @@ struct ButtonDefinition {
     struct Vector3 location;
     short roomIndex;
     short signalIndex;
-    short cubeSignalIndex;
+    short objectSignalIndex;
 };
 
 struct SwitchDefinition {

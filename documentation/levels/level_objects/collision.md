@@ -72,7 +72,9 @@ as follows.
     * [Elevators](./elevator.md)
     * [Fizzler](./fizzler.md) frames
     * Player
-* `BLOCK_TURRET_SIGHT`: Used to block turret line of sight
+* `BLOCK_TURRET_SIGHT`: Used to block turret line of sight, and by:
+    * [Doors](./door.md) (when closed)
+    * [Turrets](./turret.md)
 * `BLOCK_TURRET_SHOTS`: Used to block turret shots, and by:
     * [Decor](./decor.md) (with collision)
     * Player

@@ -1,12 +1,12 @@
 #ifndef __DOOR_H__
 #define __DOOR_H__
 
-#include "../physics/collision_object.h"
-#include "../levels/level_definition.h"
-#include "../audio/soundplayer.h"
-#include "../audio/clips.h"
-#include "../sk64/skeletool_animator.h"
-#include "../sk64/skeletool_armature.h"
+#include "audio/clips.h"
+#include "audio/soundplayer.h"
+#include "levels/level_definition.h"
+#include "physics/collision_object.h"
+#include "sk64/skeletool_animator.h"
+#include "sk64/skeletool_armature.h"
 
 enum DoorFlags {
     DoorFlagsIsOpen = (1 << 0),

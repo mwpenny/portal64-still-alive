@@ -33,7 +33,7 @@ for _, button in pairs(sk_scene.nodes_for_type('@button')) do
         location = position,
         roomIndex = room_index,
         signalIndex = signals.signal_index_for_name(button.arguments[1]),
-        cubeSignalIndex = signals.optional_signal_index_for_name(button.arguments[2])
+        objectSignalIndex = signals.optional_signal_index_for_name(button.arguments[2])
     })
 end
 

@@ -44,9 +44,7 @@ struct ColliderTypeData gButtonCollider = {
 #define BUTTON_MOVEMENT_AMOUNT          0.1f
 #define BUTTON_MOVE_VELOCTY             0.3f
 
-#define PRESSED_WITH_CUBE               2
-
-#define CUBE_PRESS_IDLE_FRAMES          2
+#define OBJECT_PRESS_DELAY_FRAMES       2
 
 void buttonRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Button* button = (struct Button*)data;
@@ -90,82 +88,93 @@ void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
 
     collisionObjectUpdateBB(&button->collisionObject);
 
-    button->dynamicId = dynamicSceneAdd(button, buttonRender, &button->rigidBody.transform.position, 0.84f);
-    button->signalIndex = definition->signalIndex;
-
     button->originalPos = definition->location;
-    button->cubeSignalIndex = definition->cubeSignalIndex;
-    button->flags = 0;
-    
-    button->cubePressFrames = CUBE_PRESS_IDLE_FRAMES;
+    button->flags = ButtonFlagsFirstUpdate;
+    button->state = ButtonStateUnpressed;
 
+    button->dynamicId = dynamicSceneAdd(button, buttonRender, &button->rigidBody.transform.position, 0.84f);
     dynamicSceneSetRoomFlags(button->dynamicId, ROOM_FLAG_FROM_INDEX(button->rigidBody.currentRoom));
+
+    button->signalIndex = definition->signalIndex;
+    button->objectSignalIndex = definition->objectSignalIndex;
+    button->objectPressTimer = OBJECT_PRESS_DELAY_FRAMES;
 }
 
 void buttonUpdate(struct Button* button) {
-    struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, NULL);
+    if (button->state != ButtonStateUnpressed) {
+        signalsSend(button->signalIndex);
 
-    int shouldPress = 0;
-    while (manifold) {
+        if (button->objectSignalIndex != -1 && button->state == ButtonStatePressedByObject) {
+            signalsSend(button->objectSignalIndex);
+        }
+    }
+
+    if (button->flags & ButtonFlagsFirstUpdate) {
+        // Objects are updated before collision is processed, so the first
+        // update after loading a save will not see objects on the button.
+        //
+        // Skip checking this during the first update to avoid bouncing.
+        button->flags &= ~ButtonFlagsFirstUpdate;
+        return;
+    }
+
+    enum ButtonState newState = ButtonStateUnpressed;
+
+    // Check for objects on button
+    for (struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, NULL);
+        manifold;
+        manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, manifold)
+    ) {
         struct CollisionObject* other = manifold->shapeA == &button->collisionObject ? manifold->shapeB : manifold->shapeA;
 
         if (other->body && other->body->mass > MASS_BUTTON_PRESS_THRESHOLD) {
-            
-            shouldPress = 1;
+            newState = ButtonStatePressed;
 
-            if ((other->body->flags & RigidBodyFlagsGrabbable) == RigidBodyFlagsGrabbable && button->cubePressFrames <= 0) {
-                shouldPress = PRESSED_WITH_CUBE;
+            if ((other->body->flags & RigidBodyFlagsGrabbable) && button->objectPressTimer <= 0) {
+                newState = ButtonStatePressedByObject;
             }
             
             break;
         }
-
-        manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, manifold);
     }
-    
+
     if (button->collisionObject.flags & COLLISION_OBJECT_PLAYER_STANDING) {
         button->collisionObject.flags &= ~COLLISION_OBJECT_PLAYER_STANDING;
-        shouldPress = 1;
+        newState = ButtonStatePressed;
     }
 
     struct Vector3 targetPos = button->originalPos;
-    
-    if (shouldPress) {
+    if (newState != ButtonStateUnpressed) {
         targetPos.y -= BUTTON_MOVEMENT_AMOUNT;
-        signalsSend(button->signalIndex);
 
-        if (button->cubeSignalIndex != -1 && shouldPress == PRESSED_WITH_CUBE) {
-            signalsSend(button->cubeSignalIndex);
-        }
-        
-        if (button->cubePressFrames > 0) {
-            --button->cubePressFrames;
+        if (button->objectPressTimer > 0) {
+            --button->objectPressTimer;
         }
     } else {
-        button->cubePressFrames = CUBE_PRESS_IDLE_FRAMES;
+        button->objectPressTimer = OBJECT_PRESS_DELAY_FRAMES;
     }
 
-    //if its actively moving up or down
-    if (targetPos.y != button->rigidBody.transform.position.y) {
-        //actively going down
-        if (shouldPress){
-            if (!(button->flags & ButtonFlagsBeingPressed)){
-                soundPlayerPlay(soundsButton, 2.5f, 0.5f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
-                hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_DOWN, SubtitleTypeCaption);
-            }
-            button->flags |= ButtonFlagsBeingPressed;
-        }
-        // actively going up
-        else{
-            if ((button->flags & ButtonFlagsBeingPressed)){
-                soundPlayerPlay(soundsButtonRelease, 2.5f, 0.4f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
-                hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_UP, SubtitleTypeCaption);
-            }
-            button->flags &= ~ButtonFlagsBeingPressed;
+    // Update state
+    if (button->state != newState) {
+        if (newState == ButtonStateUnpressed) {
+            soundPlayerPlay(soundsButtonRelease, 2.5f, 0.4f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+            hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_UP, SubtitleTypeCaption);
+        } else if (button->state == ButtonStateUnpressed) {
+            soundPlayerPlay(soundsButton, 2.5f, 0.5f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+            hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_DOWN, SubtitleTypeCaption);
         }
 
-        vector3MoveTowards(&button->rigidBody.transform.position, &targetPos, BUTTON_MOVE_VELOCTY * FIXED_DELTA_TIME, &button->rigidBody.transform.position);
+        button->state = newState;
+    }
+
+    // Adjust button position based on state
+    if (targetPos.y != button->rigidBody.transform.position.y) {
+        vector3MoveTowards(
+            &button->rigidBody.transform.position,
+            &targetPos,
+            BUTTON_MOVE_VELOCTY * FIXED_DELTA_TIME,
+            &button->rigidBody.transform.position
+        );
         collisionObjectUpdateBB(&button->collisionObject);
     }
-    
 }

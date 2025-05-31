@@ -125,20 +125,19 @@ void doorUpdate(struct Door* door) {
     int isOpen = (door->flags & DoorFlagsIsOpen) != 0;
 
     if (isOpen != signal) {
+        short clipIndex;
         if (signal) {
-            skAnimatorRunClip(&door->animator, dynamicAssetClip(typeDefinition->armatureIndex, typeDefinition->openClipIndex), 0.0f, 0);
+            clipIndex = typeDefinition->openClipIndex;
+            door->flags |= DoorFlagsIsOpen;
         } else {
-            skAnimatorRunClip(&door->animator, dynamicAssetClip(typeDefinition->armatureIndex, typeDefinition->closeClipIndex), 0.0f, 0);
+            clipIndex = typeDefinition->closeClipIndex;
+            door->flags &= ~DoorFlagsIsOpen;
         }
+
+        skAnimatorRunClip(&door->animator, dynamicAssetClip(typeDefinition->armatureIndex, clipIndex), 0.0f, 0);
 
         soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTAL_DOORCLOSE, SubtitleTypeCaption);
-
-        if (signal) {
-            door->flags |= DoorFlagsIsOpen;
-        } else {
-            door->flags &= ~DoorFlagsIsOpen;
-        }
     }
 
     int isDoorwayOpen = skAnimatorIsRunning(&door->animator) || isOpen;
@@ -171,6 +170,8 @@ void doorCheckForOpenState(struct Door* door) {
 
     int signal = signalsRead(door->signalIndex);
     if (signal) {
+        door->flags |= DoorFlagsIsOpen;
         skAnimatorRunClip(&door->animator, dynamicAssetClip(typeDefinition->armatureIndex, typeDefinition->openedClipIndex), 0.0f, 0);
+        skAnimatorUpdate(&door->animator, door->armature.pose, FIXED_DELTA_TIME);
     }
 }

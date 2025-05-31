@@ -116,7 +116,7 @@ void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene)
 void buttonsSerializeRW(struct Serializer* serializer, SerializeAction action, struct Button* buttons, int count) {
     for (int i = 0; i < count; ++i) {
         action(serializer, &buttons[i].rigidBody.transform.position.y, sizeof(float));
-        action(serializer, &buttons[i].flags, sizeof(buttons[i].flags));
+        action(serializer, &buttons[i].state, sizeof(enum ButtonState));
     }
 }
 
