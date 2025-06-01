@@ -74,10 +74,25 @@ void buttonRender(void* data, struct DynamicRenderDataList* renderList, struct R
     dynamicRenderListAddData(renderList, armatureDef->armature->displayList, matrix, BUTTON_INDEX, &button->rigidBody.transform.position, armature);
 }
 
+static void buttonHandleCollideStartEnd(struct CollisionObject* object, struct CollisionObject* other, struct Vector3* normal) {
+    if (other->body == NULL || (other->body->flags & RigidBodyIsKinematic)) {
+        return;
+    }
+
+    struct Button* button = object->data;
+
+    if ((other->body->flags & RigidBodyFlagsGrabbable) && other->body->mass > MASS_BUTTON_PRESS_THRESHOLD) {
+        button->activatingObjectCount += (normal != NULL) ? 1 : -1;
+    }
+}
+
 void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
     dynamicAssetAnimatedModel(PROPS_BUTTON_DYNAMIC_ANIMATED_MODEL);
 
     collisionObjectInit(&button->collisionObject, &gButtonCollider, &button->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_BLOCK_PORTAL);
+    button->collisionObject.collideStartEnd = buttonHandleCollideStartEnd;
+    button->collisionObject.data = button;
+
     rigidBodyMarkKinematic(&button->rigidBody);
     collisionSceneAddDynamicObject(&button->collisionObject);
 
@@ -98,6 +113,8 @@ void buttonInit(struct Button* button, struct ButtonDefinition* definition) {
     button->signalIndex = definition->signalIndex;
     button->objectSignalIndex = definition->objectSignalIndex;
     button->objectPressTimer = OBJECT_PRESS_DELAY_FRAMES;
+
+    button->activatingObjectCount = 0;
 }
 
 void buttonUpdate(struct Button* button) {
@@ -121,26 +138,15 @@ void buttonUpdate(struct Button* button) {
     enum ButtonState newState = ButtonStateUnpressed;
 
     // Check for objects on button
-    for (struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, NULL);
-        manifold;
-        manifold = contactSolverNextManifold(&gContactSolver, &button->collisionObject, manifold)
-    ) {
-        struct CollisionObject* other = manifold->shapeA == &button->collisionObject ? manifold->shapeB : manifold->shapeA;
-
-        if (other->body && other->body->mass > MASS_BUTTON_PRESS_THRESHOLD) {
-            newState = ButtonStatePressed;
-
-            if ((other->body->flags & RigidBodyFlagsGrabbable) && button->objectPressTimer <= 0) {
-                newState = ButtonStatePressedByObject;
-            }
-            
-            break;
-        }
-    }
-
     if (button->collisionObject.flags & COLLISION_OBJECT_PLAYER_STANDING) {
         button->collisionObject.flags &= ~COLLISION_OBJECT_PLAYER_STANDING;
         newState = ButtonStatePressed;
+    } else if (button->activatingObjectCount > 0) {
+        if (button->objectPressTimer == 0) {
+            newState = ButtonStatePressedByObject;
+        } else {
+            newState = ButtonStatePressed;
+        }
     }
 
     struct Vector3 targetPos = button->originalPos;

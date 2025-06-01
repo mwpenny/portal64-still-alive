@@ -20,7 +20,7 @@ void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData
     object->flags = 0;
     object->data = NULL;
     object->trigger = NULL;
-    object->sweptCollide = NULL;
+    object->collideStartEnd = NULL;
     object->manifoldIds = 0;
 }
 
@@ -118,10 +118,6 @@ void collisionObjectHandleSweptCollision(struct CollisionObject* object, struct 
     if (normalVelocity < 0.0f) {
         vector3AddScaled(&object->body->velocity, normal, (1 + restitution) * -normalVelocity, &object->body->velocity);
         vector3AddScaled(&object->body->transform.position, normal, -0.01f, &object->body->transform.position);
-    }
-
-    if (object->sweptCollide) {
-        object->sweptCollide(object, other, normal, normalVelocity);
     }
 }
 

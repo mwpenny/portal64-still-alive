@@ -147,7 +147,12 @@ void playerRender(void* data, struct DynamicRenderDataList* renderList, struct R
     );
 }
 
-void playerHandleSweptCollision(struct CollisionObject* object, struct CollisionObject* other, struct Vector3* normal, float normalVelocity) {
+static void playerHandleCollideStartEnd(struct CollisionObject* object, struct CollisionObject* other, struct Vector3* normal) {
+    if (normal == NULL) {
+        return;
+    }
+
+    float normalVelocity = vector3Dot(normal, &object->body->velocity);
     if (normalVelocity < 0.0f) {
         playerHandleLandingRumble(-normalVelocity);
     }
@@ -157,7 +162,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, 0.0f, 0.5f, NULL, NULL, SoundTypeAll);
 
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
-    player->collisionObject.sweptCollide = playerHandleSweptCollision;
+    player->collisionObject.collideStartEnd = playerHandleCollideStartEnd;
 
     // rigidBodyMarkKinematic(&player->body);
     player->body.flags |= RigidBodyIsKinematic | RigidBodyIsPlayer;

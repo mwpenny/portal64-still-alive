@@ -84,6 +84,18 @@ void contactInsert(struct ContactManifold* contactState, struct EpaResult* epaRe
         contactPoint->contactBWorld = contactPoint->contactBLocal;
     }
 
+    if (contactState->contactCount == 0) {
+        // Notify on first contact
+        if (contactState->shapeA->collideStartEnd) {
+            struct Vector3 normalReverse;
+            vector3Negate(&contactState->normal, &normalReverse);
+            contactState->shapeA->collideStartEnd(contactState->shapeA, contactState->shapeB, &normalReverse);
+        }
+        if (contactState->shapeB->collideStartEnd) {
+            contactState->shapeB->collideStartEnd(contactState->shapeB, contactState->shapeA, &contactState->normal);
+        }
+    }
+
     if (insertIndex == contactState->contactCount) {
         contactState->contactCount = insertIndex + 1;
     }

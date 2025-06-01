@@ -20,7 +20,7 @@
 #define COLLISION_OBJECT_INTERACTED         (1 << 2)
 
 typedef void (*TriggerCallback)(struct CollisionObject* collisionObject, struct CollisionObject* objectEnteringTrigger);
-typedef void (*SweptCollideCallback)(struct CollisionObject* collisionObject, struct CollisionObject* otherObject, struct Vector3* normal, float normalVelocity);
+typedef void (*CollideStartEndCallback)(struct CollisionObject* collisionObject, struct CollisionObject* otherObject, struct Vector3* normal);
 
 struct CollisionObject {
     struct ColliderTypeData *collider;
@@ -31,7 +31,7 @@ struct CollisionObject {
     short flags;
     void* data;
     TriggerCallback trigger;
-    SweptCollideCallback sweptCollide;
+    CollideStartEndCallback collideStartEnd;
     u32 manifoldIds;
 };
 

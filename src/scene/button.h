@@ -1,6 +1,8 @@
 #ifndef __SCENE_BUTTON_H__
 #define __SCENE_BUTTON_H__
 
+#include <stdint.h>
+
 #include "audio/clips.h"
 #include "audio/soundplayer.h"
 #include "levels/level_definition.h"
@@ -26,7 +28,8 @@ struct Button {
     short dynamicId;
     short signalIndex;
     short objectSignalIndex;
-    short objectPressTimer;
+    uint8_t objectPressTimer;
+    uint8_t activatingObjectCount;
 };
 
 void buttonInit(struct Button* button, struct ButtonDefinition* definition);

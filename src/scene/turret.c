@@ -329,7 +329,7 @@ static void turretRender(void* data, struct DynamicRenderDataList* renderList, s
     );
 }
 
-static void turretHandleSweptCollision(struct CollisionObject* object, struct CollisionObject* other, struct Vector3* normal, float normalVelocity) {
+static void turretHandleCollideStartEnd(struct CollisionObject* object, struct CollisionObject* other, struct Vector3* normal) {
     struct Turret* turret = object->data;
 
     // Even with rounded collision, it's difficult to knock
@@ -337,14 +337,16 @@ static void turretHandleSweptCollision(struct CollisionObject* object, struct Co
     //
     // Amplify horizontal movement to make it easier.
 
-    if (other->body == NULL || (other->body->flags & RigidBodyIsKinematic)) {
+    if (normal == NULL ||
+        other->body == NULL ||
+        (other->body->flags & RigidBodyIsKinematic)) {
         // Only amplify hits from free-moving physics objects
         return;
     }
 
     if (turret->state == TurretStateGrabbed ||
         (turret->flags & TurretFlagsTipped) ||
-        normalVelocity > (TURRET_AUTOTIP_MAX_VEL * TURRET_AUTOTIP_MAX_VEL)
+        vector3Dot(normal, &object->body->velocity) > (TURRET_AUTOTIP_MAX_VEL * TURRET_AUTOTIP_MAX_VEL)
     ) {
         // Only amplify when undisturbed
         return;
@@ -373,7 +375,7 @@ static void turretHandleSweptCollision(struct CollisionObject* object, struct Co
 
 void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     compoundColliderInit(&turret->compoundCollider, &sTurretCollider, &turret->rigidBody, TURRET_COLLISION_LAYERS);
-    turret->compoundCollider.children[TURRET_COLLISION_BODY].object.sweptCollide = turretHandleSweptCollision;
+    turret->compoundCollider.children[TURRET_COLLISION_BODY].object.collideStartEnd = turretHandleCollideStartEnd;
     turret->compoundCollider.children[TURRET_COLLISION_BODY].object.data = turret;
 
     collisionObjectInit(&turret->collisionObject, &turret->compoundCollider.colliderType, &turret->rigidBody, TURRET_MASS, TURRET_COLLISION_LAYERS);

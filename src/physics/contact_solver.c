@@ -90,9 +90,15 @@ void contactSolverManifoldCleanup(struct ContactSolver* contactSolver, struct Co
 	if (contact->shapeA->body) {
 		contact->shapeA->body->flags &= ~RigidBodyIsSleeping;
 	}
+	if (contact->shapeA->collideStartEnd) {
+		contact->shapeA->collideStartEnd(contact->shapeA, contact->shapeB, NULL);
+	}
 
 	if (contact->shapeB->body) {
 		contact->shapeB->body->flags &= ~RigidBodyIsSleeping;
+	}
+	if (contact->shapeB->collideStartEnd) {
+		contact->shapeB->collideStartEnd(contact->shapeB, contact->shapeA, NULL);
 	}
 }
 
