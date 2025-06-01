@@ -431,6 +431,7 @@ static uint8_t turretUpdateFizzled(struct Turret* turret) {
     enum FizzleCheckResult fizzleStatus = decorObjectUpdateFizzler(&turret->collisionObject, &turret->fizzleTime);
     if (fizzleStatus == FizzleCheckResultStart) {
         laserRemove(&turret->laser);
+        compoundColliderSetCollisionLayers(&turret->collisionObject, 0);
 
         turretStopAllSounds(turret);
         turretPlaySound(
