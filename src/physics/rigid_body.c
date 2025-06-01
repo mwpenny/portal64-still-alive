@@ -89,6 +89,8 @@ void rigidBodyUpdate(struct RigidBody* rigidBody) {
 
         rigidBody->flags |= RigidBodyFizzled;
     }
+
+    rigidBody->flags |= RigidBodyHasWoken;
 }
 
 void rigidBodyVelocityAtLocalPoint(struct RigidBody* rigidBody, struct Vector3* localPoint, struct Vector3* worldVelocity) {

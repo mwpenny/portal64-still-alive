@@ -81,6 +81,14 @@ static void buttonHandleCollideStartEnd(struct CollisionObject* object, struct C
 
     struct Button* button = object->data;
 
+    if (normal != NULL) {
+        // Ensure rigid bodies which stay asleep on load will hit the button
+        // Keeps activating bodies activating, and non-activating bodies on top
+        other->body->flags |= RigidBodyForceWakeOnLoad;
+    } else {
+        other->body->flags &= ~RigidBodyForceWakeOnLoad;
+    }
+
     if ((other->body->flags & RigidBodyFlagsGrabbable) && other->body->mass > MASS_BUTTON_PRESS_THRESHOLD) {
         button->activatingObjectCount += (normal != NULL) ? 1 : -1;
     }

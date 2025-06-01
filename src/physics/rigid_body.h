@@ -18,25 +18,27 @@
 #define PORTAL_EXIT_XY_CLAMP_DISTANCE (0.15f)
 
 enum RigidBodyFlags {
-    RigidBodyFlagsInFrontPortal0 = (1 << 0),
-    RigidBodyFlagsInFrontPortal1 = (1 << 1),
+    RigidBodyFlagsInFrontPortal0  = (1 << 0),
+    RigidBodyFlagsInFrontPortal1  = (1 << 1),
     RigidBodyFlagsPortalsInactive = (1 << 2),
-    RigidBodyFlagsCrossedPortal0 = (1 << 3),
-    RigidBodyFlagsCrossedPortal1 = (1 << 4),
-    RigidBodyFlagsGrabbable = (1 << 5),
-    RigidBodyIsTouchingPortalA = (1 << 6),
-    RigidBodyIsTouchingPortalB = (1 << 7),
-    RigidBodyWasTouchingPortalA = (1 << 8),
-    RigidBodyWasTouchingPortalB = (1 << 9),
+    RigidBodyFlagsCrossedPortal0  = (1 << 3),
+    RigidBodyFlagsCrossedPortal1  = (1 << 4),
+    RigidBodyFlagsGrabbable       = (1 << 5),
+    RigidBodyIsTouchingPortalA    = (1 << 6),
+    RigidBodyIsTouchingPortalB    = (1 << 7),
+    RigidBodyWasTouchingPortalA   = (1 << 8),
+    RigidBodyWasTouchingPortalB   = (1 << 9),
 
-    RigidBodyIsKinematic = (1 << 10),
-    RigidBodyIsSleeping = (1 << 11),
-    // tells the collision system to generate contacts with the player
-    RigidBodyIsPlayer = (1 << 12),
+    RigidBodyIsKinematic          = (1 << 10),
+    RigidBodyIsPlayer             = (1 << 11),  // Force contact generation
 
-    RigidBodyFizzled = (1 << 13),
-    RigidBodyDisableGravity = (1 << 14),
-    RigidBodyForceVelocity = (1 << 15),
+    RigidBodyFizzled              = (1 << 12),
+    RigidBodyDisableGravity       = (1 << 13),
+    RigidBodyForceVelocity        = (1 << 14),
+
+    RigidBodyIsSleeping           = (1 << 15),
+    RigidBodyHasWoken             = (1 << 16),
+    RigidBodyForceWakeOnLoad      = (1 << 17),
 };
 
 struct RigidBody {

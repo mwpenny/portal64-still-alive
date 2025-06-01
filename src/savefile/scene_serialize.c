@@ -587,12 +587,16 @@ void turretDeserialize(struct Serializer* serializer, struct Scene* scene) {
         serializeRead(serializer, &turret->rigidBody.flags, sizeof(enum RigidBodyFlags));
         serializeRead(serializer, &turret->rigidBody.currentRoom, sizeof(short));
 
+        if (turret->rigidBody.flags & RigidBodyForceWakeOnLoad) {
+            turret->rigidBody.flags &= ~(RigidBodyIsSleeping | RigidBodyForceWakeOnLoad);
+        } else {
+            turret->rigidBody.flags &= ~RigidBodyHasWoken;
+        }
+
         serializeRead(serializer, &turret->state, sizeof(enum TurretState));
         serializeRead(serializer, &turret->fizzleTime, sizeof(float));
 
         collisionObjectUpdateBB(&turret->collisionObject);
-        turret->rigidBody.flags &= ~RigidBodyIsSleeping;
-        turret->rigidBody.sleepFrames = IDLE_SLEEP_FRAMES;
 
         if (heldObject == i) {
             playerSetGrabbing(&scene->player, &turret->collisionObject);

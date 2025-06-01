@@ -869,6 +869,8 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                 portal->flags &= ~PortalFlagsZOffset;
             }
 
+            collisionSceneCheckUnwokenObjectsNearPortal(portalIndex);
+
             if (collisionSceneIsPortalOpen()) {
                 // the second portal is fully transparent right away
                 portal->opacity = 0.0f;

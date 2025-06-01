@@ -70,6 +70,8 @@ int mergeColliderList(short* a, int aCount, short* b, int bCount, short* output)
 
 #define GRID_CELL_CONTENTS(room, x, z) (&room->cellContents[(x) * room->spanZ + (z)])
 
+#define NEAR_PORTAL_WAKE_DISTANCE 1.0f
+
 int collisionObjectRoomColliders(struct Room* room, struct Box3D* box, short output[MAX_COLLIDERS]) {
     short tmp[MAX_COLLIDERS];
 
@@ -314,6 +316,39 @@ void collisionScenePushObjectsOutOfPortal(int portalIndex) {
         depth += 0.5f * signf(depth);
 
         vector3AddScaled(&object->body->transform.position, &reversePortalNormal, depth, &object->body->transform.position);
+    }
+}
+
+void collisionSceneCheckUnwokenObjectsNearPortal(int portalIndex) {
+    struct Transform* portalTransform = gCollisionScene.portalTransforms[portalIndex];
+    if (!portalTransform) {
+        return;
+    }
+
+    short portalRoom = gCollisionScene.portalRooms[portalIndex];
+
+    // For performance, some bodies start asleep to avoid many collisions
+    // on level load. They will have no collision contacts initially.
+    //
+    // They will wake up when collided with, but a portal could be placed
+    // underneath (no collision takes place). So wake when near a portal.
+    // This is not necessary after the first wake since contact removal
+    // from the portal placement will wake the body.
+    for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
+        struct CollisionObject* object = gCollisionScene.dynamicObjects[i];
+
+        if (object->body->flags & (RigidBodyIsKinematic | RigidBodyHasWoken)) {
+            continue;
+        }
+
+        if (object->body->currentRoom != portalRoom) {
+            continue;
+        }
+
+        float distance = vector3DistSqrd(&portalTransform->position, &object->body->transform.position);
+        if (distance < (NEAR_PORTAL_WAKE_DISTANCE * NEAR_PORTAL_WAKE_DISTANCE)) {
+            object->body->flags &= ~RigidBodyIsSleeping;
+        }
     }
 }
 

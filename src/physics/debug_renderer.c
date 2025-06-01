@@ -59,7 +59,10 @@ void contactConstraintStateDebugDraw(struct ContactManifold* constraintState, st
         if (constraintState->shapeB->body) {
             vector3Add(&constraintState->shapeB->body->transform.position, &pos, &pos);
 
-            if (constraintState->shapeB->body->flags & RigidBodyIsSleeping) {
+            int bFlags = constraintState->shapeB->body->flags;
+            int aFlags = constraintState->shapeA->body ? constraintState->shapeA->body->flags : 0;
+            int isSleeping = ((bFlags & RigidBodyIsKinematic) ? aFlags : bFlags) & RigidBodyIsSleeping;
+            if (isSleeping) {
                 vertices = vtx_contact_solver_sleeping_debug;
             }
         }

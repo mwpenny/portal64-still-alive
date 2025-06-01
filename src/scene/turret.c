@@ -382,7 +382,7 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     collisionSceneAddDynamicObject(&turret->collisionObject);
 
     turret->rigidBody.transform.scale = gOneVec;
-    turret->rigidBody.flags |= RigidBodyFlagsGrabbable;
+    turret->rigidBody.flags |= RigidBodyFlagsGrabbable | RigidBodyIsSleeping;
 
     if (definition) {
         turret->rigidBody.transform.rotation = definition->rotation;

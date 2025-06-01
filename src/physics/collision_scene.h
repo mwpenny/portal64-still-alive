@@ -45,6 +45,7 @@ void collisionSceneSetPortal(int portalIndex, struct Transform* transform, int r
 struct Transform* collisionSceneTransformToPortal(int fromPortal);
 
 void collisionScenePushObjectsOutOfPortal(int portalIndex);
+void collisionSceneCheckUnwokenObjectsNearPortal(int portalIndex);
 
 int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, int collisionLayers, float maxDistance, int passThroughPortals, struct RaycastHit* hit);
 int collisionSceneRaycastOnlyDynamic(struct CollisionScene* scene, struct Ray* ray, int collisionLayers, float maxDistance, struct RaycastHit* hit);
