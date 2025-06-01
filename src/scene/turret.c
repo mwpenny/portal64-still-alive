@@ -543,11 +543,14 @@ static void turretHitPlayer(struct Turret* turret, struct Player* player, struct
 
     float velocityTowardTurret = vector3Dot(&player->body.velocity, lookDir);
     if (velocityTowardTurret < 0.0f ||
-        (velocityTowardTurret < 0.001f && (turret->playerHitCount % TURRET_BULLET_PUSH_HITS) == 0)) {
-
+        (velocityTowardTurret < 0.001f && (turret->playerHitCount % TURRET_BULLET_PUSH_HITS) == 0)
+    ) {
         // Always push if player is moving toward turret, otherwise periodically
         struct Vector3 push;
-        vector3Scale(lookDir, &push, player->body.mass * TURRET_BULLET_IMPULSE);
+        vector3ProjectPlane(lookDir, &gUp, &push);
+        vector3Normalize(&push, &push);
+        vector3Scale(&push, &push, player->body.mass * TURRET_BULLET_IMPULSE);
+
         rigidBodyApplyImpulse(&player->body, &player->body.transform.position, &push);
     }
 
