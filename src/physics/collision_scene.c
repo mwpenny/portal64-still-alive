@@ -352,7 +352,7 @@ void collisionSceneCheckUnwokenObjectsNearPortal(int portalIndex) {
     }
 }
 
-void collisionSceneRaycastRoom(struct CollisionScene* scene, struct Room* room, struct Ray* ray, int collisionLayers, struct RaycastHit* hit) {
+void collisionSceneRaycastRoom(struct CollisionScene* scene, struct Room* room, struct Ray* ray, short collisionLayers, struct RaycastHit* hit) {
     int currX = GRID_CELL_X(room, ray->origin.x);
     int currZ = GRID_CELL_Z(room, ray->origin.z);
 
@@ -476,7 +476,7 @@ int collisionSceneRaycastDoorways(struct CollisionScene* scene, struct Room* roo
     return nextRoom;
 }
 
-void collisionSceneRaycastDynamic(struct CollisionScene* scene, struct Ray* ray, int collisionLayers, struct RaycastHit* hit) {
+void collisionSceneRaycastDynamic(struct CollisionScene* scene, struct Ray* ray, short collisionLayers, struct RaycastHit* hit) {
     for (int i = 0; i < scene->dynamicObjectCount; ++i) {
         struct RaycastHit hitTest;
 
@@ -502,7 +502,7 @@ void collisionSceneRaycastDynamic(struct CollisionScene* scene, struct Ray* ray,
     }
 }
 
-int collisionSceneRaycastOnlyDynamic(struct CollisionScene* scene, struct Ray* ray, int collisionLayers, float maxDistance, struct RaycastHit* hit) {
+int collisionSceneRaycastOnlyDynamic(struct CollisionScene* scene, struct Ray* ray, short collisionLayers, float maxDistance, struct RaycastHit* hit) {
     hit->distance = maxDistance;
     hit->throughPortal = NULL;
     hit->passedRooms = 1LL << hit->roomIndex;
@@ -513,7 +513,7 @@ int collisionSceneRaycastOnlyDynamic(struct CollisionScene* scene, struct Ray* r
     return hit->distance != maxDistance;
 }
 
-int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, int collisionLayers, float maxDistance, int passThroughPortals, struct RaycastHit* hit) {
+int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ray* ray, short collisionLayers, float maxDistance, int passThroughPortals, struct RaycastHit* hit) {
     hit->distance = maxDistance;
     hit->throughPortal = NULL;
     hit->roomIndex = roomIndex;
@@ -613,6 +613,12 @@ void collisionSceneRemoveDynamicObject(struct CollisionObject* object) {
     }
 
     if (found) {
+        // Ensure manifolds are cleaned up
+        object->collisionLayers = 0;
+        if (object->collider->type == CollisionShapeTypeCompound) {
+            compoundColliderSetCollisionLayers(object, 0);
+        }
+
         --gCollisionScene.dynamicObjectCount;
     }
 }

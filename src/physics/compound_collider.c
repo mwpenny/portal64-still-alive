@@ -11,7 +11,7 @@ void compoundColliderInit(
     struct CompoundCollider* collider,
     struct CompoundColliderDefinition* definition,
     struct RigidBody* body,
-    int collisionLayers
+    short collisionLayers
 ) {
     assert(definition->childrenCount > 0);
     assert(definition->childrenCount <= COMPOUND_COLLIDER_MAX_CHILD_COUNT);
@@ -210,6 +210,18 @@ void compoundColliderCollidePairMixed(
             contactSolver
         );
     }
+}
+
+void compoundColliderSetCollisionLayers(struct CollisionObject* compoundColliderObject, short collisionLayers) {
+    struct CompoundCollider* compoundCollider = (struct CompoundCollider*)compoundColliderObject->collider->data;
+
+    for (short i = 0; i < compoundCollider->childrenCount; ++i) {
+        struct CollisionObject* childObj = &compoundCollider->children[i].object;
+
+        childObj->collisionLayers = collisionLayers;
+    }
+
+    compoundColliderObject->collisionLayers = collisionLayers;
 }
 
 struct ColliderCallbacks gCompoundColliderCallbacks = {

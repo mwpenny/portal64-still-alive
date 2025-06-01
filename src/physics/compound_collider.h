@@ -36,7 +36,7 @@ void compoundColliderInit(
     struct CompoundCollider* collider,
     struct CompoundColliderDefinition* definition,
     struct RigidBody* body,
-    int collisionLayers
+    short collisionLayers
 );
 
 void compoundColliderFurthestPoint(
@@ -68,6 +68,11 @@ void compoundColliderCollidePairMixed(
     struct Vector3* prevOtherPos,
     struct Box3D* sweptOther,
     struct ContactSolver* contactSolver
+);
+
+void compoundColliderSetCollisionLayers(
+    struct CollisionObject* compoundColliderObject,
+    short collisionLayers
 );
 
 #endif

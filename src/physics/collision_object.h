@@ -44,8 +44,8 @@ int collisionObjectIsActive(struct CollisionObject* object);
 int collisionObjectIsGrabbable(struct CollisionObject* object);
 int collisionObjectShouldGenerateContacts(struct CollisionObject* object);
 
-void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers);
-void collisionObjectReInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers);
+void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, short collisionLayers);
+void collisionObjectReInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, short collisionLayers);
 
 struct ContactManifold* collisionObjectCollideWithQuad(struct CollisionObject* object, struct CollisionObject* quad, struct ContactSolver* contactSolver, int shouldCheckPortals);
 struct ContactManifold* collisionObjectCollideWithQuadSwept(struct CollisionObject* object, struct Vector3* objectPrevPos, struct Box3D* sweptBB, struct CollisionObject* quadObject, struct ContactSolver* contactSolver, int shouldCheckPortals);

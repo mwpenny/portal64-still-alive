@@ -10,7 +10,7 @@
 #include "math/mathf.h"
 #include "mesh_collider.h"
 
-void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers) {
+void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, short collisionLayers) {
     object->collider = collider;
     object->body = body;
     object->position = &body->transform.position;
@@ -24,7 +24,7 @@ void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData
     object->manifoldIds = 0;
 }
 
-void collisionObjectReInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, int collisionLayers) {
+void collisionObjectReInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, short collisionLayers) {
     object->collider = collider;
     object->body = body;
     collisionObjectUpdateBB(object);
