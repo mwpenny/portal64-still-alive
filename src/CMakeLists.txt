@@ -98,6 +98,7 @@ target_sources(engine INTERFACE
     physics/collision_quad.c
     physics/collision_scene.c
     physics/collision_sphere.c
+    physics/collision_tetrahedron.c
     physics/contact_insertion.c
     physics/contact_solver.c
     physics/debug_renderer.c

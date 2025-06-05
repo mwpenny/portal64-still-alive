@@ -55,7 +55,7 @@ int compoundColliderRaycast(struct CollisionObject* object, struct Ray* ray, flo
         return 0;
     }
 
-    struct CompoundCollider* collider = (struct CompoundCollider*)object->collider->data;
+    struct CompoundCollider* collider = object->collider->data;
 
     int found = 0;
 
@@ -64,7 +64,8 @@ int compoundColliderRaycast(struct CollisionObject* object, struct Ray* ray, flo
         struct ColliderTypeData* childCollider = childObj->collider;
 
         if (childCollider->callbacks->raycast &&
-            childCollider->callbacks->raycast(childObj, ray, maxDistance, contact)) {
+            childCollider->callbacks->raycast(childObj, ray, maxDistance, contact)
+        ) {
             maxDistance = contact->distance;
             found = 1;
         }
@@ -79,7 +80,7 @@ int compoundColliderRaycast(struct CollisionObject* object, struct Ray* ray, flo
 }
 
 float compoundColliderSolidMofI(struct ColliderTypeData* typeData, float mass) {
-    struct CompoundCollider* collider = (struct CompoundCollider*)typeData->data;
+    struct CompoundCollider* collider = typeData->data;
 
     float childMass = mass / collider->childrenCount;
     float mofi = 0.0f;
@@ -95,7 +96,7 @@ float compoundColliderSolidMofI(struct ColliderTypeData* typeData, float mass) {
 }
 
 void compoundColliderBoundingBox(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box) {
-    struct CompoundCollider* collider = (struct CompoundCollider*)typeData->data;
+    struct CompoundCollider* collider = typeData->data;
 
     for (short i = 0; i < collider->childrenCount; ++i) {
         struct CompoundColliderComponent* child = &collider->children[i];
@@ -125,7 +126,7 @@ void compoundColliderFurthestPoint(
     struct Vector3* direction,
     struct Vector3* point
 ) {
-    struct CompoundCollider* compoundCollider = (struct CompoundCollider*)compoundColliderObject->collider->data;
+    struct CompoundCollider* compoundCollider = compoundColliderObject->collider->data;
 
     float maxDistance = 0.0f;
 
@@ -149,7 +150,7 @@ int compoundColliderHasOverlap(
     MinkowskiSupport otherSupport,
     struct Vector3* firstDirection
 ) {
-    struct CompoundCollider* compoundCollider = (struct CompoundCollider*)compoundColliderObject->collider->data;
+    struct CompoundCollider* compoundCollider = compoundColliderObject->collider->data;
 
     for (short i = 0; i < compoundCollider->childrenCount; ++i) {
         struct CollisionObject* childObj = &compoundCollider->children[i].object;
@@ -174,7 +175,7 @@ void compoundColliderCollideMixed(
     struct CollisionScene* scene,
     struct ContactSolver* contactSolver
 ) {
-    struct CompoundCollider* compoundCollider = (struct CompoundCollider*)compoundColliderObject->collider->data;
+    struct CompoundCollider* compoundCollider = compoundColliderObject->collider->data;
 
     for (short i = 0; i < compoundCollider->childrenCount; ++i) {
         struct CollisionObject* childObj = &compoundCollider->children[i].object;
@@ -195,7 +196,7 @@ void compoundColliderCollidePairMixed(
     struct Box3D* sweptOther,
     struct ContactSolver* contactSolver
 ) {
-    struct CompoundCollider* compoundCollider = (struct CompoundCollider*)compoundColliderObject->collider->data;
+    struct CompoundCollider* compoundCollider = compoundColliderObject->collider->data;
 
     if (!box3DHasOverlap(sweptCompoundCollider, sweptOther)) {
         return;
@@ -213,7 +214,7 @@ void compoundColliderCollidePairMixed(
 }
 
 void compoundColliderSetCollisionLayers(struct CollisionObject* compoundColliderObject, short collisionLayers) {
-    struct CompoundCollider* compoundCollider = (struct CompoundCollider*)compoundColliderObject->collider->data;
+    struct CompoundCollider* compoundCollider = compoundColliderObject->collider->data;
 
     for (short i = 0; i < compoundCollider->childrenCount; ++i) {
         struct CollisionObject* childObj = &compoundCollider->children[i].object;

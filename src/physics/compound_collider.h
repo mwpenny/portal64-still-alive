@@ -3,7 +3,7 @@
 
 #include "collision_object.h"
 
-#define COMPOUND_COLLIDER_MAX_CHILD_COUNT 4
+#define COMPOUND_COLLIDER_MAX_CHILD_COUNT 2
 
 struct CollisionScene;
 

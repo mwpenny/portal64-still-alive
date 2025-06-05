@@ -6,6 +6,7 @@
 #include "locales/locales.h"
 #include "physics/collision_scene.h"
 #include "physics/collision_capsule.h"
+#include "physics/collision_tetrahedron.h"
 #include "savefile/savefile.h"
 #include "scene/dynamic_scene.h"
 #include "util/dynamic_asset_loader.h"
@@ -62,16 +63,11 @@
 #define TURRET_AUTOTIP_DIR_MAX_DOT 0.5f   // acos(0.5) * 2 = 120 degree range
 #define TURRET_AUTOTIP_IMPULSE     2.5f
 
-#define TURRET_COLLISION_LEG_L     0
-#define TURRET_COLLISION_LEG_R     1
-#define TURRET_COLLISION_LEG_B     2
-#define TURRET_COLLISION_BODY      3
+#define TURRET_COLLISION_BASE      0
+#define TURRET_COLLISION_BODY      1
 
-static struct CollisionBox sTurretFrontLegBox = {
-    {0.05f, 0.175f, 0.075f}
-};
-static struct CollisionBox sTurretBackLegBox = {
-    {0.05f, 0.25f, 0.075f}
+static struct CollisionTetrahedron sTurretBaseTetrahedron = {
+    {0.2f, 0.45f, 0.4f}
 };
 struct CollisionCapsule sTurretBodyCapsule = {
     0.2f,
@@ -79,35 +75,15 @@ struct CollisionCapsule sTurretBodyCapsule = {
 };
 
 static struct CompoundColliderComponentDefinition sTurretColliderComponents[] = {
-    [TURRET_COLLISION_LEG_L] = {
+    [TURRET_COLLISION_BASE] = {
         {
-            CollisionShapeTypeBox,
-            &sTurretFrontLegBox,
+            CollisionShapeTypeTetrahedron,
+            &sTurretBaseTetrahedron,
             0.0f,
             1.0f,
-            &gCollisionBoxCallbacks
+            &gCollisionTetrahedronCallbacks
         },
-        { 0.15f, -0.32625f,  0.175f }
-    },
-    [TURRET_COLLISION_LEG_R] = {
-        {
-            CollisionShapeTypeBox,
-            &sTurretFrontLegBox,
-            0.0f,
-            1.0f,
-            &gCollisionBoxCallbacks
-        },
-        { -0.15f, -0.32625f,  0.175f }
-    },
-    [TURRET_COLLISION_LEG_B] = {
-        {
-            CollisionShapeTypeBox,
-            &sTurretBackLegBox,
-            0.0f,
-            1.0f,
-            &gCollisionBoxCallbacks
-        },
-        { 0.0f, -0.25f, -0.32675f }
+        { 0.0f, -0.105f, -0.13f }
     },
     [TURRET_COLLISION_BODY] = {
         {
@@ -294,7 +270,7 @@ static void turretUpdateSounds(struct Turret* turret) {
 }
 
 static void turretRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
-    struct Turret* turret = (struct Turret*)data;
+    struct Turret* turret = data;
 
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
 
