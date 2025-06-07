@@ -82,5 +82,6 @@ void playerThrowObject(struct Player* player);
 
 void playerToggleJumpImpulse(struct Player* player, float newJumpImpulse);
 void playerToggleInvincibility(struct Player* player);
+void playerToggleCollisionLayers(struct Player* player, short collisionLayers);
 
 #endif

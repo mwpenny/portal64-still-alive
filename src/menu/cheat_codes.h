@@ -7,6 +7,7 @@ enum CheatCode {
     CheatCodeUnlockGun,
     CheatCodeHighJump,
     CheatCodeInvincibility,
+    CheatCodeNoAttack,
     CheatCodeAllLevels,
     CheatCodeCount,
 };

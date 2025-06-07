@@ -20,6 +20,10 @@ struct CheatCodePattern gCheatCodes[CheatCodeCount] = {
         {'u', 'd', 'u', 'd', 'u', 'd', 'l', 'l'},
         SOUNDS_BUTTONCLICKRELEASE,
     },
+    [CheatCodeNoAttack] = {
+        {'u', 'd', 'u', 'd', 'u', 'd', 'd', 'd'},
+        SOUNDS_BUTTONCLICKRELEASE,
+    },
     [CheatCodeAllLevels] = {
         {'u', 'r', 'd', 'l', 'u', 'r', 'd', 'l'},
         SOUNDS_BUTTONCLICKRELEASE,
@@ -45,6 +49,9 @@ void cheatCodeApply(enum CheatCode cheat) {
             break;
         case CheatCodeInvincibility:
             playerToggleInvincibility(&gScene.player);
+            break;
+        case CheatCodeNoAttack:
+            playerToggleCollisionLayers(&gScene.player, COLLISION_LAYERS_BLOCK_TURRET_SIGHT);
             break;
         case CheatCodeAllLevels:
             savefileMarkChapterProgress(levelCount() - 1);

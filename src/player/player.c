@@ -352,19 +352,20 @@ int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPa
     vector3Negate(&ray.dir, &ray.dir);
     int result;
 
+    short prevCollisionLayers = player->collisionObject.collisionLayers;
     player->collisionObject.collisionLayers = 0;
 
     if (checkPastObject){
-        short prevCollisionLayers = player->grabConstraint.object->collisionLayers;
+        short prevObjectCollisionLayers = player->grabConstraint.object->collisionLayers;
         player->grabConstraint.object->collisionLayers = 0;
         result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit);
-        player->grabConstraint.object->collisionLayers = prevCollisionLayers;
+        player->grabConstraint.object->collisionLayers = prevObjectCollisionLayers;
     }
     else{
         result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit);
     }
 
-    player->collisionObject.collisionLayers = PLAYER_COLLISION_LAYERS;
+    player->collisionObject.collisionLayers = prevCollisionLayers;
 
     return result;
 }
@@ -747,6 +748,7 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
 
     struct RigidBody* anchor = NULL;
 
+    short prevCollisionLayers = player->collisionObject.collisionLayers;
     player->collisionObject.collisionLayers = 0;
 
     if (collisionSceneRaycastOnlyDynamic(&gCollisionScene, &ray, COLLISION_LAYERS_TANGIBLE, hitDistance, &hit)) {
@@ -763,7 +765,7 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
         }
     }
 
-    player->collisionObject.collisionLayers = PLAYER_COLLISION_LAYERS;
+    player->collisionObject.collisionLayers = prevCollisionLayers;
     
     // Stand on collision
     float penetration = hitDistance - PLAYER_HEAD_HEIGHT;
@@ -1192,4 +1194,8 @@ void playerToggleJumpImpulse(struct Player* player, float newJumpImpulse) {
 
 void playerToggleInvincibility(struct Player* player) {
     player->flags ^= PlayerIsInvincible;
+}
+
+void playerToggleCollisionLayers(struct Player* player, short collisionLayers) {
+    player->collisionObject.collisionLayers ^= collisionLayers;
 }
