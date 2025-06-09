@@ -249,34 +249,3 @@ materials:
       clear: [G_CULL_BACK]
     gDPSetCombineMode: 
       color: ["0", "0", "0", "PRIMITIVE"]
-
-  turret1:
-    gDPSetTile:
-      filename: ../images/turret1.png
-      usePalette: ../images/turret1.png
-      fmt: G_IM_FMT_CI
-      siz: G_IM_SIZ_4b
-      palette: 0
-      tmem: 0
-      s:
-        mirror: true
-      t:
-        mirror: true
-    gSPTexture:
-      tile: 0
-
-  turret2:
-    gDPSetTile:
-      - null
-      - filename: ../images/turret2.png
-        usePalette: ../images/turret2.png
-        fmt: G_IM_FMT_CI
-        siz: G_IM_SIZ_4b
-        palette: 1
-        tmem: 128
-        s:
-          mirror: true
-        t:
-          mirror: true
-    gSPTexture:
-      tile: 1

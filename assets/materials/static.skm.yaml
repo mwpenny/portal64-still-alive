@@ -1409,22 +1409,10 @@ materials:
 
   turret:
     gDPSetTile:
-      - filename: ../images/turret1.png
-        usePalette: ../images/turret1.png
+      - filename: ../images/turret.png
+        usePalette: ../images/turret.png
         fmt: G_IM_FMT_CI
         siz: G_IM_SIZ_4b
-        palette: 0
-        tmem: 0
-        s:
-          mirror: true
-        t:
-          mirror: true
-      - filename: ../images/turret2.png
-        usePalette: ../images/turret2.png
-        fmt: G_IM_FMT_CI
-        siz: G_IM_SIZ_4b
-        palette: 1
-        tmem: 128
         s:
           mirror: true
         t:
@@ -1432,8 +1420,15 @@ materials:
 
     gDPSetTextureLUT: G_TT_RGBA16
 
-    gDPSetCombineMode: G_CC_MODULATEI
-    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode:
+      - color: ["TEXEL0", "0", "SHADE", "0"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["1", "0", "COMBINED", "COMBINED"]
+        alpha: ["0", "0", "0", "1"]
+    gDPSetRenderMode:
+      - G_RM_PASS
+      - G_RM_ZB_OPA_SURF
 
     gSPGeometryMode:
       set: [G_SHADE]
@@ -1441,22 +1436,10 @@ materials:
 
   turret_fizzled:
     gDPSetTile:
-      - filename: ../images/turret1.png
-        usePalette: ../images/turret1.png
+      - filename: ../images/turret.png
+        usePalette: ../images/turret.png
         fmt: G_IM_FMT_CI
         siz: G_IM_SIZ_4b
-        palette: 0
-        tmem: 0
-        s:
-          mirror: true
-        t:
-          mirror: true
-      - filename: ../images/turret2.png
-        usePalette: ../images/turret2.png
-        fmt: G_IM_FMT_CI
-        siz: G_IM_SIZ_4b
-        palette: 1
-        tmem: 128
         s:
           mirror: true
         t:

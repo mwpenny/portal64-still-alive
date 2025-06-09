@@ -440,8 +440,7 @@ endfunction()
 
 set_property(SOURCE static.skm.yaml
     PROPERTY ADDITIONAL_DEPS
-        ${PROJECT_SOURCE_DIR}/assets/images/turret1.png
-        ${PROJECT_SOURCE_DIR}/assets/images/turret2.png
+        ${PROJECT_SOURCE_DIR}/assets/images/turret.png
 )
 
 set_property(SOURCE hud.skm.yaml
