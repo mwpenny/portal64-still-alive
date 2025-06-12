@@ -237,11 +237,13 @@ for _, turret_element in pairs(sk_scene.nodes_for_type('@turret')) do
     local position, rotation = turret_element.node.full_transformation:decompose()
 
     local room_index = room_export.node_nearest_room_index(turret_element.node)
+    local player_can_autotip = sk_scene.find_flag_argument(turret_element.arguments, "player_can_autotip")
 
     table.insert(turrets, {
         position = position,
         rotation = rotation * sk_math.axis_angle(sk_math.vector3(1, 0, 0), math.pi * 0.5),
         roomIndex = room_index,
+        playerCanAutotip = player_can_autotip,
     })
 end
 

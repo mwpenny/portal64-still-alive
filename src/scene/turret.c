@@ -315,8 +315,10 @@ static void turretHandleCollideStartEnd(struct CollisionObject* object, struct C
 
     if (normal == NULL ||
         other->body == NULL ||
-        (other->body->flags & RigidBodyIsKinematic)) {
-        // Only amplify hits from free-moving physics objects
+        ((other->body->flags & (RigidBodyIsKinematic | RigidBodyIsPlayer)) == RigidBodyIsKinematic) ||
+        ((other->body->flags & RigidBodyIsPlayer) && !(turret->flags & TurretFlagsPlayerCanAutotip))
+    ) {
+        // Only amplify hits from free-moving physics objects (unless overridden)
         return;
     }
 
@@ -361,6 +363,8 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     turret->rigidBody.transform.scale = gOneVec;
     turret->rigidBody.flags |= RigidBodyFlagsGrabbable | RigidBodyIsSleeping;
 
+    turret->flags = 0;
+
     if (definition) {
         turret->rigidBody.transform.rotation = definition->rotation;
         turret->rigidBody.currentRoom = definition->roomIndex;
@@ -368,6 +372,10 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
         struct Vector3 originOffset;
         quatMultVector(&turret->rigidBody.transform.rotation, &sTurretOriginOffset, &originOffset);
         vector3Add(&definition->position, &originOffset, &turret->rigidBody.transform.position);
+
+        if (definition->playerCanAutotip) {
+            turret->flags |= TurretFlagsPlayerCanAutotip;
+        }
     }
 
     collisionObjectUpdateBB(&turret->collisionObject);
@@ -390,7 +398,6 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
 
     turret->playerHitCount = 0;
     turret->fizzleTime = 0.0f;
-    turret->flags = 0;
     turret->openAmount = 0.0f;
     turret->shootTimer = 0.0f;
     turret->playerDetectTimer = 0.0f;
@@ -750,6 +757,10 @@ static void turretUpdateIdle(struct Turret* turret, struct Player* player) {
     turretCheckPlayerDetected(turret, player, TurretStateDeploying);
     turretCheckTipped(turret);
     turretCheckGrabbed(turret, player);
+
+    if (turret->state != TurretStateIdle) {
+        turret->flags &= ~TurretFlagsPlayerCanAutotip;
+    }
 }
 
 static void turretUpdateDeploying(struct Turret* turret, struct Player* player) {

@@ -547,6 +547,7 @@ void turretSerialize(struct Serializer* serializer, SerializeAction action, stru
         action(serializer, &turret->rigidBody.flags, sizeof(enum RigidBodyFlags));
         action(serializer, &turret->rigidBody.currentRoom, sizeof(short));
 
+        action(serializer, &turret->flags, sizeof(enum TurretFlags));
         action(serializer, &turret->state, sizeof(enum TurretState));
         action(serializer, &turret->fizzleTime, sizeof(float));
 
@@ -559,7 +560,6 @@ void turretSerialize(struct Serializer* serializer, SerializeAction action, stru
                 action(serializer, &turret->targetRotation, sizeof(struct Quaternion));
                 action(serializer, &turret->rotationSpeed, sizeof(float));
 
-                action(serializer, &turret->flags, sizeof(enum TurretFlags));
                 action(serializer, &turret->openAmount, sizeof(float));
                 action(serializer, &turret->stateData, sizeof(union TurretStateData));
             }
@@ -593,6 +593,7 @@ void turretDeserialize(struct Serializer* serializer, struct Scene* scene) {
             turret->rigidBody.flags &= ~RigidBodyHasWoken;
         }
 
+        serializeRead(serializer, &turret->flags, sizeof(enum TurretFlags));
         serializeRead(serializer, &turret->state, sizeof(enum TurretState));
         serializeRead(serializer, &turret->fizzleTime, sizeof(float));
 
@@ -611,7 +612,6 @@ void turretDeserialize(struct Serializer* serializer, struct Scene* scene) {
                 serializeRead(serializer, &turret->targetRotation, sizeof(struct Quaternion));
                 serializeRead(serializer, &turret->rotationSpeed, sizeof(float));
 
-                serializeRead(serializer, &turret->flags, sizeof(enum TurretFlags));
                 serializeRead(serializer, &turret->openAmount, sizeof(float));
                 serializeRead(serializer, &turret->stateData, sizeof(union TurretStateData));
             }

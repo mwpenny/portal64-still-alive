@@ -1,16 +1,16 @@
 #ifndef __LEVEL_DEFINITION_H__
 #define __LEVEL_DEFINITION_H__
 
-#include "../physics/world.h"
-#include "../scene/portal_surface.h"
-#include "../scene/signals.h"
-#include "../math/boxs16.h"
-#include "../math/box3d.h"
-#include "../math/range.h"
-#include "../math/rotated_box.h"
-#include "../sk64/skeletool_clip.h"
-#include "../sk64/skeletool_armature.h"
-#include "../physics/collision_box.h"
+#include "math/box3d.h"
+#include "math/boxs16.h"
+#include "math/range.h"
+#include "math/rotated_box.h"
+#include "physics/collision_box.h"
+#include "physics/world.h"
+#include "scene/portal_surface.h"
+#include "scene/signals.h"
+#include "sk64/skeletool_armature.h"
+#include "sk64/skeletool_clip.h"
 
 #define NO_TRANSFORM_INDEX    0xFF
 #define NO_BOUNDING_BOX_INDEX 0xFF
@@ -333,6 +333,7 @@ struct TurretDefinition {
     struct Vector3 position;
     struct Quaternion rotation;
     short roomIndex;
+    short playerCanAutotip;
 };
 
 struct LevelDefinition {

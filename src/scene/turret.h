@@ -23,10 +23,11 @@ enum TurretState {
 };
 
 enum TurretFlags {
-    TurretFlagsOpen     = (1 << 0),
-    TurretFlagsRotating = (1 << 1),
-    TurretFlagsShooting = (1 << 2),
-    TurretFlagsTipped   = (1 << 3),
+    TurretFlagsOpen             = (1 << 0),
+    TurretFlagsRotating         = (1 << 1),
+    TurretFlagsShooting         = (1 << 2),
+    TurretFlagsTipped           = (1 << 3),
+    TurretFlagsPlayerCanAutotip = (1 << 4),
 };
 
 enum TurretSoundType {
