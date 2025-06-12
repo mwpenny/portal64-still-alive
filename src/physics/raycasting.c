@@ -49,7 +49,7 @@ int raycastQuad(struct CollisionObject* quadObject, struct Ray* ray, float maxDi
     return result;
 }
 
-int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
+int raycastBox(struct CollisionObject* boxObject, struct Ray* ray, short collisionLayers, float maxDistance, struct RaycastHit* contact) {
     struct CollisionBox* box = (struct CollisionBox*)boxObject->collider->data;
 
     float distance = rayDetermineDistance(ray, boxObject->position);
@@ -147,5 +147,50 @@ int raycastSphere(struct Vector3* position, float radius, struct Ray* ray, float
     }
 
     *rayDistance = distance;
+    return 1;
+}
+
+// ABC must be counterclockwise when facing ray
+int raycastTriangle(struct Vector3* a, struct Vector3* b, struct Vector3* c, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
+    // Moller-Trumbore
+
+    struct Vector3 edge1;
+    struct Vector3 edge2;
+    vector3Sub(b, a, &edge1);
+    vector3Sub(c, a, &edge2);
+
+    // Calculate determinant
+    struct Vector3 tmp;
+    vector3Cross(&ray->dir, &edge2, &tmp);
+
+    float det = vector3Dot(&edge1, &tmp);
+    if (det < 0.0001f) {
+        return 0;
+    }
+
+    // Calculate and validate barycentric coordinates
+    struct Vector3 aToRay;
+    vector3Sub(&ray->origin, a, &aToRay);
+
+    float u = vector3Dot(&aToRay, &tmp);
+    if (u < 0.0f || u > det) {
+        return 0;
+    }
+
+    vector3Cross(&aToRay, &edge1, &tmp);
+
+    float v = vector3Dot(&ray->dir, &tmp);
+    if (v < 0.0f || (u + v) > det) {
+        return 0;
+    }
+
+    contact->distance = vector3Dot(&edge2, &tmp) / det;
+    if (contact->distance > maxDistance) {
+        return 0;
+    }
+
+    vector3AddScaled(&ray->origin, &ray->dir, contact->distance, &contact->at);
+    vector3Negate(&ray->dir, &contact->normal);  // Approximate to save a sqrtf()
+
     return 1;
 }

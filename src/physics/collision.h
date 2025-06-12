@@ -26,7 +26,7 @@ enum CollisionShapeType {
 struct ColliderTypeData;
 struct RaycastHit;
 
-typedef int   (*RaycastCollider)(struct CollisionObject* object, struct Ray* ray, float maxDistance, struct RaycastHit* contact);
+typedef int   (*RaycastCollider)(struct CollisionObject* object, struct Ray* ray, short collisionLayers, float maxDistance, struct RaycastHit* contact);
 typedef float (*MomentOfInertiaCalculator)(struct ColliderTypeData* typeData, float mass);
 typedef void  (*BoundingBoxCalculator)(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box);
 typedef int   (*MinkowskiSupportWithBasis)(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output);

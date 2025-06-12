@@ -353,6 +353,7 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     compoundColliderInit(&turret->compoundCollider, &sTurretCollider, &turret->rigidBody, TURRET_COLLISION_LAYERS);
     turret->compoundCollider.children[TURRET_COLLISION_BODY].object.collideStartEnd = turretHandleCollideStartEnd;
     turret->compoundCollider.children[TURRET_COLLISION_BODY].object.data = turret;
+    turret->compoundCollider.children[TURRET_COLLISION_BASE].object.collisionLayers &= ~COLLISION_LAYERS_BLOCK_TURRET_SHOTS;
 
     collisionObjectInit(&turret->collisionObject, &turret->compoundCollider.colliderType, &turret->rigidBody, TURRET_MASS, TURRET_COLLISION_LAYERS);
     collisionSceneAddDynamicObject(&turret->collisionObject);

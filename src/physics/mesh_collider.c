@@ -114,7 +114,7 @@ void meshColliderCollideObject(struct CollisionObject* meshColliderObject, struc
     }
 }
 
-int meshColliderRaycast(struct CollisionObject* object, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
+int meshColliderRaycast(struct CollisionObject* object, struct Ray* ray, short collisionLayers, float maxDistance, struct RaycastHit* contact) {
     struct MeshCollider* meshCollider = (struct MeshCollider*)object->collider->data;
     struct Ray localRay;
     struct Vector3 rayOffset;
@@ -143,7 +143,7 @@ int meshColliderRaycast(struct CollisionObject* object, struct Ray* ray, float m
     for (int i = 0; i < meshCollider->childrenCount; ++i) {
         struct RaycastHit localHit;
 
-        if (!meshCollider->children[i].collisionLayers) {
+        if (!(meshCollider->children[i].collisionLayers & collisionLayers)) {
             continue;
         }
 

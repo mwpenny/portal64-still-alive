@@ -89,7 +89,6 @@ target_sources(engine INTERFACE
     menu/tabs.c
     menu/text_manipulation.c
     menu/video_options.c
-    physics/collision.c
     physics/collision_box.c
     physics/collision_capsule.c
     physics/collision_cylinder.c

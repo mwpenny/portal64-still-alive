@@ -136,7 +136,7 @@ static int collisionCapsuleRaycastCap(struct CollisionObject* capsuleObject, str
     return 1;
 }
 
-int collisionCapsuleRaycast(struct CollisionObject* capsuleObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
+int collisionCapsuleRaycast(struct CollisionObject* capsuleObject, struct Ray* ray, short collisionLayers, float maxDistance, struct RaycastHit* contact) {
     struct CollisionCapsule* capsule = (struct CollisionCapsule*)capsuleObject->collider->data;
     struct Vector3* capsulePos = capsuleObject->position;
 

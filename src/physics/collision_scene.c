@@ -491,8 +491,9 @@ void collisionSceneRaycastDynamic(struct CollisionScene* scene, struct Ray* ray,
         }
 
         if (object->collider->callbacks->raycast && 
-            object->collider->callbacks->raycast(object, ray, hit->distance, &hitTest) &&
-            hitTest.distance < hit->distance) {
+            object->collider->callbacks->raycast(object, ray, collisionLayers, hit->distance, &hitTest) &&
+            hitTest.distance < hit->distance
+        ) {
             hit->at = hitTest.at;
             hit->normal = hitTest.normal;
             hit->distance = hitTest.distance;

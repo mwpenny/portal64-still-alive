@@ -169,7 +169,7 @@ int collisionCylinderRaycastCap(struct CollisionObject* cylinderObject, struct R
     return 1;
 }
 
-int collisionCylinderRaycast(struct CollisionObject* cylinderObject, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
+int collisionCylinderRaycast(struct CollisionObject* cylinderObject, struct Ray* ray, short collisionLayers, float maxDistance, struct RaycastHit* contact) {
     float rayLerp;
     float cylinderLerp;
 

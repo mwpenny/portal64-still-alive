@@ -37,7 +37,7 @@ void compoundColliderInit(
     collider->colliderType.callbacks = &gCompoundColliderCallbacks;
 }
 
-int compoundColliderRaycast(struct CollisionObject* object, struct Ray* ray, float maxDistance, struct RaycastHit* contact) {
+int compoundColliderRaycast(struct CollisionObject* object, struct Ray* ray, short collisionLayers, float maxDistance, struct RaycastHit* contact) {
     float distance = rayDetermineDistance(ray, object->position);
 
     if (distance < 0.0f) {
@@ -63,8 +63,9 @@ int compoundColliderRaycast(struct CollisionObject* object, struct Ray* ray, flo
         struct CollisionObject* childObj = &collider->children[i].object;
         struct ColliderTypeData* childCollider = childObj->collider;
 
-        if (childCollider->callbacks->raycast &&
-            childCollider->callbacks->raycast(childObj, ray, maxDistance, contact)
+        if ((childObj->collisionLayers & collisionLayers) &&
+            childCollider->callbacks->raycast &&
+            childCollider->callbacks->raycast(childObj, ray, collisionLayers, maxDistance, contact)
         ) {
             maxDistance = contact->distance;
             found = 1;
