@@ -14,5 +14,7 @@ cutscenes:
   #   - activate_signage 16
   # FINISH:
   #   - q_sound 11_PART1_SUCCESS_1 CH_GLADOS PORTAL_11_PART1_SUCCESS_1
+  CHECKPOINT:
+    - save_checkpoint
 operators:
   - entry_door = not entry_door
