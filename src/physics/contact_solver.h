@@ -42,7 +42,7 @@ struct ContactManifold {
 	struct ContactManifold* next;
 };
 
-#define MAX_CONTACT_COUNT	40
+#define MAX_CONTACT_COUNT	32
 
 struct ContactSolver {
     struct ContactManifold contacts[MAX_CONTACT_COUNT];

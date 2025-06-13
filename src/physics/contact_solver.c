@@ -512,14 +512,14 @@ void contactSolverSolve(struct ContactSolver* solver) {
 }
 
 struct ContactManifold* contactSolverGetContactManifold(struct ContactSolver* solver, struct CollisionObject* shapeA, struct CollisionObject* shapeB) {
-	struct ContactManifold* curr = solver->activeContacts;
+	struct ContactManifold* curr;
 
-	while (curr) {
-		if ((curr->shapeA == shapeA && curr->shapeB == shapeB) || (curr->shapeA == shapeB && curr->shapeB == shapeA)) {
+	for (curr = solver->activeContacts; curr; curr = curr->next) {
+		if ((curr->shapeA == shapeA && curr->shapeB == shapeB) ||
+		    (curr->shapeA == shapeB && curr->shapeB == shapeA)
+		) {
 			return curr;
 		}
-
-		curr = curr->next;
 	}
 
 	struct ContactManifold* result = solver->unusedContacts;
@@ -532,6 +532,24 @@ struct ContactManifold* contactSolverGetContactManifold(struct ContactSolver* so
 		solver->unusedContacts = result->next;
 		result->next = solver->activeContacts;
 		solver->activeContacts = result;
+	} else {
+		// No more manifolds. Try to steal an active one that has settled.
+		for (curr = solver->activeContacts; curr; curr = curr->next) {
+			enum RigidBodyFlags shapeAFlags = curr->shapeA->body ? curr->shapeA->body->flags : RigidBodyIsSleeping;
+			enum RigidBodyFlags shapeBFlags = curr->shapeB->body ? curr->shapeB->body->flags : RigidBodyIsSleeping;
+
+			// Maintain kinematic contacts (moving platform, button, etc.)
+			if (((shapeAFlags & shapeBFlags) & RigidBodyIsSleeping) &&
+			    ((shapeAFlags | shapeBFlags) & RigidBodyIsKinematic) == 0
+			) {
+				curr->shapeA = shapeA;
+				curr->shapeB = shapeB;
+				curr->contactCount = 0;
+
+				result = curr;
+				break;
+			}
+		}
 	}
 
 	return result;
