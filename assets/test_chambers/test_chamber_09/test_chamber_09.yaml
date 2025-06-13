@@ -29,6 +29,8 @@ cutscenes:
     - play_animation pit_1 pit_1_down -1
     - delay 3
     - goto pit_loop
+  NEAR_CUBE:
+    - q_sound PORTAL_SELF_ESTEEM_FUND CH_MUSIC
   CHECK_STAIRS:
     - label stair_loop
     - wait_for_signal should_raise_stairs 5
