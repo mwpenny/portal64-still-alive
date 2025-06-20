@@ -614,10 +614,10 @@ void collisionSceneRemoveDynamicObject(struct CollisionObject* object) {
     }
 
     if (found) {
-        // Ensure manifolds are cleaned up
-        object->collisionLayers = 0;
         if (object->collider->type == CollisionShapeTypeCompound) {
-            compoundColliderSetCollisionLayers(object, 0);
+            compoundColliderRemoveManifolds(object, &gContactSolver);
+        } else {
+            contactSolverRemoveObjectManifolds(&gContactSolver, object);
         }
 
         --gCollisionScene.dynamicObjectCount;

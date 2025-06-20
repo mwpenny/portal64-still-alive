@@ -183,6 +183,31 @@ void contactSolverCheckPortalContacts(struct ContactSolver* contactSolver) {
 	}
 }
 
+void contactSolverRemoveObjectManifolds(struct ContactSolver* contactSolver, struct CollisionObject* object) {
+	struct ContactManifold* curr = contactSolver->activeContacts;
+	struct ContactManifold* prev = NULL;
+
+	while (curr) {
+		if (curr->shapeA == object || curr->shapeB == object) {
+			contactSolverManifoldCleanup(contactSolver, curr);
+
+			if (prev) {
+				prev->next = curr->next;
+			} else {
+				contactSolver->activeContacts = curr->next;
+			}
+
+			struct ContactManifold* next = curr->next;
+			curr->next = contactSolver->unusedContacts;
+			contactSolver->unusedContacts = curr;
+			curr = next;
+		} else {
+			prev = curr;
+			curr = curr->next;
+		}
+	}
+}
+
 void contactSolverInit(struct ContactSolver* contactSolver) {
 	int solverSize = sizeof(struct ContactSolver);
 	zeroMemory(contactSolver, solverSize);

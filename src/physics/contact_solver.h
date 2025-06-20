@@ -64,6 +64,7 @@ int contactSolverActiveManifoldCount(struct ContactSolver* solver);
 void contactSolverRemoveUnusedContacts(struct ContactSolver* contactSolver);
 void contactSolverCheckPortalContacts(struct ContactSolver* contactSolver);
 void contactSolverCleanupManifold(struct ContactManifold* manifold);
+void contactSolverRemoveObjectManifolds(struct ContactSolver* contactSolver, struct CollisionObject* object);
 
 float contactPenetration(struct ContactManifold* contact);
 void contactAdjustPenetration(struct ContactManifold* contact, float amount);

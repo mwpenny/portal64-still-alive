@@ -75,4 +75,9 @@ void compoundColliderSetCollisionLayers(
     short collisionLayers
 );
 
+void compoundColliderRemoveManifolds(
+    struct CollisionObject* compoundColliderObject,
+    struct ContactSolver* contactSolver
+);
+
 #endif

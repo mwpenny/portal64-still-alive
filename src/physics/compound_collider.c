@@ -226,6 +226,17 @@ void compoundColliderSetCollisionLayers(struct CollisionObject* compoundCollider
     compoundColliderObject->collisionLayers = collisionLayers;
 }
 
+void compoundColliderRemoveManifolds(struct CollisionObject* compoundColliderObject, struct ContactSolver* contactSolver) {
+    struct CompoundCollider* compoundCollider = compoundColliderObject->collider->data;
+
+    for (short i = 0; i < compoundCollider->childrenCount; ++i) {
+        struct CollisionObject* childObj = &compoundCollider->children[i].object;
+        contactSolverRemoveObjectManifolds(contactSolver, childObj);
+    }
+
+    contactSolverRemoveObjectManifolds(contactSolver, compoundColliderObject);
+}
+
 struct ColliderCallbacks gCompoundColliderCallbacks = {
     compoundColliderRaycast,
     compoundColliderSolidMofI,
