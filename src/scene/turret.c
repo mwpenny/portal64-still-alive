@@ -56,6 +56,7 @@
 #define TURRET_GRAB_MIN_ROT_DELAY  0.1f
 #define TURRET_GRAB_MAX_ROT_DELAY  0.75f
 
+#define TURRET_TIPPED_DOT          0.17f  // acos(0.17)    = ~80 degrees
 #define TURRET_TIPPED_DURATION     3.0f
 #define TURRET_TIPPED_ROTATE_SPEED 8.0f
 
@@ -720,7 +721,7 @@ static void turretCheckTipped(struct Turret* turret) {
         return;
     }
 
-    if (vector3Dot(&turret->rigidBody.rotationBasis.y, &gUp) <= 0.0f) {
+    if (vector3Dot(&turret->rigidBody.rotationBasis.y, &gUp) <= TURRET_TIPPED_DOT) {
         turretPlaySound(
             turret,
             TurretSoundTypeDialog,
