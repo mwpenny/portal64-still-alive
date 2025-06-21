@@ -15,16 +15,16 @@ list_option(TEXT_LANGUAGES "all"
 )
 
 # Programs used in build
-find_package(Blender                3.6 EXACT   REQUIRED)
-find_program(FFmpeg_EXECUTABLE      ffmpeg      REQUIRED)
-find_program(Git_EXECUTABLE         git         REQUIRED)
-find_package(ImageMagickConvert     6 EXACT     REQUIRED)
-find_program(NodeJs_EXECUTABLE      node        REQUIRED)
-find_package(Python3                            REQUIRED)
-find_program(SFZ2N64_EXECUTABLE     sfz2n64     REQUIRED)
-find_program(Sox_EXECUTABLE         sox         REQUIRED)
-find_program(VPK_EXECUTABLE         vpk         REQUIRED)
-find_program(VTF2PNG_EXECUTABLE     vtf2png     REQUIRED)
+find_package(Blender                3.6 EXACT        REQUIRED)
+find_program(FFmpeg_EXECUTABLE      ffmpeg           REQUIRED)
+find_program(Git_EXECUTABLE         git              REQUIRED)
+find_package(ImageMagickConvert     6.9.12.85...<7   REQUIRED)
+find_program(NodeJs_EXECUTABLE      node             REQUIRED)
+find_package(Python3                                 REQUIRED)
+find_program(SFZ2N64_EXECUTABLE     sfz2n64          REQUIRED)
+find_program(Sox_EXECUTABLE         sox              REQUIRED)
+find_program(VPK_EXECUTABLE         vpk              REQUIRED)
+find_program(VTF2PNG_EXECUTABLE     vtf2png          REQUIRED)
 
 # Add skeletool as external project to isolate from toolchain
 add_external_project_executable(skeletool64)

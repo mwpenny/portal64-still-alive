@@ -26,6 +26,8 @@ if (ImageMagickConvert_EXECUTABLE)
         message(SEND_ERROR "Error getting ImageMagick version: ${VERSION_COMMAND_ERROR}")
     elseif (VERSION_COMMAND_OUTPUT MATCHES "^Version: ImageMagick ([-0-9\\.]+)")
         set(VERSION_NUMBER "${CMAKE_MATCH_1}")
+
+        string(REPLACE "-" "." VERSION_NUMBER "${VERSION_NUMBER}")
     endif()
 endif()
 
@@ -34,4 +36,5 @@ find_package_handle_standard_args(ImageMagickConvert
         ImageMagickConvert_EXECUTABLE
     VERSION_VAR
         VERSION_NUMBER
+    HANDLE_VERSION_RANGE
 )
