@@ -637,6 +637,8 @@ void playerDamage(struct Player* player, float amount, enum PlayerDamageType dam
         playerSetGrabbing(player, NULL);
 
         rumblePakClipPlay(&gPlayerDieRumbleWave);
+    } else {
+        rumblePakClipPlay(&gPlayerDamageRumbleWave);
     }
 }
 

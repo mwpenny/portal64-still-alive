@@ -3,8 +3,8 @@
 
 #include "controls/rumble_pak.h"
 
+extern struct RumblePakWave gPlayerDamageRumbleWave;
 extern struct RumblePakWave gPlayerDieRumbleWave;
-
 extern struct RumblePakWave gPlayerClosePortalRumble;
 
 void playerHandleLandingRumble(float velocityChange);

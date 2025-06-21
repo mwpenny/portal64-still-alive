@@ -58,35 +58,21 @@ int rumblePakClipIsActive(RumbleID clip) {
 
     while (curr) {
         if (curr->rumbleId == clip) {
-            return TRUE;
+            return 1;
         }
 
         curr = curr->next;
     }
 
-    return FALSE;
+    return 0;
 }
 
 void rumblePakClipStop(RumbleID clipId) {
-    struct RumblePakClip* clip = gFirstActiveClip;
-
-    while (clip) {
-        if (clip->rumbleId == clipId) {
-            break;
-        }
-
-        clip = clip->next;
-    }
-
-    if (!clip) {
-        return;
-    }
-
     struct RumblePakClip* curr = gFirstActiveClip;
     struct RumblePakClip* prev = NULL;
 
     while (curr) { 
-        if (curr == clip) {
+        if (curr->rumbleId == clipId) {
             if (prev) {
                 prev->next = curr->next;
             } else {

@@ -42,7 +42,7 @@ void textMenuItemRebuildText(struct MenuBuilderElement* element) {
 void textMenuItemRender(struct MenuBuilderElement* element, int selection, int materialIndex, struct PrerenderedTextBatch* textBatch, struct RenderState* renderState) {
     if (textBatch) {
         prerenderedBatchAdd(textBatch, element->data, selection == element->selectionIndex ? &gColorBlack : &gColorWhite);
-        bool isTextPositionedOnFarLeft = (element->params->x < (int)(MENU_WIDTH / 2)) ? true : false;
+        int isTextPositionedOnFarLeft = (element->params->x < (int)(MENU_WIDTH / 2));
 
         if ((selection == element->selectionIndex) && isTextPositionedOnFarLeft){
             gDPPipeSync(renderState->dl++);

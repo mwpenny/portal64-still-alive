@@ -164,7 +164,8 @@ void controllerCheckRumble(int prevStatus, OSMesgQueue* serialMsgQ) {
         } else {
             gRumblePakState = RumblepakStateDisconnected;
         }
-    } if (gControllerStatus[0].status != CONT_CARD_ON) {
+    }
+    if (gControllerStatus[0].status != CONT_CARD_ON) {
         gRumblePakState = RumblepakStateDisconnected;
     }
 

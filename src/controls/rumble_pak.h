@@ -5,7 +5,7 @@ struct RumblePakWave {
     // 2 bits per sample
     unsigned char* samples;
     short sampleCount;
-    // 10.6 fixed point number ticks happens at 60 times per second (50 for pal)
+    // 10.6 fixed point number, ticks happens at 60 times per second (50 for pal)
     short samplesPerTick;
 };
 
