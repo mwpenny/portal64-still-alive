@@ -3,7 +3,7 @@
         +clone
         -colorspace gray
         -alpha off
-        -brightness-contrast 60x80
+        -brightness-contrast 35x85
     \)
     -compose copy-opacity
     -composite
