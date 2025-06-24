@@ -85,7 +85,6 @@ struct Scene {
     u8 clockCount;
     u8 securityCameraCount;
     u8 turretCount;
-    u8 boolCutsceneIsRunning;
 
     u8 continuouslyAttemptingPortalOpen;
     u8 checkpointState;

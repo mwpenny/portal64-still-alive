@@ -280,8 +280,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
         securityCameraInit(&scene->securityCameras[i], &gCurrentLevel->securityCameras[i]);
     }
 
-    scene->continuouslyAttemptingPortalOpen=0;
-    scene->boolCutsceneIsRunning=0;
+    scene->continuouslyAttemptingPortalOpen = 0;
     scene->checkpointState = SceneCheckpointStateSaved;
     scene->mainMenuMode = mainMenuMode;
 
@@ -611,8 +610,6 @@ static int sceneUpdateTurret(struct Scene* scene, void* object) {
 }
 
 void sceneUpdate(struct Scene* scene) {
-    scene->boolCutsceneIsRunning = cutsceneIsSoundQueued();
-
     if (scene->checkpointState == SceneCheckpointStateReady) {
         checkpointSave(scene);
         scene->checkpointState = SceneCheckpointStateSaved;
