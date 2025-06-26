@@ -65,10 +65,10 @@ void signageSetLargeDigit(Vtx* vertices, int nextDigit, int currentDigit) {
     }
 }
 
-#define U_COORD_FOR_DIGIT(digit) (((digit & 0x1) ? (18 << 5) : (4 << 5)) + ((digit) >= 8 ? (2 << 5) : 0))
+#define U_COORD_FOR_DIGIT(digit) ((digit & 0x1) ? (18 << 5) : (4 << 5))
 
 void signageSetSmallDigit(Vtx* vertices, int nextDigit, int currentDigit) {
-    // 14 x 18 + 6 + 0 (+4 + 0 for 8 and 9)
+    // 14 x 18 + 4 + 0
 
     int uOffset = U_COORD_FOR_DIGIT(nextDigit) - U_COORD_FOR_DIGIT(currentDigit);
     int vOffset = ((nextDigit >> 1) - (currentDigit >> 1)) * (18 << 5);
