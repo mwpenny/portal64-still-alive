@@ -61,6 +61,19 @@ Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 
 void sceneUpdateListeners(struct Scene* scene);
 
+static void dynamicColliderHandleCollideStartEnd(struct CollisionObject* object, struct CollisionObject* other, struct Vector3* normal) {
+    if (other->body == NULL || (other->body->flags & RigidBodyIsKinematic)) {
+        return;
+    }
+
+    if (normal != NULL) {
+        // Generate contact on load to keep body on moving platform
+        other->body->flags |= RigidBodyForceWakeOnLoad;
+    } else {
+        other->body->flags &= ~RigidBodyForceWakeOnLoad;
+    }
+}
+
 void sceneInitDynamicColliders(struct Scene* scene) {
     int boxCount = gCurrentLevel->dynamicBoxCount;
 
@@ -81,6 +94,7 @@ void sceneInitDynamicColliders(struct Scene* scene) {
 
         body[i].currentRoom = gCurrentLevel->dynamicBoxes[i].roomIndex;
 
+        colliders[i].collideStartEnd = dynamicColliderHandleCollideStartEnd;
         collisionSceneAddDynamicObject(&colliders[i]);
     }
 
