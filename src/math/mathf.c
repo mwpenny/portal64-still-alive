@@ -70,6 +70,14 @@ float mathfBounceBackLerp(float t) {
     return -t + t * t;
 }
 
+float mathfOutQuinticLerp(float t) {
+    // powf is undefined? :(
+    //return 1.0f - powf(1.0f - t, 5.0f);
+
+    float invert = 1.0f - t;
+    return 1.0f - (invert * invert * invert * invert * invert);
+}
+
 float mathfRandomFloat() {
     return (float)randomInt() / (float)0x7fff;
 }

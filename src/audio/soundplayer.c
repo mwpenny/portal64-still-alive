@@ -113,14 +113,21 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     }
 
     float distanceSqrt = sqrtf(distance);
-    
-    // attenuate the volume
-    *volumeOut = *volumeIn / distanceSqrt;
+
+    // Initial linear volume level.
+    float volumeLevel = *volumeIn / distanceSqrt;
 
     // clamp to full volume
-    if (*volumeOut > 1.0f) {
-        *volumeOut = 1.0f;
+    if (volumeLevel > 1.0f) {
+        volumeLevel = 1.0f;
     }
+
+    // Fudge with the volume curve a bit. 
+    // Try to make distant sounds more apparent while
+    // compressing the volume of closer sounds.
+    volumeLevel = mathfOutQuinticLerp(volumePercent);
+
+    *volumeOut = volumeLevel;
 
     struct Vector3 offset;
     if (through_0_from_1){
@@ -222,6 +229,11 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     }
 
     struct ActiveSound* sound = &gActiveSounds[gActiveSoundCount];
+
+    // HACK
+    // Clamp max input volume for all sounds.
+    // Some of the values seem excessive maybe?
+    volume = clampf(volume, 0.0f, 1.0f);
 
     sound->soundId = result;
     sound->flags = 0;
