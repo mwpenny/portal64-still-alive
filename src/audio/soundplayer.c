@@ -27,6 +27,7 @@ ALSndPlayer gSoundPlayer;
 #define SOUND_FLAGS_PAUSED      (1 << 3)
 
 #define SPEED_OF_SOUND          343.2f
+#define VOLUME_CURVE_PAD        0.2f;
 
 struct ActiveSound {
     ALSndId soundId;
@@ -115,17 +116,13 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     float distanceSqrt = sqrtf(distance);
 
     // Initial linear volume level.
-    float volumeLevel = *volumeIn / distanceSqrt;
-
-    // clamp to full volume
-    if (volumeLevel > 1.0f) {
-        volumeLevel = 1.0f;
-    }
+    float volumeLevel = clampf(*volumeIn / distanceSqrt, 0.0f, 1.0f);
 
     // Fudge with the volume curve a bit. 
     // Try to make distant sounds more apparent while
     // compressing the volume of closer sounds.
-    volumeLevel = mathfOutQuinticLerp(volumePercent);
+    volumeLevel = mathfOutQuinticLerp(volumeLevel) - VOLUME_CURVE_PAD;
+    volumeLevel = clampf(volumeLevel, 0.0f, 1.0f);
 
     *volumeOut = volumeLevel;
 
