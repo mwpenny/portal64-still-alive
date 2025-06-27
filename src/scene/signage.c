@@ -10,13 +10,14 @@
 #include "codegen/assets/models/props/cylinder_test.h"
 #include "codegen/assets/models/props/signage.h"
 
-
 struct SignStateFrame {
-    u8 backlightColor:2;
-    u8 lcdColor:2;
-    u8 warningOffColor:2;
-    u8 warningOnColor:2;
+    u8 backlightColor  : 2;
+    u8 lcdColor        : 2;
+    u8 warningOffColor : 2;
+    u8 warningOnColor  : 2;
 };
+
+#define PROGRESS_ENABLE_LCD_COLOR_INDEX 3
 
 struct SignStateFrame gSignageFrames[] = {
     // off
@@ -50,6 +51,23 @@ struct SignStateFrame gSignageFrames[] = {
     {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
     // warning on
     {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    // progress on
+    {.backlightColor = 2, .lcdColor = PROGRESS_ENABLE_LCD_COLOR_INDEX, .warningOffColor = 3, .warningOnColor = 3},
 };
 
 #define SIGNAGE_FRAME_COUNT (sizeof(gSignageFrames) / sizeof(*gSignageFrames))
@@ -78,6 +96,32 @@ void signageSetSmallDigit(Vtx* vertices, int nextDigit, int currentDigit) {
         ((Vtx*)K0_TO_K1(vertices))[i].v.tc[1] += vOffset;
     }
 }
+
+#define PROGRESS_MAX_INDEX  19
+
+#define PROGRESS_X_START    55
+#define PROGRESS_X_LENGTH   142
+
+#define PROGRESS_U_START    0
+#define PROGRESS_U_LENGTH   2400
+
+void signageSetProgress(int index, struct SignStateFrame signState) {
+    float progressAmount = (signState.lcdColor == PROGRESS_ENABLE_LCD_COLOR_INDEX) ?
+        (float)index / (float)PROGRESS_MAX_INDEX :
+        0;
+
+    // Model X coordinates are decreasing and so we must subtract
+    short xCoord = PROGRESS_X_START - (short)(progressAmount * (float)PROGRESS_X_LENGTH);
+    short uCoord = PROGRESS_U_START + (short)(progressAmount * (float)PROGRESS_U_LENGTH);
+
+    Vtx* vertices = (Vtx*)K0_TO_K1(props_signage_signage_num00_progress_color);
+    vertices[0].v.ob[0] = xCoord;
+    vertices[0].v.tc[0] = uCoord;
+
+    vertices[1].v.ob[0] = xCoord;
+    vertices[1].v.tc[0] = uCoord;
+}
+
 
 Vtx* gWarningVertices[] = {
     props_signage_signage_num00_warn_0_color,
@@ -135,6 +179,7 @@ static struct Coloru8 gLCDBlackColors[] = {
     {46, 47, 49, 49},
     {132, 135, 140, 145},
     {0, 0, 0, 255},
+    {0, 0, 0, 255},  // This color signals to turn on the progress bar
 };
 
 static struct Coloru8 gWarningOffColors[] = {
@@ -186,6 +231,7 @@ void signageCheckIndex(int neededIndex, struct SignStateFrame signState) {
     signageSetSmallDigit(props_signage_signage_num00_sdigit_0_color, oneDigit, prevOneDigit);
     signageSetSmallDigit(props_signage_signage_num00_sdigit_10_color, tenDigit, prevTenDigit);
 
+    signageSetProgress(neededIndex, signState);
     signageSetWarnings(gLevelWarnings[neededIndex], signState);
 }
 
