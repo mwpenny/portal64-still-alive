@@ -703,6 +703,26 @@ materials:
       color: ["ENVIRONMENT", PRIMITIVE, TEXEL0, PRIMITIVE]
     gDPSetCycleType: G_CYC_1CYCLE
 
+  awe_total_copy_0_shade:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props_animsigns/awe_total_copy_0.png
+      siz: G_IM_SIZ_4b
+      fmt: G_IM_FMT_I
+      s:
+        wrap: false
+      t:
+        wrap: false
+
+    gDPSetRenderMode: G_RM_ZB_OPA_DECAL
+    gDPSetTextureFilter: G_TF_BILERP
+
+    gSPGeometryMode:
+      clear: [G_LIGHTING]
+      set: [G_SHADE]
+    gDPSetCombineMode:
+      color: [SHADE, PRIMITIVE, TEXEL0, PRIMITIVE]
+    gDPSetCycleType: G_CYC_1CYCLE
+
   awe_total_copy_0_nofilter:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/models/props_animsigns/awe_total_copy_0.png

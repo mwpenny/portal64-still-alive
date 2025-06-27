@@ -10,72 +10,99 @@
 #include "codegen/assets/models/props/cylinder_test.h"
 #include "codegen/assets/models/props/signage.h"
 
+static struct Coloru8 gBacklightColors[] = {
+    {46, 47, 49, 49},
+    {132, 135, 140, 145},
+    {242, 245, 247, 255},
+};
+
+static struct Coloru8 gLCDBlackColors[] = {
+    {46, 47, 49, 49},
+    {132, 135, 140, 145},
+    {0, 0, 0, 255},
+    {0, 0, 0, 255},  // This color signals to turn on the progress bar
+};
+
+static struct Coloru8 gSymbolOffColors[] = {
+    {46, 47, 49, 49},
+    {132, 135, 140, 145},
+    {40, 40, 40, 255},
+    {212, 212, 212, 255},
+};
+
+static struct Coloru8 gSymbolOnColors[] = {
+    {46, 47, 49, 49},
+    {132, 135, 140, 145},
+    {212, 212, 212, 255},
+    {0, 0, 0, 255},
+};
+
 struct SignStateFrame {
-    u8 backlightColor  : 2;
-    u8 lcdColor        : 2;
-    u8 warningOffColor : 2;
-    u8 warningOnColor  : 2;
+    u8 backlightColor : 2;
+    u8 lcdColor       : 2;
+    u8 symbolOffColor : 2;
+    u8 symbolOnColor  : 2;
 };
 
 #define PROGRESS_ENABLE_LCD_COLOR_INDEX 3
 
-struct SignStateFrame gSignageFrames[] = {
+static struct SignStateFrame gSignageFrames[] = {
     // off
-    {.backlightColor = 0, .lcdColor = 0, .warningOffColor = 0, .warningOnColor = 0},
+    {.backlightColor = 0, .lcdColor = 0, .symbolOffColor = 0, .symbolOnColor = 0},
     // backlight half on
-    {.backlightColor = 1, .lcdColor = 1, .warningOffColor = 1, .warningOnColor = 1},
-    {.backlightColor = 1, .lcdColor = 1, .warningOffColor = 1, .warningOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 1, .symbolOffColor = 1, .symbolOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 1, .symbolOffColor = 1, .symbolOnColor = 1},
     // lcd on
-    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
-    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
-    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
-    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
-    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
-    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .symbolOffColor = 1, .symbolOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .symbolOffColor = 1, .symbolOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .symbolOffColor = 1, .symbolOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .symbolOffColor = 1, .symbolOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .symbolOffColor = 1, .symbolOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .symbolOffColor = 1, .symbolOnColor = 1},
     // backlight full on
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 2},
     // backlight flicker
-    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
-    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
-    {.backlightColor = 1, .lcdColor = 2, .warningOffColor = 1, .warningOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .symbolOffColor = 1, .symbolOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .symbolOffColor = 1, .symbolOnColor = 1},
+    {.backlightColor = 1, .lcdColor = 2, .symbolOffColor = 1, .symbolOnColor = 1},
     // backlight full back on
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 2},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 2},
     // warning on
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
-    {.backlightColor = 2, .lcdColor = 2, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
+    {.backlightColor = 2, .lcdColor = 2, .symbolOffColor = 3, .symbolOnColor = 3},
     // progress on
-    {.backlightColor = 2, .lcdColor = PROGRESS_ENABLE_LCD_COLOR_INDEX, .warningOffColor = 3, .warningOnColor = 3},
+    {.backlightColor = 2, .lcdColor = PROGRESS_ENABLE_LCD_COLOR_INDEX, .symbolOffColor = 3, .symbolOnColor = 3},
 };
 
 #define SIGNAGE_FRAME_COUNT (sizeof(gSignageFrames) / sizeof(*gSignageFrames))
 
-short gCurrentSignageIndex = -1;
-struct SignStateFrame gCurrentSignageFrame = {3, 3, 3, 3};
+static short gCurrentSignageIndex = -1;
+static struct SignStateFrame gCurrentSignageFrame = {3, 3, 3, 3};
 
-void signageSetLargeDigit(Vtx* vertices, int nextDigit, int currentDigit) {
+static void signageSetLargeDigit(Vtx* vertices, int nextDigit, int currentDigit) {
     int uOffset = (nextDigit - currentDigit) * (14 << 5);
 
     for (int i = 0; i < 4; ++i) {
@@ -85,7 +112,7 @@ void signageSetLargeDigit(Vtx* vertices, int nextDigit, int currentDigit) {
 
 #define U_COORD_FOR_DIGIT(digit) ((digit & 0x1) ? (18 << 5) : (4 << 5))
 
-void signageSetSmallDigit(Vtx* vertices, int nextDigit, int currentDigit) {
+static void signageSetSmallDigit(Vtx* vertices, int nextDigit, int currentDigit) {
     // 14 x 18 + 4 + 0
 
     int uOffset = U_COORD_FOR_DIGIT(nextDigit) - U_COORD_FOR_DIGIT(currentDigit);
@@ -105,7 +132,7 @@ void signageSetSmallDigit(Vtx* vertices, int nextDigit, int currentDigit) {
 #define PROGRESS_U_START    0
 #define PROGRESS_U_LENGTH   2400
 
-void signageSetProgress(int index, struct SignStateFrame signState) {
+static void signageSetProgress(int index, struct SignStateFrame signState) {
     float progressAmount = (signState.lcdColor == PROGRESS_ENABLE_LCD_COLOR_INDEX) ?
         (float)index / (float)PROGRESS_MAX_INDEX :
         0;
@@ -122,8 +149,30 @@ void signageSetProgress(int index, struct SignStateFrame signState) {
     vertices[1].v.tc[0] = uCoord;
 }
 
+static Vtx* gDenominatorVertices[] = {
+    props_signage_signage_num00_sdigit_denom_slash_color,
+    props_signage_signage_num00_sdigit_denom_0_color,
+    props_signage_signage_num00_sdigit_denom_10_color,
+};
 
-Vtx* gWarningVertices[] = {
+static void signageSetVertexColor(Vtx* vertices, struct Coloru8* color) {
+    for (int vIndex = 0; vIndex < 4; ++vIndex) {
+        ((Vtx*)K0_TO_K1(vertices))[vIndex].v.cn[0] = color->r;
+        ((Vtx*)K0_TO_K1(vertices))[vIndex].v.cn[1] = color->g;
+        ((Vtx*)K0_TO_K1(vertices))[vIndex].v.cn[2] = color->b;
+        ((Vtx*)K0_TO_K1(vertices))[vIndex].v.cn[3] = color->a;
+    }
+}
+
+static void signageSetDenominator(struct SignStateFrame signState) {
+    struct Coloru8 useColor = gSymbolOnColors[signState.symbolOnColor];
+
+    for (int i = 0; i < 3; ++i) {
+        signageSetVertexColor(gDenominatorVertices[i], &useColor);
+    }
+}
+
+static Vtx* gWarningVertices[] = {
     props_signage_signage_num00_warn_0_color,
     props_signage_signage_num00_warn_1_color,
     props_signage_signage_num00_warn_2_color,
@@ -149,7 +198,7 @@ enum LevelWarnings {
     LevelWarningsCake = (1 << 9),
 };
 
-short gLevelWarnings[] = {
+static short gLevelWarnings[] = {
     LevelWarningsCubeDispense | LevelWarningsCubeHit,
     0,
     0,
@@ -169,47 +218,17 @@ short gLevelWarnings[] = {
     LevelWarningsCubeDispense | LevelWarningsCubeHit | LevelWarningsTurret,
 };
 
-static struct Coloru8 gBacklightColors[] = {
-    {46, 47, 49, 49},
-    {132, 135, 140, 145},
-    {242, 245, 247, 255},
-};
-
-static struct Coloru8 gLCDBlackColors[] = {
-    {46, 47, 49, 49},
-    {132, 135, 140, 145},
-    {0, 0, 0, 255},
-    {0, 0, 0, 255},  // This color signals to turn on the progress bar
-};
-
-static struct Coloru8 gWarningOffColors[] = {
-    {46, 47, 49, 49},
-    {132, 135, 140, 145},
-    {40, 40, 40, 255},
-    {212, 212, 212, 255},
-};
-
-static struct Coloru8 gWarningOnColors[] = {
-    {46, 47, 49, 49},
-    {132, 135, 140, 145},
-    {212, 212, 212, 255},
-    {0, 0, 0, 255},
-};
-
-void signageSetWarnings(int warningMask, struct SignStateFrame signState) {
+static void signageSetWarnings(int warningMask, struct SignStateFrame signState) {
     for (int i = 0; i < 10; ++i) {
-        struct Coloru8 useColor = (1 << i) & warningMask ? gWarningOnColors[signState.warningOnColor] : gWarningOffColors[signState.warningOffColor];
+        struct Coloru8 useColor = (1 << i) & warningMask ?
+            gSymbolOnColors[signState.symbolOnColor] :
+            gSymbolOffColors[signState.symbolOffColor];
 
-        for (int vIndex = 0; vIndex < 4; ++vIndex) {
-            ((Vtx*)K0_TO_K1(gWarningVertices[i]))[vIndex].v.cn[0] = useColor.r;
-            ((Vtx*)K0_TO_K1(gWarningVertices[i]))[vIndex].v.cn[1] = useColor.g;
-            ((Vtx*)K0_TO_K1(gWarningVertices[i]))[vIndex].v.cn[2] = useColor.b;
-            ((Vtx*)K0_TO_K1(gWarningVertices[i]))[vIndex].v.cn[3] = useColor.a;
-        }
+        signageSetVertexColor(gWarningVertices[i], &useColor);
     }
 }
 
-void signageCheckIndex(int neededIndex, struct SignStateFrame signState) {
+static void signageCheckIndex(int neededIndex, struct SignStateFrame signState) {
     if (gCurrentSignageIndex == neededIndex && *((u8*)&gCurrentSignageFrame) == *((u8*)&signState)) {
         return;
     }
@@ -219,11 +238,11 @@ void signageCheckIndex(int neededIndex, struct SignStateFrame signState) {
     }
 
     int prevTenDigit = gCurrentSignageIndex / 10;
-    int prevOneDigit = gCurrentSignageIndex - prevTenDigit * 10; 
+    int prevOneDigit = gCurrentSignageIndex - prevTenDigit * 10;
 
     int tenDigit = neededIndex / 10;
     int oneDigit = neededIndex - tenDigit * 10;
-    
+
     gCurrentSignageIndex = neededIndex;
     gCurrentSignageFrame = signState;
     signageSetLargeDigit(props_signage_signage_num00_digit_0_color, oneDigit, prevOneDigit);
@@ -232,10 +251,11 @@ void signageCheckIndex(int neededIndex, struct SignStateFrame signState) {
     signageSetSmallDigit(props_signage_signage_num00_sdigit_10_color, tenDigit, prevTenDigit);
 
     signageSetProgress(neededIndex, signState);
+    signageSetDenominator(signState);
     signageSetWarnings(gLevelWarnings[neededIndex], signState);
 }
 
-void signageRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
+static void signageRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Signage* signage = (struct Signage*)data;
 
     int frameIndex = signage->currentFrame;
