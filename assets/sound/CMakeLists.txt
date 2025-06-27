@@ -134,6 +134,11 @@ set(LOCALIZED_SOUND_SCRIPTS
     npc/turret_floor/turret_autosearch_4.sox
     npc/turret_floor/turret_autosearch_5.sox
     npc/turret_floor/turret_autosearch_6.sox
+    npc/turret_floor/turret_collide_1.sox
+    npc/turret_floor/turret_collide_2.sox
+    npc/turret_floor/turret_collide_3.sox
+    npc/turret_floor/turret_collide_4.sox
+    npc/turret_floor/turret_collide_5.sox
     npc/turret_floor/turret_deploy_1.sox
     npc/turret_floor/turret_deploy_2.sox
     npc/turret_floor/turret_deploy_4.sox
@@ -264,6 +269,10 @@ set(RUSSIAN_EXCLUDED_LOCALIZED_SOUND_SCRIPTS
     npc/turret_floor/turret_autosearch_4.sox
     npc/turret_floor/turret_autosearch_5.sox
     npc/turret_floor/turret_autosearch_6.sox
+    npc/turret_floor/turret_collide_2.sox
+    npc/turret_floor/turret_collide_3.sox
+    npc/turret_floor/turret_collide_4.sox
+    npc/turret_floor/turret_collide_5.sox
     npc/turret_floor/turret_deploy_2.sox
     npc/turret_floor/turret_deploy_4.sox
     npc/turret_floor/turret_deploy_5.sox
