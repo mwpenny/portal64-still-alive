@@ -42,7 +42,7 @@ This project aims to reproduce Valve's original Portal, playable on the N64.
 Because this demake has been in development for some time, it has made
 significant progress in both gameplay systems and fidelity including:
 
-- Twelve+ test chambers completed
+- Seventeen test chambers completed
 - Fully functioning portals, and gun
 - Fully functioning physics engine
 - Lighting system
@@ -50,7 +50,7 @@ significant progress in both gameplay systems and fidelity including:
 - Sound effects/dialogue
 - Cutscenes
 - Multi-language subtitles and audio dialogue
-- Eye-Candy (Reflections, ...)
+- Eye candy (reflections, ...)
 - Much more!
 
 This is a community driven project that welcomes any and all game testers and or
