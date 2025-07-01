@@ -11,6 +11,7 @@ float mathfInvLerp(float from, float to, float value);
 float mathfMoveTowards(float from, float to, float maxMove);
 float mathfBounceBackLerp(float t);
 float mathfOutQuinticLerp(float t);
+float mathfRemap(float value, float oldMin, float oldMax, float newMin, float newMax);
 float mathfRandomFloat();
 float mathfMod(float input, float divisor);
 float clampf(float input, float min, float max);
