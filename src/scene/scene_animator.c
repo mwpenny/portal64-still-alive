@@ -80,7 +80,7 @@ void sceneAnimatorUpdate(struct SceneAnimator* sceneAnimator) {
 
         if (audioInfo->loopSoundId != SOUND_ID_NONE) {
             if (isMoving && state->soundId == SOUND_ID_NONE) {
-                state->soundId = soundPlayerPlay(audioInfo->loopSoundId, 1.0f, audioInfo->pitch, &currentPos, &gZeroVec, SoundTypeAll);
+                state->soundId = soundPlayerPlay(audioInfo->loopSoundId, audioInfo->volume, audioInfo->pitch, &currentPos, &gZeroVec, SoundTypeAll);
             } else if (isMoving && state->soundId != SOUND_ID_NONE) {
                 soundPlayerUpdatePosition(state->soundId, &currentPos, &gZeroVec);
             } else if (!isMoving && state->soundId != SOUND_ID_NONE) {
