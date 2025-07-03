@@ -97,13 +97,13 @@ void pedestalUpdate(struct Pedestal* pedestal) {
 
         if (vector2RotateTowards(&pedestal->currentRotation, &target, &gMaxPedistalRotation, &pedestal->currentRotation)) {
             if (!(pedestal->flags & PedestalFlagsDown)){
-                soundPlayerPlay(soundsPedestalShooting, 3.0f, 0.5f, &pedestal->transform.position, &gZeroVec, SoundTypeAll);
+                soundPlayerPlay(soundsPedestalShooting, 2.0f, 0.5f, &pedestal->transform.position, &gZeroVec, SoundTypeAll);
             }
             pedestal->flags &= ~PedestalFlagsIsPointing;
         }
         else{
             if (!(pedestal->flags & PedestalFlagsAlreadyMoving) && !(pedestal->flags & PedestalFlagsDown)){
-                soundPlayerPlay(soundsPedestalMoving, 3.0f, 0.5f, &pedestal->transform.position, &gZeroVec, SoundTypeAll);
+                soundPlayerPlay(soundsPedestalMoving, 2.5f, 0.5f, &pedestal->transform.position, &gZeroVec, SoundTypeAll);
                 hudShowSubtitle(&gScene.hud, PORTALGUN_PEDESTAL_ROTATE, SubtitleTypeCaption);
                 pedestal->flags |= PedestalFlagsAlreadyMoving;
             }
