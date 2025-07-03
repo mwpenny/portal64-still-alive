@@ -27,7 +27,7 @@ ALSndPlayer gSoundPlayer;
 #define SOUND_FLAGS_PAUSED      (1 << 3)
 
 #define SPEED_OF_SOUND          343.2f
-#define VOLUME_CURVE_PAD        0.01f
+#define VOLUME_CURVE_PAD        0.012f
 
 struct ActiveSound {
     ALSndId soundId;
