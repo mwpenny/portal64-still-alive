@@ -21,6 +21,7 @@ struct DecorObjectDefinition {
     short dynamicModelIndex;
     short materialIndex;
     short materialIndexFizzled;
+    float soundClipVolume;
     short soundClipId;
     short soundFizzleId;
     short flags;
