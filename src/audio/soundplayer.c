@@ -259,6 +259,12 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     alSndpSetVol(&gSoundPlayer, (short)(32767 * newVolume));
     alSndpSetPitch(&gSoundPlayer, pitch);
     alSndpSetPan(&gSoundPlayer, panning);
+
+    // Add reverb effect.
+    if (type == SoundTypeAll) {
+        alSndpSetFXMix(&gSoundPlayer, 64);
+    }
+
     alSndpPlay(&gSoundPlayer);
 
     ++gActiveSoundCount;
