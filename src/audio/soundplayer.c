@@ -264,6 +264,9 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     if (type == SoundTypeAll) {
         alSndpSetFXMix(&gSoundPlayer, 64);
     }
+    else if (type == SoundTypeVoice) {
+        alSndpSetFXMix(&gSoundPlayer, 32);
+    }
 
     alSndpPlay(&gSoundPlayer);
 
