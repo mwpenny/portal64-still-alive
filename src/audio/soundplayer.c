@@ -27,6 +27,7 @@ ALSndPlayer gSoundPlayer;
 #define SOUND_FLAGS_PAUSED      (1 << 3)
 
 #define SPEED_OF_SOUND          343.2f
+#define VOLUME_CURVE_PAD        0.012f
 
 struct ActiveSound {
     ALSndId soundId;
@@ -113,14 +114,16 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     }
 
     float distanceSqrt = sqrtf(distance);
-    
-    // attenuate the volume
-    *volumeOut = *volumeIn / distanceSqrt;
 
-    // clamp to full volume
-    if (*volumeOut > 1.0f) {
-        *volumeOut = 1.0f;
-    }
+    // Initial linear volume level.
+    float volumeLevel = clampf(*volumeIn / distanceSqrt, 0.0f, 1.0f);
+
+    // Fudge with the volume curve a bit. 
+    // Try to make distant sounds more apparent while
+    // compressing the volume of closer sounds.
+    volumeLevel = mathfRemap(volumeLevel - VOLUME_CURVE_PAD, 0.0f, 0.6f, 0.0f, 1.0f);
+
+    *volumeOut = volumeLevel;
 
     struct Vector3 offset;
     if (through_0_from_1){
@@ -256,6 +259,15 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     alSndpSetVol(&gSoundPlayer, (short)(32767 * newVolume));
     alSndpSetPitch(&gSoundPlayer, pitch);
     alSndpSetPan(&gSoundPlayer, panning);
+
+    // Add reverb effect.
+    if (type == SoundTypeAll) {
+        alSndpSetFXMix(&gSoundPlayer, 64);
+    }
+    else if (type == SoundTypeVoice) {
+        alSndpSetFXMix(&gSoundPlayer, 32);
+    }
+
     alSndpPlay(&gSoundPlayer);
 
     ++gActiveSoundCount;
