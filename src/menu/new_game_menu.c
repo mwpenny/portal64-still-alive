@@ -165,7 +165,7 @@ enum InputCapture newGameUpdate(struct NewGameMenu* newGameMenu) {
 
             confirmationDialogShow(&newGameMenu->confirmationDialog, &dialogParams);
         }
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeMenu);
     }
 
     if ((controllerGetDirectionDown(0) & ControllerDirectionRight) != 0) {
@@ -183,7 +183,7 @@ enum InputCapture newGameUpdate(struct NewGameMenu* newGameMenu) {
     }
     
     if ((controllerGetDirectionDown(0) & ControllerDirectionLeft) != 0 || (controllerGetDirectionDown(0) & ControllerDirectionRight) != 0)
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeMenu);
 
     int nextChapterOffset = newGameMenu->selectedChapter & ~1;
 

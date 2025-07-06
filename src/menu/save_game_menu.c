@@ -78,9 +78,9 @@ static void saveGameSaveInSelectedSlot(struct SaveGameMenu* saveGame) {
         );
         saveGamePopulate(saveGame, 1);
 
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeMenu);
     } else {
-        soundPlayerPlay(SOUNDS_WPN_DENYSELECT, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(SOUNDS_WPN_DENYSELECT, 1.0f, 0.5f, NULL, NULL, SoundTypeMenu);
     }
     stackMallocFree(save);
 }
@@ -125,7 +125,7 @@ enum InputCapture saveGameUpdate(struct SaveGameMenu* saveGame) {
                     (ConfirmationDialogCallback)&saveGameConfirmOverwriteClosed,
                     saveGame
                 );
-                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeMenu);
             }
         } else if (controllerGetButtonDown(0, BUTTON_Z)) {
             short selectedSaveIndex = saveGame->savefileList->selectedSave;
@@ -137,7 +137,7 @@ enum InputCapture saveGameUpdate(struct SaveGameMenu* saveGame) {
                     (ConfirmationDialogCallback)&saveGameConfirmDeletionClosed,
                     saveGame
                 );
-                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeMenu);
             }
         }
     }

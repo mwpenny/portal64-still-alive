@@ -16,6 +16,7 @@
 enum SoundType{
     SoundTypeNone,
     SoundTypeMusic,
+    SoundTypeMenu,
     SoundTypeAll,
     SoundTypeVoice,
 };
