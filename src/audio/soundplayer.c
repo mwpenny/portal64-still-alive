@@ -27,7 +27,7 @@ ALSndPlayer gSoundPlayer;
 #define SOUND_FLAGS_PAUSED      (1 << 3)
 
 #define SPEED_OF_SOUND          343.2f
-#define VOLUME_CURVE_PAD        0.012f
+#define VOLUME_CURVE_PAD        0.0125f
 
 struct ActiveSound {
     ALSndId soundId;
@@ -121,7 +121,7 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     // Fudge with the volume curve a bit. 
     // Try to make distant sounds more apparent while
     // compressing the volume of closer sounds.
-    volumeLevel = mathfRemap(volumeLevel - VOLUME_CURVE_PAD, 0.0f, 0.6f, 0.0f, 1.0f);
+    volumeLevel = mathfRemap(volumeLevel - VOLUME_CURVE_PAD, 0.0f, 0.65f, 0.0f, 1.0f);
 
     *volumeOut = volumeLevel;
 
@@ -262,7 +262,9 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
 
     // Add reverb effect.
     if (type == SoundTypeAll) {
-        alSndpSetFXMix(&gSoundPlayer, 64);
+        // Ease in echo effect for distant sounds.
+        int fxMix = (int)(127.0f * (1.0f - mathfRemap(newVolume, 0.0f, 0.5f, 0.3f, 0.87f)));
+        alSndpSetFXMix(&gSoundPlayer, fxMix);
     }
     else if (type == SoundTypeVoice) {
         alSndpSetFXMix(&gSoundPlayer, 32);
