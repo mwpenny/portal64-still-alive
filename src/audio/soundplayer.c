@@ -208,6 +208,20 @@ float soundPlayerEstimateLength(ALSound* sound, float speed) {
     return sampleCount * (1.0f / OUTPUT_RATE) / speed;
 }
 
+int soundPlayerGetFXMixAmount(float volume, enum SoundType type) {
+    int fxMix = 0;
+
+    if (type == SoundTypeAll) {
+        // Ease in FX mix for distant sounds. Make distant sounds more echoy.
+        fxMix = (int)(127.0f * (1.0f - mathfRemap(volume, 0.0f, 0.5f, 0.3f, 0.87f)));
+    }
+    else if (type == SoundTypeVoice) {
+        fxMix = 32;
+    }
+
+    return fxMix;
+}
+
 ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType type) {
     if (gActiveSoundCount >= MAX_ACTIVE_SOUNDS || soundClipId < 0 || soundClipId >= gSoundClipArray->soundCount) {
         return SOUND_ID_NONE;
@@ -261,14 +275,8 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     alSndpSetPan(&gSoundPlayer, panning);
 
     // Add reverb effect.
-    if (type == SoundTypeAll) {
-        // Ease in echo effect for distant sounds.
-        int fxMix = (int)(127.0f * (1.0f - mathfRemap(newVolume, 0.0f, 0.5f, 0.3f, 0.87f)));
-        alSndpSetFXMix(&gSoundPlayer, fxMix);
-    }
-    else if (type == SoundTypeVoice) {
-        alSndpSetFXMix(&gSoundPlayer, 32);
-    }
+    int fxMix = soundPlayerGetFXMixAmount(newVolume, type);
+    alSndpSetFXMix(&gSoundPlayer, fxMix);
 
     alSndpPlay(&gSoundPlayer);
 
@@ -370,6 +378,10 @@ void soundPlayerUpdate() {
 
                 soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &panning, &pitch);
 
+                // Update reverb effect.
+                int fxMix = soundPlayerGetFXMixAmount(volume, sound->soundType);
+                alSndpSetFXMix(&gSoundPlayer, fxMix);
+
                 if (sound->soundType != SoundTypeVoice) {
                     volume *= soundDamping;
                 }
@@ -378,7 +390,6 @@ void soundPlayerUpdate() {
                 alSndpSetPan(&gSoundPlayer, panning);
                 alSndpSetPitch(&gSoundPlayer, sound->basePitch * pitch);
             }
-
 
             ++writeIndex;
         }
