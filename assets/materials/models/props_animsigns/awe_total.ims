@@ -1,7 +1,47 @@
 \(
     +clone
 
-    -alpha extract -crop 154x1024+1894+0 -resize 32x212
+    -alpha extract
+    \( +clone -crop 154x170+1894+0   \) -insert 0
+    \( +clone -crop 154x86+1894+168  \) -insert 1
+    \(
+        +clone
+
+        \( +clone -crop 88x88+1894+250 \) -insert 0
+        \( +clone -crop 70x88+1976+250 \) -insert 1
+
+        +append
+        +repage
+        -crop 154x88+0+0
+
+    \) -insert 2
+    \( +clone -crop 154x85+1890+335  \) -insert 3
+    \( +clone -crop 154x603+1894+421 \) -insert 4
+    -append
+    +repage
+
+    -crop 154x1032+0+0
+    -resize 32x
+    -background black
+    -extent 32x216
+
+    -fill white
+    -draw 'point 0,215'
+    -draw 'point 2,215'
+    -draw 'point 4,215'
+    -draw 'point 6,215'
+    -draw 'point 8,215'
+    -draw 'point 10,215'
+    -draw 'point 12,215'
+    -draw 'point 14,215'
+    -draw 'point 16,215'
+    -draw 'point 18,215'
+    -draw 'point 20,215'
+    -draw 'point 22,215'
+    -draw 'point 24,215'
+    -draw 'point 26,215'
+    -draw 'point 28,215'
+    -draw 'point 30,215'
 
     -write portal_pak_modified/materials/models/props_animsigns/awe_total_copy_0.png
     +delete

@@ -18,54 +18,55 @@
 #include "codegen/assets/models/dynamic_animated_model_list.h"
 #include "codegen/assets/models/props/turret_01.h"
 
-#define TURRET_MASS                2.0f
-#define TURRET_COLLISION_LAYERS    (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
+#define TURRET_MASS                   2.0f
+#define TURRET_COLLISION_LAYERS       (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_TURRET_SHOTS)
 
-#define TURRET_OPEN_POSITION       46.0f
-#define TURRET_CLOSE_POSITION      22.0f
-#define TURRET_OPEN_SPEED          4.0f
-#define TURRET_SLOW_OPEN_SPEED     2.5f
-#define TURRET_CLOSE_SPEED         2.0f
-#define TURRET_CLOSE_DELAY         0.25f
-#define TURRET_ROTATE_SPEED        2.0f
-#define TURRET_SHOT_PERIOD         0.025f
+#define TURRET_OPEN_POSITION          46.0f
+#define TURRET_CLOSE_POSITION         22.0f
+#define TURRET_OPEN_SPEED             4.0f
+#define TURRET_SLOW_OPEN_SPEED        2.5f
+#define TURRET_CLOSE_SPEED            2.0f
+#define TURRET_CLOSE_DELAY            0.25f
+#define TURRET_ROTATE_SPEED           2.0f
+#define TURRET_SHOT_PERIOD            0.025f
 
-#define TURRET_BULLET_DAMAGE       4.0f
-#define TURRET_BULLET_IMPULSE      5.0f
-#define TURRET_BULLET_PUSH_HITS    8
-#define TURRET_BULLET_SOUND_HITS   4
+#define TURRET_BULLET_DAMAGE          4.0f
+#define TURRET_BULLET_IMPULSE         5.0f
+#define TURRET_BULLET_PUSH_HITS       8
+#define TURRET_BULLET_SOUND_HITS      4
 
-#define TURRET_IDLE_DIALOG_DELAY   3.0f
+#define TURRET_IDLE_DIALOGUE_DELAY    3.0f
 
-#define TURRET_DETECT_RANGE        20.0f
-#define TURRET_DETECT_FOV_DOT      0.5f   // acos(0.5) * 2 = 120 degree FOV
-#define TURRET_DETECT_DELAY        0.5f
+#define TURRET_DETECT_RANGE           20.0f
+#define TURRET_DETECT_FOV_DOT         0.5f   // acos(0.5) * 2 = 120 degree FOV
+#define TURRET_DETECT_DELAY           0.5f
 
-#define TURRET_DEPLOY_DELAY        0.5f
+#define TURRET_DEPLOY_DELAY           0.5f
 
-#define TURRET_SEARCH_PITCH_SPEED  0.5f
-#define TURRET_SEARCH_YAW_SPEED    TURRET_SEARCH_PITCH_SPEED * 1.5f
-#define TURRET_SEARCH_DURATION     5.0f
-#define TURRET_SEARCH_DIALOG_DELAY 2.0f
+#define TURRET_SEARCH_PITCH_SPEED     0.5f
+#define TURRET_SEARCH_YAW_SPEED       TURRET_SEARCH_PITCH_SPEED * 1.5f
+#define TURRET_SEARCH_DURATION        5.0f
+#define TURRET_SEARCH_DIALOGUE_DELAY  2.0f
+#define TURRET_SEARCH_DIALOGUE_START  (TURRET_SEARCH_DURATION - TURRET_SEARCH_DIALOGUE_DELAY)
 
-#define TURRET_ATTACK_DIALOG_DELAY 2.0f
-#define TURRET_ATTACK_FOV_DOT      0.9f   // acos(0.9) * 2 = ~50 degree FOV
-#define TURRET_ATTACK_SNAP_SPEED   1.5f
-#define TURRET_ATTACK_TRACK_SPEED  0.75f
+#define TURRET_ATTACK_DIALOGUE_DELAY  2.0f
+#define TURRET_ATTACK_FOV_DOT         0.9f   // acos(0.9) * 2 = ~50 degree FOV
+#define TURRET_ATTACK_SNAP_SPEED      1.5f
+#define TURRET_ATTACK_TRACK_SPEED     0.75f
 
-#define TURRET_GRAB_MIN_ROT_DELAY  0.1f
-#define TURRET_GRAB_MAX_ROT_DELAY  0.75f
+#define TURRET_GRAB_MIN_ROT_DELAY     0.1f
+#define TURRET_GRAB_MAX_ROT_DELAY     0.75f
 
-#define TURRET_TIPPED_DOT          0.17f  // acos(0.17)    = ~80 degrees
-#define TURRET_TIPPED_DURATION     3.0f
-#define TURRET_TIPPED_ROTATE_SPEED 8.0f
+#define TURRET_TIPPED_DOT             0.17f  // acos(0.17)    = ~80 degrees
+#define TURRET_TIPPED_DURATION        3.0f
+#define TURRET_TIPPED_ROTATE_SPEED    8.0f
 
-#define TURRET_AUTOTIP_MAX_VEL     1.0f
-#define TURRET_AUTOTIP_DIR_MAX_DOT 0.5f   // acos(0.5) * 2 = 120 degree range
-#define TURRET_AUTOTIP_IMPULSE     2.5f
+#define TURRET_AUTOTIP_MAX_VEL        1.0f
+#define TURRET_AUTOTIP_DIR_MAX_DOT    0.5f   // acos(0.5) * 2 = 120 degree range
+#define TURRET_AUTOTIP_IMPULSE        2.5f
 
-#define TURRET_COLLISION_BASE      0
-#define TURRET_COLLISION_BODY      1
+#define TURRET_COLLISION_BASE         0
+#define TURRET_COLLISION_BODY         1
 
 static struct CollisionTetrahedron sTurretBaseTetrahedron = {
     {0.2f, 0.45f, 0.4f}
@@ -142,6 +143,16 @@ static short sTurretAutosearchSounds[] = {
     SOUNDS_TURRET_AUTOSEARCH_4,
     SOUNDS_TURRET_AUTOSEARCH_5,
     SOUNDS_TURRET_AUTOSEARCH_6
+#endif
+};
+
+static short sTurretCollideSounds[] = {
+    SOUNDS_TURRET_COLLIDE_1,
+#ifdef SOUNDS_TURRET_COLLIDE_2
+    SOUNDS_TURRET_COLLIDE_2,
+    SOUNDS_TURRET_COLLIDE_3,
+    SOUNDS_TURRET_COLLIDE_4,
+    SOUNDS_TURRET_COLLIDE_5
 #endif
 };
 
@@ -228,7 +239,7 @@ static void turretPlaySound(struct Turret* turret, enum TurretSoundType soundTyp
 
     *currentSound = soundPlayerPlay(
         mapLocaleSound(soundId),
-        (soundType == TurretSoundTypeDialog) ? 2.0f : 1.0f,
+        (soundType == TurretSoundTypeDialogue) ? 2.0f : 1.0f,
         0.5f,
         &turret->rigidBody.transform.position,
         &turret->rigidBody.velocity,
@@ -306,6 +317,32 @@ static void turretRender(void* data, struct DynamicRenderDataList* renderList, s
     );
 }
 
+static void turretCheckFriendlyCollisionDialogue(struct CollisionObject* object, struct CollisionObject* other) {
+    if (other->collider->data != &sTurretBaseTetrahedron &&
+        other->collider->data != &sTurretBodyCapsule) {
+        return;
+    }
+
+    struct Turret* otherTurret = other->data;
+
+    if ((otherTurret->flags & TurretFlagsTipped) ||
+        vector3MagSqrd(&other->body->velocity) < vector3MagSqrd(&object->body->velocity) ||
+        otherTurret->currentSounds[TurretSoundTypeDialogue] != SOUND_ID_NONE
+    ) {
+        return;
+    }
+
+    // It is easier to make the other turret speak so we can take
+    // advantage of the early bail-outs from movement amplification
+    // (don't speak when target is already disturbed)
+    turretPlaySound(
+        otherTurret,
+        TurretSoundTypeDialogue,
+        RANDOM_TURRET_SOUND(sTurretCollideSounds),
+        NPC_FLOORTURRET_TALKCOLLIDE
+    );
+}
+
 static void turretHandleCollideStartEnd(struct CollisionObject* object, struct CollisionObject* other, struct Vector3* normal) {
     struct Turret* turret = object->data;
 
@@ -350,12 +387,16 @@ static void turretHandleCollideStartEnd(struct CollisionObject* object, struct C
 
     vector3Scale(&horizontalMovement, &horizontalMovement, object->body->mass * TURRET_AUTOTIP_IMPULSE);
     rigidBodyApplyImpulse(object->body, &object->body->transform.position, &horizontalMovement);
+
+    turretCheckFriendlyCollisionDialogue(object, other);
 }
 
 void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     compoundColliderInit(&turret->compoundCollider, &sTurretCollider, &turret->rigidBody, TURRET_COLLISION_LAYERS);
     turret->compoundCollider.children[TURRET_COLLISION_BODY].object.collideStartEnd = turretHandleCollideStartEnd;
     turret->compoundCollider.children[TURRET_COLLISION_BODY].object.data = turret;
+    turret->compoundCollider.children[TURRET_COLLISION_BASE].object.collideStartEnd = turretHandleCollideStartEnd;
+    turret->compoundCollider.children[TURRET_COLLISION_BASE].object.data = turret;
     turret->compoundCollider.children[TURRET_COLLISION_BASE].object.collisionLayers &= ~COLLISION_LAYERS_BLOCK_TURRET_SHOTS;
 
     collisionObjectInit(&turret->collisionObject, &turret->compoundCollider.colliderType, &turret->rigidBody, TURRET_MASS, TURRET_COLLISION_LAYERS);
@@ -421,11 +462,11 @@ static uint8_t turretUpdateFizzled(struct Turret* turret) {
         turretStopAllSounds(turret);
         turretPlaySound(
             turret,
-            TurretSoundTypeDialog,
+            TurretSoundTypeDialogue,
             SOUNDS_TURRET_FIZZLER_1,
             NPC_FLOORTURRET_TALKDISSOLVED
         );
-    } else if (fizzleStatus == FizzleCheckResultEnd && turret->currentSounds[TurretSoundTypeDialog] == SOUND_ID_NONE) {
+    } else if (fizzleStatus == FizzleCheckResultEnd && turret->currentSounds[TurretSoundTypeDialogue] == SOUND_ID_NONE) {
         dynamicSceneRemove(turret->dynamicId);
         collisionSceneRemoveDynamicObject(&turret->collisionObject);
         turret->dynamicId = INVALID_DYNAMIC_OBJECT;
@@ -533,7 +574,9 @@ static void turretHitPlayer(struct Turret* turret, struct Player* player, struct
     ) {
         // Always push if player is moving toward turret, otherwise periodically
         struct Vector3 push;
-        vector3ProjectPlane(lookDir, &gUp, &push);
+        push.x = lookDir->x;
+        push.y = 0.0f;
+        push.z = lookDir->z;
         vector3Normalize(&push, &push);
         vector3Scale(&push, &push, player->body.mass * TURRET_BULLET_IMPULSE);
 
@@ -702,7 +745,7 @@ static void turretCheckGrabbed(struct Turret* turret, struct Player* player) {
     if (playerIsGrabbingObject(player, &turret->collisionObject)) {
         turretPlaySound(
             turret,
-            TurretSoundTypeDialog,
+            TurretSoundTypeDialogue,
             RANDOM_TURRET_SOUND(sTurretPickupSounds),
             NPC_FLOORTURRET_TALKPICKUP
         );
@@ -724,7 +767,7 @@ static void turretCheckTipped(struct Turret* turret) {
     if (vector3Dot(&turret->rigidBody.rotationBasis.y, &gUp) <= TURRET_TIPPED_DOT) {
         turretPlaySound(
             turret,
-            TurretSoundTypeDialog,
+            TurretSoundTypeDialogue,
             RANDOM_TURRET_SOUND(sTurretTippedSounds),
             NPC_FLOORTURRET_TALKTIPPED
         );
@@ -748,7 +791,7 @@ static void turretUpdateIdle(struct Turret* turret, struct Player* player) {
         if (turret->stateTimer <= 0.0f) {
             turretPlaySound(
                 turret,
-                TurretSoundTypeDialog,
+                TurretSoundTypeDialogue,
                 RANDOM_TURRET_SOUND(sTurretAutosearchSounds),
                 NPC_FLOORTURRET_TALKAUTOSEARCH
             );
@@ -769,7 +812,7 @@ static void turretUpdateDeploying(struct Turret* turret, struct Player* player) 
         if (!(turret->flags & TurretFlagsOpen)) {
             turretPlaySound(
                 turret,
-                TurretSoundTypeDialog,
+                TurretSoundTypeDialogue,
                 RANDOM_TURRET_SOUND(sTurretDeploySounds),
                 NPC_FLOORTURRET_TALKDEPLOY
             );
@@ -816,10 +859,10 @@ static void turretUpdateSearching(struct Turret* turret, struct Player* player) 
             StringIdNone  // Don't spam
         );
 
-        if (currentSecond == (int)(TURRET_SEARCH_DURATION - TURRET_SEARCH_DIALOG_DELAY)) {
+        if (currentSecond == (int)TURRET_SEARCH_DIALOGUE_START) {
             turretPlaySound(
                 turret,
-                TurretSoundTypeDialog,
+                TurretSoundTypeDialogue,
                 RANDOM_TURRET_SOUND(sTurretSearchSounds),
                 NPC_FLOORTURRET_TALKSEARCH
             );
@@ -830,7 +873,7 @@ static void turretUpdateSearching(struct Turret* turret, struct Player* player) 
         turretEnterClosing(
             turret,
             TurretStateIdle,
-            TURRET_IDLE_DIALOG_DELAY,
+            TURRET_IDLE_DIALOGUE_DELAY,
             RANDOM_TURRET_SOUND(sTurretRetireSounds),
             NPC_FLOORTURRET_TALKRETIRE
         );
@@ -845,17 +888,17 @@ static void turretUpdateSearching(struct Turret* turret, struct Player* player) 
 
 static void turretUpdateAttacking(struct Turret* turret, struct Player* player) {
     // Talk while shooting
-    if (turret->currentSounds[TurretSoundTypeDialog] == SOUND_ID_NONE &&
+    if (turret->currentSounds[TurretSoundTypeDialogue] == SOUND_ID_NONE &&
         (turret->flags & TurretFlagsShooting)) {
         if (turret->stateTimer <= 0.0f) {
             turretPlaySound(
                 turret,
-                TurretSoundTypeDialog,
+                TurretSoundTypeDialogue,
                 RANDOM_TURRET_SOUND(sTurretActiveSounds),
                 NPC_FLOORTURRET_TALKACTIVE
             );
 
-            turret->stateTimer = TURRET_ATTACK_DIALOG_DELAY;
+            turret->stateTimer = TURRET_ATTACK_DIALOGUE_DELAY;
         } else {
             turret->stateTimer -= FIXED_DELTA_TIME;
         }
@@ -961,7 +1004,7 @@ static void turretUpdateClosing(struct Turret* turret, struct Player* player) {
         if (turret->flags & TurretFlagsOpen) {
             turretPlaySound(
                 turret,
-                TurretSoundTypeDialog,
+                TurretSoundTypeDialogue,
                 state->soundId,
                 state->subtitleId
             );
@@ -984,7 +1027,7 @@ static void turretUpdateClosing(struct Turret* turret, struct Player* player) {
 static void turretUpdateDying(struct Turret* turret) {
     // TODO: fade eye
 
-    if (turret->currentSounds[TurretSoundTypeDialog] == SOUND_ID_NONE) {
+    if (turret->currentSounds[TurretSoundTypeDialogue] == SOUND_ID_NONE) {
         laserRemove(&turret->laser);
         turret->state = TurretStateDead;
     }

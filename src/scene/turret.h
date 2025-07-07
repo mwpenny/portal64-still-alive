@@ -31,7 +31,7 @@ enum TurretFlags {
 };
 
 enum TurretSoundType {
-    TurretSoundTypeDialog,
+    TurretSoundTypeDialogue,
     TurretSoundTypeSfx,
     TurretSoundTypeCount,
 };

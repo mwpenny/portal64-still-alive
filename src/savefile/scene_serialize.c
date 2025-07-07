@@ -120,6 +120,14 @@ void buttonsSerializeRW(struct Serializer* serializer, SerializeAction action, s
     }
 }
 
+void rigidBodyDeserializeFlags(enum RigidBodyFlags* flags) {
+    if (*flags & RigidBodyForceWakeOnLoad) {
+        *flags &= ~(RigidBodyIsSleeping | RigidBodyForceWakeOnLoad);
+    } else {
+        *flags &= ~RigidBodyHasWoken;
+    }
+}
+
 void decorSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     short countAsShort = 0;
     short heldObject = -1;
@@ -163,9 +171,6 @@ void decorSerialize(struct Serializer* serializer, SerializeAction action, struc
         action(serializer, &entry->rigidBody.currentRoom, sizeof(short));
 
         action(serializer, &entry->fizzleTime, sizeof(float));
-
-        entry->rigidBody.flags &= ~RigidBodyIsSleeping;
-        entry->rigidBody.sleepFrames = IDLE_SLEEP_FRAMES;
     }
 }
 
@@ -200,6 +205,8 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
         serializeRead(serializer, &entry->rigidBody.angularVelocity, sizeof(struct Vector3));
         serializeRead(serializer, &entry->rigidBody.flags, sizeof(enum RigidBodyFlags));
         serializeRead(serializer, &entry->rigidBody.currentRoom, sizeof(short));
+        rigidBodyDeserializeFlags(&entry->rigidBody.flags);
+
         collisionObjectUpdateBB(&entry->collisionObject);
 
         serializeRead(serializer, &entry->fizzleTime, sizeof(float));
@@ -285,9 +292,7 @@ void boxDropperDeserialize(struct Serializer* serializer, struct Scene* scene) {
         serializeRead(serializer, &dropper->activeCube.rigidBody.angularVelocity, sizeof(struct Vector3));
         serializeRead(serializer, &dropper->activeCube.rigidBody.flags, sizeof(enum RigidBodyFlags));
         serializeRead(serializer, &dropper->activeCube.fizzleTime, sizeof(float));
-
-        dropper->activeCube.rigidBody.flags &= ~RigidBodyIsSleeping;
-        dropper->activeCube.rigidBody.sleepFrames = IDLE_SLEEP_FRAMES;
+        rigidBodyDeserializeFlags(&dropper->activeCube.rigidBody.flags);
 
         if (heldCube == i) {
             playerSetGrabbing(&scene->player, &dropper->activeCube.collisionObject);
@@ -510,12 +515,11 @@ void securityCameraDeserialize(struct Serializer* serializer, struct Scene* scen
         serializeRead(serializer, &cam->rigidBody.angularVelocity, sizeof(struct Vector3));
         serializeRead(serializer, &cam->rigidBody.flags, sizeof(enum RigidBodyFlags));
         serializeRead(serializer, &cam->rigidBody.currentRoom, sizeof(short));
+        rigidBodyDeserializeFlags(&cam->rigidBody.flags);
+
         collisionObjectUpdateBB(&cam->collisionObject);
 
         serializeRead(serializer, &cam->fizzleTime, sizeof(float));
-        
-        cam->rigidBody.flags &= ~RigidBodyIsSleeping;
-        cam->rigidBody.sleepFrames = IDLE_SLEEP_FRAMES;
 
         if (heldCam == i) {
             playerSetGrabbing(&scene->player, &cam->collisionObject);
@@ -586,12 +590,7 @@ void turretDeserialize(struct Serializer* serializer, struct Scene* scene) {
         serializeRead(serializer, &turret->rigidBody.angularVelocity, sizeof(struct Vector3));
         serializeRead(serializer, &turret->rigidBody.flags, sizeof(enum RigidBodyFlags));
         serializeRead(serializer, &turret->rigidBody.currentRoom, sizeof(short));
-
-        if (turret->rigidBody.flags & RigidBodyForceWakeOnLoad) {
-            turret->rigidBody.flags &= ~(RigidBodyIsSleeping | RigidBodyForceWakeOnLoad);
-        } else {
-            turret->rigidBody.flags &= ~RigidBodyHasWoken;
-        }
+        rigidBodyDeserializeFlags(&turret->rigidBody.flags);
 
         serializeRead(serializer, &turret->flags, sizeof(enum TurretFlags));
         serializeRead(serializer, &turret->state, sizeof(enum TurretState));

@@ -21,9 +21,9 @@ q_sound SOUND_ID CHANNEL_NAME SUBTITLE_ID [VOLUME]
 
 There are three cutscene sound channels:
 
-* `CH_GLADOS`: Intended for GLaDOS dialog. The intercom chime sound is inserted
-               automatically, subtitles are shown (if enabled), and other sounds
-               are dampened while this channel is playing.
+* `CH_GLADOS`: Intended for GLaDOS dialogue. The intercom chime sound is
+               inserted automatically, subtitles are shown (if enabled), and
+               other sounds are dampened while this channel is playing.
 * `CH_MUSIC`: Intended for music. Affected by the music volume setting in the
               audio options menu.
 * `CH_AMBIENT`: Intended for test chamber ambience.
