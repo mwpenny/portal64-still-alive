@@ -9,6 +9,7 @@ struct Signage {
     short roomIndex;
     short testChamberNumber;
     short currentFrame;
+    short soundLoopId;
 };
 
 void signageInit(struct Signage* signage, struct SignageDefinition* definition);
