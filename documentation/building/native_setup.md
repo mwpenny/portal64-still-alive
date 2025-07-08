@@ -6,8 +6,9 @@ machine or using Windows Subsystem for Linux (WSL). Follow them manually, or
 execute the [tools/setup_ubuntu.sh](../../tools/setup_ubuntu.sh) script.
 
 > **Note:** The steps and commands below assume you are using Ubuntu Linux or
-a similar Debian derivative. Building in other environments is possible but
-considered advanced -- you should know what you're doing if trying something
+a similar Debian derivative (we test the same version as the
+[Docker image](../../Dockerfile#L1)). Building in other environments is possible
+but considered advanced -- you should know what you're doing if trying something
 different. Otherwise, consider [using Docker](./docker_setup.md).
 
 ## SDK
@@ -61,7 +62,7 @@ pipx install vpk
 Install dependencies for `skeletool64`. This tool is used to convert some game
 assets.
 
-**Note:** Lua 5.4 is required!
+> **Note:** Lua must be version 5.4!
 
 ```sh
 sudo apt install cimg-dev libassimp-dev liblua5.4-0 liblua5.4-dev libpng-dev libtiff-dev libyaml-cpp-dev lua5.4
