@@ -113,7 +113,7 @@ struct LandingMenuOption* landingMenuUpdate(struct LandingMenu* landingMenu) {
         } else {
             landingMenu->selectedItem = landingMenu->optionCount - 1;
         }
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeMenu);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
 
         cheatCodeEnterDirection(CheatCodeDirUp);
     }
@@ -124,7 +124,7 @@ struct LandingMenuOption* landingMenuUpdate(struct LandingMenu* landingMenu) {
         } else {
             landingMenu->selectedItem = 0;
         }
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeMenu);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
 
         cheatCodeEnterDirection(CheatCodeDirDown);
     }
@@ -138,7 +138,7 @@ struct LandingMenuOption* landingMenuUpdate(struct LandingMenu* landingMenu) {
     }
 
     if (controllerGetButtonDown(0, BUTTON_A)) {
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeMenu);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         return &landingMenu->options[landingMenu->selectedItem];
     }
 

@@ -100,7 +100,7 @@ enum InputCapture optionsMenuUpdate(struct OptionsMenu* options) {
         }
 
         tabsSetSelectedTab(&options->tabs, options->tabs.selectedTab);
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeMenu);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
     }
 
     if (controllerGetButtonDown(0, BUTTON_R)) {
@@ -109,7 +109,7 @@ enum InputCapture optionsMenuUpdate(struct OptionsMenu* options) {
         } else {
             tabsSetSelectedTab(&options->tabs, options->tabs.selectedTab + 1);
         }
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeMenu);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
 
     }
 
