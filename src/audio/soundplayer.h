@@ -26,7 +26,7 @@ typedef ALSndId SoundId;
 void soundPlayerInit();
 void soundPlayerGameVolumeUpdate();
 void soundPlayerUpdate();
-ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType);
+ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType type);
 float soundClipDuration(int soundClipId, float pitch);
 void soundPlayerStop(ALSndId soundId);
 void soundPlayerStopAll();
