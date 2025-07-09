@@ -70,14 +70,6 @@ float mathfBounceBackLerp(float t) {
     return -t + t * t;
 }
 
-float mathfOutQuinticLerp(float t) {
-    // powf is undefined? :(
-    //return 1.0f - powf(1.0f - t, 5.0f);
-
-    float invert = 1.0f - t;
-    return 1.0f - (invert * invert * invert * invert * invert);
-}
-
 float mathfRemap(float value, float oldMin, float oldMax, float newMin, float newMax) {
     value = (((value - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin;
     value = clampf(value, newMin, newMax);
