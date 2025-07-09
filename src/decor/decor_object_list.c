@@ -62,7 +62,6 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         PROPS_RADIO_DYNAMIC_MODEL,
         .materialIndex = RADIO_INDEX,
         .materialIndexFizzled = RADIO_FIZZLED_INDEX,
-        .soundClipVolume = 1.0f,
         .soundClipId = SOUNDS_LOOPING_RADIO_MIX,
         .soundFizzleId = SOUNDS_DINOSAUR_FIZZLE,
     },
