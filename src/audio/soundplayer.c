@@ -28,6 +28,7 @@ ALSndPlayer gSoundPlayer;
 
 #define SPEED_OF_SOUND          343.2f
 #define VOLUME_CURVE_PAD        0.0125f
+#define VOLUME_AMPLIFICATION    1.538f
 #define VOICE_FX_MIX            32
 
 struct ActiveSound {
@@ -120,12 +121,13 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     float volumeLevel = clampf(*volumeIn / distanceSqrt, 0.0f, 1.0f);
 
     // Add FX/reverb amount.
-    *fxMix = (int)(127.0f * (1.0f - mathfRemap(volumeLevel, 0.02f, 0.4f, 0.2f, 0.85f)));
+    // TODO: Define/name these values?
+    *fxMix = (int)(127.0f * (1.0f - mathfRemap(volumeLevel, 0.02f, 0.3f, 0.2f, 0.85f)));
 
     // Fudge with the volume curve a bit. 
     // Try to make distant sounds more apparent while
     // compressing the volume of closer sounds.
-    volumeLevel = mathfRemap(volumeLevel - VOLUME_CURVE_PAD, 0.0f, 0.65f, 0.0f, 1.0f);
+    volumeLevel = clampf((volumeLevel - VOLUME_CURVE_PAD) * VOLUME_AMPLIFICATION, 0.0f, 1.0f);
 
     *volumeOut = volumeLevel;
 
