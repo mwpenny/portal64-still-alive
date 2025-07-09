@@ -268,10 +268,10 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     alSndpSetPan(&gSoundPlayer, panning);
 
     // Add reverb effect.
-    if (type == SoundTypeAll) {
+    if (type != SoundTypeVoice) {
         alSndpSetFXMix(&gSoundPlayer, fxMix);
     }
-    else if (type == SoundTypeVoice) {
+    else {
         alSndpSetFXMix(&gSoundPlayer, VOICE_FX_MIX);
     }
 
@@ -380,10 +380,10 @@ void soundPlayerUpdate() {
                 soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &panning, &pitch, &fxMix);
 
                 // Update reverb effect.
-                if (sound->soundType == SoundTypeAll) {
+                if (sound->soundType != SoundTypeVoice) {
                     alSndpSetFXMix(&gSoundPlayer, fxMix);
                 }
-                else if (sound->soundType == SoundTypeVoice) {
+                else {
                     alSndpSetFXMix(&gSoundPlayer, VOICE_FX_MIX);
                 }
 
