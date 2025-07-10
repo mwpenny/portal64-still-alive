@@ -380,14 +380,6 @@ void soundPlayerUpdate() {
 
                 soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &panning, &pitch, &fxMix);
 
-                // Update reverb effect.
-                if (sound->soundType != SoundTypeVoice) {
-                    alSndpSetFXMix(&gSoundPlayer, fxMix);
-                }
-                else {
-                    alSndpSetFXMix(&gSoundPlayer, VOICE_FX_MIX);
-                }
-
                 if (sound->soundType != SoundTypeVoice) {
                     volume *= soundDamping;
                 }
@@ -395,6 +387,7 @@ void soundPlayerUpdate() {
                 alSndpSetVol(&gSoundPlayer, (short)(32767 * volume));
                 alSndpSetPan(&gSoundPlayer, panning);
                 alSndpSetPitch(&gSoundPlayer, sound->basePitch * pitch);
+                alSndpSetFXMix(&gSoundPlayer, fxMix);
             }
 
             ++writeIndex;
