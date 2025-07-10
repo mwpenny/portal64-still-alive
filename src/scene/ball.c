@@ -112,7 +112,7 @@ void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* veloc
 
     dynamicSceneSetRoomFlags(ball->dynamicId, ROOM_FLAG_FROM_INDEX(startingRoom));
 
-    ball->soundLoopId = soundPlayerPlay(soundsBallLoop, 1.5f, 1.0f, &ball->rigidBody.transform.position, &ball->rigidBody.velocity, SoundTypeAll);
+    ball->soundLoopId = soundPlayerPlay(soundsBallLoop, 1.3f, 1.0f, &ball->rigidBody.transform.position, &ball->rigidBody.velocity, SoundTypeAll);
 }
 
 void ballTurnOnCollision(struct Ball* ball) {

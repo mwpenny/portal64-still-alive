@@ -22,7 +22,7 @@ void initAudio(int fps)
     c.maxPVoices = MAX_VOICES;
     c.maxUpdates = MAX_UPDATES;
     c.dmaproc    = 0;                  /* audio mgr will fill this in */
-    c.fxType	 = AL_FX_SMALLROOM;
+    c.fxType	 = AL_FX_BIGROOM;
     c.outputRate = 0;                  /* audio mgr will fill this in */
     c.heap       = &gAudioHeap;
     

@@ -12,16 +12,17 @@ struct AnimatedAudioInfo {
     short startSoundId;
     short loopSoundId;
     short endSoundId;
+    float volume;
     float pitch;
 };
 
 struct AnimatedAudioInfo gAnimatedAudioInfo[] = {
     {.startSoundId = SOUND_ID_NONE, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUND_ID_NONE},
-    {.startSoundId = SOUND_ID_NONE, .loopSoundId = SOUNDS_BEAM_PLATFORM_LOOP1, .endSoundId = SOUND_ID_NONE, .pitch = 0.5f},
-    {.startSoundId = SOUNDS_DOORMOVE1, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUND_ID_NONE, .pitch = 0.4f},
-    {.startSoundId = SOUNDS_TANK_TURRET_START1, .loopSoundId = SOUNDS_TANK_TURRET_LOOP1, .endSoundId = SOUNDS_ELEVATOR_STOP1, .pitch = 0.5f},
-    {.startSoundId = SOUNDS_APC_START_LOOP3, .loopSoundId = SOUNDS_DOOR_METAL_MEDIUM_OPEN1, .endSoundId = SOUNDS_APC_SHUTDOWN, .pitch = 0.5f},
-    {.startSoundId = SOUNDS_DOOR_METAL_THIN_CLOSE2, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUND_ID_NONE, .pitch = 0.5f},
+    {.startSoundId = SOUND_ID_NONE, .loopSoundId = SOUNDS_BEAM_PLATFORM_LOOP1, .endSoundId = SOUND_ID_NONE, .volume = 1.0f, .pitch = 0.5f},
+    {.startSoundId = SOUNDS_DOORMOVE1, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUND_ID_NONE, .volume = 1.0f, .pitch = 0.4f},
+    {.startSoundId = SOUNDS_TANK_TURRET_START1, .loopSoundId = SOUNDS_TANK_TURRET_LOOP1, .endSoundId = SOUNDS_ELEVATOR_STOP1, .volume = 2.0f, .pitch = 0.5f},
+    {.startSoundId = SOUNDS_APC_START_LOOP3, .loopSoundId = SOUNDS_DOOR_METAL_MEDIUM_OPEN1, .endSoundId = SOUNDS_APC_SHUTDOWN, .volume = 1.0f, .pitch = 0.5f},
+    {.startSoundId = SOUNDS_DOOR_METAL_THIN_CLOSE2, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUND_ID_NONE, .volume = 1.0f, .pitch = 0.5f},
 };
 
 void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo* animationInfo, int animatorCount) {
@@ -79,7 +80,7 @@ void sceneAnimatorUpdate(struct SceneAnimator* sceneAnimator) {
 
         if (audioInfo->loopSoundId != SOUND_ID_NONE) {
             if (isMoving && state->soundId == SOUND_ID_NONE) {
-                state->soundId = soundPlayerPlay(audioInfo->loopSoundId, 1.0f, audioInfo->pitch, &currentPos, &gZeroVec, SoundTypeAll);
+                state->soundId = soundPlayerPlay(audioInfo->loopSoundId, audioInfo->volume, audioInfo->pitch, &currentPos, &gZeroVec, SoundTypeAll);
             } else if (isMoving && state->soundId != SOUND_ID_NONE) {
                 soundPlayerUpdatePosition(state->soundId, &currentPos, &gZeroVec);
             } else if (!isMoving && state->soundId != SOUND_ID_NONE) {

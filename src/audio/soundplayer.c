@@ -27,6 +27,10 @@ ALSndPlayer gSoundPlayer;
 #define SOUND_FLAGS_PAUSED      (1 << 3)
 
 #define SPEED_OF_SOUND          343.2f
+#define VOLUME_CURVE_PAD        0.0125f
+#define VOLUME_AMPLIFICATION    1.538f
+#define VOICE_FX_MIX            32
+#define DEFAULT_FX_MIX           8 // Small amount of FX mix for all sounds.
 
 struct ActiveSound {
     ALSndId soundId;
@@ -52,7 +56,7 @@ int gActiveSoundCount = 0;
 struct SoundListener gSoundListeners[MAX_SOUND_LISTENERS];
 int gActiveListenerCount = 0;
 
-void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, float* volumeIn, float* volumeOut, int* panOut, float* pitchBend) {
+void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, float* volumeIn, float* volumeOut, int* panOut, float* pitchBend, int* fxMix) {
     if (!gActiveListenerCount) {
         *volumeOut = *volumeIn;
         *panOut = 64;
@@ -113,14 +117,20 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     }
 
     float distanceSqrt = sqrtf(distance);
-    
-    // attenuate the volume
-    *volumeOut = *volumeIn / distanceSqrt;
 
-    // clamp to full volume
-    if (*volumeOut > 1.0f) {
-        *volumeOut = 1.0f;
-    }
+    // Initial linear volume level.
+    float volumeLevel = clampf(*volumeIn / distanceSqrt, 0.0f, 1.0f);
+
+    // Add FX/reverb amount.
+    // TODO: Define/name these values?
+    *fxMix = (int)(127.0f * (1.0f - mathfRemap(volumeLevel, 0.02f, 0.24f, 0.48f, 0.85f)));
+
+    // Fudge with the volume curve a bit. 
+    // Try to make distant sounds more apparent while
+    // compressing the volume of closer sounds.
+    volumeLevel = clampf((volumeLevel - VOLUME_CURVE_PAD) * VOLUME_AMPLIFICATION, 0.0f, 1.0f);
+
+    *volumeOut = volumeLevel;
 
     struct Vector3 offset;
     if (through_0_from_1){
@@ -238,13 +248,14 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     sound->volume = newVolume;
 
     int panning = 64;
+    int fxMix = DEFAULT_FX_MIX;
 
     if (at) {
         sound->flags |= SOUND_FLAGS_3D;
         sound->pos3D = *at;
         sound->velocity3D = *velocity;
         float pitchBend;
-        soundPlayerDetermine3DSound(at, velocity, &newVolume, &newVolume, &panning, &pitchBend);
+        soundPlayerDetermine3DSound(at, velocity, &newVolume, &newVolume, &panning, &pitchBend, &fxMix);
         pitch = pitch * pitchBend;
     }
 
@@ -256,6 +267,15 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     alSndpSetVol(&gSoundPlayer, (short)(32767 * newVolume));
     alSndpSetPitch(&gSoundPlayer, pitch);
     alSndpSetPan(&gSoundPlayer, panning);
+
+    // Add reverb effect.
+    if (type != SoundTypeVoice) {
+        alSndpSetFXMix(&gSoundPlayer, fxMix);
+    }
+    else {
+        alSndpSetFXMix(&gSoundPlayer, VOICE_FX_MIX);
+    }
+
     alSndpPlay(&gSoundPlayer);
 
     ++gActiveSoundCount;
@@ -296,11 +316,14 @@ void soundPlayerGameVolumeUpdate() {
             float volume;
             float pitch;
             int panning;
-            soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &panning, &pitch);
+            int fxMix;
+            soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &panning, &pitch, &fxMix);
             alSndpSetSound(&gSoundPlayer, sound->soundId);
             alSndpSetVol(&gSoundPlayer, (short)(32767 * volume));
             alSndpSetPan(&gSoundPlayer, panning);
             alSndpSetPitch(&gSoundPlayer, sound->basePitch * pitch);
+            alSndpSetFXMix(&gSoundPlayer, fxMix);
+
             ++index;
             continue;
             
@@ -353,8 +376,9 @@ void soundPlayerUpdate() {
                 float volume;
                 float pitch;
                 int panning;
+                int fxMix;
 
-                soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &panning, &pitch);
+                soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &panning, &pitch, &fxMix);
 
                 if (sound->soundType != SoundTypeVoice) {
                     volume *= soundDamping;
@@ -363,8 +387,8 @@ void soundPlayerUpdate() {
                 alSndpSetVol(&gSoundPlayer, (short)(32767 * volume));
                 alSndpSetPan(&gSoundPlayer, panning);
                 alSndpSetPitch(&gSoundPlayer, sound->basePitch * pitch);
+                alSndpSetFXMix(&gSoundPlayer, fxMix);
             }
-
 
             ++writeIndex;
         }
