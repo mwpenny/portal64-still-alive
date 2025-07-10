@@ -30,6 +30,7 @@ ALSndPlayer gSoundPlayer;
 #define VOLUME_CURVE_PAD        0.0125f
 #define VOLUME_AMPLIFICATION    1.538f
 #define VOICE_FX_MIX            32
+#define DEFAULT_FX_MIX           8 // Small amount of FX mix for all sounds.
 
 struct ActiveSound {
     ALSndId soundId;
@@ -247,7 +248,7 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     sound->volume = newVolume;
 
     int panning = 64;
-    int fxMix = 0;
+    int fxMix = DEFAULT_FX_MIX;
 
     if (at) {
         sound->flags |= SOUND_FLAGS_3D;
