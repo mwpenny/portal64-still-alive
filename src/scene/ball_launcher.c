@@ -98,7 +98,7 @@ void ballLauncherUpdate(struct BallLauncher* launcher) {
 
         ballInit(&launcher->currentBall, &launcher->rigidBody.transform.position, &initialVelocity, launcher->rigidBody.currentRoom, launcher->ballLifetime);
         skAnimatorRunClip(&launcher->animator, dynamicAssetClip(PROPS_COMBINE_BALL_LAUNCHER_DYNAMIC_ANIMATED_MODEL, PROPS_COMBINE_BALL_LAUNCHER_ARMATURE_LAUNCH_CLIP_INDEX), 0.0f, 0);
-        soundPlayerPlay(soundsBallLaunch, 1.0f, 1.0f, &launcher->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+        soundPlayerPlay(soundsBallLaunch, 1.0f, 0.5f, &launcher->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
     }
 
     if (ballIsActive(&launcher->currentBall) && !ballIsCollisionOn(&launcher->currentBall)) {

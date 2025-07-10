@@ -441,7 +441,7 @@ void sceneCheckPortals(struct Scene* scene) {
         if (didClose) {
             rumblePakClipPlay(&gPlayerClosePortalRumble);
             portalGunFizzle(&scene->portalGun);
-            soundPlayerPlay(SOUNDS_PORTAL_FIZZLE2, 0.6f, 1.0f, NULL, NULL, SoundTypeAll);
+            soundPlayerPlay(SOUNDS_PORTAL_FIZZLE2, 0.6f, 0.5f, NULL, NULL, SoundTypeAll);
         }
     }
 
@@ -861,7 +861,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
             collisionSceneSetPortal(portalIndex, &portal->rigidBody.transform, roomIndex, portal->colliderIndex);
             collisionObjectUpdateBB(&portal->collisionObject);
 
-            soundPlayerPlay(soundsPortalOpen2, 1.5f, 1.0f, &portal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+            soundPlayerPlay(soundsPortalOpen2, 1.5f, 0.5f, &portal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             if (portalIndex == 0){
                 hudShowSubtitle(&gScene.hud, PORTAL_OPEN_RED, SubtitleTypeCaption);
             } else {
@@ -891,7 +891,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                     // something changed and play sound near other portal
                     struct Portal* otherPortal = &scene->portals[1 - portalIndex];
                     otherPortal->opacity = 1.0f;
-                    soundPlayerPlay(soundsPortalOpen2, 1.5f, 1.0f, &otherPortal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+                    soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &otherPortal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
                 }
 
                 sceneCheckSecurityCamera(scene, portal);

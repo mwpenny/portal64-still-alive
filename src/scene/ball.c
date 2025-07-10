@@ -135,7 +135,7 @@ void ballInitBurn(struct Ball* ball, struct ContactManifold* manifold) {
         if (manifold->shapeA->body) {
             transformPoint(&manifold->shapeA->body->transform, &position, &position);
         }
-        soundPlayerPlay(soundsBallBounce, 1.5f, 1.0f, &position, &gZeroVec, SoundTypeAll);
+        soundPlayerPlay(soundsBallBounce, 1.5f, 0.5f, &position, &gZeroVec, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, ENERGYBALL_IMPACT, SubtitleTypeCaption);
         ball->flags |= BallJustBounced;
     }
@@ -211,7 +211,7 @@ void ballUpdate(struct Ball* ball) {
             collisionSceneRemoveDynamicObject(&ball->collisionObject);
             dynamicSceneRemove(ball->dynamicId);
             soundPlayerStop(ball->soundLoopId);
-            soundPlayerPlay(soundsBallExplode, 2.0f, 1.0f, &ball->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+            soundPlayerPlay(soundsBallExplode, 2.0f, 0.5f, &ball->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             hudShowSubtitle(&gScene.hud, ENERGYBALL_EXPLOSION, SubtitleTypeCaption);
             effectsSplashPlay(&gScene.effects, &gBallBurst, &ball->rigidBody.transform.position, &gUp, NULL);
             ball->soundLoopId = SOUND_ID_NONE;
