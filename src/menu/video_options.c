@@ -127,8 +127,8 @@ struct MenuElementParams gVideoMenuParams[] = {
 #define WIDESCREEN_INDEX 0
 #define INTERLACED_INDEX 1
 #define DITHERING_INDEX 2
-#define SUBTITLES_INDEX 3
-#define CAPTIONS_INDEX 4
+#define SUBTITLES_INDEX 4
+#define CAPTIONS_INDEX 5
 #define LANGUAGE_SLIDER_INDEX 7
 #define LANGUAGE_TEXT_INDEX 8
 
