@@ -6,6 +6,7 @@
 *.z64
 
 .vscode/
+.vs/
 build/
 gfxvalidator/
 
