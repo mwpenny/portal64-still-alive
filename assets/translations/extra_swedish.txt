@@ -10,6 +10,7 @@
 "Valve_Look"	"Titta"
 "Valve_Look_Straight_Back"	"Titta rakt bakåt"
 "GameUI_Interlaced"	"Interlaced video"
+"GameUI_DisableDither"	"Inaktivera dithering"
 "GameUI_MovingPortals"	"Flytta portaler"
 "GameUI_TankControls"	"Tankkontroller"
 "GameUI_Deadzone"	"Dödszon"

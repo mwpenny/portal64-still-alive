@@ -10,6 +10,7 @@
 "Valve_Look"	"Umsehen"
 "Valve_Look_Straight_Back"	"Nach hinten sehen"
 "GameUI_Interlaced"	"Interlaced-Modus"
+"GameUI_DisableDither"	"Dithering deaktivieren"
 "GameUI_MovingPortals"	"Bewegende Portale"
 "GameUI_TankControls"	"Panzersteuerung"
 "GameUI_Deadzone"	"Totzone"

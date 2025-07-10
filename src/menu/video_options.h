@@ -8,6 +8,7 @@
 enum VideoOption {
     VideoOptionWidescreen,
     VideoOptionInterlaced,
+    VideoOptionDithering,
     VideoOptionSubtitles,
     VideoOptionCaptions,
     VideoOptionTextLanguage,

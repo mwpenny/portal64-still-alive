@@ -27,6 +27,8 @@ extern Vp fullscreenViewport;
 
 extern void* gLevelSegment;
 
+extern char gDisableDither;
+
 #define GET_GFX_TYPE(gfx)       (_SHIFTR((gfx)->words.w0, 24, 8))
 
 typedef void (*GraphicsCallback)(void* data, struct RenderState* renderState, struct GraphicsTask* task);

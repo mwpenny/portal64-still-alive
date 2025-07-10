@@ -10,6 +10,7 @@
 "Valve_Look"	"Regarder"
 "Valve_Look_Straight_Back"	"Regarder droit derrière"
 "GameUI_Interlaced"	"Entrelacement vidéo"
+"GameUI_DisableDither"	"Désactiver le tramage"
 "GameUI_MovingPortals"	"Portails mobiles"
 "GameUI_TankControls"	"Commandes de char (Tank controls)"
 "GameUI_Deadzone"	"Zone morte"

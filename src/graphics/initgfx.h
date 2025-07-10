@@ -4,7 +4,8 @@
 #include <ultra64.h>
 
 extern Gfx setup_rspstate[];
-extern Gfx setup_rdpstate[];
+extern Gfx setup_rdpstate_dithered[];
+extern Gfx setup_rdpstate_non_dithered[];
 extern Gfx rdpstateinit_dl[];
 
 #endif

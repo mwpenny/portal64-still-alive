@@ -62,10 +62,19 @@ Gfx rdpstateinit_dl[] = {
 
 
 
-Gfx setup_rdpstate[] = {
+Gfx setup_rdpstate_dithered[] = {
     gsDPSetRenderMode(G_RM_OPA_SURF, G_RM_OPA_SURF2),
     gsDPSetScissor(G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT),
     gsDPSetColorDither(G_CD_BAYER),
+    gsDPSetTexturePersp(G_TP_PERSP),
+
+    gsSPEndDisplayList(),
+};
+
+Gfx setup_rdpstate_non_dithered[] = {
+    gsDPSetRenderMode(G_RM_OPA_SURF, G_RM_OPA_SURF2),
+    gsDPSetScissor(G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT),
+    gsDPSetColorDither(G_CD_DISABLE),
     gsDPSetTexturePersp(G_TP_PERSP),
 
     gsSPEndDisplayList(),

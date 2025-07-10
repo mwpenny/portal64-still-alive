@@ -10,6 +10,7 @@
 "Valve_Look"	"Kijken"
 "Valve_Look_Straight_Back"	"Omkijken"
 "GameUI_Interlaced"	"Geïnterlinieerde video"
+"GameUI_DisableDither"	"Dithering uitschakelen"
 "GameUI_MovingPortals"	"Bewegende portalen"
 "GameUI_TankControls"	"Tankbesturing"
 "GameUI_Deadzone"	"Dode zone"

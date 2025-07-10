@@ -60,6 +60,7 @@ void textMenuItemRender(struct MenuBuilderElement* element, int selection, int m
 
 void checkboxMenuItemInit(struct MenuBuilderElement* element) {
     struct MenuCheckbox* checkbox = malloc(sizeof(struct MenuCheckbox));
+    
     *checkbox = menuBuildCheckbox(
         element->params->params.checkbox.font,
         translationsGet(element->params->params.checkbox.messageId),

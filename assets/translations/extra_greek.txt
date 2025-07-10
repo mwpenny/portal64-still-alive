@@ -10,6 +10,7 @@
 "Valve_Look"	"Κοίτα"
 "Valve_Look_Straight_Back"	"Κοιτάξτε ευθεία πίσω"
 "GameUI_Interlaced"	"Πεπλεγμένο βίντεο"
+"GameUI_DisableDither"	"Απενεργοποιήστε το dithering"
 "GameUI_MovingPortals"	"Μετακινούμενες πύλες"
 "GameUI_TankControls"	"Χειριστήρια δεξαμενής"
 "GameUI_Deadzone"	"Νεκρή ζώνη"

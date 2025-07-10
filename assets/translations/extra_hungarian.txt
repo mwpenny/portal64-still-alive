@@ -10,6 +10,7 @@
 "Valve_Look"	"Körülnézés"
 "Valve_Look_Straight_Back"	"Hátranézés"
 "GameUI_Interlaced"	"Váltottsoros videó"
+"GameUI_DisableDither"	"A dithering letiltása"
 "GameUI_MovingPortals"	"Portálok mozgatása"
 "GameUI_TankControls"	"Tartályvezérlők"
 "GameUI_Deadzone"	"Érzékelési zóna"

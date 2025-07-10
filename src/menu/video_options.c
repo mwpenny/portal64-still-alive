@@ -16,7 +16,7 @@ struct MenuElementParams gVideoMenuParams[] = {
     {
         .type = MenuElementTypeCheckbox,
         .x = MENU_X + 8, 
-        .y = MENU_Y + 8,
+        .y = MENU_Y + 0,
         .params = {
             .checkbox = {
                 .font = &gDejaVuSansFont,
@@ -28,7 +28,7 @@ struct MenuElementParams gVideoMenuParams[] = {
     {
         .type = MenuElementTypeCheckbox,
         .x = MENU_X + 8, 
-        .y = MENU_Y + 28,
+        .y = MENU_Y + 20,
         .params = {
             .checkbox = {
                 .font = &gDejaVuSansFont,
@@ -38,9 +38,21 @@ struct MenuElementParams gVideoMenuParams[] = {
         .selectionIndex = VideoOptionInterlaced,
     },
     {
+        .type = MenuElementTypeCheckbox,
+        .x = MENU_X + 8,
+        .y = MENU_Y + 40,
+        .params = {
+            .checkbox = {
+                .font = &gDejaVuSansFont,
+                .messageId = GAMEUI_DISABLEDITHER,
+            },
+        },
+        .selectionIndex = VideoOptionDithering,
+    },
+    {
         .type = MenuElementTypeText,
         .x = MENU_X + 8, 
-        .y = MENU_Y + 48,
+        .y = MENU_Y + 60,
         .params = {
             .checkbox = {
                 .font = &gDejaVuSansFont,
@@ -52,7 +64,7 @@ struct MenuElementParams gVideoMenuParams[] = {
     {
         .type = MenuElementTypeCheckbox,
         .x = MENU_X + 8, 
-        .y = MENU_Y + 68,
+        .y = MENU_Y + 80,
         .params = {
             .checkbox = {
                 .font = &gDejaVuSansFont,
@@ -64,7 +76,7 @@ struct MenuElementParams gVideoMenuParams[] = {
     {
         .type = MenuElementTypeCheckbox,
         .x = MENU_X + 8, 
-        .y = MENU_Y + 88,
+        .y = MENU_Y + 100,
         .params = {
             .checkbox = {
                 .font = &gDejaVuSansFont,
@@ -76,7 +88,7 @@ struct MenuElementParams gVideoMenuParams[] = {
     {
         .type = MenuElementTypeSlider,
         .x = MENU_X + 8, 
-        .y = MENU_Y + 124,
+        .y = MENU_Y + 136,
         .params = {
             .slider = {
                 .width = 232,
@@ -89,7 +101,7 @@ struct MenuElementParams gVideoMenuParams[] = {
     {
         .type = MenuElementTypeText,
         .x = MENU_X + 8, 
-        .y = MENU_Y + 108,
+        .y = MENU_Y + 120,
         .params = {
             .text = {
                 .font = &gDejaVuSansFont,
@@ -101,7 +113,7 @@ struct MenuElementParams gVideoMenuParams[] = {
     {
         .type = MenuElementTypeText,
         .x = MENU_X + 125, 
-        .y = MENU_Y + 108,
+        .y = MENU_Y + 120,
         .params = {
             .text = {
                 .font = &gDejaVuSansFont,
@@ -114,10 +126,11 @@ struct MenuElementParams gVideoMenuParams[] = {
 
 #define WIDESCREEN_INDEX 0
 #define INTERLACED_INDEX 1
+#define DITHERING_INDEX 2
 #define SUBTITLES_INDEX 3
 #define CAPTIONS_INDEX 4
-#define LANGUAGE_SLIDER_INDEX 5
-#define LANGUAGE_TEXT_INDEX 7
+#define LANGUAGE_SLIDER_INDEX 7
+#define LANGUAGE_TEXT_INDEX 8
 
 char gIsInterlacedEnabled = 1;
 
@@ -135,6 +148,16 @@ void videoOptionsAction(void* data, int selection, struct MenuAction* action) {
         case VideoOptionInterlaced:
             gIsInterlacedEnabled = action->state.checkbox.isChecked;
             setViMode(action->state.checkbox.isChecked);
+            break;
+        case VideoOptionDithering:
+            gDisableDither = action->state.checkbox.isChecked;
+
+            if (gDisableDither) {
+                gSaveData.controls.flags |= ControlSaveDithering;
+            }
+            else {
+                gSaveData.controls.flags &= ~ControlSaveDithering;
+            }
             break;
         case VideoOptionSubtitles:
             if (action->state.checkbox.isChecked) {
@@ -180,6 +203,9 @@ void videoOptionsInit(struct VideoOptions* videoOptions) {
 
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[WIDESCREEN_INDEX], (gSaveData.controls.flags & ControlSaveWideScreen) != 0);
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[INTERLACED_INDEX], gIsInterlacedEnabled);
+
+    gDisableDither = (gSaveData.controls.flags & ControlSaveDithering) != 0;
+    menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[DITHERING_INDEX], gDisableDither);
 
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[CAPTIONS_INDEX], (gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled) != 0);
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[SUBTITLES_INDEX], (gSaveData.controls.flags & ControlSaveSubtitlesEnabled) != 0);

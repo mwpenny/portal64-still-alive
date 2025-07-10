@@ -10,6 +10,7 @@
 "Valve_Look"	"Patrzenie"
 "Valve_Look_Straight_Back"	"Patrzenie do tyłu"
 "GameUI_Interlaced"	"Wideo z przeplotem"
+"GameUI_DisableDither"	"Wyłącz dithering"
 "GameUI_MovingPortals"	"Ruchome portale"
 "GameUI_TankControls"	"Sterowanie czołgowe"
 "GameUI_Deadzone"	"Martwa strefa"

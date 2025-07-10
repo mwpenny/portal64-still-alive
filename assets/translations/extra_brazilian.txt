@@ -10,6 +10,7 @@
 "Valve_Look"	"Olhar"
 "Valve_Look_Straight_Back"	"Olhar para trás"
 "GameUI_Interlaced"	"Vídeo entrelaçado"
+"GameUI_DisableDither"	"Desativar pontilhamento"
 "GameUI_MovingPortals"	"Movimento dos portais"
 "GameUI_TankControls"	"Controles de tanque"
 "GameUI_Deadzone"	"Zona morta"

@@ -10,6 +10,7 @@
 "Valve_Look"	"Look"
 "Valve_Look_Straight_Back"	"Look straight back"
 "GameUI_Interlaced"	"Interlaced video"
+"GameUI_DisableDither"	"Disable dithering"
 "GameUI_MovingPortals"	"Moving portals"
 "GameUI_TankControls"	"Tank controls"
 "GameUI_Deadzone"	"Deadzone"

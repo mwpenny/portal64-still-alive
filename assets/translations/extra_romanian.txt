@@ -10,6 +10,7 @@
 "Valve_Look"	"Uite"
 "Valve_Look_Straight_Back"	"Privește drept înapoi"
 "GameUI_Interlaced"	"Video intercalat"
+"GameUI_DisableDither"	"Dezactivați ditheringul"
 "GameUI_MovingPortals"	"Mutarea portalurilor"
 "GameUI_TankControls"	"Comenzi tanc"
 "GameUI_Deadzone"	"Zonă moartă"

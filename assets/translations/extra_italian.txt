@@ -10,6 +10,7 @@
 "Valve_Look"	"Guardare"
 "Valve_Look_Straight_Back"	"Guarda Indietro"
 "GameUI_Interlaced"	"Video interlacciato"
+"GameUI_DisableDither"	"Disabilita il dithering"
 "GameUI_MovingPortals"	"Portali in movimento"
 "GameUI_TankControls"	"Controlli del carro armato"
 "GameUI_Deadzone"	"Zona morta"

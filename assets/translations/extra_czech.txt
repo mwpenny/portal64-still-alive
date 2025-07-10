@@ -10,6 +10,7 @@
 "Valve_Look"	"Dívej se"
 "Valve_Look_Straight_Back"	"Podívejte se přímo dozadu"
 "GameUI_Interlaced"	"Prokládané video"
+"GameUI_DisableDither"	"Zakázat dithering"
 "GameUI_MovingPortals"	"Pohyblivé portály"
 "GameUI_TankControls"	"Ovládání nádrže"
 "GameUI_Deadzone"	"Mrtvá zóna"

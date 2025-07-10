@@ -10,6 +10,7 @@
 "Valve_Look"	"Katso"
 "Valve_Look_Straight_Back"	"Katso taaksepäin"
 "GameUI_Interlaced"	"Lomitettu video"
+"GameUI_DisableDither"	"Poista värjäys käytöstä"
 "GameUI_MovingPortals"	"Liikkuvat portaalit"
 "GameUI_TankControls"	"Tankkikontrollit"
 "GameUI_Deadzone"	"Kuollut alue"

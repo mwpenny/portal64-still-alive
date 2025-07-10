@@ -8,6 +8,7 @@ extern OSMesgQueue  gfxFrameMsgQ;
 extern OSMesgQueue	*schedulerCommandQueue;
 
 void* gLevelSegment;
+char gDisableDither;
 
 #if PORTAL64_WITH_GFX_VALIDATOR
 #include "gfxvalidator/validator.h"
@@ -59,7 +60,13 @@ void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callba
         gSPDisplayList(renderState->dl++, rdpstateinit_dl);
 	    firsttime = 0;
     }
-    gSPDisplayList(renderState->dl++, setup_rdpstate);
+
+    if (gDisableDither) {
+        gSPDisplayList(renderState->dl++, setup_rdpstate_non_dithered);
+    }
+    else {
+        gSPDisplayList(renderState->dl++, setup_rdpstate_dithered);
+    }
 
     gDPSetDepthImage(renderState->dl++, osVirtualToPhysical(zbuffer));
     gDPPipeSync(renderState->dl++);

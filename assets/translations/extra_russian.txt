@@ -10,6 +10,7 @@
 "Valve_Look"	"Обзор"
 "Valve_Look_Straight_Back"	"Смотреть назад"
 "GameUI_Interlaced"	"Чересстрочное видео"
+"GameUI_DisableDither"	"Отключить дизеринг"
 "GameUI_MovingPortals"	"Движущиеся порталы"
 "GameUI_TankControls"	"Танковое управление"
 "GameUI_Deadzone"	"Мертвая зона"

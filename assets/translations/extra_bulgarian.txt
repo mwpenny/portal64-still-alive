@@ -10,6 +10,7 @@
 "Valve_Look"	"Гледам"
 "Valve_Look_Straight_Back"	"Погледни право назад"
 "GameUI_Interlaced"	"Преплетено видео"
+"GameUI_DisableDither"	"Деактивирайте дитъринга"
 "GameUI_MovingPortals"	"Подвижни портали"
 "GameUI_TankControls"	"Управление на резервоара"
 "GameUI_Deadzone"	"Мъртва зона"
