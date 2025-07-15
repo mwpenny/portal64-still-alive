@@ -7,7 +7,7 @@ find_package(assimp                 REQUIRED)
 find_package(CImg                   REQUIRED)
 find_package(Lua        5.4 EXACT   REQUIRED)
 find_package(Luac       5.4 EXACT   REQUIRED)
-find_package(yaml-cpp               REQUIRED)
+find_package(yaml-cpp   0.8         REQUIRED)
 find_package(PNG                    REQUIRED)
 find_package(TIFF                   REQUIRED)
 
