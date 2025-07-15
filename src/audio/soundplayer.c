@@ -269,10 +269,10 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     alSndpSetPan(&gSoundPlayer, panning);
 
     // Add reverb effect.
-    if (type != SoundTypeVoice) {
+    if (type == SoundTypeAll) {
         alSndpSetFXMix(&gSoundPlayer, fxMix);
     }
-    else {
+    else if (type == SoundTypeVoice) {
         alSndpSetFXMix(&gSoundPlayer, VOICE_FX_MIX);
     }
 
