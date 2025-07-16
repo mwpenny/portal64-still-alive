@@ -13,11 +13,12 @@
 
 #define SOUND_ID_NONE -1
 
-enum SoundType{
+enum SoundType {
     SoundTypeNone,
     SoundTypeMusic,
-    SoundTypeAll,
     SoundTypeVoice,
+    SoundTypeAmbience,
+    SoundTypeAll,
 };
 
 typedef ALSndId SoundId;

@@ -491,7 +491,7 @@ void cutscenesUpdateSounds() {
         }else if (i == CH_MUSIC){
             soundType = SoundTypeMusic;
         }else if (i == CH_AMBIENT){
-            soundType = SoundTypeMusic;
+            soundType = SoundTypeAmbience;
         }
 
         if (!soundPlayerIsPlaying(gCutsceneCurrentSound[i])) {

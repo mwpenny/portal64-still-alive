@@ -242,7 +242,7 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     sound->soundType = type;
 
     float newVolume = sound->originalVolume * gSaveData.audio.soundVolume/0xFFFF;
-    if (type == SoundTypeMusic){
+    if (type == SoundTypeMusic) {
         newVolume = newVolume * gSaveData.audio.musicVolume/0xFFFF;
     }
     sound->volume = newVolume;
@@ -271,8 +271,7 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     // Add reverb effect.
     if (type == SoundTypeAll) {
         alSndpSetFXMix(&gSoundPlayer, fxMix);
-    }
-    else if (type == SoundTypeVoice) {
+    } else if (type == SoundTypeVoice) {
         alSndpSetFXMix(&gSoundPlayer, VOICE_FX_MIX);
     }
 
@@ -302,8 +301,8 @@ void soundPlayerGameVolumeUpdate() {
         }
 
         float newVolume = sound->originalVolume * gSaveData.audio.soundVolume/0xFFFF;
-        if (sound->soundType == SoundTypeMusic){
-            newVolume = newVolume* gSaveData.audio.musicVolume/0xFFFF;
+        if (sound->soundType == SoundTypeMusic) {
+            newVolume = newVolume * gSaveData.audio.musicVolume/0xFFFF;
         }
         
         if (sound->flags & SOUND_FLAGS_PAUSED) {
@@ -456,7 +455,7 @@ void soundPlayerAdjustVolume(ALSndId soundId, float newVolume) {
 
     if (activeSound) {
         newVolume = newVolume * gSaveData.audio.soundVolume/0xFFFF;
-        if (activeSound->soundType == SoundTypeMusic){
+        if (activeSound->soundType == SoundTypeMusic) {
             newVolume = newVolume * gSaveData.audio.musicVolume/0xFFFF;
         }
         if (activeSound->flags & SOUND_FLAGS_3D){
