@@ -353,7 +353,7 @@ void soundPlayerUpdate() {
             continue;
         }
 
-        if (sound->soundType == SoundTypeVoice) {
+        if (sound->soundType == SoundTypeVoice && sound->estimatedTimeLeft > 0.0f) {
             isVoiceActive = 1;
         }
 
