@@ -353,11 +353,11 @@ void soundPlayerUpdate() {
             continue;
         }
 
-        if (sound->soundType == SoundTypeVoice) {
+        sound->estimatedTimeLeft -= FIXED_DELTA_TIME;
+
+        if (sound->soundType == SoundTypeVoice && sound->estimatedTimeLeft > 0.0f) {
             isVoiceActive = 1;
         }
-
-        sound->estimatedTimeLeft -= FIXED_DELTA_TIME;
 
         alSndpSetSound(&gSoundPlayer, sound->soundId);
 
