@@ -556,16 +556,16 @@ void playerUpdateSounds(struct Player* player) {
     enum PlayerFlags flags = player->flags;
 
     if ((flags & PlayerFlagsGrounded) && (flags & PlayerIsStepping)) {
-        soundPlayerPlay(soundsConcreteFootstep[player->currentFoot], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(soundsConcreteFootstep[player->currentFoot], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         player->flags &= ~PlayerIsStepping;
     }
     if (flags & PlayerJustJumped) {
-        soundPlayerPlay(soundsConcreteFootstep[3], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(soundsConcreteFootstep[3], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         player->flags &= ~PlayerJustJumped;
     }
     if (flags & PlayerJustLanded) {
         // TODO: Dead body sound when landing on ground while dead
-        soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         player->flags &= ~PlayerJustLanded;
     }
     if (flags & PlayerJustSelect) {
@@ -581,9 +581,9 @@ void playerUpdateSounds(struct Player* player) {
         player->flags &= ~PlayerJustDeniedSelect;
     }
     if (player->passedThroughPortal) {
-        soundPlayerPlay(soundsPortalEnter[player->passedThroughPortal - 1], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(soundsPortalEnter[player->passedThroughPortal - 1], 0.75f, 0.5f, NULL, NULL, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTALPLAYER_ENTERPORTAL, SubtitleTypeCaption);
-        soundPlayerPlay(soundsPortalExit[2 - player->passedThroughPortal], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(soundsPortalExit[2 - player->passedThroughPortal], 0.75f, 0.5f, NULL, NULL, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTALPLAYER_EXITPORTAL, SubtitleTypeCaption);
     }
 
