@@ -891,7 +891,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                     // something changed and play sound near other portal
                     struct Portal* otherPortal = &scene->portals[1 - portalIndex];
                     otherPortal->opacity = 1.0f;
-                    soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &otherPortal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+                    soundPlayerPlay(soundsPortalOpen2, 1.0f, 0.5f, &otherPortal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
                 }
 
                 sceneCheckSecurityCamera(scene, portal);
