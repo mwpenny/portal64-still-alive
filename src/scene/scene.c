@@ -441,7 +441,7 @@ void sceneCheckPortals(struct Scene* scene) {
         if (didClose) {
             rumblePakClipPlay(&gPlayerClosePortalRumble);
             portalGunFizzle(&scene->portalGun);
-            soundPlayerPlay(SOUNDS_PORTAL_FIZZLE2, 0.6f, 0.5f, NULL, NULL, SoundTypeAll);
+            soundPlayerPlay(soundsPortalFizzle, 0.6f, 1.0f, NULL, NULL, SoundTypeAll);
         }
     }
 

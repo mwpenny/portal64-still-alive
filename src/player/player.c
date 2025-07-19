@@ -239,7 +239,7 @@ void playerHandleCollision(struct Player* player) {
 
         if (((isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB)) && !playerIsDead(player))) {
             playerDamage(player, PLAYER_MAX_HEALTH, PlayerDamageTypeEnemy);
-            soundPlayerPlay(soundsBallKill, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+            soundPlayerPlay(soundsBallKill, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         }
     }
 }
