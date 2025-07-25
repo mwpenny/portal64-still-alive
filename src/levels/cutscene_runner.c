@@ -45,9 +45,9 @@ float   gCutsceneCurrentVolume[CH_COUNT];
 
 
 float gCutsceneChannelPitch[CH_COUNT] = {
-    [CH_GLADOS] = 0.5f,
-    [CH_MUSIC] = 0.5f,
-    [CH_AMBIENT] = 0.5f
+    [CH_GLADOS] = 1.0f,
+    [CH_MUSIC] = 1.0f,
+    [CH_AMBIENT] = 1.0f
 };
 
 void cutsceneRunnerCancel(struct CutsceneRunner* runner);

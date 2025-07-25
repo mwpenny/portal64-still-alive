@@ -97,13 +97,13 @@ void pedestalUpdate(struct Pedestal* pedestal) {
 
         if (vector2RotateTowards(&pedestal->currentRotation, &target, &gMaxPedistalRotation, &pedestal->currentRotation)) {
             if (!(pedestal->flags & PedestalFlagsDown)){
-                soundPlayerPlay(soundsPedestalShooting, 2.0f, 0.5f, &pedestal->transform.position, &gZeroVec, SoundTypeAll);
+                soundPlayerPlay(soundsPedestalShooting, 2.0f, 1.0f, &pedestal->transform.position, &gZeroVec, SoundTypeAll);
             }
             pedestal->flags &= ~PedestalFlagsIsPointing;
         }
         else{
             if (!(pedestal->flags & PedestalFlagsAlreadyMoving) && !(pedestal->flags & PedestalFlagsDown)){
-                soundPlayerPlay(soundsPedestalMoving, 2.5f, 0.5f, &pedestal->transform.position, &gZeroVec, SoundTypeAll);
+                soundPlayerPlay(soundsPedestalMoving, 2.5f, 1.0f, &pedestal->transform.position, &gZeroVec, SoundTypeAll);
                 hudShowSubtitle(&gScene.hud, PORTALGUN_PEDESTAL_ROTATE, SubtitleTypeCaption);
                 pedestal->flags |= PedestalFlagsAlreadyMoving;
             }
@@ -118,7 +118,7 @@ void pedestalUpdate(struct Pedestal* pedestal) {
 }
 
 void pedestalHide(struct Pedestal* pedestal) {
-    soundPlayerPlay(soundsReleaseCube, 3.0f, 0.5f, &pedestal->transform.position, &gZeroVec, SoundTypeAll);
+    soundPlayerPlay(soundsReleaseCube, 3.0f, 1.0f, &pedestal->transform.position, &gZeroVec, SoundTypeAll);
     hudShowSubtitle(&gScene.hud, WEAPON_PORTALGUN_POWERUP, SubtitleTypeCaption);
     pedestal->flags |= PedestalFlagsDown;
     skAnimatorRunClip(&pedestal->animator, dynamicAssetClip(PEDESTAL_DYNAMIC_ANIMATED_MODEL, PEDESTAL_ARMATURE_HIDE_CLIP_INDEX), 0.0f, 0);

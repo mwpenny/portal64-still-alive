@@ -136,7 +136,7 @@ void doorUpdate(struct Door* door) {
 
         skAnimatorRunClip(&door->animator, dynamicAssetClip(typeDefinition->armatureIndex, clipIndex), 0.0f, 0);
 
-        soundPlayerPlay(soundsDoor, 3.0f, 0.5f, &door->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+        soundPlayerPlay(soundsDoor, 3.0f, 1.0f, &door->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTAL_DOORCLOSE, SubtitleTypeCaption);
     }
 

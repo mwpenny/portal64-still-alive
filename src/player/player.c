@@ -159,7 +159,7 @@ static void playerHandleCollideStartEnd(struct CollisionObject* object, struct C
 }
 
 void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity) {
-    player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, 0.0f, 0.5f, NULL, NULL, SoundTypeAll);
+    player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, 0.0f, 1.0f, NULL, NULL, SoundTypeAll);
 
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
     player->collisionObject.collideStartEnd = playerHandleCollideStartEnd;
@@ -239,7 +239,7 @@ void playerHandleCollision(struct Player* player) {
 
         if (((isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB)) && !playerIsDead(player))) {
             playerDamage(player, PLAYER_MAX_HEALTH, PlayerDamageTypeEnemy);
-            soundPlayerPlay(soundsBallKill, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+            soundPlayerPlay(soundsBallKill, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         }
     }
 }
@@ -556,34 +556,34 @@ void playerUpdateSounds(struct Player* player) {
     enum PlayerFlags flags = player->flags;
 
     if ((flags & PlayerFlagsGrounded) && (flags & PlayerIsStepping)) {
-        soundPlayerPlay(soundsConcreteFootstep[player->currentFoot], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(soundsConcreteFootstep[player->currentFoot], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         player->flags &= ~PlayerIsStepping;
     }
     if (flags & PlayerJustJumped) {
-        soundPlayerPlay(soundsConcreteFootstep[3], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(soundsConcreteFootstep[3], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         player->flags &= ~PlayerJustJumped;
     }
     if (flags & PlayerJustLanded) {
         // TODO: Dead body sound when landing on ground while dead
-        soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         player->flags &= ~PlayerJustLanded;
     }
     if (flags & PlayerJustSelect) {
-        soundPlayerPlay(soundsSelecting[1], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(soundsSelecting[1], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         player->flags &= ~PlayerJustSelect;
     }
     if (flags & PlayerJustDeniedSelect) {
         if (flags & PlayerHasFirstPortalGun) {
-            soundPlayerPlay(soundsSelecting[0], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+            soundPlayerPlay(soundsSelecting[0], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         } else {
-            soundPlayerPlay(soundsSelecting[2], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+            soundPlayerPlay(soundsSelecting[2], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         }
         player->flags &= ~PlayerJustDeniedSelect;
     }
     if (player->passedThroughPortal) {
-        soundPlayerPlay(soundsPortalEnter[player->passedThroughPortal - 1], 0.75f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(soundsPortalEnter[player->passedThroughPortal - 1], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTALPLAYER_ENTERPORTAL, SubtitleTypeCaption);
-        soundPlayerPlay(soundsPortalExit[2 - player->passedThroughPortal], 0.75f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(soundsPortalExit[2 - player->passedThroughPortal], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTALPLAYER_EXITPORTAL, SubtitleTypeCaption);
     }
 
