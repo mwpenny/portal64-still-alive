@@ -401,7 +401,7 @@ void sceneCheckPortals(struct Scene* scene) {
         portalGunFire(&scene->portalGun, 0, &raycastRay, &scene->player.lookTransform, &playerUp, scene->player.body.currentRoom);
         scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 0);
-        soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, WEAPON_PORTALGUN_FIRE_RED, SubtitleTypeCaption);
         rumblePakClipPlay(&gFireGunRumbleWave);
     }
@@ -410,7 +410,7 @@ void sceneCheckPortals(struct Scene* scene) {
         portalGunFire(&scene->portalGun, 1, &raycastRay, &scene->player.lookTransform, &playerUp, scene->player.body.currentRoom);
         scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 1);
-        soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, WEAPON_PORTALGUN_FIRE_BLUE, SubtitleTypeCaption);
         rumblePakClipPlay(&gFireGunRumbleWave);
     }
@@ -441,7 +441,7 @@ void sceneCheckPortals(struct Scene* scene) {
         if (didClose) {
             rumblePakClipPlay(&gPlayerClosePortalRumble);
             portalGunFizzle(&scene->portalGun);
-            soundPlayerPlay(soundsPortalFizzle, 0.6f, 1.0f, NULL, NULL, SoundTypeAll);
+            soundPlayerPlay(soundsPortalFizzle, 0.6f, 0.5f, NULL, NULL, SoundTypeAll);
         }
     }
 
@@ -1049,7 +1049,7 @@ int sceneClosePortal(struct Scene* scene, int portalIndex) {
     if (gCollisionScene.portalTransforms[portalIndex]) {
         collisionScenePushObjectsOutOfPortal(portalIndex);
 
-        soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position, &gZeroVec, SoundTypeAll);
+        soundPlayerPlay(soundsPortalFizzle, 1.0f, 0.5f, &gCollisionScene.portalTransforms[portalIndex]->position, &gZeroVec, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTAL_FIZZLE_MOVED, SubtitleTypeCaption);
         gCollisionScene.portalTransforms[portalIndex] = NULL;
         gCollisionScene.portalColliderIndex[portalIndex] = -1;

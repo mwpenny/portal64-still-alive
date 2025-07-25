@@ -21,7 +21,7 @@
 void creditsInit(struct Credits* credits) {
     credits->time = 0.0f;
 
-    soundPlayerPlay(SOUNDS_LOOPING_RADIO_MIX, 0.5f, 1.0f, NULL, NULL, SoundTypeMusic);
+    soundPlayerPlay(SOUNDS_LOOPING_RADIO_MIX, 0.5f, 0.5f, NULL, NULL, SoundTypeMusic);
 }
 
 void creditsUpdate(struct Credits* credits) {

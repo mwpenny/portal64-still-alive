@@ -72,6 +72,7 @@ set(SOUND_SCRIPTS
     ambient/machines/portalgun_rotate1.sox
     ambient/machines/ticktock1.sox
     ambient/machines/wall_move5.sox
+    ambient/music/looping_radio_mix.sox
     ambient/music/valve.sox
     buttons/button10.sox
     buttons/button3.sox
@@ -114,6 +115,7 @@ set(SOUND_SCRIPTS
     weapons/physcannon/energy_disintegrate4.sox
     weapons/physcannon/energy_sing_explosion2.sox
     weapons/physcannon/energy_sing_flyby1.sox
+    weapons/physcannon/energy_sing_loop4.sox
     weapons/portalgun/portal_fizzle2.sox
     weapons/portalgun/portal_open2.sox
     weapons/portalgun/portalgun_shoot_blue1.sox
