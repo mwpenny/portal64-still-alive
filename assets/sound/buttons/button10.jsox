@@ -1,0 +1,6 @@
+[
+    {
+        "flags": "-c 1 -b 16",
+        "filters": "speed 0.8"
+    }
+]

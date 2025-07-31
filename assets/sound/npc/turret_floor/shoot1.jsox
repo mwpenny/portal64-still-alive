@@ -1,6 +1,6 @@
 [
     {
-        "flags": "--combine merge shoot2.wav shoot3.wav shoot2.wav shoot3.wav shoot1.wav shoot2.wav shoot1.wav shoot3.wav -c 1 -r 22050",
+        "flags": "--combine merge shoot2.wav shoot3.wav shoot2.wav shoot3.wav shoot1.wav shoot2.wav shoot1.wav shoot3.wav -c 1",
         "filters": "delay 0 0 0.09 0.09 0.18 0.18 0.27 0.27 0.36 0.36 0.45 0.45 0.54 0.54 0.63 0.63 0.72 0.72 remix -m 1,3,5,7,9,11,13,15,17 2,4,6,8,10,12,14,16,18"
     }
 ]

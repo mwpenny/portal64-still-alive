@@ -171,10 +171,10 @@ void buttonUpdate(struct Button* button) {
     // Update state
     if (button->state != newState) {
         if (newState == ButtonStateUnpressed) {
-            soundPlayerPlay(soundsButtonRelease, 2.5f, 0.8f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+            soundPlayerPlay(soundsButtonRelease, 2.5f, 1.0f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_UP, SubtitleTypeCaption);
         } else if (button->state == ButtonStateUnpressed) {
-            soundPlayerPlay(soundsButton, 2.5f, 0.9f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+            soundPlayerPlay(soundsButton, 2.5f, 1.0f, &button->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_DOWN, SubtitleTypeCaption);
         }
 

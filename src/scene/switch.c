@@ -114,7 +114,7 @@ void switchActivate(struct Switch* switchObj) {
         return;
     }
 
-    soundPlayerPlay(soundsButton, 1.0f, 0.9f, &switchObj->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+    soundPlayerPlay(soundsButton, 1.0f, 1.0f, &switchObj->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
     hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_DOWN, SubtitleTypeCaption);
 
     // Wait longer for first tick sound
@@ -155,7 +155,7 @@ void switchUpdate(struct Switch* switchObj) {
     if (switchObj->timeLeft <= 0.0f) {
         switchObj->timeLeft = 0.0f;
 
-        soundPlayerPlay(soundsButtonRelease, 1.0f, 0.8f, &switchObj->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+        soundPlayerPlay(soundsButtonRelease, 1.0f, 1.0f, &switchObj->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTAL_BUTTON_UP, SubtitleTypeCaption);
     } else {
         if (!soundPlayerIsPlaying(switchObj->ticktockSoundLoopId)){
