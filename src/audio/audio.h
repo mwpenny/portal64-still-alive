@@ -24,7 +24,7 @@
 #define MAX_RSP_CMDS            4096   /* max number of commands in any command list.   */
                                        /* Mainly dependent on sequences used            */
 
-#define NUM_DMA_BUFFERS         24     /* max number of dma buffers needed.             */
+#define NUM_DMA_BUFFERS         30     /* max number of dma buffers needed.             */
                                        /* Mainly dependent on sequences and sfx's       */
 
 #define NUM_DMA_MESSAGES        32     /* The maximum number of DMAs any one frame can  */
