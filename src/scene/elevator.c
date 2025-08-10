@@ -202,6 +202,11 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
     elevator->openAmount = mathfMoveTowards(elevator->openAmount, shouldBeOpen ? 1.0f : 0.0f, DOOR_SPEED * FIXED_DELTA_TIME);
 
     // Sounds and effects
+    if ((elevator->flags & (ElevatorFlagsIsArrival | ElevatorFlagsHasHadPlayer | ElevatorFlagsMovingSoundPlayed)) == (ElevatorFlagsIsArrival | ElevatorFlagsHasHadPlayer)) {
+        soundPlayerPlay(soundsElevatorArrive, 0.5f, 1.0f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+        elevator->flags |= ElevatorFlagsMovingSoundPlayed;
+    }
+
     if ((isClosed && shouldBeOpen) || (isOpen && !shouldBeOpen)) {
         soundPlayerPlay(soundsElevatorDoor, 1.0f, 1.0f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
         if ((isClosed && shouldBeOpen) && (elevator->flags & ElevatorFlagsIsArrival)){

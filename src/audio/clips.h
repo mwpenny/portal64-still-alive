@@ -23,10 +23,10 @@ extern unsigned short soundsTickTock;
 
 extern unsigned short soundsPortalFizzle;
 
+extern unsigned short soundsElevatorArrive;
+extern unsigned short soundsElevatorMoving;
 extern unsigned short soundsElevatorDoor;
 extern unsigned short soundsElevatorChime;
-extern unsigned short soundsElevatorMoving;
-
 
 extern unsigned short soundsBallLoop;
 extern unsigned short soundsBallLaunch;
