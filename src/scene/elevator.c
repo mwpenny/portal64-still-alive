@@ -203,9 +203,9 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
 
     // Sounds and effects
     if ((isClosed && shouldBeOpen) || (isOpen && !shouldBeOpen)) {
-        soundPlayerPlay(soundsElevatorDoor, 1.0f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+        soundPlayerPlay(soundsElevatorDoor, 1.0f, 1.0f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
         if ((isClosed && shouldBeOpen) && (elevator->flags & ElevatorFlagsIsArrival)){
-            soundPlayerPlay(soundsElevatorChime, 1.5f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+            soundPlayerPlay(soundsElevatorChime, 1.5f, 1.0f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             hudShowSubtitle(&gScene.hud, PORTAL_ELEVATOR_CHIME, SubtitleTypeCaption);
         }
     }
@@ -213,7 +213,7 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
     if (((elevator->flags & (ElevatorFlagsIsLocked | ElevatorFlagsIsArrival | ElevatorFlagsMovingSoundPlayed)) == ElevatorFlagsIsLocked) &&
         elevator->timer <= MOVE_SOUND_START
     ) {
-        soundPlayerPlay(soundsElevatorMoving, 1.25f, 0.5f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+        soundPlayerPlay(soundsElevatorMoving, 1.25f, 1.0f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTAL_ELEVATOR_START, SubtitleTypeCaption);
         player->shakeTimer = MOVE_SHAKE_DURATION;
         rumblePakClipPlay(&sElevatorRumbleWave);

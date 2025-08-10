@@ -88,14 +88,14 @@ enum InputCapture loadGameUpdate(struct LoadGameMenu* loadGame) {
                     loadGame
                 );
             }
-            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         } else if (controllerGetButtonDown(0, BUTTON_Z)) {
             savefileListConfirmDeletion(
                 loadGame->savefileList,
                 (ConfirmationDialogCallback)&loadGameConfirmDeletionClosed,
                 loadGame
             );
-            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         }
     }
 

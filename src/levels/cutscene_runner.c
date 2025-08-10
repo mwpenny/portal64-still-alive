@@ -43,13 +43,6 @@ u16 gCutsceneCurrentSoundId[CH_COUNT];
 u16 gCutsceneCurrentSubtitleId[CH_COUNT];
 float   gCutsceneCurrentVolume[CH_COUNT];
 
-
-float gCutsceneChannelPitch[CH_COUNT] = {
-    [CH_GLADOS] = 0.5f,
-    [CH_MUSIC] = 0.5f,
-    [CH_AMBIENT] = 0.5f
-};
-
 void cutsceneRunnerCancel(struct CutsceneRunner* runner);
 
 void cutsceneRunnerReset() {
@@ -376,7 +369,7 @@ float cutsceneStepEstimateTime(struct CutsceneStep* step, union CutsceneStepStat
         case CutsceneStepTypePlaySound:
             return state ? soundPlayerTimeLeft(state->playSound.soundId) : soundClipDuration(step->playSound.soundId, step->playSound.pitch * (1.0f / 64.0f));
         case CutsceneStepTypeQueueSound:
-            return state ? soundPlayerTimeLeft(state->playSound.soundId) : soundClipDuration(step->queueSound.soundId, gCutsceneChannelPitch[step->queueSound.channel]);
+            return state ? soundPlayerTimeLeft(state->playSound.soundId) : soundClipDuration(step->queueSound.soundId, 1.0f);
         case CutsceneStepTypeWaitForChannel:
         {
             return state ? cutsceneSoundQueueTime(step->waitForChannel.channel) : 0.0f;
@@ -474,7 +467,7 @@ float cutsceneSoundQueueTime(int channel) {
     struct QueuedSound* curr = gCutsceneSoundQueues[channel];
 
     while (curr) {
-        result += soundClipDuration(curr->soundId, gCutsceneChannelPitch[channel]);
+        result += soundClipDuration(curr->soundId, 1.0f);
         curr = curr->next;
     }
 
@@ -498,7 +491,7 @@ void cutscenesUpdateSounds() {
             if (gCutsceneSoundQueues[i]) {
                 struct QueuedSound* curr = gCutsceneSoundQueues[i];
 
-                gCutsceneCurrentSound[i] = soundPlayerPlay(curr->soundId, curr->volume, gCutsceneChannelPitch[i], NULL, NULL, soundType);
+                gCutsceneCurrentSound[i] = soundPlayerPlay(curr->soundId, curr->volume, 1.0f, NULL, NULL, soundType);
                 gCutsceneCurrentSoundId[i] = curr->soundId;
                 gCutsceneCurrentSubtitleId[i] = curr->subtitleId;
                 gCutsceneCurrentVolume[i] = curr->volume;
@@ -512,7 +505,7 @@ void cutscenesUpdateSounds() {
                 gCutsceneNextFreeSound = curr;
             } else {
                 if (gCutsceneCurrentSound[i] != SOUND_ID_NONE && i == CH_GLADOS) {
-                    soundPlayerPlay(soundsIntercom[1], 1.0f, gCutsceneChannelPitch[i], NULL, NULL, soundType);
+                    soundPlayerPlay(soundsIntercom[1], 1.0f, 1.0f, NULL, NULL, soundType);
                     hudResolveSubtitle(&gScene.hud);
                 }
 
