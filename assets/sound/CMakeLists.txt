@@ -91,7 +91,6 @@ set(SOUND_SCRIPTS
     physics/flesh/flesh_impact_bullet3.sox
     physics/flesh/flesh_impact_bullet4.sox
     physics/flesh/flesh_impact_bullet5.sox
-    plats/elevator_move_loop1.sox
     plats/elevator_stop1.sox
     player/footsteps/concrete1.sox
     player/footsteps/concrete2.sox
@@ -101,7 +100,6 @@ set(SOUND_SCRIPTS
     player/portal_enter2.sox
     player/portal_exit1.sox
     player/portal_exit2.sox
-    player/suit_denydevice.sox
     ui/buttonclickrelease.sox
     ui/buttonrollover.sox
     vehicles/apc/apc_shutdown.sox

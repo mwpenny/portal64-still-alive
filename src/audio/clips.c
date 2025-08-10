@@ -47,10 +47,9 @@ unsigned short soundsConcreteFootstep[4] = {
     SOUNDS_CONCRETE4, //jump
 };
 
-unsigned short soundsSelecting[3] = {
+unsigned short soundsSelecting[2] = {
     SOUNDS_WPN_DENYSELECT,
     SOUNDS_WPN_SELECT,
-    SOUNDS_SUIT_DENYDEVICE,
 };
 
 unsigned short soundsIntercom[2] = {

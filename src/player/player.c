@@ -573,11 +573,7 @@ void playerUpdateSounds(struct Player* player) {
         player->flags &= ~PlayerJustSelect;
     }
     if (flags & PlayerJustDeniedSelect) {
-        if (flags & PlayerHasFirstPortalGun) {
-            soundPlayerPlay(soundsSelecting[0], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
-        } else {
-            soundPlayerPlay(soundsSelecting[2], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
-        }
+        soundPlayerPlay(soundsSelecting[0], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         player->flags &= ~PlayerJustDeniedSelect;
     }
     if (player->passedThroughPortal) {
