@@ -67,26 +67,20 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     struct SoundListener* nearestListener = &gSoundListeners[0];
 
     struct Vector3 playerPosition = gSoundListeners[0].worldPos;
-    struct Vector3 playerEarPosition = gSoundListeners[0].rightVector;
+    struct Vector3 playerEarRotation = gSoundListeners[0].rightVector;
     struct Vector3 nearestDirection;
     struct Vector3 playerSndDirection;
     struct Vector3 portal0PlrDirection = gZeroVec;
     struct Vector3 portal1PlrDirection = gZeroVec;
 
+    // Initial distance between player and sound.
     float nearestDist = vector3DistSqrd(at, &playerPosition);
-    float playerSndDist = nearestDist;
-
-    float portal0SndDist = 0.0f;
-    float portal1SndDist = 0.0f;
-
-    float portal0PlrDist = 0.0f;
-    float portal1PlrDist = 0.0f;
 
     // Inverse distance falloff amounts.
     // Used to determine the contribution of each angle to the final pan result.
-    float p0Falloff = 0.0f;
-    float p1Falloff = 0.0f;
-    float plrFalloff = 1.0f / playerSndDist;
+    float playerFalloff = 1.0f / nearestDist;
+    float portal0Falloff = 0.0f;
+    float portal1Falloff = 0.0f;
 
     // Set the initial direction.
     vector3Sub(at, &playerPosition, &nearestDirection);
@@ -104,11 +98,11 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
 
         // Determine the total distance the sound will travel through the portals.
         // Distance = (Sound -> PortalIn + PortalOut -> Player)
-        portal0SndDist = vector3DistSqrd(at, &portal0transform.position);
-        portal1SndDist = vector3DistSqrd(at, &portal1transform.position);
+        float portal0SndDist = vector3DistSqrd(at, &portal0transform.position);
+        float portal1SndDist = vector3DistSqrd(at, &portal1transform.position);
 
-        portal0PlrDist = vector3DistSqrd(&playerPosition, &portal0transform.position);
-        portal1PlrDist = vector3DistSqrd(&playerPosition, &portal1transform.position);
+        float portal0PlrDist = vector3DistSqrd(&playerPosition, &portal0transform.position);
+        float portal1PlrDist = vector3DistSqrd(&playerPosition, &portal1transform.position);
 
         float portal0TotDist = (portal0PlrDist + portal1SndDist);
         float portal1TotDist = (portal1PlrDist + portal0SndDist);
@@ -118,34 +112,20 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
         p1Falloff = 1.0f / portal1TotDist;
 
         // Determine which portal is closest to the sound.
-        // If portal 0 is closer to the sound than 1.
-        if (portal0SndDist < portal1SndDist)
+        // If the total distance the sound traveled through portal 1 is less than the player -> sound distance.
+        if (portal1TotDist < nearestDist)
         {
-            // Portal 0 is closer to the sound than the player.
-            if (portal0SndDist < playerSndDist)
-            {
-                // The total distance the sound traveled through portal 1 is less than the player -> sound distance.
-                if (portal1TotDist < playerSndDist)
-                {
-                    // The sound is coming out of portal 1.
-                    nearestDist = portal1TotDist;
-                    nearestListener = &gSoundListeners[2];
-                    vector3Sub(&portal1transform.position, &playerPosition, &nearestDirection);
-                }
-            }
+            // The sound is coming out of portal 1.
+            nearestDist = portal1TotDist;
+            nearestListener = &gSoundListeners[2];
+            vector3Sub(&portal1transform.position, &playerPosition, &nearestDirection);
         }
-        // Same logic as above for portal 1.
-        else if (portal0SndDist > portal1SndDist)
+        else if (portal0TotDist < nearestDist)
         {
-            if (portal1SndDist < playerSndDist)
-            {
-                if (portal0TotDist < playerSndDist)
-                {
-                    nearestDist = portal0TotDist;
-                    nearestListener = &gSoundListeners[1];
-                    vector3Sub(&portal0transform.position, &playerPosition, &nearestDirection);
-                }
-            }
+            // The sound is coming out of portal 0.
+            nearestDist = portal0TotDist;
+            nearestListener = &gSoundListeners[1];
+            vector3Sub(&portal0transform.position, &playerPosition, &nearestDirection);
         }
     }
 
@@ -182,24 +162,24 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     *pitchBend = (SPEED_OF_SOUND + nearestDirectionalVelocity) * (1.0f / SPEED_OF_SOUND);
 
     // Determine pan direction.
-    struct Vector3 panAngleVec = gZeroVec;
-    struct Vector3 plrDirectionScaled = gZeroVec;
-    struct Vector3 p0DirectionScaled = gZeroVec;
-    struct Vector3 p1DirectionScaled = gZeroVec;
+    struct Vector3 panAngleVec;
+    struct Vector3 plrDirectionScaled;
+    struct Vector3 p0DirectionScaled;
+    struct Vector3 p1DirectionScaled;
 
     // Scale all directions by their falloff amount.
-    vector3Scale(&playerSndDirection, &plrDirectionScaled, plrFalloff);
-    vector3Scale(&portal0PlrDirection, &p0DirectionScaled, p0Falloff);
-    vector3Scale(&portal1PlrDirection, &p1DirectionScaled, p1Falloff);
+    vector3Scale(&playerSndDirection, &plrDirectionScaled, playerFalloff);
+    vector3Scale(&portal0PlrDirection, &p0DirectionScaled, portal0Falloff);
+    vector3Scale(&portal1PlrDirection, &p1DirectionScaled, portal1Falloff);
    
-    // Average all directions to get the final angle for the sound origin.
+    // Average all 3 scaled directions to get the final angle for the sound origin.
     vector3Add(&plrDirectionScaled, &p0DirectionScaled, &panAngleVec);
     vector3Add(&p1DirectionScaled, &panAngleVec, &panAngleVec);
     vector3Scale(&panAngleVec, &panAngleVec, 0.33333f);
     vector3Normalize(&panAngleVec, &panAngleVec);
 
     // Compare the angle to the player rotation and compute the scalar 1D pan amount.
-    float pan = vector3Dot(&panAngleVec, &playerEarPosition);
+    float pan = vector3Dot(&panAngleVec, &playerEarRotation);
     pan = pan * 64.0f + 64.0f;
 
     *panOut = (int)pan;
