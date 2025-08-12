@@ -564,10 +564,6 @@ void playerUpdateSounds(struct Player* player) {
         soundPlayerPlay(soundsConcreteFootstep[3], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         player->flags &= ~PlayerJustJumped;
     }
-    if (flags & PlayerJustLanded) {
-        // TODO: Dead body sound when landing on ground while dead
-        player->flags &= ~PlayerJustLanded;
-    }
     if (flags & PlayerJustSelect) {
         soundPlayerPlay(soundsSelecting[1], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         player->flags &= ~PlayerJustSelect;
@@ -777,12 +773,11 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
                 soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
             }
 
+            // TODO: Dead body sound when landing on ground while dead
+
             player->body.velocity.y = 0.0f;
         }
 
-        if (!(player->flags & PlayerFlagsGrounded)){
-            player->flags |= PlayerJustLanded;
-        }
         player->flags |= PlayerFlagsGrounded;
 
         player->anchoredTo = anchor;

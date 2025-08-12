@@ -21,7 +21,6 @@ enum PlayerFlags {
     PlayerCrouched = (1 << 3),
     PlayerIsStepping = (1 << 4),
     PlayerJustJumped = (1 << 5),
-    PlayerJustLanded = (1 << 6),
     PlayerJustSelect = (1 << 7),
     PlayerJustDeniedSelect = (1 << 8),
     PlayerJustShotPortalGun = (1 << 9),
