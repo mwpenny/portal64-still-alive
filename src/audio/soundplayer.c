@@ -108,8 +108,8 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
         float portal1TotDist = (portal1PlrDist + portal0SndDist);
 
         // Falloff amount for each portal.
-        p0Falloff = 1.0f / portal0TotDist;
-        p1Falloff = 1.0f / portal1TotDist;
+        portal0Falloff = 1.0f / portal0TotDist;
+        portal1Falloff = 1.0f / portal1TotDist;
 
         // Determine which portal is closest to the sound.
         // If the total distance the sound traveled through portal 1 is less than the player -> sound distance.
