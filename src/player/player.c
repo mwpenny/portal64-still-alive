@@ -54,7 +54,7 @@
 #define PLAYER_ACCEL            (20.0f)
 #define PLAYER_AIR_ACCEL        (15.0f)
 #define PLAYER_FRICTION         (5.875f)
-#define PLAYER_LAND_STEP_VEL    1.6f
+#define PLAYER_LAND_STEP_VEL    2.2f
 
 #define FRICTION_STOP_THRESHOLD (190.0f / 64.0f)
 #define FLING_THRESHOLD_VEL     (5.0f)
@@ -564,9 +564,8 @@ void playerUpdateSounds(struct Player* player) {
         soundPlayerPlay(soundsConcreteFootstep[3], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         player->flags &= ~PlayerJustJumped;
     }
-    if (player->body.velocity.y > PLAYER_LAND_STEP_VEL && flags & PlayerJustLanded) {
+    if (flags & PlayerJustLanded) {
         // TODO: Dead body sound when landing on ground while dead
-        soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         player->flags &= ~PlayerJustLanded;
     }
     if (flags & PlayerJustSelect) {
@@ -772,6 +771,12 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
         vector3AddScaled(&player->body.transform.position, &gUp, MIN(-penetration, maxStandDistance), &player->body.transform.position);
         if (player->body.velocity.y < 0.0f) {
             playerHandleLandingRumble(-player->body.velocity.y);
+
+            // Only play landing footstep sound if the player is moving downward with enough velocity.
+            if (player->body.velocity.y < -PLAYER_LAND_STEP_VEL) {
+                soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+            }
+
             player->body.velocity.y = 0.0f;
         }
 
