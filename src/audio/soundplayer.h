@@ -9,8 +9,6 @@
 
 #define MAX_SOUND_LISTENERS 3
 
-#define SOUND_SAMPLE_RATE 22500
-
 #define SOUND_ID_NONE -1
 
 enum SoundType {

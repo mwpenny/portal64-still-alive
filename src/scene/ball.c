@@ -135,7 +135,7 @@ void ballInitBurn(struct Ball* ball, struct ContactManifold* manifold) {
         if (manifold->shapeA->body) {
             transformPoint(&manifold->shapeA->body->transform, &position, &position);
         }
-        soundPlayerPlay(soundsBallBounce, 1.5f, 0.5f, &position, &gZeroVec, SoundTypeAll);
+        soundPlayerPlay(soundsBallBounce, 1.5f, 1.0f, &position, &gZeroVec, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, ENERGYBALL_IMPACT, SubtitleTypeCaption);
         ball->flags |= BallJustBounced;
     }

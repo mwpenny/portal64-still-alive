@@ -28,7 +28,7 @@ void introInit(struct Intro* intro) {
     intro->valveImage = malloc(VALVE_IMAGE_SIZE);
     romCopy((char*)images_valve_rgba_16b, (char*)intro->valveImage, VALVE_IMAGE_SIZE);
 
-    soundPlayerPlay(SOUNDS_VALVE, 1.0f, 0.5f, NULL, NULL, SoundTypeMusic);
+    soundPlayerPlay(SOUNDS_VALVE, 1.0f, 1.0f, NULL, NULL, SoundTypeMusic);
 }
 
 void introUpdate(struct Intro* intro) {

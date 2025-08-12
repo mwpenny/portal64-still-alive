@@ -58,17 +58,19 @@ file extension:
    I.e., `sox INPUT ARGS OUTPUT FILTERS`. Processing of these files is handled
    by [`tools/sound/jsox.js`](../../tools/sound/jsox.js).
 
-At the end of this process `portal_pak_modified/sound/` will contain only
-original-game sounds actually used by Portal 64.
+At the end of this process `portal_pak_modified/sound/` will contain all
+transformed sounds, and no more transformation will take place.
 
 ## Sound Conversion
 
-Before sound table data can be generated, sounds must be converted to AIFC.
+Before sound table data is generated, sounds are converted to AIFC.
 These are compressed AIFF files using N64/libultra specific compression.
 Conversion is done using [sfz2n64](https://github.com/lambertjamesd/sfz2n64).
 
-Converted AIFC files are output to `<build directory>/assets/sound/` at the
-same relative path as the input file.
+For transformed sounds, converted AIFC files are output to
+`<build directory>/assets/sound/` at the same relative path as the input file.
+Untransformed sounds are converted at the same time they are added to the final
+output data and no intermediate files are written.
 
 ## Sound Table Generation
 
@@ -81,17 +83,17 @@ Sound data tables are generated using sfz2n64, which packs all audio data into
 `<build directory>/assets/sound/sounds.sounds.tbl` and playback information
 (envelope, pan, loop, etc.) into `sounds.sounds`.
 
-### Instrument Bank Configuration
+### Instrument Bank Definitions
 
 Most sounds (those that have been transformed and converted to AIFC) are added
-to the generated instrument banks as-is.
+to the generated instrument banks using default parameters set by sfz2n64.
 
 Some sounds require more control over parameters such as envelope, panning,
-looping, etc. This additional configuration is specified in `.ins` files under
-`assets/sounds/`, following the same directory structure as the SoX argument
-files (same relative path as input file). It is possible to use this
-configuration on both transformed and untransformed sounds. The functionality is
-mainly used in Portal 64 for looping.
+looping, etc. This additional configuration is specified in instrument bank
+definition (`.ins`) files under `assets/sounds/`, following the same directory
+structure as the SoX argument files (same relative path as input file). These
+definitions can reference either transformed or untransformed sounds and are
+mainly used for looping.
 
 See https://github.com/lambertjamesd/sfz2n64 for more details.
 

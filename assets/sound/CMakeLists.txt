@@ -72,6 +72,7 @@ set(SOUND_SCRIPTS
     ambient/machines/portalgun_rotate1.sox
     ambient/machines/ticktock1.sox
     ambient/machines/wall_move5.sox
+    ambient/music/looping_radio_mix.sox
     ambient/music/valve.sox
     buttons/button10.sox
     buttons/button3.sox
@@ -80,6 +81,7 @@ set(SOUND_SCRIPTS
     doors/door_metal_thin_close2.sox
     doors/doormove1.jsox
     doors/doormove2.sox
+    doors/garage_stop1.sox
     npc/turret_floor/active.sox
     npc/turret_floor/deploy.sox
     npc/turret_floor/ping.sox
@@ -90,7 +92,6 @@ set(SOUND_SCRIPTS
     physics/flesh/flesh_impact_bullet3.sox
     physics/flesh/flesh_impact_bullet4.sox
     physics/flesh/flesh_impact_bullet5.sox
-    plats/elevator_move_loop1.sox
     plats/elevator_stop1.sox
     player/footsteps/concrete1.sox
     player/footsteps/concrete2.sox
@@ -100,7 +101,6 @@ set(SOUND_SCRIPTS
     player/portal_enter2.sox
     player/portal_exit1.sox
     player/portal_exit2.sox
-    player/suit_denydevice.sox
     ui/buttonclickrelease.sox
     ui/buttonrollover.sox
     vehicles/apc/apc_shutdown.sox
@@ -114,6 +114,7 @@ set(SOUND_SCRIPTS
     weapons/physcannon/energy_disintegrate4.sox
     weapons/physcannon/energy_sing_explosion2.sox
     weapons/physcannon/energy_sing_flyby1.sox
+    weapons/physcannon/energy_sing_loop4.sox
     weapons/portalgun/portal_fizzle2.sox
     weapons/portalgun/portal_open2.sox
     weapons/portalgun/portalgun_shoot_blue1.sox
@@ -548,7 +549,7 @@ add_custom_command(
     OUTPUT
         ${SOUND_DATA_TABLE_FILES}
     COMMAND
-        ${SFZ2N64_EXECUTABLE} -o ${SOUND_TABLE_SOUNDS} ${SOUND_TABLE_INPUTS}
+        ${SFZ2N64_EXECUTABLE} --compress -o ${SOUND_TABLE_SOUNDS} ${SOUND_TABLE_INPUTS}
     WORKING_DIRECTORY
         ${OUTPUT_DIR}
     COMMENT
