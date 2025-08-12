@@ -68,7 +68,7 @@ void cheatCodeEnterDirection(enum CheatCodeDir dir) {
 
             if (gCheatProgress[i] == CHEAT_CODE_LENGTH) {
                 cheatCodeApply(i);
-                soundPlayerPlay(gCheatCodes[i].soundId, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+                soundPlayerPlay(gCheatCodes[i].soundId, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
                 gCheatProgress[i] = 0;
             }
         } else if (gCheatCodes[i].pattern[0] == dir) {

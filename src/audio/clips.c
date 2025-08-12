@@ -47,10 +47,9 @@ unsigned short soundsConcreteFootstep[4] = {
     SOUNDS_CONCRETE4, //jump
 };
 
-unsigned short soundsSelecting[3] = {
+unsigned short soundsSelecting[2] = {
     SOUNDS_WPN_DENYSELECT,
     SOUNDS_WPN_SELECT,
-    SOUNDS_SUIT_DENYDEVICE,
 };
 
 unsigned short soundsIntercom[2] = {
@@ -72,6 +71,7 @@ unsigned short soundsTickTock = SOUNDS_TICKTOCK1;
 
 unsigned short soundsPortalFizzle = SOUNDS_PORTAL_FIZZLE2;
 
+unsigned short soundsElevatorArrive = SOUNDS_GARAGE_STOP1;
 unsigned short soundsElevatorMoving = SOUNDS_WALL_MOVE5;
 unsigned short soundsElevatorDoor = SOUNDS_DOORMOVE1;
 unsigned short soundsElevatorChime = SOUNDS_PORTAL_ELEVATOR_CHIME;

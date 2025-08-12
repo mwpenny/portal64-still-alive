@@ -79,7 +79,7 @@ enum InputCapture checkboxMenuItemUpdate(struct MenuBuilderElement* element, Men
         action.type = MenuElementTypeCheckbox;
         action.state.checkbox.isChecked = checkbox->checked;
         actionCallback(data, element->selectionIndex, &action);
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll); 
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
     }
 
     return InputCapturePass;
@@ -234,7 +234,7 @@ enum InputCapture sliderMenuItemUpdate(struct MenuBuilderElement* element, MenuA
     }
     
     if (controllerGetButtonDown(0, BUTTON_LEFT | BUTTON_RIGHT | BUTTON_A) || (element->params->params.slider.discrete && ((controllerDir & ControllerDirectionLeft) || (controllerDir & ControllerDirectionRight))))
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll); 
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
 
     return InputCapturePass;
 }
@@ -288,7 +288,7 @@ enum InputCapture menuBuilderUpdate(struct MenuBuilder* menuBuilder) {
         if (menuBuilder->selection == menuBuilder->maxSelection) {
             menuBuilder->selection = 0;
         }
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
     }
 
     if (controllerDir & ControllerDirectionUp) {
@@ -297,7 +297,7 @@ enum InputCapture menuBuilderUpdate(struct MenuBuilder* menuBuilder) {
         } else {
             --menuBuilder->selection;
         }
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
     }
 
     for (int i = 0; i < menuBuilder->elementCount; ++i) {

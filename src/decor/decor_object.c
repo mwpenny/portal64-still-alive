@@ -174,7 +174,7 @@ int decorObjectUpdate(struct DecorObject* decorObject) {
         }
 
         if (decorObject->definition->soundFizzleId != SOUND_ID_NONE) {
-            decorObject->playingSound = soundPlayerPlay(decorObject->definition->soundFizzleId, 2.0f, 0.5f, &decorObject->rigidBody.transform.position, &decorObject->rigidBody.velocity, SoundTypeAll);
+            decorObject->playingSound = soundPlayerPlay(decorObject->definition->soundFizzleId, 2.0f, 1.0f, &decorObject->rigidBody.transform.position, &decorObject->rigidBody.velocity, SoundTypeAll);
         }
     } else if (fizzleResult == FizzleCheckResultEnd) {
         if (decorObject->definition->flags & DecorObjectFlagsImportant) {

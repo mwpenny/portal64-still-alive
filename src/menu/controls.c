@@ -329,7 +329,7 @@ enum InputCapture controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
 
             controlsLayout(controlsMenu);
 
-            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         }
 
         return InputCaptureGrab;
@@ -342,7 +342,7 @@ enum InputCapture controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
         if (controlsMenu->selectedRow == ControllerActionCount + 1) {
             controlsMenu->selectedRow = 0;
         }
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
     }
 
     if (controllerDir & ControllerDirectionUp) {
@@ -351,7 +351,7 @@ enum InputCapture controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
         if (controlsMenu->selectedRow < 0) {
             controlsMenu->selectedRow = ControllerActionCount;
         }
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
     }
 
     if (controlsMenu->selectedRow >= 0 && controlsMenu->selectedRow < ControllerActionCount) {
@@ -386,7 +386,7 @@ enum InputCapture controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
             controlsLayout(controlsMenu);
         }
 
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
     }
 
     return InputCapturePass;

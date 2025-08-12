@@ -240,7 +240,7 @@ static void turretPlaySound(struct Turret* turret, enum TurretSoundType soundTyp
     *currentSound = soundPlayerPlay(
         mapLocaleSound(soundId),
         (soundType == TurretSoundTypeDialogue) ? 2.0f : 1.0f,
-        0.5f,
+        1.0f,
         &turret->rigidBody.transform.position,
         &turret->rigidBody.velocity,
         SoundTypeAll
@@ -518,7 +518,7 @@ static void turretUpdateOpenAmount(struct Turret* turret) {
         soundPlayerPlay(
             shouldOpen ? SOUNDS_DEPLOY : SOUNDS_RETRACT,
             1.0f,
-            0.5f,
+            1.0f,
             &turret->rigidBody.transform.position,
             &turret->rigidBody.velocity,
             SoundTypeAll
@@ -550,7 +550,7 @@ static void turretStartShooting(struct Turret* turret) {
     turret->currentSounds[TurretSoundTypeSfx] = soundPlayerPlay(
         SOUNDS_SHOOT1,
         5.0f,
-        0.5f,
+        1.0f,
         &turret->rigidBody.transform.position,
         &turret->rigidBody.velocity,
         SoundTypeAll
@@ -587,7 +587,7 @@ static void turretHitPlayer(struct Turret* turret, struct Player* player, struct
         soundPlayerPlay(
             sTurretPlayerBulletHitSounds[randomInRange(0, LIST_SIZE(sTurretPlayerBulletHitSounds))],
             1.0f,
-            0.5f,
+            1.0f,
             NULL,
             NULL,
             SoundTypeAll

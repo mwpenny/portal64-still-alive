@@ -95,7 +95,7 @@ static int debugSceneVisibleRoomCount(uint64_t visibleRooms) {
 }
 
 // Average time-based metrics over 2 frames for more stable output
-static float debugSceneAveragedTimeMs(float value, float* prevValue) {
+static float debugSceneAveragedTimeMs(Time value, float* prevValue) {
     float ms = timeMicroseconds(value) / 1000.0f;
     float averaged = (ms + *prevValue) / 2.0f;
     *prevValue = ms;

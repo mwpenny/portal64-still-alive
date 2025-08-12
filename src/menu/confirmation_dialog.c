@@ -151,7 +151,7 @@ enum InputCapture confirmationDialogUpdate(struct ConfirmationDialog* confirmati
             confirmationDialogClose(confirmationDialog, 0);
         }
 
-        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
     }
 
     int controllerDir = controllerGetDirectionDown(0);
@@ -161,7 +161,7 @@ enum InputCapture confirmationDialogUpdate(struct ConfirmationDialog* confirmati
         } else {
             confirmationDialog->selectedButton = &confirmationDialog->confirmButton;
         }
-        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 0.5f, NULL, NULL, SoundTypeAll);
+        soundPlayerPlay(SOUNDS_BUTTONROLLOVER, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
     }
 
     return InputCaptureGrab;

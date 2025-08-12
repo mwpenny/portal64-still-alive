@@ -8,7 +8,7 @@ extern unsigned short soundsPortalExit[2];
 
 extern unsigned short soundsPortalgunShoot[2];
 extern unsigned short soundsConcreteFootstep[4];
-extern unsigned short soundsSelecting[3];
+extern unsigned short soundsSelecting[2];
 extern unsigned short soundsIntercom[2];
 extern unsigned short soundsButton;
 extern unsigned short soundsButtonRelease;
@@ -23,10 +23,10 @@ extern unsigned short soundsTickTock;
 
 extern unsigned short soundsPortalFizzle;
 
+extern unsigned short soundsElevatorArrive;
+extern unsigned short soundsElevatorMoving;
 extern unsigned short soundsElevatorDoor;
 extern unsigned short soundsElevatorChime;
-extern unsigned short soundsElevatorMoving;
-
 
 extern unsigned short soundsBallLoop;
 extern unsigned short soundsBallLaunch;
