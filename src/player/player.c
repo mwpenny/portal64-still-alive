@@ -58,6 +58,7 @@
 #define FRICTION_STOP_THRESHOLD (190.0f / 64.0f)
 #define FLING_THRESHOLD_VEL     (5.0f)
 #define JUMP_BOOST_LIMIT        (PLAYER_SPEED * 1.5f)
+#define LAND_FALL_THRESHOLD_VEL (2.2f)
 
 #define MIN_ROTATE_RATE         (M_PI * 0.5f)
 #define MAX_ROTATE_RATE         (M_PI * 3.5f)
@@ -568,10 +569,10 @@ void playerUpdateSounds(struct Player* player) {
         soundPlayerPlay(soundsConcreteFootstep[3], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         player->flags &= ~PlayerJustJumped;
     }
-    if (flags & PlayerJustLanded) {
+    if (flags & PlayerJustLandedFromFall) {
         // TODO: Dead body sound when landing on ground while dead
         soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
-        player->flags &= ~PlayerJustLanded;
+        player->flags &= ~PlayerJustLandedFromFall;
     }
     if (flags & PlayerJustSelect) {
         soundPlayerPlay(soundsSelecting[1], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
@@ -776,12 +777,15 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
         vector3AddScaled(&player->body.transform.position, &gUp, MIN(-penetration, maxStandDistance), &player->body.transform.position);
         if (player->body.velocity.y < 0.0f) {
             playerHandleLandingRumble(-player->body.velocity.y);
+
+            // Only consider it a fall moving downward with enough velocity
+            if (player->body.velocity.y < -LAND_FALL_THRESHOLD_VEL) {
+                player->flags |= PlayerJustLandedFromFall;
+            }
+
             player->body.velocity.y = 0.0f;
         }
 
-        if (!(player->flags & PlayerFlagsGrounded)){
-            player->flags |= PlayerJustLanded;
-        }
         player->flags |= PlayerFlagsGrounded;
 
         player->anchoredTo = anchor;
