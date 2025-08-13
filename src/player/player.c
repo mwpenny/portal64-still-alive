@@ -279,10 +279,12 @@ void playerInitGrabRotationBase(struct Player* player) {
     if (!player->grabConstraint.object) {
         return;
     }
-    struct Quaternion forwardRotation = player->lookTransform.rotation;
+
     struct Vector3 forward, tmpVec;
-    playerGetMoveBasis(&forwardRotation, &forward, &tmpVec);
+    playerGetMoveBasis(&player->lookTransform.rotation, &forward, &tmpVec);
     vector3Negate(&forward, &forward);
+
+    struct Quaternion forwardRotation;
     quatLook(&forward, &gUp, &forwardRotation);
     playerPortalGrabTransform(player, NULL, &forwardRotation);
     
