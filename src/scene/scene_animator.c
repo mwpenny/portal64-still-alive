@@ -18,7 +18,7 @@ struct AnimatedAudioInfo {
 
 struct AnimatedAudioInfo gAnimatedAudioInfo[] = {
     {.startSoundId = SOUND_ID_NONE, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUND_ID_NONE},
-    {.startSoundId = SOUND_ID_NONE, .loopSoundId = SOUNDS_BEAM_PLATFORM_LOOP1, .endSoundId = SOUND_ID_NONE, .volume = 1.0f, .pitch = 1.0f},
+    {.startSoundId = SOUND_ID_NONE, .loopSoundId = SOUNDS_BEAM_PLATFORM_LOOP1, .endSoundId = SOUND_ID_NONE, .volume = 1.0f, .pitch = 0.8f},
     {.startSoundId = SOUNDS_DOORMOVE1, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUND_ID_NONE, .volume = 1.0f, .pitch = 0.8f},
     {.startSoundId = SOUNDS_TANK_TURRET_START1, .loopSoundId = SOUNDS_TANK_TURRET_LOOP1, .endSoundId = SOUNDS_ELEVATOR_STOP1, .volume = 2.0f, .pitch = 1.0f},
     {.startSoundId = SOUNDS_APC_START_LOOP3, .loopSoundId = SOUNDS_DOOR_METAL_MEDIUM_OPEN1, .endSoundId = SOUNDS_APC_SHUTDOWN, .volume = 1.0f, .pitch = 1.0f},
