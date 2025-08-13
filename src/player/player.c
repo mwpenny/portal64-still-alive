@@ -330,17 +330,20 @@ void playerThrowObject(struct Player* player) {
     if (!playerIsGrabbing(player)) {
         return;
     }
-    struct Quaternion throwRotation = player->lookTransform.rotation;
-    playerPortalGrabTransform(player, NULL, &throwRotation);
 
     struct Vector3 forward, right;
-    playerGetMoveBasis(&throwRotation, &forward, &right);
-    
+    playerGetMoveBasis(&player->lookTransform.rotation, &forward, &right);
+
+    struct Quaternion throwRotation;
+    quatLook(&forward, &gUp, &throwRotation);
+    playerPortalGrabTransform(player, NULL, &throwRotation);
+    quatMultVector(&throwRotation, &gForward, &forward);
+
     struct CollisionObject* object = player->grabConstraint.object;
     playerSetGrabbing(player, NULL);
     
-    // scale impulse with mass to throw each object the same distance
-    vector3Scale(&forward, &forward, -1.0f * THROW_IMPULSE * object->body->mass);
+    // Scale impulse with mass to throw each object the same distance
+    vector3Scale(&forward, &forward, THROW_IMPULSE * object->body->mass);
     rigidBodyApplyImpulse(object->body, &object->body->transform.position, &forward);
 }
 
