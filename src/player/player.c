@@ -185,6 +185,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->healthRegenTimer = HEALTH_REGEN_DELAY;
     player->stepTimer = STEP_TIME;
     player->shakeTimer = 0.0f;
+    player->zoomTimer = 0.0f;
     player->currentFoot = 0;
     player->passedThroughPortal = 0;
     player->jumpImpulse = JUMP_IMPULSE;
@@ -906,6 +907,11 @@ void playerProcessInput(struct Player* player, struct Vector3* forward, struct V
 
         if (controllerActionGet(ControllerActionLookBackward)) {
             quatLook(forward, &gUp, &player->lookTransform.rotation);
+        }
+
+        if (controllerActionGet(ControllerActionZoom)) {
+            player->zoomTimer = 0.0f;
+            player->flags ^= PlayerIsZoomed;
         }
     }
 }
