@@ -38,4 +38,4 @@ whether necessary characters are missing from the DejaVu Sans font and will
 throw an error if they are (see [Fonts](./fonts.md) for details on updating
 fonts).
 
-Generated code is output to `<build directory>/codegen/assets/fonts/`.
+Generated code is output to `<build directory>/codegen/assets/strings/`.
