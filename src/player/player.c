@@ -59,6 +59,7 @@
 #define FLING_THRESHOLD_VEL     (5.0f)
 #define JUMP_BOOST_LIMIT        (PLAYER_SPEED * 1.5f)
 #define LAND_FALL_THRESHOLD_VEL (2.2f)
+#define FLY_SOUND_THRESHOLD_VEL (0.2f)
 
 #define MIN_ROTATE_RATE         (M_PI * 0.5f)
 #define MAX_ROTATE_RATE         (M_PI * 3.5f)
@@ -160,8 +161,6 @@ static void playerHandleCollideStartEnd(struct CollisionObject* object, struct C
 }
 
 void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity) {
-    player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, 0.0f, 1.0f, NULL, NULL, SoundTypeAll);
-
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
     player->collisionObject.collideStartEnd = playerHandleCollideStartEnd;
 
@@ -590,10 +589,27 @@ void playerUpdateSounds(struct Player* player) {
     }
 
     float flyingSoundVolume = clampf(
-        sqrtf(vector3MagSqrd(&player->body.velocity))*(0.6f / MAX_PORTAL_SPEED),
+        sqrtf(vector3MagSqrd(&player->body.velocity)) * (0.6f / MAX_PORTAL_SPEED),
         0.0f, 1.0f
     );
-    soundPlayerAdjustVolume(player->flyingSoundLoopId, flyingSoundVolume);
+
+    if (flyingSoundVolume > FLY_SOUND_THRESHOLD_VEL) {
+        // Start the fall sound or adjust the current volume
+        if (player->flyingSoundLoopId == SOUND_ID_NONE) {
+            player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, flyingSoundVolume, 1.0f, NULL, NULL, SoundTypeAll);
+        }
+        else {
+            soundPlayerAdjustVolume(player->flyingSoundLoopId, flyingSoundVolume);
+        }
+    }
+    else {
+        // Stop the fall sound when the velocity is below the threshold
+        if (player->flyingSoundLoopId != SOUND_ID_NONE) {
+            soundPlayerStop(player->flyingSoundLoopId);
+            player->flyingSoundLoopId = SOUND_ID_NONE;
+        }
+    }
+
     if (flyingSoundVolume >= 0.75){
         hudShowSubtitle(&gScene.hud, PORTALPLAYER_WOOSH, SubtitleTypeCaption);
     }
