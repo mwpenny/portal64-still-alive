@@ -187,6 +187,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->currentFoot = 0;
     player->passedThroughPortal = 0;
     player->jumpImpulse = JUMP_IMPULSE;
+    player->flyingSoundLoopId = SOUND_ID_NONE;
 
     // player->flags |= PlayerHasFirstPortalGun | PlayerHasSecondPortalGun;
 
