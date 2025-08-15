@@ -453,13 +453,7 @@ void sceneCheckPortals(struct Scene* scene) {
     portalCheckForHoles(scene->portals);
 }
 
-#define MAX_LISTEN_THROUGH_PORTAL_DISTANCE 3.0f
-
-int sceneUpdatePortalListener(struct Scene* scene, int portalIndex, int listenerIndex) {
-    if (vector3DistSqrd(&scene->player.lookTransform.position, &scene->portals[portalIndex].rigidBody.transform.position) > MAX_LISTEN_THROUGH_PORTAL_DISTANCE * MAX_LISTEN_THROUGH_PORTAL_DISTANCE) {
-        return 0;
-    }
-
+void sceneUpdatePortalListener(struct Scene* scene, int portalIndex, int listenerIndex) {
     struct Transform otherInverse;
     transformInvert(&scene->portals[1 - portalIndex].rigidBody.transform, &otherInverse);
     struct Transform portalCombined;
@@ -472,8 +466,6 @@ int sceneUpdatePortalListener(struct Scene* scene, int portalIndex, int listener
     quatMultVector(&relativeTransform.rotation, &scene->player.body.velocity, &velocity);
 
     soundListenerUpdate(&relativeTransform.position, &relativeTransform.rotation, &velocity, listenerIndex);
-
-    return 1;
 }
 
 void sceneUpdateListeners(struct Scene* scene) {
@@ -482,13 +474,11 @@ void sceneUpdateListeners(struct Scene* scene) {
     int listenerCount = 1;
 
     if (collisionSceneIsPortalOpen()) {
-        if (sceneUpdatePortalListener(scene, 0, listenerCount)) {
-            ++listenerCount;
-        }
+        sceneUpdatePortalListener(scene, 0, listenerCount);
+        ++listenerCount;
 
-        if (sceneUpdatePortalListener(scene, 1, listenerCount)) {
-            ++listenerCount;
-        }
+        sceneUpdatePortalListener(scene, 1, listenerCount);
+        ++listenerCount;
     }
 
     soundListenerSetCount(listenerCount);
