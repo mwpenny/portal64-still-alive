@@ -131,6 +131,7 @@ struct ControlActionDataRow gControllerDataRows[] = {
 
     {VALVE_LOOK_STRAIGHT_AHEAD, VALVE_MISCELLANEOUS_KEYBOARD_KEYS_TITLE, ControllerActionLookForward},
     {VALVE_LOOK_STRAIGHT_BACK, -1, ControllerActionLookBackward},
+    {VALVE_ZOOM, -1, ControllerActionZoom},
 };
 
 int controlsMeasureIcons(enum ControllerAction action) {

@@ -623,6 +623,31 @@ static int sceneUpdateTurret(struct Scene* scene, void* object) {
     return 1;
 }
 
+void sceneUpdateCameraZoom(struct Scene* scene) {
+    if (playerIsDead(&scene->player)) {
+        scene->camera.fov = DEFAULT_CAMERA_FOV;
+        scene->portalGun.fov = DEFAULT_PORTALGUN_FOV;
+        return;
+    }
+
+    if (scene->player.zoomTimer >= ZOOM_CAMERA_TIME) {
+        return;
+    }
+
+    scene->player.zoomTimer += FIXED_DELTA_TIME;
+
+    scene->camera.fov = mathfLerp(
+        scene->camera.fov, 
+        (scene->player.flags & PlayerIsZoomed) ? ZOOM_CAMERA_FOV : DEFAULT_CAMERA_FOV, 
+        scene->player.zoomTimer / ZOOM_CAMERA_TIME
+    );
+    scene->portalGun.fov = mathfLerp(
+        scene->portalGun.fov, 
+        (scene->player.flags & PlayerIsZoomed) ? ZOOM_PORTALGUN_FOV : DEFAULT_PORTALGUN_FOV, 
+        scene->player.zoomTimer / ZOOM_CAMERA_TIME
+    );
+}
+
 void sceneUpdate(struct Scene* scene) {
     if (scene->checkpointState == SceneCheckpointStateReady) {
         checkpointSave(scene);
@@ -687,6 +712,7 @@ void sceneUpdate(struct Scene* scene) {
     portalGunUpdate(&scene->portalGun, &scene->player);
     sceneUpdateListeners(scene);
     sceneCheckPortals(scene);
+    sceneUpdateCameraZoom(scene);
 
     if ((playerIsDead(&scene->player) && (
         controllerActionGet(ControllerActionPause) ||
