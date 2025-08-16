@@ -381,6 +381,6 @@ void signageActivate(struct Signage* signage) {
         signage->currentFrame = 0;
 
         // Start the hum sound once actived.
-        currentSoundLoopId = soundPlayerPlay(soundsSignageHum, SIGNAGE_HUM_VOLUME, 0.5f, &signage->transform.position, &gZeroVec, SoundTypeAll);
+        currentSoundLoopId = soundPlayerPlay(soundsSignageHum, SIGNAGE_HUM_VOLUME, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
     }
 }
