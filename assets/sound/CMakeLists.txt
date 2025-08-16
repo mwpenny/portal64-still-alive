@@ -69,6 +69,7 @@ set(SOUND_SCRIPTS
     ambient/alarms/portal_elevator_chime.sox
     ambient/atmosphere/ambience_base.sox
     ambient/dinosaur_fizzle.sox
+    ambient/machines/fluorescent_hum_1.sox
     ambient/machines/portalgun_rotate1.sox
     ambient/machines/ticktock1.sox
     ambient/machines/wall_move5.sox
@@ -313,6 +314,7 @@ set(MUSIC_SCRIPTS
 set(INSTRUMENT_BANKS
     ambient/atmosphere/ambience_base.ins
     ambient/machines/beam_platform_loop1.ins
+    ambient/machines/fluorescent_hum_1.ins
     ambient/music/looping_radio_mix.ins
     doors/door_metal_medium_open1.ins
     npc/turret_floor/shoot1.ins

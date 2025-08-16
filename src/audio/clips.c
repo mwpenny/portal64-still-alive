@@ -82,6 +82,8 @@ unsigned short soundsBallBounce = SOUNDS_ENERGY_BOUNCE1;
 unsigned short soundsBallKill = SOUNDS_ENERGY_DISINTEGRATE4;
 unsigned short soundsBallExplode = SOUNDS_ENERGY_SING_EXPLOSION2;
 
+unsigned short soundsSignageHum = SOUNDS_FLUORESCENT_HUM_1;
+
 int clipsCheckSoundSkippable(unsigned short soundID){
     int arrayLength = sizeof(soundsSkippable)/sizeof(soundsSkippable[0]);
     for(int i=0; i<arrayLength; i++){

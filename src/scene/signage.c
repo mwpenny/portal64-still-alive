@@ -1,9 +1,12 @@
 #include "signage.h"
 
 #include "defs.h"
+#include "audio/soundplayer.h"
+#include "audio/clips.h"
 #include "graphics/color.h"
 #include "levels/levels.h"
 #include "scene/dynamic_scene.h"
+#include "scene/scene.h"
 #include "system/time.h"
 
 #include "codegen/assets/materials/static.h"
@@ -97,7 +100,14 @@ static struct SignStateFrame gSignageFrames[] = {
     {.backlightColor = 2, .lcdColor = PROGRESS_ENABLE_LCD_COLOR_INDEX, .symbolOffColor = 3, .symbolOnColor = 3},
 };
 
-#define SIGNAGE_FRAME_COUNT (sizeof(gSignageFrames) / sizeof(*gSignageFrames))
+#define SIGNAGE_HUM_VOLUME            0.6f
+#define SIGNAGE_HUM_FADE_START_TIME   10.0f
+#define SIGNAGE_HUM_FADE_TIME         40.0f
+#define SIGNAGE_FRAME_COUNT           (sizeof(gSignageFrames) / sizeof(*gSignageFrames))
+
+float humFadeElapTime = 0.0f;
+float humFadeVolume = 0.0f;
+ALSndId currentSoundLoopId = SOUND_ID_NONE;
 
 static short gCurrentSignageIndex = -1;
 static struct SignStateFrame gCurrentSignageFrame = {3, 3, 3, 3};
@@ -305,6 +315,15 @@ void signageInit(struct Signage* signage, struct SignageDefinition* definition) 
     signage->testChamberNumber = definition->testChamberNumber;
     signage->currentFrame = -1;
 
+    // Stop current sound if one if playing.
+    if (currentSoundLoopId != SOUND_ID_NONE) {
+        soundPlayerStop(currentSoundLoopId);
+        currentSoundLoopId = SOUND_ID_NONE;
+    }
+
+    humFadeElapTime = 0.0f;
+    humFadeVolume = 0.0f;
+
     int dynamicId = dynamicSceneAdd(signage, signageRender, &signage->transform.position, 1.7f);
 
     dynamicSceneSetRoomFlags(dynamicId, ROOM_FLAG_FROM_INDEX(definition->roomIndex));
@@ -312,13 +331,56 @@ void signageInit(struct Signage* signage, struct SignageDefinition* definition) 
 
 
 void signageUpdate(struct Signage* signage) {
+
     if (signage->currentFrame >= 0 && signage->currentFrame + 1 < SIGNAGE_FRAME_COUNT) {
         ++signage->currentFrame;
+
+        if (currentSoundLoopId != SOUND_ID_NONE) {
+
+            // Flicker the hum sound on and off with the backlight
+            struct SignStateFrame frame = gSignageFrames[signage->currentFrame];
+            float humVolume = SIGNAGE_HUM_VOLUME * (frame.backlightColor == 2);
+
+            // Boost volume while at main menu
+            if (gScene.mainMenuMode) {
+                humVolume *= 1.7f;
+
+                if (humFadeVolume != humVolume) {
+                    humFadeVolume = humVolume;
+                }
+            }
+
+            soundPlayerAdjustVolume(currentSoundLoopId, humVolume);
+        }
+    }
+
+    // If we are at the main menu gradually fade out the sign hum sound after several seconds
+    if (gScene.mainMenuMode) {
+
+        if (currentSoundLoopId != SOUND_ID_NONE) {
+
+            humFadeElapTime += FIXED_DELTA_TIME;
+
+            if (humFadeElapTime > SIGNAGE_HUM_FADE_START_TIME) {
+
+                humFadeVolume = mathfMoveTowards(humFadeVolume, 0.0f, FIXED_DELTA_TIME / SIGNAGE_HUM_FADE_TIME);
+                soundPlayerAdjustVolume(currentSoundLoopId, humFadeVolume);
+
+                // Stop the sound and fade logic once it is inaudible
+                if (humFadeVolume < 0.2f) {
+                    soundPlayerStop(currentSoundLoopId);
+                    currentSoundLoopId = SOUND_ID_NONE;
+                }
+            }
+        }
     }
 }
 
 void signageActivate(struct Signage* signage) {
     if (signage->currentFrame == -1) {
         signage->currentFrame = 0;
+
+        // Start the hum sound once actived.
+        currentSoundLoopId = soundPlayerPlay(soundsSignageHum, SIGNAGE_HUM_VOLUME, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
     }
 }
