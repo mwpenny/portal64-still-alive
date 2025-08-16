@@ -60,6 +60,7 @@
 #define JUMP_BOOST_LIMIT        (PLAYER_SPEED * 1.5f)
 #define LAND_FALL_THRESHOLD_VEL (2.2f)
 #define FLY_SOUND_THRESHOLD_VEL (0.2f)
+#define FLY_CAPTION_THRESHOLD   (0.75f)
 
 #define MIN_ROTATE_RATE         (M_PI * 0.5f)
 #define MAX_ROTATE_RATE         (M_PI * 3.5f)
@@ -598,21 +599,17 @@ void playerUpdateSounds(struct Player* player) {
         // Start the fall sound or adjust the current volume
         if (player->flyingSoundLoopId == SOUND_ID_NONE) {
             player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, flyingSoundVolume, 1.0f, NULL, NULL, SoundTypeAll);
-        }
-        else {
+        } else {
             soundPlayerAdjustVolume(player->flyingSoundLoopId, flyingSoundVolume);
         }
-    }
-    else {
-        // Stop the fall sound when the velocity is below the threshold
-        if (player->flyingSoundLoopId != SOUND_ID_NONE) {
-            soundPlayerStop(player->flyingSoundLoopId);
-            player->flyingSoundLoopId = SOUND_ID_NONE;
-        }
-    }
 
-    if (flyingSoundVolume >= 0.75){
-        hudShowSubtitle(&gScene.hud, PORTALPLAYER_WOOSH, SubtitleTypeCaption);
+        if (flyingSoundVolume >= FLY_CAPTION_THRESHOLD) {
+            hudShowSubtitle(&gScene.hud, PORTALPLAYER_WOOSH, SubtitleTypeCaption);
+        }
+    } else if (player->flyingSoundLoopId != SOUND_ID_NONE) {
+        // Stop the fall sound when the velocity is below the threshold
+        soundPlayerStop(player->flyingSoundLoopId);
+        player->flyingSoundLoopId = SOUND_ID_NONE;
     }
 }
 
