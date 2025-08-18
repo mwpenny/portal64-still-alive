@@ -355,22 +355,17 @@ void signageUpdate(struct Signage* signage) {
     }
 
     // If we are at the main menu gradually fade out the sign hum sound after several seconds
-    if (gScene.mainMenuMode) {
+    if (gScene.mainMenuMode && gHumSoundLoopId != SOUND_ID_NONE) {
+        gHumFadeElapTime += FIXED_DELTA_TIME;
 
-        if (gHumSoundLoopId != SOUND_ID_NONE) {
+        if (gHumFadeElapTime > SIGNAGE_HUM_FADE_START_TIME) {
+            gHumFadeVolume = mathfMoveTowards(gHumFadeVolume, 0.0f, FIXED_DELTA_TIME / SIGNAGE_HUM_FADE_TIME);
+            soundPlayerAdjustVolume(gHumSoundLoopId, gHumFadeVolume);
 
-            gHumFadeElapTime += FIXED_DELTA_TIME;
-
-            if (gHumFadeElapTime > SIGNAGE_HUM_FADE_START_TIME) {
-
-                gHumFadeVolume = mathfMoveTowards(gHumFadeVolume, 0.0f, FIXED_DELTA_TIME / SIGNAGE_HUM_FADE_TIME);
-                soundPlayerAdjustVolume(gHumSoundLoopId, gHumFadeVolume);
-
-                // Stop the sound and fade logic once it is inaudible
-                if (gHumFadeVolume < 0.2f) {
-                    soundPlayerStop(gHumSoundLoopId);
-                    gHumSoundLoopId = SOUND_ID_NONE;
-                }
+            // Stop the sound and fade logic once it is inaudible
+            if (gHumFadeVolume < 0.2f) {
+                soundPlayerStop(gHumSoundLoopId);
+                gHumSoundLoopId = SOUND_ID_NONE;
             }
         }
     }
