@@ -66,8 +66,6 @@ void mainMenuUpdate(struct GameMenu* gameMenu) {
     mainMenuPlayAmbientSound();
 
     if (gScene.animator.animators[0].currentTime > 5.0f) {
-        
-        // Only activate the first sign for main menu.
         signageActivate(&gScene.signage[0]);
     }
 

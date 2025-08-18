@@ -342,7 +342,6 @@ void signageUpdate(struct Signage* signage) {
             struct SignStateFrame frame = gSignageFrames[signage->currentFrame];
             float humVolume = SIGNAGE_HUM_VOLUME * (frame.backlightColor == 2);
 
-            // Boost volume while at main menu
             if (gScene.mainMenuMode) {
                 humVolume *= SIGNAGE_HUM_MENU_MULTIPLIER;
 
@@ -381,7 +380,6 @@ void signageActivate(struct Signage* signage) {
     if (signage->currentFrame == -1) {
         signage->currentFrame = 0;
 
-        // Start the hum sound once actived.
         gHumSoundLoopId = soundPlayerPlay(soundsSignageHum, SIGNAGE_HUM_VOLUME, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
     }
 }
