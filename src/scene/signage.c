@@ -1,8 +1,8 @@
 #include "signage.h"
 
-#include "defs.h"
 #include "audio/soundplayer.h"
 #include "audio/clips.h"
+#include "defs.h"
 #include "graphics/color.h"
 #include "levels/levels.h"
 #include "scene/dynamic_scene.h"
