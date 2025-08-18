@@ -316,12 +316,7 @@ void signageInit(struct Signage* signage, struct SignageDefinition* definition) 
     signage->testChamberNumber = definition->testChamberNumber;
     signage->currentFrame = -1;
 
-    // Stop current sound if one if playing.
-    if (gHumSoundLoopId != SOUND_ID_NONE) {
-        soundPlayerStop(gHumSoundLoopId);
-        gHumSoundLoopId = SOUND_ID_NONE;
-    }
-
+    gHumSoundLoopId = SOUND_ID_NONE;
     gHumFadeElapTime = 0.0f;
     gHumFadeVolume = 0.0f;
 
