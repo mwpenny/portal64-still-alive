@@ -107,7 +107,7 @@ static struct SignStateFrame gSignageFrames[] = {
 #define SIGNAGE_FRAME_COUNT           (sizeof(gSignageFrames) / sizeof(*gSignageFrames))
 
 static float gHumFadeElapTime = 0.0f;
-static float gHumFadeVolume = 0.0f;
+static float gCurrentHumVolume = 0.0f;
 static ALSndId gHumSoundLoopId = SOUND_ID_NONE;
 
 static short gCurrentSignageIndex = -1;
@@ -318,7 +318,7 @@ void signageInit(struct Signage* signage, struct SignageDefinition* definition) 
 
     gHumSoundLoopId = SOUND_ID_NONE;
     gHumFadeElapTime = 0.0f;
-    gHumFadeVolume = 0.0f;
+    gCurrentHumVolume = 0.0f;
 
     int dynamicId = dynamicSceneAdd(signage, signageRender, &signage->transform.position, 1.7f);
 
@@ -335,17 +335,11 @@ void signageUpdate(struct Signage* signage) {
 
             // Flicker the hum sound on and off with the backlight
             struct SignStateFrame frame = gSignageFrames[signage->currentFrame];
-            float humVolume = SIGNAGE_HUM_VOLUME * (frame.backlightColor == 2);
+            gCurrentHumVolume = SIGNAGE_HUM_VOLUME * (frame.backlightColor == 2);
 
             if (gScene.mainMenuMode) {
-                humVolume *= SIGNAGE_HUM_MENU_MULTIPLIER;
-
-                if (gHumFadeVolume != humVolume) {
-                    gHumFadeVolume = humVolume;
-                }
+                gCurrentHumVolume *= SIGNAGE_HUM_MENU_MULTIPLIER;
             }
-
-            soundPlayerAdjustVolume(gHumSoundLoopId, humVolume);
         }
     }
 
@@ -354,22 +348,23 @@ void signageUpdate(struct Signage* signage) {
         gHumFadeElapTime += FIXED_DELTA_TIME;
 
         if (gHumFadeElapTime > SIGNAGE_HUM_FADE_START_TIME) {
-            gHumFadeVolume = mathfMoveTowards(gHumFadeVolume, 0.0f, FIXED_DELTA_TIME / SIGNAGE_HUM_FADE_TIME);
-            soundPlayerAdjustVolume(gHumSoundLoopId, gHumFadeVolume);
+            gCurrentHumVolume = mathfMoveTowards(gCurrentHumVolume, 0.0f, FIXED_DELTA_TIME / SIGNAGE_HUM_FADE_TIME);
 
             // Stop the sound and fade logic once it is inaudible
-            if (gHumFadeVolume < 0.2f) {
+            if (gCurrentHumVolume == 0.0f) {
                 soundPlayerStop(gHumSoundLoopId);
                 gHumSoundLoopId = SOUND_ID_NONE;
             }
         }
     }
+
+    soundPlayerAdjustVolume(gHumSoundLoopId, gCurrentHumVolume);
 }
 
 void signageActivate(struct Signage* signage) {
     if (signage->currentFrame == -1) {
         signage->currentFrame = 0;
 
-        gHumSoundLoopId = soundPlayerPlay(soundsSignageHum, SIGNAGE_HUM_VOLUME, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
+        gHumSoundLoopId = soundPlayerPlay(soundsSignageHum, 0.0f, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
     }
 }
