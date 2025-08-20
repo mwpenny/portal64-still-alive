@@ -35,7 +35,6 @@ ALSndPlayer gSoundPlayer;
 struct ActiveSound {
     ALSndId soundId;
     u16 flags;
-    Time lastUpdate;
     Time timeRemaining;
     struct Vector3 pos3D;
     struct Vector3 velocity3D;
@@ -255,7 +254,6 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
 
     sound->soundId = result;
     sound->flags = 0;
-    sound->lastUpdate = timeGetTime();
     sound->timeRemaining = soundPlayerCalculateLength(alSound, pitch);
     sound->volume = volume;
     sound->originalVolume = volume;
@@ -351,10 +349,16 @@ void soundPlayerGameVolumeUpdate() {
 #define SOUND_DAMPING_LEVEL 0.5f
 
 void soundPlayerUpdate() {
+    static float soundDamping = 1.0f;
+    static Time lastUpdate = 0;
+
     int index = 0;
     int writeIndex = 0;
     int isVoiceActive = 0;
-    static float soundDamping = 1.0f;
+
+    Time now = timeGetTime();
+    Time timeDelta = now - lastUpdate;
+    lastUpdate = now;
 
     while (index < gActiveSoundCount) {
         struct ActiveSound* sound = &gActiveSounds[index];
@@ -372,12 +376,8 @@ void soundPlayerUpdate() {
         ) {
             // Check if it is time for the sound to stop. We must manage this
             // ourselves due how sounds are paused. See soundInitDecayTimes().
-            Time now = timeGetTime();
-            Time delta = now - sound->lastUpdate;
-            sound->lastUpdate = now;
-
-            if (sound->timeRemaining > delta) {
-                sound->timeRemaining -= delta;
+            if (sound->timeRemaining > timeDelta) {
+                sound->timeRemaining -= timeDelta;
             } else {
                 sound->timeRemaining = 0;
                 alSndpStop(&gSoundPlayer);
@@ -553,8 +553,6 @@ void soundPlayerPause() {
 }
 
 void soundPlayerResume() {
-    Time now = timeGetTime();
-
     for (int i = 0; i < gActiveSoundCount; ++i) {
         struct ActiveSound* activeSound = &gActiveSounds[i];
         if (activeSound->flags & SOUND_FLAGS_PAUSED) {
@@ -563,9 +561,6 @@ void soundPlayerResume() {
             alSndpSetSound(&gSoundPlayer, activeSound->soundId);
             alSndpSetPitch(&gSoundPlayer, activeSound->basePitch);
             alSndpSetVol(&gSoundPlayer, (short)(32767 * activeSound->volume));
-
-            // Forget the time spent paused, so the sound ends when it should
-            activeSound->lastUpdate = now;
         }
     }
     soundPlayerGameVolumeUpdate();
