@@ -282,15 +282,6 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     return result;
 }
 
-float soundClipDuration(int soundClipId, float pitch) {
-    if (soundClipId < 0 || soundClipId >= gSoundClipArray->soundCount) {
-        return 0.0f;
-    }
-
-    ALSound* alSound = gSoundClipArray->sounds[soundClipId];
-    return soundPlayerEstimateLength(alSound, pitch);
-}
-
 void soundPlayerGameVolumeUpdate() {
     int index = 0;
     while (index < gActiveSoundCount) {
@@ -500,16 +491,6 @@ int soundPlayerIsLoopedById(int soundId){
     }
 
     return 0;
-}
-
-float soundPlayerTimeLeft(ALSndId soundId) {
-    struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
-
-    if (!activeSound) {
-        return 0.0f;
-    }
-
-    return activeSound->estimatedTimeLeft;
 }
 
 void soundListenerUpdate(struct Vector3* position, struct Quaternion* rotation, struct Vector3* velocity, int listenerIndex) {

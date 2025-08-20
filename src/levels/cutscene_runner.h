@@ -2,9 +2,10 @@
 #define __CUTSCENE_RUNNER_H__
 
 #include <ultra64.h>
+
+#include "audio/clips.h"
 #include "level_definition.h"
-#include "../audio/clips.h"
-#include "../savefile/serializer.h"
+#include "savefile/serializer.h"
 
 union CutsceneStepState {
     struct {
@@ -35,7 +36,6 @@ void cutsceneStart(struct Cutscene* cutscene);
 void cutsceneStop(struct Cutscene* cutscene);
 int cutsceneIsRunning(struct Cutscene* cutscene);
 void cutscenesUpdate();
-float cutsceneEstimateTimeLeft(struct Cutscene* cutscene);
 
 int cutsceneTrigger(int cutsceneIndex, int triggerIndex);
 
