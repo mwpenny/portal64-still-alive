@@ -365,6 +365,12 @@ void signageActivate(struct Signage* signage) {
     if (signage->currentFrame == -1) {
         signage->currentFrame = 0;
 
-        gHumSoundLoopId = soundPlayerPlay(soundsSignageHum, 0.0f, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
+        if (gHumSoundLoopId == SOUND_ID_NONE) {
+            gHumSoundLoopId = soundPlayerPlay(soundsSignageHum, 0.0f, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
+        }
+        else {
+            soundPlayerAdjustVolume(gHumSoundLoopId, 0.0f);
+            soundPlayerUpdatePosition(gHumSoundLoopId, &signage->transform.position, &gZeroVec);
+        }
     }
 }
