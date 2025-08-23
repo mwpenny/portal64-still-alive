@@ -318,6 +318,10 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 if (gScene.signage[i].testChamberNumber == step->activateSignage.testChamberIndex) {
                     signageActivate(&gScene.signage[i]);
                 }
+                else {
+                    // Deactivate other signs
+                    gScene.signage[i].currentFrame = -1;
+                }
             }
             break;
         default:
