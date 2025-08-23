@@ -332,11 +332,11 @@ void signageUpdate(struct Signage* signage) {
     }
 
     if (signage->currentFrame > 0) {
-        // Flicker the hum sound on and off with the backlight
-        struct SignStateFrame frame = gSignageFrames[signage->currentFrame];
-        float humVolume = SIGNAGE_HUM_VOLUME * (frame.backlightColor == 2);
-
         if (gHumSoundLoopId != SOUND_ID_NONE) {
+            // Flicker the hum sound on and off with the backlight
+            struct SignStateFrame frame = gSignageFrames[signage->currentFrame];
+            float humVolume = SIGNAGE_HUM_VOLUME * (frame.backlightColor == 2);
+
             if (gScene.mainMenuMode) {
 
                 humVolume *= SIGNAGE_HUM_MENU_MULTIPLIER;
