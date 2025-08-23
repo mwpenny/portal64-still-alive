@@ -1,9 +1,12 @@
 #include "signage.h"
 
+#include "audio/soundplayer.h"
+#include "audio/clips.h"
 #include "defs.h"
 #include "graphics/color.h"
 #include "levels/levels.h"
 #include "scene/dynamic_scene.h"
+#include "scene/scene.h"
 #include "system/time.h"
 
 #include "codegen/assets/materials/static.h"
@@ -97,7 +100,15 @@ static struct SignStateFrame gSignageFrames[] = {
     {.backlightColor = 2, .lcdColor = PROGRESS_ENABLE_LCD_COLOR_INDEX, .symbolOffColor = 3, .symbolOnColor = 3},
 };
 
-#define SIGNAGE_FRAME_COUNT (sizeof(gSignageFrames) / sizeof(*gSignageFrames))
+#define SIGNAGE_HUM_VOLUME            0.6f
+#define SIGNAGE_HUM_MENU_MULTIPLIER   1.7f
+#define SIGNAGE_HUM_FADE_START_TIME   10.0f
+#define SIGNAGE_HUM_FADE_TIME         10.0f
+#define SIGNAGE_FRAME_COUNT           (sizeof(gSignageFrames) / sizeof(*gSignageFrames))
+
+static float gHumFadeElapTime = 0.0f;
+static float gCurrentHumVolume = 0.0f;
+static ALSndId gHumSoundLoopId = SOUND_ID_NONE;
 
 static short gCurrentSignageIndex = -1;
 static struct SignStateFrame gCurrentSignageFrame = {3, 3, 3, 3};
@@ -305,6 +316,10 @@ void signageInit(struct Signage* signage, struct SignageDefinition* definition) 
     signage->testChamberNumber = definition->testChamberNumber;
     signage->currentFrame = -1;
 
+    gHumSoundLoopId = SOUND_ID_NONE;
+    gHumFadeElapTime = 0.0f;
+    gCurrentHumVolume = 0.0f;
+
     int dynamicId = dynamicSceneAdd(signage, signageRender, &signage->transform.position, 1.7f);
 
     dynamicSceneSetRoomFlags(dynamicId, ROOM_FLAG_FROM_INDEX(definition->roomIndex));
@@ -315,10 +330,64 @@ void signageUpdate(struct Signage* signage) {
     if (signage->currentFrame >= 0 && signage->currentFrame + 1 < SIGNAGE_FRAME_COUNT) {
         ++signage->currentFrame;
     }
+
+    if (signage->currentFrame > 0) {
+        if (gHumSoundLoopId != SOUND_ID_NONE) {
+            // Flicker the hum sound on and off with the backlight
+            struct SignStateFrame frame = gSignageFrames[signage->currentFrame];
+            float humVolume = SIGNAGE_HUM_VOLUME * (frame.backlightColor == 2);
+
+            if (gScene.mainMenuMode) {
+
+                humVolume *= SIGNAGE_HUM_MENU_MULTIPLIER;
+                gHumFadeElapTime += FIXED_DELTA_TIME;
+
+                if (gHumFadeElapTime > SIGNAGE_HUM_FADE_START_TIME) {
+                    float fadeAmount = clampf(1.0f - ((gHumFadeElapTime - SIGNAGE_HUM_FADE_START_TIME) / SIGNAGE_HUM_FADE_TIME), 0.0f, 1.0f);
+                    humVolume *= fadeAmount;
+               
+                    // Stop the sound and fade logic once it is inaudible
+                    if (humVolume == 0.0f) {
+                        soundPlayerStop(gHumSoundLoopId);
+                        gHumSoundLoopId = SOUND_ID_NONE;
+                        gCurrentHumVolume = 0.0f;
+                        return;
+                    }
+                }
+            }
+
+            if (humVolume != gCurrentHumVolume) {
+                gCurrentHumVolume = humVolume;
+                soundPlayerAdjustVolume(gHumSoundLoopId, gCurrentHumVolume);
+            }
+        }
+        else {
+            // Start the sound if it is not currently playing
+            // This occurs when a game save is loaded since activate is never called
+            if (!gScene.mainMenuMode) {
+                gCurrentHumVolume = SIGNAGE_HUM_VOLUME;
+                gHumSoundLoopId = soundPlayerPlay(soundsSignageHum, gCurrentHumVolume, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
+            }
+        }
+    }
 }
 
 void signageActivate(struct Signage* signage) {
     if (signage->currentFrame == -1) {
         signage->currentFrame = 0;
+
+        // TODO: The hum sound should be started at zero volume
+        // but due to the current behavior of the 'Play' function
+        // starting a sound at zero volume results in it staying
+        // muted following a pause/unpause during gameplay
+        gCurrentHumVolume = SIGNAGE_HUM_VOLUME;
+
+        if (gHumSoundLoopId == SOUND_ID_NONE) {
+            gHumSoundLoopId = soundPlayerPlay(soundsSignageHum, gCurrentHumVolume, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
+        }
+        else {
+            soundPlayerAdjustVolume(gHumSoundLoopId, gCurrentHumVolume);
+            soundPlayerUpdatePosition(gHumSoundLoopId, &signage->transform.position, &gZeroVec);
+        }
     }
 }
