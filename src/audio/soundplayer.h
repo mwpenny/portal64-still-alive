@@ -25,7 +25,6 @@ void soundPlayerInit();
 void soundPlayerGameVolumeUpdate();
 void soundPlayerUpdate();
 ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType type);
-float soundClipDuration(int soundClipId, float pitch);
 void soundPlayerStop(ALSndId soundId);
 void soundPlayerStopAll();
 
@@ -37,7 +36,6 @@ void soundPlayerAdjustVolume(ALSndId soundId, float newVolume);
 
 int soundPlayerIsPlaying(ALSndId soundId);
 int soundPlayerIsLoopedById(int soundId);
-float soundPlayerTimeLeft(ALSndId soundId);
 
 void soundListenerUpdate(struct Vector3* position, struct Quaternion* rotation, struct Vector3* velocity, int listenerIndex);
 void soundListenerSetCount(int count);

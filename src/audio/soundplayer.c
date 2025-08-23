@@ -35,7 +35,7 @@ ALSndPlayer gSoundPlayer;
 struct ActiveSound {
     ALSndId soundId;
     u16 flags;
-    float estimatedTimeLeft;
+    Time timeRemaining;
     struct Vector3 pos3D;
     struct Vector3 velocity3D;
     float volume;
@@ -167,10 +167,29 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     }
 }
 
+static void soundInitDecayTimes(struct SoundArray* soundArray) {
+    for (int i = 0; i < soundArray->soundCount; ++i) {
+        ALSound* sound = soundArray->sounds[i];
+
+        // When pausing the game we also want to pause all sounds. Libultra
+        // doesn't provide a good way to do this, or to start sounds partway
+        // through. So to "pause" sounds the player sets the pitch to 0.
+        // Unfortunately mid-playback pitch changes don't affect the envelope
+        // and so sounds will end at the same time regardless of the pause.
+        //
+        // This is a bit of a hack to get around the problem. All sounds are
+        // given infinite duration and the sound player will stop them at
+        // the proper time.
+        sound->envelope->decayTime = -1;
+    }
+}
+
 void soundPlayerInit() {
     gSoundClipArray = alHeapAlloc(&gAudioHeap, 1, _soundsSegmentRomEnd - _soundsSegmentRomStart);
     romCopy(_soundsSegmentRomStart, (char*)gSoundClipArray, _soundsSegmentRomEnd - _soundsSegmentRomStart);
     soundArrayInit(gSoundClipArray, _soundsTblSegmentRomStart);
+
+    soundInitDecayTimes(gSoundClipArray);
 
     ALSndpConfig sndConfig;
     sndConfig.maxEvents = MAX_EVENTS;
@@ -195,13 +214,13 @@ int soundPlayerIsLooped(ALSound* sound) {
     }
 }
 
-float soundPlayerEstimateLength(ALSound* sound, float speed) {
+Time soundPlayerCalculateLength(ALSound* sound, float speed) {
     if (!sound->wavetable) {
         return 0.0f;
     }
 
     if (soundPlayerIsLooped(sound)) {
-        return 1000000000000000000000.0f;
+        return -1;
     }
 
     int sampleCount = 0;
@@ -212,7 +231,7 @@ float soundPlayerEstimateLength(ALSound* sound, float speed) {
         sampleCount = sound->wavetable->len >> 1;
     }
 
-    return sampleCount * (1.0f / OUTPUT_RATE) / speed;
+    return timeFromSeconds(sampleCount * (1.0f / OUTPUT_RATE) / speed);
 }
 
 ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType type) {
@@ -235,7 +254,7 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
 
     sound->soundId = result;
     sound->flags = 0;
-    sound->estimatedTimeLeft = soundPlayerEstimateLength(alSound, pitch);
+    sound->timeRemaining = soundPlayerCalculateLength(alSound, pitch);
     sound->volume = volume;
     sound->originalVolume = volume;
     sound->basePitch = pitch;
@@ -280,15 +299,6 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     ++gActiveSoundCount;
 
     return result;
-}
-
-float soundClipDuration(int soundClipId, float pitch) {
-    if (soundClipId < 0 || soundClipId >= gSoundClipArray->soundCount) {
-        return 0.0f;
-    }
-
-    ALSound* alSound = gSoundClipArray->sounds[soundClipId];
-    return soundPlayerEstimateLength(alSound, pitch);
 }
 
 void soundPlayerGameVolumeUpdate() {
@@ -339,10 +349,16 @@ void soundPlayerGameVolumeUpdate() {
 #define SOUND_DAMPING_LEVEL 0.5f
 
 void soundPlayerUpdate() {
+    static float soundDamping = 1.0f;
+    static Time lastUpdate = 0;
+
     int index = 0;
     int writeIndex = 0;
     int isVoiceActive = 0;
-    static float soundDamping = 1.0f;
+
+    Time now = timeGetTime();
+    Time timeDelta = now - lastUpdate;
+    lastUpdate = now;
 
     while (index < gActiveSoundCount) {
         struct ActiveSound* sound = &gActiveSounds[index];
@@ -353,13 +369,24 @@ void soundPlayerUpdate() {
             continue;
         }
 
-        sound->estimatedTimeLeft -= FIXED_DELTA_TIME;
+        alSndpSetSound(&gSoundPlayer, sound->soundId);
 
-        if (sound->soundType == SoundTypeVoice && sound->estimatedTimeLeft > 0.0f) {
-            isVoiceActive = 1;
+        if ((sound->flags & (SOUND_HAS_STARTED | SOUND_FLAGS_LOOPING)) == SOUND_HAS_STARTED &&
+            sound->timeRemaining > 0
+        ) {
+            // Check if it is time for the sound to stop. We must manage this
+            // ourselves due how sounds are paused. See soundInitDecayTimes().
+            if (sound->timeRemaining > timeDelta) {
+                sound->timeRemaining -= timeDelta;
+            } else {
+                sound->timeRemaining = 0;
+                alSndpStop(&gSoundPlayer);
+            }
         }
 
-        alSndpSetSound(&gSoundPlayer, sound->soundId);
+        if (sound->soundType == SoundTypeVoice) {
+            isVoiceActive = 1;
+        }
 
         int soundState = alSndpGetState(&gSoundPlayer);
 
@@ -367,7 +394,7 @@ void soundPlayerUpdate() {
             alSndpDeallocate(&gSoundPlayer, sound->soundId);
             sound->soundId = SOUND_ID_NONE;
         } else {
-            if (soundState == AL_PLAYING || sound->estimatedTimeLeft < 0.0) {
+            if (soundState == AL_PLAYING || sound->timeRemaining == 0) {
                 sound->flags |= SOUND_HAS_STARTED;
             }
 
@@ -425,7 +452,7 @@ void soundPlayerStop(ALSndId soundId) {
     if (activeSound) {
         alSndpSetSound(&gSoundPlayer, soundId);
         alSndpStop(&gSoundPlayer);
-        activeSound->estimatedTimeLeft = 0.0f;
+        activeSound->timeRemaining = 0;
     }
 }
 
@@ -435,7 +462,7 @@ void soundPlayerStopAll() {
         if (activeSound->soundId != SOUND_ID_NONE) {
             alSndpSetSound(&gSoundPlayer, activeSound->soundId);
             alSndpStop(&gSoundPlayer);
-            activeSound->estimatedTimeLeft = 0.0f;
+            activeSound->timeRemaining = 0;
         }
     }
 }
@@ -485,7 +512,7 @@ int soundPlayerIsPlaying(ALSndId soundId) {
     }
 
     alSndpSetSound(&gSoundPlayer, soundId);
-    return activeSound->estimatedTimeLeft > 0.0f && alSndpGetState(&gSoundPlayer) != AL_STOPPED;
+    return activeSound->timeRemaining > 0 && alSndpGetState(&gSoundPlayer) != AL_STOPPED;
 }
 
 int soundPlayerIsLoopedById(int soundId){
@@ -500,16 +527,6 @@ int soundPlayerIsLoopedById(int soundId){
     }
 
     return 0;
-}
-
-float soundPlayerTimeLeft(ALSndId soundId) {
-    struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
-
-    if (!activeSound) {
-        return 0.0f;
-    }
-
-    return activeSound->estimatedTimeLeft;
 }
 
 void soundListenerUpdate(struct Vector3* position, struct Quaternion* rotation, struct Vector3* velocity, int listenerIndex) {

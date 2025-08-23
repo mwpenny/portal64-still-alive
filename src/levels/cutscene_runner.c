@@ -1,13 +1,14 @@
 #include "cutscene_runner.h"
-#include "../audio/soundplayer.h"
+
+#include "audio/soundplayer.h"
+#include "controls/rumble_pak.h"
+#include "levels/levels.h"
+#include "locales/locales.h"
+#include "savefile/checkpoint.h"
+#include "scene/scene.h"
+#include "scene/signals.h"
 #include "system/time.h"
-#include "../scene/scene.h"
-#include "../scene/signals.h"
-#include "../levels/levels.h"
-#include "../util/memory.h"
-#include "../savefile/checkpoint.h"
-#include "../locales/locales.h"
-#include "../controls/rumble_pak.h"
+#include "util/memory.h"
 
 unsigned char gPortalOpenRumbleData[] = {
     0xFA, 0xA9,
@@ -362,32 +363,6 @@ int cutsceneRunnerUpdateCurrentStep(struct CutsceneRunner* runner) {
     }
 }
 
-float cutsceneSoundQueueTime(int channel);
-
-float cutsceneStepEstimateTime(struct CutsceneStep* step, union CutsceneStepState* state) {
-    switch (step->type) {
-        case CutsceneStepTypePlaySound:
-            return state ? soundPlayerTimeLeft(state->playSound.soundId) : soundClipDuration(step->playSound.soundId, step->playSound.pitch * (1.0f / 64.0f));
-        case CutsceneStepTypeQueueSound:
-            return state ? soundPlayerTimeLeft(state->playSound.soundId) : soundClipDuration(step->queueSound.soundId, 1.0f);
-        case CutsceneStepTypeWaitForChannel:
-        {
-            return state ? cutsceneSoundQueueTime(step->waitForChannel.channel) : 0.0f;
-        }
-        case CutsceneStepTypeDelay:
-            return state ? state->delay : step->delay;
-        case CutsceneStepTypeWaitForSignal:
-            return 0.0f;
-        case CutsceneStepTypeWaitForCutscene:
-            return cutsceneEstimateTimeLeft(&gCurrentLevel->cutscenes[step->cutscene.cutsceneIndex]);
-        case CutsceneStepWaitForAnimation:
-            // Maybe todo
-            return 0.0f;
-        default:
-            return 0.0f;
-    }
-} 
-
 void cutsceneRunnerRun(struct CutsceneRunner* runner, struct Cutscene* cutscene) {
     runner->currentCutscene = cutscene;
     runner->currentStep = 0;
@@ -455,23 +430,6 @@ int cutsceneIsRunning(struct Cutscene* cutscene) {
 
 
     return 0;
-}
-
-float cutsceneSoundQueueTime(int channel) {
-    float result = 0.0f;
-
-    if (soundPlayerIsPlaying(gCutsceneCurrentSound[channel])) {
-        result += soundPlayerTimeLeft(gCutsceneCurrentSound[channel]);
-    }
-
-    struct QueuedSound* curr = gCutsceneSoundQueues[channel];
-
-    while (curr) {
-        result += soundClipDuration(curr->soundId, 1.0f);
-        curr = curr->next;
-    }
-
-    return result;
 }
 
 void cutscenesUpdateSounds() {
@@ -543,31 +501,6 @@ void cutscenesUpdate() {
             gUnusedRunners = toRemove;            
         } 
     }
-}
-
-float cutsceneRunnerEstimateTimeLeft(struct CutsceneRunner* cutsceneRunner) {
-    float result = 0.0f;
-
-    for (int i = cutsceneRunner->currentStep; i < cutsceneRunner->currentCutscene->stepCount; ++i) {
-        result += cutsceneStepEstimateTime(&cutsceneRunner->currentCutscene->steps[i], i == cutsceneRunner->currentStep ? &cutsceneRunner->state : NULL);
-    }
-
-    return result;
-}
-
-float cutsceneEstimateTimeLeft(struct Cutscene* cutscene) {
-    struct CutsceneRunner* current = gRunningCutscenes;
-
-    while (current) {
-        if (current->currentCutscene == cutscene) {
-            return cutsceneRunnerEstimateTimeLeft(current);
-        }
-
-        current = current->nextRunner;
-    }
-
-
-    return 0.0f;
 }
 
 int cutsceneTrigger(int cutsceneIndex, int triggerIndex) {
