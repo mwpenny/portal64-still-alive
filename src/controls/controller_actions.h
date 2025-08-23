@@ -37,6 +37,7 @@ enum ControllerAction {
     ControllerActionDuck,
     ControllerActionLookForward,
     ControllerActionLookBackward,
+    ControllerActionZoom,
     ControllerActionPause,
     // direction actions
     ControllerActionMove,
