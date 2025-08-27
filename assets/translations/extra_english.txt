@@ -9,7 +9,6 @@
 "Valve_Move"	"Move"
 "Valve_Look"	"Look"
 "Valve_Look_Straight_Back"	"Look straight back"
-"Valve_Zoom"    "Zoom"
 "GameUI_Interlaced"	"Interlaced video"
 "GameUI_MovingPortals"	"Moving portals"
 "GameUI_TankControls"	"Tank controls"

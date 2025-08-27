@@ -27,7 +27,6 @@ enum PlayerFlags {
     PlayerJustShotPortalGun = (1 << 9),
     PlayerInCutscene = (1 << 10),
     PlayerIsInvincible = (1 << 11),
-    PlayerIsZoomed = (1 << 12),
 };
 
 enum PlayerDamageType {
@@ -55,7 +54,6 @@ struct Player {
     float healthRegenTimer;
     float stepTimer;
     float shakeTimer;
-    float zoomTimer;
     short currentFoot; //left=0, right=1
     short passedThroughPortal;
     float jumpImpulse;
