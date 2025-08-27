@@ -11,9 +11,6 @@
 #include "codegen/assets/models/grav_flare.h"
 #include "codegen/assets/models/portal_gun/v_portalgun.h"
 
-// the portal gun is rendered with a different field of view than the scene
-#define FIRST_PERSON_POV_FOV    42.45f
-
 #define PORTAL_GUN_RECOIL_TIME (0.22f)
 
 #define PORTAL_GUN_NEAR_PLANE   0.05f
@@ -36,6 +33,7 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at, int isFres
     portalGun->portalGunVisible = 0;
     portalGun->shootAnimationTimer = 0.0;
     portalGun->shootTotalAnimationTimer = 0.0;
+    portalGun->fov = DEFAULT_PORTALGUN_FOV;
 
     portalGun->projectiles[0].roomIndex = -1;
     portalGun->projectiles[1].roomIndex = -1;
@@ -133,7 +131,7 @@ void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* render
     }
 
     u16 perspectiveNormalize;
-    guPerspective(&matrix[1], &perspectiveNormalize, FIRST_PERSON_POV_FOV, getAspect(), 0.05f * SCENE_SCALE, 4.0f * SCENE_SCALE, 1.0f);
+    guPerspective(&matrix[1], &perspectiveNormalize, portalGun->fov, getAspect(), 0.05f * SCENE_SCALE, 4.0f * SCENE_SCALE, 1.0f);
     gSPMatrix(renderState->dl++, &matrix[1], G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
 
     gSPLookAt(renderState->dl++, &gLookAt);
@@ -285,8 +283,8 @@ void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray
 
     skCalculateBonePosition(&portalGun->armature, PORTAL_GUN_V_PORTALGUN_BODY_BONE, &gPortalGunExit, &projectile->effectOffset);
 
-    projectile->effectOffset.x *= -(DEFAULT_CAMERA_FOV / (FIRST_PERSON_POV_FOV * PORTAL_GUN_SCALE));
-    projectile->effectOffset.y *= (DEFAULT_CAMERA_FOV / (FIRST_PERSON_POV_FOV * PORTAL_GUN_SCALE));
+    projectile->effectOffset.x *= -(gScene.camera.fov / (portalGun->fov * PORTAL_GUN_SCALE));
+    projectile->effectOffset.y *= (gScene.camera.fov / (portalGun->fov * PORTAL_GUN_SCALE));
     projectile->effectOffset.z *= -1.0f / PORTAL_GUN_SCALE;
 
     quatMultVector(&portalGun->rotation, &projectile->effectOffset, &projectile->effectOffset);

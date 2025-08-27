@@ -36,6 +36,7 @@ struct PortalGun {
     int portalGunVisible;
     float shootAnimationTimer;
     float shootTotalAnimationTimer;
+    float fov;
 
     struct PortalGunProjectile projectiles[2];
 };
