@@ -101,7 +101,7 @@ static struct SignStateFrame gSignageFrames[] = {
 };
 
 #define SIGNAGE_HUM_VOLUME            0.6f
-#define SIGNAGE_HUM_MENU_MULTIPLIER   1.7f
+#define SIGNAGE_HUM_MENU_VOLUME       2.0f
 #define SIGNAGE_HUM_FADE_START_TIME   10.0f
 #define SIGNAGE_HUM_FADE_TIME         10.0f
 #define SIGNAGE_FRAME_COUNT           (sizeof(gSignageFrames) / sizeof(*gSignageFrames))
@@ -337,8 +337,7 @@ void signageUpdate(struct Signage* signage) {
             float humVolume = SIGNAGE_HUM_VOLUME * (frame.backlightColor == 2);
 
             if (gScene.mainMenuMode) {
-
-                humVolume *= SIGNAGE_HUM_MENU_MULTIPLIER;
+                humVolume = SIGNAGE_HUM_MENU_VOLUME;
                 gHumFadeElapTime += FIXED_DELTA_TIME;
 
                 if (gHumFadeElapTime > SIGNAGE_HUM_FADE_START_TIME) {
