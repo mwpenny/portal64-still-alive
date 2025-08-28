@@ -8,5 +8,12 @@ extern struct SplashParticleDefinition gFailPortalSplash[2];
 extern struct SplashParticleDefinition gBallBurst;
 extern struct SplashParticleDefinition gBallBounce;
 extern struct SplashParticleDefinition gMuzzleFlash;
+extern struct SplashParticleDefinition gSpark;
+
+enum ScriptableEffectType {
+    ScriptableEffectTypeSpark
+};
+
+extern struct SplashParticleDefinition* gScriptableEffects[1];
 
 #endif

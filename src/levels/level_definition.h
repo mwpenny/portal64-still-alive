@@ -1,6 +1,7 @@
 #ifndef __LEVEL_DEFINITION_H__
 #define __LEVEL_DEFINITION_H__
 
+#include "effects/effect_definitions.h"
 #include "math/box3d.h"
 #include "math/boxs16.h"
 #include "math/range.h"
@@ -68,6 +69,7 @@ enum CutsceneStepType {
     CutsceneStepShowPrompt,
     CutsceneStepRumble,
     CutsceneStepActivateSignage,
+    CutsceneStepPlayEffect,
 };
 
 enum CutscenePromptType {
@@ -99,6 +101,7 @@ struct CutsceneStep {
             u16 soundId;
             u8 volume;
             u8 pitch;
+            s16 locationIndex;
         } playSound;
         struct {
             u16 soundId;
@@ -168,6 +171,10 @@ struct CutsceneStep {
         struct {
             u8 testChamberIndex;
         } activateSignage;
+        struct {
+            u8 effectIndex;
+            u16 locationIndex;
+        } playEffect;
         int noop;
     };
 };

@@ -83,3 +83,23 @@ struct SplashParticleDefinition gMuzzleFlash = {
     .particleColor = {210, 135, 50, 255},
     .flags = SplashParticleFlagsBillboarded | SplashParticleFlagsNoGravity
 };
+
+struct SplashParticleDefinition gSpark = {
+    .particleLifetime = 0.75f,
+    .fullWidthTime = 0.125f,
+    .fadeStartTime = 0.5f,
+    .particleTailDelay = 0.05f,
+    .minNormalVelocity = -0.5f,
+    .maxNormalVelocity = 1.0f,
+    .minTangentVelocity = 0.5f,
+    .maxTangentVelocity = 1.25f,
+    .particleCount = 8,
+    .materialIndex = SPARK_INDEX,
+    .particleHalfWidth = 0.02f,
+    .particleColor = {255, 255, 255, 255},
+    .flags = 0,
+};
+
+struct SplashParticleDefinition* gScriptableEffects[1] = {
+    [ScriptableEffectTypeSpark] = &gSpark
+};

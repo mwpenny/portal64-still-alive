@@ -59,9 +59,12 @@
 #define FLING_THRESHOLD_VEL     (5.0f)
 #define JUMP_BOOST_LIMIT        (PLAYER_SPEED * 1.5f)
 #define LAND_FALL_THRESHOLD_VEL (2.2f)
+#define FLY_SOUND_THRESHOLD_VEL (0.2f)
+#define FLY_CAPTION_THRESHOLD   (0.75f)
 
 #define MIN_ROTATE_RATE         (M_PI * 0.5f)
 #define MAX_ROTATE_RATE         (M_PI * 3.5f)
+#define ZOOM_ROTATE_SCALE       (0.5f)
 
 #define MIN_ROTATE_RATE_DELTA   (M_PI * 0.06125f)
 #define MAX_ROTATE_RATE_DELTA   MAX_ROTATE_RATE
@@ -160,8 +163,6 @@ static void playerHandleCollideStartEnd(struct CollisionObject* object, struct C
 }
 
 void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity) {
-    player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, 0.0f, 1.0f, NULL, NULL, SoundTypeAll);
-
     collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
     player->collisionObject.collideStartEnd = playerHandleCollideStartEnd;
 
@@ -188,6 +189,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->currentFoot = 0;
     player->passedThroughPortal = 0;
     player->jumpImpulse = JUMP_IMPULSE;
+    player->flyingSoundLoopId = SOUND_ID_NONE;
 
     // player->flags |= PlayerHasFirstPortalGun | PlayerHasSecondPortalGun;
 
@@ -590,12 +592,25 @@ void playerUpdateSounds(struct Player* player) {
     }
 
     float flyingSoundVolume = clampf(
-        sqrtf(vector3MagSqrd(&player->body.velocity))*(0.6f / MAX_PORTAL_SPEED),
+        sqrtf(vector3MagSqrd(&player->body.velocity)) * (0.6f / MAX_PORTAL_SPEED),
         0.0f, 1.0f
     );
-    soundPlayerAdjustVolume(player->flyingSoundLoopId, flyingSoundVolume);
-    if (flyingSoundVolume >= 0.75){
-        hudShowSubtitle(&gScene.hud, PORTALPLAYER_WOOSH, SubtitleTypeCaption);
+
+    if (flyingSoundVolume > FLY_SOUND_THRESHOLD_VEL) {
+        // Start the fall sound or adjust the current volume
+        if (player->flyingSoundLoopId == SOUND_ID_NONE) {
+            player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, flyingSoundVolume, 1.0f, NULL, NULL, SoundTypeAll);
+        } else {
+            soundPlayerAdjustVolume(player->flyingSoundLoopId, flyingSoundVolume);
+        }
+
+        if (flyingSoundVolume >= FLY_CAPTION_THRESHOLD) {
+            hudShowSubtitle(&gScene.hud, PORTALPLAYER_WOOSH, SubtitleTypeCaption);
+        }
+    } else if (player->flyingSoundLoopId != SOUND_ID_NONE) {
+        // Stop the fall sound when the velocity is below the threshold
+        soundPlayerStop(player->flyingSoundLoopId);
+        player->flyingSoundLoopId = SOUND_ID_NONE;
     }
 }
 
@@ -610,7 +625,7 @@ void playerUpdateHealth(struct Player* player) {
 
     if (player->healthRegenTimer <= 0.0f) {
         player->healthRegenTimer = 0.0f;
-        player->health = MIN(player->health + (HEALTH_REGEN_SPEED * FIXED_DELTA_TIME), PLAYER_MAX_HEALTH);
+        player->health = mathfMoveTowards(player->health, PLAYER_MAX_HEALTH, HEALTH_REGEN_SPEED * FIXED_DELTA_TIME);
     }
 }
 
@@ -1052,6 +1067,10 @@ void playerUpdateCamera(struct Player* player, struct Vector2* lookInput, int di
 
     // Compute yaw and pitch velocities
     float rotateRate = mathfLerp(MIN_ROTATE_RATE, MAX_ROTATE_RATE, (float)gSaveData.controls.sensitivity / 0xFFFF);
+    if (gScene.isZoomedIn) {
+        rotateRate *= ZOOM_ROTATE_SCALE;
+    }
+
     float targetYaw = -lookInput->x * rotateRate;
     float targetPitch = lookInput->y * rotateRate;
     if (gSaveData.controls.flags & ControlSaveFlagsInvert) {

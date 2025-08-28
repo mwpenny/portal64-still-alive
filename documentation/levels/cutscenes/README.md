@@ -73,3 +73,4 @@ See the pages below for details on specific cutscene steps.
 | [show_prompt](./show_prompt.md)               | Displays an action prompt                   |
 | [rumble](./rumble.md)                         | Activates the rumble pak                    |
 | [activate_signage](./activate_signage.md)     | Turns on test chamber signs                 |
+| [play_effect](./play_effect.md)               | Plays a particle effect at a location       |

@@ -90,6 +90,9 @@ struct Scene {
     u8 checkpointState;
     u8 mainMenuMode;
 
+    u8 isZoomedIn;
+    float zoomTimer;
+
     u8 showPerformanceMetrics;
     u8 showCollisionContacts;
     u8 hideCurrentRoom;

@@ -10,9 +10,9 @@ damage_player AMOUNT
 
 ## Arguments
 
-| Name    | Description                                   |
-| ------- | --------------------------------------------- |
-| `AMOUNT` | The amount of damage to apply to the player. |
+| Name     | Description                                 |
+| -------- | ------------------------------------------- |
+| `AMOUNT` | The amount of damage to apply to the player |
 
 ## Notes
 
