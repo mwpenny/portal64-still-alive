@@ -376,11 +376,7 @@ void signageActivate(struct Signage* signage) {
     if (signage->currentFrame == -1) {
         signage->currentFrame = 0;
 
-        // TODO: The hum sound should be started at zero volume
-        // but due to the current behavior of the 'Play' function
-        // starting a sound at zero volume results in it staying
-        // muted following a pause/unpause during gameplay
-        gCurrentHumVolume = SIGNAGE_HUM_VOLUME;
+        gCurrentHumVolume = 0.0f;
 
         if (gHumSoundLoopId == SOUND_ID_NONE) {
             gHumSoundLoopId = soundPlayerPlay(soundsSignageHum, gCurrentHumVolume, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
