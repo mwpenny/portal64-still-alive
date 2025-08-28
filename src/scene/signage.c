@@ -108,7 +108,6 @@ static struct SignStateFrame gSignageFrames[] = {
 
 static float gHumFadeElapTime = 0.0f;
 static float gCurrentHumVolume = 0.0f;
-static ALSndId gHumSoundLoopId = SOUND_ID_NONE;
 
 static short gCurrentSignageIndex = -1;
 static struct SignStateFrame gCurrentSignageFrame = {3, 3, 3, 3};
@@ -315,8 +314,8 @@ void signageInit(struct Signage* signage, struct SignageDefinition* definition) 
     signage->roomIndex = definition->roomIndex;
     signage->testChamberNumber = definition->testChamberNumber;
     signage->currentFrame = -1;
+    signage->currentSoundId = SOUND_ID_NONE;
 
-    gHumSoundLoopId = SOUND_ID_NONE;
     gHumFadeElapTime = 0.0f;
     gCurrentHumVolume = 0.0f;
 
@@ -332,7 +331,7 @@ void signageUpdate(struct Signage* signage) {
     }
 
     if (signage->currentFrame > 0) {
-        if (gHumSoundLoopId != SOUND_ID_NONE) {
+        if (signage->currentSoundId != SOUND_ID_NONE) {
             // Flicker the hum sound on and off with the backlight
             struct SignStateFrame frame = gSignageFrames[signage->currentFrame];
             float humVolume = SIGNAGE_HUM_VOLUME * (frame.backlightColor == 2);
@@ -348,8 +347,8 @@ void signageUpdate(struct Signage* signage) {
                
                     // Stop the sound and fade logic once it is inaudible
                     if (humVolume == 0.0f) {
-                        soundPlayerStop(gHumSoundLoopId);
-                        gHumSoundLoopId = SOUND_ID_NONE;
+                        soundPlayerStop(signage->currentSoundId);
+                        signage->currentSoundId = SOUND_ID_NONE;
                         gCurrentHumVolume = 0.0f;
                         return;
                     }
@@ -358,7 +357,7 @@ void signageUpdate(struct Signage* signage) {
 
             if (humVolume != gCurrentHumVolume) {
                 gCurrentHumVolume = humVolume;
-                soundPlayerAdjustVolume(gHumSoundLoopId, gCurrentHumVolume);
+                soundPlayerAdjustVolume(signage->currentSoundId, gCurrentHumVolume);
             }
         }
         else {
@@ -366,7 +365,7 @@ void signageUpdate(struct Signage* signage) {
             // This occurs when a game save is loaded since activate is never called
             if (!gScene.mainMenuMode) {
                 gCurrentHumVolume = SIGNAGE_HUM_VOLUME;
-                gHumSoundLoopId = soundPlayerPlay(soundsSignageHum, gCurrentHumVolume, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
+                signage->currentSoundId = soundPlayerPlay(soundsSignageHum, gCurrentHumVolume, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
             }
         }
     }
@@ -377,13 +376,15 @@ void signageActivate(struct Signage* signage) {
         signage->currentFrame = 0;
 
         gCurrentHumVolume = 0.0f;
+        signage->currentSoundId = soundPlayerPlay(soundsSignageHum, gCurrentHumVolume, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
+    }
+}
 
-        if (gHumSoundLoopId == SOUND_ID_NONE) {
-            gHumSoundLoopId = soundPlayerPlay(soundsSignageHum, gCurrentHumVolume, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
-        }
-        else {
-            soundPlayerAdjustVolume(gHumSoundLoopId, gCurrentHumVolume);
-            soundPlayerUpdatePosition(gHumSoundLoopId, &signage->transform.position, &gZeroVec);
-        }
+void signageDeactivate(struct Signage* signage) {
+    signage->currentFrame = -1;
+
+    if (signage->currentSoundId != SOUND_ID_NONE) {
+        soundPlayerStop(signage->currentSoundId);
+        signage->currentSoundId = SOUND_ID_NONE;
     }
 }

@@ -327,8 +327,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                     signageActivate(&gScene.signage[i]);
                 }
                 else {
-                    // Deactivate other signs
-                    gScene.signage[i].currentFrame = -1;
+                    signageDeactivate(&gScene.signage[i]);
                 }
             }
             break;
