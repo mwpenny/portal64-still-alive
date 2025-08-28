@@ -2,6 +2,7 @@
 
 #include "audio/soundplayer.h"
 #include "controls/rumble_pak.h"
+#include "effects/effect_definitions.h"
 #include "levels/levels.h"
 #include "locales/locales.h"
 #include "savefile/checkpoint.h"
@@ -327,6 +328,20 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 }
             }
             break;
+        case CutsceneStepPlayEffect:
+        {
+            struct Location* location = &gCurrentLevel->locations[step->playEffect.locationIndex];
+
+            effectsSplashPlay(
+                &gScene.effects,
+                gScriptableEffects[step->playEffect.effectIndex],
+                &location->transform.position,
+                &gUp,
+                NULL
+            );
+
+            break;
+        }
         default:
     }
 }

@@ -244,6 +244,12 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
         result.activateSignage = {
             tonumber(step.args[1]),
         }
+    elseif step.command == "play_effect" then
+        result.type = sk_definition_writer.raw('CutsceneStepPlayEffect')
+        result.playEffect = {
+            sk_definition_writer.raw('ScriptableEffectType' .. step.args[1]),
+            find_location_index(step.args[2]),
+        }
     else
         error("Unrecognized cutscene step " .. step.command)
         result.type = sk_definition_writer.raw('CutsceneStepTypeNoop')
