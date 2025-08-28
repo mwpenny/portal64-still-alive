@@ -481,11 +481,14 @@ void soundPlayerAdjustVolume(ALSndId soundId, float newVolume) {
     struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
 
     if (activeSound) {
-        newVolume = newVolume * gSaveData.audio.soundVolume/0xFFFF;
+        activeSound->originalVolume = newVolume;
+
+        newVolume = newVolume * gSaveData.audio.soundVolume / 0xFFFF;
         if (activeSound->soundType == SoundTypeMusic) {
-            newVolume = newVolume * gSaveData.audio.musicVolume/0xFFFF;
+            newVolume = newVolume * gSaveData.audio.musicVolume / 0xFFFF;
         }
-        if (activeSound->flags & SOUND_FLAGS_3D){
+
+        if (activeSound->flags & SOUND_FLAGS_3D) {
             activeSound->volume = newVolume;
         } else {
             short newVolumeInt = (short)(32767 * newVolume);
