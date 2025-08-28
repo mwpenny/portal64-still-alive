@@ -66,7 +66,7 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     struct SoundListener* nearestListener = &gSoundListeners[0];
     float distance = vector3DistSqrd(at, &gSoundListeners[0].worldPos);
 
-    for (int i = 1; i < MAX_SOUND_LISTENERS; ++i) {
+    for (int i = 1; i < gActiveListenerCount; ++i) {
         float check = vector3DistSqrd(at, &gSoundListeners[i].worldPos);
 
         if (check < distance) {
