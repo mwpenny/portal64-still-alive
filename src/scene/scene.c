@@ -298,6 +298,9 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     scene->checkpointState = SceneCheckpointStateSaved;
     scene->mainMenuMode = mainMenuMode;
 
+    scene->isZoomedIn = 0;
+    scene->zoomTimer = 0.0f;
+
     debugSceneInit(scene);
 
     effectsInit(&scene->effects);
@@ -621,6 +624,42 @@ static int sceneUpdateTurret(struct Scene* scene, void* object) {
     return 1;
 }
 
+void sceneUpdateCameraZoom(struct Scene* scene) {
+    if (playerIsDead(&scene->player)) {
+        if (scene->isZoomedIn) {
+            scene->camera.fov = DEFAULT_CAMERA_FOV;
+            scene->portalGun.fov = DEFAULT_PORTALGUN_FOV;
+            scene->zoomTimer = 0.0f;
+            scene->isZoomedIn = 0;
+        }
+
+        return;
+    }
+
+    if (controllerActionGet(ControllerActionZoom)) {
+        scene->zoomTimer = ZOOM_CAMERA_TIME;
+        scene->isZoomedIn ^= 1;
+    }
+
+    if (scene->zoomTimer > 0.0f) {
+        // Do this first to guarantee we hit <= 0 and set the proper final FOV
+        scene->zoomTimer -= FIXED_DELTA_TIME;
+
+        float zoomAmount = clampf(1.0f - (scene->zoomTimer / ZOOM_CAMERA_TIME), 0.0f, 1.0f);
+
+        scene->camera.fov = mathfLerp(
+            scene->camera.fov,
+            scene->isZoomedIn ? ZOOM_CAMERA_FOV : DEFAULT_CAMERA_FOV,
+            zoomAmount
+        );
+        scene->portalGun.fov = mathfLerp(
+            scene->portalGun.fov,
+            scene->isZoomedIn ? ZOOM_PORTALGUN_FOV : DEFAULT_PORTALGUN_FOV,
+            zoomAmount
+        );
+    }
+}
+
 void sceneUpdate(struct Scene* scene) {
     if (scene->checkpointState == SceneCheckpointStateReady) {
         checkpointSave(scene);
@@ -786,6 +825,7 @@ void sceneUpdate(struct Scene* scene) {
     debugSceneUpdate(scene);
 
     hudUpdate(&scene->hud);
+    sceneUpdateCameraZoom(scene);
 
     scene->updateTime = timeGetTime() - startTime;
 }
