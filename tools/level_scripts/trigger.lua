@@ -98,6 +98,7 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
             sk_definition_writer.raw(string_starts_with(step.args[1], "SOUNDS_") and step.args[1] or ("SOUNDS_" .. step.args[1])),
             tonumber(step.args[2] or "1") * 255,
             math.floor(tonumber(step.args[3] or "1") * 64 + 0.5),
+            step.args[4] and find_location_index(step.args[4]) or -1,
         }
     elseif step.command == "q_sound" and #step.args >= 2 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeQueueSound')

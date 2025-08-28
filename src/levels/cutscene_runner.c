@@ -179,15 +179,21 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
     switch (step->type) {
         case CutsceneStepTypePlaySound:
         case CutsceneStepTypeStartSound:
+        {
+            struct Vector3* location = step->playSound.locationIndex >= 0 ?
+                &gCurrentLevel->locations[step->playSound.locationIndex].transform.position :
+                NULL;
+
             runner->state.playSound.soundId = soundPlayerPlay(
                 step->playSound.soundId,
                 step->playSound.volume * (1.0f / 255.0f),
                 step->playSound.pitch * (1.0f / 64.0f),
-                NULL,
-                NULL,
+                location,
+                &gZeroVec,
                 SoundTypeAll
             );
             break;
+        }
         case CutsceneStepTypeQueueSound:
         {
             cutsceneQueueSoundInChannel(step->queueSound.soundId, step->queueSound.volume * (1.0f / 255.0f), step->queueSound.channel, step->queueSound.subtitleId);

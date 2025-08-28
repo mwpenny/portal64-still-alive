@@ -99,6 +99,7 @@ struct CutsceneStep {
             u16 soundId;
             u8 volume;
             u8 pitch;
+            s16 locationIndex;
         } playSound;
         struct {
             u16 soundId;
