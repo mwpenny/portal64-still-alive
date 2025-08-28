@@ -463,18 +463,16 @@ int sceneUpdatePortalListener(struct Scene* scene, int portalIndex, int listener
         return 0;
     }
 
-    struct Transform otherInverse;
-    transformInvert(&scene->portals[1 - portalIndex].rigidBody.transform, &otherInverse);
-    struct Transform portalCombined;
-    transformConcat(&scene->portals[portalIndex].rigidBody.transform, &otherInverse, &portalCombined);
+    struct Transform portalTransform;
+    collisionSceneGetPortalTransform(portalIndex, &portalTransform);
 
-    struct Transform relativeTransform;
-    transformConcat(&portalCombined, &scene->player.lookTransform, &relativeTransform);
+    struct Transform listenTransform;
+    transformConcat(&portalTransform, &scene->player.lookTransform, &listenTransform);
 
-    struct Vector3 velocity;
-    quatMultVector(&relativeTransform.rotation, &scene->player.body.velocity, &velocity);
+    struct Vector3 listenVelocity;
+    quatMultVector(&portalTransform.rotation, &scene->player.body.velocity, &listenVelocity);
 
-    soundListenerUpdate(&relativeTransform.position, &relativeTransform.rotation, &velocity, listenerIndex);
+    soundListenerUpdate(&listenTransform.position, &listenTransform.rotation, &listenVelocity, listenerIndex);
 
     return 1;
 }

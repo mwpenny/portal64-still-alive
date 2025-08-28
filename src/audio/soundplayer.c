@@ -65,48 +65,13 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
 
     struct SoundListener* nearestListener = &gSoundListeners[0];
     float distance = vector3DistSqrd(at, &gSoundListeners[0].worldPos);
-    int through_0_from_1 = 0;
-    int through_1_from_0 = 0;
 
-
-    int portalsPresent = 0;
-    struct Transform portal0transform;
-    struct Transform portal1transform;
-    if (gCollisionScene.portalTransforms[0] != NULL && gCollisionScene.portalTransforms[1] != NULL){
-        portalsPresent = 1;
-        portal0transform = *gCollisionScene.portalTransforms[0];
-        portal1transform = *gCollisionScene.portalTransforms[1];
-    }
-
-    for (int i = 0; i < MAX_SOUND_LISTENERS; ++i) {
+    for (int i = 1; i < gActiveListenerCount; ++i) {
         float check = vector3DistSqrd(at, &gSoundListeners[i].worldPos);
+
         if (check < distance) {
             distance = check;
             nearestListener = &gSoundListeners[i];
-            through_0_from_1 = 0;
-            through_1_from_0 = 0;
-        }
-
-        if (portalsPresent){
-            float dist1,dist2;
-            // check dist from obj to 0 portal + from 1 portal to listener
-            dist1 =  vector3DistSqrd(at, &portal0transform.position);
-            dist2 =  vector3DistSqrd(&portal1transform.position, &gSoundListeners[i].worldPos);
-            if ((dist1+dist2) < distance){
-                distance = (dist1+dist2);
-                nearestListener = &gSoundListeners[i];
-                through_0_from_1 = 1;
-                through_1_from_0 = 0;
-            }
-            // check dist from obj to 1 portal + from 0 portal to listener
-            dist1 =  vector3DistSqrd(at, &portal1transform.position);
-            dist2 =  vector3DistSqrd(&portal0transform.position, &gSoundListeners[i].worldPos);
-            if ((dist1+dist2) < distance){
-                distance = (dist1+dist2);
-                nearestListener = &gSoundListeners[i];
-                through_0_from_1 = 0;
-                through_1_from_0 = 1;
-            }
         }
     }
 
@@ -133,16 +98,8 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     *volumeOut = volumeLevel;
 
     struct Vector3 offset;
-    if (through_0_from_1){
-        vector3Sub(&portal1transform.position, &nearestListener->worldPos, &offset);
-    }
-    else if(through_1_from_0){
-        vector3Sub(&portal0transform.position, &nearestListener->worldPos, &offset);
-    }
-    else{
-        vector3Sub(at, &nearestListener->worldPos, &offset);
-    }
-    
+    vector3Sub(at, &nearestListener->worldPos, &offset);
+
     struct Vector3 relativeVelocity;
     vector3Sub(velocity, &nearestListener->velocity, &relativeVelocity);
 
