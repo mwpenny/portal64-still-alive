@@ -625,7 +625,7 @@ void playerUpdateHealth(struct Player* player) {
 
     if (player->healthRegenTimer <= 0.0f) {
         player->healthRegenTimer = 0.0f;
-        player->health = MIN(player->health + (HEALTH_REGEN_SPEED * FIXED_DELTA_TIME), PLAYER_MAX_HEALTH);
+        player->health = mathfMoveTowards(player->health, PLAYER_MAX_HEALTH, HEALTH_REGEN_SPEED * FIXED_DELTA_TIME);
     }
 }
 
