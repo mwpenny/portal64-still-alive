@@ -18,8 +18,8 @@ extern char _soundsTblSegmentRomEnd[];
 struct SoundArray* gSoundClipArray;
 ALSndPlayer gSoundPlayer;
 
-#define MAX_SKIPPABLE_SOUNDS    6
-#define MAX_ACTIVE_SOUNDS       12
+#define MAX_SKIPPABLE_SOUNDS    20
+#define MAX_ACTIVE_SOUNDS       26
 
 #define SOUND_FLAGS_3D          (1 << 0)
 #define SOUND_FLAGS_LOOPING     (1 << 1)
