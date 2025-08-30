@@ -10,6 +10,8 @@ struct Signage {
     short testChamberNumber;
     short currentFrame;
     ALSndId currentSoundId;
+    float currentHumVolume;
+    float humFadeElapTime;
 };
 
 void signageInit(struct Signage* signage, struct SignageDefinition* definition);
