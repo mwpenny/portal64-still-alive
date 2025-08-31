@@ -8,12 +8,78 @@ cutscenes:
     - q_sound 11_PART1_ENTRY_3 CH_GLADOS PORTAL_11_PART1_ENTRY_3
     - wait_for_channel CH_GLADOS
     - set_signal entry_door
+    - start_cutscene CUBE_DROPPER
+    - start_cutscene CUBE_DROPPER_SPARKS_1
+    - start_cutscene CUBE_DROPPER_SPARKS_2
     - save_checkpoint
   SIGNAGE:
     - delay 4
     - activate_signage 16
   FINISH:
     - q_sound 11_PART1_SUCCESS_1 CH_GLADOS PORTAL_11_PART1_SUCCESS_1
-  CHECKPOINT:
+  CHECKPOINT_1:
     - save_checkpoint
-operators: []
+  CHECKPOINT_2:
+    - save_checkpoint
+  CHECKPOINT_3:
+    - save_checkpoint
+  CUBE_DROPPER:
+    - label loop
+
+    - wait_for_signal near_cube_dropper
+    - delay_random 5 10
+    - set_signal cube_dropper
+    - delay 1
+    - clear_signal cube_dropper
+
+    - goto loop
+  CUBE_DROPPER_SPARKS_1:
+    - label loop
+
+    - delay_random 0 10
+    - play_effect Spark cube_dropper_spark_1
+    - start_sound ZAP1 1 1 cube_dropper_spark_1
+
+    - delay_random 0 10
+    - play_effect Spark cube_dropper_spark_1
+    - start_sound ZAP3 1 1 cube_dropper_spark_1
+
+    - delay_random 0 10
+    - play_effect Spark cube_dropper_spark_1
+    - start_sound ZAP1 1 1 cube_dropper_spark_1
+
+    - delay_random 0 10
+    - play_effect Spark cube_dropper_spark_1
+    - start_sound ZAP2 1 1 cube_dropper_spark_1
+
+    - delay_random 0 10
+    - play_effect Spark cube_dropper_spark_1
+    - start_sound ZAP3 1 1 cube_dropper_spark_1
+
+    - goto loop
+  CUBE_DROPPER_SPARKS_2:
+    - label loop
+
+    - delay_random 0 15
+    - play_effect Spark cube_dropper_spark_2
+    - start_sound ZAP2 1 1 cube_dropper_spark_2
+
+    - delay_random 0 15
+    - play_effect Spark cube_dropper_spark_2
+    - start_sound ZAP1 1 1 cube_dropper_spark_2
+
+    - delay_random 0 15
+    - play_effect Spark cube_dropper_spark_2
+    - start_sound ZAP2 1 1 cube_dropper_spark_2
+
+    - delay_random 0 15
+    - play_effect Spark cube_dropper_spark_2
+    - start_sound ZAP3 1 1 cube_dropper_spark_2
+
+    - delay_random 0 15
+    - play_effect Spark cube_dropper_spark_2
+    - start_sound ZAP3 1 1 cube_dropper_spark_2
+
+    - goto loop
+operators:
+  - near_cube_dropper = near_cube_dropper_1 or near_cube_dropper_2

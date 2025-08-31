@@ -69,6 +69,9 @@ set(SOUND_SCRIPTS
     ambient/alarms/portal_elevator_chime.sox
     ambient/atmosphere/ambience_base.sox
     ambient/dinosaur_fizzle.sox
+    ambient/energy/zap1.sox
+    ambient/energy/zap2.sox
+    ambient/energy/zap3.sox
     ambient/machines/fluorescent_hum_1.sox
     ambient/machines/portalgun_rotate1.sox
     ambient/machines/ticktock1.sox

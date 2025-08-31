@@ -85,7 +85,7 @@ struct SplashParticleDefinition gMuzzleFlash = {
 };
 
 struct SplashParticleDefinition gSpark = {
-    .particleLifetime = 0.75f,
+    .particleLifetime = 1.0f,
     .fullWidthTime = 0.125f,
     .fadeStartTime = 0.5f,
     .particleTailDelay = 0.05f,
