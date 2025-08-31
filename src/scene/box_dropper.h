@@ -20,6 +20,7 @@ struct BoxDropper {
     struct SKArmature armature;
     struct SKAnimator animator;
 
+    enum BoxDropperCubeType cubeType;
     struct DecorObject activeCube;
     float reloadTimer;
 

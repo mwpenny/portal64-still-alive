@@ -277,10 +277,16 @@ struct SignageDefinition {
     short testChamberNumber;
 };
 
+enum BoxDropperCubeType {
+    BoxDropperCubeTypeNone,
+    BoxDropperCubeTypeStandard,
+};
+
 struct BoxDropperDefinition {
     struct Vector3 position;
     short roomIndex;
     short signalIndex;
+    enum BoxDropperCubeType cubeType;
 };
 
 enum AnimationSoundType {

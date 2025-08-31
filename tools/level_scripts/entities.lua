@@ -13,10 +13,13 @@ for _, dropper in pairs(sk_scene.nodes_for_type('@box_dropper')) do
 
     local room_index = room_export.node_nearest_room_index(dropper.node)
 
+    local cube_type = dropper.arguments[2] or 'Standard'
+
     table.insert(box_droppers, {
         position = position,
         roomIndex = room_index,
         signalIndex = signals.signal_index_for_name(dropper.arguments[1]),
+        cubeType = sk_definition_writer.raw('BoxDropperCubeType' .. cube_type),
     })
 end
 

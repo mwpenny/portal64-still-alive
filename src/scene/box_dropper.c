@@ -30,7 +30,6 @@ void boxDropperFakePos(struct BoxDropper* dropper, struct Transform* result) {
     }
 }
 
-
 void boxDropperRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct BoxDropper* dropper = (struct BoxDropper*)data;
 
@@ -68,7 +67,7 @@ void boxDropperRender(void* data, struct DynamicRenderDataList* renderList, stru
         NULL
     );
 
-    if (dropper->reloadTimer < DROPPER_DROP_TIME) {
+    if (dropper->reloadTimer < DROPPER_DROP_TIME && dropper->cubeType != BoxDropperCubeTypeNone) {
         struct Transform pendingCubePos;
         boxDropperFakePos(dropper, &pendingCubePos);
 
@@ -107,6 +106,7 @@ void boxDropperInit(struct BoxDropper* dropper, struct BoxDropperDefinition* def
 
     skAnimatorInit(&dropper->animator, PROPS_BOX_DROPPER_DEFAULT_BONES_COUNT);
 
+    dropper->cubeType = definition->cubeType;
     dropper->flags = 0;
     dropper->reloadTimer = DROPPER_RELOAD_TIME;
 
@@ -142,22 +142,26 @@ void boxDropperUpdate(struct BoxDropper* dropper) {
         dropper->flags |= BoxDropperFlagsCubeRequested;
     }
 
-    if (signalIsSet && !(dropper->flags & BoxDropperFlagsCubeIsActive)) {
+    if (signalIsSet && dropper->cubeType != BoxDropperCubeTypeNone && !(dropper->flags & BoxDropperFlagsCubeIsActive)) {
         dropper->flags |= BoxDropperFlagsCubeRequested;
     }
 
     if (dropper->reloadTimer == 0.0f && ((dropper->flags & (BoxDropperFlagsCubeIsActive | BoxDropperFlagsCubeRequested)) == BoxDropperFlagsCubeRequested)) {
-        struct Transform pendingCubePos;
-        boxDropperFakePos(dropper, &pendingCubePos);
+        if (dropper->cubeType != BoxDropperCubeTypeNone) {
+            struct Transform pendingCubePos;
+            boxDropperFakePos(dropper, &pendingCubePos);
 
-        decorObjectInit(&dropper->activeCube, decorObjectDefinitionForId(DECOR_TYPE_CUBE_UNIMPORTANT), &pendingCubePos, dropper->roomIndex);
+            decorObjectInit(&dropper->activeCube, decorObjectDefinitionForId(DECOR_TYPE_CUBE_UNIMPORTANT), &pendingCubePos, dropper->roomIndex);
+            dropper->flags |= BoxDropperFlagsCubeIsActive;
+
+            // Only show this for non-empty droppers to avoid non-gameplay-critical spam
+            hudShowSubtitle(&gScene.hud, ESCAPE_CAKE_RIDE_1, SubtitleTypeCaption);
+        }
+
         skAnimatorRunClip(&dropper->animator, dynamicAssetClip(PROPS_BOX_DROPPER_DYNAMIC_ANIMATED_MODEL, PROPS_BOX_DROPPER_ARMATURE_DROPCUBE_CLIP_INDEX), 0.0f, 0);
-        soundPlayerPlay(soundsReleaseCube, 5.0f, 1.0f, &dropper->activeCube.rigidBody.transform.position, &gZeroVec, SoundTypeAll);
-        hudShowSubtitle(&gScene.hud, ESCAPE_CAKE_RIDE_1, SubtitleTypeCaption);
+        soundPlayerPlay(soundsReleaseCube, 2.5f, 1.0f, &dropper->transform.position, &gZeroVec, SoundTypeAll);
 
         dropper->flags &= ~BoxDropperFlagsCubeRequested;
-        dropper->flags |= BoxDropperFlagsCubeIsActive;
-
         dropper->reloadTimer = DROPPER_RELOAD_TIME;
     }
 
