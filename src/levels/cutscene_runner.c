@@ -203,6 +203,9 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         case CutsceneStepTypeDelay:
             runner->state.delay = step->delay;
             break;
+        case CutsceneStepTypeDelayRandom:
+            runner->state.delay = randomInRangef(step->delayRandom.min, step->delayRandom.max);
+            break;
         case CutsceneStepTypeWaitForSignal:
             runner->state.waitForSignal.currentFrame = step->waitForSignal.forFrames;
             break;
@@ -364,6 +367,7 @@ int cutsceneRunnerUpdateCurrentStep(struct CutsceneRunner* runner) {
             return result;
         }
         case CutsceneStepTypeDelay:
+        case CutsceneStepTypeDelayRandom:
             runner->state.delay -= FIXED_DELTA_TIME;
             return runner->state.delay <= 0.0f;
         case CutsceneStepTypeWaitForSignal:

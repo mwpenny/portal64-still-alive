@@ -1,9 +1,9 @@
 # Cutscenes
 
 Cutscenes are scripted sequences of steps which can be executed by the game
-in response to [triggers](../level_objects/trigger.md) or other cutscenes. Unlike
-typical usage of the term "cutscene", most do not take control away from the
-player and are instead more similar to background threads.
+in response to [triggers](../level_objects/trigger.md) or other cutscenes.
+Unlike typical usage of the term "cutscene", most do not take control away
+from the player and are instead more similar to background threads.
 
 ## Definition
 
@@ -36,8 +36,10 @@ cutscenes:
     - set_signal open_door
 ```
 
-Multiple cutscenes can be running at once, and triggered cutscenes are stopped
-after their final step is executed.
+Multiple cutscenes can be running at once. On each game tick, each running
+cutscene is advanced until an unsatisfied blocking step is encountered.
+A cutscene is stopped after its final step is executed or another cutscene
+uses `stop_cutscene` to end it.
 
 ## Step types
 
@@ -50,6 +52,7 @@ See the pages below for details on specific cutscene steps.
 | [q_sound](./q_sound.md)                       | Queues a sound to be played on a channel    |
 | [wait_for_channel](./wait_for_channel.md)     | Waits for a sound channel to be available   |
 | [delay](./delay.md)                           | Pauses for a specified duration             |
+| [delay_random](./delay_random.md)             | Pauses for a random duration within a range |
 | [open_portal](./open_portal.md)               | Opens a portal at a location                |
 | [close_portal](./close_portal.md)             | Closes a portal at a location               |
 | [set_signal](./set_signal.md)                 | Changes a signal's default state to set     |

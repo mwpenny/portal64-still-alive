@@ -15,7 +15,7 @@ int randomInRange(int min, int maxPlusOne) {
 }
 
 float randomInRangef(float min, float max) {
-    return randomInt() * (max - min) * (1.0f / MAX_INT_VALUE) + min;
+    return mathfRandomFloat() * (max - min) + min;
 }
 
 float fabsf(float input) {
@@ -78,7 +78,7 @@ float mathfRemap(float value, float oldMin, float oldMax, float newMin, float ne
 }
 
 float mathfRandomFloat() {
-    return (float)randomInt() / (float)0x7fff;
+    return (float)randomInt() / (float)MAX_INT_VALUE;
 }
 
 float clampf(float input, float min, float max) {

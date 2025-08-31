@@ -49,6 +49,7 @@ enum CutsceneStepType {
     CutsceneStepTypeQueueSound,
     CutsceneStepTypeWaitForChannel,
     CutsceneStepTypeDelay,
+    CutsceneStepTypeDelayRandom,
     CutsceneStepTypeOpenPortal,
     CutsceneStepTypeSetSignal,
     CutsceneStepTypeWaitForSignal,
@@ -121,6 +122,10 @@ struct CutsceneStep {
             u16 portalIndex;
         } closePortal;
         float delay;
+        struct {
+            float min;
+            float max;
+        } delayRandom;
         struct {
             u16 signalIndex;
             u16 signalValue;

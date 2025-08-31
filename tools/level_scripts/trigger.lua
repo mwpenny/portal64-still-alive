@@ -116,6 +116,12 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
     elseif step.command == "delay" and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeDelay')
         result.delay = tonumber(step.args[1])
+    elseif step.command =="delay_random" and #step.args >= 2 then
+        result.type = sk_definition_writer.raw('CutsceneStepTypeDelayRandom')
+        result.delayRandom = {
+            min = tonumber(step.args[1]),
+            max = tonumber(step.args[2]),
+        }
     elseif step.command == "open_portal" and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeOpenPortal')
         result.openPortal = {
