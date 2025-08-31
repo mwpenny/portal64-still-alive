@@ -326,6 +326,9 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 if (gScene.signage[i].testChamberNumber == step->activateSignage.testChamberIndex) {
                     signageActivate(&gScene.signage[i]);
                 }
+                else {
+                    signageDeactivate(&gScene.signage[i]);
+                }
             }
             break;
         case CutsceneStepPlayEffect:

@@ -1,9 +1,12 @@
 #include "signage.h"
 
+#include "audio/soundplayer.h"
+#include "audio/clips.h"
 #include "defs.h"
 #include "graphics/color.h"
 #include "levels/levels.h"
 #include "scene/dynamic_scene.h"
+#include "scene/scene.h"
 #include "system/time.h"
 
 #include "codegen/assets/materials/static.h"
@@ -97,7 +100,11 @@ static struct SignStateFrame gSignageFrames[] = {
     {.backlightColor = 2, .lcdColor = PROGRESS_ENABLE_LCD_COLOR_INDEX, .symbolOffColor = 3, .symbolOnColor = 3},
 };
 
-#define SIGNAGE_FRAME_COUNT (sizeof(gSignageFrames) / sizeof(*gSignageFrames))
+#define SIGNAGE_HUM_VOLUME            0.6f
+#define SIGNAGE_HUM_MENU_VOLUME       2.0f
+#define SIGNAGE_HUM_FADE_START_TIME   10.0f
+#define SIGNAGE_HUM_FADE_TIME         10.0f
+#define SIGNAGE_FRAME_COUNT           (sizeof(gSignageFrames) / sizeof(*gSignageFrames))
 
 static short gCurrentSignageIndex = -1;
 static struct SignStateFrame gCurrentSignageFrame = {3, 3, 3, 3};
@@ -304,6 +311,9 @@ void signageInit(struct Signage* signage, struct SignageDefinition* definition) 
     signage->roomIndex = definition->roomIndex;
     signage->testChamberNumber = definition->testChamberNumber;
     signage->currentFrame = -1;
+    signage->currentSoundId = SOUND_ID_NONE;
+    signage->currentHumVolume = 0.0f;
+    signage->humFadeElapTime = 0.0f;
 
     int dynamicId = dynamicSceneAdd(signage, signageRender, &signage->transform.position, 1.7f);
 
@@ -315,10 +325,63 @@ void signageUpdate(struct Signage* signage) {
     if (signage->currentFrame >= 0 && signage->currentFrame + 1 < SIGNAGE_FRAME_COUNT) {
         ++signage->currentFrame;
     }
+
+    if (signage->currentFrame > 0) {
+        if (signage->currentSoundId != SOUND_ID_NONE) {
+            float humVolume = SIGNAGE_HUM_VOLUME;
+
+            if (gScene.mainMenuMode) {
+                humVolume = SIGNAGE_HUM_MENU_VOLUME;
+                signage->humFadeElapTime += FIXED_DELTA_TIME;
+
+                if (signage->humFadeElapTime > SIGNAGE_HUM_FADE_START_TIME) {
+                    float fadeAmount = clampf(1.0f - ((signage->humFadeElapTime - SIGNAGE_HUM_FADE_START_TIME) / SIGNAGE_HUM_FADE_TIME), 0.0f, 1.0f);
+                    humVolume *= fadeAmount;
+               
+                    // Stop the sound and fade logic once it is inaudible
+                    if (humVolume == 0.0f) {
+                        soundPlayerStop(signage->currentSoundId);
+                        signage->currentSoundId = SOUND_ID_NONE;
+                        signage->currentHumVolume = 0.0f;
+                        return;
+                    }
+                }
+            }
+
+            // Flicker the hum sound on and off with the backlight
+            struct SignStateFrame frame = gSignageFrames[signage->currentFrame];
+            humVolume *= (frame.backlightColor == 2);
+
+            if (signage->currentHumVolume != humVolume) {
+                signage->currentHumVolume = humVolume;
+                soundPlayerAdjustVolume(signage->currentSoundId, humVolume);
+            }
+        }
+        else {
+            // Start the sound if it is not currently playing
+            // This occurs when a game save is loaded since activate is never called
+            if (!gScene.mainMenuMode) {
+                signage->currentHumVolume = SIGNAGE_HUM_VOLUME;
+                signage->currentSoundId = soundPlayerPlay(soundsSignageHum, SIGNAGE_HUM_VOLUME, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
+            }
+        }
+    }
 }
 
 void signageActivate(struct Signage* signage) {
     if (signage->currentFrame == -1) {
         signage->currentFrame = 0;
+
+        signage->currentHumVolume = 0.0f;
+        signage->currentSoundId = soundPlayerPlay(soundsSignageHum, 0.0f, 1.0f, &signage->transform.position, &gZeroVec, SoundTypeAll);
+    }
+}
+
+void signageDeactivate(struct Signage* signage) {
+    signage->currentFrame = -1;
+
+    if (signage->currentSoundId != SOUND_ID_NONE) {
+        soundPlayerStop(signage->currentSoundId);
+        signage->currentSoundId = SOUND_ID_NONE;
     }
 }
