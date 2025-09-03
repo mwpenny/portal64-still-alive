@@ -212,6 +212,21 @@ materials:
       tileSizeS: 0.5
       tileSizeT: 0.5
 
+  metalwall061f:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalwall061f.png
+      siz: G_IM_SIZ_16b
+      s:
+        mirror: true
+      t:
+        mirror: true
+
+    gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
 
   metal_modular_floor001:
     gDPSetTile:
@@ -360,6 +375,47 @@ materials:
       tileSizeS: 0.5
       tileSizeT: 0.125
 
+  concrete_bts_floor002a:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/concrete/concrete_bts_floor002a.png
+      siz: G_IM_SIZ_4b
+      twoTone: true
+
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode:
+      - color: [PRIMITIVE, "ENVIRONMENT", TEXEL0, "ENVIRONMENT"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["COMBINED", "0", "SHADE", "0"]
+        alpha: ["0", "0", "0", "1"]
+
+    gDPSetRenderMode:
+      - G_RM_PASS
+      - G_RM_ZB_OPA_SURF
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+  concrete_bts_modular_wall001c:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/concrete/concrete_bts_modular_wall001c.png
+      siz: G_IM_SIZ_4b
+      twoTone: true
+
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode:
+      - color: [PRIMITIVE, "ENVIRONMENT", TEXEL0, "ENVIRONMENT"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["COMBINED", "0", "SHADE", "0"]
+        alpha: ["0", "0", "0", "1"]
+
+    gDPSetRenderMode:
+      - G_RM_PASS
+      - G_RM_ZB_OPA_SURF
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
 
   concrete_modular_ceiling001a:
     gDPSetTile:
