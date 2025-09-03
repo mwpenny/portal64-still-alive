@@ -240,7 +240,10 @@ void playerHandleCollision(struct Player* player) {
             player->body.velocity.y = MAX(player->body.velocity.y, prevVelY);
         }
 
-        if (((isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB)) && !playerIsDead(player))) {
+        if (!(player->flags & PlayerIsInvincible) &&
+            !playerIsDead(player) &&
+            (isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB))
+        ) {
             playerDamage(player, PLAYER_MAX_HEALTH, PlayerDamageTypeEnemy);
             soundPlayerPlay(soundsBallKill, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         }
