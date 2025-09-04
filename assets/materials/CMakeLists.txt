@@ -24,6 +24,8 @@ set(TEXTURES
     gamepadui/portal_logo
     glass/glasswindow_frosted_002
     glass/refract01_dx8
+    metal/metalbeam_bts_001a
+    metal/metalfloor_bts_001b
     metal/metalgrate018
     metal/metal_modular_floor001
     metal/metalwall061f
