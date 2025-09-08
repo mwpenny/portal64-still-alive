@@ -1,0 +1,1 @@
+-crop 240x240+0+16 -flip -flop -resize 32x32

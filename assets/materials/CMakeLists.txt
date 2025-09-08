@@ -30,6 +30,7 @@ set(TEXTURES
     metal/metal_modular_floor001
     metal/metalwall061f
     metal/metalwall048b
+    metal/metalwall060a
     metal/metalwall_bts_006a
     models/player/chell_body
     models/player/chell_face
