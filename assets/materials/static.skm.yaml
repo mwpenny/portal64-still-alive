@@ -119,6 +119,40 @@ materials:
 
       staticLit: true
 
+  fence_alpha:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props_wasteland/fence_alpha.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode: G_CC_MODULATERGBA
+    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetAlphaCompare: G_AC_THRESHOLD
+    gDPSetRenderMode: G_RM_AA_ZB_TEX_EDGE
+    gDPSetBlendColor:
+      r: 255
+      g: 255
+      b: 255
+      a: 128
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING, G_CULL_BACK]
+
+  prison_yard001:
+    gDPSetTile:
+        filename: ../../portal_pak_modified/materials/models/props_wasteland/prison_yard001.png
+        siz: G_IM_SIZ_16b
+        s:
+          mirror: true
+        t:
+          mirror: true
+
+    gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
   concrete/observationwall_001a:
     gDPSetTile: 
       filename: ../../portal_pak_modified/materials/concrete/observationwall_001a.png
@@ -222,6 +256,7 @@ materials:
         mirror: true
 
     gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
 
     gSPGeometryMode:
       set: [G_SHADE]
@@ -281,22 +316,6 @@ materials:
       tileSizeS: 1
       tileSizeT: 1
 
-  metalwall_bts_006a_shade:
-    gDPSetTile:
-      filename: ../../portal_pak_modified/materials/metal/metalwall_bts_006a.png
-      siz: G_IM_SIZ_16b
-
-    gSPGeometryMode:
-      set: [G_SHADE]
-      clear: [G_LIGHTING]
-
-    gDPSetCombineMode: G_CC_MODULATERGB
-    gDPSetCycleType: G_CYC_1CYCLE
-
-    properties:
-      tileSizeS: 1
-      tileSizeT: 1
-
   metalbeam_bts_001a:
     gDPSetTile:
         filename: ../../portal_pak_modified/materials/metal/metalbeam_bts_001a.png
@@ -307,6 +326,7 @@ materials:
           mirror: true
 
     gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
     gSPGeometryMode:
       set: [G_SHADE]
       clear: [G_LIGHTING]
@@ -454,6 +474,7 @@ materials:
       - color: ["COMBINED", "0", "SHADE", "0"]
         alpha: ["0", "0", "0", "1"]
 
+    gDPSetCycleType: G_CYC_1CYCLE
     gDPSetRenderMode:
       - G_RM_PASS
       - G_RM_ZB_OPA_SURF
@@ -677,7 +698,7 @@ materials:
     t:
         wrap: false
 
-    gDPSetCombineMode: G_CC_MODULATERGBA
+    gDPSetCombineMode: G_CC_MODULATERGB
     gDPSetCycleType: G_CYC_1CYCLE
 
     gSPGeometryMode:

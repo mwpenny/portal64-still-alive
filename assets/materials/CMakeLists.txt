@@ -56,6 +56,8 @@ set(TEXTURES
     models/props_animsigns/awe_total
     models/props_animsigns/newsignage_back02
     models/props_c17/door01a_skin6
+    models/props_wasteland/fence_alpha
+    models/props_wasteland/prison_yard001
     models/weapons/v_models/v_portalgun/v_portalgun
     nature/hazard_liquid
     overlays/overlay_handprint
