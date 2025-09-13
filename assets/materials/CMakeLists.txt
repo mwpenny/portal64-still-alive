@@ -28,6 +28,7 @@ set(TEXTURES
     metal/metalfloor_bts_001b
     metal/metalgrate018
     metal/metal_modular_floor001
+    metal/metalvent014a
     metal/metalwall061f
     metal/metalwall048b
     metal/metalwall060a
@@ -56,6 +57,7 @@ set(TEXTURES
     models/props_animsigns/awe_total
     models/props_animsigns/newsignage_back02
     models/props_c17/door01a_skin6
+    models/props_c17/substation_transformer01b
     models/props_wasteland/fence_alpha
     models/props_wasteland/prison_yard001
     models/weapons/v_models/v_portalgun/v_portalgun
@@ -320,6 +322,11 @@ set_property(SOURCE models/props/round_elevator_sheet_1.ims
 set_property(SOURCE models/props/round_elevator_sheet_3.ims
     PROPERTY ADDITIONAL_OUTPUTS
         models/props/elevator_sign
+)
+set_property(SOURCE models/props_c17/substation_transformer01b.ims
+    PROPERTY ADDITIONAL_OUTPUTS
+        models/props_c17/substation_transformer01b_center
+        models/props_c17/substation_transformer01b_rim
 )
 set_property(SOURCE signage/clock/countdown.ims
     PROPERTY ADDITIONAL_DEPS

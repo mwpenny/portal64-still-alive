@@ -1,0 +1,16 @@
+\(
+    +clone
+    -crop 64x64+391+281
+    -resize 32x32
+    -write portal_pak_modified/materials/models/props_c17/substation_transformer01b_center.png
+    +delete
+\)
+\(
+    +clone
+    -crop 64x64+391+331
+    -resize 32x32
+    -write portal_pak_modified/materials/models/props_c17/substation_transformer01b_rim.png
+    +delete
+\)
+-crop 64x64+443+112
+-resize 32x32

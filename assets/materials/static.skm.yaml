@@ -119,6 +119,46 @@ materials:
 
       staticLit: true
 
+  substation_transformer01b:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props_c17/substation_transformer01b.png
+      siz: G_IM_SIZ_16b
+      s:
+        mirror: true
+      t:
+        mirror: true
+
+    gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+  substation_transformer01b_center:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props_c17/substation_transformer01b_center.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+  substation_transformer01b_rim:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props_c17/substation_transformer01b_rim.png
+      siz: G_IM_SIZ_16b
+
+    gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
   fence_alpha:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/models/props_wasteland/fence_alpha.png
@@ -257,6 +297,23 @@ materials:
 
     gDPSetCombineMode: G_CC_MODULATERGB
     gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+  metalvent014a:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalvent014a.png
+      siz: G_IM_SIZ_16b
+      s:
+        mirror: true
+      t:
+        mirror: true
+
+    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetRenderMode: G_RM_RA_ZB_OPA_DECAL
 
     gSPGeometryMode:
       set: [G_SHADE]
