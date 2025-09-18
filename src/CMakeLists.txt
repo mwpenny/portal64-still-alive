@@ -45,7 +45,6 @@ target_sources(engine INTERFACE
     levels/credits.c
     levels/cutscene_runner.c
     levels/intro.c
-    levels/level_definition.c
     levels/levels.c
     levels/material_state.c
     levels/static_render.c

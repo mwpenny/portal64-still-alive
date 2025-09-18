@@ -96,7 +96,6 @@ set(SOUND_SCRIPTS
     physics/flesh/flesh_impact_bullet3.sox
     physics/flesh/flesh_impact_bullet4.sox
     physics/flesh/flesh_impact_bullet5.sox
-    plats/elevator_stop1.sox
     player/footsteps/concrete1.sox
     player/footsteps/concrete2.sox
     player/footsteps/concrete3.sox
@@ -107,10 +106,9 @@ set(SOUND_SCRIPTS
     player/portal_exit2.sox
     ui/buttonclickrelease.sox
     ui/buttonrollover.sox
+    vehicles/apc/apc_idle1.jsox
     vehicles/apc/apc_shutdown.sox
     vehicles/apc/apc_start_loop3.jsox
-    vehicles/tank_turret_loop1.sox
-    vehicles/tank_turret_start1.sox
     vo/aperture_ai/ding_off.sox
     vo/aperture_ai/ding_on.sox
     weapons/cguard/charging.sox
@@ -321,8 +319,8 @@ set(INSTRUMENT_BANKS
     ambient/music/looping_radio_mix.ins
     doors/door_metal_medium_open1.ins
     npc/turret_floor/shoot1.ins
+    vehicles/apc/apc_idle1.ins
     vehicles/fast_windloop1.ins
-    vehicles/tank_turret_loop1.ins
     weapons/physcannon/energy_sing_loop4.ins
 )
 
