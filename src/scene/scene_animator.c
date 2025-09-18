@@ -75,7 +75,10 @@ void sceneAnimatorUpdate(struct SceneAnimator* sceneAnimator) {
         skArmatureGetCenter(&sceneAnimator->armatures[i], &currentPos);
         vector3Scale(&currentPos, &currentPos, 1.0f / SCENE_SCALE);
 
-        int isMoving = currentPos.x != state->lastPosition.x || currentPos.y != state->lastPosition.y || currentPos.z != state->lastPosition.z;
+        int isMoving = skAnimatorIsRunning(animator) &&
+            (currentPos.x != state->lastPosition.x ||
+             currentPos.y != state->lastPosition.y ||
+             currentPos.z != state->lastPosition.z);
         int wasMoving = (state->flags & SceneAnimatorStateWasMoving) != 0;
 
         if (audioInfo->loopSoundId != SOUND_ID_NONE) {
@@ -90,11 +93,11 @@ void sceneAnimatorUpdate(struct SceneAnimator* sceneAnimator) {
         }
 
         if (isMoving && !wasMoving && audioInfo->startSoundId != SOUND_ID_NONE) {
-            soundPlayerPlay(audioInfo->startSoundId, 1.0f, audioInfo->pitch, &currentPos, &gZeroVec, SoundTypeAll);
+            soundPlayerPlay(audioInfo->startSoundId, audioInfo->volume, audioInfo->pitch, &currentPos, &gZeroVec, SoundTypeAll);
         }
 
         if (wasMoving && !isMoving && audioInfo->endSoundId != SOUND_ID_NONE) {
-            soundPlayerPlay(audioInfo->endSoundId, 1.0f, audioInfo->pitch, &currentPos, &gZeroVec, SoundTypeAll);
+            soundPlayerPlay(audioInfo->endSoundId, audioInfo->volume, audioInfo->pitch, &currentPos, &gZeroVec, SoundTypeAll);
         }
 
         state->lastPosition = currentPos;
