@@ -36,10 +36,11 @@ name, which serves as a key to look up their actual data elsewhere
 (see [Level File Formats](../file_formats.md#materials)) and to denote which
 surfaces are portalable. The following material names allow portals to be placed:
 
-* `concrete_modular_wall001b`
-* `concrete_modular_wall001d`
 * `concrete_modular_ceiling001a`
 * `concrete_modular_floor001a`
+* `concrete_modular_wall001b`
+* `concrete_modular_wall001d`
+* `concrete_bts_modular_wall001c`
 * `transparent_portal_surface`
 
 This behavior can be overridden by using the `accept_portals` or `no_portals`
