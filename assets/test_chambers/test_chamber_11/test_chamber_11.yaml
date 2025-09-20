@@ -23,6 +23,32 @@ cutscenes:
     - save_checkpoint
   CHECKPOINT_3:
     - save_checkpoint
+  WALL_GLITCH:
+    - wait_for_signal not_cube_near_wall 5
+
+    - play_animation moving_wall wall_glitch
+
+    - delay 0.15
+    - play_effect Spark moving_wall_spark_1
+    - start_sound ZAP1 1 1 moving_wall_spark_1
+
+    - delay 0.1
+    - play_effect Spark moving_wall_spark_2
+    - start_sound ZAP2 1 1 moving_wall_spark_2
+
+    - delay 0.1
+    - play_effect Spark moving_wall_spark_1
+    - start_sound ZAP3 1 1 moving_wall_spark_1
+
+    - delay 0.1
+    - play_effect Spark moving_wall_spark_2
+    - start_sound ZAP2 1 1 moving_wall_spark_2
+
+    - delay 0.07
+    - play_effect Spark moving_wall_spark_1
+    - start_sound ZAP1 1 1 moving_wall_spark_1
+  RATTMANN_DEN:
+    - q_sound PORTAL_NO_CAKE_FOR_YOU CH_MUSIC
   CUBE_DROPPER:
     - label loop
 
@@ -83,3 +109,4 @@ cutscenes:
     - goto loop
 operators:
   - near_cube_dropper = near_cube_dropper_1 or near_cube_dropper_2
+  - not_cube_near_wall = not cube_near_wall

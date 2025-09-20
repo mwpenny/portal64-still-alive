@@ -305,6 +305,7 @@ set(RUSSIAN_EXCLUDED_LOCALIZED_SOUND_SCRIPTS
 
 set(MUSIC_SCRIPTS
     music/portal_android_hell.sox
+    music/portal_no_cake_for_you.sox
     music/portal_procedural_jiggle_bone.sox
     music/portal_self_esteem_fund.sox
     music/portal_still_alive.sox
