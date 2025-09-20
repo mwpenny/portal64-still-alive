@@ -54,6 +54,7 @@ for _, decor_entry in pairs(sk_scene.nodes_for_type('@decor')) do
         rotation = rotation,
         roomIndex = room_index,
         decorId = sk_definition_writer.raw('DECOR_TYPE_' .. decor_entry.arguments[1]),
+        startAsleep = sk_scene.find_flag_argument(decor_entry.arguments, "start_asleep")
     })
 end
 

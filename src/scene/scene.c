@@ -196,7 +196,11 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
             decorTransform.scale = gOneVec;
             scene->decor[i] = decorObjectNew(decorObjectDefinitionForId(decorDef->decorId), &decorTransform, decorDef->roomIndex);
 
-            if(mainMenuMode == 1) {
+            if (decorDef->startAsleep) {
+                scene->decor[i]->rigidBody.flags |= RigidBodyIsSleeping;
+            }
+
+            if (mainMenuMode == 1) {
                 scene->decor[i]->definition->flags |= DecorObjectFlagsMuted;
             } else {
                 scene->decor[i]->definition->flags &= ~(DecorObjectFlagsMuted);

@@ -5,14 +5,15 @@ A generic dynamic object without its own dedicated logic.
 ## Name Structure
 
 ```
-@decor TYPE
+@decor TYPE [start_asleep]
 ```
 
 ## Arguments
 
-| Name   | Description                                                    |
-| ------ | -------------------------------------------------------------- |
-| `TYPE` | The type of decor. Used to determine its model and properties. |
+| Name                      | Description                                                                |
+| ------------------------- | -------------------------------------------------------------------------- |
+| `TYPE`                    | The type of decor. Used to determine its model and properties.             |
+| `start_asleep` (optional) | If specified, physics are not applied to the decor until it is acted upon. |
 
 ## Notes
 

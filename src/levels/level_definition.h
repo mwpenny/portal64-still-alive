@@ -252,6 +252,7 @@ struct DecorDefinition {
     struct Quaternion rotation;
     short roomIndex;
     short decorId;
+    u8 startAsleep;
 };
 
 struct FizzlerDefinition {

@@ -190,15 +190,15 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
 
         serializeRead(serializer, &id, sizeof(short));
 
-        struct Transform transform;
+        struct Transform originalTransform;
         short originalRoom;
 
-        serializeRead(serializer, &transform.position, sizeof(struct Vector3));
-        serializeRead(serializer, &transform.rotation, sizeof(struct Quaternion));
-        transform.scale = gOneVec;
+        serializeRead(serializer, &originalTransform.position, sizeof(struct Vector3));
+        serializeRead(serializer, &originalTransform.rotation, sizeof(struct Quaternion));
+        originalTransform.scale = gOneVec;
         serializeRead(serializer, &originalRoom, sizeof(short));
 
-        struct DecorObject* entry = decorObjectNew(decorObjectDefinitionForId(id), &transform, originalRoom);
+        struct DecorObject* entry = decorObjectNew(decorObjectDefinitionForId(id), &originalTransform, originalRoom);
 
         serializeRead(serializer, &entry->rigidBody.transform, sizeof(struct PartialTransform));
         serializeRead(serializer, &entry->rigidBody.velocity, sizeof(struct Vector3));
