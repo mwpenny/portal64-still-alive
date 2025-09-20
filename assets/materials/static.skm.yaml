@@ -373,6 +373,35 @@ materials:
       tileSizeS: 1
       tileSizeT: 1
 
+  metalwall_bts_006a_shade:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalwall_bts_006a.png
+      siz: G_IM_SIZ_16b
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode:
+      - color: ["TEXEL0", "0", "SHADE", "0"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["COMBINED", "PRIMITIVE", "SHADE_ALPHA", "PRIMITIVE"]
+        alpha: ["0", "0", "0", "1"]
+
+    gDPSetRenderMode:
+      - G_RM_PASS
+      - G_RM_ZB_OPA_SURF
+
+    gDPSetPrimColor:
+      r: 217
+      g: 71
+      b: 24
+
+    properties:
+      tileSizeS: 1
+      tileSizeT: 1
+
   metalbeam_bts_001a:
     gDPSetTile:
         filename: ../../portal_pak_modified/materials/metal/metalbeam_bts_001a.png
