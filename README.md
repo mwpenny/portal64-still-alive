@@ -85,3 +85,5 @@ Next, install the dependencies. There are two supported ways to do this:
 
 With everything set up, follow the instructions at
 [Building the Game](./documentation/building/building.md).
+
+To run and save properly, the game expects a cartridge with 32 KB of SRAM.
