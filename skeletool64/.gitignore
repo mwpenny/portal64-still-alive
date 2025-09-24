@@ -1,13 +1,4 @@
 *.o
-*.d
 .vscode/
-assimp/
-cimg/
-yaml-cpp/
-output/
-skeletool64*
-dna.txt
 build/
-images/
-examples/*.h
-examples/*.c
+skeletool64*
