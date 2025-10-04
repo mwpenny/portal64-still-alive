@@ -58,6 +58,7 @@ set(DYNAMIC_MODELS
     props/security_camera
     props/switch001
     props/turret_01
+    props/turret_01_eye
     signage/clock
     signage/clock_digits
 )

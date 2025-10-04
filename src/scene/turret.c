@@ -16,6 +16,7 @@
 #include "codegen/assets/audio/languages.h"
 #include "codegen/assets/materials/static.h"
 #include "codegen/assets/models/dynamic_animated_model_list.h"
+#include "codegen/assets/models/dynamic_model_list.h"
 #include "codegen/assets/models/props/turret_01.h"
 
 #define TURRET_MASS                   2.0f
@@ -60,6 +61,11 @@
 #define TURRET_TIPPED_DOT             0.17f  // acos(0.17)    = ~80 degrees
 #define TURRET_TIPPED_DURATION        3.0f
 #define TURRET_TIPPED_ROTATE_SPEED    8.0f
+
+#define TURRET_DYING_DURATION         3.0f
+#define TURRET_DYING_LASER_OFF_DELAY  1.5f
+#define TURRET_DYING_LASER_OFF_START  (TURRET_DYING_DURATION - TURRET_DYING_LASER_OFF_DELAY)
+#define TURRET_DYING_MAX_EYE_FADE     130
 
 #define TURRET_AUTOTIP_MAX_VEL        1.0f
 #define TURRET_AUTOTIP_DIR_MAX_DOT    0.5f   // acos(0.5) * 2 = 120 degree range
@@ -306,9 +312,43 @@ static void turretRender(void* data, struct DynamicRenderDataList* renderList, s
 
     skCalculateTransforms(&turret->armature, armature);
 
+    // Turrets are fizzlable and so their material can differ from the one their
+    // display list was generated against. As a result, using a separate
+    // material for the eye fade would cause graphical issues when reverting
+    // back to the base material.
+    //
+    // Instead, the turret materials (normal and fizzled) are fade-capable, and
+    // the eye is rendered as an attachment so we can control the fade amount
+    // before/after it is drawn and not affect the rest of the turret.
+
+    int eyeFade;
+    if (turret->state == TurretStateDead) {
+        eyeFade = TURRET_DYING_MAX_EYE_FADE;
+    } else if (turret->state == TurretStateDying) {
+        float elapsed = 1.0f - (turret->stateTimer * (1.0f / TURRET_DYING_DURATION));
+        eyeFade = elapsed * TURRET_DYING_MAX_EYE_FADE;
+    } else {
+        eyeFade = 0;
+    }
+
+    Gfx* dlChunk = renderStateAllocateDLChunk(renderState, 7);
+    Gfx* curr = dlChunk;
+
+    Gfx* eyeGfx = curr;
+    gDPSetEnvColor(curr++, eyeFade, eyeFade, eyeFade, 0);
+    gSPDisplayList(curr++, dynamicAssetModel(PROPS_TURRET_01_EYE_DYNAMIC_MODEL));
+    gDPSetEnvColor(curr++, 0, 0, 0, 0);
+    gSPEndDisplayList(curr++);
+
+    Gfx* turretGfx = decorBuildFizzleGfx(turret->armature.displayList, turret->fizzleTime, renderState);
+    Gfx* finalGfx = curr;
+    gSPSegment(curr++, BONE_ATTACHMENT_SEGMENT, osVirtualToPhysical(eyeGfx));
+    gSPDisplayList(curr++, turretGfx);
+    gSPEndDisplayList(curr++);
+
     dynamicRenderListAddDataTouchingPortal(
         renderList,
-        decorBuildFizzleGfx(turret->armature.displayList, turret->fizzleTime, renderState),
+        finalGfx,
         matrix,
         turret->fizzleTime > 0.0f ? TURRET_FIZZLED_INDEX : TURRET_INDEX,
         &turret->rigidBody.transform.position,
@@ -423,6 +463,7 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     collisionObjectUpdateBB(&turret->collisionObject);
 
     struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_TURRET_01_DYNAMIC_ANIMATED_MODEL);
+    dynamicAssetModelPreload(PROPS_TURRET_01_EYE_DYNAMIC_MODEL);
     skArmatureInit(&turret->armature, armature->armature);
 
     laserInit(
@@ -715,18 +756,42 @@ static void turretEnterSearching(struct Turret* turret) {
     turret->state = TurretStateSearching;
 }
 
-static void turretEnterClosing(struct Turret* turret, enum TurretState nextState, float nextStateTimer, short soundId, short subtitleId) {
+static void turretEnterClosing(struct Turret* turret, enum TurretState nextState, float nextStateTimer) {
     quatIdent(&turret->targetRotation);
     turretStartRotation(turret, TURRET_ROTATE_SPEED);
 
     struct ClosingStateData* state = &turret->stateData.closing;
     state->nextState = nextState;
     state->nextStateTimer = nextStateTimer;
-    state->soundId = soundId;
-    state->subtitleId = subtitleId;
 
     turret->stateTimer = TURRET_CLOSE_DELAY;
     turret->state = TurretStateClosing;
+}
+
+static void turretPlayClosingSounds(struct Turret* turret) {
+    struct ClosingStateData* state = &turret->stateData.closing;
+
+    if (state->nextState == TurretStateIdle) {
+        turretPlaySound(
+            turret,
+            TurretSoundTypeDialogue,
+            RANDOM_TURRET_SOUND(sTurretRetireSounds),
+            NPC_FLOORTURRET_TALKRETIRE
+        );
+    } else if (state->nextState == TurretStateDying) {
+        turretPlaySound(
+            turret,
+            TurretSoundTypeDialogue,
+            RANDOM_TURRET_SOUND(sTurretDisabledSounds),
+            NPC_FLOORTURRET_TALKDISABLED
+        );
+        turretPlaySound(
+            turret,
+            TurretSoundTypeSfx,
+            SOUNDS_DIE,
+            NPC_FLOORTURRET_DIE
+        );
+    }
 }
 
 static void turretCheckPlayerDetected(struct Turret* turret, struct Player* player, enum TurretState nextState) {
@@ -870,13 +935,7 @@ static void turretUpdateSearching(struct Turret* turret, struct Player* player) 
     }
 
     if (turret->stateTimer <= 0.0f) {
-        turretEnterClosing(
-            turret,
-            TurretStateIdle,
-            TURRET_IDLE_DIALOGUE_DELAY,
-            RANDOM_TURRET_SOUND(sTurretRetireSounds),
-            NPC_FLOORTURRET_TALKRETIRE
-        );
+        turretEnterClosing(turret, TurretStateIdle, TURRET_IDLE_DIALOGUE_DELAY);
     } else {
         turret->stateTimer -= FIXED_DELTA_TIME;
     }
@@ -985,13 +1044,7 @@ static void turretUpdateTipped(struct Turret* turret) {
 
     if (turret->stateTimer <= 0.0f) {
         turretStopShooting(turret);
-        turretEnterClosing(
-            turret,
-            TurretStateDying,
-            0.0f,
-            RANDOM_TURRET_SOUND(sTurretDisabledSounds),
-            NPC_FLOORTURRET_TALKDISABLED
-        );
+        turretEnterClosing(turret, TurretStateDying, TURRET_DYING_DURATION);
     } else {
         turret->stateTimer -= FIXED_DELTA_TIME;
     }
@@ -1002,13 +1055,7 @@ static void turretUpdateClosing(struct Turret* turret, struct Player* player) {
 
     if (turret->stateTimer <= 0.0f) {
         if (turret->flags & TurretFlagsOpen) {
-            turretPlaySound(
-                turret,
-                TurretSoundTypeDialogue,
-                state->soundId,
-                state->subtitleId
-            );
-
+            turretPlayClosingSounds(turret);
             turret->flags &= ~TurretFlagsOpen;
         } else if (turret->openAmount == 0.0f) {
             turret->stateTimer = state->nextStateTimer;
@@ -1025,12 +1072,16 @@ static void turretUpdateClosing(struct Turret* turret, struct Player* player) {
 }
 
 static void turretUpdateDying(struct Turret* turret) {
-    // TODO: fade eye
-
-    if (turret->currentSounds[TurretSoundTypeDialogue] == SOUND_ID_NONE) {
-        laserRemove(&turret->laser);
+    if (turret->stateTimer <= 0.0f) {
         turret->state = TurretStateDead;
+        return;
     }
+
+    if (turret->stateTimer <= TURRET_DYING_LASER_OFF_START) {
+        laserRemove(&turret->laser);
+    }
+
+    turret->stateTimer -= FIXED_DELTA_TIME;
 }
 
 int turretUpdate(struct Turret* turret, struct Player* player) {

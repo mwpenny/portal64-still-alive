@@ -1690,7 +1690,7 @@ materials:
 
     gDPSetCycleType: G_CYC_2CYCLE
     gDPSetCombineMode:
-      - color: ["TEXEL0", "0", "SHADE", "0"]
+      - color: ["TEXEL0", "ENVIRONMENT", "SHADE", "0"]
         alpha: ["0", "0", "0", "1"]
       - color: ["1", "0", "COMBINED", "COMBINED"]
         alpha: ["0", "0", "0", "1"]
@@ -1701,6 +1701,11 @@ materials:
     gSPGeometryMode:
       set: [G_SHADE]
       clear: [G_LIGHTING]
+
+    gDPSetEnvColor:
+      r: 0
+      g: 0
+      b: 0
 
   turret_fizzled:
     gDPSetTile:
@@ -1717,7 +1722,7 @@ materials:
 
     gDPSetCycleType: G_CYC_2CYCLE
     gDPSetCombineMode:
-      - color: ["SHADE", "0", "TEXEL0", "0"]
+      - color: ["SHADE", "ENVIRONMENT", "TEXEL0", "0"]
         alpha: ["0", "0", "0", "PRIMITIVE"]
       - color: ["NOISE", "COMBINED", "PRIMITIVE", "COMBINED"]
         alpha: ["0", "0", "0", "PRIMITIVE"]
@@ -1730,6 +1735,11 @@ materials:
       clear: [G_LIGHTING]
 
     gDPSetFogColor:
+      r: 0
+      g: 0
+      b: 0
+
+    gDPSetEnvColor:
       r: 0
       g: 0
       b: 0

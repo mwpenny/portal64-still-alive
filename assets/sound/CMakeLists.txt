@@ -88,6 +88,7 @@ set(SOUND_SCRIPTS
     doors/garage_stop1.sox
     npc/turret_floor/active.sox
     npc/turret_floor/deploy.sox
+    npc/turret_floor/die.sox
     npc/turret_floor/ping.sox
     npc/turret_floor/retract.sox
     npc/turret_floor/shoot1.jsox

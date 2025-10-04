@@ -14,11 +14,11 @@ sk_definition_writer.add_header('"codegen/assets/strings/strings.h"')
 sk_definition_writer.add_header('"levels/level_definition.h"')
 
 local portalable_surfaces = {
+    concrete_bts_modular_wall001c = true,
     concrete_modular_ceiling001a = true,
     concrete_modular_floor001a = true,
     concrete_modular_wall001b = true,
     concrete_modular_wall001d = true,
-    concrete_bts_modular_wall001c = true,
     transparent_portal_surface = true,
 }
 

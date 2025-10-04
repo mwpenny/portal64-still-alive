@@ -51,8 +51,6 @@ union TurretStateData {
 
     struct ClosingStateData {
         enum TurretState nextState;
-        short soundId;
-        short subtitleId;
         float nextStateTimer;
     } closing;
 };
