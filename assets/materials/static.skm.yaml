@@ -1751,3 +1751,14 @@ materials:
     gSPGeometryMode:
       set: [G_SHADE]
       clear: [G_LIGHTING]
+
+  doorway_cover:
+    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetRenderMode: G_RM_ZB_XLU_SURF
+    gSPGeometryMode:
+      set: [G_LIGHTING]
+      clear: [G_SHADE, G_CULL_BACK]
+
+    gDPSetCombineMode:
+      color: ["0", "0", "0", "ENVIRONMENT"]
+      alpha: ["0", "0", "0", "ENVIRONMENT"]

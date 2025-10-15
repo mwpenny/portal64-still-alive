@@ -38,6 +38,8 @@ sk_definition_writer.add_definition("level", "struct LevelDefinition", "_geo", {
     world = world.world,
     doors = sk_definition_writer.reference_to(world.doors, 1),
     doorCount = #world.doors,
+    doorwayCovers = sk_definition_writer.reference_to(world.doorway_covers, 1),
+    doorwayCoverCount = #world.doorway_covers,
     boxDroppers = sk_definition_writer.reference_to(entities.entities.box_droppers, 1),
     boxDropperCount = #entities.entities.box_droppers,
     buttons = sk_definition_writer.reference_to(entities.entities.buttons, 1),

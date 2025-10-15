@@ -18,6 +18,7 @@
 #include "button.h"
 #include "clock.h"
 #include "door.h"
+#include "doorway_cover.h"
 #include "elevator.h"
 #include "fizzler.h"
 #include "hud.h"
@@ -51,6 +52,7 @@ struct Scene {
     struct DecorObject** decor;
     struct TriggerListener* triggerListeners;
     struct Door* doors;
+    struct DoorwayCover* doorwayCovers;
     struct Fizzler* fizzlers;
     struct Elevator* elevators;
     struct Pedestal* pedestals;
@@ -74,6 +76,7 @@ struct Scene {
     u8 decorCount;
     u8 triggerListenerCount;
     u8 doorCount;
+    u8 doorwayCoverCount;
     u8 fizzlerCount;
     u8 elevatorCount;
     u8 pedestalCount;

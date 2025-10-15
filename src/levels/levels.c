@@ -85,6 +85,7 @@ struct LevelDefinition* levelFixPointers(struct LevelDefinition* from, int point
     }
 
     result->doors = ADJUST_POINTER_POS(result->doors, pointerOffset);
+    result->doorwayCovers = ADJUST_POINTER_POS(result->doorwayCovers, pointerOffset);
     result->buttons = ADJUST_POINTER_POS(result->buttons, pointerOffset);
     result->signalOperators = ADJUST_POINTER_POS(result->signalOperators, pointerOffset);
     result->decor = ADJUST_POINTER_POS(result->decor, pointerOffset);

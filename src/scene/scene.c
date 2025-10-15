@@ -229,6 +229,12 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
         doorInit(&scene->doors[i], &gCurrentLevel->doors[i], &gCurrentLevel->world);
     }
 
+    scene->doorwayCoverCount = gCurrentLevel->doorwayCoverCount;
+    scene->doorwayCovers = malloc(sizeof(struct DoorwayCover) * scene->doorwayCoverCount);
+    for (int i = 0; i < scene->doorwayCoverCount; ++i) {
+        doorwayCoverInit(&scene->doorwayCovers[i], &gCurrentLevel->doorwayCovers[i], &gCurrentLevel->world);
+    }
+
     scene->fizzlerCount = gCurrentLevel->fizzlerCount;
     scene->fizzlers = malloc(sizeof(struct Fizzler) * scene->fizzlerCount);
     for (int i = 0; i < scene->fizzlerCount; ++i) {
@@ -760,6 +766,10 @@ void sceneUpdate(struct Scene* scene) {
 
     for (int i = 0; i < scene->doorCount; ++i) {
         doorUpdate(&scene->doors[i]);
+    }
+
+    for (int i = 0; i < scene->doorwayCoverCount; ++i) {
+        doorwayCoverUpdate(&scene->doorwayCovers[i], &scene->player);
     }
 
     for (int i = 0; i < scene->fizzlerCount; ++i) {

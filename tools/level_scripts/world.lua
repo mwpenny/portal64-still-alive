@@ -87,6 +87,31 @@ end
 
 sk_definition_writer.add_definition('doors', 'struct DoorDefinition[]', '_geo', doors)
 
+local doorway_covers = {}
+
+for _, cover in pairs(sk_scene.nodes_for_type('@doorway_cover')) do
+    local position = cover.node.full_transformation:decompose()
+    local doorway_index = find_coplanar_doorway(position)
+    local doorway = doorways[doorway_index][1]
+
+    -- TODO: configurable
+    local color = { 30, 27, 23, 255 }
+
+    local position = doorway.corner +
+        (doorway.edgeA * doorway.edgeALength * 0.5) +
+        (doorway.edgeB * doorway.edgeBLength * 0.5)
+
+    table.insert(doorway_covers, {
+        position = position,
+        fadeStartDistance = tonumber(cover.arguments[1]),
+        fadeEndDistance = tonumber(cover.arguments[2]),
+        color = color,
+        doorwayIndex = doorway_index - 1
+    })
+end
+
+sk_definition_writer.add_definition('doorwayCovers', 'struct DoorwayCoverDefinition[]', '_geo', doorway_covers)
+
 local function generate_room(room_index)
     local quad_indices = {}
     local cell_contents = {}
@@ -148,5 +173,6 @@ return {
         doorwayCount = #doorways,
     },
     doors = doors,
+    doorway_covers = doorway_covers,
     find_coplanar_doorway = find_coplanar_doorway,
 }

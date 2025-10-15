@@ -232,6 +232,14 @@ struct DoorDefinition {
     short doorType;
 };
 
+struct DoorwayCoverDefinition {
+    struct Vector3 position;
+    float fadeStartDistance;
+    float fadeEndDistance;
+    struct Coloru8 color;
+    short doorwayIndex;
+};
+
 struct ButtonDefinition {
     struct Vector3 location;
     short roomIndex;
@@ -375,6 +383,7 @@ struct LevelDefinition {
     struct Location* locations;
     struct World world;
     struct DoorDefinition* doors;
+    struct DoorwayCoverDefinition* doorwayCovers;
     struct ButtonDefinition* buttons;
     struct SignalOperator* signalOperators;
     struct DecorDefinition* decor;
@@ -399,6 +408,7 @@ struct LevelDefinition {
     short cutsceneCount;
     short locationCount;
     short doorCount;
+    short doorwayCoverCount;
     short buttonCount;
     short signalOperatorCount;
     short decorCount;
