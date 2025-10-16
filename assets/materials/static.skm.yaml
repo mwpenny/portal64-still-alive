@@ -311,9 +311,8 @@ materials:
       t:
         mirror: true
 
-    gDPSetCombineMode: G_CC_DECALRGB
+    gDPSetCombineMode: G_CC_MODULATERGB
     gDPSetCycleType: G_CYC_1CYCLE
-    gDPSetRenderMode: G_RM_RA_ZB_OPA_DECAL
 
     gSPGeometryMode:
       set: [G_SHADE]
