@@ -165,16 +165,22 @@ int staticRenderIsRoomVisible(u64 visibleRooms, u16 roomIndex) {
     return (visibleRooms & (1LL << roomIndex)) != 0;
 }
 
-void staticRender(struct Transform* cameraTransform, struct FrustumCullingInformation* cullingInfo, u64 visibleRooms, struct DynamicRenderDataList* dynamicList, int stageIndex, Mtx* staticMatrices, struct Transform* staticTransforms, struct RenderState* renderState) {
+void staticRender(struct RenderProps* renderStage, struct DynamicRenderDataList* dynamicList, int stageIndex, Mtx* staticMatrices, struct Transform* staticTransforms, struct RenderState* renderState) {
     if (!gCurrentLevel) {
         return;
     }
 
-    struct RenderScene* renderScene = renderSceneNew(cameraTransform, renderState, MAX_RENDER_COUNT, visibleRooms);
+    struct Transform* cameraTransform = &renderStage->camera.transform;
+    struct FrustumCullingInformation* cullingInfo = &renderStage->cameraMatrixInfo.cullingInformation;
+    u64* visibleRooms = &renderStage->visiblerooms;
+
+    struct RenderScene* renderScene = renderSceneNew(cameraTransform, renderState, MAX_RENDER_COUNT, *visibleRooms);
 
     staticRenderPopulateRooms(cullingInfo, staticMatrices, staticTransforms, renderScene);
-    dynamicRenderPopulateRenderScene(dynamicList, stageIndex, renderScene, cameraTransform, cullingInfo, visibleRooms);
+    dynamicRenderPopulateRenderScene(dynamicList, stageIndex, renderScene, cameraTransform, cullingInfo, *visibleRooms);
     renderSceneGenerate(renderScene, renderState);
+
+    renderStage->renderPartCount = renderScene->currentRenderPart;
 
     renderSceneFree(renderScene);
 }

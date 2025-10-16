@@ -94,6 +94,16 @@ static int debugSceneVisibleRoomCount(uint64_t visibleRooms) {
     return roomCount;
 }
 
+static int debugSceneMaxRenderPartCount(struct RenderPlan* renderPlan) {
+    int maxRenderPartCount = 0;
+
+    for (int i = 0; i < renderPlan->stageCount; ++i) {
+        maxRenderPartCount = MAX(maxRenderPartCount, renderPlan->stageProps[i].renderPartCount);
+    }
+
+    return maxRenderPartCount;
+}
+
 // Average time-based metrics over 2 frames for more stable output
 static float debugSceneAveragedTimeMs(Time value, float* prevValue) {
     float ms = timeMicroseconds(value) / 1000.0f;
@@ -149,7 +159,7 @@ static void debugSceneRenderPerformanceMetrics(struct Scene* scene, struct Rende
     gDPPipeSync(renderState->dl++);
 
     struct FontRenderer fontRenderer;
-    char metricText[16];
+    char metricText[20];
     int textY = SCREEN_HT - PERF_METRICS_MARGIN;
 
     float dt = debugSceneAveragedTimeMs(gLastFrameTime, &lastFrameTimeMs);
@@ -169,6 +179,10 @@ static void debugSceneRenderPerformanceMetrics(struct Scene* scene, struct Rende
 
     textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
     sprintf(metricText, "OBJ: %d/%d", dynamicSceneObjectCount(), MAX_DYNAMIC_SCENE_OBJECTS);
+    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+
+    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    sprintf(metricText, "GEO: %d/%d", debugSceneMaxRenderPartCount(renderPlan), MAX_RENDER_COUNT);
     debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
 
     textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;

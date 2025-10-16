@@ -41,6 +41,7 @@ struct RenderProps {
     short maxY;
 
     u64 visiblerooms;
+    u16 renderPartCount;
 
     struct RenderProps* previousProperties;
     struct RenderProps* nextProperites[2];

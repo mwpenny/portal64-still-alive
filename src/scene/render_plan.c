@@ -615,13 +615,11 @@ void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* 
         }
 
         staticRender(
-            &current->camera.transform, 
-            &current->cameraMatrixInfo.cullingInformation, 
-            current->visiblerooms, 
-            dynamicList, 
-            stageIndex, 
+            current,
+            dynamicList,
+            stageIndex,
             staticMatrices,
-            staticTransforms, 
+            staticTransforms,
             renderState
         );
 
