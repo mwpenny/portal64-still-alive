@@ -514,7 +514,7 @@ function Quaternion.slerp(a, b, t)
 end
 
 --- creates a new 4d color
---- @function color
+--- @function color4
 --- @tparam number r
 --- @tparam number g
 --- @tparam number b
@@ -522,6 +522,25 @@ end
 --- @treturn Color4
 local function color4(r, g, b, a) 
     return setmetatable({ r = r or 1, g = g or 1, b = b or 1, a = a or 1 }, Color4)
+end
+
+--- creates a new 4d color from a hex string
+--- @function color4
+--- @tparam string hex
+--- @treturn Color4
+local function color4_from_hex(hex)
+    if type(hex) ~= 'string' then
+        error("Expected string, got " .. type(hex), 2)
+    elseif hex:len() ~= 6 and hex:len() ~= 8 then
+        error("Expected string of length 6 or 8, got " .. tostring(hex:len()), 2)
+    end
+
+    return color4(
+        tonumber(hex:sub(1, 2), 16),
+        tonumber(hex:sub(3, 4), 16),
+        tonumber(hex:sub(5, 6), 16),
+        hex:len() == 8 and tonumber(hex:sub(7, 8), 16) or 255
+    )
 end
 
 --- determines if the input is a Vector3
@@ -652,6 +671,7 @@ return {
     axis_angle = axis_angle,
     isQuaternion = isQuaternion,
     color4 = color4,
+    color4_from_hex = color4_from_hex,
     isColor4 = isColor4,
     plane3 = plane3,
     plane3_with_point = plane3_with_point,

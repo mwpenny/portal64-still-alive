@@ -769,7 +769,7 @@ void sceneUpdate(struct Scene* scene) {
     }
 
     for (int i = 0; i < scene->doorwayCoverCount; ++i) {
-        doorwayCoverUpdate(&scene->doorwayCovers[i], &scene->player);
+        doorwayCoverUpdate(&scene->doorwayCovers[i], &scene->player, scene->portals);
     }
 
     for (int i = 0; i < scene->fizzlerCount; ++i) {

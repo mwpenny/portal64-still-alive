@@ -37,17 +37,15 @@ static void doorwayCoverRender(void* data, struct DynamicRenderDataList* renderL
         return;
     }
 
-    struct CollisionQuad* quad = &cover->forDoorway->quad;
-    struct Coloru8* color = &cover->definition->color;
+    matrixFromBasisL(
+        matrix,
+        &cover->definition->position,
+        &cover->definition->basis.x,
+        &cover->definition->basis.y,
+        &cover->definition->basis.z
+    );
 
-    // TODO: precompute
-    struct Vector3 normal;
-    struct Vector3 x;
-    struct Vector3 y;
-    vector3Scale(&quad->edgeA, &x, (quad->edgeALength - 1.0f));
-    vector3Scale(&quad->edgeB, &y, (quad->edgeBLength - 1.0f));
-    vector3Cross(&quad->edgeA, &quad->edgeB, &normal);
-    matrixFromBasisL(matrix, &cover->definition->position, &x, &y, &normal);
+    struct Coloru8* color = &cover->definition->color;
 
     gDPSetEnvColor(curr++, color->r, color->g, color->b, cover->opacity * 255);
     gSPDisplayList(curr++, cover_gfx);
@@ -65,7 +63,6 @@ static void doorwayCoverRender(void* data, struct DynamicRenderDataList* renderL
 
 void doorwayCoverInit(struct DoorwayCover* cover, struct DoorwayCoverDefinition* definition, struct World* world) {
     cover->forDoorway = &world->doorways[definition->doorwayIndex];
-    cover->forDoorway->flags &= ~DoorwayFlagsOpen;
     cover->opacity = 0.0f;
 
     float radius = sqrtf(
@@ -78,10 +75,37 @@ void doorwayCoverInit(struct DoorwayCover* cover, struct DoorwayCoverDefinition*
     cover->definition = definition;
 }
 
-void doorwayCoverUpdate(struct DoorwayCover* cover, struct Player* player) {
-    // TODO: through portals
-
+static float doorwayCoverGetClosestDistance(struct DoorwayCover* cover, struct Player* player, struct Portal* portals) {
     float dist = vector3DistSqrd(&cover->definition->position, &player->body.transform.position);
+
+    if (!collisionSceneIsPortalOpen()) {
+        return dist;
+    }
+
+    float endSquared = cover->definition->fadeEndDistance * cover->definition->fadeEndDistance;
+
+    if (vector3DistSqrd(&cover->definition->position, &portals[0].rigidBody.transform.position) < endSquared ||
+        vector3DistSqrd(&cover->definition->position, &portals[1].rigidBody.transform.position) < endSquared
+    ) {
+        for (int i = 0; i < 2; ++i) {
+            struct Transform relativeTransform;
+            collisionSceneGetPortalTransform(i, &relativeTransform);
+
+            struct Vector3 viewPosition;
+            transformPointNoScale(&relativeTransform, &player->lookTransform.position, &viewPosition);
+
+            float distThroughPortal = vector3DistSqrd(&cover->definition->position, &viewPosition);
+            if (distThroughPortal < dist) {
+                dist = distThroughPortal;
+            }
+        }
+    }
+
+    return dist;
+}
+
+void doorwayCoverUpdate(struct DoorwayCover* cover, struct Player* player, struct Portal* portals) {
+    float dist = doorwayCoverGetClosestDistance(cover, player, portals);
     float start = cover->definition->fadeStartDistance;
     float end = cover->definition->fadeEndDistance;
 

@@ -13,6 +13,8 @@ end
 
 local doorways = {}
 
+local DOORWAY_PADDING = 0.5
+
 for doorway_index, doorway in pairs(sk_scene.nodes_for_type('@doorway')) do
     local quad = collision_export.collision_quad_from_mesh(
         doorway.node.meshes[1]:transform(doorway.node.full_transformation),
@@ -32,9 +34,9 @@ for doorway_index, doorway in pairs(sk_scene.nodes_for_type('@doorway')) do
     table.insert(room_doorways[room_a + 1], doorway_index - 1)
     table.insert(room_doorways[room_b + 1], doorway_index - 1)
 
-    quad.corner = quad.corner + (-0.5 * quad.edgeA + -0.5 * quad.edgeB)
-    quad.edgeALength = quad.edgeALength + 1.0
-    quad.edgeBLength = quad.edgeBLength + 1.0
+    quad.corner = quad.corner + (-DOORWAY_PADDING * quad.edgeA) + (-DOORWAY_PADDING * quad.edgeB)
+    quad.edgeALength = quad.edgeALength + (DOORWAY_PADDING * 2)
+    quad.edgeBLength = quad.edgeBLength + (DOORWAY_PADDING * 2)
 
     for _, doorway in pairs(doorways) do
         if (doorway[2] == room_a and doorway[3] == room_b) or
@@ -94,18 +96,22 @@ for _, cover in pairs(sk_scene.nodes_for_type('@doorway_cover')) do
     local doorway_index = find_coplanar_doorway(position)
     local doorway = doorways[doorway_index][1]
 
-    -- TODO: configurable
-    local color = { 30, 27, 23, 255 }
-
-    local position = doorway.corner +
+    local center = doorway.corner +
         (doorway.edgeA * doorway.edgeALength * 0.5) +
         (doorway.edgeB * doorway.edgeBLength * 0.5)
 
+    local basis = {
+        x = doorway.edgeA * (doorway.edgeALength - (DOORWAY_PADDING * 2)),
+        y = doorway.edgeB * (doorway.edgeBLength - (DOORWAY_PADDING * 2)),
+        z = doorway.edgeA:cross(doorway.edgeB)
+    }
+
     table.insert(doorway_covers, {
-        position = position,
+        position = center,
+        basis = basis,
         fadeStartDistance = tonumber(cover.arguments[1]),
         fadeEndDistance = tonumber(cover.arguments[2]),
-        color = color,
+        color = sk_math.color4_from_hex(cover.arguments[3] or 'ffffff'),
         doorwayIndex = doorway_index - 1
     })
 end

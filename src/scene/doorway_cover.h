@@ -6,6 +6,7 @@
 #include "math/vector3.h"
 #include "physics/world.h"
 #include "player/player.h"
+#include "scene/portal.h"
 
 struct DoorwayCover {
     struct Doorway* forDoorway;
@@ -15,6 +16,6 @@ struct DoorwayCover {
 };
 
 void doorwayCoverInit(struct DoorwayCover* cover, struct DoorwayCoverDefinition* definition, struct World* world);
-void doorwayCoverUpdate(struct DoorwayCover* cover, struct Player* player);
+void doorwayCoverUpdate(struct DoorwayCover* cover, struct Player* player, struct Portal* portals);
 
 #endif

@@ -65,7 +65,7 @@ void transformPoint(struct Transform* transform, struct Vector3* in, struct Vect
 }
 
 void transformPointNoScale(struct Transform* transform, struct Vector3* in, struct Vector3* out) {
-    quatMultVector(&transform->rotation, out, out);
+    quatMultVector(&transform->rotation, in, out);
     vector3Add(&transform->position, out, out);
 }
 

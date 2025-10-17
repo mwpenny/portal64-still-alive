@@ -234,6 +234,7 @@ struct DoorDefinition {
 
 struct DoorwayCoverDefinition {
     struct Vector3 position;
+    struct Basis basis;
     float fadeStartDistance;
     float fadeEndDistance;
     struct Coloru8 color;
