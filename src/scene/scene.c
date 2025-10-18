@@ -768,10 +768,6 @@ void sceneUpdate(struct Scene* scene) {
         doorUpdate(&scene->doors[i]);
     }
 
-    for (int i = 0; i < scene->doorwayCoverCount; ++i) {
-        doorwayCoverUpdate(&scene->doorwayCovers[i], &scene->player, scene->portals);
-    }
-
     for (int i = 0; i < scene->fizzlerCount; ++i) {
         fizzlerUpdate(&scene->fizzlers[i]);
     }
@@ -1113,4 +1109,10 @@ int sceneClosePortal(struct Scene* scene, int portalIndex) {
     }
 
     return 0;
+}
+
+void sceneUpdateDoorwayCovers(struct Scene* scene, struct Vector3* viewPosition) {
+    for (int i = 0; i < scene->doorwayCoverCount; ++i) {
+        doorwayCoverUpdate(&scene->doorwayCovers[i], viewPosition);
+    }
 }

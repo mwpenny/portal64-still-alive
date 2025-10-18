@@ -367,7 +367,10 @@ int renderShouldRenderOtherPortal(struct Scene* scene, int visiblePortal, struct
 }
 
 void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderProps* properties, struct RenderState* renderState) {
+    // Update doorway covers at each render stage since portals affect visibility
     struct FrustumCullingInformation* cullingInfo = &properties->cameraMatrixInfo.cullingInformation;
+    sceneUpdateDoorwayCovers(scene, &cullingInfo->cameraPos);
+
     staticRenderDetermineVisibleRooms(cullingInfo, cullingInfo, properties->fromRoom, &properties->visiblerooms, 0);
 
     if (scene->hideCurrentRoom) {

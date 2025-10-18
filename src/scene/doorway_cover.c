@@ -19,19 +19,38 @@ static Gfx cover_gfx[] = {
     gsSPEndDisplayList()
 };
 
-static void doorwayCoverRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
+static float doorwayCoverOpacity(struct DoorwayCover* cover, struct Vector3* viewPosition) {
+    float dist = vector3DistSqrd(&cover->definition->position, viewPosition);
+    float start = cover->definition->fadeStartDistance;
+    float end = cover->definition->fadeEndDistance;
+
+    if (dist <= (start * start)) {
+        return 0.0f;
+    } else if (dist >= (end * end)) {
+        return 1.0f;
+    } else {
+        return (sqrtf(dist) - start) / (end - start);
+    }
+}
+
+static void doorwayCoverRender(void* data, struct RenderScene* renderScene, struct Transform* fromView) {
     struct DoorwayCover* cover = (struct DoorwayCover*)data;
 
-    if (cover->opacity <= 0.0f) {
+    // It's difficult to use fog here since portals are their own cameras. Near
+    // and far plane distances are relative to each camera, leading to incorrect
+    // fade amounts depending on portal placement. CPU-side distance calculation
+    // is required regardless to compensate, so simply calculate fade instead.
+    float opacity = doorwayCoverOpacity(cover, &fromView->position);
+    if (opacity <= 0.0f) {
         return;
     }
 
-    Mtx* matrix = renderStateRequestMatrices(renderState, 1);
+    Mtx* matrix = renderStateRequestMatrices(renderScene->renderState, 1);
     if (!matrix) {
         return;
     }
 
-    Gfx* dl = renderStateAllocateDLChunk(renderState, 3);
+    Gfx* dl = renderStateAllocateDLChunk(renderScene->renderState, 3);
     Gfx* curr = dl;
     if (!dl) {
         return;
@@ -47,12 +66,12 @@ static void doorwayCoverRender(void* data, struct DynamicRenderDataList* renderL
 
     struct Coloru8* color = &cover->definition->color;
 
-    gDPSetEnvColor(curr++, color->r, color->g, color->b, cover->opacity * 255);
+    gDPSetEnvColor(curr++, color->r, color->g, color->b, opacity * 255);
     gSPDisplayList(curr++, cover_gfx);
     gSPEndDisplayList(curr++);
 
-    dynamicRenderListAddData(
-        renderList,
+    renderSceneAdd(
+        renderScene,
         dl,
         matrix,
         DOORWAY_COVER_INDEX,
@@ -63,61 +82,23 @@ static void doorwayCoverRender(void* data, struct DynamicRenderDataList* renderL
 
 void doorwayCoverInit(struct DoorwayCover* cover, struct DoorwayCoverDefinition* definition, struct World* world) {
     cover->forDoorway = &world->doorways[definition->doorwayIndex];
-    cover->opacity = 0.0f;
 
     float radius = sqrtf(
         (cover->forDoorway->quad.edgeALength * cover->forDoorway->quad.edgeALength * 0.25f) +
         (cover->forDoorway->quad.edgeBLength * cover->forDoorway->quad.edgeBLength * 0.25f)
     );
-    cover->dynamicId = dynamicSceneAdd(cover, doorwayCoverRender, &definition->position, radius);
+    cover->dynamicId = dynamicSceneAddViewDependent(cover, doorwayCoverRender, &definition->position, radius);
     dynamicSceneSetRoomFlags(cover->dynamicId, ROOM_FLAG_FROM_INDEX(cover->forDoorway->roomA) | ROOM_FLAG_FROM_INDEX(cover->forDoorway->roomB));
 
     cover->definition = definition;
 }
 
-static float doorwayCoverGetClosestDistance(struct DoorwayCover* cover, struct Player* player, struct Portal* portals) {
-    float dist = vector3DistSqrd(&cover->definition->position, &player->body.transform.position);
+void doorwayCoverUpdate(struct DoorwayCover* cover, struct Vector3* viewPosition) {
+    float threshold = cover->definition->fadeEndDistance * cover->definition->fadeEndDistance;
 
-    if (!collisionSceneIsPortalOpen()) {
-        return dist;
-    }
-
-    float endSquared = cover->definition->fadeEndDistance * cover->definition->fadeEndDistance;
-
-    if (vector3DistSqrd(&cover->definition->position, &portals[0].rigidBody.transform.position) < endSquared ||
-        vector3DistSqrd(&cover->definition->position, &portals[1].rigidBody.transform.position) < endSquared
-    ) {
-        for (int i = 0; i < 2; ++i) {
-            struct Transform relativeTransform;
-            collisionSceneGetPortalTransform(i, &relativeTransform);
-
-            struct Vector3 viewPosition;
-            transformPointNoScale(&relativeTransform, &player->lookTransform.position, &viewPosition);
-
-            float distThroughPortal = vector3DistSqrd(&cover->definition->position, &viewPosition);
-            if (distThroughPortal < dist) {
-                dist = distThroughPortal;
-            }
-        }
-    }
-
-    return dist;
-}
-
-void doorwayCoverUpdate(struct DoorwayCover* cover, struct Player* player, struct Portal* portals) {
-    float dist = doorwayCoverGetClosestDistance(cover, player, portals);
-    float start = cover->definition->fadeStartDistance;
-    float end = cover->definition->fadeEndDistance;
-
-    if (dist >= (end * end)) {
-        cover->opacity = 1.0f;
+    if (vector3DistSqrd(&cover->definition->position, viewPosition) >= threshold) {
         cover->forDoorway->flags &= ~DoorwayFlagsOpen;
-    } else if (dist <= (start * start)) {
-        cover->opacity = 0.0f;
-        cover->forDoorway->flags |= DoorwayFlagsOpen;
     } else {
-        dist = clampf(sqrtf(dist), start, end) - start;
-        cover->opacity = dist / (end - start);
         cover->forDoorway->flags |= DoorwayFlagsOpen;
     }
 }
