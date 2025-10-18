@@ -117,7 +117,7 @@ void staticRenderPopulateRooms(struct FrustumCullingInformation* cullingInfo, Mt
 
 #define FORCE_RENDER_DOORWAY_DISTANCE   0.1f
 
-void staticRenderDetermineVisibleRooms(struct FrustumCullingInformation* cullingInfo, u16 currentRoom, u64* visitedRooms, u64 nonVisibleRooms) {
+void staticRenderDetermineVisibleRooms(struct FrustumCullingInformation* rootCullingInfo, struct FrustumCullingInformation* cullingInfo, u16 currentRoom, u64* visitedRooms, u64 nonVisibleRooms) {
     if (currentRoom == RIGID_BODY_NO_ROOM) {
         return;
     }
@@ -145,7 +145,8 @@ void staticRenderDetermineVisibleRooms(struct FrustumCullingInformation* culling
         if (
             // if the player is close enough to the doorway it should still render it, even if facing the wrong way
             (fabsf(doorwayDistance) > FORCE_RENDER_DOORWAY_DISTANCE || collisionQuadDetermineEdges(&cullingInfo->cameraPos, &doorway->quad)) && 
-            isQuadOutsideFrustum(cullingInfo, &doorway->quad)) {
+            (isQuadOutsideFrustum(cullingInfo, &doorway->quad) || isQuadOutsideFrustum(rootCullingInfo, &doorway->quad))
+         ) {
             continue;
         }
 
@@ -157,7 +158,7 @@ void staticRenderDetermineVisibleRooms(struct FrustumCullingInformation* culling
         struct FrustumCullingInformation doorwayFrustum;
         frustumFromQuad(&cullingInfo->cameraPos, &doorway->quad, &doorwayFrustum);
 
-        staticRenderDetermineVisibleRooms(&doorwayFrustum, newRoom, visitedRooms, nonVisibleRooms);
+        staticRenderDetermineVisibleRooms(rootCullingInfo, &doorwayFrustum, newRoom, visitedRooms, nonVisibleRooms);
     };
 }
 

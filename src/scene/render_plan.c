@@ -363,11 +363,12 @@ int renderShouldRenderOtherPortal(struct Scene* scene, int visiblePortal, struct
     struct Vector3 sceneScalePos;
     vector3Scale(&gCollisionScene.portalTransforms[visiblePortal]->position, &sceneScalePos, SCENE_SCALE);
 
-    return planePointDistance(&properties->cameraMatrixInfo.cullingInformation.clippingPlanes[4], &sceneScalePos) >= -1.0f * SCENE_SCALE;
+    return planePointDistance(&properties->cameraMatrixInfo.cullingInformation.clippingPlanes[CLIPPING_PLANE_NEAR], &sceneScalePos) >= -1.0f * SCENE_SCALE;
 }
 
 void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderProps* properties, struct RenderState* renderState) {
-    staticRenderDetermineVisibleRooms(&properties->cameraMatrixInfo.cullingInformation, properties->fromRoom, &properties->visiblerooms, 0);
+    struct FrustumCullingInformation* cullingInfo = &properties->cameraMatrixInfo.cullingInformation;
+    staticRenderDetermineVisibleRooms(cullingInfo, cullingInfo, properties->fromRoom, &properties->visiblerooms, 0);
 
     if (scene->hideCurrentRoom) {
         properties->visiblerooms &= ~(1LL << properties->fromRoom);
