@@ -47,6 +47,12 @@ set(VPKS_HL2_TEXTURES
 )
 
 function(_add_vpk_extract_command VPK_LIST OUTPUT_DIR OUTPUT_LIST)
+    # If the files do not exist at configuration time, CMake will treat the
+    # paths as relative to the build directory, even once they are present.
+    # Use absolute paths to avoid this problem for users who forget to copy
+    # their game files before running CMake.
+    list(TRANSFORM VPK_LIST PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/" OUTPUT_VARIABLE VPK_LIST)
+
     # First VPK is the one to extract
     list(GET VPK_LIST 0 MAIN_VPK)
 
