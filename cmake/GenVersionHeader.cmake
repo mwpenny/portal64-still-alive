@@ -10,6 +10,7 @@ execute_process(
         GIT_DESCRIBE_RC
     OUTPUT_VARIABLE
         GIT_DESCRIBE_OUTPUT
+    ERROR_QUIET
 )
 
 # If not in a git repo, fall back to exported version
