@@ -27,13 +27,18 @@ bool isPathCharacter(char chr) {
 }
 
 std::string replaceExtension(const std::string& input, const std::string& newExt) {
-    std::size_t extPos = input.rfind('.');
+    std::string directoryName = DirectoryName(input);
+    std::string fileName = getBaseName(input);
+
+    std::size_t extPos = fileName.rfind('.');
 
     if (extPos == std::string::npos) {
-        return input + newExt;
+        fileName += newExt;
     } else {
-        return input.substr(0, extPos) + newExt;
+        fileName = fileName.substr(0, extPos) + newExt;
     }
+
+    return Join(directoryName, fileName);
 }
 
 std::string getBaseName(const std::string& input) {
@@ -62,7 +67,7 @@ std::string DirectoryName(const std::string& filename) {
     }
 
     if (correctSlash == std::string::npos) {
-        return "";
+        return ".";
     }
 
     return filename.substr(0, correctSlash);

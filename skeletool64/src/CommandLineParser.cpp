@@ -146,9 +146,5 @@ bool parseCommandLineArguments(int argc, char *argv[], struct CommandLineArgumen
         std::cerr << "usage " << argv[0] << " [ARGS] -o [output-file] [input-file]" << std::endl;
     }
 
-    if (output.mOutputFile.length() > 2 && output.mOutputFile.substr(output.mOutputFile.length() - 2) == ".h") {
-        output.mOutputFile = output.mOutputFile.substr(0, output.mOutputFile.length() - 2);
-    }
-
     return !hasError;
 }
