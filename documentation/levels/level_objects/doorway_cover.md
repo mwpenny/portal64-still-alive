@@ -16,7 +16,7 @@ doorway but is too far away to perceive detail.
 | ------------------------ | ----------------------------------------------------------------------------- |
 | `FADE_START_DISTANCE`    | The view distance at which the doorway begins to be covered.                  |
 | `FADE_END_DISTANCE`      | The view distance at which the doorway becomes fully covered and closes.      |
-| `COLOR` (optional)       | The hex representation of the color to fade in. Defaults to `ffffff` (black). |
+| `COLOR` (optional)       | The hex representation of the color to fade in. Defaults to `000000` (black). |
 
 ## Notes
 

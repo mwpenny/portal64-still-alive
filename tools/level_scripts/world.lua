@@ -111,7 +111,7 @@ for _, cover in pairs(sk_scene.nodes_for_type('@doorway_cover')) do
         basis = basis,
         fadeStartDistance = tonumber(cover.arguments[1]),
         fadeEndDistance = tonumber(cover.arguments[2]),
-        color = sk_math.color4_from_hex(cover.arguments[3] or 'ffffff'),
+        color = sk_math.color4_from_hex(cover.arguments[3] or '000000'),
         doorwayIndex = doorway_index - 1
     })
 end
