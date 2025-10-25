@@ -8,6 +8,7 @@ set(PAK_MODIFIED_MATERIALS_DIR "${PAK_MODIFIED_DIR}/materials")
 # All textures used from the original game
 set(TEXTURES
     concrete/concrete_bts_floor002a
+    concrete/concrete_bts_modular_wall001b
     concrete/concrete_bts_modular_wall001c
     concrete/concrete_modular_ceiling001a
     concrete/concrete_modular_floor001a
