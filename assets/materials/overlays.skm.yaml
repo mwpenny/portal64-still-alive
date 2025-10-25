@@ -1,0 +1,225 @@
+materials:
+  overlay_scrawlings002a_1:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_2:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_2.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_3:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_3.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_4:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_4.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_5:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_5.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_6:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_6.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_7:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_7.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_8:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_8.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_9:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_9.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_10:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_10.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_11:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_11.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_12:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_12.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_13:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_13.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_14:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_14.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_15:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_15.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_16:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_16.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_17:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_17.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_18:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_18.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_19:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_19.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_20:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_20.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_21:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_21.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_22:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_22.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_23:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_23.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_24:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_24.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_25:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_25.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_26:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_26.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_27:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_27.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_28:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_28.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_29:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_29.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_30:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_30.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_31:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_31.png"
+      s:
+        wrap: false
+      t:
+        wrap: false
+  overlay_scrawlings002a_32:
+    gDPSetTile:
+      filename: "../../portal_pak_modified/materials/overlays/overlay_scrawlings002a_32.png"
+      s:
+        wrap: false
+      t:
+        wrap: false

@@ -1446,8 +1446,7 @@ materials:
       alpha: ["0", "0", "0", "TEXEL0"]
 
     gSPGeometryMode:
-      clear: [G_LIGHTING]
-      set: [G_SHADE]
+      clear: [G_LIGHTING, G_SHADE]
 
     gDPSetPrimColor:
       r: 25
@@ -1466,8 +1465,7 @@ materials:
       alpha: ["0", "0", "0", "TEXEL0"]
 
     gSPGeometryMode:
-      clear: [G_LIGHTING]
-      set: [G_SHADE]
+      clear: [G_LIGHTING, G_SHADE]
 
     gDPSetPrimColor:
       r: 79
@@ -1486,8 +1484,7 @@ materials:
       alpha: ["0", "0", "0", "TEXEL0"]
 
     gSPGeometryMode:
-      clear: [G_LIGHTING]
-      set: [G_SHADE]
+      clear: [G_LIGHTING, G_SHADE]
 
     gDPSetPrimColor:
       r: 79
@@ -1761,3 +1758,11 @@ materials:
     gDPSetCombineMode:
       color: ["0", "0", "0", "ENVIRONMENT"]
       alpha: ["0", "0", "0", "ENVIRONMENT"]
+
+  overlay:
+    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetRenderMode: G_RM_ZB_OPA_SURF
+    gDPSetCombineMode: G_CC_MODULATERGB
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]

@@ -218,6 +218,21 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         .soundClipId = -1,
         .soundFizzleId = -1,
     },
+    [DECOR_TYPE_SCRAWLINGS002A] = {
+        {
+            CollisionShapeTypeNone,
+            NULL,
+            0.0f,
+            0.0f,
+            NULL,
+        },
+        0.0f,
+        1.5f,
+        OVERLAYS_OVERLAY_SCRAWLINGS002A_DYNAMIC_MODEL,
+        .materialIndex = OVERLAY_INDEX,
+        .soundClipId = -1,
+        .soundFizzleId = -1,
+    },
 };
 
 struct DecorObjectDefinition* decorObjectDefinitionForId(int id) {

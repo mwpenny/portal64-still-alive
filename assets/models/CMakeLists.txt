@@ -36,6 +36,7 @@ set(STATIC_MODELS
 # Models whose data is loaded/unloaded as needed
 set(DYNAMIC_MODELS
     cube/cube
+    overlays/overlay_scrawlings002a
     pedestal
     props/autoportal_frame/autoportal_frame
     props/box_dropper
@@ -197,6 +198,11 @@ endfunction()
 set_property(SOURCE player/chell.flags
     PROPERTY ADDITIONAL_MATERIALS
         ${ASSETS_DIR}/materials/chell.skm.yaml
+)
+
+set_property(SOURCE overlays/overlay_scrawlings002a.flags
+    PROPERTY ADDITIONAL_MATERIALS
+        ${ASSETS_DIR}/materials/overlays.skm.yaml
 )
 
 set_property(SOURCE props/combine_ball_launcher.flags

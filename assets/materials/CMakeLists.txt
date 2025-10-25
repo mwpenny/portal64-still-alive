@@ -63,6 +63,7 @@ set(TEXTURES
     models/weapons/v_models/v_portalgun/v_portalgun
     nature/hazard_liquid
     overlays/overlay_handprint
+    overlays/overlay_scrawlings002a
     overlays/overlay_scrawlings003a
     overlays/overlay_scrawlings004a
     plastic/plasticwall003a
@@ -328,6 +329,17 @@ set_property(SOURCE models/props_c17/substation_transformer01b.ims
         models/props_c17/substation_transformer01b_center
         models/props_c17/substation_transformer01b_rim
 )
+set_property(SOURCE overlays/overlay_scrawlings002a.ims
+    PROPERTY ADDITIONAL_DEPS
+        concrete/concrete_bts_modular_wall001b
+)
+foreach(i RANGE 2 32)
+    set_property(SOURCE overlays/overlay_scrawlings002a.ims
+        APPEND
+        PROPERTY ADDITIONAL_OUTPUTS
+            overlays/overlay_scrawlings002a_${i}
+    )
+endforeach()
 set_property(SOURCE signage/clock/countdown.ims
     PROPERTY ADDITIONAL_DEPS
         signage/clock/countdown_1
