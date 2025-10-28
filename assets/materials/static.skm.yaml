@@ -193,6 +193,21 @@ materials:
       set: [G_SHADE]
       clear: [G_LIGHTING]
 
+  fan01:
+    gDPSetTile:
+        filename: ../../portal_pak_modified/materials/models/props_bts/fan01.png
+        siz: G_IM_SIZ_16b
+        s:
+          mirror: true
+        t:
+          mirror: true
+
+    gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
   concrete/observationwall_001a:
     gDPSetTile: 
       filename: ../../portal_pak_modified/materials/concrete/observationwall_001a.png

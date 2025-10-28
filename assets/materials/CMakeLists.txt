@@ -57,6 +57,7 @@ set(TEXTURES
     models/props/toilet
     models/props_animsigns/awe_total
     models/props_animsigns/newsignage_back02
+    models/props_bts/fan01
     models/props_c17/door01a_skin6
     models/props_c17/substation_transformer01b
     models/props_wasteland/fence_alpha
