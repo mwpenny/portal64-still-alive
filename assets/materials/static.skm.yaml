@@ -365,6 +365,18 @@ materials:
       tileSizeS: 0.5
       tileSizeT: 0.5
 
+  metalwall_bts_005a:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalwall_bts_005a.png
+      siz: G_IM_SIZ_16b
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+    gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
+
   metalwall_bts_006a:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/metal/metalwall_bts_006a.png
@@ -396,6 +408,22 @@ materials:
       set: [G_SHADE]
       clear: [G_LIGHTING]
 
+    gDPSetCycleType: G_CYC_1CYCLE
+    gDPSetCombineMode: G_CC_MODULATERGB
+
+    properties:
+      tileSizeS: 1
+      tileSizeT: 1
+
+  metalwall_bts_006a_shade_orange:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalwall_bts_006a.png
+      siz: G_IM_SIZ_16b
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
     gDPSetCycleType: G_CYC_2CYCLE
     gDPSetCombineMode:
       - color: ["TEXEL0", "0", "SHADE", "0"]
@@ -411,6 +439,35 @@ materials:
       r: 217
       g: 71
       b: 24
+
+    properties:
+      tileSizeS: 1
+      tileSizeT: 1
+
+  metalwall_bts_006a_shade_white:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metalwall_bts_006a.png
+      siz: G_IM_SIZ_16b
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode:
+      - color: ["TEXEL0", "0", "SHADE", "0"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["COMBINED", "PRIMITIVE", "SHADE_ALPHA", "PRIMITIVE"]
+        alpha: ["0", "0", "0", "1"]
+
+    gDPSetRenderMode:
+      - G_RM_PASS
+      - G_RM_ZB_OPA_SURF
+
+    gDPSetPrimColor:
+      r: 255
+      g: 255
+      b: 255
 
     properties:
       tileSizeS: 1
