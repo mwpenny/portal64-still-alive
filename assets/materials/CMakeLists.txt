@@ -26,6 +26,7 @@ set(TEXTURES
     glass/glasswindow_frosted_002
     glass/refract01_dx8
     metal/metalbeam_bts_001a
+    metal/metaldoor_white01
     metal/metalfloor_bts_001b
     metal/metalgrate018
     metal/metal_modular_floor001

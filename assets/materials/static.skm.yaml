@@ -119,6 +119,18 @@ materials:
 
       staticLit: true
 
+  metaldoor_white01:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/metal/metaldoor_white01.png
+      siz: G_IM_SIZ_4b
+
+    gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
   substation_transformer01b:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/models/props_c17/substation_transformer01b.png
