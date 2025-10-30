@@ -11,6 +11,7 @@ cutscenes:
     - start_cutscene CUBE_DROPPER
     - start_cutscene CUBE_DROPPER_SPARKS_1
     - start_cutscene CUBE_DROPPER_SPARKS_2
+    - play_animation fan fan_rotate 1 Loop
     - save_checkpoint
   SIGNAGE:
     - delay 4
