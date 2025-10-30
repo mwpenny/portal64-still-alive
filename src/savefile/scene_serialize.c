@@ -419,6 +419,7 @@ void sceneAnimatorSerialize(struct Serializer* serializer, SerializeAction actio
 
         if (animationIndex != -1) {
             action(serializer, &animator->currentTime, sizeof(float));
+            action(serializer, &animator->flags, sizeof(short));
         }
     }
 }
@@ -454,8 +455,11 @@ void sceneAnimatorDeserialize(struct Serializer* serializer, struct Scene* scene
 
         if (animationIndex != -1) {
             float time;
+            short flags;
             serializeRead(serializer, &time, sizeof(float));
-            skAnimatorRunClip(animator, &scene->animator.animationInfo[i].clips[animationIndex], time, 0);
+            serializeRead(serializer, &flags, sizeof(short));
+
+            skAnimatorRunClip(animator, &scene->animator.animationInfo[i].clips[animationIndex], time, flags);
         }
     }
 }

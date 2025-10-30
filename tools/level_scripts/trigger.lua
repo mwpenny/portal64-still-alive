@@ -194,22 +194,36 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
             find_location_index(step.args[1]),
         }
     elseif step.command == "play_animation" then
-        result.type = sk_definition_writer.raw('CutsceneStepPlayAnimation')
         local armature = animation.get_armature_index_with_name(step.args[1])
-        local animation = animation.get_animation_with_name(step.args[1], step.args[2])
-
         if not armature then
             error("Unrecognized animator " .. step.args[1])
         end
 
+        local animation = animation.get_animation_with_name(step.args[1], step.args[2])
         if not animation then
             error("Unrecognized animation " .. step.args[2])
         end
 
+        local speed = step.args[3] and (tonumber(step.args[3]) * 127) or 127
+
+        local flags = step.args[4]
+        local flag_mask
+        if flags then
+            local flag_list = {}
+            for _, flag in pairs(util.string_split(flags, ",")) do
+                table.insert(flag_list, "SKAnimatorFlags" .. flag)
+            end
+            flag_mask = table.concat(flag_list, " | ")
+        else
+            flag_mask = "0"
+        end
+
+        result.type = sk_definition_writer.raw('CutsceneStepPlayAnimation')
         result.playAnimation = {
             armature,
             animation,
-            step.args[3] and (tonumber(step.args[3]) * 127) or 127,
+            speed,
+            sk_definition_writer.raw(flag_mask),
         }
     elseif step.command == "pause_animation" then
         result.type = sk_definition_writer.raw('CutsceneStepSetAnimationSpeed')

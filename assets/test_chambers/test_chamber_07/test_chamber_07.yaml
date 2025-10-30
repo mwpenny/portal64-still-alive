@@ -67,10 +67,10 @@ cutscenes:
     - set_signal trap_door
   platform_loop:
     - label anim_platform_loop_start
-    - play_animation horizontal slide 1 loop
+    - play_animation horizontal slide 1
     - wait_for_animation horizontal loop_out
     - delay 3 anim_pause
-    - play_animation horizontal slide -1 slide_
+    - play_animation horizontal slide -1
     - wait_for_animation horizontal loop_in
     - delay 3 anim_pause_end
     - goto anim_platform_loop_start

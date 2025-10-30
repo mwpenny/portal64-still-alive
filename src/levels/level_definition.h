@@ -10,6 +10,7 @@
 #include "physics/world.h"
 #include "scene/portal_surface.h"
 #include "scene/signals.h"
+#include "sk64/skeletool_animator.h"
 #include "sk64/skeletool_armature.h"
 #include "sk64/skeletool_clip.h"
 
@@ -156,6 +157,7 @@ struct CutsceneStep {
             u8 armatureIndex;
             u8 animationIndex;
             s8 playbackSpeed;
+            u8 flags;
         } playAnimation;
         struct {
             u8 armatureIndex;

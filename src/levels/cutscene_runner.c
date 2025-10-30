@@ -305,14 +305,14 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 step->playAnimation.armatureIndex, 
                 step->playAnimation.animationIndex,
                 cutsceneRunnerConvertPlaybackSpeed(step->playAnimation.playbackSpeed),
-                0
+                step->playAnimation.flags
             );
             break;
         case CutsceneStepSetAnimationSpeed:
             sceneAnimatorSetSpeed(
                 &gScene.animator,
                 step->playAnimation.armatureIndex, 
-                cutsceneRunnerConvertPlaybackSpeed(step->playAnimation.playbackSpeed)
+                cutsceneRunnerConvertPlaybackSpeed(step->setAnimationSpeed.playbackSpeed)
             );
             break;
         case CutsceneStepSaveCheckpoint:
