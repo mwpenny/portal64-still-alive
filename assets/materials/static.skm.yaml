@@ -218,7 +218,7 @@ materials:
     gDPSetCycleType: G_CYC_1CYCLE
     gSPGeometryMode:
       set: [G_SHADE]
-      clear: [G_LIGHTING]
+      clear: [G_LIGHTING, G_CULL_BACK]
 
   concrete/observationwall_001a:
     gDPSetTile: 
@@ -1526,11 +1526,12 @@ materials:
 
     gDPSetRenderMode: G_RM_ZB_XLU_DECAL
     gDPSetCombineMode:
-      color: ["0", "0", "0", "PRIMITIVE"]
+      color: ["PRIMITIVE", "0", "SHADE", "0"]
       alpha: ["0", "0", "0", "TEXEL0"]
 
     gSPGeometryMode:
-      clear: [G_LIGHTING, G_SHADE]
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
 
     gDPSetPrimColor:
       r: 25
@@ -1545,11 +1546,12 @@ materials:
 
     gDPSetRenderMode: G_RM_ZB_XLU_DECAL
     gDPSetCombineMode:
-      color: ["0", "0", "0", "PRIMITIVE"]
+      color: ["PRIMITIVE", "0", "SHADE", "0"]
       alpha: ["0", "0", "0", "TEXEL0"]
 
     gSPGeometryMode:
-      clear: [G_LIGHTING, G_SHADE]
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
 
     gDPSetPrimColor:
       r: 79
@@ -1564,11 +1566,12 @@ materials:
 
     gDPSetRenderMode: G_RM_ZB_XLU_DECAL
     gDPSetCombineMode:
-      color: ["0", "0", "0", "PRIMITIVE"]
+      color: ["PRIMITIVE", "0", "SHADE", "0"]
       alpha: ["0", "0", "0", "TEXEL0"]
 
     gSPGeometryMode:
-      clear: [G_LIGHTING, G_SHADE]
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
 
     gDPSetPrimColor:
       r: 79

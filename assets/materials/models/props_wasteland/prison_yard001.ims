@@ -1,1 +1,1 @@
--crop 32x128+304+230 -resize 16x64
+-brightness-contrast 8x10 -crop 32x128+304+230 -resize 16x64
