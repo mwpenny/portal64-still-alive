@@ -47,6 +47,7 @@ set(DYNAMIC_MODELS
     props/cylinder_test
     props/door_01
     props/door_02
+    props/food_can/food_can
     props/lab_chair
     props/lab_desk/lab_desk01
     props/lab_desk/lab_desk02
@@ -60,6 +61,7 @@ set(DYNAMIC_MODELS
     props/switch001
     props/turret_01
     props/turret_01_eye
+    props/water_bottle/water_bottle
     signage/clock
     signage/clock_digits
 )

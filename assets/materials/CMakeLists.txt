@@ -47,6 +47,7 @@ set(TEXTURES
     models/props/door_02
     models/props/elevatorshaft_wall/elevatorshaft_wall
     models/props/elevator_caps/elevator_caps
+    models/props/food_can/food_can
     models/props/lab_monitor/lab_monitor_screen_text
     models/props/light_rail_endcap
     models/props/metal_box
@@ -57,6 +58,7 @@ set(TEXTURES
     models/props/round_elevator_sheet_3
     models/props/security_camera
     models/props/toilet
+    models/props/water_bottle/water_bottle
     models/props_animsigns/awe_total
     models/props_animsigns/newsignage_back02
     models/props_bts/fan01
@@ -327,6 +329,10 @@ set_property(SOURCE models/props/round_elevator_sheet_1.ims
 set_property(SOURCE models/props/round_elevator_sheet_3.ims
     PROPERTY ADDITIONAL_OUTPUTS
         models/props/elevator_sign
+)
+set_property(SOURCE models/props/water_bottle/water_bottls.ims
+    PROPERTY ADDITIONAL_OUTPUTS
+        models/props/water_bottle/water_bottle_label
 )
 set_property(SOURCE models/props_c17/substation_transformer01b.ims
     PROPERTY ADDITIONAL_OUTPUTS

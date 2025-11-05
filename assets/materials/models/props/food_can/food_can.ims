@@ -1,0 +1,8 @@
+-crop 100x64+84+52
+-resize 56x36
+
+-fill '#222222'
+-draw 'line 0,0 55,0'
+-draw 'line 0,1 55,1'
+-draw 'line 0,34 55,34'
+-draw 'line 0,35 55,35'

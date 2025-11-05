@@ -807,6 +807,72 @@ materials:
       g: 0
       b: 0
 
+  food_can:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/food_can/food_can.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      s:
+        wrap: false
+      t:
+        wrap: false
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode:
+      color: ["SHADE", "0", "TEXEL0", "0"]
+
+  food_can_fizzled:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/food_can/food_can.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      s:
+        wrap: false
+      t:
+        wrap: false
+
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode:
+      - color: ["SHADE", "0", "TEXEL0", "0"]
+        alpha: ["0", "0", "0", "PRIMITIVE"]
+      - color: ["NOISE", "COMBINED", "PRIMITIVE", "COMBINED"]
+        alpha: ["0", "0", "0", "PRIMITIVE"]
+    gDPSetRenderMode:
+      - blend: ["G_BL_CLR_IN", "G_BL_A_IN", "G_BL_CLR_FOG", "G_BL_1MA"]
+      - G_RM_ZB_XLU_SURF
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetFogColor:
+      r: 0
+      g: 0
+      b: 0
+
+  lit_object:
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode:
+      color: ["SHADE", "0", "TEXEL0", "0"]
+
+  lit_object_fizzled:
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode:
+      - color: ["SHADE", "0", "TEXEL0", "0"]
+        alpha: ["0", "0", "0", "PRIMITIVE"]
+      - color: ["NOISE", "COMBINED", "PRIMITIVE", "COMBINED"]
+        alpha: ["0", "0", "0", "PRIMITIVE"]
+    gDPSetRenderMode:
+      - blend: ["G_BL_CLR_IN", "G_BL_A_IN", "G_BL_CLR_FOG", "G_BL_1MA"]
+      - G_RM_ZB_XLU_SURF
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetFogColor:
+      r: 0
+      g: 0
+      b: 0
+
   door_01:
     gDPSetTile: 
       filename:

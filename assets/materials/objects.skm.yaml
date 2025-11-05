@@ -249,3 +249,15 @@ materials:
       clear: [G_CULL_BACK]
     gDPSetCombineMode: 
       color: ["0", "0", "0", "PRIMITIVE"]
+
+  water_bottle:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/water_bottle/water_bottle.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+
+  water_bottle_label:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/water_bottle/water_bottle_label.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA

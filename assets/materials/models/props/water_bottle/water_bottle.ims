@@ -1,0 +1,13 @@
+-fill '#262515'
+
+\(
+    +clone
+    -crop 40x64+107+184
+    -resize 32x64!
+    -draw 'rectangle 0,62 31,63'
+    -write portal_pak_modified/materials/models/props/water_bottle/water_bottle_label.png
+    +delete
+\)
+
+-crop 32x64+184+184
+-draw 'rectangle 0,62 31,63'
