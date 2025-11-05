@@ -30,7 +30,11 @@ ALSndPlayer gSoundPlayer;
 #define VOLUME_CURVE_PAD        0.0125f
 #define VOLUME_AMPLIFICATION    1.538f
 #define VOICE_FX_MIX            32
-#define DEFAULT_FX_MIX           8 // Small amount of FX mix for all sounds.
+#define FX_PEAK_DISTANCE        25.0f
+#define FX_MIN_AMOUNT           0.1f
+#define FX_MAX_AMOUNT           0.6f
+#define FX_CURVE_FACTOR         (FX_MAX_AMOUNT - FX_MIN_AMOUNT)
+#define DEFAULT_FX_MIX          8 // Small amount of FX mix for all sounds.
 
 struct ActiveSound {
     ALSndId soundId;
@@ -83,12 +87,12 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
 
     float distanceSqrt = sqrtf(distance);
 
+    // Add FX/reverb amount.
+    float fxDistCurve = clampf(((distanceSqrt / FX_PEAK_DISTANCE) * FX_CURVE_FACTOR) + FX_MIN_AMOUNT, 0.0f, 1.0f);
+    *fxMix = (int)(127.0f * fxDistCurve);
+
     // Initial linear volume level.
     float volumeLevel = clampf(*volumeIn / distanceSqrt, 0.0f, 1.0f);
-
-    // Add FX/reverb amount.
-    // TODO: Define/name these values?
-    *fxMix = (int)(127.0f * (1.0f - mathfRemap(volumeLevel, 0.02f, 0.24f, 0.48f, 0.85f)));
 
     // Fudge with the volume curve a bit. 
     // Try to make distant sounds more apparent while
@@ -198,7 +202,7 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     if (gActiveSoundCount >= MAX_SKIPPABLE_SOUNDS && clipsCheckSoundSkippable(soundClipId)) {
         return SOUND_ID_NONE;
     }
-    
+
     ALSound* alSound = gSoundClipArray->sounds[soundClipId];
 
     ALSndId result = alSndpAllocate(&gSoundPlayer, alSound);
