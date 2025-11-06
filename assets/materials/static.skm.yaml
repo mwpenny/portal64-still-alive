@@ -861,14 +861,13 @@ materials:
 
     gSPGeometryMode:
       set: [G_LIGHTING, G_SHADE]
-      clear: [G_CULL_BACK]
     gDPSetCombineMode:
       color: ["SHADE", "0", "TEXEL0", "0"]
 
   saucepan_fizzled:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/models/props/saucepan/saucepan.png
-      siz: G_IM_SIZ_16b
+      siz: G_IM_SIZ_32b
       fmt: G_IM_FMT_RGBA
       s:
         mirror: true
@@ -887,7 +886,6 @@ materials:
 
     gSPGeometryMode:
       set: [G_LIGHTING, G_SHADE]
-      clear: [G_CULL_BACK]
     gDPSetFogColor:
       r: 0
       g: 0
