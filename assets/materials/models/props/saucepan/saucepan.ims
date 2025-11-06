@@ -1,0 +1,10 @@
+-alpha off
+-blur 0x0.5
+-crop 32x32+164+179
+-copy 32x1+0+29 +0+30
+-copy 32x1+0+28 +0+31
+
+-fill '#080508'
+-draw 'line 0,31 1,31'
+-fill '#150708'
+-draw 'line 2,31 3,31'

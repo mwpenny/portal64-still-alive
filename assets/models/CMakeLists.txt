@@ -57,6 +57,7 @@ set(DYNAMIC_MODELS
     props/light_rail_endcap
     props/portal_cleanser
     props/radio
+    props/saucepan/saucepan
     props/security_camera
     props/switch001
     props/turret_01

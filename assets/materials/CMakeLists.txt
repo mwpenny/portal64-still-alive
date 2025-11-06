@@ -56,6 +56,7 @@ set(TEXTURES
     models/props/round_elevator_sheet_1
     models/props/round_elevator_sheet_2
     models/props/round_elevator_sheet_3
+    models/props/saucepan/saucepan
     models/props/security_camera
     models/props/toilet
     models/props/water_bottle/water_bottle

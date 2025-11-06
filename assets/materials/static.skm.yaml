@@ -849,6 +849,50 @@ materials:
       g: 0
       b: 0
 
+  saucepan:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/saucepan/saucepan.png
+      siz: G_IM_SIZ_32b
+      fmt: G_IM_FMT_RGBA
+      s:
+        mirror: true
+      t:
+        mirror: true
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+      clear: [G_CULL_BACK]
+    gDPSetCombineMode:
+      color: ["SHADE", "0", "TEXEL0", "0"]
+
+  saucepan_fizzled:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/saucepan/saucepan.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      s:
+        mirror: true
+      t:
+        mirror: true
+
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode:
+      - color: ["SHADE", "0", "TEXEL0", "0"]
+        alpha: ["0", "0", "0", "PRIMITIVE"]
+      - color: ["NOISE", "COMBINED", "PRIMITIVE", "COMBINED"]
+        alpha: ["0", "0", "0", "PRIMITIVE"]
+    gDPSetRenderMode:
+      - blend: ["G_BL_CLR_IN", "G_BL_A_IN", "G_BL_CLR_FOG", "G_BL_1MA"]
+      - G_RM_ZB_XLU_SURF
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+      clear: [G_CULL_BACK]
+    gDPSetFogColor:
+      r: 0
+      g: 0
+      b: 0
+
   lit_object:
     gSPGeometryMode:
       set: [G_LIGHTING, G_SHADE]
