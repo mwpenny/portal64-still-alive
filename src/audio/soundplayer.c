@@ -88,7 +88,7 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     float distanceSqrt = sqrtf(distance);
 
     // Add FX/reverb amount.
-    float fxDistCurve = clampf(((distanceSqrt / FX_PEAK_DISTANCE) * FX_CURVE_FACTOR) + FX_MIN_AMOUNT, 0.0f, 1.0f);
+    float fxDistCurve = clampf(((distanceSqrt / FX_PEAK_DISTANCE) * FX_CURVE_FACTOR) + FX_MIN_AMOUNT, FX_MIN_AMOUNT, FX_MAX_AMOUNT);
     *fxMix = (int)(127.0f * fxDistCurve);
 
     // Initial linear volume level.
