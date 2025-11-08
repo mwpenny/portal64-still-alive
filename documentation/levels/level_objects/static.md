@@ -5,14 +5,15 @@ Static level geometry. Used to generate level mesh and portal surface data.
 ## Name Structure
 
 ```
-@static [no_portals] [indicator_lights SIGNAL_NAME] [uvtransx TRANS_X] [uvtransy TRANS_Y] [uvtransz TRANS_Z] [uvrotx ROT_X] [uvroty ROT_Y] [uvrotz ROT_Z] [uvscale SCALE] [precise_culling]
+@static [no_portals|accept_portals] [indicator_lights SIGNAL_NAME] [uvtransx TRANS_X] [uvtransy TRANS_Y] [uvtransz TRANS_Z] [uvrotx ROT_X] [uvroty ROT_Y] [uvrotz ROT_Z] [uvscale SCALE] [precise_culling]
 ```
 
 ## Arguments
 
 | Name                                      | Description                                                                                                                                                                      |
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `no_portals` (optional)                   | If specified, the surface will not be considered portalable, regardless of its material name                                                                                     |
+| `no_portals` (optional)                   | If specified, the surface will not be considered portalable, regardless of its material name. This argument cannot be used at the same time as `accept_portals`.                 |
+| `accept_portals` (optional)               | If specified, the surface will be considered portalable, regardless of its material name. This argument cannot be used at the same time as `no_portals`.                         |
 | `indicator_lights SIGNAL_NAME` (optional) | If specified and the indicator light or door state material is used, it will be switched to the corresponding "active" variant when the specified [signal](../signals.md) is set |
 | `uvtransx TRANS_X` (optional)             | If specified and the material has `tileSizeS` and `tileSizeT` properties, translates UV coordinates by `TRANS_X` on the X axis. Defaults to 0.                                   |
 | `uvtransy TRANS_Y` (optional)             | If specified and the material has `tileSizeS` and `tileSizeT` properties, translates UV coordinates by `TRANS_Y` on the Y axis. Defaults to 0.                                   |
