@@ -29,11 +29,11 @@ ALSndPlayer gSoundPlayer;
 #define SPEED_OF_SOUND          343.2f
 #define VOLUME_CURVE_PAD        0.0125f
 #define VOLUME_AMPLIFICATION    1.538f
+#define VOLUME_MUTE_THRESHOLD   0.04f
 #define VOICE_FX_MIX            32
 #define FX_PEAK_DISTANCE        25.0f
 #define FX_MIN_AMOUNT           0.1f
 #define FX_MAX_AMOUNT           0.6f
-#define FX_CURVE_FACTOR         (FX_MAX_AMOUNT - FX_MIN_AMOUNT)
 #define DEFAULT_FX_MIX          8 // Small amount of FX mix for all sounds.
 
 struct ActiveSound {
@@ -61,9 +61,12 @@ struct SoundListener gSoundListeners[MAX_SOUND_LISTENERS];
 int gActiveListenerCount = 0;
 
 void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, float* volumeIn, float* volumeOut, int* panOut, float* pitchBend, int* fxMix) {
+    *panOut = 64;
+    *pitchBend = 1.0f;
+    *fxMix = 0;
+
     if (!gActiveListenerCount) {
         *volumeOut = *volumeIn;
-        *panOut = 64;
         return;
     }
 
@@ -81,15 +84,10 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
 
     if (distance < 0.0000001f) {
         *volumeOut = *volumeIn;
-        *panOut = 64;
         return;
     }
 
     float distanceSqrt = sqrtf(distance);
-
-    // Add FX/reverb amount.
-    float fxDistCurve = clampf(((distanceSqrt / FX_PEAK_DISTANCE) * FX_CURVE_FACTOR) + FX_MIN_AMOUNT, FX_MIN_AMOUNT, FX_MAX_AMOUNT);
-    *fxMix = (int)(127.0f * fxDistCurve);
 
     // Initial linear volume level.
     float volumeLevel = clampf(*volumeIn / distanceSqrt, 0.0f, 1.0f);
@@ -99,7 +97,19 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     // compressing the volume of closer sounds.
     volumeLevel = clampf((volumeLevel - VOLUME_CURVE_PAD) * VOLUME_AMPLIFICATION, 0.0f, 1.0f);
 
+    if (volumeLevel < VOLUME_MUTE_THRESHOLD) {
+        *volumeOut = 0.0f;
+        return;
+    }
+
     *volumeOut = volumeLevel;
+
+    // Add FX/reverb amount.
+    float fxDistCurve = clampf(
+        mathfLerp(FX_MIN_AMOUNT, FX_MAX_AMOUNT, distanceSqrt / FX_PEAK_DISTANCE),
+        FX_MIN_AMOUNT, FX_MAX_AMOUNT
+    );
+    *fxMix = (int)(127.0f * fxDistCurve);
 
     struct Vector3 offset;
     vector3Sub(at, &nearestListener->worldPos, &offset);
@@ -117,15 +127,7 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
 
     pan = pan * 64.0f + 64.0f;
 
-    *panOut = (int)pan;
-
-    if (*panOut < 0) {
-        *panOut = 0;
-    } 
-
-    if (*panOut > 127) {
-        *panOut = 127;
-    }
+    *panOut = MAX(0, MIN((int)pan, 127));
 }
 
 static void soundInitDecayTimes(struct SoundArray* soundArray) {
