@@ -463,7 +463,7 @@ int collisionSceneRaycastDoorways(struct CollisionScene* scene, struct Room* roo
 
         if (raycastQuadShape(&doorway->quad, ray, roomDistance, &hitTest) && hitTest.distance < roomDistance) {
             // Check that the doorway wasn't hit from the wrong side
-            int expectedRoom = vector3Dot(&doorway->quad.plane.normal, &hitTest.normal) < 0.0f ? doorway->roomA : doorway->roomB;
+            int expectedRoom = vector3Dot(&doorway->quad.plane.normal, &ray->dir) > 0.0f ? doorway->roomA : doorway->roomB;
             int otherRoom = currentRoom == doorway->roomA ? doorway->roomB : doorway->roomA;
 
             if (expectedRoom == otherRoom) {

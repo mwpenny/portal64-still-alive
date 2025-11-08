@@ -28,7 +28,7 @@ int raycastQuadShape(struct CollisionQuad* quad, struct Ray* ray, float maxDista
         return 0;
     }
 
-    if (normalDot > 0.0f) {
+    if (quad->thickness > 0.0f && normalDot > 0.0f) {
         vector3Negate(&quad->plane.normal, &contact->normal);
     } else {
         contact->normal = quad->plane.normal;
