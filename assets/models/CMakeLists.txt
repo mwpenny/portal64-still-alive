@@ -63,6 +63,7 @@ set(DYNAMIC_MODELS
     props/turret_01
     props/turret_01_eye
     props/water_bottle/water_bottle
+    props_junk/metalbucket01a
     signage/clock
     signage/clock_digits
 )
