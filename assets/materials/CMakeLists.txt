@@ -65,7 +65,7 @@ set(TEXTURES
     models/props_bts/fan01
     models/props_c17/door01a_skin6
     models/props_c17/substation_transformer01b
-    models/props_junk/MetalBucket01a
+    models/props_junk/metalbucket01a
     models/props_wasteland/fence_alpha
     models/props_wasteland/prison_yard001
     models/weapons/v_models/v_portalgun/v_portalgun
