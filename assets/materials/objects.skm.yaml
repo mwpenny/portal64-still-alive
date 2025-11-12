@@ -261,3 +261,17 @@ materials:
       filename: ../../portal_pak_modified/materials/models/props/water_bottle/water_bottle_label.png
       siz: G_IM_SIZ_16b
       fmt: G_IM_FMT_RGBA
+
+  milk_carton_bottom:
+    gDPSetTile:
+      - null
+      - filename: ../../portal_pak_modified/materials/models/props/milk_carton/milk_carton_bottom.png
+        siz: G_IM_SIZ_4b
+        fmt: G_IM_FMT_I
+        tmem: 492
+        s:
+          mirror: true
+        t:
+          mirror: true
+    gSPTexture:
+      tile: 1

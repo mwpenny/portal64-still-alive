@@ -931,6 +931,80 @@ materials:
       g: 0
       b: 0
 
+  milk_carton:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/milk_carton/milk_carton.png
+        siz: G_IM_SIZ_4b
+        fmt: G_IM_FMT_I
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ../../portal_pak_modified/materials/models/props/milk_carton/milk_carton_bottom.png
+        siz: G_IM_SIZ_4b
+        fmt: G_IM_FMT_I
+        tmem: 492
+        s:
+          mirror: true
+        t:
+          mirror: true
+
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode:
+      - color: ["ENVIRONMENT", "0", "TEXEL0", "0"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["SHADE", "0", "COMBINED", "0"]
+        alpha: ["0", "0", "0", "1"]
+    gDPSetRenderMode:
+      - G_RM_PASS
+      - G_RM_ZB_OPA_SURF
+
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetEnvColor:
+      r: 214
+      g: 212
+      b: 192
+
+  milk_carton_fizzled:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/models/props/milk_carton/milk_carton.png
+        siz: G_IM_SIZ_4b
+        fmt: G_IM_FMT_I
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ../../portal_pak_modified/materials/models/props/milk_carton/milk_carton_bottom.png
+        siz: G_IM_SIZ_4b
+        fmt: G_IM_FMT_I
+        tmem: 492
+        s:
+          mirror: true
+        t:
+          mirror: true
+
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode:
+      - color: ["ENVIRONMENT", "0", "TEXEL0", "0"]
+        alpha: ["0", "0", "0", "PRIMITIVE"]
+      - color: ["NOISE", "COMBINED", "PRIMITIVE", "COMBINED"]
+        alpha: ["0", "0", "0", "PRIMITIVE"]
+    gDPSetRenderMode:
+      - blend: ["G_BL_CLR_IN", "G_BL_A_IN", "G_BL_CLR_FOG", "G_BL_1MA"]
+      - G_RM_ZB_XLU_SURF
+
+    gSPGeometryMode:
+      clear: [G_LIGHTING, G_SHADE]
+    gDPSetEnvColor:
+      r: 214
+      g: 212
+      b: 192
+    gDPSetFogColor:
+      r: 0
+      g: 0
+      b: 0
+
   lit_object:
     gSPGeometryMode:
       set: [G_LIGHTING, G_SHADE]

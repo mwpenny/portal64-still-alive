@@ -1,0 +1,11 @@
+-colorspace gray
+
+\(
+    +clone
+    -blur 0x0.5
+    -crop 16x16+124+23
+    -write portal_pak_modified/materials/models/props/milk_carton/milk_carton_bottom.png
+    +delete
+\)
+
+-crop 48x164+137+72

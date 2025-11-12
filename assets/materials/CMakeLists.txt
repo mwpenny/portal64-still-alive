@@ -51,6 +51,7 @@ set(TEXTURES
     models/props/lab_monitor/lab_monitor_screen_text
     models/props/light_rail_endcap
     models/props/metal_box
+    models/props/milk_carton/milk_carton
     models/props/portal_cleanser
     models/props/radio
     models/props/round_elevator_sheet_1
@@ -319,6 +320,10 @@ set_property(SOURCE models/props/bed01.ims
 set_property(SOURCE models/props/button.ims
     PROPERTY ADDITIONAL_OUTPUTS
         models/props/button_base
+)
+set_property(SOURCE models/props/milk_carton/milk_carton.ims
+    PROPERTY ADDITIONAL_OUTPUTS
+        models/props/milk_carton/milk_carton_bottom
 )
 set_property(SOURCE models/props/round_elevator_sheet_1.ims
     PROPERTY ADDITIONAL_DEPS
