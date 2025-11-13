@@ -936,6 +936,7 @@ materials:
       - filename: ../../portal_pak_modified/materials/models/props/milk_carton/milk_carton.png
         siz: G_IM_SIZ_4b
         fmt: G_IM_FMT_I
+        twoTone: true
         s:
           wrap: false
         t:
@@ -943,6 +944,7 @@ materials:
       - filename: ../../portal_pak_modified/materials/models/props/milk_carton/milk_carton_bottom.png
         siz: G_IM_SIZ_4b
         fmt: G_IM_FMT_I
+        twoTone: true
         tmem: 492
         s:
           mirror: true
@@ -951,9 +953,9 @@ materials:
 
     gDPSetCycleType: G_CYC_2CYCLE
     gDPSetCombineMode:
-      - color: ["ENVIRONMENT", "0", "TEXEL0", "0"]
+      - color: [PRIMITIVE, "ENVIRONMENT", TEXEL0, "ENVIRONMENT"]
         alpha: ["0", "0", "0", "1"]
-      - color: ["SHADE", "0", "COMBINED", "0"]
+      - color: ["COMBINED", "0", "SHADE", "0"]
         alpha: ["0", "0", "0", "1"]
     gDPSetRenderMode:
       - G_RM_PASS
@@ -961,16 +963,13 @@ materials:
 
     gSPGeometryMode:
       set: [G_LIGHTING, G_SHADE]
-    gDPSetEnvColor:
-      r: 214
-      g: 212
-      b: 192
 
   milk_carton_fizzled:
     gDPSetTile:
       - filename: ../../portal_pak_modified/materials/models/props/milk_carton/milk_carton.png
         siz: G_IM_SIZ_4b
         fmt: G_IM_FMT_I
+        twoTone: true
         s:
           wrap: false
         t:
@@ -978,6 +977,7 @@ materials:
       - filename: ../../portal_pak_modified/materials/models/props/milk_carton/milk_carton_bottom.png
         siz: G_IM_SIZ_4b
         fmt: G_IM_FMT_I
+        twoTone: true
         tmem: 492
         s:
           mirror: true
@@ -986,6 +986,7 @@ materials:
 
     gDPSetCycleType: G_CYC_2CYCLE
     gDPSetCombineMode:
+      # Can't do real two-tone since it would interfere with fizzled effect
       - color: ["ENVIRONMENT", "0", "TEXEL0", "0"]
         alpha: ["0", "0", "0", "PRIMITIVE"]
       - color: ["NOISE", "COMBINED", "PRIMITIVE", "COMBINED"]
@@ -997,9 +998,9 @@ materials:
     gSPGeometryMode:
       clear: [G_LIGHTING, G_SHADE]
     gDPSetEnvColor:
-      r: 214
-      g: 212
-      b: 192
+      r: 181
+      g: 175
+      b: 167
     gDPSetFogColor:
       r: 0
       g: 0

@@ -264,10 +264,19 @@ materials:
 
   milk_carton_bottom:
     gDPSetTile:
-      - null
+      # Include this so the min/max twoTone colors match the base material
+      - filename: ../../portal_pak_modified/materials/models/props/milk_carton/milk_carton.png
+        siz: G_IM_SIZ_4b
+        fmt: G_IM_FMT_I
+        twoTone: true
+        s:
+          wrap: false
+        t:
+          wrap: false
       - filename: ../../portal_pak_modified/materials/models/props/milk_carton/milk_carton_bottom.png
         siz: G_IM_SIZ_4b
         fmt: G_IM_FMT_I
+        twoTone: true
         tmem: 492
         s:
           mirror: true
@@ -275,3 +284,9 @@ materials:
           mirror: true
     gSPTexture:
       tile: 1
+
+    gDPSetCombineMode:
+      - color: [PRIMITIVE, "ENVIRONMENT", TEXEL0, "ENVIRONMENT"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["COMBINED", "0", "SHADE", "0"]
+        alpha: ["0", "0", "0", "1"]
