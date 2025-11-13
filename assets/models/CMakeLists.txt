@@ -56,6 +56,7 @@ set(DYNAMIC_MODELS
     props/lab_monitor
     props/light_rail_endcap
     props/milk_carton/milk_carton
+    props/milk_carton/milk_carton_open
     props/portal_cleanser
     props/radio
     props/saucepan/saucepan
