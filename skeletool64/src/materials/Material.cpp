@@ -15,13 +15,10 @@ int Material::TextureWidth(Material* material) {
         return 0;
     }
 
-    for (int i = 0; i < MAX_TILE_COUNT; ++i) {
-        if (material->mState.tiles[i].isOn && material->mState.tiles[i].texture) {
-            return material->mState.tiles[i].texture->Width();
-        }
-    }
+    int tileIndex = material->mState.textureState.tile;
+    TileState& tile = material->mState.tiles[tileIndex];
 
-    return 0;
+    return (tile.isOn && tile.texture) ? tile.texture->Width() : 0;
 }
 
 int Material::TextureHeight(Material* material) {
@@ -29,13 +26,10 @@ int Material::TextureHeight(Material* material) {
         return 0;
     }
 
-    for (int i = 0; i < MAX_TILE_COUNT; ++i) {
-        if (material->mState.tiles[i].isOn && material->mState.tiles[i].texture) {
-            return material->mState.tiles[i].texture->Height();
-        }
-    }
+    int tileIndex = material->mState.textureState.tile;
+    TileState& tile = material->mState.tiles[tileIndex];
 
-    return 0;
+    return (tile.isOn && tile.texture) ? tile.texture->Height() : 0;
 }
 
 VertexType convertNormalSourceToVertexType(NormalSource normalSource) {
