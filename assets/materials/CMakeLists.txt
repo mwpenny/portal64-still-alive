@@ -52,6 +52,7 @@ set(TEXTURES
     models/props/light_rail_endcap
     models/props/metal_box
     models/props/milk_carton/milk_carton
+    models/props/pc_case_open/pc_case_open
     models/props/portal_cleanser
     models/props/radio
     models/props/round_elevator_sheet_1
@@ -325,6 +326,15 @@ set_property(SOURCE models/props/milk_carton/milk_carton.ims
     PROPERTY ADDITIONAL_OUTPUTS
         models/props/milk_carton/milk_carton_bottom
 )
+set_property(SOURCE models/props/pc_case_open/pc_case_open.ims
+    PROPERTY ADDITIONAL_OUTPUTS
+        models/props/pc_case_open/pc_case_logo_side
+        models/props/pc_case_open/pc_case_logo_front
+        models/props/pc_case_open/pc_case_grill
+        models/props/pc_case_open/pc_case_button
+        models/props/pc_case_open/pc_case_bottom
+        models/props/pc_case_open/pc_case_interior
+)
 set_property(SOURCE models/props/round_elevator_sheet_1.ims
     PROPERTY ADDITIONAL_DEPS
         models/props/round_elevator_sheet_3
@@ -337,7 +347,7 @@ set_property(SOURCE models/props/round_elevator_sheet_3.ims
     PROPERTY ADDITIONAL_OUTPUTS
         models/props/elevator_sign
 )
-set_property(SOURCE models/props/water_bottle/water_bottls.ims
+set_property(SOURCE models/props/water_bottle/water_bottle.ims
     PROPERTY ADDITIONAL_OUTPUTS
         models/props/water_bottle/water_bottle_label
 )

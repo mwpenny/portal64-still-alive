@@ -290,3 +290,111 @@ materials:
         alpha: ["0", "0", "0", "1"]
       - color: ["COMBINED", "0", "SHADE", "0"]
         alpha: ["0", "0", "0", "1"]
+
+  pc_case_logo_side:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/pc_case_open/pc_case_logo_side.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      s:
+        wrap: false
+      t:
+        wrap: false
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+
+  pc_case_logo_front:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/pc_case_open/pc_case_logo_front.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      s:
+        wrap: false
+      t:
+        wrap: false
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+
+  pc_case_grill:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/pc_case_open/pc_case_grill.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      s:
+        mirror: true
+      t:
+        mirror: true
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+
+  pc_case_button:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/pc_case_open/pc_case_button.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      s:
+        wrap: false
+      t:
+        wrap: false
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+
+  pc_case_bottom:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/pc_case_open/pc_case_bottom.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      s:
+        mirror: true
+      t:
+        mirror: true
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+
+  pc_case_interior:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/pc_case_open/pc_case_interior.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      s:
+        wrap: false
+      t:
+        wrap: true
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+
+  pc_case_interior_top_bottom:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/pc_case_open/pc_case_interior.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      s:
+        mirror: true
+      t:
+        wrap: false
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]
+
+  pc_case_interior_edges:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/pc_case_open/pc_case_interior.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      s:
+        wrap: false
+      t:
+        wrap: true
+    gSPGeometryMode:
+      clear: [G_CULL_BACK]
+
+  pc_case_motherboard:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/pc_case_open/pc_case_open.png
+      siz: G_IM_SIZ_16b
+      fmt: G_IM_FMT_RGBA
+      s:
+        wrap: false
+      t:
+        wrap: false
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE, G_CULL_BACK]

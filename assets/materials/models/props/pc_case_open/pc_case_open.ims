@@ -1,0 +1,110 @@
+-alpha off
+
+\(
+    +clone
+
+    -crop 33x33+121+18
+    -resize 32x32
+    -colors 8
+
+    -write portal_pak_modified/materials/models/props/pc_case_open/pc_case_logo_side.png
+    +delete
+\)
+
+\(
+        +clone
+
+        -crop 10x33+72+143
+        -rotate 270
+        -resize 32x10
+
+        -fill '#e8e7e6'
+        -fuzz 5%
+        -opaque '#f2f2f2'
+
+        -write portal_pak_modified/materials/models/props/pc_case_open/pc_case_logo_front.png
+        +delete
+\)
+
+\(
+    +clone
+
+    -crop 3x8+104+168
+    -resize 4x8!
+
+    -write portal_pak_modified/materials/models/props/pc_case_open/pc_case_grill.png
+    +delete
+\)
+
+\(
+    +clone
+
+    -fuzz 5%
+    -transparent black
+
+    \(
+        +clone
+        -crop 23x23+228+201
+        -resize 19x19
+    \)
+
+    -compose Over
+    -geometry +230+229
+    -composite
+
+    -background '#e8e7e6'
+    -alpha remove
+
+    -crop 28x26+226+226
+    -resize 20x19
+
+    -stroke '#e8e7e6'
+    -draw 'line 0,0,19,0'
+    -draw 'line 0,18,19,18'
+    -draw 'line 0,0,0,18'
+    -draw 'line 19,0,19,18'
+
+    -write portal_pak_modified/materials/models/props/pc_case_open/pc_case_button.png
+    +delete
+\)
+
+\(
+    +clone
+
+    -crop 8x25+192+200
+    -flip
+
+    -write portal_pak_modified/materials/models/props/pc_case_open/pc_case_bottom.png
+    +delete
+\)
+
+\(
+    +clone
+
+    \( -clone 0 -crop 16x15+206+234 -flip -rotate 90 \)
+    \( -clone 0 -crop 16x37+201+51 -rotate 90 \)
+    \( -clone 0 -crop 16x3+235+120 -rotate 90 \)
+    \( -clone 0 -crop 16x4+186+192 -rotate 90 \)
+    \( -clone 0 -crop 5x16+154+92 \)
+
+    -delete 0
+    +append
+
+    -write portal_pak_modified/materials/models/props/pc_case_open/pc_case_interior.png
+    +delete
+\)
+
+\(
+    -clone 0
+
+    -crop 96x80+6+5
+    -resize 48x40
+\)
+\(
+    -clone 0
+    -crop 14x14+67+90
+\)
+-delete 0
+-compose Over
+-geometry +23+13
+-composite
