@@ -128,6 +128,34 @@ void rigidBodyDeserializeFlags(enum RigidBodyFlags* flags) {
     }
 }
 
+void rigidBodySerialize(struct Serializer* serializer, SerializeAction action, struct RigidBody* rigidBody) {
+    action(serializer, &rigidBody->transform, sizeof(struct PartialTransform));
+    action(serializer, &rigidBody->currentRoom, sizeof(short));
+    action(serializer, &rigidBody->flags, sizeof(enum RigidBodyFlags));
+
+    if (!(rigidBody->flags & RigidBodyIsSleeping)) {
+        action(serializer, &rigidBody->velocity, sizeof(struct Vector3));
+        action(serializer, &rigidBody->angularVelocity, sizeof(struct Vector3));
+    }
+}
+
+void rigidBodyDeserialize(struct Serializer* serializer, struct RigidBody* rigidBody) {
+    serializeRead(serializer, &rigidBody->transform, sizeof(struct PartialTransform));
+    serializeRead(serializer, &rigidBody->currentRoom, sizeof(short));
+    serializeRead(serializer, &rigidBody->flags, sizeof(enum RigidBodyFlags));
+
+    enum RigidBodyFlags serializedFlags = rigidBody->flags;
+    rigidBodyDeserializeFlags(&rigidBody->flags);
+
+    if (!(serializedFlags & RigidBodyIsSleeping)) {
+        serializeRead(serializer, &rigidBody->velocity, sizeof(struct Vector3));
+        serializeRead(serializer, &rigidBody->angularVelocity, sizeof(struct Vector3));
+    } else {
+        rigidBody->velocity = gZeroVec;
+        rigidBody->angularVelocity = gZeroVec;
+    }
+}
+
 void decorSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     short countAsShort = 0;
     short heldObject = -1;
@@ -160,17 +188,17 @@ void decorSerialize(struct Serializer* serializer, SerializeAction action, struc
 
         action(serializer, &id, sizeof(short));
 
-        action(serializer, &entry->originalPosition, sizeof(struct Vector3));
-        action(serializer, &entry->originalRotation, sizeof(struct Quaternion));
-        action(serializer, &entry->originalRoom, sizeof(short));
+        if (entry->definition->flags & DecorObjectFlagsImportant) {
+            // Non-important decor will never be reset, so don't serialize this
+            action(serializer, &entry->originalPosition, sizeof(struct Vector3));
+            action(serializer, &entry->originalRotation, sizeof(struct Quaternion));
+            action(serializer, &entry->originalRoom, sizeof(short));
+        }
 
-        action(serializer, &entry->rigidBody.transform, sizeof(struct PartialTransform));
-        action(serializer, &entry->rigidBody.velocity, sizeof(struct Vector3));
-        action(serializer, &entry->rigidBody.angularVelocity, sizeof(struct Vector3));
-        action(serializer, &entry->rigidBody.flags, sizeof(enum RigidBodyFlags));
-        action(serializer, &entry->rigidBody.currentRoom, sizeof(short));
-
-        action(serializer, &entry->fizzleTime, sizeof(float));
+        rigidBodySerialize(serializer, action, &entry->rigidBody);
+        if (entry->rigidBody.flags & RigidBodyFizzled) {
+            action(serializer, &entry->fizzleTime, sizeof(float));
+        }
     }
 }
 
@@ -187,29 +215,32 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
 
     for (int i = 0; i < countAsShort; ++i) {
         short id;
-
         serializeRead(serializer, &id, sizeof(short));
 
         struct Transform originalTransform;
         short originalRoom;
 
-        serializeRead(serializer, &originalTransform.position, sizeof(struct Vector3));
-        serializeRead(serializer, &originalTransform.rotation, sizeof(struct Quaternion));
-        originalTransform.scale = gOneVec;
-        serializeRead(serializer, &originalRoom, sizeof(short));
+        struct DecorObjectDefinition* definition = decorObjectDefinitionForId(id);
+        if (definition->flags & DecorObjectFlagsImportant) {
+            serializeRead(serializer, &originalTransform.position, sizeof(struct Vector3));
+            serializeRead(serializer, &originalTransform.rotation, sizeof(struct Quaternion));
+            originalTransform.scale = gOneVec;
+            serializeRead(serializer, &originalRoom, sizeof(short));
+        } else {
+            transformInitIdentity(&originalTransform);
+            originalRoom = 0;
+        }
 
-        struct DecorObject* entry = decorObjectNew(decorObjectDefinitionForId(id), &originalTransform, originalRoom);
+        struct DecorObject* entry = decorObjectNew(definition, &originalTransform, originalRoom);
 
-        serializeRead(serializer, &entry->rigidBody.transform, sizeof(struct PartialTransform));
-        serializeRead(serializer, &entry->rigidBody.velocity, sizeof(struct Vector3));
-        serializeRead(serializer, &entry->rigidBody.angularVelocity, sizeof(struct Vector3));
-        serializeRead(serializer, &entry->rigidBody.flags, sizeof(enum RigidBodyFlags));
-        serializeRead(serializer, &entry->rigidBody.currentRoom, sizeof(short));
-        rigidBodyDeserializeFlags(&entry->rigidBody.flags);
+        rigidBodyDeserialize(serializer, &entry->rigidBody);
+        if (entry->rigidBody.flags & RigidBodyFizzled) {
+            serializeRead(serializer, &entry->fizzleTime, sizeof(float));
+        } else {
+            entry->fizzleTime = 0.0f;
+        }
 
         collisionObjectUpdateBB(&entry->collisionObject);
-
-        serializeRead(serializer, &entry->fizzleTime, sizeof(float));
 
         scene->decor[i] = entry;
 
@@ -258,12 +289,10 @@ void boxDropperSerialize(struct Serializer* serializer, SerializeAction action, 
             continue;
         }
 
-        action(serializer, &dropper->activeCube.rigidBody.transform, sizeof(struct PartialTransform));
-        action(serializer, &dropper->activeCube.rigidBody.currentRoom, sizeof(short));
-        action(serializer, &dropper->activeCube.rigidBody.velocity, sizeof(struct Vector3));
-        action(serializer, &dropper->activeCube.rigidBody.angularVelocity, sizeof(struct Vector3));
-        action(serializer, &dropper->activeCube.rigidBody.flags, sizeof(enum RigidBodyFlags));
-        action(serializer, &dropper->activeCube.fizzleTime, sizeof(float));
+        rigidBodySerialize(serializer, action, &dropper->activeCube.rigidBody);
+        if (dropper->activeCube.rigidBody.flags & RigidBodyFizzled) {
+            action(serializer, &dropper->activeCube.fizzleTime, sizeof(float));
+        }
     }
 }
 
@@ -280,19 +309,21 @@ void boxDropperDeserialize(struct Serializer* serializer, struct Scene* scene) {
             continue;
         }
 
-        struct Transform cubePosition;
-        short cubeRoom;
-        serializeRead(serializer, &cubePosition, sizeof(struct PartialTransform));
-        cubePosition.scale = gOneVec;
-        serializeRead(serializer, &cubeRoom, sizeof(short));
+        // Cube droppers respawn their own cubes, so they are not marked as
+        // important and therefore will never auto-reset. We still need to
+        // fill in this data though for the initial spawn point.
+        struct Transform dummyOriginalCubePosition;
+        short dummyOriginalCubeRoom = 0;
+        transformInitIdentity(&dummyOriginalCubePosition);
 
-        decorObjectInit(&dropper->activeCube, decorObjectDefinitionForId(DECOR_TYPE_CUBE_UNIMPORTANT), &cubePosition, cubeRoom);
+        decorObjectInit(&dropper->activeCube, decorObjectDefinitionForId(DECOR_TYPE_CUBE_UNIMPORTANT), &dummyOriginalCubePosition, dummyOriginalCubeRoom);
 
-        serializeRead(serializer, &dropper->activeCube.rigidBody.velocity, sizeof(struct Vector3));
-        serializeRead(serializer, &dropper->activeCube.rigidBody.angularVelocity, sizeof(struct Vector3));
-        serializeRead(serializer, &dropper->activeCube.rigidBody.flags, sizeof(enum RigidBodyFlags));
-        serializeRead(serializer, &dropper->activeCube.fizzleTime, sizeof(float));
-        rigidBodyDeserializeFlags(&dropper->activeCube.rigidBody.flags);
+        rigidBodyDeserialize(serializer, &dropper->activeCube.rigidBody);
+        if (dropper->activeCube.rigidBody.flags & RigidBodyFizzled) {
+            serializeRead(serializer, &dropper->activeCube.fizzleTime, sizeof(float));
+        } else {
+            dropper->activeCube.fizzleTime = 0.0f;
+        }
 
         if (heldCube == i) {
             playerSetGrabbing(&scene->player, &dropper->activeCube.collisionObject);
@@ -485,13 +516,10 @@ void securityCameraSerialize(struct Serializer* serializer, SerializeAction acti
             u8 index = i;
             action(serializer, &index, sizeof(u8));
             
-            action(serializer, &cam->rigidBody.transform, sizeof(struct PartialTransform));
-            action(serializer, &cam->rigidBody.velocity, sizeof(struct Vector3));
-            action(serializer, &cam->rigidBody.angularVelocity, sizeof(struct Vector3));
-            action(serializer, &cam->rigidBody.flags, sizeof(enum RigidBodyFlags));
-            action(serializer, &cam->rigidBody.currentRoom, sizeof(short));
-
-            action(serializer, &cam->fizzleTime, sizeof(float));
+            rigidBodySerialize(serializer, action, &cam->rigidBody);
+            if (cam->rigidBody.flags & RigidBodyFizzled) {
+                action(serializer, &cam->fizzleTime, sizeof(float));
+            }
         }
     }
 }
@@ -513,17 +541,15 @@ void securityCameraDeserialize(struct Serializer* serializer, struct Scene* scen
         struct SecurityCamera* cam = &scene->securityCameras[index];
         
         securityCameraDetach(cam);
-        
-        serializeRead(serializer, &cam->rigidBody.transform, sizeof(struct PartialTransform));
-        serializeRead(serializer, &cam->rigidBody.velocity, sizeof(struct Vector3));
-        serializeRead(serializer, &cam->rigidBody.angularVelocity, sizeof(struct Vector3));
-        serializeRead(serializer, &cam->rigidBody.flags, sizeof(enum RigidBodyFlags));
-        serializeRead(serializer, &cam->rigidBody.currentRoom, sizeof(short));
-        rigidBodyDeserializeFlags(&cam->rigidBody.flags);
+
+        rigidBodyDeserialize(serializer, &cam->rigidBody);
+        if (cam->rigidBody.flags & RigidBodyFizzled) {
+            serializeRead(serializer, &cam->fizzleTime, sizeof(float));
+        } else {
+            cam->fizzleTime = 0.0f;
+        }
 
         collisionObjectUpdateBB(&cam->collisionObject);
-
-        serializeRead(serializer, &cam->fizzleTime, sizeof(float));
 
         if (heldCam == i) {
             playerSetGrabbing(&scene->player, &cam->collisionObject);
@@ -549,15 +575,13 @@ void turretSerialize(struct Serializer* serializer, SerializeAction action, stru
     for (int i = 0; i < scene->turretCount; ++i) {
         struct Turret* turret = scene->turrets[i];
 
-        action(serializer, &turret->rigidBody.transform, sizeof(struct PartialTransform));
-        action(serializer, &turret->rigidBody.velocity, sizeof(struct Vector3));
-        action(serializer, &turret->rigidBody.angularVelocity, sizeof(struct Vector3));
-        action(serializer, &turret->rigidBody.flags, sizeof(enum RigidBodyFlags));
-        action(serializer, &turret->rigidBody.currentRoom, sizeof(short));
+        rigidBodySerialize(serializer, action, &turret->rigidBody);
+        if (turret->rigidBody.flags & RigidBodyFizzled) {
+            action(serializer, &turret->fizzleTime, sizeof(float));
+        }
 
         action(serializer, &turret->flags, sizeof(enum TurretFlags));
         action(serializer, &turret->state, sizeof(enum TurretState));
-        action(serializer, &turret->fizzleTime, sizeof(float));
 
         if (turret->state != TurretStateDead) {
             action(serializer, &turret->stateTimer, sizeof(float));
@@ -589,16 +613,15 @@ void turretDeserialize(struct Serializer* serializer, struct Scene* scene) {
     for (int i = 0; i < count; ++i) {
         struct Turret* turret = turretNew(NULL);
 
-        serializeRead(serializer, &turret->rigidBody.transform, sizeof(struct PartialTransform));
-        serializeRead(serializer, &turret->rigidBody.velocity, sizeof(struct Vector3));
-        serializeRead(serializer, &turret->rigidBody.angularVelocity, sizeof(struct Vector3));
-        serializeRead(serializer, &turret->rigidBody.flags, sizeof(enum RigidBodyFlags));
-        serializeRead(serializer, &turret->rigidBody.currentRoom, sizeof(short));
-        rigidBodyDeserializeFlags(&turret->rigidBody.flags);
+        rigidBodyDeserialize(serializer, &turret->rigidBody);
+        if (turret->rigidBody.flags & RigidBodyFizzled) {
+            serializeRead(serializer, &turret->fizzleTime, sizeof(float));
+        } else {
+            turret->fizzleTime = 0.0f;
+        }
 
         serializeRead(serializer, &turret->flags, sizeof(enum TurretFlags));
         serializeRead(serializer, &turret->state, sizeof(enum TurretState));
-        serializeRead(serializer, &turret->fizzleTime, sizeof(float));
 
         collisionObjectUpdateBB(&turret->collisionObject);
 
