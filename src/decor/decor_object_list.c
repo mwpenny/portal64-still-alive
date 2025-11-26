@@ -15,14 +15,13 @@ struct Vector2 gCylinderColliderEdgeVectors[] = {
     {0.707f, -0.707f},
 };
 
-struct CollisionQuad gCyliderColliderFaces[8];
-
+struct CollisionQuad gCylinderColliderFaces[8];
 struct CollisionCylinder gCylinderCollider = {
     0.3f,
     0.35f,
     gCylinderColliderEdgeVectors,
     sizeof(gCylinderColliderEdgeVectors) / sizeof(*gCylinderColliderEdgeVectors),
-    gCyliderColliderFaces,
+    gCylinderColliderFaces,
 };
 
 struct CollisionBox gRadioCollider = {
@@ -31,6 +30,45 @@ struct CollisionBox gRadioCollider = {
 
 struct CollisionBox gCubeCollisionBox = {
     {0.3165f, 0.3165f, 0.3165f}
+};
+
+struct CollisionQuad gFoodCanColliderFaces[8];
+struct CollisionCylinder gFoodCanCollider = {
+    0.11f,
+    0.125f,
+    gCylinderColliderEdgeVectors,
+    sizeof(gCylinderColliderEdgeVectors) / sizeof(*gCylinderColliderEdgeVectors),
+    gFoodCanColliderFaces,
+};
+
+struct CollisionQuad gWaterBottleColliderFaces[8];
+struct CollisionCylinder gWaterBottleCollider = {
+    0.3f,
+    0.25f,
+    gCylinderColliderEdgeVectors,
+    sizeof(gCylinderColliderEdgeVectors) / sizeof(*gCylinderColliderEdgeVectors),
+    gWaterBottleColliderFaces,
+};
+
+struct CollisionBox gSaucepanCollisionBox = {
+    {0.15f, 0.15f, 0.1f}
+};
+
+struct CollisionQuad gBucketColliderFaces[8];
+struct CollisionCylinder gBucketCollider = {
+    0.2f,
+    0.2f,
+    gCylinderColliderEdgeVectors,
+    sizeof(gCylinderColliderEdgeVectors) / sizeof(*gCylinderColliderEdgeVectors),
+    gBucketColliderFaces,
+};
+
+struct CollisionBox gMilkCartonCollisionBox = {
+    {0.125f, 0.125f, 0.2f}
+};
+
+struct CollisionBox gPCCaseCollisionBox = {
+    {0.25f, 0.25f, 0.15f}
 };
 
 struct DecorObjectDefinition gDecorObjectDefinitions[] = {
@@ -230,6 +268,118 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         1.5f,
         OVERLAYS_OVERLAY_SCRAWLINGS002A_DYNAMIC_MODEL,
         .materialIndex = OVERLAY_INDEX,
+        .soundClipId = -1,
+        .soundFizzleId = -1,
+    },
+    [DECOR_TYPE_FOOD_CAN] = {
+        {
+            CollisionShapeTypeCylinder,
+            &gFoodCanCollider,
+            0.0f,
+            0.4f,
+            &gCollisionCylinderCallbacks,
+        },
+        0.8f,
+        0.18f,
+        PROPS_FOOD_CAN_FOOD_CAN_DYNAMIC_MODEL,
+        .materialIndex = FOOD_CAN_INDEX,
+        .materialIndexFizzled = FOOD_CAN_FIZZLED_INDEX,
+        .soundClipId = -1,
+        .soundFizzleId = -1,
+    },
+    [DECOR_TYPE_WATER_BOTTLE] = {
+        {
+            CollisionShapeTypeCylinder,
+            &gWaterBottleCollider,
+            0.0f,
+            0.75f,
+            &gCollisionCylinderCallbacks,
+        },
+        1.0f,
+        0.4f,
+        PROPS_WATER_BOTTLE_WATER_BOTTLE_DYNAMIC_MODEL,
+        .materialIndex = LIT_OBJECT_INDEX,
+        .materialIndexFizzled = LIT_OBJECT_FIZZLED_INDEX,
+        .soundClipId = -1,
+        .soundFizzleId = -1,
+    },
+    [DECOR_TYPE_SAUCEPAN] = {
+        {
+            CollisionShapeTypeBox,
+            &gSaucepanCollisionBox,
+            0.0f,
+            0.5f,
+            &gCollisionBoxCallbacks,
+        },
+        1.25f,
+        0.375f,
+        PROPS_SAUCEPAN_SAUCEPAN_DYNAMIC_MODEL,
+        .materialIndex = SAUCEPAN_INDEX,
+        .materialIndexFizzled = SAUCEPAN_FIZZLED_INDEX,
+        .soundClipId = -1,
+        .soundFizzleId = -1,
+    },
+    [DECOR_TYPE_METALBUCKET01A] = {
+        {
+            CollisionShapeTypeCylinder,
+            &gBucketCollider,
+            0.0f,
+            0.75f,
+            &gCollisionCylinderCallbacks,
+        },
+        1.25f,
+        0.4f,
+        PROPS_JUNK_METALBUCKET01A_DYNAMIC_MODEL,
+        .materialIndex = METALBUCKET01A_INDEX,
+        .materialIndexFizzled = METALBUCKET01A_FIZZLED_INDEX,
+        .soundClipId = -1,
+        .soundFizzleId = -1,
+    },
+    [DECOR_TYPE_MILK_CARTON] = {
+        {
+            CollisionShapeTypeBox,
+            &gMilkCartonCollisionBox,
+            0.0f,
+            0.4f,
+            &gCollisionBoxCallbacks,
+        },
+        0.8f,
+        0.4f,
+        PROPS_MILK_CARTON_MILK_CARTON_DYNAMIC_MODEL,
+        .materialIndex = MILK_CARTON_INDEX,
+        .materialIndexFizzled = MILK_CARTON_FIZZLED_INDEX,
+        .soundClipId = -1,
+        .soundFizzleId = -1,
+    },
+    [DECOR_TYPE_MILK_CARTON_OPEN] = {
+        {
+            CollisionShapeTypeBox,
+            &gMilkCartonCollisionBox,
+            0.0f,
+            0.4f,
+            &gCollisionBoxCallbacks,
+        },
+        0.8f,
+        0.4f,
+        PROPS_MILK_CARTON_MILK_CARTON_OPEN_DYNAMIC_MODEL,
+        .materialIndex = MILK_CARTON_INDEX,
+        .materialIndexFizzled = MILK_CARTON_FIZZLED_INDEX,
+        .soundClipId = -1,
+        .soundFizzleId = -1,
+    },
+    [DECOR_TYPE_PC_CASE_OPEN] = {
+        {
+            CollisionShapeTypeBox,
+            &gPCCaseCollisionBox,
+            0.0f,
+            0.5f,
+            &gCollisionBoxCallbacks,
+        },
+        1.5f,
+        0.25f,
+        PROPS_PC_CASE_OPEN_PC_CASE_OPEN_DYNAMIC_MODEL,
+        .materialIndex = LIT_OBJECT_INDEX,
+        .materialIndexFizzled = LIT_OBJECT_FIZZLED_INDEX,
         .soundClipId = -1,
         .soundFizzleId = -1,
     },

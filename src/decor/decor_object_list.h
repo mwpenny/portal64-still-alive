@@ -16,6 +16,13 @@
 #define DECOR_TYPE_LAB_DESK03           10
 #define DECOR_TYPE_LAB_DESK04           11
 #define DECOR_TYPE_SCRAWLINGS002A       12
+#define DECOR_TYPE_FOOD_CAN             13
+#define DECOR_TYPE_WATER_BOTTLE         14
+#define DECOR_TYPE_SAUCEPAN             15
+#define DECOR_TYPE_METALBUCKET01A       16
+#define DECOR_TYPE_MILK_CARTON          17
+#define DECOR_TYPE_MILK_CARTON_OPEN     18
+#define DECOR_TYPE_PC_CASE_OPEN         19
 
 struct DecorObjectDefinition* decorObjectDefinitionForId(int id);
 int decorIdForObjectDefinition(struct DecorObjectDefinition* def);

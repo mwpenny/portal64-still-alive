@@ -1,1 +1,1 @@
--r 90,0,0 -m assets/materials/static.skm.yaml --default-material food_can
+-m assets/materials/static.skm.yaml --default-material food_can
