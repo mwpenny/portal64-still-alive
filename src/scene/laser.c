@@ -101,7 +101,6 @@ void laserInit(struct Laser* laser, struct RigidBody* parent, struct Vector3* of
     laser->parentOffset = offset;
     laser->parentRotation = rotation;
     laser->beamCount = 0;
-    laser->lastObjectHit = NULL;
 
     // The laser could traverse multiple rooms and pass through portals.
     //
@@ -141,8 +140,6 @@ void laserUpdate(struct Laser* laser) {
     uint64_t beamRooms = ROOM_FLAG_FROM_INDEX(currentRoom);
     laser->beamCount = 0;
 
-    laser->lastObjectHit = NULL;
-
     for (short i = 0; i < LASER_MAX_BEAMS; ++i) {
         struct LaserBeam* beam = &laser->beams[i];
 
@@ -166,7 +163,6 @@ void laserUpdate(struct Laser* laser) {
 
         int touchingPortals = collisionSceneIsTouchingPortal(&hit.at, &hit.normal);
         if (!touchingPortals) {
-            laser->lastObjectHit = hit.object;
             break;
         } else {
             int portalIndex = (touchingPortals & RigidBodyIsTouchingPortalA) ? 0 : 1;

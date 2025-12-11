@@ -31,8 +31,11 @@
 #define TURRET_ROTATE_SPEED           2.0f
 #define TURRET_SHOT_PERIOD            0.025f
 
+#define TURRET_BULLET_SPREAD_VERT     0.4f
+#define TURRET_BULLET_SPREAD_HORIZ    0.125f
 #define TURRET_BULLET_DAMAGE          4.0f
-#define TURRET_BULLET_IMPULSE         5.0f
+#define TURRET_BULLET_IMPULSE_PLAYER  5.0f
+#define TURRET_BULLET_IMPULSE_OBJECT  0.125f
 #define TURRET_BULLET_PUSH_HITS       8
 #define TURRET_BULLET_SOUND_HITS      4
 
@@ -606,22 +609,26 @@ static void turretStopShooting(struct Turret* turret) {
     turret->flags &= ~TurretFlagsShooting;
 }
 
-static void turretHitPlayer(struct Turret* turret, struct Player* player, struct Vector3* lookDir) {
+static void turretPushObject(struct RigidBody* body, struct Vector3* hitDir, float impulse) {
+    struct Vector3 push;
+    push.x = hitDir->x;
+    push.y = 0.0f;
+    push.z = hitDir->z;
+    vector3Normalize(&push, &push);
+    vector3Scale(&push, &push, body->mass * impulse);
+
+    rigidBodyApplyImpulse(body, &body->transform.position, &push);
+}
+
+static void turretHitPlayer(struct Turret* turret, struct Player* player, struct Vector3* hitDir) {
     playerDamage(player, TURRET_BULLET_DAMAGE, PlayerDamageTypeEnemy);
 
-    float velocityTowardTurret = vector3Dot(&player->body.velocity, lookDir);
+    float velocityTowardTurret = vector3Dot(&player->body.velocity, hitDir);
     if (velocityTowardTurret < 0.0f ||
         (velocityTowardTurret < 0.001f && (turret->playerHitCount % TURRET_BULLET_PUSH_HITS) == 0)
     ) {
         // Always push if player is moving toward turret, otherwise periodically
-        struct Vector3 push;
-        push.x = lookDir->x;
-        push.y = 0.0f;
-        push.z = lookDir->z;
-        vector3Normalize(&push, &push);
-        vector3Scale(&push, &push, player->body.mass * TURRET_BULLET_IMPULSE);
-
-        rigidBodyApplyImpulse(&player->body, &player->body.transform.position, &push);
+        turretPushObject(&player->body, hitDir, TURRET_BULLET_IMPULSE_PLAYER);
     }
 
     if ((turret->playerHitCount % TURRET_BULLET_SOUND_HITS) == 0) {
@@ -638,6 +645,22 @@ static void turretHitPlayer(struct Turret* turret, struct Player* player, struct
     ++turret->playerHitCount;
 }
 
+static void turretApplyBulletSpread(struct Vector3* trajectory, struct Basis* basis) {
+    vector3AddScaled(
+        trajectory,
+        &basis->y,
+        randomInRangef(-TURRET_BULLET_SPREAD_VERT, TURRET_BULLET_SPREAD_VERT),
+        trajectory
+    );
+    vector3AddScaled(
+        trajectory,
+        &basis->z,
+        randomInRangef(-TURRET_BULLET_SPREAD_HORIZ, TURRET_BULLET_SPREAD_HORIZ),
+        trajectory
+    );
+}
+
+// TODO: bullet trails, bullet holes on objects, blood, friendly fire dialogue, etc.
 static void turretUpdateShots(struct Turret* turret, struct Player* player) {
     if (turret->shootTimer > 0.0f) {
         turret->shootTimer -= FIXED_DELTA_TIME;
@@ -662,17 +685,59 @@ static void turretUpdateShots(struct Turret* turret, struct Player* player) {
         );
     }
 
-    // TODO: bullet trails, bullet holes on objects, blood, friendly fire, etc.
+    // Get bullet trajectory
 
-    if (turret->laser.lastObjectHit == &player->collisionObject) {
-        struct Vector3* laserDir = &turret->laser.beams[turret->laser.beamCount - 1].startPosition.dir;
-        turretHitPlayer(turret, player, laserDir);
+    struct Ray ray;
+    ray.origin = turret->rigidBody.transform.position;
+
+    if (turret->state == TurretStateAttacking) {
+        // Aim between center and head (targetPosition is center)
+        struct Vector3 target = turret->stateData.attacking.targetPosition;
+        vector3AddScaled(
+            &target,
+            &player->body.rotationBasis.y,
+            (PLAYER_HEAD_HEIGHT - PLAYER_CENTER_HEIGHT) * 0.5f,
+            &target
+        );
+
+        // Add some noise to liven things up and make it harder to camp
+        turretApplyBulletSpread(&target, &player->body.rotationBasis);
+
+        vector3Sub(&target, &ray.origin, &ray.dir);
+        vector3Normalize(&ray.dir, &ray.dir);
+    } else {
+        quatMultVector(&turret->rigidBody.transform.rotation, &lookDir, &ray.dir);
     }
 
+    // Shoot
+
+    short* collisionLayers = &turret->compoundCollider.children[TURRET_COLLISION_BODY].object.collisionLayers;
+    *collisionLayers &= ~COLLISION_LAYERS_BLOCK_TURRET_SHOTS;
+
+    struct RaycastHit hit;
+    if (collisionSceneRaycast(
+        &gCollisionScene,
+        turret->rigidBody.currentRoom,
+        &ray,
+        COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_TURRET_SHOTS,
+        1000000.0f,
+        1, // passThroughPortals
+        &hit) && hit.object->body && !playerIsGrabbingObject(player, hit.object)
+    ) {
+        vector3Negate(&hit.normal, &hit.normal);
+
+        if (hit.object == &player->collisionObject) {
+            turretHitPlayer(turret, player, &hit.normal);
+        } else {
+            turretPushObject(hit.object->body, &hit.normal, TURRET_BULLET_IMPULSE_OBJECT);
+        }
+    }
+
+    *collisionLayers |= COLLISION_LAYERS_BLOCK_TURRET_SHOTS;
     turret->shootTimer = TURRET_SHOT_PERIOD;
 }
 
-static uint8_t turretRaycastTarget(struct Turret* turret, struct Vector3* target, int checkPortals, struct Vector3* direction) {
+static uint8_t turretRaycastTarget(struct Turret* turret, struct CollisionObject* targetCollider, struct Vector3* target, int checkPortals) {
     struct Vector3 turretToTarget;
     vector3Sub(target, &turret->rigidBody.transform.position, &turretToTarget);
 
@@ -693,42 +758,35 @@ static uint8_t turretRaycastTarget(struct Turret* turret, struct Vector3* target
     ray.origin = turret->rigidBody.transform.position;
 
     struct RaycastHit hit;
-    if (collisionSceneRaycast(
-            &gCollisionScene,
-            turret->rigidBody.currentRoom,
-            &ray,
-            COLLISION_LAYERS_BLOCK_TURRET_SIGHT,
-            targetDistance,
-            checkPortals,
-            &hit)
+    if (!collisionSceneRaycast(
+        &gCollisionScene,
+        turret->rigidBody.currentRoom,
+        &ray,
+        COLLISION_LAYERS_BLOCK_TURRET_SIGHT,
+        targetDistance,
+        checkPortals,
+        &hit) || hit.object != targetCollider
     ) {
         return 0;
-    }
-
-    if (checkPortals && hit.numPortalsPassed == 0) {
-        return 0;
-    }
-
-    if (direction != NULL) {
-        struct Quaternion rotationInv;
-        quatConjugate(&turret->rigidBody.transform.rotation, &rotationInv);
-        quatMultVector(&rotationInv, &turretToTarget, direction);
-        vector3Negate(direction, direction);
-        vector3Normalize(direction, direction);
     }
 
     return 1;
 }
 
-static uint8_t turretFindPlayerLineOfSight(struct Turret* turret, struct Player* player, struct Vector3* direction) {
+static uint8_t turretFindPlayerLineOfSight(struct Turret* turret, struct Player* player, struct Vector3* targetPosition) {
     if (playerIsDead(player)) {
         return 0;
     }
 
+    // Aim at center of player (origin is head)
     struct Vector3 target = player->body.transform.position;
-    vector3AddScaled(&target, &turret->rigidBody.rotationBasis.y, -PLAYER_HEAD_HEIGHT / 2.0f, &target);
+    vector3AddScaled(&target, &player->body.rotationBasis.y, PLAYER_CENTER_HEIGHT - PLAYER_HEAD_HEIGHT, &target);
 
-    if (turretRaycastTarget(turret, &target, 0, direction)) {
+    if (turretRaycastTarget(turret, &player->collisionObject, &target, 0)) {
+        if (targetPosition) {
+            *targetPosition = target;
+        }
+
         return 1;
     }
 
@@ -738,13 +796,29 @@ static uint8_t turretFindPlayerLineOfSight(struct Turret* turret, struct Player*
             transformPointInverseNoScale(gCollisionScene.portalTransforms[i], &target, &portalTarget);
             transformPointNoScale(gCollisionScene.portalTransforms[1 - i], &portalTarget, &portalTarget);
 
-            if (turretRaycastTarget(turret, &portalTarget, 1, direction)) {
+            if (turretRaycastTarget(turret, &player->collisionObject, &portalTarget, 1)) {
+                if (targetPosition) {
+                    *targetPosition = portalTarget;
+                }
+
                 return 1;
             }
         }
     }
 
     return 0;
+}
+
+static void turretLocalDirection(struct Turret* turret, struct Vector3* target, struct Vector3* direction) {
+    struct Vector3 turretToTarget;
+    vector3Sub(target, &turret->rigidBody.transform.position, &turretToTarget);
+
+    struct Quaternion rotationInv;
+    quatConjugate(&turret->rigidBody.transform.rotation, &rotationInv);
+
+    quatMultVector(&rotationInv, &turretToTarget, direction);
+    vector3Negate(direction, direction);
+    vector3Normalize(direction, direction);
 }
 
 // State transition functions
@@ -965,15 +1039,18 @@ static void turretUpdateAttacking(struct Turret* turret, struct Player* player) 
 
     // Rotate to player
     if (!(turret->flags & TurretFlagsRotating)) {
-        struct Vector3 playerDirection;
-        if (turretFindPlayerLineOfSight(turret, player, &playerDirection)) {
+        struct Vector3* targetPosition = &turret->stateData.attacking.targetPosition;
+        if (turretFindPlayerLineOfSight(turret, player, targetPosition)) {
+            struct Vector3 targetDirection;
+            turretLocalDirection(turret, targetPosition, &targetDirection);
+
             struct Quaternion* currentRotation = &turret->armature.pose[PROPS_TURRET_01_ARM_C_BONE].rotation;
             struct Vector3 lookDir;
             quatMultVector(currentRotation, &gForward, &lookDir);
 
             // Only shoot if aiming near player
             float rotationSpeed;
-            if (vector3Dot(&lookDir, &playerDirection) <= -TURRET_ATTACK_FOV_DOT) {
+            if (vector3Dot(&lookDir, &targetDirection) <= -TURRET_ATTACK_FOV_DOT) {
                 rotationSpeed = TURRET_ATTACK_TRACK_SPEED;
                 if (!(turret->flags & TurretFlagsShooting)) {
                     turretStartShooting(turret);
@@ -983,7 +1060,7 @@ static void turretUpdateAttacking(struct Turret* turret, struct Player* player) 
                 turretStopShooting(turret);
             }
 
-            quatLook(&playerDirection, &gUp, &turret->targetRotation);
+            quatLook(&targetDirection, &gUp, &turret->targetRotation);
             turretStartRotation(turret, rotationSpeed);
         } else {
             turretStopShooting(turret);

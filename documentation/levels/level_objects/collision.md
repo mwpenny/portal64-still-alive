@@ -75,12 +75,13 @@ as follows.
 * `BLOCK_TURRET_SIGHT`: Used to block turret line of sight, and by:
     * [Doors](./door.md) (when closed)
     * [Elevators](./elevator.md)
-    * [Turrets](./turret.md)
+    * Player
 * `BLOCK_TURRET_SHOTS`: Used to block turret shots, and by:
     * [Decor](./decor.md) (with collision)
     * Player
     * [Security cameras](./security_camera.md) (when detached)
     * [Switches](./switch.md)
+    * [Turrets](./turret.md)
 
 ## TODO
 

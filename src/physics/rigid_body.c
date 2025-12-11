@@ -55,6 +55,8 @@ void rigidBodyApplyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoi
 
     vector3AddScaled(&rigidBody->angularVelocity, &torque, rigidBody->momentOfInertiaInv, &rigidBody->angularVelocity);
     vector3AddScaled(&rigidBody->velocity, impulse, rigidBody->massInv, &rigidBody->velocity);
+
+    rigidBody->flags &= ~RigidBodyIsSleeping;
 }
 
 #define ENERGY_SCALE_PER_STEP   0.99f

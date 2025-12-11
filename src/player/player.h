@@ -12,6 +12,7 @@
 #include "sk64/skeletool_armature.h"
 
 #define PLAYER_HEAD_HEIGHT              1.0f
+#define PLAYER_CENTER_HEIGHT            0.55f
 #define PLAYER_MAX_HEALTH               100.0f
 
 enum PlayerFlags {

@@ -18,8 +18,6 @@ struct Laser {
     struct Quaternion* parentRotation;
     short dynamicId;
 
-    struct CollisionObject* lastObjectHit;
-
     struct LaserBeam beams[LASER_MAX_BEAMS];
     short beamCount;
 };

@@ -44,6 +44,10 @@ union TurretStateData {
         uint8_t pitchDirection  : 1;
     } searching;
 
+    struct AttackingStateData {
+        struct Vector3 targetPosition;
+    } attacking;
+
     struct GrabbedStateData {
         float yawAmount;
         float pitchAmount;
