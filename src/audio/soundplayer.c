@@ -27,9 +27,10 @@ ALSndPlayer gSoundPlayer;
 #define SOUND_FLAGS_PAUSED      (1 << 3)
 
 #define SPEED_OF_SOUND          343.2f
+#define VOLUME_FADE_THRESHOLD   0.055f
+#define VOLUME_FADE_DISTANCE    3.5f
 #define VOLUME_CURVE_PAD        0.0125f
 #define VOLUME_AMPLIFICATION    1.538f
-#define VOLUME_MUTE_THRESHOLD   0.04f
 #define VOICE_FX_MIX            32
 #define FX_PEAK_DISTANCE        25.0f
 #define FX_MIN_AMOUNT           0.1f
@@ -89,15 +90,25 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
 
     float distanceSqrt = sqrtf(distance);
 
-    // Initial linear volume level.
+    // Initial linear volume level
     float volumeLevel = clampf(*volumeIn / distanceSqrt, 0.0f, 1.0f);
+
+    // Fade quiet sounds more aggressively
+    if (volumeLevel > 0.0f && volumeLevel < VOLUME_FADE_THRESHOLD) {
+        // How far is the listener from where the threshold volume was reached?
+        float fadeStartDist = *volumeIn * (1.0f / VOLUME_FADE_THRESHOLD);
+        float distFromFadeStart = distanceSqrt - fadeStartDist;
+
+        float fadeAmount = clampf(distFromFadeStart * (1.0f / VOLUME_FADE_DISTANCE), 0.0f, 1.0f);
+        volumeLevel *= (1.0f - fadeAmount);
+    }
 
     // Fudge with the volume curve a bit. 
     // Try to make distant sounds more apparent while
     // compressing the volume of closer sounds.
     volumeLevel = clampf((volumeLevel - VOLUME_CURVE_PAD) * VOLUME_AMPLIFICATION, 0.0f, 1.0f);
 
-    if (volumeLevel < VOLUME_MUTE_THRESHOLD) {
+    if (volumeLevel == 0.0f) {
         *volumeOut = 0.0f;
         return;
     }
