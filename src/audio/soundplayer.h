@@ -32,7 +32,9 @@ void soundPlayerPause();
 void soundPlayerResume();
 
 void soundPlayerUpdatePosition(ALSndId soundId, struct Vector3* at, struct Vector3* velocity);
+float soundPlayerGetOriginalVolume(ALSndId soundId);
 void soundPlayerAdjustVolume(ALSndId soundId, float newVolume);
+void soundPlayerFadeOutsideRadius(float volumePercent, struct Vector3* origin, float radius, int persistent);
 
 int soundPlayerIsPlaying(ALSndId soundId);
 int soundPlayerIsLoopedById(int soundId);

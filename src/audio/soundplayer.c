@@ -276,25 +276,20 @@ ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
 }
 
 void soundPlayerGameVolumeUpdate() {
-    int index = 0;
-    while (index < gActiveSoundCount) {
-        struct ActiveSound* sound = &gActiveSounds[index];
+    for (int i = 0; i < gActiveSoundCount; ++i) {
+        struct ActiveSound* sound = &gActiveSounds[i];
         if (!sound){
-            ++index;
             continue;
         }
 
-        float newVolume = sound->originalVolume * gSaveData.audio.soundVolume/0xFFFF;
+        float newVolume = sound->originalVolume * (gSaveData.audio.soundVolume / 0xFFFF);
         if (sound->soundType == SoundTypeMusic) {
-            newVolume = newVolume * gSaveData.audio.musicVolume/0xFFFF;
+            newVolume = newVolume * (gSaveData.audio.musicVolume / 0xFFFF);
         }
         
         if (sound->flags & SOUND_FLAGS_PAUSED) {
             sound->volume = newVolume;
-            ++index;
-            continue;
-        }
-        if (sound->flags & SOUND_FLAGS_3D){
+        } else if (sound->flags & SOUND_FLAGS_3D){
             sound->volume = newVolume;
             float volume;
             float pitch;
@@ -306,16 +301,10 @@ void soundPlayerGameVolumeUpdate() {
             alSndpSetPan(&gSoundPlayer, panning);
             alSndpSetPitch(&gSoundPlayer, sound->basePitch * pitch);
             alSndpSetFXMix(&gSoundPlayer, fxMix);
-
-            ++index;
-            continue;
-            
         } else {
             alSndpSetSound(&gSoundPlayer, sound->soundId);
             alSndpSetVol(&gSoundPlayer, (short)(32767 * newVolume));
             sound->volume = newVolume;
-            ++index;
-            continue;
         }
     }
 }
@@ -451,6 +440,16 @@ void soundPlayerUpdatePosition(ALSndId soundId, struct Vector3* at, struct Vecto
     }
 }
 
+float soundPlayerGetOriginalVolume(ALSndId soundId) {
+    struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
+
+    if (activeSound) {
+        return activeSound->originalVolume;
+    }
+
+    return 0.0f;
+}
+
 void soundPlayerAdjustVolume(ALSndId soundId, float newVolume) {
     struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
 
@@ -473,6 +472,29 @@ void soundPlayerAdjustVolume(ALSndId soundId, float newVolume) {
                 alSndpSetVol(&gSoundPlayer, newVolumeInt);
                 activeSound->volume = newVolume;
             }
+        }
+    }
+}
+
+void soundPlayerFadeOutsideRadius(float volumePercent, struct Vector3* origin, float radius, int persistent) {
+    float radiusSquared = radius * radius;
+
+    for (int i = 0; i < gActiveSoundCount; ++i) {
+        struct ActiveSound* sound = &gActiveSounds[i];
+
+        if (!sound ||
+            sound->soundType != SoundTypeAll ||
+            !(sound->flags & SOUND_FLAGS_3D) ||
+            vector3DistSqrd(origin, &sound->pos3D) <= radiusSquared
+        ) {
+            continue;
+        }
+
+        float newVolume = volumePercent * sound->originalVolume * (gSaveData.audio.soundVolume / 0xFFFF);
+        sound->volume = newVolume;
+
+        if (persistent) {
+            sound->originalVolume = newVolume;
         }
     }
 }

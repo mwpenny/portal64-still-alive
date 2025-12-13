@@ -195,6 +195,11 @@ void decorSerialize(struct Serializer* serializer, SerializeAction action, struc
             action(serializer, &entry->originalRoom, sizeof(short));
         }
 
+        if (entry->definition->soundClipId != -1) {
+            uint8_t shouldMute = soundPlayerGetOriginalVolume(entry->playingSound) == 0.0f;
+            action(serializer, &shouldMute, sizeof(uint8_t));
+        }
+
         rigidBodySerialize(serializer, action, &entry->rigidBody);
         if (entry->rigidBody.flags & RigidBodyFizzled) {
             action(serializer, &entry->fizzleTime, sizeof(float));
@@ -229,6 +234,16 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
         } else {
             transformInitIdentity(&originalTransform);
             originalRoom = 0;
+        }
+
+        uint8_t shouldMute = 0;
+        if (definition->soundClipId != -1) {
+            serializeRead(serializer, &shouldMute, sizeof(uint8_t));
+        }
+        if (shouldMute) {
+            definition->flags |= DecorObjectFlagsMuted;
+        } else {
+            definition->flags &= ~DecorObjectFlagsMuted;
         }
 
         struct DecorObject* entry = decorObjectNew(definition, &originalTransform, originalRoom);

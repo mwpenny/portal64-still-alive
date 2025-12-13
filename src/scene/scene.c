@@ -772,6 +772,22 @@ void sceneUpdate(struct Scene* scene) {
         fizzlerUpdate(&scene->fizzlers[i]);
     }
 
+    for (int i = 0; i < scene->pedestalCount; ++i) {
+        pedestalUpdate(&scene->pedestals[i]);
+    }
+
+    for (int i = 0; i < scene->signageCount; ++i) {
+        signageUpdate(&scene->signage[i]);
+    }
+
+    for (int i = 0; i < scene->boxDropperCount; ++i) {
+        boxDropperUpdate(&scene->boxDroppers[i]);
+    }
+
+    for (int i = 0; i < scene->ballLauncherCount; ++i) {
+        ballLauncherUpdate(&scene->ballLaunchers[i]);
+    }
+
     for (int i = 0; i < scene->elevatorCount; ++i) {
         int teleportTo = elevatorUpdate(&scene->elevators[i], &scene->player);
 
@@ -804,22 +820,6 @@ void sceneUpdate(struct Scene* scene) {
                 scene->player.lookTransform.position = scene->player.body.transform.position;
             }
         }
-    }
-
-    for (int i = 0; i < scene->pedestalCount; ++i) {
-        pedestalUpdate(&scene->pedestals[i]);
-    }
-
-    for (int i = 0; i < scene->signageCount; ++i) {
-        signageUpdate(&scene->signage[i]);
-    }
-
-    for (int i = 0; i < scene->boxDropperCount; ++i) {
-        boxDropperUpdate(&scene->boxDroppers[i]);
-    }
-
-    for (int i = 0; i < scene->ballLauncherCount; ++i) {
-        ballLauncherUpdate(&scene->ballLaunchers[i]);
     }
 
     sceneAnimatorUpdate(&scene->animator);

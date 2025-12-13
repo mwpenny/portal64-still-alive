@@ -17,17 +17,21 @@
 #include "codegen/assets/models/props/round_elevator_interior.h"
 #include "codegen/assets/models/props/round_elevator.h"
 
-#define AUTO_OPEN_DISTANCE      4.0f
-#define INSIDE_DISTANCE         1.2f
-#define SAME_LEVEL_HEIGHT       3.0f
+#define AUTO_OPEN_DISTANCE        4.0f
+#define INSIDE_DISTANCE           1.2f
+#define SAME_LEVEL_HEIGHT         3.0f
 
-#define DOOR_SPEED              2.0f
+#define DOOR_SPEED                2.0f
 
-#define OPEN_DELAY              1.0f
-#define TELEPORT_DELAY          10.0f
-#define MOVE_SOUND_DELAY        2.5f
-#define MOVE_SOUND_START        (TELEPORT_DELAY - MOVE_SOUND_DELAY)
-#define MOVE_SHAKE_DURATION     0.5f
+#define OPEN_DELAY                1.0f
+#define TELEPORT_DELAY            10.0f
+#define MOVE_SOUND_DELAY          2.5f
+#define MOVE_SOUND_START          (TELEPORT_DELAY - MOVE_SOUND_DELAY)
+#define SOUND_FADE_DELAY          3.0f
+#define SOUND_FADE_START          (TELEPORT_DELAY - SOUND_FADE_DELAY)
+#define SOUND_FADE_LENGTH         3.5f
+#define SOUND_FADE_EXCLUDE_RADIUS 2.0f
+#define MOVE_SHAKE_DURATION       0.5f
 
 static unsigned char sElevatorRumbleData[] = {
     0xEF, 0xE9, 0xAA, 0xAA, 0xAA, 0x55
@@ -215,14 +219,33 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
         }
     }
 
-    if (((elevator->flags & (ElevatorFlagsIsLocked | ElevatorFlagsIsArrival | ElevatorFlagsMovingSoundPlayed)) == ElevatorFlagsIsLocked) &&
-        elevator->timer <= MOVE_SOUND_START
+    if ((elevator->flags & (ElevatorFlagsIsLocked | ElevatorFlagsIsArrival)) == ElevatorFlagsIsLocked &&
+        elevator->timer > 0.0f
     ) {
-        soundPlayerPlay(soundsElevatorMoving, 1.25f, 1.0f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
-        hudShowSubtitle(&gScene.hud, PORTAL_ELEVATOR_START, SubtitleTypeCaption);
-        player->shakeTimer = MOVE_SHAKE_DURATION;
-        rumblePakClipPlay(&sElevatorRumbleWave);
-        elevator->flags |= ElevatorFlagsMovingSoundPlayed;
+        // Move
+        if (!(elevator->flags & ElevatorFlagsMovingSoundPlayed) && elevator->timer <= MOVE_SOUND_START) {
+            soundPlayerPlay(soundsElevatorMoving, 1.25f, 1.0f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+            hudShowSubtitle(&gScene.hud, PORTAL_ELEVATOR_START, SubtitleTypeCaption);
+            player->shakeTimer = MOVE_SHAKE_DURATION;
+            rumblePakClipPlay(&sElevatorRumbleWave);
+            elevator->flags |= ElevatorFlagsMovingSoundPlayed;
+        }
+
+        // Fade out other sounds for a nice transition
+        // In multi-chamber maps this also avoids sound bleed
+        if (elevator->timer < SOUND_FADE_START) {
+            float volumePercent = 1.0f - clampf(
+                (SOUND_FADE_START - elevator->timer) * (1.0f / SOUND_FADE_LENGTH),
+                0.0f,
+                1.0f
+            );
+            soundPlayerFadeOutsideRadius(
+                volumePercent,
+                &elevator->rigidBody.transform.position,
+                SOUND_FADE_EXCLUDE_RADIUS,
+                volumePercent == 0.0f  // persistent
+            );
+        }
     }
 
     return destination;
