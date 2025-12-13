@@ -208,6 +208,7 @@ int elevatorUpdate(struct Elevator* elevator, struct Player* player) {
     // Sounds and effects
     if ((elevator->flags & (ElevatorFlagsIsArrival | ElevatorFlagsHasHadPlayer | ElevatorFlagsMovingSoundPlayed)) == (ElevatorFlagsIsArrival | ElevatorFlagsHasHadPlayer)) {
         soundPlayerPlay(soundsElevatorArrive, 0.5f, 1.0f, &elevator->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+        hudShowSubtitle(&gScene.hud, DOORS_FULLCLOSE11, SubtitleTypeCaption);
         elevator->flags |= ElevatorFlagsMovingSoundPlayed;
     }
 
