@@ -43,7 +43,7 @@ struct CollisionCylinder gFoodCanCollider = {
 
 struct CollisionQuad gWaterBottleColliderFaces[8];
 struct CollisionCylinder gWaterBottleCollider = {
-    0.3f,
+    0.24f,
     0.25f,
     gCylinderColliderEdgeVectors,
     sizeof(gCylinderColliderEdgeVectors) / sizeof(*gCylinderColliderEdgeVectors),
