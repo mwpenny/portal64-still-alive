@@ -282,14 +282,14 @@ void soundPlayerGameVolumeUpdate() {
             continue;
         }
 
-        float newVolume = sound->originalVolume * (gSaveData.audio.soundVolume / 0xFFFF);
+        float newVolume = (sound->originalVolume * gSaveData.audio.soundVolume) / 0xFFFF;
         if (sound->soundType == SoundTypeMusic) {
-            newVolume = newVolume * (gSaveData.audio.musicVolume / 0xFFFF);
+            newVolume = (newVolume * gSaveData.audio.musicVolume) / 0xFFFF;
         }
         
         if (sound->flags & SOUND_FLAGS_PAUSED) {
             sound->volume = newVolume;
-        } else if (sound->flags & SOUND_FLAGS_3D){
+        } else if (sound->flags & SOUND_FLAGS_3D) {
             sound->volume = newVolume;
             float volume;
             float pitch;
