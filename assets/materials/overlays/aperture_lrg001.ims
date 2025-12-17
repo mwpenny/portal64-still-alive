@@ -1,0 +1,5 @@
+-alpha extract
+-resize 62x62
+-background black
+-gravity center
+-extent 64x64

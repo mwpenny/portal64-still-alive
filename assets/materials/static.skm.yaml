@@ -1006,6 +1006,54 @@ materials:
       g: 0
       b: 0
 
+  bts_bed_solid_brown:
+    gDPSetPrimColor:
+      r: 23
+      g: 17
+      b: 11
+    gSPGeometryMode:
+      set: [G_LIGHTING, G_SHADE]
+    gDPSetCombineMode:
+      color: ["PRIMITIVE", "0", "SHADE", "0"]
+
+  bts_bed:
+    gDPSetTile:
+      - filename: ../../portal_pak_modified/materials/overlays/aperture_lrg001.png
+        siz: G_IM_SIZ_4b
+        fmt: G_IM_FMT_I
+        tmem: 0
+        s:
+          wrap: false
+        t:
+          wrap: false
+      - filename: ../../portal_pak_modified/materials/models/props_junk/cardboard_boxes001a.png
+        siz: G_IM_SIZ_16b
+        fmt: G_IM_FMT_RGBA
+        tmem: 256
+        s:
+          mirror: true
+        t:
+          mirror: false
+
+    gDPSetCycleType: G_CYC_2CYCLE
+    gDPSetCombineMode:
+      - color: ["PRIMITIVE", "TEXEL1", "TEXEL0", "TEXEL1"]
+        alpha: ["0", "0", "0", "1"]
+      - color: ["SHADE", "0", "COMBINED", "0"]
+        alpha: ["0", "0", "0", "1"]
+    gDPSetRenderMode:
+      - G_RM_PASS
+      - G_RM_ZB_OPA_SURF
+
+    gSPGeometryMode:
+      set: [G_SHADE]
+      clear: [G_LIGHTING]
+
+    gDPSetPrimColor:
+      r: 25
+      g: 31
+      b: 33
+
   lit_object:
     gSPGeometryMode:
       set: [G_LIGHTING, G_SHADE]
