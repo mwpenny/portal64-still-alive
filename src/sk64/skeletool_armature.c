@@ -1,8 +1,8 @@
 
 #include "skeletool_armature.h"
 #include "skeletool_defs.h"
+#include "system/cartridge.h"
 #include "util/memory.h"
-#include "util/rom.h"
 
 void skArmatureInit(struct SKArmature* object, struct SKArmatureDefinition* definition) {
     unsigned transformSize = sizeof(struct Transform) * definition->numberOfBones;

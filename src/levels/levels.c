@@ -6,7 +6,7 @@
 #include "player/player.h"
 #include "savefile/checkpoint.h"
 #include "static_render.h"
-#include "util/rom.h"
+#include "system/cartridge.h"
 #include "util/memory.h"
 
 #include "codegen/assets/materials/static.h"

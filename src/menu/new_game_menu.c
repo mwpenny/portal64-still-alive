@@ -8,11 +8,10 @@
 #include "levels/levels.h"
 #include "strings/translations.h"
 #include "savefile/savefile.h"
+#include "system/cartridge.h"
 #include "system/controller.h"
 #include "text_manipulation.h"
 #include "util/memory.h"
-#include "util/rom.h"
-
 
 #include "codegen/assets/audio/clips.h"
 #include "codegen/assets/materials/ui.h"

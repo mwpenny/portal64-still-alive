@@ -2,7 +2,7 @@
 
 #include "graphics/profile_task.h"
 #include "memory.h"
-#include "rom.h"
+#include "system/cartridge.h"
 
 #include "codegen/assets/models/dynamic_model_list.h"
 #include "codegen/assets/models/dynamic_animated_model_list.h"

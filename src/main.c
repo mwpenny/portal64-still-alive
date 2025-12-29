@@ -4,49 +4,43 @@
 #include "audio/audio.h"
 #include "audio/soundplayer.h"
 #include "controls/controller_actions.h"
-#include "system/controller.h"
 #include "controls/rumble_pak.h"
 #include "defs.h"
 #include "graphics/graphics.h"
+#include "graphics/profile_task.h"
 #include "levels/cutscene_runner.h"
-#include "levels/intro.h"
 #include "levels/credits.h"
+#include "levels/intro.h"
+#include "levels/levels.h"
+#include "main.h"
 #include "menu/main_menu.h"
-#include "strings/translations.h"
+#include "savefile/checkpoint.h"
 #include "savefile/savefile.h"
 #include "scene/dynamic_scene.h"
 #include "scene/portal_surface.h"
 #include "scene/scene.h"
 #include "sk64/skeletool_animator.h"
-#include "sk64/skeletool_defs.h"
+#include "strings/translations.h"
+#include "system/cartridge.h"
+#include "system/controller.h"
 #include "util/dynamic_asset_loader.h"
 #include "util/frame_time.h"
 #include "util/memory.h"
 #include "util/profile.h"
-#include "util/rom.h"
-#include "system/time.h"
-#include "graphics/profile_task.h"
-
-#include "levels/levels.h"
-#include "savefile/checkpoint.h"
-#include "main.h"
 
 #ifdef PORTAL64_WITH_DEBUGGER
 #include "debugger/debug.h"
 #endif
 
+static OSThread idleThread;
 static OSThread gameThread;
-static OSThread initThread;
 
 u64    mainStack[STACKSIZEBYTES/sizeof(u64)];
+static u64 idleThreadStack[STACKSIZEBYTES/sizeof(u64)];
 static u64 gameThreadStack[STACKSIZEBYTES/sizeof(u64)];
-static u64 initThreadStack[STACKSIZEBYTES/sizeof(u64)];
 
+static void idleProc(void *);
 static void gameProc(void *);
-static void initProc(void *);
-
-static OSMesg           PiMessages[DMA_QUEUE_SIZE];
-static OSMesgQueue      PiMessageQ;
 
 OSMesgQueue      gfxFrameMsgQ;
 static OSMesg           gfxFrameMsgBuf[MAX_FRAME_BUFFER_MESGS];
@@ -57,39 +51,31 @@ OSSched scheduler;
 u64            scheduleStack[OS_SC_STACKSIZE/8];
 OSMesgQueue	*schedulerCommandQueue;
 u8  schedulerMode;
-OSPiHandle	*gPiHandle;
 
 void boot(void *arg) {
     osInitialize();
 
-    gPiHandle = osCartRomInit();
-
     osCreateThread(
-        &initThread, 
-        1, 
-        initProc, 
+        &idleThread,
+        1,
+        idleProc,
         NULL,
-        (void *)(initThreadStack+(STACKSIZEBYTES/sizeof(u64))), 
+        (void *)(idleThreadStack + (STACKSIZEBYTES / sizeof(u64))),
 		(OSPri)INIT_PRIORITY
     );
 
-    osStartThread(&initThread);
+    osStartThread(&idleThread);
 }
 
-static void initProc(void* arg) {
-    osCreatePiManager(
-        (OSPri) OS_PRIORITY_PIMGR, 
-        &PiMessageQ,
-        PiMessages,
-        DMA_QUEUE_SIZE
-    );
+static void idleProc(void* arg) {
+    cartridgeInit();
 
     osCreateThread(
         &gameThread, 
         6, 
         gameProc, 
         0, 
-        gameThreadStack + (STACKSIZEBYTES/sizeof(u64)),
+        gameThreadStack + (STACKSIZEBYTES / sizeof(u64)),
         (OSPri)GAME_PRIORITY
     );
 
@@ -104,11 +90,7 @@ struct GameMenu gGameMenu;
 struct Intro gIntro;
 struct Credits gCredits;
 
-extern OSMesgQueue dmaMessageQ;
-
 extern char _heapStart[];
-
-extern char _animation_segmentSegmentRomStart[];
 
 typedef void (*InitCallback)(void* data);
 typedef void (*UpdateCallback)(void* data);
@@ -235,7 +217,6 @@ static void gameProc(void* arg) {
     memoryEnd = (u16*)gAudioHeapBuffer;
 
     heapInit(_heapStart, memoryEnd);
-    romInit();
 
 #ifdef PORTAL64_WITH_DEBUGGER
     debug_initialize();
@@ -257,7 +238,6 @@ static void gameProc(void* arg) {
     frameTimeSetFixedDelta(fps);
     soundPlayerInit();
     translationsLoad(gSaveData.controls.textLanguage);
-    skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
     gSceneCallbacks->initCallback(gSceneCallbacks->data);
     // this prevents the intro from crashing
     gGameMenu.currentRenderedLanguage = gSaveData.controls.textLanguage;
@@ -320,7 +300,7 @@ static void gameProc(void* arg) {
                 controllersTriggerRead();
                 controllerHandlePlayback();
                 controllerActionRead();
-                skAnimatorSync();
+                romCopyAsyncDrain();
                 
                 if (inputIgnore) {
                     --inputIgnore;

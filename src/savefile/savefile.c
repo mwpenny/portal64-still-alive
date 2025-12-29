@@ -8,60 +8,6 @@
 struct SaveData __attribute__((aligned(8))) gSaveData;
 int gCurrentTestSubject = -1;
 
-OSPiHandle gSramHandle;
-
-extern OSMesgQueue dmaMessageQ;
-
-#define SRAM_latency     0x5 
-#define SRAM_pulse       0x0c 
-#define SRAM_pageSize    0xd 
-#define SRAM_relDuration 0x2
-
-#define SRAM_CHUNK_DELAY_USECS (10 * 1000)
-
-#define SRAM_ADDR   0x08000000
-
-void savefileSramSave(void* dst, void* src, int size) {
-    OSIoMesg dmaIoMesgBuf;
-
-    // save checkpoint
-    dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
-    dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
-    dmaIoMesgBuf.dramAddr = src;
-    dmaIoMesgBuf.devAddr = (u32)dst;
-    dmaIoMesgBuf.size = size;
-
-    osWritebackDCache(src, size);
-    if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_WRITE) == -1)
-    {
-        return;
-    }
-    (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
-
-    timeUSleep(SRAM_CHUNK_DELAY_USECS);
-}
-
-int savefileSramLoad(void* sramAddr, void* ramAddr, int size) {
-    OSIoMesg dmaIoMesgBuf;
-
-    dmaIoMesgBuf.hdr.pri = OS_MESG_PRI_HIGH;
-    dmaIoMesgBuf.hdr.retQueue = &dmaMessageQ;
-    dmaIoMesgBuf.dramAddr = ramAddr;
-    dmaIoMesgBuf.devAddr = (u32)sramAddr;
-    dmaIoMesgBuf.size = size;
-
-    osInvalDCache(ramAddr, size);
-    if (osEPiStartDma(&gSramHandle, &dmaIoMesgBuf, OS_READ) == -1)
-    {
-        return 0;
-    }
-    (void) osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
-
-    timeUSleep(SRAM_CHUNK_DELAY_USECS);
-
-    return 1;
-}
-
 static void savefileUpdateSlot(int slotIndex, unsigned char testChamber, unsigned char subjectNumber, unsigned char slotOrder) {
     gSaveData.saveSlotMetadata[slotIndex].testChamber = testChamber;
     gSaveData.saveSlotMetadata[slotIndex].testSubjectNumber = subjectNumber;
@@ -96,35 +42,7 @@ void savefileNew() {
 }
 
 void savefileLoad() {
-    /* Fill basic information */
-
-    gSramHandle.type = 3;
-    gSramHandle.baseAddress = PHYS_TO_K1(SRAM_START_ADDR);
-
-    /* Get Domain parameters */
-
-    gSramHandle.latency = (u8)SRAM_latency;
-    gSramHandle.pulse = (u8)SRAM_pulse;
-    gSramHandle.pageSize = (u8)SRAM_pageSize;
-    gSramHandle.relDuration = (u8)SRAM_relDuration;
-    gSramHandle.domain = PI_DOMAIN2;
-    gSramHandle.speed = 0;
-
-    /* TODO gSramHandle.speed = */
-
-    zeroMemory(&(gSramHandle.transferInfo), sizeof(gSramHandle.transferInfo));
-
-    /*
-    * Put the gSramHandle onto PiTable
-    */
-
-    OSIntMask saveMask = osGetIntMask();
-    osSetIntMask(OS_IM_NONE);
-    gSramHandle.next = __osPiTable;
-    __osPiTable = &gSramHandle;
-    osSetIntMask(saveMask);
-
-    if (!savefileSramLoad((void*)SRAM_ADDR, &gSaveData, sizeof(gSaveData))) {
+    if (!sramRead(0, &gSaveData, sizeof(gSaveData))) {
         savefileNew();
     }
 
@@ -136,7 +54,7 @@ void savefileLoad() {
 }
 
 void savefileSave() {
-    savefileSramSave((void*)SRAM_ADDR, &gSaveData, sizeof(gSaveData));
+    sramWrite(0, &gSaveData, sizeof(gSaveData));
 }
 
 void savefileDeleteGame(int slotIndex) {
@@ -156,11 +74,9 @@ void savefileDeleteGame(int slotIndex) {
     savefileSave();
 }
 
-#define SAVE_SLOT_SRAM_ADDRESS(index) (SRAM_ADDR + (1 + (index)) * SAVE_SLOT_SIZE)
-
 void savefileSaveGame(Checkpoint checkpoint, u16* screenshot, int testChamberDisplayNumber, int subjectNumber, int slotIndex) {
-    savefileSramSave((void*)SAVE_SLOT_SRAM_ADDRESS(slotIndex), checkpoint, MAX_CHECKPOINT_SIZE);
-    savefileSramSave((void*)SCREEN_SHOT_SRAM(slotIndex), screenshot, THUMBNAIL_IMAGE_SIZE);
+    sramWrite((void*)SAVE_SLOT_OFFSET(slotIndex), checkpoint, MAX_CHECKPOINT_SIZE);
+    sramWrite((void*)SAVE_SLOT_SCREENSHOT_OFFSET(slotIndex), screenshot, THUMBNAIL_IMAGE_SIZE);
 
     unsigned char prevSortOrder = gSaveData.saveSlotMetadata[slotIndex].saveSlotOrder;
 
@@ -311,19 +227,10 @@ int savefileFirstFreeSlot() {
 }
 
 void savefileLoadGame(int slot, Checkpoint checkpoint, int* testChamberIndex, int* subjectNumber) {
-    savefileSramLoad((void*)SAVE_SLOT_SRAM_ADDRESS(slot), checkpoint, MAX_CHECKPOINT_SIZE);
+    sramRead((void*)SAVE_SLOT_OFFSET(slot), checkpoint, MAX_CHECKPOINT_SIZE);
     *testChamberIndex = gSaveData.saveSlotMetadata[slot].testChamber;
     *subjectNumber = gSaveData.saveSlotMetadata[slot].testSubjectNumber;
 }
-
-void savefileLoadScreenshot(u16* target, u16* location) {
-    if ((int)location >= SRAM_START_ADDR && (int)location <= (SRAM_START_ADDR + SRAM_SIZE)) {
-        savefileSramLoad(location, target, THUMBNAIL_IMAGE_SIZE);
-    } else {
-        memCopy(target, location, THUMBNAIL_IMAGE_SIZE);
-    }
-}
-
 
 u16 gScreenGrabBuffer[SAVE_SLOT_IMAGE_W * SAVE_SLOT_IMAGE_H];
 
@@ -343,5 +250,13 @@ void savefileGrabScreenshot() {
 
             ++dst;
         }
+    }
+}
+
+void savefileLoadScreenshot(u16* target, u16* location) {
+    if (location != gScreenGrabBuffer) {
+        sramRead(location, target, THUMBNAIL_IMAGE_SIZE);
+    } else {
+        memCopy(target, location, THUMBNAIL_IMAGE_SIZE);
     }
 }

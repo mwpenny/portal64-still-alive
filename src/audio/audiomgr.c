@@ -3,7 +3,7 @@
 #include "audio.h"
 #include "defs.h"
 
-extern OSPiHandle	*gPiHandle;
+static OSPiHandle* sPiHandle;
 
 /****  type define's for structures unique to audiomgr ****/
 typedef union {    
@@ -95,6 +95,8 @@ void amCreateAudioMgr(ALSynConfig *c, OSPri pri, amConfig *amc, int fps)
     f32     fsize;
 
     dmaState.initialized = FALSE;	/* Reset this before the first call to __amDmaNew */
+
+    sPiHandle = osCartRomInit();
 
     c->dmaproc    = __amDmaNew;    
     c->outputRate = osAiSetFrequency(amc->outputRate);
@@ -354,7 +356,7 @@ s32 __amDMA(s32 addr, s32 len, void *state)
     audDMAIOMesgBuf[nextDMA].devAddr      = (u32)addr;
     audDMAIOMesgBuf[nextDMA].size         = DMA_BUFFER_LENGTH;
 
-    osEPiStartDma(gPiHandle, &audDMAIOMesgBuf[nextDMA++], OS_READ);
+    osEPiStartDma(sPiHandle, &audDMAIOMesgBuf[nextDMA++], OS_READ);
 
     return (int) osVirtualToPhysical(foundBuffer) + delta;
 }

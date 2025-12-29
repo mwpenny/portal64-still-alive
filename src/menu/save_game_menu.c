@@ -27,7 +27,7 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
         savefileInfo[i].slotIndex = saveSlots[i].saveSlot;
         savefileInfo[i].testchamberDisplayNumber = saveSlots[i].testChamber;
         savefileInfo[i].savefileName = NULL;
-        savefileInfo[i].screenshot = (u16*)SCREEN_SHOT_SRAM(saveSlots[i].saveSlot);
+        savefileInfo[i].screenshot = (u16*)SAVE_SLOT_SCREENSHOT_OFFSET(saveSlots[i].saveSlot);
         savefileInfo[i].isFree = 0;
 
         if (suggestedSlot == saveSlots[i].saveSlot) {

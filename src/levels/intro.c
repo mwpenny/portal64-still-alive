@@ -3,10 +3,10 @@
 #include "audio/soundplayer.h"
 #include "graphics/image.h"
 #include "levels.h"
+#include "system/cartridge.h"
 #include "system/controller.h"
 #include "util/frame_time.h"
 #include "util/memory.h"
-#include "util/rom.h"
 
 #include "codegen/assets/audio/clips.h"
 #include "codegen/assets/materials/images.h"

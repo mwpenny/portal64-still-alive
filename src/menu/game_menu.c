@@ -5,7 +5,6 @@
 #include "strings/translations.h"
 #include "system/controller.h"
 #include "util/memory.h"
-#include "util/rom.h"
 
 #include "codegen/assets/materials/ui.h"
 #include "codegen/assets/strings/strings.h"

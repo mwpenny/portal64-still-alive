@@ -1,7 +1,7 @@
 #include "translations.h"
 
+#include "system/cartridge.h"
 #include "util/memory.h"
-#include "util/rom.h"
 
 #include "codegen/assets/strings/strings.h"
 
@@ -29,11 +29,11 @@ void translationsLoad(int language) {
     gLoadedLanugageBlock = malloc(blockSize);
     romCopy(block->romStart, gLoadedLanugageBlock, blockSize);
 
-    gCurrentTranslations = CALC_RAM_POINTER(block->values, gLoadedLanugageBlock);
+    gCurrentTranslations = CALC_SEGMENT_POINTER(block->values, gLoadedLanugageBlock);
     gCurrentLoadedLanguage = language;
 
     for (int i = 0; i < NUM_TRANSLATED_STRINGS; ++i) {
-        gCurrentTranslations[i] = CALC_RAM_POINTER(gCurrentTranslations[i], gLoadedLanugageBlock);
+        gCurrentTranslations[i] = CALC_SEGMENT_POINTER(gCurrentTranslations[i], gLoadedLanugageBlock);
     }
 }
 

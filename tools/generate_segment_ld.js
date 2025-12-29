@@ -29,9 +29,9 @@ function generateAlign(alignment) {
     return `__romPos = ALIGN(__romPos, ${alignment});\n`;
 }
 
-function generateSegment(segmentName, loadAddress, alignment, objectPaths) {
+function generateSegment(segmentName, virtualAddress, alignment, objectPaths) {
     const align = alignment ? `    ${generateAlign(alignment)}` : '';
-    return `${align}    BEGIN_SEG(${segmentName}, ${loadAddress})
+    return `${align}    BEGIN_SEG(${segmentName}, ${virtualAddress})
     {
         ${objectPaths.map(generateSegmentContent).join('\n        ')}
     }
@@ -39,10 +39,10 @@ function generateSegment(segmentName, loadAddress, alignment, objectPaths) {
 `;
 }
 
-function generateMultiSegments(loadAddress, alignment, objectPaths) {
+function generateMultiSegments(virtualAddress, alignment, objectPaths) {
     return objectPaths.map(objectPath => {
         const segmentName = getObjectName(objectPath);
-        return generateSegment(segmentName, loadAddress, alignment, [objectPath]);
+        return generateSegment(segmentName, virtualAddress, alignment, [objectPath]);
     }).join('\n');
 }
 
@@ -59,7 +59,7 @@ const { values, positionals } = util.parseArgs({
     allowPositionals: true
 });
 
-const [outputLinkerScript, loadAddress, ...objectPaths] = positionals;
+const [outputLinkerScript, virtualAddress, ...objectPaths] = positionals;
 const singleSegmentName = values['single-segment-name'];
 const alignment = values['alignment'];
 
@@ -69,6 +69,6 @@ if (!fs.existsSync(outputParentDir)) {
 }
 
 const output = singleSegmentName ?
-    generateSegment(singleSegmentName, loadAddress, alignment, objectPaths) :
-    generateMultiSegments(loadAddress, alignment, objectPaths);
+    generateSegment(singleSegmentName, virtualAddress, alignment, objectPaths) :
+    generateMultiSegments(virtualAddress, alignment, objectPaths);
 fs.writeFileSync(outputLinkerScript, output);

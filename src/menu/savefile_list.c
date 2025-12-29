@@ -7,7 +7,7 @@
 #include "strings/translations.h"
 #include "system/controller.h"
 #include "text_manipulation.h"
-#include "util/rom.h"
+#include "util/memory.h"
 #include "util/string.h"
 
 #include "codegen/assets/audio/clips.h"

@@ -4,7 +4,6 @@
 #include "scene/render_plan.h"
 #include "system/controller.h"
 #include "util/memory.h"
-#include "util/rom.h"
 
 #include "codegen/assets/audio/clips.h"
 #include "codegen/assets/materials/ui.h"

@@ -1,53 +1,13 @@
 #include "skeletool_animator.h"
 
-#include "../util/memory.h"
-#include "../math/mathf.h"
+#include <stdint.h>
+
+#include "math/mathf.h"
 #include "skeletool_animator.h"
+#include "system/cartridge.h"
+#include "util/memory.h"
 
-#define MAX_ANIMATION_QUEUE_ENTRIES 20
-
-OSPiHandle* gAnimationPiHandle;
-OSMesgQueue gAnimationQueue;
-OSMesg gAnimationQueueEntries[MAX_ANIMATION_QUEUE_ENTRIES];
-OSIoMesg gAnimationIOMesg[MAX_ANIMATION_QUEUE_ENTRIES];
-int gAnimationNextMessage;
-int gPendingAnimationRequests;
-
-void skAnimatorCopy(u32 romAddress, void* target, u32 size) {
-    if (!gAnimationPiHandle) {
-        gAnimationPiHandle = osCartRomInit();
-        osCreateMesgQueue(&gAnimationQueue, gAnimationQueueEntries, MAX_ANIMATION_QUEUE_ENTRIES);
-    }
-
-    if (gPendingAnimationRequests == MAX_ANIMATION_QUEUE_ENTRIES) {
-        OSMesg msg;
-        osRecvMesg(&gAnimationQueue, &msg, OS_MESG_BLOCK);
-        --gPendingAnimationRequests;
-    }
-
-    // request new chunk
-    OSIoMesg* ioMesg = &gAnimationIOMesg[gAnimationNextMessage];
-    gAnimationNextMessage = (gAnimationNextMessage + 1) % MAX_ANIMATION_QUEUE_ENTRIES;
-
-    osInvalDCache((void*)target, size);
-
-    ioMesg->hdr.pri = OS_MESG_PRI_NORMAL;
-    ioMesg->hdr.retQueue = &gAnimationQueue;
-    ioMesg->dramAddr = target;
-    ioMesg->devAddr = skTranslateSegment(romAddress);
-    ioMesg->size = size;
-
-    osEPiStartDma(gAnimationPiHandle, ioMesg, OS_READ);
-    ++gPendingAnimationRequests;
-}
-
-void skAnimatorSync() {
-    while (gPendingAnimationRequests) {
-        OSMesg msg;
-        osRecvMesg(&gAnimationQueue, &msg, OS_MESG_BLOCK);
-        --gPendingAnimationRequests;
-    }
-}
+extern char _animation_segmentSegmentRomStart[];
 
 void skAnimatorInit(struct SKAnimator* animator, int nBones) {
     animator->currentClip = NULL;
@@ -94,7 +54,12 @@ void skAnimatorRequestFrame(struct SKAnimator* animator, int nextFrame) {
 
     int frameSize = currentClip->nBones * sizeof(struct SKAnimationBoneFrame);
 
-    skAnimatorCopy((u32)currentClip->frames + frameSize * nextFrame, (void*)animator->boneState[animator->nextFrameStateIndex], sizeof(struct SKAnimationBoneFrame) * boneCount);
+    uint32_t address = (uint32_t)currentClip->frames + frameSize * nextFrame;
+    romCopyAsync(
+        CALC_SEGMENT_POINTER(address, _animation_segmentSegmentRomStart),
+        animator->boneState[animator->nextFrameStateIndex],
+        sizeof(struct SKAnimationBoneFrame) * boneCount
+    );
 }
 
 void skAnimatorExtractBone(struct SKAnimationBoneFrame* bone, struct Transform* result) {
@@ -315,17 +280,6 @@ void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip
 
 int skAnimatorIsRunning(struct SKAnimator* animator) {
     return animator->currentClip != NULL;
-}
-
-static unsigned gSegmentLocations[SK_SEGMENT_COUNT];
-
-void skSetSegmentLocation(unsigned segmentNumber, unsigned segmentLocation) {
-    gSegmentLocations[segmentNumber] = segmentLocation;
-}
-
-u32 skTranslateSegment(unsigned address) {
-    unsigned segment = (address >> 24) & 0xF;
-    return (address & 0xFFFFFF) + gSegmentLocations[segment];
 }
 
 void skBlenderInit(struct SKAnimatorBlender* blender, int nBones) {

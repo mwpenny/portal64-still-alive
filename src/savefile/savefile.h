@@ -1,11 +1,9 @@
-#ifndef _SAVEFILE_H
-#define _SAVEFILE_H
+#ifndef __SAVEFILE_H__
+#define __SAVEFILE_H__
 
-#include "./checkpoint.h"
-#include "../controls/controller_actions.h"
-
-#define SRAM_START_ADDR  0x08000000 
-#define SRAM_SIZE        0x8000 
+#include "checkpoint.h"
+#include "controls/controller_actions.h"
+#include "system/cartridge.h"
 
 #define SAVEFILE_NO_SLOT    -1
 
@@ -18,7 +16,8 @@
 
 #define SAVE_SLOT_SIZE  (MAX_CHECKPOINT_SIZE + THUMBNAIL_IMAGE_SPACE)
 
-#define SCREEN_SHOT_SRAM(slotIndex)     (((slotIndex) + 1) * SAVE_SLOT_SIZE + MAX_CHECKPOINT_SIZE + SRAM_START_ADDR)
+#define SAVE_SLOT_OFFSET(index)                (((index) + 1) * SAVE_SLOT_SIZE)
+#define SAVE_SLOT_SCREENSHOT_OFFSET(index)     (SAVE_SLOT_OFFSET(index) + MAX_CHECKPOINT_SIZE)
 
 #define SAVEFILE_HEADER 0xDF00
 

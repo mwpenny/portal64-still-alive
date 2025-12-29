@@ -1,11 +1,11 @@
 #include "checkpoint.h"
 
-#include "../util/memory.h"
-#include "../levels/cutscene_runner.h"
-#include "../levels/levels.h"
-#include "./scene_serialize.h"
+#include "levels/cutscene_runner.h"
+#include "levels/levels.h"
+#include "savefile.h"
+#include "scene_serialize.h"
 #include "serializer.h"
-#include "./savefile.h"
+#include "util/memory.h"
 
 char gHasCheckpoint = 0;
 char __attribute__((aligned(8))) gCheckpoint[MAX_CHECKPOINT_SIZE];

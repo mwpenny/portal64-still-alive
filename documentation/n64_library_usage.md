@@ -8,25 +8,25 @@ One major goal of this fork is to remove the requirement on proprietary code. Th
 
 Portal 64's high-level usage of proprietary libraries is listed in the following table:
 
-| Library  | Subsystem                     | Usage                                        | Free equivalent implemented? |
-| -------- | ----------------------------- | -------------------------------------------- | ---------------------------- |
-| libultra | Audio (al)                    | Music                                        | ❌                          |
-|          |                               | Sound effects                                | ❌                          |
-|          | Display processing (gDP/gsDP) | Graphics rendering<sup>*</sup>               | ❌                          |
-|          | Signal processing (gSP/gsSP)  | 3D Math, lighting, culling, etc.<sup>*</sup> | ❌                          |
-|          | Graphics common (gdSP)        | Lighting                                     | ❌                          |
-|          | Graphics utility (gu)         | 3D math                                      | ❌                          |
-|          | Operating system (os)         | Address translation                          | ❌                          |
-|          |                               | DMA                                          | ❌                          |
-|          |                               | Timers                                       | ❌                          |
-|          |                               | Interrupts                                   | ❌                          |
-|          |                               | Task scheduling                              | ❌                          |
-|          |                               | Message passing                              | ❌                          |
-|          |                               | Peripheral access                            | ❌                          |
-|          |                               | Video initialization                         | ❌                          |
-|          | Math                          | Trig functions                               | ❌                          |
-| libnustd | Math                          | `floor()`                                    | ✅                          |
-|          | String                        | `strcpy()`, `memset()`                       | ✅                          |
+| Library  | Subsystem                     | Usage                                        | Game code abstracted ? | Free equivalent implemented? |
+| -------- | ----------------------------- | -------------------------------------------- | ---------------------- | ---------------------------- |
+| libultra | Audio (al)                    | Music                                        | ❌                     | ❌                           |
+|          |                               | Sound effects                                | ❌                     | ❌                           |
+|          | Display processing (gDP/gsDP) | Graphics rendering<sup>*</sup>               | ❌                     | ❌                           |
+|          | Signal processing (gSP/gsSP)  | 3D Math, lighting, culling, etc.<sup>*</sup> | ❌                     | ❌                           |
+|          | Graphics common (gdSP)        | Lighting                                     | ❌                     | ❌                           |
+|          | Graphics utility (gu)         | 3D math                                      | ❌                     | ❌                           |
+|          | Operating system (os)         | Address translation                          | ❌                     | ❌                           |
+|          |                               | DMA                                          | ✅                     | ❌                           |
+|          |                               | Timers                                       | ✅                     | ❌                           |
+|          |                               | Interrupts                                   | ❌                     | ❌                           |
+|          |                               | Task scheduling                              | ❌                     | ❌                           |
+|          |                               | Message passing                              | ❌                     | ❌                           |
+|          |                               | Peripheral access                            | ❌                     | ❌                           |
+|          |                               | Video initialization                         | ❌                     | ❌                           |
+|          | Math                          | Trig functions                               | ❌                     | ❌                           |
+| libnustd | Math                          | `floor()`                                    | ✅                     | ✅                           |
+|          | String                        | `strcpy()`, `memset()`                       | ✅                     | ✅                           |
 
 <sup>*</sup> = Not only the game uses these APIs. At build time, `Skeletool64`
 reads YAML files located in `assets/materials/` to generate code containing

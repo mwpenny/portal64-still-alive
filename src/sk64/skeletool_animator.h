@@ -1,8 +1,8 @@
 #ifndef _SKELETOOL_ANIMATOR_H
 #define _SKELETOOL_ANIMATOR_H
 
+#include "math/transform.h"
 #include "skeletool_clip.h"
-#include "../math/transform.h"
 
 enum SKAnimatorFlags {
     SKAnimatorFlagsLoop = (1 << 0),
@@ -25,15 +25,7 @@ void skAnimatorCleanup(struct SKAnimator* animator);
 void skAnimatorUpdate(struct SKAnimator* animator, struct Transform* transforms, float deltaTime);
 
 void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip, float startTime, int flags);
-
 int skAnimatorIsRunning(struct SKAnimator* animator);
-
-void skAnimatorSync();
-
-#define SK_SEGMENT_COUNT 16
-
-void skSetSegmentLocation(unsigned segmentNumber, unsigned segmentLocatoin);
-u32 skTranslateSegment(unsigned address);
 
 struct SKAnimatorBlender {
     struct SKAnimator from;

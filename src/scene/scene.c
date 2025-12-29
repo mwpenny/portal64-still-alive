@@ -31,7 +31,6 @@
 #include "scene/portal_surface.h"
 #include "shadow_map.h"
 #include "signals.h"
-#include "sk64/skeletool_defs.h"
 #include "system/controller.h"
 #include "util/frame_time.h"
 #include "util/memory.h"

@@ -1,6 +1,5 @@
 
 #include "audio.h"
-#include "util/rom.h"
 
 #include "defs.h"
 

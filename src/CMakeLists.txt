@@ -160,7 +160,6 @@ target_sources(engine INTERFACE
     util/frame_time.c
     util/memory.c
     util/profile.c
-    util/rom.c
     util/string.c
 )
 
@@ -221,6 +220,7 @@ add_dependencies(engine version_header)
 ###########################
 
 target_sources(engine INTERFACE
+    system/libultra/cartridge_libultra.c
     system/libultra/controller_libultra.c
     system/libultra/time_libultra.c
 )

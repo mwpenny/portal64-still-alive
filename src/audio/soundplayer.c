@@ -7,6 +7,7 @@
 #include "physics/collision_scene.h"
 #include "savefile/savefile.h"
 #include "soundarray.h"
+#include "system/cartridge.h"
 #include "system/time.h"
 #include "util/frame_time.h"
 
