@@ -1,7 +1,6 @@
 
 #include "savefile.h"
 #include "util/memory.h"
-#include "system/time.h"
 #include "system/controller.h"
 
 #include "../controls/controller_actions.h"

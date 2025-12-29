@@ -4,7 +4,7 @@
 #include "contact_solver.h"
 #include "defs.h"
 #include "physics/config.h"
-#include "system/time.h"
+#include "util/frame_time.h"
 
 #define VELOCITY_SLEEP_THRESHOLD      0.001f
 #define ANGULAR_VELOCITY_SLEEP_THRESHOLD  0.001f

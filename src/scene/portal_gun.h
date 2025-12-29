@@ -1,18 +1,16 @@
 #ifndef __PORTAL_GUN_H__
 #define __PORTAL_GUN_H__
 
-#include "../physics/collision_object.h"
-#include "../math/transform.h"
-#include "../graphics/renderstate.h"
-#include "../physics/rigid_body.h"
-#include "../physics/collision_object.h"
-#include "../scene/dynamic_scene.h"
-#include "../player/player.h"
-#include "system/time.h"
-#include "../effects/portal_trail.h"
-#include "../scene/camera.h"
-#include "../sk64/skeletool_armature.h"
-#include "../sk64/skeletool_animator.h"
+#include "effects/portal_trail.h"
+#include "graphics/renderstate.h"
+#include "math/transform.h"
+#include "physics/collision_object.h"
+#include "physics/rigid_body.h"
+#include "player/player.h"
+#include "scene/camera.h"
+#include "scene/dynamic_scene.h"
+#include "sk64/skeletool_animator.h"
+#include "sk64/skeletool_armature.h"
 
 struct PortalGunProjectile {
     struct Ray positionDirection;

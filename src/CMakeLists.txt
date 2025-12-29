@@ -157,6 +157,7 @@ target_sources(engine INTERFACE
     strings/translations.c
     util/assert.c
     util/dynamic_asset_loader.c
+    util/frame_time.c
     util/memory.c
     util/profile.c
     util/rom.c

@@ -8,7 +8,7 @@
 #include "savefile/savefile.h"
 #include "soundarray.h"
 #include "system/time.h"
-#include "util/rom.h"
+#include "util/frame_time.h"
 
 extern char _soundsSegmentRomStart[];
 extern char _soundsSegmentRomEnd[];

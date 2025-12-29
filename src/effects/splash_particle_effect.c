@@ -5,7 +5,7 @@
 #include "math/vector2.h"
 #include "physics/config.h"
 #include "scene/dynamic_scene.h"
-#include "system/time.h"
+#include "util/frame_time.h"
 
 void splashParticleEffectBuildVerticesBillboarded(Vtx* vtx, struct SplashParticleEffect* effect, struct Coloru8* color, float widthScalar, struct Vector3* cameraPosition) {
     for (short pidx = 0; pidx < effect->def->particleCount; ++pidx) {

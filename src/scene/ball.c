@@ -8,7 +8,7 @@
 #include "physics/collision_scene.h"
 #include "physics/collision_box.h"
 #include "scene.h"
-#include "system/time.h"
+#include "util/frame_time.h"
 
 #include "codegen/assets/models/grav_flare.h"
 #include "codegen/assets/models/fleck_ash2.h"

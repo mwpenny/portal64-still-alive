@@ -5,7 +5,7 @@
 #include "math/mathf.h"
 #include "strings/translations.h"
 #include "system/controller.h"
-#include "system/time.h"
+#include "util/frame_time.h"
 #include "util/memory.h"
 
 #include "codegen/assets/audio/clips.h"

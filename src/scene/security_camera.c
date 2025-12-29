@@ -7,8 +7,8 @@
 #include "physics/collision_box.h"
 #include "physics/collision_scene.h"
 #include "scene.h"
-#include "system/time.h"
 #include "util/dynamic_asset_loader.h"
+#include "util/frame_time.h"
 
 #include "codegen/assets/audio/clips.h"
 #include "codegen/assets/materials/static.h"

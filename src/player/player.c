@@ -17,7 +17,7 @@
 #include "physics/point_constraint.h"
 #include "savefile/savefile.h"
 #include "scene/ball.h"
-#include "system/time.h"
+#include "util/frame_time.h"
 
 #include "codegen/assets/materials/static.h"
 #include "codegen/assets/models/player/chell.h"

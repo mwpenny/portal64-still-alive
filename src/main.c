@@ -20,6 +20,7 @@
 #include "sk64/skeletool_animator.h"
 #include "sk64/skeletool_defs.h"
 #include "util/dynamic_asset_loader.h"
+#include "util/frame_time.h"
 #include "util/memory.h"
 #include "util/profile.h"
 #include "util/rom.h"
@@ -253,7 +254,7 @@ static void gameProc(void* arg) {
     controllersInit();
     rumblePakClipInit();
     initAudio(fps);
-    timeSetFrameRate(fps);
+    frameTimeSetFixedDelta(fps);
     soundPlayerInit();
     translationsLoad(gSaveData.controls.textLanguage);
     skSetSegmentLocation(CHARACTER_ANIMATION_SEGMENT, (unsigned)_animation_segmentSegmentRomStart);
@@ -355,7 +356,7 @@ static void gameProc(void* arg) {
                     gScene.checkpointState = SceneCheckpointStateReady;
                 }
 
-                timeUpdateFrameTime();
+                frameTimeUpdate();
                 break;
             case (OS_SC_PRE_NMI_MSG):
                 pendingGFX += 2;

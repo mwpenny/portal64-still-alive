@@ -6,7 +6,7 @@
 #include "savefile/savefile.h"
 #include "scene.h"
 #include "strings/translations.h"
-#include "system/time.h"
+#include "util/frame_time.h"
 
 #include "codegen/assets/materials/hud.h"
 

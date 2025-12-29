@@ -10,7 +10,7 @@
 #include "savefile/checkpoint.h"
 #include "scene/dynamic_scene.h"
 #include "signals.h"
-#include "system/time.h"
+#include "util/frame_time.h"
 
 #include "codegen/assets/materials/static.h"
 #include "codegen/assets/models/props/round_elevator_collision.h"

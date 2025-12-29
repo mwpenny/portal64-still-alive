@@ -10,7 +10,7 @@
 #include "physics/collision_scene.h"
 #include "portal_surface_generator.h"
 #include "scene/dynamic_scene.h"
-#include "system/time.h"
+#include "util/frame_time.h"
 
 #include "codegen/assets/models/portal/portal_blue.h"
 #include "codegen/assets/models/portal/portal_blue_filled.h"

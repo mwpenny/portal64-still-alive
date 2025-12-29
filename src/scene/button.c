@@ -8,8 +8,8 @@
 #include "physics/contact_solver.h"
 #include "scene/hud.h"
 #include "scene/scene.h"
-#include "system/time.h"
 #include "util/dynamic_asset_loader.h"
+#include "util/frame_time.h"
 
 #include "codegen/assets/materials/static.h"
 #include "codegen/assets/models/dynamic_animated_model_list.h"

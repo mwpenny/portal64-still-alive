@@ -6,6 +6,7 @@
 #include "physics/collision_cylinder.h"
 #include "render_plan.h"
 #include "scene.h"
+#include "util/frame_time.h"
 
 #include "codegen/assets/materials/static.h"
 #include "codegen/assets/models/grav_flare.h"

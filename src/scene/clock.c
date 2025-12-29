@@ -5,8 +5,8 @@
 #include "levels/levels.h"
 #include "math/mathf.h"
 #include "scene/dynamic_scene.h"
-#include "system/time.h"
 #include "util/dynamic_asset_loader.h"
+#include "util/frame_time.h"
 #include "util/memory.h"
 
 #include "codegen/assets/materials/static.h"

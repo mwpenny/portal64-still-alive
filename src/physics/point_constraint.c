@@ -1,6 +1,6 @@
 #include "point_constraint.h"
 
-#include "system/time.h"
+#include "util/frame_time.h"
 
 #define BREAK_CONSTRAINT_DISTANCE 1.25f
 #define CLAMP_CONSTRAINT_DISTANCE 0.07f

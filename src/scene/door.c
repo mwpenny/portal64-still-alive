@@ -9,8 +9,8 @@
 #include "scene.h"
 #include "scene/dynamic_scene.h"
 #include "signals.h"
-#include "system/time.h"
 #include "util/dynamic_asset_loader.h"
+#include "util/frame_time.h"
 
 #include "codegen/assets/materials/static.h"
 #include "codegen/assets/models/dynamic_animated_model_list.h"

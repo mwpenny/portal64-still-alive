@@ -8,7 +8,7 @@
 #include "savefile/checkpoint.h"
 #include "scene/scene.h"
 #include "scene/signals.h"
-#include "system/time.h"
+#include "util/frame_time.h"
 #include "util/memory.h"
 
 unsigned char gPortalOpenRumbleData[] = {

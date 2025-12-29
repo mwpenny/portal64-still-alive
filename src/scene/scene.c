@@ -33,7 +33,7 @@
 #include "signals.h"
 #include "sk64/skeletool_defs.h"
 #include "system/controller.h"
-#include "system/time.h"
+#include "util/frame_time.h"
 #include "util/memory.h"
 
 #include "codegen/assets/audio/clips.h"

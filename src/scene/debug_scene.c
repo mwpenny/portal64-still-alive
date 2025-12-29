@@ -9,7 +9,7 @@
 #include "physics/collision_scene.h"
 #include "player/player.h"
 #include "system/controller.h"
-#include "system/time.h"
+#include "util/frame_time.h"
 
 #include "codegen/assets/materials/ui.h"
 

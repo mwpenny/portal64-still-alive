@@ -2,12 +2,12 @@
 #define __FIZZLER_H__
 
 #include <ultra64.h>
-#include "../math/transform.h"
-#include "defs.h"
-#include "system/time.h"
 
-#include "../physics/collision_box.h"
-#include "../physics/collision_object.h"
+#include "defs.h"
+#include "math/transform.h"
+#include "physics/collision_box.h"
+#include "physics/collision_object.h"
+#include "util/frame_time.h"
 
 #define FIZZLER_PARTICLES_PER_1x1   10.0f
 #define FIZZLER_PARTICLE_VELOCITY   1.0f

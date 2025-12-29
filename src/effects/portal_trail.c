@@ -4,7 +4,7 @@
 #include "graphics/color.h"
 #include "math/vector2.h"
 #include "math/mathf.h"
-#include "system/time.h"
+#include "util/frame_time.h"
 
 #include "codegen/assets/models/portal_gun/ball_trail.h"
 #include "codegen/assets/materials/static.h"

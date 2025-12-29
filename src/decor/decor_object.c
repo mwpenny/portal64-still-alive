@@ -3,8 +3,8 @@
 #include "audio/soundplayer.h"
 #include "physics/collision_scene.h"
 #include "scene/dynamic_scene.h"
-#include "system/time.h"
 #include "util/dynamic_asset_loader.h"
+#include "util/frame_time.h"
 #include "util/memory.h"
 
 #define TIME_TO_FIZZLE         2.0f
