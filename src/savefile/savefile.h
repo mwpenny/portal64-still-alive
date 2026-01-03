@@ -1,111 +1,116 @@
 #ifndef __SAVEFILE_H__
 #define __SAVEFILE_H__
 
+#include <stdint.h>
+
 #include "checkpoint.h"
 #include "controls/controller_actions.h"
 #include "system/cartridge.h"
 
-#define SAVEFILE_NO_SLOT    -1
+#define SAVE_SLOT_IMAGE_W       36
+#define SAVE_SLOT_IMAGE_H       27
+#define SAVE_SLOT_IMAGE_SIZE    (SAVE_SLOT_IMAGE_W * SAVE_SLOT_IMAGE_H * sizeof(uint16_t))
+#define SAVE_SLOT_IMAGE_SPACE   2048
 
-#define SAVE_SLOT_IMAGE_W   36
-#define SAVE_SLOT_IMAGE_H   27
+#define SAVE_SLOT_SIZE          (MAX_CHECKPOINT_SIZE + SAVE_SLOT_IMAGE_SPACE)
 
-#define THUMBNAIL_IMAGE_SIZE    (SAVE_SLOT_IMAGE_W * SAVE_SLOT_IMAGE_H * sizeof(u16))
-
-#define THUMBNAIL_IMAGE_SPACE    2048
-
-#define SAVE_SLOT_SIZE  (MAX_CHECKPOINT_SIZE + THUMBNAIL_IMAGE_SPACE)
-
-#define SAVE_SLOT_OFFSET(index)                (((index) + 1) * SAVE_SLOT_SIZE)
-#define SAVE_SLOT_SCREENSHOT_OFFSET(index)     (SAVE_SLOT_OFFSET(index) + MAX_CHECKPOINT_SIZE)
-
-#define SAVEFILE_HEADER 0xDF00
-
-// first save slot is always reserved for auto save
-#define MAX_SAVE_SLOTS  ((int)(SRAM_SIZE / SAVE_SLOT_SIZE) - 1)
-#define MAX_USER_SAVE_SLOTS (MAX_SAVE_SLOTS - 1)
-
-struct SaveHeader {
-    unsigned header;
-    unsigned char chapterProgressLevelIndex;
-    unsigned char flags;
-    unsigned char nextTestSubject;
-};
+// One slot's worth of space is reserved for global data
+// The first checkpoint slot is used for autosave
+#define MAX_SAVE_SLOTS          ((int)(SRAM_SIZE / SAVE_SLOT_SIZE) - 1)
+#define AUTOSAVE_SLOT           0
+#define SAVEFILE_NO_SLOT        -1
 
 enum ControlSaveFlags {
     ControlSaveFlagsInvert = (1 << 0),
-    ControlSaveTankControls = (1 << 2),
+    ControlSaveFlagsTankControls = (1 << 1),
+};
 
-    ControlSaveSubtitlesEnabled = (1 << 5),
-    ControlSaveAllSubtitlesEnabled = (1 << 6),
+enum VideoSaveFlags {
+    VideoSaveFlagsSubtitlesEnabled = (1 << 0),
+    VideoSaveFlagsCaptionsEnabled = (1 << 1),
+    VideoSaveFlagsWideScreen = (1 << 2),
+};
 
-    ControlSavePortalFunneling = (1 << 7),
-    ControlSaveMoveablePortals = (1 << 8),
-    ControlSaveWideScreen = (1 << 9),
+enum GameplaySaveFlags {
+    GameplaySaveFlagsPortalFunneling = (1 << 0),
+    GameplaySaveFlagsMovablePortals = (1 << 1),
+};
+
+struct SaveHeader {
+    uint16_t magic;
+    uint8_t chapterProgressLevelIndex;
+    uint8_t nextTestSubject;
 };
 
 struct ControlSaveState {
-    unsigned char controllerSettings[2][ControllerActionSourceCount];
-    unsigned short flags;
-    unsigned short sensitivity;
-    unsigned short acceleration;
-    unsigned short deadzone;
-    unsigned char portalRenderDepth;
-    unsigned char textLanguage;
+    uint8_t controllerSettings[2][ControllerActionSourceCount];
+    enum ControlSaveFlags flags;
+    uint16_t sensitivity;
+    uint16_t acceleration;
+    uint16_t deadzone;
 };
 
 struct AudioSettingsSaveState {
-    unsigned short soundVolume;
-    unsigned short musicVolume;
-    unsigned char audioLanguage;
+    uint16_t soundVolume;
+    uint16_t musicVolume;
+    uint8_t audioLanguage;
 };
 
-#define NO_TEST_CHAMBER         0xFF
-#define TEST_SUBJECT_MAX        99
+struct VideoSettingsSaveState {
+    enum VideoSaveFlags flags;
+    uint8_t textLanguage;
+};
+
+struct GameplaySaveState {
+    enum GameplaySaveFlags flags;
+    uint8_t portalRenderDepth;
+};
 
 struct SaveSlotMetadata {
-    unsigned char testChamber;
-    unsigned char testSubjectNumber;
-    unsigned char saveSlotOrder;
+    uint8_t testChamberNumber;
+    uint8_t testSubjectNumber;
+    uint8_t saveSlotOrder;
 };
 
 struct SaveData {
     struct SaveHeader header;
     struct ControlSaveState controls;
     struct AudioSettingsSaveState audio;
+    struct VideoSettingsSaveState video;
+    struct GameplaySaveState gameplay;
     struct SaveSlotMetadata saveSlotMetadata[MAX_SAVE_SLOTS];
-    // without this the dma copy into SRAM is cut short
-    u64 __align;
+
+    // Without this, the DMA copy into SRAM is cut short
+    uint64_t __align;
 };
 
 struct SaveSlotInfo {
-    unsigned char testChamber;
-    unsigned char saveSlot;
+    uint8_t slotIndex;
+    uint8_t testChamberNumber;
+    uint8_t testSubjectNumber;
 };
 
 extern struct SaveData gSaveData;
-extern int gCurrentTestSubject;
+extern uint8_t gCurrentTestSubject;
 
 void savefileLoad();
 void savefileSave();
+void savefileMarkChapterProgress(int testChamberNumber);
 
-void savefileDeleteGame(int slotIndex);
+int savefileLoadSlot(int slotIndex, Checkpoint checkpoint);
+void savefileSaveSlot(int slotIndex, int testChamberNumber, int subjectNumber, Checkpoint checkpoint);
+void savefileClearSlot(int slotIndex);
 
-void savefileSaveGame(Checkpoint checkpoint, u16* screenshot, int testChamberIndex, int subjectNumber, int slotIndex);
-int savefileListSaves(struct SaveSlotInfo* slots, int includeAuto);
-int savefileNextTestSubject();
-int savefileSuggestedSlot(int testSubject);
-int savefileOldestSlot();
+void savefileGetSlotInfo(int slotIndex, struct SaveSlotInfo* info);
+int savefileGetAllSlotInfo(struct SaveSlotInfo* slots, int includeAuto);
 
-void savefileMarkChapterProgress(int chamberNumber);
-
+int savefileSlotIsFree(int slotIndex);
 int savefileFirstFreeSlot();
 
-void savefileLoadGame(int slot, Checkpoint checkpoint, int* testChamberIndex, int* subjectNumber);
-void savefileLoadScreenshot(u16* target, u16* location);
+int savefileNextTestSubject();
+int savefileLatestSubjectSlot(int testSubjectNumber, int includeAuto);
 
-extern u16 gScreenGrabBuffer[SAVE_SLOT_IMAGE_W * SAVE_SLOT_IMAGE_H];
-
-void savefileGrabScreenshot();
+void savefileUpdateSlotImage();
+void savefileCopySlotImage(int slotIndex, void* dest);
 
 #endif

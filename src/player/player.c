@@ -902,7 +902,7 @@ void playerProcessInput(struct Player* player, struct Vector3* forward, struct V
     *moveInput = controllerDirectionGet(ControllerActionMove);
     *lookInput = controllerDirectionGet(ControllerActionRotate);
 
-    if (gSaveData.controls.flags & ControlSaveTankControls) {
+    if (gSaveData.controls.flags & ControlSaveFlagsTankControls) {
         float tmp;
         tmp = moveInput->y;
         moveInput->y = lookInput->y;
@@ -1038,7 +1038,7 @@ void playerMove(struct Player* player, struct Vector2* moveInput, struct Vector3
             targetVelocity.z = 0.0f;
         }
 
-        if ((gSaveData.controls.flags & ControlSavePortalFunneling) && !hasMoveInput) {
+        if ((gSaveData.gameplay.flags & GameplaySaveFlagsPortalFunneling) && !hasMoveInput) {
             playerPortalFunnel(player, &targetVelocity);
         }
 

@@ -7,6 +7,11 @@
 #include "physics/collision_scene.h"
 #include "util/memory.h"
 
+struct PartialTransform {
+    struct Vector3 position;
+    struct Quaternion rotation;
+};
+
 void playerSerialize(struct Serializer* serializer, SerializeAction action, struct Player* player) {
     action(serializer, &player->lookTransform, sizeof(struct PartialTransform));
     action(serializer, &player->body.velocity, sizeof(player->body.velocity));
@@ -746,8 +751,6 @@ void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
     for (int i = 0; i < scene->doorCount; ++i) {
         doorCheckForOpenState(&scene->doors[i]);
     }
-
-    scene->hud.overlayTimer = 0.0f;
 
     if (scene->player.flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
         scene->portalGun.rotation = scene->player.lookTransform.rotation;

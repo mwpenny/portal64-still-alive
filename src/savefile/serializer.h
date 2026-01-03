@@ -5,8 +5,6 @@ struct Serializer {
     void* curr;
 };
 
-typedef void* Reader;
-
 typedef void (*SerializeAction)(struct Serializer* serializer, void* target, int size);
 typedef void (*SerializeCallback)(struct Serializer* serializer, SerializeAction action, void* data);
 

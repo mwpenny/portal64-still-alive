@@ -5,40 +5,48 @@
 #include "system/screen.h"
 #include "util/memory.h"
 
-struct SaveData __attribute__((aligned(8))) gSaveData;
-int gCurrentTestSubject = -1;
+#define SAVEFILE_MAGIC                      0xDF01
 
-static void savefileUpdateSlot(int slotIndex, unsigned char testChamber, unsigned char subjectNumber, unsigned char slotOrder) {
-    gSaveData.saveSlotMetadata[slotIndex].testChamber = testChamber;
-    gSaveData.saveSlotMetadata[slotIndex].testSubjectNumber = subjectNumber;
-    gSaveData.saveSlotMetadata[slotIndex].saveSlotOrder = slotOrder;
+#define SAVE_SLOT_OFFSET(index)             (((index) + 1) * SAVE_SLOT_SIZE)
+#define SAVE_SLOT_IMAGE_OFFSET(index)       (SAVE_SLOT_OFFSET(index) + MAX_CHECKPOINT_SIZE)
+
+#define NO_TEST_CHAMBER                     0xFF
+#define TEST_SUBJECT_MAX                    99
+
+#define SAVE_SLOT_IMAGE_SCALE_FACTOR        (int)((SCREEN_WD << 16) / SAVE_SLOT_IMAGE_W)
+#define SCALE_SAVE_SLOT_IMAGE_COORD(value)  ((SAVE_SLOT_IMAGE_SCALE_FACTOR * (value)) >> 16)
+
+struct SaveData __attribute__((aligned(8))) gSaveData;
+uint8_t gCurrentTestSubject = 0;
+
+static uint16_t sSlotImage[SAVE_SLOT_IMAGE_W * SAVE_SLOT_IMAGE_H];
+
+static void savefileUpdateSlot(uint8_t slotIndex, uint8_t testChamber, uint8_t subjectNumber, uint8_t slotOrder) {
+    struct SaveSlotMetadata* metadata = &gSaveData.saveSlotMetadata[slotIndex];
+
+    metadata->testChamberNumber = testChamber;
+    metadata->testSubjectNumber = subjectNumber;
+    metadata->saveSlotOrder = slotOrder;
 }
 
-void savefileNew() {
+static void savefileNew() {
     zeroMemory(&gSaveData, sizeof(gSaveData));
-    gSaveData.header.header = SAVEFILE_HEADER;
-
-    gSaveData.header.nextTestSubject = 0;
-    gSaveData.header.flags = 0;
+    gSaveData.header.magic = SAVEFILE_MAGIC;
 
     for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
         savefileUpdateSlot(i, NO_TEST_CHAMBER, 0xFF, 0xFF);
     }
 
     controllerSetDefaultSource();
-    gSaveData.controls.flags = 0;
-    gSaveData.controls.flags |= ControlSavePortalFunneling;
     gSaveData.controls.sensitivity = 0x4000;
     gSaveData.controls.acceleration = 0x4000;
     gSaveData.controls.deadzone = 0x4000;
-    gSaveData.controls.portalRenderDepth = 2;
-    gSaveData.controls.textLanguage = 0;
 
     gSaveData.audio.soundVolume = 0xFFFF;
     gSaveData.audio.musicVolume = 0x8000;
-    gSaveData.audio.audioLanguage = 0;
 
-    controllerSetDeadzone(gSaveData.controls.deadzone * (1.0f / 0xFFFF) * MAX_DEADZONE);
+    gSaveData.gameplay.portalRenderDepth = 2;
+    gSaveData.gameplay.flags |= GameplaySaveFlagsPortalFunneling;
 }
 
 void savefileLoad() {
@@ -46,7 +54,7 @@ void savefileLoad() {
         savefileNew();
     }
 
-    if (gSaveData.header.header != SAVEFILE_HEADER) {
+    if (gSaveData.header.magic != SAVEFILE_MAGIC) {
         savefileNew();
     }
 
@@ -57,47 +65,74 @@ void savefileSave() {
     sramWrite(0, &gSaveData, sizeof(gSaveData));
 }
 
-void savefileDeleteGame(int slotIndex) {
-    unsigned char prevSortOrder = gSaveData.saveSlotMetadata[slotIndex].saveSlotOrder;
+void savefileMarkChapterProgress(int testChamberNumber) {
+    if (testChamberNumber > gSaveData.header.chapterProgressLevelIndex) {
+        gSaveData.header.chapterProgressLevelIndex = testChamberNumber;
+        savefileSave();
+    }
+}
 
-    // shift existing slot sort orders
+int savefileLoadSlot(int slot, Checkpoint checkpoint) {
+    return sramRead((void*)SAVE_SLOT_OFFSET(slot), checkpoint, MAX_CHECKPOINT_SIZE);
+}
+
+void savefileSaveSlot(int slotIndex, int testChamberNumber, int subjectNumber, Checkpoint checkpoint) {
+    sramWrite((void*)SAVE_SLOT_OFFSET(slotIndex), checkpoint, MAX_CHECKPOINT_SIZE);
+    sramWrite((void*)SAVE_SLOT_IMAGE_OFFSET(slotIndex), sSlotImage, SAVE_SLOT_IMAGE_SIZE);
+
+    uint8_t prevSortOrder = gSaveData.saveSlotMetadata[slotIndex].saveSlotOrder;
+
+    // Shift existing slot sort orders
     for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
-        unsigned char currSlotOrder = gSaveData.saveSlotMetadata[i].saveSlotOrder;
+        if (savefileSlotIsFree(i)) {
+            continue;
+        }
 
-        if (currSlotOrder > prevSortOrder && currSlotOrder < 0xFF) {
-            --gSaveData.saveSlotMetadata[i].saveSlotOrder;
+        uint8_t* currSlotOrder = &gSaveData.saveSlotMetadata[i].saveSlotOrder;
+        if (*currSlotOrder < prevSortOrder) {
+            ++*currSlotOrder;
+        }
+    }
+
+    savefileUpdateSlot(slotIndex, testChamberNumber, subjectNumber, 0);
+    savefileSave();
+}
+
+void savefileClearSlot(int slotIndex) {
+    uint8_t prevSortOrder = gSaveData.saveSlotMetadata[slotIndex].saveSlotOrder;
+
+    // Shift existing slot sort orders
+    for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
+        if (savefileSlotIsFree(i)) {
+            continue;
+        }
+
+        uint8_t* currSlotOrder = &gSaveData.saveSlotMetadata[i].saveSlotOrder;
+        if (*currSlotOrder > prevSortOrder) {
+            --*currSlotOrder;
         }
     }
 
     savefileUpdateSlot(slotIndex, NO_TEST_CHAMBER, 0xFF, 0xFF);
-
     savefileSave();
 }
 
-void savefileSaveGame(Checkpoint checkpoint, u16* screenshot, int testChamberDisplayNumber, int subjectNumber, int slotIndex) {
-    sramWrite((void*)SAVE_SLOT_OFFSET(slotIndex), checkpoint, MAX_CHECKPOINT_SIZE);
-    sramWrite((void*)SAVE_SLOT_SCREENSHOT_OFFSET(slotIndex), screenshot, THUMBNAIL_IMAGE_SIZE);
+void savefileGetSlotInfo(int slotIndex, struct SaveSlotInfo* info) {
+    struct SaveSlotMetadata* metadata = &gSaveData.saveSlotMetadata[slotIndex];
 
-    unsigned char prevSortOrder = gSaveData.saveSlotMetadata[slotIndex].saveSlotOrder;
-
-    // shift existing slot sort orders
-    for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
-        if (gSaveData.saveSlotMetadata[i].saveSlotOrder < prevSortOrder) {
-            ++gSaveData.saveSlotMetadata[i].saveSlotOrder;
-        }
-    }
-
-    savefileUpdateSlot(slotIndex, testChamberDisplayNumber, subjectNumber, 0);
-
-    savefileSave();
+    info->slotIndex = slotIndex;
+    info->testChamberNumber = metadata->testChamberNumber;
+    info->testSubjectNumber = metadata->testSubjectNumber;
 }
 
 struct SlotAndOrder {
-    unsigned char saveSlot;
-    unsigned char sortOrder;
+    uint8_t slotIndex;
+    uint8_t sortOrder;
 };
 
-void savefileMetadataSort(struct SlotAndOrder* result, struct SlotAndOrder* tmp, int start, int end) {
+static void savefileMetadataSort(struct SlotAndOrder* result, struct SlotAndOrder* tmp, int start, int end) {
+    // Merge sort
+
     if (start + 1 >= end) {
         return;
     }
@@ -128,35 +163,52 @@ void savefileMetadataSort(struct SlotAndOrder* result, struct SlotAndOrder* tmp,
     }
 }
 
-int savefileListSaves(struct SaveSlotInfo* slots, int includeAuto) {
-    int result = 0;
-
-    struct SlotAndOrder unsortedResult[MAX_SAVE_SLOTS];
+int savefileGetAllSlotInfo(struct SaveSlotInfo* slots, int includeAuto) {
+    struct SlotAndOrder result[MAX_SAVE_SLOTS];
+    int slotCount = 0;
 
     for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
-        if (gSaveData.saveSlotMetadata[i].testChamber == NO_TEST_CHAMBER) {
+        if (savefileSlotIsFree(i)) {
             continue;
         }
 
-        if (i == 0 && !includeAuto) {
+        if (i == AUTOSAVE_SLOT && !includeAuto) {
             continue;
         }
 
-        unsortedResult[result].sortOrder = gSaveData.saveSlotMetadata[i].saveSlotOrder;
-        unsortedResult[result].saveSlot = i;
-        ++result;
+        result[slotCount].slotIndex = i;
+        result[slotCount].sortOrder = gSaveData.saveSlotMetadata[i].saveSlotOrder;
+        ++slotCount;
     }
 
     struct SlotAndOrder tmp[MAX_SAVE_SLOTS];
+    savefileMetadataSort(result, tmp, 0, slotCount);
 
-    savefileMetadataSort(unsortedResult, tmp, 0, result);
-
-    for (int i = 0; i < result; ++i) {
-        slots[i].saveSlot = unsortedResult[i].saveSlot;
-        slots[i].testChamber = gSaveData.saveSlotMetadata[unsortedResult[i].saveSlot].testChamber;
+    for (int i = 0; i < slotCount; ++i) {
+        savefileGetSlotInfo(result[i].slotIndex, &slots[i]);
     }
 
-    return result;
+    return slotCount;
+}
+
+int savefileSlotIsFree(int slotIndex) {
+    return slotIndex >= 0 &&
+        slotIndex < MAX_SAVE_SLOTS &&
+        gSaveData.saveSlotMetadata[slotIndex].testChamberNumber == NO_TEST_CHAMBER;
+}
+
+int savefileFirstFreeSlot() {
+    for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
+        if (i == AUTOSAVE_SLOT) {
+            continue;
+        }
+
+        if (savefileSlotIsFree(i)) {
+            return i;
+        }
+    }
+
+    return SAVEFILE_NO_SLOT;
 }
 
 int savefileNextTestSubject() {
@@ -166,6 +218,10 @@ int savefileNextTestSubject() {
         needsToCheck = 0;
 
         for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
+            if (savefileSlotIsFree(i)) {
+                continue;
+            }
+
             if (gSaveData.saveSlotMetadata[i].testSubjectNumber == gSaveData.header.nextTestSubject) {
                 needsToCheck = 1;
                 ++gSaveData.header.nextTestSubject;
@@ -179,16 +235,27 @@ int savefileNextTestSubject() {
         }
     }
 
+    savefileSave();
     return gSaveData.header.nextTestSubject;
 }
 
-int savefileSuggestedSlot(int testSubject) {
-    int result = 0;
+int savefileLatestSubjectSlot(int testSubjectNumber, int includeAuto) {
+    int result = SAVEFILE_NO_SLOT;
 
-    // 0 indicates a new save
-    for (int i = 1; i < MAX_SAVE_SLOTS; ++i) {
-        if (gSaveData.saveSlotMetadata[i].testSubjectNumber == testSubject && 
-            (result == 0 || gSaveData.saveSlotMetadata[i].saveSlotOrder < gSaveData.saveSlotMetadata[result].saveSlotOrder)) {
+    for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
+        if (savefileSlotIsFree(i)) {
+            continue;
+        }
+
+        if (i == AUTOSAVE_SLOT && !includeAuto) {
+            continue;
+        }
+
+        struct SaveSlotMetadata* metadata = &gSaveData.saveSlotMetadata[i];
+
+        if (metadata->testSubjectNumber == testSubjectNumber &&
+            (result == SAVEFILE_NO_SLOT || metadata->saveSlotOrder < gSaveData.saveSlotMetadata[result].saveSlotOrder)
+        ) {
             result = i;
         }
     }
@@ -196,67 +263,27 @@ int savefileSuggestedSlot(int testSubject) {
     return result;
 }
 
-int savefileOldestSlot() {
-    int result = 1;
-
-    // 0 indicates a new save
-    for (int i = 1; i < MAX_SAVE_SLOTS; ++i) {
-        if (gSaveData.saveSlotMetadata[i].saveSlotOrder > gSaveData.saveSlotMetadata[result].saveSlotOrder) {
-            result = i;
-        }
-    }
-
-    return result;
-}
-
-void savefileMarkChapterProgress(int levelIndex) {
-    if (levelIndex > gSaveData.header.chapterProgressLevelIndex) {
-        gSaveData.header.chapterProgressLevelIndex = levelIndex;
-        savefileSave();
-    }
-}
-
-int savefileFirstFreeSlot() {
-    for (int i = 1; i < MAX_SAVE_SLOTS; ++i) {
-        if (gSaveData.saveSlotMetadata[i].testChamber == NO_TEST_CHAMBER) {
-            return i;
-        }
-    }
-
-    return SAVEFILE_NO_SLOT;
-}
-
-void savefileLoadGame(int slot, Checkpoint checkpoint, int* testChamberIndex, int* subjectNumber) {
-    sramRead((void*)SAVE_SLOT_OFFSET(slot), checkpoint, MAX_CHECKPOINT_SIZE);
-    *testChamberIndex = gSaveData.saveSlotMetadata[slot].testChamber;
-    *subjectNumber = gSaveData.saveSlotMetadata[slot].testSubjectNumber;
-}
-
-u16 gScreenGrabBuffer[SAVE_SLOT_IMAGE_W * SAVE_SLOT_IMAGE_H];
-
-#define IMAGE_SCALE_FACTOR      (int)((SCREEN_WD << 16) / SAVE_SLOT_IMAGE_W)
-#define SCALE_TO_SOURCE(value)  ((IMAGE_SCALE_FACTOR * (value)) >> 16)
-
-void savefileGrabScreenshot() {
-    u16* cfb = screenGetCurrentFramebuffer();
-    u16* dst = gScreenGrabBuffer;
+void savefileUpdateSlotImage() {
+    uint16_t* cfb = screenGetCurrentFramebuffer();
+    uint16_t* dst = sSlotImage;
 
     for (int y = 0; y < SAVE_SLOT_IMAGE_H; ++y) {
         for (int x = 0; x < SAVE_SLOT_IMAGE_W; ++x) {
-            int srcX = SCALE_TO_SOURCE(x);
-            int srcY = SCALE_TO_SOURCE(y);
+            int srcX = SCALE_SAVE_SLOT_IMAGE_COORD(x);
+            int srcY = SCALE_SAVE_SLOT_IMAGE_COORD(y);
 
-            *dst = cfb[srcX + srcY * SCREEN_WD];
+            *dst = cfb[srcX + (srcY * SCREEN_WD)];
 
             ++dst;
         }
     }
 }
 
-void savefileLoadScreenshot(u16* target, u16* location) {
-    if (location != gScreenGrabBuffer) {
-        sramRead(location, target, THUMBNAIL_IMAGE_SIZE);
+void savefileCopySlotImage(int slotIndex, void* dest) {
+    if (savefileSlotIsFree(slotIndex)) {
+        // TODO: "new slot" image (not screenshot)
+        memCopy(dest, sSlotImage, SAVE_SLOT_IMAGE_SIZE);
     } else {
-        memCopy(target, location, THUMBNAIL_IMAGE_SIZE);
+        sramRead((void*)SAVE_SLOT_IMAGE_OFFSET(slotIndex), dest, SAVE_SLOT_IMAGE_SIZE);
     }
 }

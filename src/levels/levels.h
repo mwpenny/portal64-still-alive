@@ -1,7 +1,6 @@
 #ifndef __LEVELS_H__
 #define __LEVELS_H__
 
-#include "physics/collision_object.h"
 #include "level_definition.h"
 
 #define CREDITS_MENU    -5
@@ -10,17 +9,21 @@
 #define NO_QUEUED_LEVEL -2
 #define NEXT_LEVEL      -1
 
-int levelCount();
-void levelLoad(int index);
+extern struct LevelDefinition* gCurrentLevel;
+extern int gCurrentLevelIndex;
 
-void levelQueueLoad(int index, struct Transform* relativeExitTransform, struct Vector3* relativeVelocity);
-void levelLoadLastCheckpoint();
+void levelQueueLoad(int index, struct Transform* relativeTransform, struct Vector3* relativeVelocity, int useCheckpoint);
+void levelQueueReload();
 int levelGetQueued();
+void levelClearQueued();
+
+void levelLoad(int index);
 struct Transform* levelRelativeTransform();
 struct Vector3* levelRelativeVelocity();
 
-extern struct LevelDefinition* gCurrentLevel;
-extern int gCurrentLevelIndex;
+int levelCount();
+int getChamberIndexFromLevelIndex(int levelIndex, int roomIndex);
+int getLevelIndexFromChamberIndex(int chamberIndex);
 
 int levelMaterialCount();
 int levelMaterialTransparentStart();
@@ -29,11 +32,6 @@ Gfx* levelMaterialDefault();
 Gfx* levelMaterialRevert(int index);
 
 int levelQuadIndex(struct CollisionObject* pointer);
-
-int getChamberDisplayNumberFromLevelIndex(int levelIndex, int roomIndex);
-void levelClearQueuedLevel();
-int getLevelIndexFromChamberDisplayNumber(int chamberNumber);
-
 struct Location* levelGetLocation(short index);
 
 #endif

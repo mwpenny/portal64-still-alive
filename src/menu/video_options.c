@@ -128,9 +128,9 @@ void videoOptionsAction(void* data, int selection, struct MenuAction* action) {
     switch (selection) {
         case VideoOptionWidescreen:
             if (action->state.checkbox.isChecked) {
-                gSaveData.controls.flags |= ControlSaveWideScreen;
+                gSaveData.video.flags |= VideoSaveFlagsWideScreen;
             } else {
-                gSaveData.controls.flags &= ~ControlSaveWideScreen;
+                gSaveData.video.flags &= ~VideoSaveFlagsWideScreen;
             }
             break;
         case VideoOptionInterlaced:
@@ -139,36 +139,36 @@ void videoOptionsAction(void* data, int selection, struct MenuAction* action) {
             break;
         case VideoOptionSubtitles:
             if (action->state.checkbox.isChecked) {
-                gSaveData.controls.flags |= ControlSaveSubtitlesEnabled;
-                gSaveData.controls.flags &= ~ControlSaveAllSubtitlesEnabled;
+                gSaveData.video.flags |= VideoSaveFlagsSubtitlesEnabled;
+                gSaveData.video.flags &= ~VideoSaveFlagsCaptionsEnabled;
                 menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[CAPTIONS_INDEX], 0);
             } else {
-                gSaveData.controls.flags &= ~ControlSaveSubtitlesEnabled;
+                gSaveData.video.flags &= ~VideoSaveFlagsSubtitlesEnabled;
             }
             break;
         case VideoOptionCaptions:
             if (action->state.checkbox.isChecked) {
-                gSaveData.controls.flags |= ControlSaveAllSubtitlesEnabled;
-                gSaveData.controls.flags &= ~ControlSaveSubtitlesEnabled;
+                gSaveData.video.flags |= VideoSaveFlagsCaptionsEnabled;
+                gSaveData.video.flags &= ~VideoSaveFlagsSubtitlesEnabled;
                 menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[SUBTITLES_INDEX], 0);
             } else {
-                gSaveData.controls.flags &= ~ControlSaveAllSubtitlesEnabled;
+                gSaveData.video.flags &= ~VideoSaveFlagsCaptionsEnabled;
             }
             break;
         case VideoOptionTextLanguage:
-            gSaveData.controls.textLanguage = action->state.iSlider.value;
-            gVideoMenuParams[LANGUAGE_TEXT_INDEX].params.text.message = StringLanguages[gSaveData.controls.textLanguage];
-            translationsReload(gSaveData.controls.textLanguage);
+            gSaveData.video.textLanguage = action->state.iSlider.value;
+            gVideoMenuParams[LANGUAGE_TEXT_INDEX].params.text.message = StringLanguages[gSaveData.video.textLanguage];
+            translationsReload(gSaveData.video.textLanguage);
             break;
     }
 }
 
 void videoOptionsInit(struct VideoOptions* videoOptions) {
-    if (gSaveData.controls.textLanguage < 0 || gSaveData.controls.textLanguage >= NUM_STRING_LANGUAGES) {
-        gSaveData.controls.textLanguage = 0;
+    if (gSaveData.video.textLanguage < 0 || gSaveData.video.textLanguage >= NUM_STRING_LANGUAGES) {
+        gSaveData.video.textLanguage = 0;
     }
 
-    gVideoMenuParams[LANGUAGE_TEXT_INDEX].params.text.message = StringLanguages[gSaveData.controls.textLanguage];
+    gVideoMenuParams[LANGUAGE_TEXT_INDEX].params.text.message = StringLanguages[gSaveData.video.textLanguage];
 
     menuBuilderInit(
         &videoOptions->menuBuilder,
@@ -179,13 +179,13 @@ void videoOptionsInit(struct VideoOptions* videoOptions) {
         videoOptions
     );
 
-    menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[WIDESCREEN_INDEX], (gSaveData.controls.flags & ControlSaveWideScreen) != 0);
+    menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[WIDESCREEN_INDEX], (gSaveData.video.flags & VideoSaveFlagsWideScreen) != 0);
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[INTERLACED_INDEX], gIsInterlacedEnabled);
 
-    menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[CAPTIONS_INDEX], (gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled) != 0);
-    menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[SUBTITLES_INDEX], (gSaveData.controls.flags & ControlSaveSubtitlesEnabled) != 0);
+    menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[CAPTIONS_INDEX], (gSaveData.video.flags & VideoSaveFlagsCaptionsEnabled) != 0);
+    menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[SUBTITLES_INDEX], (gSaveData.video.flags & VideoSaveFlagsSubtitlesEnabled) != 0);
 
-    menuBuilderSetISlider(&videoOptions->menuBuilder.elements[LANGUAGE_SLIDER_INDEX], gSaveData.controls.textLanguage);
+    menuBuilderSetISlider(&videoOptions->menuBuilder.elements[LANGUAGE_SLIDER_INDEX], gSaveData.video.textLanguage);
 }
 
 void videoOptionsRebuildtext(struct VideoOptions* videoOptions) {

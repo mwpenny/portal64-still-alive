@@ -44,12 +44,12 @@ void renderPropscheckViewportSize(int* min, int* max, int screenSize) {
 }
 
 int renderPropsZDistance(int currentDepth) {
-    if (currentDepth >= gSaveData.controls.portalRenderDepth) {
+    if (currentDepth >= gSaveData.gameplay.portalRenderDepth) {
         return 0;
     } else if (currentDepth < 0) {
         return G_MAXZ;
     } else {
-        return G_MAXZ - (G_MAXZ >> (gSaveData.controls.portalRenderDepth - currentDepth));
+        return G_MAXZ - (G_MAXZ >> (gSaveData.gameplay.portalRenderDepth - currentDepth));
     }
 }
 
@@ -90,7 +90,7 @@ void renderPropsInit(struct RenderProps* props, struct Camera* camera, float asp
 
     cameraSetupMatrices(camera, renderState, aspectRatio, &fullscreenViewport, 1, &props->cameraMatrixInfo);
 
-    props->currentDepth = gSaveData.controls.portalRenderDepth;
+    props->currentDepth = gSaveData.gameplay.portalRenderDepth;
     props->exitPortalIndex = NO_PORTAL;
     props->fromRoom = roomIndex;
     props->parentStageIndex = -1;
@@ -117,7 +117,7 @@ void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, st
 
 float getAspect()
 {
-    return (gSaveData.controls.flags & ControlSaveWideScreen) != 0 ? ASPECT_WIDE : ASPECT_SD;
+    return (gSaveData.video.flags & VideoSaveFlagsWideScreen) != 0 ? ASPECT_WIDE : ASPECT_SD;
 }
 
 #define CALC_SCREEN_SPACE(clip_space, screen_size) ((clip_space + 1.0f) * ((screen_size) / 2))
@@ -343,7 +343,7 @@ int renderShouldRenderOtherPortal(struct Scene* scene, int visiblePortal, struct
         return 0;
     }
 
-    if ((scene->player.body.flags & (RigidBodyIsTouchingPortalA << visiblePortal)) != 0 && properties->currentDepth == gSaveData.controls.portalRenderDepth) {
+    if ((scene->player.body.flags & (RigidBodyIsTouchingPortalA << visiblePortal)) != 0 && properties->currentDepth == gSaveData.gameplay.portalRenderDepth) {
         return 1;
     }
 
@@ -429,9 +429,9 @@ void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, st
 }
 
 void renderPlanAdjustViewportDepth(struct RenderPlan* renderPlan) {
-    float depthWeight[gSaveData.controls.portalRenderDepth + 1];
+    float depthWeight[gSaveData.gameplay.portalRenderDepth + 1];
 
-    for (int i = 0; i <= gSaveData.controls.portalRenderDepth; ++i) {
+    for (int i = 0; i <= gSaveData.gameplay.portalRenderDepth; ++i) {
         depthWeight[i] = 0.0f;
     }
 
@@ -449,21 +449,21 @@ void renderPlanAdjustViewportDepth(struct RenderPlan* renderPlan) {
 
     float totalWeight = 0.0f;
 
-    for (int i = 0; i <= gSaveData.controls.portalRenderDepth; ++i) {
+    for (int i = 0; i <= gSaveData.gameplay.portalRenderDepth; ++i) {
         totalWeight += depthWeight[i];
     }
 
     // give the main view a larger slice of the depth buffer
-    totalWeight += depthWeight[gSaveData.controls.portalRenderDepth];
-    depthWeight[gSaveData.controls.portalRenderDepth] *= 2.0f;
+    totalWeight += depthWeight[gSaveData.gameplay.portalRenderDepth];
+    depthWeight[gSaveData.gameplay.portalRenderDepth] *= 2.0f;
 
     float scale = (float)G_MAXZ / totalWeight;
 
-    short zBufferBoundary[gSaveData.controls.portalRenderDepth + 2];
+    short zBufferBoundary[gSaveData.gameplay.portalRenderDepth + 2];
 
-    zBufferBoundary[gSaveData.controls.portalRenderDepth + 1] = 0;
+    zBufferBoundary[gSaveData.gameplay.portalRenderDepth + 1] = 0;
 
-    for (int i = gSaveData.controls.portalRenderDepth; i >= 0; --i) {
+    for (int i = gSaveData.gameplay.portalRenderDepth; i >= 0; --i) {
         zBufferBoundary[i] = (short)(scale * depthWeight[i]) + zBufferBoundary[i + 1];
 
         zBufferBoundary[i] = MIN(zBufferBoundary[i], G_MAXZ);

@@ -10,9 +10,9 @@
 
 struct SavefileInfo {
     short slotIndex;
-    short testchamberDisplayNumber;
+    short testChamberNumber;
+    short testSubjectNumber;
     char* savefileName;
-    u16* screenshot;
     int isFree;
 };
 

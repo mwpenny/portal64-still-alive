@@ -1,36 +1,29 @@
 #include "levels.h"
 
 #include "cutscene_runner.h"
-#include "graphics/graphics.h"
 #include "physics/collision_scene.h"
 #include "player/player.h"
 #include "savefile/checkpoint.h"
-#include "static_render.h"
 #include "system/cartridge.h"
 #include "util/memory.h"
 
 #include "codegen/assets/materials/static.h"
 #include "codegen/assets/test_chambers/level_list.h"
 
+#define ADJUST_POINTER_POS(ptr, offset) (void*)((ptr) ? (char*)(ptr) + (offset) : 0)
+
 struct LevelDefinition* gCurrentLevel;
 int gCurrentLevelIndex;
 
-int gQueuedLevel = NO_QUEUED_LEVEL;
-struct Transform gRelativeTransform = {
+static int sQueuedLevel = NO_QUEUED_LEVEL;
+static struct Transform sRelativeTransform = {
     {0.0f, PLAYER_HEAD_HEIGHT, 0.0f},
     {0.0f, 0.0f, 0.0f, 1.0f},
     {1.0f, 1.0f, 1.0f},
 };
+static struct Vector3 sRelativeVelocity = { 0 };
 
-struct Vector3 gRelativeVelocity;
-
-int levelCount() {
-    return LEVEL_COUNT;
-}
-
-#define ADJUST_POINTER_POS(ptr, offset) (void*)((ptr) ? (char*)(ptr) + (offset) : 0)
-
-struct LevelDefinition* levelFixPointers(struct LevelDefinition* from, int pointerOffset) {
+static struct LevelDefinition* levelFixPointers(struct LevelDefinition* from, int pointerOffset) {
     struct LevelDefinition* result = ADJUST_POINTER_POS(from, pointerOffset);
 
     result->collisionQuads = ADJUST_POINTER_POS(result->collisionQuads, pointerOffset);
@@ -113,6 +106,47 @@ struct LevelDefinition* levelFixPointers(struct LevelDefinition* from, int point
     return result;
 }
 
+void levelQueueLoad(int index, struct Transform* relativeTransform, struct Vector3* relativeVelocity, int useCheckpoint) {
+    if (index == NEXT_LEVEL) {
+        sQueuedLevel = gCurrentLevelIndex + 1;
+
+        if (sQueuedLevel == LEVEL_COUNT) {
+            sQueuedLevel = CREDITS_MENU;
+        }
+    } else {
+        sQueuedLevel = index;
+    }
+
+    if (relativeTransform) {
+        sRelativeTransform = *relativeTransform;
+    } else {
+        transformInitIdentity(&sRelativeTransform);
+        sRelativeTransform.position.y = PLAYER_HEAD_HEIGHT;
+    }
+
+    if (relativeVelocity) {
+        sRelativeVelocity = *relativeVelocity;
+    } else {
+        sRelativeVelocity = gZeroVec;
+    }
+
+    if (!useCheckpoint) {
+        checkpointClear();
+    }
+}
+
+void levelQueueReload() {
+    levelQueueLoad(gCurrentLevelIndex, NULL, NULL, 1 /* useCheckpoint */);
+}
+
+int levelGetQueued() {
+    return sQueuedLevel;
+}
+
+void levelClearQueued() {
+    sQueuedLevel = NO_QUEUED_LEVEL;
+}
+
 void levelLoad(int index) {
     if (index < 0 || index >= LEVEL_COUNT) {
         return;
@@ -130,101 +164,22 @@ void levelLoad(int index) {
 
     collisionSceneInit(&gCollisionScene, gCurrentLevel->collisionQuads, gCurrentLevel->collisionQuadCount, &gCurrentLevel->world);
     soundPlayerResume();
-}
-
-void levelClearQueuedLevel() {
-    gQueuedLevel = NO_QUEUED_LEVEL;
-}
-
-void levelQueueLoad(int index, struct Transform* relativeExitTransform, struct Vector3* relativeVelocity) {
-    if (index == NEXT_LEVEL) {
-        gQueuedLevel = gCurrentLevelIndex + 1;
-
-        if (gQueuedLevel == LEVEL_COUNT) {
-            gQueuedLevel = CREDITS_MENU;
-        }
-    } else {
-        gQueuedLevel = index;
-    }
-    if (relativeExitTransform) {
-        gRelativeTransform = *relativeExitTransform;
-    } else {
-        transformInitIdentity(&gRelativeTransform);
-        gRelativeTransform.position.y = 1.0f;
-    }
-    if (relativeVelocity) {
-        gRelativeVelocity = *relativeVelocity;
-    } else {
-        gRelativeVelocity = gZeroVec;
-    }
-    checkpointClear();
-}
-
-void levelLoadLastCheckpoint() {
     cutsceneRunnerReset();
-    gQueuedLevel = gCurrentLevelIndex;
-    transformInitIdentity(&gRelativeTransform);
-    gRelativeTransform.position.y = PLAYER_HEAD_HEIGHT;
-    gRelativeVelocity = gZeroVec;
-}
-
-int levelGetQueued() {
-    return gQueuedLevel;
 }
 
 struct Transform* levelRelativeTransform() {
-    return &gRelativeTransform;
+    return &sRelativeTransform;
 }
 
 struct Vector3* levelRelativeVelocity() {
-    return &gRelativeVelocity;
+    return &sRelativeVelocity;
 }
 
-int levelMaterialCount() {
-    return STATIC_MATERIAL_COUNT;
+int levelCount() {
+    return LEVEL_COUNT;
 }
 
-int levelMaterialTransparentStart() {
-    return STATIC_TRANSPARENT_START;
-}
-
-Gfx* levelMaterial(int index) {
-    if (index < 0 || index >= STATIC_MATERIAL_COUNT) {
-        return NULL;
-    }
-
-    return static_material_list[index];
-}
-
-Gfx* levelMaterialDefault() {
-    return static_material_list[DEFAULT_INDEX];
-}
-
-Gfx* levelMaterialRevert(int index) {
-    if (index < 0 || index >= STATIC_MATERIAL_COUNT) {
-        return NULL;
-    }
-
-    return static_material_revert_list[index];
-}
-
-int levelQuadIndex(struct CollisionObject* pointer) {
-    if (pointer < gCollisionScene.quads || pointer >= gCollisionScene.quads + gCollisionScene.quadCount) {
-        return -1;
-    }
-
-    return pointer - gCollisionScene.quads;
-}
-
-struct Location* levelGetLocation(short index) {
-    if (index < 0 || index >= gCurrentLevel->locationCount) {
-        return NULL;
-    }
-
-    return &gCurrentLevel->locations[index];
-}
-
-int getChamberDisplayNumberFromLevelIndex(int levelIndex, int roomIndex) {
+int getChamberIndexFromLevelIndex(int levelIndex, int roomIndex) {
     switch(levelIndex){
         case 0:
             if (roomIndex <= 2)
@@ -270,8 +225,8 @@ int getChamberDisplayNumberFromLevelIndex(int levelIndex, int roomIndex) {
     }
 }
 
-int getLevelIndexFromChamberDisplayNumber(int chamberNumber) {
-    switch (chamberNumber) {
+int getLevelIndexFromChamberIndex(int chamberIndex) {
+    switch (chamberIndex) {
         case 0:
         case 1:
             return 0;
@@ -304,4 +259,48 @@ int getLevelIndexFromChamberDisplayNumber(int chamberNumber) {
         default:
             return 0;
     }
+}
+
+int levelMaterialCount() {
+    return STATIC_MATERIAL_COUNT;
+}
+
+int levelMaterialTransparentStart() {
+    return STATIC_TRANSPARENT_START;
+}
+
+Gfx* levelMaterial(int index) {
+    if (index < 0 || index >= STATIC_MATERIAL_COUNT) {
+        return NULL;
+    }
+
+    return static_material_list[index];
+}
+
+Gfx* levelMaterialDefault() {
+    return static_material_list[DEFAULT_INDEX];
+}
+
+Gfx* levelMaterialRevert(int index) {
+    if (index < 0 || index >= STATIC_MATERIAL_COUNT) {
+        return NULL;
+    }
+
+    return static_material_revert_list[index];
+}
+
+int levelQuadIndex(struct CollisionObject* pointer) {
+    if (pointer < gCollisionScene.quads || pointer >= gCollisionScene.quads + gCollisionScene.quadCount) {
+        return -1;
+    }
+
+    return pointer - gCollisionScene.quads;
+}
+
+struct Location* levelGetLocation(short index) {
+    if (index < 0 || index >= gCurrentLevel->locationCount) {
+        return NULL;
+    }
+
+    return &gCurrentLevel->locations[index];
 }

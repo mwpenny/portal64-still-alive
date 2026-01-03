@@ -28,7 +28,7 @@ void creditsUpdate(struct Credits* credits) {
     credits->time += FIXED_DELTA_TIME;
 
     if (controllerGetButtonDown(0, BUTTON_START)) {
-        levelQueueLoad(MAIN_MENU, NULL, NULL);
+        levelQueueLoad(MAIN_MENU, NULL, NULL, 0);
     }
 }
 

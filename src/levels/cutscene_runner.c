@@ -267,7 +267,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
 
             transformConcat(&exitInverse, &gScene.player.lookTransform, &relativeExit);
             quatMultVector(&exitInverse.rotation, &gScene.player.body.velocity, &relativeVelocity);
-            levelQueueLoad(step->loadLevel.levelIndex, &relativeExit, &relativeVelocity);
+            levelQueueLoad(step->loadLevel.levelIndex, &relativeExit, &relativeVelocity, 0 /* useCheckpoint */);
             break;
         }
         case CutsceneStepTypeGoto:

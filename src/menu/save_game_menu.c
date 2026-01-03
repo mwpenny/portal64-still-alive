@@ -18,19 +18,22 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
     struct SavefileInfo savefileInfo[MAX_SAVE_SLOTS];
     struct SaveSlotInfo saveSlots[MAX_SAVE_SLOTS];
 
-    int numberOfSaves = savefileListSaves(saveSlots, 0);
+    int numberOfSaves = savefileGetAllSlotInfo(saveSlots, 0 /* includeAuto */);
 
-    int suggestedSlot = savefileSuggestedSlot(gCurrentTestSubject);
+    int subjectSlot = savefileLatestSubjectSlot(gCurrentTestSubject, 0 /* includeAuto */);
     int startSelection = -1;
 
     for (int i = 0; i < numberOfSaves; ++i) {
-        savefileInfo[i].slotIndex = saveSlots[i].saveSlot;
-        savefileInfo[i].testchamberDisplayNumber = saveSlots[i].testChamber;
-        savefileInfo[i].savefileName = NULL;
-        savefileInfo[i].screenshot = (u16*)SAVE_SLOT_SCREENSHOT_OFFSET(saveSlots[i].saveSlot);
-        savefileInfo[i].isFree = 0;
+        struct SavefileInfo* entry = &savefileInfo[i];
+        struct SaveSlotInfo* info = &saveSlots[i];
 
-        if (suggestedSlot == saveSlots[i].saveSlot) {
+        entry->slotIndex = info->slotIndex;
+        entry->testChamberNumber = info->testChamberNumber;
+        entry->testSubjectNumber = info->testSubjectNumber;
+        entry->savefileName = NULL;
+        entry->isFree = 0;
+
+        if (subjectSlot == info->slotIndex) {
             startSelection = i;
         }
     }
@@ -38,13 +41,15 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
     int freeSlot = savefileFirstFreeSlot();
 
     if (includeNew && freeSlot != SAVEFILE_NO_SLOT) {
-        savefileInfo[numberOfSaves].slotIndex = freeSlot;
-        savefileInfo[numberOfSaves].savefileName = translationsGet(GAMEUI_NEWSAVEGAME);
-        savefileInfo[numberOfSaves].testchamberDisplayNumber = getChamberDisplayNumberFromLevelIndex(gCurrentLevelIndex, gScene.player.body.currentRoom);
-        savefileInfo[numberOfSaves].screenshot = gScreenGrabBuffer;
-        savefileInfo[numberOfSaves].isFree = 1;
+        struct SavefileInfo* newEntry = &savefileInfo[numberOfSaves];
 
-        if (suggestedSlot == 0) {
+        newEntry->slotIndex = freeSlot;
+        newEntry->savefileName = translationsGet(GAMEUI_NEWSAVEGAME);
+        newEntry->testChamberNumber = getChamberIndexFromLevelIndex(gCurrentLevelIndex, gScene.player.body.currentRoom);
+        newEntry->testSubjectNumber = 0;
+        newEntry->isFree = 1;
+
+        if (subjectSlot == SAVEFILE_NO_SLOT) {
             startSelection = numberOfSaves; 
         }
         
@@ -67,22 +72,12 @@ void saveGamePopulate(struct SaveGameMenu* saveGame, int includeNew) {
 }
 
 static void saveGameSaveInSelectedSlot(struct SaveGameMenu* saveGame) {
-    Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
-    if (checkpointSaveInto(&gScene, save)) {
-        savefileSaveGame(
-            save,
-            gScreenGrabBuffer,
-            getChamberDisplayNumberFromLevelIndex(gCurrentLevelIndex, gScene.player.body.currentRoom),
-            gCurrentTestSubject,
-            savefileGetSlot(saveGame->savefileList)
-        );
-        saveGamePopulate(saveGame, 1);
-
+    if (checkpointSave(&gScene, savefileGetSlot(saveGame->savefileList))) {
+        saveGamePopulate(saveGame, 1 /* includeNew */);
         soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
     } else {
         soundPlayerPlay(SOUNDS_WPN_DENYSELECT, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
     }
-    stackMallocFree(save);
 }
 
 static void saveGameConfirmDeletionClosed(struct SaveGameMenu* saveGame, int isConfirmed) {
@@ -90,7 +85,7 @@ static void saveGameConfirmDeletionClosed(struct SaveGameMenu* saveGame, int isC
         short selectedSaveIndex = saveGame->savefileList->selectedSave;
         struct SavefileInfo* selectedSave = &saveGame->savefileList->savefileInfo[selectedSaveIndex];
 
-        savefileDeleteGame(selectedSave->slotIndex);
+        savefileClearSlot(selectedSave->slotIndex);
         saveGamePopulate(saveGame, 1);
 
         if (selectedSaveIndex >= saveGame->savefileList->numberOfSaves) {

@@ -178,7 +178,7 @@ void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType) {
 }
 
 void hudShowSubtitle(struct Hud* hud, enum StringId subtitleId, enum SubtitleType subtitleType) {
-    if (!(gSaveData.controls.flags & ControlSaveSubtitlesEnabled || gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled)){
+    if (!(gSaveData.video.flags & (VideoSaveFlagsSubtitlesEnabled | VideoSaveFlagsCaptionsEnabled))) {
         return;
     }
     if (subtitleId == hud->subtitleId) {
@@ -194,7 +194,7 @@ void hudShowSubtitle(struct Hud* hud, enum StringId subtitleId, enum SubtitleTyp
         return;
     }
     else if (subtitleType == SubtitleTypeCaption) {
-        if (!(gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled)){
+        if (!(gSaveData.video.flags & VideoSaveFlagsCaptionsEnabled)){
             return;
         }
         if ((hud->flags & HudFlagsShowingSubtitle) && ((hud->subtitleType > subtitleType) || (hud->queuedSubtitleType > subtitleType))){
@@ -363,7 +363,7 @@ void hudRender(struct Hud* hud, struct Player* player, struct RenderState* rende
         controlsRenderPrompt(gPromptActions[hud->promptType], translationsGet(gPromptText[hud->promptType]), hud->promptOpacity, renderState);
     }
 
-    if (hud->subtitleOpacity > 0.0f && (gSaveData.controls.flags & ControlSaveSubtitlesEnabled || gSaveData.controls.flags & ControlSaveAllSubtitlesEnabled) && hud->subtitleId != StringIdNone) {
+    if (hud->subtitleOpacity > 0.0f && (gSaveData.video.flags & (VideoSaveFlagsSubtitlesEnabled | VideoSaveFlagsCaptionsEnabled)) && hud->subtitleId != StringIdNone) {
         controlsRenderSubtitle(translationsGet(hud->subtitleId), hud->subtitleOpacity, hud->backgroundOpacity, renderState, hud->subtitleType);
     }
 }

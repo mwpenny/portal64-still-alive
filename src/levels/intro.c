@@ -36,7 +36,7 @@ void introUpdate(struct Intro* intro) {
     intro->time += FIXED_DELTA_TIME;
 
     if (intro->time > INTRO_TIME || controllerGetButtonDown(0, BUTTON_START)) {
-        levelQueueLoad(MAIN_MENU, NULL, NULL);
+        levelQueueLoad(MAIN_MENU, NULL, NULL, 0);
     }
 }
 

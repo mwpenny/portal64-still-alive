@@ -1,20 +1,17 @@
 #ifndef __SAVEFILE_CHECKPOINT_H__
 #define __SAVEFILE_CHECKPOINT_H__
 
-#include "../scene/scene.h"
-
-typedef void* Checkpoint;
+#include "scene/scene.h"
 
 #define MAX_CHECKPOINT_SIZE 2048
 
-void checkpointClear();
-void checkpointUse(Checkpoint checkpoint);
-void checkpointSave(struct Scene* scene);
-void checkpointLoadLast(struct Scene* scene);
-
-int checkpointSaveInto(struct Scene* scene, Checkpoint into);
-void checkpointLoadLastFrom(struct Scene* scene, Checkpoint from);
+typedef void* Checkpoint;
 
 int checkpointExists();
+void checkpointClear();
+
+int checkpointSave(struct Scene* scene, int slotIndex);
+void checkpointQueueLoad(int slotIndex);
+void checkpointLoadCurrent(struct Scene* scene);
 
 #endif

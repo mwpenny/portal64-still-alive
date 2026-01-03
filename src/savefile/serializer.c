@@ -1,7 +1,6 @@
 #include "serializer.h"
 
-#include "../scene/signals.h"
-#include "../util/memory.h"
+#include "util/memory.h"
 
 void serializeCount(struct Serializer* serializer, void* src, int size) {
     serializer->curr = (char*)serializer->curr + size;

@@ -222,7 +222,7 @@ void debugSceneUpdate(struct Scene* scene) {
     debugSceneUpdateFreeCamera(scene);
 
     if (controllerGetButtonDown(2, BUTTON_L)) {
-        levelQueueLoad(NEXT_LEVEL, NULL, NULL);
+        levelQueueLoad(NEXT_LEVEL, NULL, NULL, 0 /* useCheckpoint */);
     }
 
     if (controllerGetButtonDown(2, BUTTON_R)) {

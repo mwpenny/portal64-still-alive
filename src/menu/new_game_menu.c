@@ -64,7 +64,7 @@ void chapterMenuSetChapter(struct ChapterMenu* chapterMenu, struct Chapter* chap
     sprintf(chapterText, "%s %d", translationsGet(GAMEUI_CHAPTER), chapterIndex + 1);
     chapterMenu->chapterText = menuBuildPrerenderedText(&gDejaVuSansFont, chapterText, chapterMenu->x, chapterMenu->y, SCREEN_WD);
 
-    textManipTestChamberMessage(chapterText, gChapters[chapterIndex].testChamberDisplayNumber);
+    textManipTestChamberMessage(chapterText, gChapters[chapterIndex].testChamberNumber);
 
     chapterMenu->testChamberText = menuBuildPrerenderedText(&gDejaVuSansFont, chapterText, chapterMenu->x, chapterMenu->y + 14, 100);
 
@@ -123,7 +123,8 @@ static void newGameStartSelectedChapter(struct NewGameMenu* newGameMenu) {
     levelQueueLoad(
         gChapters[newGameMenu->selectedChapter].testChamberLevelIndex,
         NULL,
-        NULL
+        NULL,
+        0 /* useCheckpoint */
     );
 }
 

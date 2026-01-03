@@ -146,7 +146,7 @@ void levelLoadWithCallbacks(int levelIndex) {
         gSceneCallbacks = &gTestChamberCallbacks;
     }
 
-    levelClearQueuedLevel();
+    levelClearQueued();
 }
 
 int updateSchedulerModeAndGetFPS(int interlacedMode) {
@@ -231,17 +231,15 @@ static void gameProc(void* arg) {
     savefileLoad();
     
     levelLoadWithCallbacks(INTRO_MENU);
-    gCurrentTestSubject = 0;
-    cutsceneRunnerReset();
     controllersInit();
     rumblePakClipInit();
     initAudio(fps);
     frameTimeSetFixedDelta(fps);
     soundPlayerInit();
-    translationsLoad(gSaveData.controls.textLanguage);
+    translationsLoad(gSaveData.video.textLanguage);
     gSceneCallbacks->initCallback(gSceneCallbacks->data);
     // this prevents the intro from crashing
-    gGameMenu.currentRenderedLanguage = gSaveData.controls.textLanguage;
+    gGameMenu.currentRenderedLanguage = gSaveData.video.textLanguage;
 
     while (1) {
         OSScMsg *msg = NULL;
@@ -265,10 +263,9 @@ static void gameProc(void* arg) {
                         portalSurfaceCleanupQueueInit();
                         heapInit(_heapStart, memoryEnd);
                         profileClearAddressMap();
-                        translationsLoad(gSaveData.controls.textLanguage);
+                        translationsLoad(gSaveData.video.textLanguage);
                         levelLoadWithCallbacks(levelGetQueued());
                         rumblePakClipInit();
-                        cutsceneRunnerReset();
                         dynamicAssetsReset();
                         menuResetDeferredQueue();
                         // if a portal fire button is being held

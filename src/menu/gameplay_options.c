@@ -68,20 +68,20 @@ void gameplayOptionsAction(void* data, int selection, struct MenuAction* action)
     switch (selection) {
         case GameplayOptionMovingPortals:
             if (action->state.checkbox.isChecked) {
-                gSaveData.controls.flags |= ControlSaveMoveablePortals;
+                gSaveData.gameplay.flags |= GameplaySaveFlagsMovablePortals;
             } else {
-                gSaveData.controls.flags &= ~ControlSaveMoveablePortals;
+                gSaveData.gameplay.flags &= ~GameplaySaveFlagsMovablePortals;
             }
             break;
         case GameplayOptionPortalFunneling:
             if (action->state.checkbox.isChecked) {
-                gSaveData.controls.flags |= ControlSavePortalFunneling;
+                gSaveData.gameplay.flags |= GameplaySaveFlagsPortalFunneling;
             } else {
-                gSaveData.controls.flags &= ~ControlSavePortalFunneling;
+                gSaveData.gameplay.flags &= ~GameplaySaveFlagsPortalFunneling;
             }
             break;
         case GameplayOptionPortalRenderDepth:
-            gSaveData.controls.portalRenderDepth = action->state.iSlider.value;
+            gSaveData.gameplay.portalRenderDepth = action->state.iSlider.value;
             break;
     }
 }
@@ -100,10 +100,10 @@ void gameplayOptionsInit(struct GameplayOptions* gameplayOptions) {
         gameplayOptions
     );
  
-    menuBuilderSetCheckbox(&gameplayOptions->menuBuilder.elements[MOVING_PORTAL_INDEX], (gSaveData.controls.flags & ControlSaveMoveablePortals) != 0);
-    menuBuilderSetCheckbox(&gameplayOptions->menuBuilder.elements[PORTAL_FUNNELING_INDEX], (gSaveData.controls.flags & ControlSavePortalFunneling) != 0);
+    menuBuilderSetCheckbox(&gameplayOptions->menuBuilder.elements[MOVING_PORTAL_INDEX], (gSaveData.gameplay.flags & GameplaySaveFlagsMovablePortals) != 0);
+    menuBuilderSetCheckbox(&gameplayOptions->menuBuilder.elements[PORTAL_FUNNELING_INDEX], (gSaveData.gameplay.flags & GameplaySaveFlagsPortalFunneling) != 0);
 
-    menuBuilderSetISlider(&gameplayOptions->menuBuilder.elements[PORTAL_DEPTH], gSaveData.controls.portalRenderDepth);
+    menuBuilderSetISlider(&gameplayOptions->menuBuilder.elements[PORTAL_DEPTH], gSaveData.gameplay.portalRenderDepth);
 }
 
 void gameplayOptionsRebuildText(struct GameplayOptions* gameplayOptions) {

@@ -10,8 +10,6 @@
 #define MAX_SOURCES_PER_ACTION  4
 #define MAX_CONTROLS_SECTIONS   4
 
-#include "./menu.h"
-
 #define SOURCE_ICON_COUNT MAX_SOURCES_PER_ACTION * GFX_ENTRIES_PER_IMAGE + GFX_ENTRIES_PER_END_DL
 
 struct ControlsMenuRow {

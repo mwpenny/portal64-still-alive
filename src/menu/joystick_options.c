@@ -133,9 +133,9 @@ void joystickOptionsAction(void* data, int selection, struct MenuAction* action)
             break;
         case JoystickOptionTankControls:
             if (action->state.checkbox.isChecked) {
-                gSaveData.controls.flags |= ControlSaveTankControls;
+                gSaveData.controls.flags |= ControlSaveFlagsTankControls;
             } else {
-                gSaveData.controls.flags &= ~ControlSaveTankControls;
+                gSaveData.controls.flags &= ~ControlSaveFlagsTankControls;
             }
             break;
         case JoystickOptionSensitivity:
@@ -162,7 +162,7 @@ void joystickOptionsInit(struct JoystickOptions* joystickOptions) {
     );
 
     menuBuilderSetCheckbox(&joystickOptions->menuBuilder.elements[INVERT_JOYSTICK_INDEX], (gSaveData.controls.flags & ControlSaveFlagsInvert) != 0);
-    menuBuilderSetCheckbox(&joystickOptions->menuBuilder.elements[TANK_CONTROLS_INDEX], (gSaveData.controls.flags & ControlSaveTankControls) != 0);
+    menuBuilderSetCheckbox(&joystickOptions->menuBuilder.elements[TANK_CONTROLS_INDEX], (gSaveData.controls.flags & ControlSaveFlagsTankControls) != 0);
 
     menuBuilderSetFSlider(&joystickOptions->menuBuilder.elements[SENSITIVITY_INDEX], (float)gSaveData.controls.sensitivity / 0xFFFF);
     menuBuilderSetFSlider(&joystickOptions->menuBuilder.elements[ACCELERATION_INDEX], (float)gSaveData.controls.acceleration / 0xFFFF);

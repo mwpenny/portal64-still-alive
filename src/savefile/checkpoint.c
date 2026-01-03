@@ -7,76 +7,126 @@
 #include "serializer.h"
 #include "util/memory.h"
 
-char gHasCheckpoint = 0;
-char __attribute__((aligned(8))) gCheckpoint[MAX_CHECKPOINT_SIZE];
+static int sCheckpointCurrentSlot = SAVEFILE_NO_SLOT;
 
-void checkpointSerialize(struct Serializer* serializer, SerializeAction action, void* data) {
-    struct Scene* scene = data;
-
+static void checkpointSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     signalsSerializeRW(serializer, action);
     cutsceneSerializeWrite(serializer, action);
     sceneSerialize(serializer, action, scene);
 }
 
-void checkpointDeserialize(struct Serializer* serializer, void* data) {
-    struct Scene* scene = data;
-
+static void checkpointDeserialize(struct Serializer* serializer, struct Scene* scene) {
     signalsSerializeRW(serializer, serializeRead);
     cutsceneSerializeRead(serializer);
     sceneDeserialize(serializer, scene);
 }
 
-int checkpointEstimateSize(struct Scene* scene) {
-    struct Serializer serializer = {NULL};
+static int checkpointCalculateSize(struct Scene* scene) {
+    struct Serializer serializer = { NULL };
     checkpointSerialize(&serializer, serializeCount, scene);
     return (int)serializer.curr;
 }
 
-void checkpointClear() {
-    gHasCheckpoint = 0;
-}
-
-void checkpointUse(Checkpoint checkpoint) {
-    memCopy(gCheckpoint, checkpoint, MAX_CHECKPOINT_SIZE);
-    gHasCheckpoint = 1;
-}
-
-int checkpointExists() {
-    if (gHasCheckpoint != 0){
-        return 1;
-    }
-    return 0;
-}
-
-void checkpointSave(struct Scene* scene) {
-    savefileGrabScreenshot();
-    gHasCheckpoint = checkpointSaveInto(scene, gCheckpoint);
-    // slot 0 is the autosave slot
-    savefileSaveGame(gCheckpoint, gScreenGrabBuffer, getChamberDisplayNumberFromLevelIndex(gCurrentLevelIndex, gScene.player.body.currentRoom), gCurrentTestSubject, 0);
-}
-
-void checkpointLoadLast(struct Scene* scene) {
-    if (!gHasCheckpoint) {
-        return;
-    }
-
-    checkpointLoadLastFrom(scene, gCheckpoint);
-}
-
-int checkpointSaveInto(struct Scene* scene, Checkpoint into) {
-    int size = checkpointEstimateSize(scene);
+static int checkpointSaveInto(struct Scene* scene, Checkpoint into) {
+    int size = checkpointCalculateSize(scene);
 
     if (size > MAX_CHECKPOINT_SIZE) {
         return 0;
     }
 
-    struct Serializer serializer = {into};
+    struct Serializer serializer = { into };
     checkpointSerialize(&serializer, serializeWrite, scene);
 
     return 1;
 }
 
-void checkpointLoadLastFrom(struct Scene* scene, Checkpoint from) {
-    struct Serializer serializer = {from};
+static void checkpointLoadFrom(struct Scene* scene, Checkpoint from) {
+    struct Serializer serializer = { from };
     checkpointDeserialize(&serializer, scene);
+}
+
+static int checkpointSlotIsValid(int slotIndex) {
+    if (slotIndex == SAVEFILE_NO_SLOT || savefileSlotIsFree(slotIndex)) {
+        return 0;
+    }
+
+    struct SaveSlotInfo info;
+    savefileGetSlotInfo(slotIndex, &info);
+
+    return getLevelIndexFromChamberIndex(info.testChamberNumber) == gCurrentLevelIndex &&
+        info.testSubjectNumber == gCurrentTestSubject;
+}
+
+static void checkpointUpdateCurrentSlot() {
+    // The player can delete saves, so look for the most relevant existing save
+    // Note that deleting saves only reorderes in menus, not in memory
+
+    if (sCheckpointCurrentSlot == SAVEFILE_NO_SLOT) {
+        // Not trying to load a checkpoint
+        return;
+    }
+
+    // Last slot used for save/load
+    if (checkpointSlotIsValid(sCheckpointCurrentSlot)) {
+        return;
+    }
+
+    // Most recent save from this run
+    sCheckpointCurrentSlot = savefileLatestSubjectSlot(gCurrentTestSubject, 1 /* includeAuto */);
+    if (checkpointSlotIsValid(sCheckpointCurrentSlot)) {
+        return;
+    }
+
+    sCheckpointCurrentSlot = SAVEFILE_NO_SLOT;
+}
+
+void checkpointClear() {
+    sCheckpointCurrentSlot = SAVEFILE_NO_SLOT;
+}
+
+int checkpointExists() {
+    checkpointUpdateCurrentSlot();
+
+    return sCheckpointCurrentSlot != SAVEFILE_NO_SLOT;
+}
+
+int checkpointSave(struct Scene* scene, int slotIndex) {
+    Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
+    int success = checkpointSaveInto(scene, save);
+
+    if (success) {
+        savefileSaveSlot(
+            slotIndex,
+            getChamberIndexFromLevelIndex(gCurrentLevelIndex, scene->player.body.currentRoom),
+            gCurrentTestSubject,
+            save
+        );
+
+        sCheckpointCurrentSlot = slotIndex;
+    }
+
+    stackMallocFree(save);
+
+    return success;
+}
+
+void checkpointQueueLoad(int slotIndex) {
+    struct SaveSlotInfo info;
+    savefileGetSlotInfo(slotIndex, &info);
+
+    sCheckpointCurrentSlot = slotIndex;
+    gCurrentTestSubject = info.testSubjectNumber;
+    levelQueueLoad(getLevelIndexFromChamberIndex(info.testChamberNumber), NULL, NULL, 1 /* useCheckpoint */);
+}
+
+void checkpointLoadCurrent(struct Scene* scene) {
+    if (sCheckpointCurrentSlot == SAVEFILE_NO_SLOT) {
+        return;
+    }
+
+    Checkpoint* save = stackMalloc(MAX_CHECKPOINT_SIZE);
+    if (savefileLoadSlot(sCheckpointCurrentSlot, save)) {
+        checkpointLoadFrom(scene, save);
+    }
+    stackMallocFree(save);
 }

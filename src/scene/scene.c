@@ -25,7 +25,6 @@
 #include "physics/collision_scene.h"
 #include "physics/debug_renderer.h"
 #include "physics/point_constraint.h"
-#include "savefile/checkpoint.h"
 #include "player/player_rumble_clips.h"
 #include "render_plan.h"
 #include "scene/portal_surface.h"
@@ -109,7 +108,7 @@ void sceneInit(struct Scene* scene) {
         scene->checkpointState = SceneCheckpointStatePendingRender;
     } else {
         scene->checkpointState = SceneCheckpointStateSaved;
-        checkpointLoadLast(scene);
+        checkpointLoadCurrent(scene);
 
         // Signal materials are only updated on state change, and the loaded
         // checkpoint could have active signals. Ensure materials accurately
@@ -148,10 +147,6 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     hudInit(&scene->hud);
 
-    if (gCurrentLevelIndex == 0) {
-        hudShowColoredOverlay(&scene->hud, &gColorBlack, INTRO_TOTAL_TIME, INTRO_FADE_TIME);
-    }
-
     struct Vector3* startPosition = &levelRelativeTransform()->position;
 
     portalGunInit(&scene->portalGun, &scene->player.lookTransform, startPosition->x == 0.0f && startPosition->y == 1.0f && startPosition->z == 0.0f);
@@ -184,6 +179,10 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
         scene->turretCount = 0;
         scene->turrets = NULL;
     } else {
+        if (gCurrentLevelIndex == 0) {
+            hudShowColoredOverlay(&scene->hud, &gColorBlack, INTRO_TOTAL_TIME, INTRO_FADE_TIME);
+        }
+
         scene->decorCount = gCurrentLevel->decorCount;
         scene->decor = malloc(sizeof(struct DecorObject*) * scene->decorCount);
 
@@ -529,7 +528,7 @@ void sceneUpdatePortalVelocity(struct Scene* scene) {
         struct Vector3 offset;
         vector3Sub(&newPos, &gCollisionScene.portalTransforms[i]->position, &offset);
 
-        if (!vector3IsZero(&offset) && !(gSaveData.controls.flags & ControlSaveMoveablePortals)) {
+        if (!vector3IsZero(&offset) && !(gSaveData.gameplay.flags & GameplaySaveFlagsMovablePortals)) {
             sceneClosePortal(scene, i);
             continue;
         }
@@ -671,7 +670,8 @@ void sceneUpdateCameraZoom(struct Scene* scene) {
 
 void sceneUpdate(struct Scene* scene) {
     if (scene->checkpointState == SceneCheckpointStateReady) {
-        checkpointSave(scene);
+        savefileUpdateSlotImage();
+        checkpointSave(scene, AUTOSAVE_SLOT);
         scene->checkpointState = SceneCheckpointStateSaved;
     }
 
@@ -680,7 +680,6 @@ void sceneUpdate(struct Scene* scene) {
     if (gGameMenu.state != GameMenuStateResumeGame) {
         if (gGameMenu.state == GameMenuStateLanding && (controllerGetButtonDown(0, BUTTON_B) || controllerActionGet(ControllerActionPause))) {
             gGameMenu.state = GameMenuStateResumeGame;
-            savefileSave();
         }
 
         gameMenuUpdate(&gGameMenu);
@@ -692,13 +691,13 @@ void sceneUpdate(struct Scene* scene) {
         }
 
         if (gGameMenu.state == GameMenuStateQuit) {
-            levelQueueLoad(MAIN_MENU, NULL, NULL);
+            levelQueueLoad(MAIN_MENU, NULL, NULL, 0);
             return;
         }
 
         return;
     } else if (controllerActionGet(ControllerActionPause)) {
-        savefileGrabScreenshot();
+        savefileUpdateSlotImage();
         gGameMenu.state = GameMenuStateLanding;
         gGameMenu.landingMenu.selectedItem = 0;
         soundPlayerPause();
@@ -740,9 +739,8 @@ void sceneUpdate(struct Scene* scene) {
         controllerActionGet(ControllerActionUseItem) ||
         controllerActionGet(ControllerActionOpenPortal0) ||
         controllerActionGet(ControllerActionOpenPortal1)
-    )) ||
-        scene->player.lookTransform.position.y < KILL_PLANE_Y) {
-        levelLoadLastCheckpoint();
+    )) || scene->player.lookTransform.position.y < KILL_PLANE_Y) {
+        levelQueueReload();
     }
 
     for (int i = 0; i < scene->buttonCount; ++i) {
@@ -803,7 +801,7 @@ void sceneUpdate(struct Scene* scene) {
 
                 transformConcat(&exitInverse, &scene->player.lookTransform, &relativeExit);
                 quatMultVector(&exitInverse.rotation, &scene->player.body.velocity, &relativeVelocity);
-                levelQueueLoad(NEXT_LEVEL, &relativeExit, &relativeVelocity);
+                levelQueueLoad(NEXT_LEVEL, &relativeExit, &relativeVelocity, 0 /* useCheckpoint */);
             } else {
                 rigidBodyTeleport(
                     &scene->player.body,
