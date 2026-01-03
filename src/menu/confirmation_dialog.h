@@ -1,8 +1,8 @@
 #ifndef __MENU_CONFIRMATION_DIALOG_H__
 #define __MENU_CONFIRMATION_DIALOG_H__
 
-#include "./menu.h"
-#include "../graphics/graphics.h"
+#include "graphics/graphics.h"
+#include "menu.h"
 
 typedef void (*ConfirmationDialogCallback)(void* data, int isConfirmed);
 

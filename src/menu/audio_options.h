@@ -1,8 +1,8 @@
 #ifndef __MENU_AUDIO_OPTIONS_H__
 #define __MENU_AUDIO_OPTIONS_H__
 
-#include "./menu.h"
-#include "../graphics/graphics.h"
+#include "graphics/graphics.h"
+#include "menu.h"
 #include "menu_builder.h"
 
 enum AudioOption {

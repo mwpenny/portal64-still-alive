@@ -1,9 +1,9 @@
 #ifndef __MENU_LANDING_MENU_H__
 #define __MENU_LANDING_MENU_H__
 
-#include "../graphics/graphics.h"
-#include "../font/font.h"
-#include "./menu.h"
+#include "font/font.h"
+#include "graphics/graphics.h"
+#include "menu.h"
 
 struct LandingMenuOption {
     short messageId;

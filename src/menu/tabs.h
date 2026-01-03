@@ -2,7 +2,8 @@
 #define __MENU_TABS_H__
 
 #include <ultra64.h>
-#include "../font/font.h"
+
+#include "font/font.h"
 
 struct Tab {
     short messageId;

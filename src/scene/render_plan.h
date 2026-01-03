@@ -1,9 +1,9 @@
 #ifndef __SCENE_RENDER_PLAN_H__
 #define __SCENE_RENDER_PLAN_H__
 
-#include "./scene.h"
-#include "../graphics/screen_clipper.h"
-#include "../graphics/graphics.h"
+#include "graphics/screen_clipper.h"
+#include "graphics/graphics.h"
+#include "scene.h"
 
 #define DEFAULT_FAR_PLANE       50.0f
 #define DEFAULT_NEAR_PLANE      0.125f

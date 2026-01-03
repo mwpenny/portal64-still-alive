@@ -1,8 +1,8 @@
 #include "portal_render.h"
 
-#include "defs.h"
 #include "graphics/graphics.h"
 #include "render_plan.h"
+#include "system/screen.h"
 
 #include "codegen/assets/models/portal/portal_blue_filled.h"
 #include "codegen/assets/models/portal/portal_orange_filled.h"

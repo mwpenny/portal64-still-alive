@@ -1,12 +1,12 @@
-
 #include "screen_clipper.h"
-#include "../scene/camera.h"
-#include "../math/vector4.h"
-#include "../math/matrix.h"
-#include "../math/mathf.h"
-#include "./graphics.h"
 
 #include <ultra64.h>
+
+#include "math/mathf.h"
+#include "math/matrix.h"
+#include "math/vector4.h"
+#include "scene/camera.h"
+#include "system/screen.h"
 
 void screenClipperInit(struct ScreenClipper* clipper, float transform[4][4]) {
     for (unsigned i = 0; i < 4; ++i) {

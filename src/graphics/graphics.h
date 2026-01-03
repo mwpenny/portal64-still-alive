@@ -1,18 +1,11 @@
 #ifndef __GRAPHICS_H__
 #define __GRAPHICS_H__
 
-#include <ultra64.h>
 #include <sched.h>
-#include "renderstate.h"
-#include "defs.h"
+#include <ultra64.h>
 
-#if HIGH_RES
-#define SCREEN_WD   640
-#define SCREEN_HT   480
-#else
-#define SCREEN_WD   320
-#define SCREEN_HT   240
-#endif
+#include "defs.h"
+#include "renderstate.h"
 
 struct GraphicsTask {
     struct RenderState renderState;

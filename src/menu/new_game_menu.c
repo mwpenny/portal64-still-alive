@@ -10,6 +10,7 @@
 #include "savefile/savefile.h"
 #include "system/cartridge.h"
 #include "system/controller.h"
+#include "system/screen.h"
 #include "text_manipulation.h"
 #include "util/memory.h"
 

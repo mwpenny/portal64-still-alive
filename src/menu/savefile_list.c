@@ -6,6 +6,7 @@
 #include "graphics/image.h"
 #include "strings/translations.h"
 #include "system/controller.h"
+#include "system/screen.h"
 #include "text_manipulation.h"
 #include "util/memory.h"
 #include "util/string.h"

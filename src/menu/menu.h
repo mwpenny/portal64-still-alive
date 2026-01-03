@@ -2,9 +2,10 @@
 #define __MENU_MENU_H__
 
 #include <ultra64.h>
-#include "../font/font.h"
-#include "../graphics/color.h"
-#include "../graphics/graphics.h"
+
+#include "font/font.h"
+#include "graphics/color.h"
+#include "graphics/graphics.h"
 
 #define CHECKBOX_SIZE   12
 

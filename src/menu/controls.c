@@ -4,6 +4,7 @@
 #include "font/dejavu_sans.h"
 #include "font/font.h"
 #include "strings/translations.h"
+#include "system/screen.h"
 #include "system/controller.h"
 #include "util/memory.h"
 

@@ -1,12 +1,12 @@
 #ifndef __MENU_SAVEFILE_LIST_H__
 #define __MENU_SAVEFILE_LIST_H__
 
-#include "./menu.h"
-#include "../font/font.h"
-#include "../graphics/graphics.h"
-#include "../savefile/savefile.h"
-#include "./new_game_menu.h"
-#include "./confirmation_dialog.h"
+#include "confirmation_dialog.h"
+#include "font/font.h"
+#include "graphics/graphics.h"
+#include "menu.h"
+#include "new_game_menu.h"
+#include "savefile/savefile.h"
 
 struct SavefileInfo {
     short slotIndex;

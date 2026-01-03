@@ -1,9 +1,9 @@
 
 #include "camera.h"
+#include "graphics/graphics.h"
+#include "math/mathf.h"
 #include "math/transform.h"
-#include "defs.h"
-#include "../graphics/graphics.h"
-#include "../math/mathf.h"
+#include "system/screen.h"
 
 void frustumFromQuad(struct Vector3* cameraPos, struct CollisionQuad* quad, struct FrustumCullingInformation* out) {
     float isInFront = planePointDistance(&quad->plane, cameraPos) > 0;

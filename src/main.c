@@ -23,6 +23,7 @@
 #include "strings/translations.h"
 #include "system/cartridge.h"
 #include "system/controller.h"
+#include "system/screen.h"
 #include "util/dynamic_asset_loader.h"
 #include "util/frame_time.h"
 #include "util/memory.h"

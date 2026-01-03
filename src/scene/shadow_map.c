@@ -1,10 +1,11 @@
 #include "shadow_map.h"
-#include "util/memory.h"
+
+#include "graphics/graphics.h"
 #include "math/mathf.h"
 #include "math/matrix.h"
-#include "graphics/graphics.h"
 #include "math/plane.h"
-#include "defs.h"
+#include "system/screen.h"
+#include "util/memory.h"
 
 #define SHADOW_MAP_WIDTH    64
 #define SHADOW_MAP_HEIGHT   64

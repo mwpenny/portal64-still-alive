@@ -2,6 +2,7 @@
 
 #include "menu.h"
 #include "strings/translations.h"
+#include "system/screen.h"
 #include "util/memory.h"
 
 #define LEFT_TEXT_PADDING  4

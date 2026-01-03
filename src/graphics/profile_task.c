@@ -1,7 +1,5 @@
 #include "profile_task.h"
 
-#include "../defs.h"
-
 #ifdef PORTAL64_WITH_DEBUGGER
 #include "debugger/debug.h"
 #include "system/time.h"
@@ -9,6 +7,7 @@
 
 #include "graphics/graphics.h"
 #include "util/memory.h"
+#include "system/screen.h"
 
 extern u16 __attribute__((aligned(64))) zbuffer[SCREEN_HT * SCREEN_WD];
 

@@ -1,14 +1,14 @@
 #ifndef __MENU_OPTIONS_MENU_H__
 #define __MENU_OPTIONS_MENU_H__
 
-#include "../graphics/graphics.h"
-#include "./menu.h"
-#include "./tabs.h"
-#include "./controls.h"
-#include "./audio_options.h"
-#include "./joystick_options.h"
-#include "./gameplay_options.h"
-#include "./video_options.h"
+#include "audio_options.h"
+#include "controls.h"
+#include "gameplay_options.h"
+#include "graphics/graphics.h"
+#include "joystick_options.h"
+#include "menu.h"
+#include "tabs.h"
+#include "video_options.h"
 
 enum OptionsMenuTabs {
     OptionsMenuTabsControlMapping,

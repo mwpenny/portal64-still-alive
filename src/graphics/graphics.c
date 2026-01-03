@@ -1,5 +1,6 @@
 #include "graphics.h"
 #include "initgfx.h"
+#include "system/screen.h"
 #include "util/memory.h"
 
 struct GraphicsTask gGraphicsTasks[2];

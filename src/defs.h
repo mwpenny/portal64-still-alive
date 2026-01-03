@@ -8,8 +8,6 @@
 
 #define MAX_FRAME_BUFFER_MESGS	8
 
-#define HIGH_RES    0
-
 #define INIT_PRIORITY		10
 #define GAME_PRIORITY		10
 #define CONTROLLER_PRIORITY 11

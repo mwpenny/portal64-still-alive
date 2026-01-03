@@ -5,6 +5,7 @@
 #include "levels.h"
 #include "system/cartridge.h"
 #include "system/controller.h"
+#include "system/screen.h"
 #include "util/frame_time.h"
 #include "util/memory.h"
 

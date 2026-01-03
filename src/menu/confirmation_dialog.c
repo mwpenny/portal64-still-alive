@@ -3,6 +3,7 @@
 #include "audio/soundplayer.h"
 #include "font/dejavu_sans.h"
 #include "system/controller.h"
+#include "system/screen.h"
 
 #include "codegen/assets/audio/clips.h"
 #include "codegen/assets/materials/ui.h"

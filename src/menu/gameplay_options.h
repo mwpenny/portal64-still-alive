@@ -1,9 +1,9 @@
 #ifndef __MENU_GAMEPLAY_OPTIONS_H__
 #define __MENU_GAMEPLAY_OPTIONS_H__
 
-#include "./menu.h"
-#include "../graphics/graphics.h"
-#include "./menu_builder.h"
+#include "graphics/graphics.h"
+#include "menu.h"
+#include "menu_builder.h"
 
 enum GameplayOption {
     GameplayOptionMovingPortals,

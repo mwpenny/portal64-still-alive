@@ -3,14 +3,14 @@
 
 #include <ultra64.h>
 
+#include "graphics/renderstate.h"
+#include "math/boxs16.h"
 #include "math/quaternion.h"
+#include "math/rotated_box.h"
 #include "math/vector3.h"
 #include "math/transform.h"
 #include "math/plane.h"
-#include "graphics/renderstate.h"
-#include "../physics/collision_quad.h"
-#include "../math/boxs16.h"
-#include "../math/rotated_box.h"
+#include "physics/collision_quad.h"
 
 #define CLIPPING_PLANE_LEFT         0
 #define CLIPPING_PLANE_BOTTOM       1

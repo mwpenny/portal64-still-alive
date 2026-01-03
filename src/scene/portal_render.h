@@ -1,9 +1,9 @@
 #ifndef __SCENE_PORTAL_RENDER_H__
 #define __SCENE_PORTAL_RENDER_H__
 
-#include "../math/vector2s16.h"
+#include "graphics/renderstate.h"
+#include "math/vector2s16.h"
 #include "portal.h"
-#include "../graphics/renderstate.h"
 
 struct RenderProps;
 

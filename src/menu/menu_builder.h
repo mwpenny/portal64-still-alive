@@ -1,9 +1,9 @@
 #ifndef __MENU_MENU_BUILDER_H__
 #define __MENU_MENU_BUILDER_H__
 
-#include "../font/font.h"
-#include "./menu.h"
-#include "../graphics/renderstate.h"
+#include "font/font.h"
+#include "graphics/renderstate.h"
+#include "menu.h"
 
 struct MenuBuilderElement;
 struct MenuElementParams;

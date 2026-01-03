@@ -2,11 +2,12 @@
 #define __SHADOW_MAP_H__
 
 #include <ultra64.h>
+
 #include "graphics/graphics.h"
 #include "math/transform.h"
 #include "math/plane.h"
-#include "shadow_map.h"
 #include "point_light.h"
+#include "shadow_map.h"
 
 struct ShadowMap {
     Gfx* subject;

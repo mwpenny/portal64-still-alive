@@ -1,9 +1,9 @@
-
 #include "savefile.h"
-#include "util/memory.h"
-#include "system/controller.h"
 
-#include "../controls/controller_actions.h"
+#include "controls/controller_actions.h"
+#include "system/controller.h"
+#include "system/screen.h"
+#include "util/memory.h"
 
 struct SaveData __attribute__((aligned(8))) gSaveData;
 int gCurrentTestSubject = -1;
@@ -238,7 +238,7 @@ u16 gScreenGrabBuffer[SAVE_SLOT_IMAGE_W * SAVE_SLOT_IMAGE_H];
 #define SCALE_TO_SOURCE(value)  ((IMAGE_SCALE_FACTOR * (value)) >> 16)
 
 void savefileGrabScreenshot() {
-    u16* cfb = osViGetCurrentFramebuffer();
+    u16* cfb = screenGetCurrentFramebuffer();
     u16* dst = gScreenGrabBuffer;
 
     for (int y = 0; y < SAVE_SLOT_IMAGE_H; ++y) {

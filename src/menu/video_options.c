@@ -4,6 +4,7 @@
 #include "main.h"
 #include "savefile/savefile.h"
 #include "strings/translations.h"
+#include "system/screen.h"
 
 #include "codegen/assets/strings/strings.h"
 

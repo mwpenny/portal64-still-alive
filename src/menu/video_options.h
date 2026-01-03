@@ -1,9 +1,9 @@
 #ifndef __OPTIONS_VIDEO_OPTIONS_H__
 #define __OPTIONS_VIDEO_OPTIONS_H__
 
-#include "./menu.h"
-#include "./menu_builder.h"
-#include "../graphics/graphics.h"
+#include "graphics/graphics.h"
+#include "menu.h"
+#include "menu_builder.h"
 
 enum VideoOption {
     VideoOptionWidescreen,

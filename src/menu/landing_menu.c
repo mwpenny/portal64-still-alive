@@ -6,6 +6,7 @@
 #include "font/dejavu_sans.h"
 #include "strings/translations.h"
 #include "system/controller.h"
+#include "system/screen.h"
 #include "util/memory.h"
 
 #include "codegen/assets/audio/clips.h"
