@@ -206,9 +206,8 @@ int collisionSceneIsTouchingSinglePortal(struct Vector3* contactPoint, struct Ve
         return 0;
     }
 
-    struct Vector3 portalNormal = gZeroVec;
-    portalNormal.z = portalIndex ? 1.0f : -1.0f;
-    quatMultVector(&portalTransform->rotation, &portalNormal, &portalNormal);
+    struct Vector3 portalNormal;
+    collisionSceneGetPortalNormal(portalIndex, &portalNormal);
 
     return vector3Dot(contactNormal, &portalNormal) > 0.0f;
 }
@@ -279,15 +278,14 @@ struct Transform* collisionSceneTransformToPortal(int fromPortal) {
 }
 
 void collisionScenePushObjectsOutOfPortal(int portalIndex) {
-    if (!gCollisionScene.portalTransforms[portalIndex]) {
+    if (!collisionSceneIsPortalOpen()) {
         return;
     }
 
     struct Transform* portalTransform = gCollisionScene.portalTransforms[portalIndex];
 
-    struct Vector3 reversePortalNormal = gZeroVec;
-    reversePortalNormal.z = portalIndex ? -1.0f : 1.0f;
-    quatMultVector(&portalTransform->rotation, &reversePortalNormal, &reversePortalNormal);
+    struct Vector3 reversePortalNormal;
+    collisionSceneGetPortalNormal(1 - portalIndex, &reversePortalNormal);
     
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
         struct CollisionObject* object = gCollisionScene.dynamicObjects[i];
@@ -591,6 +589,12 @@ void collisionSceneGetPortalTransform(int fromPortal, struct Transform* out) {
     struct Transform inverseA;
     transformInvert(gCollisionScene.portalTransforms[fromPortal], &inverseA);
     transformConcat(gCollisionScene.portalTransforms[1 - fromPortal], &inverseA, out);
+}
+
+void collisionSceneGetPortalNormal(int portalIndex, struct Vector3* out) {
+    *out = gZeroVec;
+    out->z = portalIndex ? 1.0f : -1.0f;
+    quatMultVector(&gCollisionScene.portalTransforms[portalIndex]->rotation, out, out);
 }
 
 void collisionSceneAddDynamicObject(struct CollisionObject* object) {

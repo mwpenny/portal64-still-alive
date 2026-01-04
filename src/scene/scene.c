@@ -467,21 +467,42 @@ void sceneCheckPortals(struct Scene* scene) {
 #define MAX_LISTEN_THROUGH_PORTAL_DISTANCE 3.0f
 
 int sceneUpdatePortalListener(struct Scene* scene, int portalIndex, int listenerIndex) {
-    if (vector3DistSqrd(&scene->player.lookTransform.position, &scene->portals[portalIndex].rigidBody.transform.position) > MAX_LISTEN_THROUGH_PORTAL_DISTANCE * MAX_LISTEN_THROUGH_PORTAL_DISTANCE) {
+    struct Transform* playerTransform = &scene->player.lookTransform;
+    struct Transform* portalTransform = &scene->portals[portalIndex].rigidBody.transform;
+
+    if (vector3DistSqrd(&playerTransform->position, &portalTransform->position) > (MAX_LISTEN_THROUGH_PORTAL_DISTANCE * MAX_LISTEN_THROUGH_PORTAL_DISTANCE)) {
         return 0;
     }
 
-    struct Transform portalTransform;
-    collisionSceneGetPortalTransform(portalIndex, &portalTransform);
+    struct Transform portalTeleportTransform;
+    collisionSceneGetPortalTransform(portalIndex, &portalTeleportTransform);
 
-    struct Transform listenTransform;
-    transformConcat(&portalTransform, &scene->player.lookTransform, &listenTransform);
-
+    // Get effective ear transform and velocity through portal
+    struct Vector3 listenPosition;
+    struct Quaternion listenRotation;
     struct Vector3 listenVelocity;
-    quatMultVector(&portalTransform.rotation, &scene->player.body.velocity, &listenVelocity);
+    quatMultiply(&portalTeleportTransform.rotation, &playerTransform->rotation, &listenRotation);
+    quatMultVector(&portalTeleportTransform.rotation, &scene->player.body.velocity, &listenVelocity);
 
-    soundListenerUpdate(&listenTransform.position, &listenTransform.rotation, &listenVelocity, listenerIndex);
+    // Effective position depends on side of portal
+    struct Vector3 portalNormal;
+    struct Vector3 portalToPlayer;
+    collisionSceneGetPortalNormal(portalIndex, &portalNormal);
+    vector3Sub(&playerTransform->position, &portalTransform->position, &portalToPlayer);
 
+    float portalNormalDist = vector3Dot(&portalToPlayer, &portalNormal);
+    if (portalNormalDist < 0.0f) {
+        // Mirror position across normal so standing behind portals doesn't
+        // put the player closer to sounds. Noticeable at chamber 00 start.
+        vector3AddScaled(&playerTransform->position, &portalNormal, -2.0f * portalNormalDist, &listenPosition);
+        quatMultVector(&portalTeleportTransform.rotation, &listenPosition, &listenPosition);
+    } else {
+        quatMultVector(&portalTeleportTransform.rotation, &playerTransform->position, &listenPosition);
+    }
+
+    vector3Add(&portalTeleportTransform.position, &listenPosition, &listenPosition);
+
+    soundListenerUpdate(&listenPosition, &listenRotation, &listenVelocity, listenerIndex);
     return 1;
 }
 

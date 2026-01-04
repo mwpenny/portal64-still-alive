@@ -206,13 +206,13 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
         }
 
         if (speedSqrd < MIN_PORTAL_SPEED * MIN_PORTAL_SPEED) {
-            struct Vector3 portalNormal = gZeroVec;
-            portalNormal.z = i ? -1.0f : 1.0f;
-            quatMultVector(&otherPortal->rotation, &portalNormal, &portalNormal);
+            struct Vector3 otherPortalNormal;
+            collisionSceneGetPortalNormal(1 - i, &otherPortalNormal);
+            quatMultVector(&otherPortal->rotation, &otherPortalNormal, &otherPortalNormal);
 
-            if (portalNormal.y > 0.9f) {
+            if (otherPortalNormal.y > 0.9f) {
                 if (speedSqrd < 0.000001f) {
-                    vector3Scale(&portalNormal, &rigidBody->velocity, MIN_PORTAL_SPEED);
+                    vector3Scale(&otherPortalNormal, &rigidBody->velocity, MIN_PORTAL_SPEED);
                 } else {
                     vector3Normalize(&rigidBody->velocity, &rigidBody->velocity);
                     vector3Scale(&rigidBody->velocity, &rigidBody->velocity, MIN_PORTAL_SPEED);
