@@ -326,6 +326,11 @@ void playerSignalPortalChanged(struct Player* player) {
     }
 }
 
+int playerHasPortalCollision(struct Player* player) {
+    // Player collider becomes sphere for a short time after teleporting
+    return gPlayerCollider.extendDownward != TARGET_CAPSULE_EXTEND_HEIGHT;
+}
+
 int playerIsGrabbing(struct Player* player) {
     return player->grabConstraint.object != NULL;
 }

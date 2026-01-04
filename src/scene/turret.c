@@ -778,9 +778,12 @@ static uint8_t turretFindPlayerLineOfSight(struct Turret* turret, struct Player*
         return 0;
     }
 
-    // Aim at center of player (origin is head)
     struct Vector3 target = player->body.transform.position;
-    vector3AddScaled(&target, &player->body.rotationBasis.y, PLAYER_CENTER_HEIGHT - PLAYER_HEAD_HEIGHT, &target);
+    if (!playerHasPortalCollision(player)) {
+        // Aim at center of player (origin is head)
+        // Only for normal collision, to keep line of sight when passing through portals
+        vector3AddScaled(&target, &player->body.rotationBasis.y, PLAYER_CENTER_HEIGHT - PLAYER_HEAD_HEIGHT, &target);
+    }
 
     if (turretRaycastTarget(turret, &player->collisionObject, &target, 0)) {
         if (targetPosition) {
