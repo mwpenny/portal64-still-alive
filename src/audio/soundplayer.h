@@ -39,7 +39,7 @@ void soundPlayerFadeOutsideRadius(float volumePercent, struct Vector3* origin, f
 int soundPlayerIsPlaying(ALSndId soundId);
 int soundPlayerIsLoopedById(int soundId);
 
-void soundListenerUpdate(struct Vector3* position, struct Quaternion* rotation, struct Vector3* velocity, int listenerIndex);
+void soundListenerUpdate(struct Vector3* position, struct Vector3* right, struct Vector3* velocity, int listenerIndex);
 void soundListenerSetCount(int count);
 
 #endif

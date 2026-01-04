@@ -18,7 +18,10 @@ struct LandingMenuOption gMainMenuOptions[] = {
 void mainMenuReadCamera(struct GameMenu* gameMenu) {
     gScene.camera.transform = gScene.animator.armatures[TEST_CHAMBER_00_TEST_CHAMBER_00_ARMATURE_CAMERA].pose[0];
     vector3Scale(&gScene.camera.transform.position, &gScene.camera.transform.position, 1.0f / SCENE_SCALE);
-    soundListenerUpdate(&gScene.camera.transform.position, &gScene.camera.transform.rotation, &gZeroVec, 0);
+
+    struct Vector3 cameraListenRight;
+    quatMultVector(&gScene.camera.transform.rotation, &gRight, &cameraListenRight);
+    soundListenerUpdate(&gScene.camera.transform.position, &cameraListenRight, &gZeroVec, 0);
 }
 
 void mainMenuPlayAmbientSound() {

@@ -529,10 +529,10 @@ int soundPlayerIsLoopedById(int soundId){
     return 0;
 }
 
-void soundListenerUpdate(struct Vector3* position, struct Quaternion* rotation, struct Vector3* velocity, int listenerIndex) {
+void soundListenerUpdate(struct Vector3* position, struct Vector3* right, struct Vector3* velocity, int listenerIndex) {
     gSoundListeners[listenerIndex].worldPos = *position;
+    gSoundListeners[listenerIndex].rightVector = *right;
     gSoundListeners[listenerIndex].velocity = *velocity;
-    quatMultVector(rotation, &gRight, &gSoundListeners[listenerIndex].rightVector);
 }
 
 void soundListenerSetCount(int count) {
