@@ -326,11 +326,6 @@ void playerSignalPortalChanged(struct Player* player) {
     }
 }
 
-int playerHasPortalCollision(struct Player* player) {
-    // Player collider becomes sphere for a short time after teleporting
-    return gPlayerCollider.extendDownward != TARGET_CAPSULE_EXTEND_HEIGHT;
-}
-
 int playerIsGrabbing(struct Player* player) {
     return player->grabConstraint.object != NULL;
 }
@@ -509,6 +504,17 @@ void playerUpdateGrabbedObject(struct Player* player) {
         grabRotationUpdate(grabRotationFlags, &lookRotationDelta, &forwardRotation, &player->grabRotationBase, &grabRotation);
         
         pointConstraintUpdateTarget(&player->grabConstraint, &grabPoint, &grabRotation);
+    }
+}
+
+void playerGetTargetCenter(struct Player* player, struct Vector3* out) {
+    // Player origin is the head
+    *out = player->body.transform.position;
+
+    // The player collider becomes a sphere for a short time after teleporting
+    // Targeting the center in that window will miss, so only adjust when done
+    if (gPlayerCollider.extendDownward == TARGET_CAPSULE_EXTEND_HEIGHT) {
+        vector3AddScaled(out, &player->body.rotationBasis.y, PLAYER_CENTER_HEIGHT - PLAYER_HEAD_HEIGHT, out);
     }
 }
 

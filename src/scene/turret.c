@@ -645,18 +645,18 @@ static void turretHitPlayer(struct Turret* turret, struct Player* player, struct
     ++turret->playerHitCount;
 }
 
-static void turretApplyBulletSpread(struct Vector3* trajectory, struct Basis* basis) {
+static void turretApplyBulletSpread(struct Turret* turret, struct Vector3* target) {
     vector3AddScaled(
-        trajectory,
-        &basis->y,
+        target,
+        &turret->rigidBody.rotationBasis.y,
         randomInRangef(-TURRET_BULLET_SPREAD_VERT, TURRET_BULLET_SPREAD_VERT),
-        trajectory
+        target
     );
     vector3AddScaled(
-        trajectory,
-        &basis->z,
+        target,
+        &turret->rigidBody.rotationBasis.x,
         randomInRangef(-TURRET_BULLET_SPREAD_HORIZ, TURRET_BULLET_SPREAD_HORIZ),
-        trajectory
+        target
     );
 }
 
@@ -692,16 +692,16 @@ static void turretUpdateShots(struct Turret* turret, struct Player* player) {
 
     if (turret->state == TurretStateAttacking) {
         // Aim between center and head (targetPosition is center)
-        struct Vector3 target = turret->stateData.attacking.targetPosition;
+        struct Vector3 target;
         vector3AddScaled(
-            &target,
+            &turret->stateData.attacking.targetPosition,
             &player->body.rotationBasis.y,
             (PLAYER_HEAD_HEIGHT - PLAYER_CENTER_HEIGHT) * 0.5f,
             &target
         );
 
         // Add some noise to liven things up and make it harder to camp
-        turretApplyBulletSpread(&target, &player->body.rotationBasis);
+        turretApplyBulletSpread(turret, &target);
 
         vector3Sub(&target, &ray.origin, &ray.dir);
         vector3Normalize(&ray.dir, &ray.dir);
@@ -778,12 +778,8 @@ static uint8_t turretFindPlayerLineOfSight(struct Turret* turret, struct Player*
         return 0;
     }
 
-    struct Vector3 target = player->body.transform.position;
-    if (!playerHasPortalCollision(player)) {
-        // Aim at center of player (origin is head)
-        // Only for normal collision, to keep line of sight when passing through portals
-        vector3AddScaled(&target, &player->body.rotationBasis.y, PLAYER_CENTER_HEIGHT - PLAYER_HEAD_HEIGHT, &target);
-    }
+    struct Vector3 target;
+    playerGetTargetCenter(player, &target);
 
     if (turretRaycastTarget(turret, &player->collisionObject, &target, 0)) {
         if (targetPosition) {

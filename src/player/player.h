@@ -65,6 +65,7 @@ void playerUpdate(struct Player* player);
 void playerUpdateFooting(struct Player* player, float maxStandDistance);
 void playerApplyCameraTransform(struct Player* player, struct Transform* cameraTransform);
 
+void playerGetTargetCenter(struct Player* player, struct Vector3* out);
 void playerGetMoveBasis(struct Quaternion* rotation, struct Vector3* forward, struct Vector3* right);
 void playerPortalGrabTransform(struct Player* player, struct Vector3* point, struct Quaternion* rotation);
 void playerInitGrabRotationBase(struct Player* player);
@@ -77,7 +78,6 @@ void playerDamage(struct Player* player, float amount, enum PlayerDamageType dam
 int playerIsDead(struct Player* player);
 void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing);
 void playerSignalPortalChanged(struct Player* player);
-int playerHasPortalCollision(struct Player* player);
 int playerIsGrabbing(struct Player* player);
 int playerIsGrabbingObject(struct Player* player, struct CollisionObject* object);
 void playerThrowObject(struct Player* player);
