@@ -34,6 +34,7 @@
 #define TURRET_BULLET_SPREAD_VERT     0.4f
 #define TURRET_BULLET_SPREAD_HORIZ    0.125f
 #define TURRET_BULLET_DAMAGE          4.0f
+#define TURRET_BULLET_VERTICAL_DOT    0.95f  // acos(0.95) = ~18 degrees
 #define TURRET_BULLET_IMPULSE_PLAYER  5.0f
 #define TURRET_BULLET_IMPULSE_OBJECT  0.125f
 #define TURRET_BULLET_PUSH_HITS       8
@@ -610,6 +611,12 @@ static void turretStopShooting(struct Turret* turret) {
 }
 
 static void turretPushObject(struct RigidBody* body, struct Vector3* hitDir, float impulse) {
+    if (fabsf(vector3Dot(hitDir, &gUp)) > TURRET_BULLET_VERTICAL_DOT) {
+        // Don't push through floor/ceiling portals
+        // Shoot FOV is narrow enough to not trigger this at steep angles
+        return;
+    }
+
     struct Vector3 push;
     push.x = hitDir->x;
     push.y = 0.0f;
