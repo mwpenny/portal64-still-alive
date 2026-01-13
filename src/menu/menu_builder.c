@@ -71,7 +71,7 @@ void checkboxMenuItemInit(struct MenuBuilderElement* element) {
 }
 
 enum InputCapture checkboxMenuItemUpdate(struct MenuBuilderElement* element, MenuActionCalback actionCallback, void* data) {
-    if (controllerGetButtonDown(0, BUTTON_A)) {
+    if (controllerGetButtonsDown(0, ControllerButtonA)) {
         struct MenuCheckbox* checkbox = (struct MenuCheckbox*)element->data;
 
         checkbox->checked = !checkbox->checked;
@@ -158,7 +158,7 @@ enum InputCapture sliderMenuItemUpdate(struct MenuBuilderElement* element, MenuA
         int currentValue = (int)floorf(slider->value * (numTicks - 1));
         int newValue = currentValue;
 
-        if ((controllerDir & ControllerDirectionRight) || controllerGetButtonDown(0, BUTTON_A)) {
+        if ((controllerDir & ControllerDirectionRight) || controllerGetButtonsDown(0, ControllerButtonA)) {
             ++newValue;
         } else if (controllerDir & ControllerDirectionLeft) {
             --newValue;
@@ -167,7 +167,7 @@ enum InputCapture sliderMenuItemUpdate(struct MenuBuilderElement* element, MenuA
         if (newValue < 0) {
             newValue = 0;
         } else if (newValue > numTicks - 1) {
-            if (controllerGetButtonDown(0, BUTTON_A)) {
+            if (controllerGetButtonsDown(0, ControllerButtonA)) {
                 newValue = 0;
             } else {
                 newValue = numTicks - 1;
@@ -188,8 +188,9 @@ enum InputCapture sliderMenuItemUpdate(struct MenuBuilderElement* element, MenuA
             slider->value = 0.0f;
         }
     } else {
-        ControllerStick pad_stick = controllerGetStick(0);
-        float newValue = slider->value + pad_stick.x * SCROLL_MULTIPLIER;
+        struct ControllerStick padStick;
+        controllerGetStick(0, &padStick);
+        float newValue = slider->value + padStick.x * SCROLL_MULTIPLIER;
 
         if (newValue > 1.0f) {
             newValue = 1.0f;
@@ -199,13 +200,13 @@ enum InputCapture sliderMenuItemUpdate(struct MenuBuilderElement* element, MenuA
 
         int numTicks = element->params->params.slider.numberOfTicks;
 
-        if (controllerGetButtonDown(0, BUTTON_RIGHT | BUTTON_A)) {
+        if (controllerGetButtonsDown(0, ControllerButtonRight | ControllerButtonA)) {
             int currentValue = (int)floorf(newValue * (numTicks - 1) + NEXT_TICK_TOLERANCE);
 
             currentValue = currentValue + 1;
 
             if (currentValue > numTicks - 1) {
-                if (controllerGetButtonDown(0, BUTTON_A)) {
+                if (controllerGetButtonsDown(0, ControllerButtonA)) {
                     currentValue = 0;
                 } else {
                     currentValue = numTicks - 1;
@@ -213,7 +214,7 @@ enum InputCapture sliderMenuItemUpdate(struct MenuBuilderElement* element, MenuA
             }
 
             newValue = (float)currentValue / (float)(numTicks - 1);
-        } else if (controllerGetButtonDown(0, BUTTON_LEFT)) {
+        } else if (controllerGetButtonsDown(0, ControllerButtonLeft)) {
             int currentValue = (int)ceilf(newValue * (numTicks - 1) - NEXT_TICK_TOLERANCE);
 
             currentValue = currentValue - 1;
@@ -234,8 +235,11 @@ enum InputCapture sliderMenuItemUpdate(struct MenuBuilderElement* element, MenuA
         }
     }
     
-    if (controllerGetButtonDown(0, BUTTON_LEFT | BUTTON_RIGHT | BUTTON_A) || (element->params->params.slider.discrete && ((controllerDir & ControllerDirectionLeft) || (controllerDir & ControllerDirectionRight))))
+    if (controllerGetButtonsDown(0, ControllerButtonLeft | ControllerButtonRight | ControllerButtonA) ||
+        (element->params->params.slider.discrete && (controllerDir & (ControllerDirectionLeft | ControllerDirectionRight)))
+    ) {
         soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+    }
 
     return InputCapturePass;
 }
@@ -277,7 +281,7 @@ void menuBuilderInit(
 }
 
 enum InputCapture menuBuilderUpdate(struct MenuBuilder* menuBuilder) {
-    if (controllerGetButtonDown(0, BUTTON_B)) {
+    if (controllerGetButtonsDown(0, ControllerButtonB)) {
         return InputCaptureExit;
     }
 

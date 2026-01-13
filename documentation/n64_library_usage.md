@@ -22,7 +22,7 @@ Portal 64's high-level usage of proprietary libraries is listed in the following
 |          |                               | Interrupts                                   | ❌                     | ❌                           |
 |          |                               | Task scheduling                              | ❌                     | ❌                           |
 |          |                               | Message passing                              | ❌                     | ❌                           |
-|          |                               | Peripheral access                            | ❌                     | ❌                           |
+|          |                               | Peripheral access                            | ✅                     | ❌                           |
 |          |                               | Video initialization                         | ❌                     | ❌                           |
 |          |                               | Frame buffer reading                         | ✅                     | ❌                           |
 |          | Math                          | Trig functions                               | ❌                     | ❌                           |

@@ -194,7 +194,7 @@ enum InputCapture savefileListUpdate(struct SavefileListMenu* savefileList) {
         return confirmationDialogUpdate(&savefileList->confirmationDialog);
     }
 
-    if (controllerGetButtonDown(0, BUTTON_B)) {
+    if (controllerGetButtonsDown(0, ControllerButtonB)) {
         return InputCaptureExit;
     }
 

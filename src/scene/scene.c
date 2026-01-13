@@ -700,7 +700,7 @@ void sceneUpdate(struct Scene* scene) {
     Time startTime = timeGetTime();
 
     if (gGameMenu.state != GameMenuStateResumeGame) {
-        if (gGameMenu.state == GameMenuStateLanding && (controllerGetButtonDown(0, BUTTON_B) || controllerActionGet(ControllerActionPause))) {
+        if (gGameMenu.state == GameMenuStateLanding && (controllerGetButtonsDown(0, ControllerButtonB) || controllerActionGet(ControllerActionPause))) {
             gGameMenu.state = GameMenuStateResumeGame;
         }
 

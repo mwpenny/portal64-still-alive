@@ -143,9 +143,9 @@ static void confirmationDialogClose(struct ConfirmationDialog* confirmationDialo
 }
 
 enum InputCapture confirmationDialogUpdate(struct ConfirmationDialog* confirmationDialog) {
-    if (controllerGetButtonDown(0, BUTTON_B)) {
+    if (controllerGetButtonsDown(0, ControllerButtonB)) {
         confirmationDialogClose(confirmationDialog, 0);
-    } else if (controllerGetButtonDown(0, BUTTON_A)) {
+    } else if (controllerGetButtonsDown(0, ControllerButtonA)) {
         if (confirmationDialog->selectedButton == &confirmationDialog->confirmButton) {
             confirmationDialogClose(confirmationDialog, 1);
         } else {

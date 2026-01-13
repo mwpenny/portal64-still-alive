@@ -108,7 +108,7 @@ enum InputCapture saveGameUpdate(struct SaveGameMenu* saveGame) {
     }
 
     if (saveGame->savefileList->numberOfSaves) {
-        if (controllerGetButtonDown(0, BUTTON_A)) {
+        if (controllerGetButtonsDown(0, ControllerButtonA)) {
             short selectedSaveIndex = saveGame->savefileList->selectedSave;
             struct SavefileInfo* selectedSave = &saveGame->savefileList->savefileInfo[selectedSaveIndex];
 
@@ -122,7 +122,7 @@ enum InputCapture saveGameUpdate(struct SaveGameMenu* saveGame) {
                 );
                 soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
             }
-        } else if (controllerGetButtonDown(0, BUTTON_Z)) {
+        } else if (controllerGetButtonsDown(0, ControllerButtonZ)) {
             short selectedSaveIndex = saveGame->savefileList->selectedSave;
             struct SavefileInfo* selectedSave = &saveGame->savefileList->savefileInfo[selectedSaveIndex];
 

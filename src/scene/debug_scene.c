@@ -26,37 +26,38 @@ static float lastCpuTimeMs       = 0.0f;
 static float lastUpdateTimeMs    = 0.0f;
 
 static void debugSceneUpdateFreeCamera(struct Scene* scene) {
-    ControllerStick freecam_stick = controllerGetStick(2);
+    struct ControllerStick freecamStick;
+    controllerGetStick(2, &freecamStick);
 
-    if (freecam_stick.x || freecam_stick.y) {
+    if (freecamStick.x || freecamStick.y) {
         struct Vector3 lookDir;
         struct Vector3 rightDir;
         playerGetMoveBasis(&scene->camera.transform.rotation, &lookDir, &rightDir);
 
-        if (freecam_stick.y) {
-            if (controllerGetButton(2, BUTTON_Z)) {
+        if (freecamStick.y) {
+            if (controllerGetButtons(2, ControllerButtonZ)) {
                 vector3AddScaled(
                     &scene->freeCameraOffset,
                     &lookDir,
-                    -freecam_stick.y * FREE_CAM_VELOCITY * FIXED_DELTA_TIME,
+                    -freecamStick.y * FREE_CAM_VELOCITY * FIXED_DELTA_TIME,
                     &scene->freeCameraOffset
                 );
             } else {
-                scene->freeCameraOffset.y += freecam_stick.y * FREE_CAM_VELOCITY * FIXED_DELTA_TIME;
+                scene->freeCameraOffset.y += freecamStick.y * FREE_CAM_VELOCITY * FIXED_DELTA_TIME;
             }
         }
 
-        if (freecam_stick.x) {
+        if (freecamStick.x) {
             vector3AddScaled(
                 &scene->freeCameraOffset,
                 &rightDir,
-                freecam_stick.x * FREE_CAM_VELOCITY * FIXED_DELTA_TIME,
+                freecamStick.x * FREE_CAM_VELOCITY * FIXED_DELTA_TIME,
                 &scene->freeCameraOffset
             );
         }
     }
 
-    if (controllerGetButtonDown(2, BUTTON_START)) {
+    if (controllerGetButtonsDown(2, ControllerButtonStart)) {
         scene->freeCameraOffset = gZeroVec;
     }
 }
@@ -221,19 +222,19 @@ void debugSceneUpdate(struct Scene* scene) {
 
     debugSceneUpdateFreeCamera(scene);
 
-    if (controllerGetButtonDown(2, BUTTON_L)) {
+    if (controllerGetButtonsDown(2, ControllerButtonL)) {
         levelQueueLoad(NEXT_LEVEL, NULL, NULL, 0 /* useCheckpoint */);
     }
 
-    if (controllerGetButtonDown(2, BUTTON_R)) {
+    if (controllerGetButtonsDown(2, ControllerButtonR)) {
         scene->hideCurrentRoom ^= 1;
     }
 
-    if (controllerGetButtonDown(2, BUTTON_LEFT)) {
+    if (controllerGetButtonsDown(2, ControllerButtonLeft)) {
         scene->showPerformanceMetrics ^= 1;
     }
 
-    if (controllerGetButtonDown(2, BUTTON_RIGHT)) {
+    if (controllerGetButtonsDown(2, ControllerButtonRight)) {
         scene->showCollisionContacts ^= 1;
     }
 }

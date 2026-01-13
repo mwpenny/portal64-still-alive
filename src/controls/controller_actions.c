@@ -1,44 +1,44 @@
 #include "controller_actions.h"
 
-#include "../util/memory.h"
-#include "../system/controller.h"
-#include "../math/mathf.h"
-#include "../savefile/savefile.h"
+#include "math/mathf.h"
+#include "savefile/savefile.h"
+#include "system/controller.h"
+#include "util/memory.h"
 
 unsigned char gDefaultControllerSettings[ControllerActionSourceCount] = {
-    [ControllerActionSourceAButton] = ControllerActionOpenPortal0,
-    [ControllerActionSourceBButton] = ControllerActionOpenPortal1,
-    [ControllerActionSourceCUpButton] = ControllerActionMove,
-    [ControllerActionSourceCRightButton] = ControllerActionNone,
-    [ControllerActionSourceCDownButton] = ControllerActionNone,
-    [ControllerActionSourceCLeftButton] = ControllerActionNone,
-    [ControllerActionSourceDUpButton] = ControllerActionLookForward,
-    [ControllerActionSourceDRightButton] = ControllerActionZoom,
-    [ControllerActionSourceDDownButton] = ControllerActionLookBackward,
-    [ControllerActionSourceDLeftButton] = ControllerActionNone,
-    [ControllerActionSourceStartButton] = ControllerActionPause,
-    [ControllerActionSourceLTrig] = ControllerActionDuck,
-    [ControllerActionSourceRTrig] = ControllerActionUseItem,
-    [ControllerActionSourceZTrig] = ControllerActionJump,
-    [ControllerActionSourceJoystick] = ControllerActionRotate,
+    [ControllerActionSourceAButton]         = ControllerActionOpenPortal0,
+    [ControllerActionSourceBButton]         = ControllerActionOpenPortal1,
+    [ControllerActionSourceCUpButton]       = ControllerActionMove,
+    [ControllerActionSourceCRightButton]    = ControllerActionNone,
+    [ControllerActionSourceCDownButton]     = ControllerActionNone,
+    [ControllerActionSourceCLeftButton]     = ControllerActionNone,
+    [ControllerActionSourceDUpButton]       = ControllerActionLookForward,
+    [ControllerActionSourceDRightButton]    = ControllerActionZoom,
+    [ControllerActionSourceDDownButton]     = ControllerActionLookBackward,
+    [ControllerActionSourceDLeftButton]     = ControllerActionNone,
+    [ControllerActionSourceStartButton]     = ControllerActionPause,
+    [ControllerActionSourceLTrig]           = ControllerActionDuck,
+    [ControllerActionSourceRTrig]           = ControllerActionUseItem,
+    [ControllerActionSourceZTrig]           = ControllerActionJump,
+    [ControllerActionSourceJoystick]        = ControllerActionRotate,
 };
 
 unsigned short gActionSourceButtonMask[ControllerActionSourceCount] = {
-    [ControllerActionSourceAButton] = BUTTON_A,
-    [ControllerActionSourceBButton] = BUTTON_B,
-    [ControllerActionSourceCUpButton] = BUTTON_C_UP,
-    [ControllerActionSourceCRightButton] = BUTTON_C_RIGHT,
-    [ControllerActionSourceCDownButton] = BUTTON_C_DOWN,
-    [ControllerActionSourceCLeftButton] = BUTTON_C_LEFT,
-    [ControllerActionSourceDUpButton] = BUTTON_UP,
-    [ControllerActionSourceDRightButton] = BUTTON_RIGHT,
-    [ControllerActionSourceDDownButton] = BUTTON_DOWN,
-    [ControllerActionSourceDLeftButton] = BUTTON_LEFT,
-    [ControllerActionSourceStartButton] = BUTTON_START,
-    [ControllerActionSourceLTrig] = BUTTON_L,
-    [ControllerActionSourceRTrig] = BUTTON_R,
-    [ControllerActionSourceZTrig] = BUTTON_Z,
-    [ControllerActionSourceJoystick] = 0,
+    [ControllerActionSourceAButton]         = ControllerButtonA,
+    [ControllerActionSourceBButton]         = ControllerButtonB,
+    [ControllerActionSourceCUpButton]       = ControllerButtonCUp,
+    [ControllerActionSourceCRightButton]    = ControllerButtonCRight,
+    [ControllerActionSourceCDownButton]     = ControllerButtonCDown,
+    [ControllerActionSourceCLeftButton]     = ControllerButtonCLeft,
+    [ControllerActionSourceDUpButton]       = ControllerButtonUp,
+    [ControllerActionSourceDRightButton]    = ControllerButtonRight,
+    [ControllerActionSourceDDownButton]     = ControllerButtonDown,
+    [ControllerActionSourceDLeftButton]     = ControllerButtonLeft,
+    [ControllerActionSourceStartButton]     = ControllerButtonStart,
+    [ControllerActionSourceLTrig]           = ControllerButtonL,
+    [ControllerActionSourceRTrig]           = ControllerButtonR,
+    [ControllerActionSourceZTrig]           = ControllerButtonZ,
+    [ControllerActionSourceJoystick]        = ControllerButtonNone,
 };
 
 int gActionState = 0;
@@ -51,18 +51,19 @@ void controllerActionApply(enum ControllerAction action) {
     gActionState |= ACTION_TO_BITMASK(action);
 }
 
-#define DEADZONE_SIZE       5
-#define MAX_JOYSTICK_RANGE  80
+#define DEFAULT_DEADZONE_SIZE   5
+#define JOYSTICK_MOVE_THRESHOLD 40
+#define MAX_JOYSTICK_RANGE      80
 
-short gDeadzone = DEADZONE_SIZE;
-float gDeadzoneScale = 1.0f / (MAX_JOYSTICK_RANGE - DEADZONE_SIZE);
+short gDeadzone = DEFAULT_DEADZONE_SIZE;
+float gDeadzoneScale = 1.0f / (MAX_JOYSTICK_RANGE - DEFAULT_DEADZONE_SIZE);
 
 void controllerSetDeadzone(float percent) {
     gDeadzone = (short)(percent * MAX_JOYSTICK_RANGE);
     gDeadzoneScale = 1.0f / (MAX_JOYSTICK_RANGE - gDeadzone);
 }
 
-float controllerCleanupStickInput(s8 input) {
+float controllerCleanupStickInput(int8_t input) {
     if (input > -gDeadzone && input < gDeadzone) {
         return 0.0f;
     }
@@ -83,38 +84,39 @@ void controllerActionReadDirection(enum ControllerActionSource source, int contr
 
     switch (source) {
         case ControllerActionSourceCUpButton:
-            if (controllerGetButton(controllerIndex, BUTTON_C_UP)) {
+            if (controllerGetButtons(controllerIndex, ControllerButtonCUp)) {
                 result.y += 1.0f;
             }
-            if (controllerGetButton(controllerIndex, BUTTON_C_DOWN)) {
+            if (controllerGetButtons(controllerIndex, ControllerButtonCDown)) {
                 result.y -= 1.0f;
             }
-            if (controllerGetButton(controllerIndex, BUTTON_C_RIGHT)) {
+            if (controllerGetButtons(controllerIndex, ControllerButtonCRight)) {
                 result.x += 1.0f;
             }
-            if (controllerGetButton(controllerIndex, BUTTON_C_LEFT)) {
+            if (controllerGetButtons(controllerIndex, ControllerButtonCLeft)) {
                 result.x -= 1.0f;
             }
             break;
         case ControllerActionSourceDUpButton:
-            if (controllerGetButton(controllerIndex, BUTTON_UP)) {
+            if (controllerGetButtons(controllerIndex, ControllerButtonUp)) {
                 result.y += 1.0f;
             }
-            if (controllerGetButton(controllerIndex, BUTTON_DOWN)) {
+            if (controllerGetButtons(controllerIndex, ControllerButtonDown)) {
                 result.y -= 1.0f;
             }
-            if (controllerGetButton(controllerIndex, BUTTON_RIGHT)) {
+            if (controllerGetButtons(controllerIndex, ControllerButtonRight)) {
                 result.x += 1.0f;
             }
-            if (controllerGetButton(controllerIndex, BUTTON_LEFT)) {
+            if (controllerGetButtons(controllerIndex, ControllerButtonLeft)) {
                 result.x -= 1.0f;
             }
             break;
         case ControllerActionSourceJoystick:
         {
-            ControllerStick pad_stick = controllerGetStick(controllerIndex);
-            result.x += controllerCleanupStickInput(pad_stick.x);
-            result.y += controllerCleanupStickInput(pad_stick.y);
+            struct ControllerStick padStick;
+            controllerGetStick(controllerIndex, &padStick);
+            result.x += controllerCleanupStickInput(padStick.x);
+            result.y += controllerCleanupStickInput(padStick.y);
             break;
         }
         default:
@@ -131,7 +133,7 @@ void controllerActionRead() {
 
     int nextMutedState = 0;
 
-    for (int controllerIndex = 0; controllerIndex < 2; ++controllerIndex) {
+    for (int controllerIndex = 0; controllerIndex < MAX_BINDABLE_CONTROLLERS; ++controllerIndex) {
         for (int sourceIndex = 0; sourceIndex < ControllerActionSourceCount; ++sourceIndex) {
             enum ControllerAction action = gSaveData.controls.controllerSettings[controllerIndex][sourceIndex];
 
@@ -141,13 +143,13 @@ void controllerActionRead() {
                 if (sourceIndex == ControllerActionSourceCUpButton || sourceIndex == ControllerActionSourceDUpButton) {
                     sourceIndex += 3;
                 }
-            } else if (IS_HOLDABLE_ACTION(action) && controllerGetButton(controllerIndex, gActionSourceButtonMask[sourceIndex])) {
+            } else if (IS_HOLDABLE_ACTION(action) && controllerGetButtons(controllerIndex, gActionSourceButtonMask[sourceIndex])) {
                 if (ACTION_TO_BITMASK(action) & gMutedActions) {
                     nextMutedState |= ACTION_TO_BITMASK(action);
                 } else {
                     controllerActionApply(action);
                 }
-            } else if (controllerGetButtonDown(controllerIndex, gActionSourceButtonMask[sourceIndex])) {
+            } else if (controllerGetButtonsDown(controllerIndex, gActionSourceButtonMask[sourceIndex])) {
                 controllerActionApply(action);
             }
         }
@@ -180,7 +182,7 @@ void controllerActionMuteActive() {
 int controllerSourcesForAction(enum ControllerAction action, struct ControllerSourceWithController* sources, int maxSources) {
     int index = 0;
 
-    for (int controllerIndex = 0; controllerIndex < 2; ++controllerIndex) {
+    for (int controllerIndex = 0; controllerIndex < MAX_BINDABLE_CONTROLLERS; ++controllerIndex) {
         for (int sourceIndex = 0; sourceIndex < ControllerActionSourceCount; ++sourceIndex) {
             if (gSaveData.controls.controllerSettings[controllerIndex][sourceIndex] == action) {
                 sources[index].button = sourceIndex;
@@ -236,24 +238,24 @@ void controllerSetSource(enum ControllerAction action, enum ControllerActionSour
 }
 
 void controllerSetDefaultSource() {
+    zeroMemory(gSaveData.controls.controllerSettings, sizeof(gSaveData.controls.controllerSettings));
     memCopy(gSaveData.controls.controllerSettings[0], gDefaultControllerSettings, sizeof(gDefaultControllerSettings));
-    zeroMemory(gSaveData.controls.controllerSettings[1], sizeof(gDefaultControllerSettings));
 }
 
 struct ControllerSourceWithController controllerReadAnySource() {
     struct ControllerSourceWithController result;
 
-
-    for (result.controller = 0; result.controller < 2; ++result.controller) {
+    for (result.controller = 0; result.controller < MAX_BINDABLE_CONTROLLERS; ++result.controller) {
         for (result.button = 0; result.button < ControllerActionSourceCount; ++result.button) {
-            if (controllerGetButtonDown(result.controller, gActionSourceButtonMask[result.button])) {
+            if (controllerGetButtonsDown(result.controller, gActionSourceButtonMask[result.button])) {
                 return result;
             }
 
             if (result.button == ControllerActionSourceJoystick) {
-                ControllerStick pad_stick = controllerGetStick(result.controller);
+                struct ControllerStick padStick;
+                controllerGetStick(result.controller, &padStick);
 
-                if (abs(pad_stick.x) > 40 || abs(pad_stick.y) > 40) {
+                if (abs(padStick.x) > JOYSTICK_MOVE_THRESHOLD || abs(padStick.y) > JOYSTICK_MOVE_THRESHOLD) {
                     return result;
                 }
             }

@@ -3,6 +3,10 @@
 #include "audio.h"
 #include "defs.h"
 
+#ifdef PORTAL64_WITH_DEBUGGER
+#include "debugger/debug.h"
+#endif
+
 static OSPiHandle* sPiHandle;
 
 /****  type define's for structures unique to audiomgr ****/
@@ -146,7 +150,7 @@ void amCreateAudioMgr(ALSynConfig *c, OSPri pri, amConfig *amc, int fps)
     osCreateMesgQueue(&__am.audioFrameMsgQ, __am.audioFrameMsgBuf, MAX_AUDIO_MESGS);
     osCreateMesgQueue(&audDMAMessageQ, audDMAMessageBuf, NUM_DMA_MESSAGES);
 
-    osCreateThread(&__am.thread, 3, __amMain, 0,
+    osCreateThread(&__am.thread, AUDIO_THREAD_ID, __amMain, 0,
                    (void *)(audioStack+AUDIO_STACKSIZE/sizeof(u64)), pri);
     osStartThread(&__am.thread);
 }
@@ -275,7 +279,9 @@ static void __amHandleDoneMsg(AudioInfo *info)
     samplesLeft = osAiGetLength()>>2;
     if (samplesLeft == 0 && !firstTime) 
     {
-        PRINTF("audio: ai out of samples\n");    
+#ifdef PORTAL64_WITH_DEBUGGER
+        debug_printf("audio: ai out of samples\n");
+#endif
         firstTime = 0;
     }
 }
@@ -395,8 +401,11 @@ static void __clearAudioDMA(void)
      */
     for (i=0; i<nextDMA; i++)
     {
-        if (osRecvMesg(&audDMAMessageQ,(OSMesg *)&iomsg,OS_MESG_NOBLOCK) == -1)
-            PRINTF("Dma not done\n");
+        if (osRecvMesg(&audDMAMessageQ,(OSMesg *)&iomsg,OS_MESG_NOBLOCK) == -1) {
+#ifdef PORTAL64_WITH_DEBUGGER
+            debug_printf("Dma not done\n");
+#endif
+        }
     }
 
     

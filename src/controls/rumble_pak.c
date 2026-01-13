@@ -1,6 +1,8 @@
 #include "rumble_pak.h"
 
-#include <ultra64.h>
+#include "system/controller.h"
+
+#include <stddef.h>
 
 #define MAX_ACTIVE_RUMBLE   4
 
@@ -8,7 +10,7 @@ struct RumblePakClip gClips[MAX_ACTIVE_RUMBLE];
 struct RumblePakClip* gFirstActiveClip = NULL;
 struct RumblePakClip* gFirstIdleClip = NULL;
 RumbleID gNextRumbleId = 1;
-u8 gRumbleIsPaused = 0;
+uint8_t gRumbleIsPaused = 0;
 
 void rumblePakClipInit() {
     struct RumblePakClip* prev = NULL;
@@ -91,6 +93,11 @@ void rumblePakClipStop(RumbleID clipId) {
     
 }
 
+void rumblePakClipUpdate() {
+    int state = rumblePakCalculateState();
+    controllerSetRumble(0, state);
+}
+
 void rumblePakSetPaused(int paused) {
     gRumbleIsPaused = paused;
 }
@@ -128,7 +135,7 @@ int rumblePakCalculateState() {
             int byteIndex = sampleAsInt >> 2;
             int byteOffset = sampleAsInt & 0x3;
 
-            u8 byte = curr->wave->samples[byteIndex];
+            uint8_t byte = curr->wave->samples[byteIndex];
 
             amplitude += (byte >> (6 - byteOffset * 2)) & 0x3;
 

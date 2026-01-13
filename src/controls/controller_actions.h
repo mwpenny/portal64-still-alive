@@ -1,7 +1,7 @@
 #ifndef __CONTROLS_CONTROLLER_ACTIONS_H__
 #define __CONTROLS_CONTROLLER_ACTIONS_H__
 
-#include "../math/vector2.h"
+#include "math/vector2.h"
 
 enum ControllerActionSource {
     // face buttons
@@ -50,7 +50,8 @@ enum ControllerAction {
 #define IS_HOLDABLE_ACTION(action)     ((action) >= ControllerActionOpenPortal0 && (action) <= ControllerActionOpenPortal1)
 #define IS_VALID_SOURCE(source) ((source) >= 0 && (source) < ControllerActionSourceCount)
 
-#define MAX_DEADZONE    0.25f
+#define MAX_DEADZONE             0.25f
+#define MAX_BINDABLE_CONTROLLERS 2
 
 struct ControllerSourceWithController {
     unsigned char button;

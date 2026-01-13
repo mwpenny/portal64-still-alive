@@ -138,7 +138,7 @@ struct LandingMenuOption* landingMenuUpdate(struct LandingMenu* landingMenu) {
         cheatCodeEnterDirection(CheatCodeDirRight);
     }
 
-    if (controllerGetButtonDown(0, BUTTON_A)) {
+    if (controllerGetButtonsDown(0, ControllerButtonA)) {
         soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         return &landingMenu->options[landingMenu->selectedItem];
     }

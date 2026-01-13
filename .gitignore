@@ -14,10 +14,10 @@ assets_working/
 notes/
 portal_pak_dir/
 portal_pak_modified/
-resource/closecaption_*
 vpk/
 
 tools/vtf2png*
 
+controller_recording*.h
 log.txt
 log_images/

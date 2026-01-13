@@ -58,11 +58,11 @@ void boot(void *arg) {
 
     osCreateThread(
         &idleThread,
-        1,
+        IDLE_THREAD_ID,
         idleProc,
         NULL,
-        (void *)(idleThreadStack + (STACKSIZEBYTES / sizeof(u64))),
-		(OSPri)INIT_PRIORITY
+        idleThreadStack + (STACKSIZEBYTES / sizeof(u64)),
+        (OSPri)INIT_PRIORITY
     );
 
     osStartThread(&idleThread);
@@ -73,7 +73,7 @@ static void idleProc(void* arg) {
 
     osCreateThread(
         &gameThread, 
-        6, 
+        GAME_THREAD_ID,
         gameProc, 
         0, 
         gameThreadStack + (STACKSIZEBYTES / sizeof(u64)),
@@ -295,8 +295,8 @@ static void gameProc(void* arg) {
                     ++pendingGFX;
                 }
 
-                controllersTriggerRead();
-                controllerHandlePlayback();
+                controllersPoll();
+                rumblePakClipUpdate();
                 controllerActionRead();
                 romCopyAsyncDrain();
                 
@@ -310,14 +310,13 @@ static void gameProc(void* arg) {
                 }
     
 #if PORTAL64_WITH_RSP_PROFILER
-                if (controllerGetButtonDown(2, BUTTON_DOWN)) {
+                if (controllerGetButtonsDown(2, ControllerButtonDown)) {
                     struct GraphicsTask* task = &gGraphicsTasks[drawBufferIndex];
                     profileTask(&scheduler, &gameThread, &task->task.list, task->framebuffer);
                 }
 #endif
 
                 soundPlayerUpdate();
-                controllersSavePreviousState();
 
                 profileReport();
 
