@@ -82,7 +82,9 @@ int renderStateMaxDLCount(struct RenderState* renderState) {
     return renderState->currentMemoryChunk - renderState->glist;
 }
 
-void renderStateInlineBranch(struct RenderState* renderState, Gfx* dl) {
+void renderStateAppendDL(struct RenderState* renderState, Gfx* dl) {
+    // Useful for small display lists that can be overwritten during rendering
+    // E.g., menu elements
     while (_SHIFTR(dl->words.w0, 24, 8) != G_ENDDL) {
         *renderState->dl++ = *dl++;
     }

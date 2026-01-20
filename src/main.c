@@ -297,7 +297,7 @@ static void gameProc(void* arg) {
 
                 controllersPoll();
                 rumblePakClipUpdate();
-                controllerActionRead();
+                controllerActionUpdate();
                 romCopyAsyncDrain();
                 
                 if (inputIgnore) {

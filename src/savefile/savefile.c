@@ -37,7 +37,7 @@ static void savefileNew() {
         savefileUpdateSlot(i, NO_TEST_CHAMBER, 0xFF, 0xFF);
     }
 
-    controllerSetDefaultSource();
+    controllerActionSetDefaultSources();
     gSaveData.controls.sensitivity = 0x4000;
     gSaveData.controls.acceleration = 0x4000;
     gSaveData.controls.deadzone = 0x4000;
@@ -58,7 +58,7 @@ void savefileLoad() {
         savefileNew();
     }
 
-    controllerSetDeadzone(gSaveData.controls.deadzone * (1.0f / 0xFFFF) * MAX_DEADZONE);
+    controllerActionSetDeadzone(gSaveData.controls.deadzone * (1.0f / 0xFFFF));
 }
 
 void savefileSave() {

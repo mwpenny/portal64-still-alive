@@ -910,8 +910,8 @@ void playerPortalFunnel(struct Player* player, struct Vector3* targetVelocity) {
 }
 
 void playerProcessInput(struct Player* player, struct Vector3* forward, struct Vector3* right, struct Vector2* moveInput, struct Vector2* lookInput) {
-    *moveInput = controllerDirectionGet(ControllerActionMove);
-    *lookInput = controllerDirectionGet(ControllerActionRotate);
+    controllerActionGetDirection(ControllerActionMove, moveInput);
+    controllerActionGetDirection(ControllerActionRotate, lookInput);
 
     if (gSaveData.controls.flags & ControlSaveFlagsTankControls) {
         float tmp;

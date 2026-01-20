@@ -13,225 +13,266 @@
 #include "codegen/assets/audio/clips.h"
 #include "codegen/assets/strings/strings.h"
 
-#define CONTROL_ROW_HEIGHT  14
+#define CONTROLS_WIDTH      252
+#define CONTROLS_HEIGHT     124
+#define CONTROLS_X          ((SCREEN_WD - CONTROLS_WIDTH) / 2)
+#define CONTROLS_Y          54
 
-#define CONTROLS_Y      54
-#define CONTROLS_WIDTH  252
-#define CONTROLS_HEIGHT 124
+#define OUTLINE_THICKNESS   1
+#define CONTROLS_WD_INNER   (CONTROLS_WIDTH  - OUTLINE_THICKNESS)
+#define CONTROLS_HT_INNER   (CONTROLS_HEIGHT - OUTLINE_THICKNESS)
+#define CONTROLS_X_INNER    (CONTROLS_X      + OUTLINE_THICKNESS)
+#define CONTROLS_Y_INNER    (CONTROLS_Y      + OUTLINE_THICKNESS)
 
-#define CONTROLS_X      ((SCREEN_WD - CONTROLS_WIDTH) / 2)
+#define HEADER_PADDING_X    2
+#define HEADER_PADDING_Y    4
+#define HEADER_HEIGHT       14
 
-#define ROW_PADDING         8
-#define SEPARATOR_PADDING   8
-#define HEADER_PADDING      4
-#define TOP_PADDING         4
+#define SEPARATOR_PADDING_X 8
+#define SEPARATOR_PADDING_Y 3
+#define SEPARATOR_THICKNESS 1
 
-#define SEPARATOR_SPACE     3
+#define ROW_PADDING_X       8
+#define ROW_PADDING_Y       2
+#define ROW_TEXT_MAX_WIDTH  190
 
 #define USE_DEFAULTS_X      286
 #define USE_DEFAULTS_Y      186
 #define USE_DEFAULTS_HEIGHT 16
+
+#define PROMPT_MARGIN_X     17
+#define PROMPT_MARGIN_Y     72
+#define PROMPT_HEIGHT       24
+#define PROMPT_PADDING      6
 
 struct ControllerIcon {
     char x, y;
     char w, h;
 };
 
-enum ControllerButtonIcons {
-    ControllerButtonIconsA,
-    ControllerButtonIconsB,
-    ControllerButtonIconsS,
-    ControllerButtonIconsCU,
-    ControllerButtonIconsCR,
-    ControllerButtonIconsCD,
-    ControllerButtonIconsCL,
-    ControllerButtonIconsDU,
-    ControllerButtonIconsDR,
-    ControllerButtonIconsDD,
-    ControllerButtonIconsDL,
-    ControllerButtonIconsZ,
-    ControllerButtonIconsR,
-    ControllerButtonIconsL,
+enum ControllerButtonIcon {
+    ControllerButtonIconA,
+    ControllerButtonIconB,
+    ControllerButtonIconS,
+
+    ControllerButtonIconCU,
+    ControllerButtonIconCR,
+    ControllerButtonIconCD,
+    ControllerButtonIconCL,
+
+    ControllerButtonIconDU,
+    ControllerButtonIconDR,
+    ControllerButtonIconDD,
+    ControllerButtonIconDL,
+
+    ControllerButtonIconZ,
+    ControllerButtonIconR,
+    ControllerButtonIconL,
 };
 
-struct ControllerIcon gControllerButtonIcons[] = {
-    [ControllerButtonIconsA] = {0, 0, 12, 12},
-    [ControllerButtonIconsB] = {12, 0, 12, 12},
-    [ControllerButtonIconsS] = {24, 0, 12, 12},
-
-    [ControllerButtonIconsCU] = {0, 24, 12, 12},
-    [ControllerButtonIconsCR] = {12, 24, 12, 12},
-    [ControllerButtonIconsCD] = {24, 24, 12, 12},
-    [ControllerButtonIconsCL] = {36, 24, 12, 12},
-
-    [ControllerButtonIconsDU] = {0, 36, 12, 12},
-    [ControllerButtonIconsDR] = {12, 36, 12, 12},
-    [ControllerButtonIconsDD] = {24, 36, 12, 12},
-    [ControllerButtonIconsDL] = {36, 36, 12, 12},
-
-    [ControllerButtonIconsZ] = {0, 48, 12, 12},
-    [ControllerButtonIconsR] = {12, 48, 12, 12},
-    [ControllerButtonIconsL] = {24, 48, 12, 12},
+enum ControllerDirectionIcon {
+    ControllerDirectionIconC,
+    ControllerDirectionIconD,
+    ControllerDirectionIconJ,
 };
 
-char gControllerActionToButtonIcon[] = {
-    [ControllerActionSourceAButton] = ControllerButtonIconsA,
-    [ControllerActionSourceBButton] = ControllerButtonIconsB,
-    [ControllerActionSourceStartButton] = ControllerButtonIconsS,
+static struct ControllerIcon sControllerButtonIcons[] = {
+    [ControllerButtonIconA]    = {0, 0, 12, 12},
+    [ControllerButtonIconB]    = {12, 0, 12, 12},
+    [ControllerButtonIconS]    = {24, 0, 12, 12},
 
-    [ControllerActionSourceCUpButton] = ControllerButtonIconsCU,
-    [ControllerActionSourceCRightButton] = ControllerButtonIconsCR,
-    [ControllerActionSourceCDownButton] = ControllerButtonIconsCD,
-    [ControllerActionSourceCLeftButton] = ControllerButtonIconsCL,
+    [ControllerButtonIconCU]   = {0, 24, 12, 12},
+    [ControllerButtonIconCR]   = {12, 24, 12, 12},
+    [ControllerButtonIconCD]   = {24, 24, 12, 12},
+    [ControllerButtonIconCL]   = {36, 24, 12, 12},
 
-    [ControllerActionSourceDUpButton] = ControllerButtonIconsDU,
-    [ControllerActionSourceDRightButton] = ControllerButtonIconsDR,
-    [ControllerActionSourceDDownButton] = ControllerButtonIconsDD,
-    [ControllerActionSourceDLeftButton] = ControllerButtonIconsDL,
+    [ControllerButtonIconDU]   = {0, 36, 12, 12},
+    [ControllerButtonIconDR]   = {12, 36, 12, 12},
+    [ControllerButtonIconDD]   = {24, 36, 12, 12},
+    [ControllerButtonIconDL]   = {36, 36, 12, 12},
 
-    [ControllerActionSourceZTrig] = ControllerButtonIconsZ,
-    [ControllerActionSourceRTrig] = ControllerButtonIconsR,
-    [ControllerActionSourceLTrig] = ControllerButtonIconsL,
+    [ControllerButtonIconZ]    = {0, 48, 12, 12},
+    [ControllerButtonIconR]    = {12, 48, 12, 12},
+    [ControllerButtonIconL]    = {24, 48, 12, 12},
 };
 
-enum ControllerDirectionIcons {
-    ControllerDirectionIconsC,
-    ControllerDirectionIconsD,
-    ControllerDirectionIconsJ,
+static struct ControllerIcon sControllerDirectionIcons[] = {
+    [ControllerDirectionIconC] = {0, 12, 14, 12},
+    [ControllerDirectionIconD] = {14, 12, 12, 12},
+    [ControllerDirectionIconJ] = {26, 12, 15, 12},
 };
 
-struct ControllerIcon gControllerDirectionIcons[] = {
-    [ControllerDirectionIconsC] = {0, 12, 14, 12},
-    [ControllerDirectionIconsD] = {14, 12, 12, 12},
-    [ControllerDirectionIconsJ] = {26, 12, 15, 12},
+static uint8_t sControllerActionInputToButtonIcon[] = {
+    [ControllerActionInputAButton]      = ControllerButtonIconA,
+    [ControllerActionInputBButton]      = ControllerButtonIconB,
+    [ControllerActionInputStartButton]  = ControllerButtonIconS,
+
+    [ControllerActionInputCUpButton]    = ControllerButtonIconCU,
+    [ControllerActionInputCRightButton] = ControllerButtonIconCR,
+    [ControllerActionInputCDownButton]  = ControllerButtonIconCD,
+    [ControllerActionInputCLeftButton]  = ControllerButtonIconCL,
+
+    [ControllerActionInputDUpButton]    = ControllerButtonIconDU,
+    [ControllerActionInputDRightButton] = ControllerButtonIconDR,
+    [ControllerActionInputDDownButton]  = ControllerButtonIconDD,
+    [ControllerActionInputDLeftButton]  = ControllerButtonIconDL,
+
+    [ControllerActionInputZTrig]        = ControllerButtonIconZ,
+    [ControllerActionInputRTrig]        = ControllerButtonIconR,
+    [ControllerActionInputLTrig]        = ControllerButtonIconL,
 };
 
-char gControllerActionToDirectionIcon[] = {
-    [ControllerActionSourceCUpButton] = ControllerDirectionIconsC,
-    [ControllerActionSourceDUpButton] = ControllerDirectionIconsD,
-    [ControllerActionSourceJoystick] = ControllerDirectionIconsJ,
+static uint8_t sControllerActionInputToDirectionIcon[] = {
+    [ControllerActionInputCUpButton]    = ControllerDirectionIconC,
+    [ControllerActionInputDUpButton]    = ControllerDirectionIconD,
+    [ControllerActionInputJoystick]     = ControllerDirectionIconJ,
 };
 
 struct ControlActionDataRow {
-    short nameId;
-    short headerId;
+    enum StringId nameId;
+    enum StringId headerId;
     enum ControllerAction action;
 };
 
-struct ControlActionDataRow gControllerDataRows[] = {
-    {VALVE_MOVE, VALVE_MOVEMENT_TITLE, ControllerActionMove},
-    {VALVE_LOOK, -1, ControllerActionRotate},
-    {VALVE_JUMP, -1, ControllerActionJump},
-    {VALVE_DUCK, -1, ControllerActionDuck},
+struct ControlActionDataRow sControllerDataRows[] = {
+    {VALVE_MOVE,                VALVE_MOVEMENT_TITLE,                    ControllerActionMove},
+    {VALVE_LOOK,                StringIdNone,                            ControllerActionRotate},
+    {VALVE_JUMP,                StringIdNone,                            ControllerActionJump},
+    {VALVE_DUCK,                StringIdNone,                            ControllerActionDuck},
 
-    {VALVE_PRIMARY_ATTACK, VALVE_COMBAT_TITLE, ControllerActionOpenPortal0},
-    {VALVE_SECONDARY_ATTACK, -1, ControllerActionOpenPortal1},
-    {VALVE_USE_ITEMS, -1, ControllerActionUseItem},
+    {VALVE_PRIMARY_ATTACK,      VALVE_COMBAT_TITLE,                      ControllerActionOpenPortal0},
+    {VALVE_SECONDARY_ATTACK,    StringIdNone,                            ControllerActionOpenPortal1},
+    {VALVE_USE_ITEMS,           StringIdNone,                            ControllerActionUseItem},
 
-    {VALVE_PAUSE_GAME, VALVE_MISCELLANEOUS_TITLE, ControllerActionPause},
+    {VALVE_PAUSE_GAME,          VALVE_MISCELLANEOUS_TITLE,               ControllerActionPause},
 
     {VALVE_LOOK_STRAIGHT_AHEAD, VALVE_MISCELLANEOUS_KEYBOARD_KEYS_TITLE, ControllerActionLookForward},
-    {VALVE_LOOK_STRAIGHT_BACK, -1, ControllerActionLookBackward},
-    {VALVE_OVERVIEW_ZOOMIN, -1, ControllerActionZoom},
+    {VALVE_LOOK_STRAIGHT_BACK,  StringIdNone,                            ControllerActionLookBackward},
+    {VALVE_OVERVIEW_ZOOMIN,     StringIdNone,                            ControllerActionZoom},
 };
 
-int controlsMeasureIcons(enum ControllerAction action) {
-    struct ControllerSourceWithController sources[MAX_SOURCES_PER_ACTION];
+static struct Coloru8 sButtonPromptTextColor = { 232, 206, 80, 255 };
 
-    int sourceCount = controllerSourcesForAction(action, sources, MAX_SOURCES_PER_ACTION);
+static int controlsGetActionSourceIcons(enum ControllerAction action, struct ControllerIcon** sourceIcons) {
+    struct ControllerActionSource sources[MAX_SOURCES_PER_CONTROLLER_ACTION];
+    int sourceCount = controllerActionSources(action, sources, MAX_SOURCES_PER_CONTROLLER_ACTION);
 
-    char* iconMapping;
+    uint8_t* iconMapping;
     struct ControllerIcon* icons;
-    
-    if (IS_DIRECTION_ACTION(action)) {
-        iconMapping = gControllerActionToDirectionIcon;
-        icons = gControllerDirectionIcons;
-    } else {
-        iconMapping = gControllerActionToButtonIcon;
-        icons = gControllerButtonIcons;
-    }
 
-    int result = 0;
+    if (ACTION_IS_DIRECTION(action)) {
+        iconMapping = sControllerActionInputToDirectionIcon;
+        icons = sControllerDirectionIcons;
+    } else {
+        iconMapping = sControllerActionInputToButtonIcon;
+        icons = sControllerButtonIcons;
+    }
 
     for (int i = 0; i < sourceCount; ++i) {
-        struct ControllerIcon icon = icons[(int)iconMapping[(int)sources[i].button]];
-        result += icon.w;
+        sourceIcons[i] = &icons[iconMapping[sources[i].input]];
     }
 
-    return result;
+    return sourceCount;
 }
 
-Gfx* controlsRenderActionIcons(Gfx* dl, enum ControllerAction action, int x, int y) {
-    struct ControllerSourceWithController sources[MAX_SOURCES_PER_ACTION];
+static Gfx* controlsRenderIcon(Gfx* dl, struct ControllerIcon* icon, int x, int y) {
+    gSPTextureRectangle(
+        dl++,
+        x << 2, y << 2,
+        (x + icon->w) << 2, (y + icon->h) << 2,
+        G_TX_RENDERTILE,
+        icon->x << 5, icon->y << 5,
+        0x400, 0x400
+    );
 
-    int sourceCount = controllerSourcesForAction(action, sources, MAX_SOURCES_PER_ACTION);
+    return dl;
+}
 
-    char* iconMapping;
-    struct ControllerIcon* icons;
-    
-    if (IS_DIRECTION_ACTION(action)) {
-        iconMapping = gControllerActionToDirectionIcon;
-        icons = gControllerDirectionIcons;
-    } else {
-        iconMapping = gControllerActionToButtonIcon;
-        icons = gControllerButtonIcons;
-    }
+static Gfx* controlsRenderActionSourceIcons(Gfx* dl, enum ControllerAction action, int x, int y) {
+    struct ControllerIcon* sourceIcons[MAX_SOURCES_PER_CONTROLLER_ACTION];
+    int sourceCount = controlsGetActionSourceIcons(action, sourceIcons);
 
     for (int i = 0; i < sourceCount; ++i) {
-        struct ControllerIcon icon = icons[(int)iconMapping[(int)sources[i].button]];
+        struct ControllerIcon* icon = sourceIcons[i];
 
-        x -= icon.w;
-        gSPTextureRectangle(
-            dl++, 
-            x << 2, y << 2, 
-            (x + icon.w) << 2, (y + icon.h) << 2, 
-            G_TX_RENDERTILE, 
-            icon.x << 5, icon.y << 5, 
-            0x400, 0x400
-        );
+        x -= icon->w;
+        dl = controlsRenderIcon(dl, icon, x, y);
     }
     
     return dl;
 }
 
-void controlsRenderButtonIcon(enum ControllerActionSource source, int x, int y, struct RenderState* renderState) {
-    struct ControllerIcon icon;
+static int controlsActionSourceIconsWidth(enum ControllerAction action) {
+    struct ControllerIcon* sourceIcons[MAX_SOURCES_PER_CONTROLLER_ACTION];
+    int sourceCount = controlsGetActionSourceIcons(action, sourceIcons);
 
-    source = controllerSourceMapAction(source);
-    if (!IS_VALID_SOURCE(source)) {
-        return;
+    int result = 0;
+
+    for (int i = 0; i < sourceCount; ++i) {
+        struct ControllerIcon* icon = sourceIcons[i];
+        result += icon->w;
     }
 
-    icon = gControllerButtonIcons[(int)gControllerActionToButtonIcon[(int)source]];
-    gSPTextureRectangle(
-        renderState->dl++,
-        x << 2, y << 2,
-        (x + icon.w) << 2, (y + icon.h) << 2,
-        G_TX_RENDERTILE,
-        icon.x << 5, icon.y << 5,
-        0x400, 0x400
-    );
+    return result;
 }
 
-void controlsLayoutRow(struct ControlsMenuRow* row, struct ControlActionDataRow* data, int x, int y) {
+static void controlsMenuLayoutRow(struct ControlsMenuRow* row, struct ControlActionDataRow* data, int x, int y) {
     struct PrerenderedText* copy = prerenderedTextCopy(row->actionText);
     menuFreePrerenderedDeferred(row->actionText);
     row->actionText = copy;
-    prerenderedTextRelocate(row->actionText, x + ROW_PADDING, y);
-    Gfx* dl = controlsRenderActionIcons(row->sourceIcons, data->action, CONTROLS_X + CONTROLS_WIDTH - ROW_PADDING * 2, y);
+    prerenderedTextRelocate(row->actionText, x + ROW_PADDING_X, y);
+
+    Gfx* dl = controlsRenderActionSourceIcons(
+        row->sourceIcons,
+        data->action,
+        CONTROLS_X + CONTROLS_WIDTH - (ROW_PADDING_X * 2), y
+    );
     gSPEndDisplayList(dl++);
     row->y = y;
 }
 
-void controlsLayoutHeader(struct ControlsMenuHeader* header, int x, int y) {
+void controlsMenuLayoutHeader(struct ControlsMenuHeader* header, int x, int y) {
     struct PrerenderedText* copy = prerenderedTextCopy(header->headerText);
     menuFreePrerenderedDeferred(header->headerText);
     header->headerText = copy;
     prerenderedTextRelocate(header->headerText, x, y);
 }
 
-void controlsInitRow(struct ControlsMenuRow* row, struct ControlActionDataRow* data) {
-    row->actionText = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(data->nameId), 0, 0, 200);
+static void controlsMenuLayout(struct ControlsMenu* controlsMenu) {
+    int y = CONTROLS_Y + controlsMenu->scrollOffset;
+    int currentHeader = 0;
+
+    Gfx* headerSeparators = controlsMenu->headerSeparators;
+
+    for (int i = 0; i < ControllerActionCount; ++i) {
+        if (sControllerDataRows[i].headerId != StringIdNone && currentHeader < MAX_CONTROLS_SECTIONS) {
+            y += HEADER_PADDING_Y;
+            controlsMenuLayoutHeader(&controlsMenu->headers[currentHeader], CONTROLS_X + HEADER_PADDING_X, y);
+            y += HEADER_HEIGHT;
+
+            if ((y + SEPARATOR_THICKNESS) > CONTROLS_Y_INNER && y < (CONTROLS_Y_INNER + CONTROLS_HT_INNER)) {
+                gDPFillRectangle(
+                    headerSeparators++,
+                    CONTROLS_X + SEPARATOR_PADDING_X,
+                    y,
+                    CONTROLS_X + CONTROLS_WIDTH - (SEPARATOR_PADDING_X * 2),
+                    y + SEPARATOR_THICKNESS
+                );
+            }
+            y += SEPARATOR_PADDING_Y;
+            ++currentHeader;
+        }
+
+        controlsMenuLayoutRow(&controlsMenu->actionRows[i], &sControllerDataRows[i], CONTROLS_X, y);
+        
+        y += controlsMenu->actionRows[i].actionText->height + ROW_PADDING_Y;
+    }
+
+    gSPEndDisplayList(headerSeparators++);
+}
+
+static void controlsMenuInitRow(struct ControlsMenuRow* row, struct ControlActionDataRow* data) {
+    row->actionText = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(data->nameId), 0, 0, ROW_TEXT_MAX_WIDTH);
 
     Gfx* dl = row->sourceIcons;
     for (int i = 0; i < SOURCE_ICON_COUNT; ++i) {
@@ -239,47 +280,20 @@ void controlsInitRow(struct ControlsMenuRow* row, struct ControlActionDataRow* d
     }
 }
 
-void controlsInitHeader(struct ControlsMenuHeader* header, int message) {
+static void controlsMenuInitHeader(struct ControlsMenuHeader* header, int message) {
     header->headerText = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(message), 0, 0, SCREEN_WD);
 }
 
-void controlsLayout(struct ControlsMenu* controlsMenu) {
-    int y = CONTROLS_Y + controlsMenu->scrollOffset;
-    int currentHeader = 0;
-
-    Gfx* headerSeparators = controlsMenu->headerSeparators;
-
-    for (int i = 0; i < ControllerActionCount; ++i) {
-        if (gControllerDataRows[i].headerId != -1 && currentHeader < MAX_CONTROLS_SECTIONS) {
-            y += TOP_PADDING;
-            controlsLayoutHeader(&controlsMenu->headers[currentHeader], CONTROLS_X + 2, y);
-            y += CONTROL_ROW_HEIGHT;
-
-            if (y > CONTROLS_Y + 1 && y < CONTROLS_Y + CONTROLS_HEIGHT - 1) {
-                gDPFillRectangle(headerSeparators++, CONTROLS_X + SEPARATOR_PADDING, y, CONTROLS_X + CONTROLS_WIDTH - SEPARATOR_PADDING * 2, y + 1);
-            }
-            y += SEPARATOR_SPACE;
-            ++currentHeader;
-        }
-
-        controlsLayoutRow(&controlsMenu->actionRows[i], &gControllerDataRows[i], CONTROLS_X, y);
-        
-        y += controlsMenu->actionRows[i].actionText->height + 2;
-    }
-
-    gSPEndDisplayList(headerSeparators++);
-}
-
-void controlsMenuInitText(struct ControlsMenu* controlsMenu) {
+static void controlsMenuInitText(struct ControlsMenu* controlsMenu) {
     int currentHeader = 0;
 
     for (int i = 0; i < ControllerActionCount; ++i) {
-        controlsInitRow(&controlsMenu->actionRows[i], &gControllerDataRows[i]);
-
-        if (gControllerDataRows[i].headerId != -1 && currentHeader < MAX_CONTROLS_SECTIONS) {
-            controlsInitHeader(&controlsMenu->headers[currentHeader], gControllerDataRows[i].headerId);
+        if (sControllerDataRows[i].headerId != StringIdNone && currentHeader < MAX_CONTROLS_SECTIONS) {
+            controlsMenuInitHeader(&controlsMenu->headers[currentHeader], sControllerDataRows[i].headerId);
             ++currentHeader;
         }
+
+        controlsMenuInitRow(&controlsMenu->actionRows[i], &sControllerDataRows[i]);
     }
 
     for (; currentHeader < MAX_CONTROLS_SECTIONS; ++currentHeader) {
@@ -294,7 +308,7 @@ void controlsMenuInit(struct ControlsMenu* controlsMenu) {
     controlsMenu->scrollOffset = 0;
     controlsMenu->waitingForAction = ControllerActionNone;
 
-    controlsLayout(controlsMenu);
+    controlsMenuLayout(controlsMenu);
 
     controlsMenu->useDefaults = menuBuildButton(
         &gDejaVuSansFont, 
@@ -304,10 +318,16 @@ void controlsMenuInit(struct ControlsMenu* controlsMenu) {
         1
     );
 
-    controlsMenu->scrollOutline = menuBuildOutline(CONTROLS_X, CONTROLS_Y, CONTROLS_WIDTH, CONTROLS_HEIGHT, 1);
+    controlsMenu->scrollOutline = menuBuildOutline(
+        CONTROLS_X,
+        CONTROLS_Y,
+        CONTROLS_WIDTH,
+        CONTROLS_HEIGHT,
+        1
+    );
 }
 
-void controlsRebuildtext(struct ControlsMenu* controlsMenu) {
+void controlsMenuRebuildText(struct ControlsMenu* controlsMenu) {
     for (int i = 0; i < ControllerActionCount; ++i) {
         prerenderedTextFree(controlsMenu->actionRows[i].actionText);
     }
@@ -317,21 +337,28 @@ void controlsRebuildtext(struct ControlsMenu* controlsMenu) {
     }
 
     controlsMenuInitText(controlsMenu);
-    controlsLayout(controlsMenu);
-    menuRebuildButtonText(&controlsMenu->useDefaults, &gDejaVuSansFont, translationsGet(GAMEUI_USEDEFAULTS), 1);
+    controlsMenuLayout(controlsMenu);
+    menuRebuildButtonText(
+        &controlsMenu->useDefaults,
+        &gDejaVuSansFont,
+        translationsGet(GAMEUI_USEDEFAULTS),
+        1
+    );
 }
 
 enum InputCapture controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
     if (controlsMenu->waitingForAction != ControllerActionNone) {
-        struct ControllerSourceWithController source = controllerReadAnySource();
+        struct ControllerActionSource source;
 
-        if (IS_VALID_SOURCE(source.button)) {
-            controllerSetSource(controlsMenu->waitingForAction, source.button, source.controller);
+        if (controllerActionReadAnySource(&source)) {
+            if (controllerActionSetSource(controlsMenu->waitingForAction, &source)) {
+                controlsMenuLayout(controlsMenu);
+                soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+            } else {
+                soundPlayerPlay(SOUNDS_WPN_DENYSELECT, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+            }
+
             controlsMenu->waitingForAction = ControllerActionNone;
-
-            controlsLayout(controlsMenu);
-
-            soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         }
 
         return InputCaptureGrab;
@@ -360,32 +387,36 @@ enum InputCapture controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
         struct ControlsMenuRow* selectedAction = &controlsMenu->actionRows[controlsMenu->selectedRow];
         int newScroll = controlsMenu->scrollOffset;
         int topY = selectedAction->y;
-        int bottomY = topY + selectedAction->actionText->height + 2 + TOP_PADDING;
+        int bottomY = topY + selectedAction->actionText->height + ROW_PADDING_Y + OUTLINE_THICKNESS;
 
-        if (gControllerDataRows[controlsMenu->selectedRow].headerId != -1) {
-            topY -= CONTROL_ROW_HEIGHT + TOP_PADDING + SEPARATOR_SPACE;
+        if (sControllerDataRows[controlsMenu->selectedRow].headerId != StringIdNone) {
+            topY -= HEADER_PADDING_Y + HEADER_HEIGHT + SEPARATOR_PADDING_Y;
+        } else {
+            topY -= ROW_PADDING_Y + OUTLINE_THICKNESS;
         }
 
         if (topY < CONTROLS_Y) {
-            newScroll = CONTROLS_Y - (topY - controlsMenu->scrollOffset);
-        }
-
-        if (bottomY > CONTROLS_Y + CONTROLS_HEIGHT) {
-            newScroll = (CONTROLS_Y + CONTROLS_HEIGHT) - (bottomY - controlsMenu->scrollOffset);
+            newScroll += CONTROLS_Y - topY;
+        } else if (bottomY > (CONTROLS_Y + CONTROLS_HEIGHT)) {
+            newScroll += CONTROLS_Y + CONTROLS_HEIGHT - bottomY;
         }
 
         if (newScroll != controlsMenu->scrollOffset) {
             controlsMenu->scrollOffset = newScroll;
-            controlsLayout(controlsMenu);
+            controlsMenuLayout(controlsMenu);
         }
+    }
+
+    if (controllerGetButtonsDown(0, ControllerButtonB)) {
+        return InputCaptureExit;
     }
 
     if (controllerGetButtonsDown(0, ControllerButtonA)) {
         if (controlsMenu->selectedRow >= 0 && controlsMenu->selectedRow < ControllerActionCount) {
-            controlsMenu->waitingForAction = gControllerDataRows[controlsMenu->selectedRow].action;
+            controlsMenu->waitingForAction = sControllerDataRows[controlsMenu->selectedRow].action;
         } else if (controlsMenu->selectedRow == ControllerActionCount) {
-            controllerSetDefaultSource();
-            controlsLayout(controlsMenu);
+            controllerActionSetDefaultSources();
+            controlsMenuLayout(controlsMenu);
         }
 
         soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
@@ -399,13 +430,14 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
     gDPFillRectangle(renderState->dl++, CONTROLS_X, CONTROLS_Y, CONTROLS_X + CONTROLS_WIDTH, CONTROLS_Y + CONTROLS_HEIGHT);
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
 
+    // Outlines
     gSPDisplayList(renderState->dl++, ui_material_list[SOLID_ENV_INDEX]);
     gSPDisplayList(renderState->dl++, controlsMenu->scrollOutline);
     gDPPipeSync(renderState->dl++);
-    gDPSetEnvColor(renderState->dl++, 0, 0, 0, 255);
-    renderStateInlineBranch(renderState, controlsMenu->headerSeparators);
+    gDPSetEnvColor(renderState->dl++, gColorBlack.r, gColorBlack.g, gColorBlack.b, gColorBlack.a);
+    renderStateAppendDL(renderState, controlsMenu->headerSeparators);
 
-
+    // Selection indicator
     if (controlsMenu->selectedRow >= 0 && controlsMenu->selectedRow < ControllerActionCount) {
         struct ControlsMenuRow* selectedAction = &controlsMenu->actionRows[controlsMenu->selectedRow];
 
@@ -416,10 +448,10 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
             gDPSetEnvColor(renderState->dl++, gSelectionOrange.r, gSelectionOrange.g, gSelectionOrange.b, gSelectionOrange.a);
         }
         gDPFillRectangle(
-            renderState->dl++, 
-            CONTROLS_X + ROW_PADDING, 
-            selectedAction->y, 
-            CONTROLS_X + CONTROLS_WIDTH - ROW_PADDING * 2, 
+            renderState->dl++,
+            CONTROLS_X + ROW_PADDING_X,
+            selectedAction->y,
+            CONTROLS_X + CONTROLS_WIDTH - (ROW_PADDING_X * 2),
             selectedAction->y + selectedAction->actionText->height
         );
     }
@@ -437,21 +469,24 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
     }
 
     gSPDisplayList(renderState->dl++, controlsMenu->useDefaults.outline);
-
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
 
-    gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, CONTROLS_X, CONTROLS_Y, CONTROLS_X + CONTROLS_WIDTH, CONTROLS_Y + CONTROLS_HEIGHT);
-
-
+    // Text
     gSPDisplayList(renderState->dl++, ui_material_list[DEJAVU_SANS_0_INDEX]);
 
     gDPPipeSync(renderState->dl++);
-    gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT);
     struct PrerenderedTextBatch* batch = prerenderedBatchStart();
     prerenderedBatchAdd(batch, controlsMenu->useDefaults.text, controlsMenu->selectedRow == ControllerActionCount ? &gColorBlack : &gColorWhite);
     renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
 
-    gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, CONTROLS_X, CONTROLS_Y, CONTROLS_X + CONTROLS_WIDTH, CONTROLS_Y + CONTROLS_HEIGHT);
+    gDPSetScissor(
+        renderState->dl++,
+        G_SC_NON_INTERLACE,
+        CONTROLS_X_INNER,
+        CONTROLS_Y_INNER,
+        CONTROLS_X_INNER + CONTROLS_WD_INNER,
+        CONTROLS_Y_INNER + CONTROLS_HT_INNER
+    );
 
     batch = prerenderedBatchStart();
 
@@ -459,28 +494,30 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
         prerenderedBatchAdd(batch, controlsMenu->actionRows[i].actionText, controlsMenu->selectedRow == i ? &gColorBlack : &gColorWhite);
     }
     for (int i = 0; i < MAX_CONTROLS_SECTIONS; ++i) {
-        if (!controlsMenu->headers[i].headerText) {
+        if (controlsMenu->headers[i].headerText == NULL) {
             break;
         }
+
         prerenderedBatchAdd(batch, controlsMenu->headers[i].headerText, &gColorWhite);
     }
 
     renderState->dl = prerenderedBatchFinish(batch, gDejaVuSansImages, renderState->dl);
-
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 
+    // Input icons
     gSPDisplayList(renderState->dl++, ui_material_list[BUTTON_ICONS_INDEX]);
     for (int i = 0; i < ControllerActionCount; ++i) {
         if (controlsMenu->selectedRow == i) {
             gDPPipeSync(renderState->dl++);
-            gDPSetEnvColor(renderState->dl++, 0, 0, 0, 255);
+
+            gDPSetEnvColor(renderState->dl++, gColorBlack.r, gColorBlack.g, gColorBlack.b, gColorBlack.a);
         }
 
-        renderStateInlineBranch(renderState, controlsMenu->actionRows[i].sourceIcons);
+        renderStateAppendDL(renderState, controlsMenu->actionRows[i].sourceIcons);
 
         if (controlsMenu->selectedRow == i) {
             gDPPipeSync(renderState->dl++);
-            gDPSetEnvColor(renderState->dl++, 255, 255, 255, 255);
+            gDPSetEnvColor(renderState->dl++, gColorWhite.r, gColorWhite.g, gColorWhite.b, gColorWhite.a);
         }
     }
     gSPDisplayList(renderState->dl++, ui_material_revert_list[BUTTON_ICONS_INDEX]);
@@ -488,52 +525,32 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT);
 }
 
-#define CONTROL_PROMPT_RIGHT_MARGIN     20
-#define CONTROL_PROMPT_BOTTOM_MARGIN    50
-#define CONTROL_PROMPT_HEIGHT           24
-#define CONTROL_PROMPT_PADDING          6
-
-#define SUBTITLE_SIDE_MARGIN     17
-#define SUBTITLE_BOTTOM_MARGIN    11
-#define SUBTITLE_PADDING   5
-
-
 void controlsRenderPrompt(enum ControllerAction action, char* message, float opacity, struct RenderState* renderState) {
-    if (message == NULL || (message != NULL && message[0] == '\0'))
+    if (message == NULL || *message == '\0') {
         return;
+    }
     
     struct FontRenderer* fontRender = stackMalloc(sizeof(struct FontRenderer));
-    fontRendererLayout(fontRender, &gDejaVuSansFont, message, SCREEN_WD - (CONTROL_PROMPT_RIGHT_MARGIN + (CONTROL_PROMPT_PADDING * 2)));
+    fontRendererLayout(fontRender, &gDejaVuSansFont, message, SCREEN_WD - (PROMPT_MARGIN_X + (PROMPT_PADDING * 2)));
     
-    int iconsWidth = controlsMeasureIcons(action);
+    int iconsWidth = controlsActionSourceIconsWidth(action);
+    int opacityAsInt = (int)(255.0f * opacity);
 
-    int opacityAsInt = (int)(255 * opacity);
-
-    if (opacityAsInt > 255) {
-        opacityAsInt = 255;
-    } else if (opacityAsInt < 0) {
-        opacityAsInt = 0;
-    }
-
-    int textPositionX = (SCREEN_WD - CONTROL_PROMPT_RIGHT_MARGIN - CONTROL_PROMPT_PADDING) - fontRender->width;
-    int textPositionY = (SCREEN_HT - CONTROL_PROMPT_BOTTOM_MARGIN - CONTROL_PROMPT_PADDING) - fontRender->height;
+    int textPositionX = (SCREEN_WD - PROMPT_MARGIN_X - PROMPT_PADDING) - fontRender->width;
+    int textPositionY = (SCREEN_HT - PROMPT_MARGIN_Y - PROMPT_PADDING) - fontRender->height;
     
     gSPDisplayList(renderState->dl++, ui_material_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
     gDPSetEnvColor(renderState->dl++, 0, 0, 0, opacityAsInt / 3);
     gDPFillRectangle(
-        renderState->dl++, 
-        textPositionX - iconsWidth - CONTROL_PROMPT_PADDING * 2,
-        textPositionY - CONTROL_PROMPT_PADDING,
-        SCREEN_WD - CONTROL_PROMPT_RIGHT_MARGIN, 
-        SCREEN_HT - CONTROL_PROMPT_BOTTOM_MARGIN
+        renderState->dl++,
+        textPositionX - iconsWidth - (PROMPT_PADDING * 2),
+        textPositionY - PROMPT_PADDING,
+        SCREEN_WD - PROMPT_MARGIN_X,
+        SCREEN_HT - PROMPT_MARGIN_Y
     );
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
 
-    struct Coloru8 textColor;
-    
-    textColor.r = 232;
-    textColor.g = 206;
-    textColor.b = 80;
+    struct Coloru8 textColor = sButtonPromptTextColor;
     textColor.a = opacityAsInt;
         
     renderState->dl = fontRendererBuildGfx(fontRender, gDejaVuSansImages, textPositionX, textPositionY, &textColor, renderState->dl);
@@ -541,65 +558,26 @@ void controlsRenderPrompt(enum ControllerAction action, char* message, float opa
     gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
 
     gSPDisplayList(renderState->dl++, ui_material_list[BUTTON_ICONS_INDEX]);
-    gDPSetEnvColor(renderState->dl++, 232, 206, 80, opacityAsInt);
-    renderState->dl = controlsRenderActionIcons(renderState->dl, action, textPositionX - CONTROL_PROMPT_PADDING, textPositionY);
+    gDPSetEnvColor(renderState->dl++, textColor.r, textColor.g, textColor.b, textColor.a);
+    renderState->dl = controlsRenderActionSourceIcons(
+        renderState->dl,
+        action,
+        textPositionX - PROMPT_PADDING,
+        textPositionY
+    );
     gSPDisplayList(renderState->dl++, ui_material_revert_list[BUTTON_ICONS_INDEX]);
     
     stackMallocFree(fontRender);
 }
 
-void controlsRenderSubtitle(char* message, float textOpacity, float backgroundOpacity, struct RenderState* renderState, enum SubtitleType subtitleType) {
-    if (message == NULL || (message != NULL && message[0] == '\0'))
-        return;
-    
-    struct FontRenderer* fontRender = stackMalloc(sizeof(struct FontRenderer));
-    fontRendererLayout(fontRender, &gDejaVuSansFont, message, SCREEN_WD - (SUBTITLE_SIDE_MARGIN + SUBTITLE_PADDING) * 2);
+void controlsRenderInputIcon(enum ControllerActionInput input, int x, int y, struct RenderState* renderState) {
+    struct ControllerIcon* icon;
 
-    int textOpacityAsInt = (int)(255 * textOpacity);
-
-    if (textOpacityAsInt > 255) {
-        textOpacityAsInt = 255;
-    } else if (textOpacityAsInt < 0) {
-        textOpacityAsInt = 0;
+    if (input == ControllerActionInputJoystick) {
+        icon = &sControllerDirectionIcons[ControllerDirectionIconJ];
+    } else {
+        icon = &sControllerButtonIcons[sControllerActionInputToButtonIcon[input]];
     }
 
-    int backgroundOpacityAsInt = (int)(255 * backgroundOpacity);
-
-    if (backgroundOpacityAsInt > 255) {
-        backgroundOpacityAsInt = 255;
-    } else if (backgroundOpacityAsInt < 0) {
-        backgroundOpacityAsInt = 0;
-    }
-
-    int textPositionX = (SUBTITLE_SIDE_MARGIN + SUBTITLE_PADDING);
-    int textPositionY = (SCREEN_HT - SUBTITLE_BOTTOM_MARGIN - SUBTITLE_PADDING) - fontRender->height;
-
-    gSPDisplayList(renderState->dl++, ui_material_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
-    gDPSetEnvColor(renderState->dl++, 0, 0, 0, backgroundOpacityAsInt);
-    gDPFillRectangle(
-        renderState->dl++, 
-        textPositionX - CONTROL_PROMPT_PADDING,
-        textPositionY - CONTROL_PROMPT_PADDING,
-        SCREEN_WD - SUBTITLE_SIDE_MARGIN, 
-        SCREEN_HT - SUBTITLE_BOTTOM_MARGIN
-    );
-    gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_TRANSPARENT_OVERLAY_INDEX]);
-
-    struct Coloru8 textColor;
-
-    if (subtitleType == SubtitleTypeCloseCaption) {
-        textColor.r = 255;
-        textColor.g = 140;
-        textColor.b = 155;
-    } else if (subtitleType == SubtitleTypeCaption) {
-        textColor = gColorWhite;
-    }
-
-    textColor.a = textOpacityAsInt;
-
-    renderState->dl = fontRendererBuildGfx(fontRender, gDejaVuSansImages, textPositionX, textPositionY, &textColor, renderState->dl);
-
-    gSPDisplayList(renderState->dl++, ui_material_revert_list[DEJAVU_SANS_0_INDEX]);
-
-    stackMallocFree(fontRender);
+    renderState->dl = controlsRenderIcon(renderState->dl, icon, x, y);
 }

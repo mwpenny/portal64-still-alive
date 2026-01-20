@@ -57,7 +57,7 @@ void optionsMenuInit(struct OptionsMenu* options) {
 }
 
 void optionsMenuRebuildText(struct OptionsMenu* options) {
-    controlsRebuildtext(&options->controlsMenu);
+    controlsMenuRebuildText(&options->controlsMenu);
     joystickOptionsRebuildText(&options->joystickOptions);
     audioOptionsRebuildtext(&options->audioOptions);
     videoOptionsRebuildtext(&options->videoOptions);
@@ -86,7 +86,7 @@ enum InputCapture optionsMenuUpdate(struct OptionsMenu* options) {
             break;
     }
 
-    if (result == InputCaptureExit || controllerGetButtonsDown(0, ControllerButtonB)) {
+    if (result == InputCaptureExit) {
         savefileSave();
         return InputCaptureExit;
     } else if (result != InputCapturePass) {

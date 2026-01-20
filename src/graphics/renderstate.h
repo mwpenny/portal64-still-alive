@@ -30,7 +30,7 @@ Gfx* renderStateEndChunk(struct RenderState* renderState, Gfx* chunkStart);
 
 int renderStateMaxDLCount(struct RenderState* renderState);
 
-void renderStateInlineBranch(struct RenderState* renderState, Gfx* dl);
+void renderStateAppendDL(struct RenderState* renderState, Gfx* dl);
 
 float renderStateMemoryUsage(struct RenderState* renderState);
 

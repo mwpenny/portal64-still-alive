@@ -43,7 +43,7 @@ struct SaveHeader {
 };
 
 struct ControlSaveState {
-    uint8_t controllerSettings[MAX_BINDABLE_CONTROLLERS][ControllerActionSourceCount];
+    uint8_t controllerBindings[MAX_BINDABLE_CONTROLLERS][ControllerActionInputCount];
     enum ControlSaveFlags flags;
     uint16_t sensitivity;
     uint16_t acceleration;

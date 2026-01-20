@@ -242,8 +242,8 @@ static void savefileListRenderControls(struct SavefileListMenu* savefileList, st
     gSPDisplayList(renderState->dl++, ui_material_list[BUTTON_ICONS_INDEX]);
 
     if (savefileList->confirmText) {
-        controlsRenderButtonIcon(
-            ControllerActionSourceAButton,
+        controlsRenderInputIcon(
+            ControllerActionInputAButton,
             savefileList->confirmText->x - CONTROL_TEXT_PADDING - 2,
             savefileList->confirmText->y,
             renderState
@@ -251,8 +251,8 @@ static void savefileListRenderControls(struct SavefileListMenu* savefileList, st
         prerenderedBatchAdd(batch, savefileList->confirmText, NULL);
     }
     if (savefileList->deleteText && !selectedSave->isFree) {
-        controlsRenderButtonIcon(
-            ControllerActionSourceZTrig,
+        controlsRenderInputIcon(
+            ControllerActionInputZTrig,
             savefileList->deleteText->x - CONTROL_TEXT_PADDING - 1,
             savefileList->deleteText->y,
             renderState
@@ -294,7 +294,7 @@ void savefileListRender(struct SavefileListMenu* savefileList, struct RenderStat
         gDPPipeSync(renderState->dl++);
         menuSetRenderColor(renderState, savefileList->indexOffset + i == savefileList->selectedSave, &gSelectionOrange, &gColorBlack);
 
-        renderStateInlineBranch(renderState, slot->border);
+        renderStateAppendDL(renderState, slot->border);
     }
     gSPDisplayList(renderState->dl++, ui_material_revert_list[SOLID_ENV_INDEX]);
 

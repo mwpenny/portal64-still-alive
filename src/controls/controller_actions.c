@@ -5,66 +5,71 @@
 #include "system/controller.h"
 #include "util/memory.h"
 
-unsigned char gDefaultControllerSettings[ControllerActionSourceCount] = {
-    [ControllerActionSourceAButton]         = ControllerActionOpenPortal0,
-    [ControllerActionSourceBButton]         = ControllerActionOpenPortal1,
-    [ControllerActionSourceCUpButton]       = ControllerActionMove,
-    [ControllerActionSourceCRightButton]    = ControllerActionNone,
-    [ControllerActionSourceCDownButton]     = ControllerActionNone,
-    [ControllerActionSourceCLeftButton]     = ControllerActionNone,
-    [ControllerActionSourceDUpButton]       = ControllerActionLookForward,
-    [ControllerActionSourceDRightButton]    = ControllerActionZoom,
-    [ControllerActionSourceDDownButton]     = ControllerActionLookBackward,
-    [ControllerActionSourceDLeftButton]     = ControllerActionNone,
-    [ControllerActionSourceStartButton]     = ControllerActionPause,
-    [ControllerActionSourceLTrig]           = ControllerActionDuck,
-    [ControllerActionSourceRTrig]           = ControllerActionUseItem,
-    [ControllerActionSourceZTrig]           = ControllerActionJump,
-    [ControllerActionSourceJoystick]        = ControllerActionRotate,
-};
-
-unsigned short gActionSourceButtonMask[ControllerActionSourceCount] = {
-    [ControllerActionSourceAButton]         = ControllerButtonA,
-    [ControllerActionSourceBButton]         = ControllerButtonB,
-    [ControllerActionSourceCUpButton]       = ControllerButtonCUp,
-    [ControllerActionSourceCRightButton]    = ControllerButtonCRight,
-    [ControllerActionSourceCDownButton]     = ControllerButtonCDown,
-    [ControllerActionSourceCLeftButton]     = ControllerButtonCLeft,
-    [ControllerActionSourceDUpButton]       = ControllerButtonUp,
-    [ControllerActionSourceDRightButton]    = ControllerButtonRight,
-    [ControllerActionSourceDDownButton]     = ControllerButtonDown,
-    [ControllerActionSourceDLeftButton]     = ControllerButtonLeft,
-    [ControllerActionSourceStartButton]     = ControllerButtonStart,
-    [ControllerActionSourceLTrig]           = ControllerButtonL,
-    [ControllerActionSourceRTrig]           = ControllerButtonR,
-    [ControllerActionSourceZTrig]           = ControllerButtonZ,
-    [ControllerActionSourceJoystick]        = ControllerButtonNone,
-};
-
-int gActionState = 0;
-int gMutedActions = 0;
-struct Vector2 gDirections[2];
-
 #define ACTION_TO_BITMASK(action)       (1 << (action))
+#define ACTION_DIRECTION_INDEX(action)  ((action) - ControllerActionMove)
 
-void controllerActionApply(enum ControllerAction action) {
-    gActionState |= ACTION_TO_BITMASK(action);
-}
+#define ACTION_IS_HOLDABLE(action)      ((action) >= ControllerActionOpenPortal0 && (action) <= ControllerActionOpenPortal1)
+#define INPUT_IS_C_BUTTON(input)        ((input) >= ControllerActionInputCUpButton && (input) <= ControllerActionInputCLeftButton)
+#define INPUT_IS_D_PAD(input)           ((input) >= ControllerActionInputDUpButton && (input) <= ControllerActionInputDLeftButton)
 
-#define DEFAULT_DEADZONE_SIZE   5
-#define JOYSTICK_MOVE_THRESHOLD 40
-#define MAX_JOYSTICK_RANGE      80
+#define MAX_JOYSTICK_RANGE              80
+#define MAX_DEADZONE_RANGE              20
+#define DEFAULT_DEADZONE_SIZE           5
+#define JOYSTICK_MOVE_THRESHOLD         40
 
-short gDeadzone = DEFAULT_DEADZONE_SIZE;
-float gDeadzoneScale = 1.0f / (MAX_JOYSTICK_RANGE - DEFAULT_DEADZONE_SIZE);
+static int sActiveActions = 0;
+static int sMutedActions = 0;
 
-void controllerSetDeadzone(float percent) {
-    gDeadzone = (short)(percent * MAX_JOYSTICK_RANGE);
-    gDeadzoneScale = 1.0f / (MAX_JOYSTICK_RANGE - gDeadzone);
-}
+struct Vector2 sDirections[2];  // 0 = move, 1 = rotate
+static short sDeadzone = DEFAULT_DEADZONE_SIZE;
+static float sDeadzoneScale = 1.0f / (MAX_JOYSTICK_RANGE - DEFAULT_DEADZONE_SIZE);
 
-float controllerCleanupStickInput(int8_t input) {
-    if (input > -gDeadzone && input < gDeadzone) {
+static uint8_t sDefaultControllerBindings[ControllerActionInputCount] = {
+    [ControllerActionInputAButton]         = ControllerActionOpenPortal0,
+    [ControllerActionInputBButton]         = ControllerActionOpenPortal1,
+    [ControllerActionInputStartButton]     = ControllerActionPause,
+
+    [ControllerActionInputCUpButton]       = ControllerActionMove,
+    [ControllerActionInputCRightButton]    = ControllerActionNone,
+    [ControllerActionInputCDownButton]     = ControllerActionNone,
+    [ControllerActionInputCLeftButton]     = ControllerActionNone,
+
+    [ControllerActionInputDUpButton]       = ControllerActionLookForward,
+    [ControllerActionInputDRightButton]    = ControllerActionZoom,
+    [ControllerActionInputDDownButton]     = ControllerActionLookBackward,
+    [ControllerActionInputDLeftButton]     = ControllerActionNone,
+
+    [ControllerActionInputZTrig]           = ControllerActionJump,
+    [ControllerActionInputRTrig]           = ControllerActionUseItem,
+    [ControllerActionInputLTrig]           = ControllerActionDuck,
+
+    [ControllerActionInputJoystick]        = ControllerActionRotate,
+};
+
+static enum ControllerButtons sActionInputButtonMask[ControllerActionInputCount] = {
+    [ControllerActionInputAButton]         = ControllerButtonA,
+    [ControllerActionInputBButton]         = ControllerButtonB,
+    [ControllerActionInputStartButton]     = ControllerButtonStart,
+
+    [ControllerActionInputCUpButton]       = ControllerButtonCUp,
+    [ControllerActionInputCRightButton]    = ControllerButtonCRight,
+    [ControllerActionInputCDownButton]     = ControllerButtonCDown,
+    [ControllerActionInputCLeftButton]     = ControllerButtonCLeft,
+
+    [ControllerActionInputDUpButton]       = ControllerButtonUp,
+    [ControllerActionInputDRightButton]    = ControllerButtonRight,
+    [ControllerActionInputDDownButton]     = ControllerButtonDown,
+    [ControllerActionInputDLeftButton]     = ControllerButtonLeft,
+
+    [ControllerActionInputZTrig]           = ControllerButtonZ,
+    [ControllerActionInputRTrig]           = ControllerButtonR,
+    [ControllerActionInputLTrig]           = ControllerButtonL,
+
+    [ControllerActionInputJoystick]        = ControllerButtonNone,
+};
+
+static float normalizeJoystickValue(int8_t input) {
+    if (input > -sDeadzone && input < sDeadzone) {
         return 0.0f;
     }
 
@@ -76,215 +81,216 @@ float controllerCleanupStickInput(int8_t input) {
         return -1.0f;
     }
 
-    return ((float)input + (input > 0 ? -gDeadzone : gDeadzone)) * gDeadzoneScale;
+    // Percentage that stick has moved outside of deadzone
+    return ((float)input + (input > 0 ? -sDeadzone : sDeadzone)) * sDeadzoneScale;
 }
 
-void controllerActionReadDirection(enum ControllerActionSource source, int controllerIndex, int directionIndex) {
-    struct Vector2 result = gDirections[directionIndex];
-
-    switch (source) {
-        case ControllerActionSourceCUpButton:
+static void controllerActionReadDirection(struct Vector2* direction, int controllerIndex, enum ControllerActionInput input) {
+    // Button clusters (C buttons or D-pad) either have all buttons bound to
+    // a direction action or none at all. This is represented by binding the
+    // up button and leaving the others unbound.
+    switch (input) {
+        case ControllerActionInputCUpButton:
             if (controllerGetButtons(controllerIndex, ControllerButtonCUp)) {
-                result.y += 1.0f;
+                direction->y += 1.0f;
             }
             if (controllerGetButtons(controllerIndex, ControllerButtonCDown)) {
-                result.y -= 1.0f;
+                direction->y -= 1.0f;
             }
             if (controllerGetButtons(controllerIndex, ControllerButtonCRight)) {
-                result.x += 1.0f;
+                direction->x += 1.0f;
             }
             if (controllerGetButtons(controllerIndex, ControllerButtonCLeft)) {
-                result.x -= 1.0f;
+                direction->x -= 1.0f;
             }
             break;
-        case ControllerActionSourceDUpButton:
+        case ControllerActionInputDUpButton:
             if (controllerGetButtons(controllerIndex, ControllerButtonUp)) {
-                result.y += 1.0f;
+                direction->y += 1.0f;
             }
             if (controllerGetButtons(controllerIndex, ControllerButtonDown)) {
-                result.y -= 1.0f;
+                direction->y -= 1.0f;
             }
             if (controllerGetButtons(controllerIndex, ControllerButtonRight)) {
-                result.x += 1.0f;
+                direction->x += 1.0f;
             }
             if (controllerGetButtons(controllerIndex, ControllerButtonLeft)) {
-                result.x -= 1.0f;
+                direction->x -= 1.0f;
             }
             break;
-        case ControllerActionSourceJoystick:
+        case ControllerActionInputJoystick:
         {
             struct ControllerStick padStick;
             controllerGetStick(controllerIndex, &padStick);
-            result.x += controllerCleanupStickInput(padStick.x);
-            result.y += controllerCleanupStickInput(padStick.y);
+            direction->x += normalizeJoystickValue(padStick.x);
+            direction->y += normalizeJoystickValue(padStick.y);
             break;
         }
         default:
             break;
     }
-
-    gDirections[directionIndex] = result;
 }
 
-void controllerActionRead() {
-    gActionState = 0;
-    gDirections[0] = gZeroVec2;
-    gDirections[1] = gZeroVec2;
+static void controllerActionApply(enum ControllerAction action) {
+    sActiveActions |= ACTION_TO_BITMASK(action);
+}
 
-    int nextMutedState = 0;
+void controllerActionSetDeadzone(float percent) {
+    sDeadzone = (short)(percent * MAX_DEADZONE_RANGE);
+    sDeadzoneScale = 1.0f / (MAX_JOYSTICK_RANGE - sDeadzone);
+}
+
+void controllerActionUpdate() {
+    sActiveActions = 0;
+    sDirections[0] = gZeroVec2;
+    sDirections[1] = gZeroVec2;
+
+    int nextMutedActions = 0;
 
     for (int controllerIndex = 0; controllerIndex < MAX_BINDABLE_CONTROLLERS; ++controllerIndex) {
-        for (int sourceIndex = 0; sourceIndex < ControllerActionSourceCount; ++sourceIndex) {
-            enum ControllerAction action = gSaveData.controls.controllerSettings[controllerIndex][sourceIndex];
+        for (int inputIndex = 0; inputIndex < ControllerActionInputCount; ++inputIndex) {
+            enum ControllerAction action = gSaveData.controls.controllerBindings[controllerIndex][inputIndex];
 
-            if (IS_DIRECTION_ACTION(action)) {
-                controllerActionReadDirection(sourceIndex, controllerIndex, action - ControllerActionMove);
+            if (action == ControllerActionNone) {
+                continue;
+            }
 
-                if (sourceIndex == ControllerActionSourceCUpButton || sourceIndex == ControllerActionSourceDUpButton) {
-                    sourceIndex += 3;
-                }
-            } else if (IS_HOLDABLE_ACTION(action) && controllerGetButtons(controllerIndex, gActionSourceButtonMask[sourceIndex])) {
-                if (ACTION_TO_BITMASK(action) & gMutedActions) {
-                    nextMutedState |= ACTION_TO_BITMASK(action);
+            if (ACTION_IS_DIRECTION(action)) {
+                controllerActionReadDirection(&sDirections[ACTION_DIRECTION_INDEX(action)], controllerIndex, inputIndex);
+            } else if (ACTION_IS_HOLDABLE(action) && controllerGetButtons(controllerIndex, sActionInputButtonMask[inputIndex])) {
+                if (ACTION_TO_BITMASK(action) & sMutedActions) {
+                    nextMutedActions |= ACTION_TO_BITMASK(action);
                 } else {
                     controllerActionApply(action);
                 }
-            } else if (controllerGetButtonsDown(controllerIndex, gActionSourceButtonMask[sourceIndex])) {
+            } else if (controllerGetButtonsDown(controllerIndex, sActionInputButtonMask[inputIndex])) {
                 controllerActionApply(action);
             }
         }
     }
 
     for (int i = 0; i < 2; ++i) {
-        gDirections[i].x = clampf(gDirections[i].x, -1.0f, 1.0f);
-        gDirections[i].y = clampf(gDirections[i].y, -1.0f, 1.0f);
+        sDirections[i].x = clampf(sDirections[i].x, -1.0f, 1.0f);
+        sDirections[i].y = clampf(sDirections[i].y, -1.0f, 1.0f);
     }
 
-    gMutedActions = nextMutedState;
-}
-
-struct Vector2 controllerDirectionGet(enum ControllerAction direction) {
-    if (!IS_DIRECTION_ACTION(direction)) {
-        return gZeroVec2;
-    }
-
-    return gDirections[direction - ControllerActionMove];
+    sMutedActions = nextMutedActions;
 }
 
 int controllerActionGet(enum ControllerAction action) {
-    return (gActionState & (1 << action)) != 0;
+    return (sActiveActions & ACTION_TO_BITMASK(action)) != 0;
+}
+
+void controllerActionGetDirection(enum ControllerAction action, struct Vector2* direction) {
+    if (ACTION_IS_DIRECTION(action)) {
+        *direction = sDirections[ACTION_DIRECTION_INDEX(action)];
+    } else {
+        *direction = gZeroVec2;
+    }
 }
 
 void controllerActionMuteActive() {
-    gMutedActions = gActionState;
+    sMutedActions = sActiveActions;
 }
 
-int controllerSourcesForAction(enum ControllerAction action, struct ControllerSourceWithController* sources, int maxSources) {
-    int index = 0;
+int controllerActionSources(enum ControllerAction action, struct ControllerActionSource* sources, int maxSources) {
+    int sourceIndex = 0;
 
     for (int controllerIndex = 0; controllerIndex < MAX_BINDABLE_CONTROLLERS; ++controllerIndex) {
-        for (int sourceIndex = 0; sourceIndex < ControllerActionSourceCount; ++sourceIndex) {
-            if (gSaveData.controls.controllerSettings[controllerIndex][sourceIndex] == action) {
-                sources[index].button = sourceIndex;
-                sources[index].controller = controllerIndex;
-                ++index;
+        for (int inputIndex = 0; inputIndex < ControllerActionInputCount; ++inputIndex) {
+            if (gSaveData.controls.controllerBindings[controllerIndex][inputIndex] != action) {
+                continue;
+            }
 
-                if (IS_DIRECTION_ACTION(action) && 
-                    (sourceIndex == ControllerActionSourceCUpButton || sourceIndex == ControllerActionSourceDUpButton)) {
-                    sourceIndex += 3;
-                }
+            sources[sourceIndex].controllerIndex = controllerIndex;
+            sources[sourceIndex].input = inputIndex;
+            ++sourceIndex;
 
-                if (index == maxSources) {
-                    return index;
-                }
-            } 
+            if (sourceIndex == maxSources) {
+                return sourceIndex;
+            }
         }
     }
 
-    return index;
+    return sourceIndex;
 }
 
-void controllerSetSource(enum ControllerAction action, enum ControllerActionSource source, int controller) {
-    if (IS_DIRECTION_ACTION(action)) {
-        source = controllerSourceMapToDirection(source);
-        
+static int controllerActionSetDirectionSource(enum ControllerAction action, struct ControllerActionSource* source) {
+    uint8_t* bindings = gSaveData.controls.controllerBindings[source->controllerIndex];
+
+    // If binding a button from a cluster (C buttons or D-pad), bind all of
+    // its buttons. This is represented by binding the up button and leaving
+    // the others unbound.
+    if (INPUT_IS_C_BUTTON(source->input)) {
+        bindings[ControllerActionInputCUpButton]    = action;
+        bindings[ControllerActionInputCRightButton] = ControllerActionNone;
+        bindings[ControllerActionInputCDownButton]  = ControllerActionNone;
+        bindings[ControllerActionInputCLeftButton]  = ControllerActionNone;
+    } else if (INPUT_IS_D_PAD(source->input)) {
+        bindings[ControllerActionInputDUpButton]    = action;
+        bindings[ControllerActionInputDRightButton] = ControllerActionNone;
+        bindings[ControllerActionInputDDownButton]  = ControllerActionNone;
+        bindings[ControllerActionInputDLeftButton]  = ControllerActionNone;
+    } else if (source->input == ControllerActionInputJoystick) {
+        bindings[ControllerActionInputJoystick]     = action;
     } else {
-        source = controllerSourceMapAction(source);
+        return 0;
     }
 
-    if (source == ControllerActionSourceCount) {
-        return;
+    return 1;
+}
+
+static int controllerActionSetNonDirectionSource(enum ControllerAction action, struct ControllerActionSource* source) {
+    if (source->input == ControllerActionInputJoystick) {
+        return 0;
     }
 
-    if (source >= ControllerActionSourceCUpButton && 
-        source <= ControllerActionSourceCLeftButton && 
-        IS_DIRECTION_ACTION(gSaveData.controls.controllerSettings[controller][ControllerActionSourceCUpButton])) {
-        gSaveData.controls.controllerSettings[controller][ControllerActionSourceCUpButton] = ControllerActionNone;
+    uint8_t* bindings = gSaveData.controls.controllerBindings[source->controllerIndex];
+
+    // When a button from a cluster (C buttons or D-pad) is bound to a direction
+    // action, all of its buttons are bound. This is represented by binding
+    // the up button and leaving the others unbound.
+    //
+    // Unbind button cluster from direction action if rebinding one of its
+    // buttons (don't allow both types of actions at the same time)
+    if (INPUT_IS_C_BUTTON(source->input) && ACTION_IS_DIRECTION(bindings[ControllerActionInputCUpButton])) {
+        bindings[ControllerActionInputCUpButton] = ControllerActionNone;
+    } else if (INPUT_IS_D_PAD(source->input) && ACTION_IS_DIRECTION(bindings[ControllerActionInputDUpButton])) {
+        bindings[ControllerActionInputDUpButton] = ControllerActionNone;
     }
 
-    if (source >= ControllerActionSourceDUpButton && 
-        source <= ControllerActionSourceDLeftButton && 
-        IS_DIRECTION_ACTION(gSaveData.controls.controllerSettings[controller][ControllerActionSourceDUpButton])) {
-        gSaveData.controls.controllerSettings[controller][ControllerActionSourceDUpButton] = ControllerActionNone;
-    }
+    bindings[source->input] = action;
+    return 1;
+}
 
-    gSaveData.controls.controllerSettings[controller][source] = action;
-
-    if (IS_DIRECTION_ACTION(action) && (source == ControllerActionSourceCUpButton || source == ControllerActionSourceDUpButton)) {
-        gSaveData.controls.controllerSettings[controller][source + 1] = ControllerActionNone;
-        gSaveData.controls.controllerSettings[controller][source + 2] = ControllerActionNone;
-        gSaveData.controls.controllerSettings[controller][source + 3] = ControllerActionNone;
+int controllerActionSetSource(enum ControllerAction action, struct ControllerActionSource* source) {
+    if (ACTION_IS_DIRECTION(action)) {
+        return controllerActionSetDirectionSource(action, source);
+    } else {
+        return controllerActionSetNonDirectionSource(action, source);
     }
 }
 
-void controllerSetDefaultSource() {
-    zeroMemory(gSaveData.controls.controllerSettings, sizeof(gSaveData.controls.controllerSettings));
-    memCopy(gSaveData.controls.controllerSettings[0], gDefaultControllerSettings, sizeof(gDefaultControllerSettings));
+void controllerActionSetDefaultSources() {
+    zeroMemory(gSaveData.controls.controllerBindings, sizeof(gSaveData.controls.controllerBindings));
+    memCopy(gSaveData.controls.controllerBindings[0], sDefaultControllerBindings, sizeof(sDefaultControllerBindings));
 }
 
-struct ControllerSourceWithController controllerReadAnySource() {
-    struct ControllerSourceWithController result;
-
-    for (result.controller = 0; result.controller < MAX_BINDABLE_CONTROLLERS; ++result.controller) {
-        for (result.button = 0; result.button < ControllerActionSourceCount; ++result.button) {
-            if (controllerGetButtonsDown(result.controller, gActionSourceButtonMask[result.button])) {
-                return result;
-            }
-
-            if (result.button == ControllerActionSourceJoystick) {
+int controllerActionReadAnySource(struct ControllerActionSource* source) {
+    for (source->controllerIndex = 0; source->controllerIndex < MAX_BINDABLE_CONTROLLERS; ++source->controllerIndex) {
+        for (source->input = 0; source->input < ControllerActionInputCount; ++source->input) {
+            if (source->input == ControllerActionInputJoystick) {
                 struct ControllerStick padStick;
-                controllerGetStick(result.controller, &padStick);
+                controllerGetStick(source->controllerIndex, &padStick);
 
                 if (abs(padStick.x) > JOYSTICK_MOVE_THRESHOLD || abs(padStick.y) > JOYSTICK_MOVE_THRESHOLD) {
-                    return result;
+                    return 1;
                 }
+            } else if (controllerGetButtonsDown(source->controllerIndex, sActionInputButtonMask[source->input])) {
+                return 1;
             }
         }
     }
 
-    return result;
-}
-
-enum ControllerActionSource controllerSourceMapToDirection(enum ControllerActionSource source) {
-    if (source >= ControllerActionSourceCUpButton && source <= ControllerActionSourceCLeftButton) {
-        return ControllerActionSourceCUpButton;
-    }
-
-    if (source >= ControllerActionSourceDUpButton && source <= ControllerActionSourceDLeftButton) {
-        return ControllerActionSourceDUpButton;
-    }
-
-    if (source == ControllerActionSourceJoystick) {
-        return ControllerActionSourceJoystick;
-    }
-
-    return ControllerActionSourceCount;
-}
-
-enum ControllerActionSource controllerSourceMapAction(enum ControllerActionSource source) {
-    if (source == ControllerActionSourceJoystick) {
-        return ControllerActionSourceCount;
-    }
-
-    return source;
+    return 0;
 }

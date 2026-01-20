@@ -3,33 +3,40 @@
 
 #include "math/vector2.h"
 
-enum ControllerActionSource {
-    // face buttons
-    ControllerActionSourceAButton,
-    ControllerActionSourceBButton,
-    ControllerActionSourceStartButton,
-    // c buttons
-    ControllerActionSourceCUpButton,
-    ControllerActionSourceCRightButton,
-    ControllerActionSourceCDownButton,
-    ControllerActionSourceCLeftButton,
-    // d pad
-    ControllerActionSourceDUpButton,
-    ControllerActionSourceDRightButton,
-    ControllerActionSourceDDownButton,
-    ControllerActionSourceDLeftButton,
-    // triggers
-    ControllerActionSourceZTrig,
-    ControllerActionSourceRTrig,
-    ControllerActionSourceLTrig,
-    // joystick
-    ControllerActionSourceJoystick,
+#include <stdint.h>
 
-    ControllerActionSourceCount,
+#define ACTION_IS_DIRECTION(action)         ((action) >= ControllerActionMove && (action) <= ControllerActionRotate)
+#define MAX_BINDABLE_CONTROLLERS            2
+#define MAX_SOURCES_PER_CONTROLLER_ACTION   4
+
+enum ControllerActionInput {
+    ControllerActionInputAButton,
+    ControllerActionInputBButton,
+    ControllerActionInputStartButton,
+
+    ControllerActionInputCUpButton,
+    ControllerActionInputCRightButton,
+    ControllerActionInputCDownButton,
+    ControllerActionInputCLeftButton,
+
+    ControllerActionInputDUpButton,
+    ControllerActionInputDRightButton,
+    ControllerActionInputDDownButton,
+    ControllerActionInputDLeftButton,
+
+    ControllerActionInputZTrig,
+    ControllerActionInputRTrig,
+    ControllerActionInputLTrig,
+
+    ControllerActionInputJoystick,
+
+    ControllerActionInputCount
 };
 
 enum ControllerAction {
     ControllerActionNone,
+
+    // Button actions
     ControllerActionOpenPortal0,
     ControllerActionOpenPortal1,
     ControllerActionJump,
@@ -39,40 +46,30 @@ enum ControllerAction {
     ControllerActionLookBackward,
     ControllerActionZoom,
     ControllerActionPause,
-    // direction actions
+
+    // Direction actions
     ControllerActionMove,
     ControllerActionRotate,
 
     ControllerActionCount = ControllerActionRotate,
 };
 
-#define IS_DIRECTION_ACTION(action)     ((action) >= ControllerActionMove && (action) <= ControllerActionRotate)
-#define IS_HOLDABLE_ACTION(action)     ((action) >= ControllerActionOpenPortal0 && (action) <= ControllerActionOpenPortal1)
-#define IS_VALID_SOURCE(source) ((source) >= 0 && (source) < ControllerActionSourceCount)
-
-#define MAX_DEADZONE             0.25f
-#define MAX_BINDABLE_CONTROLLERS 2
-
-struct ControllerSourceWithController {
-    unsigned char button;
-    unsigned char controller;
+struct ControllerActionSource {
+    uint8_t controllerIndex;
+    enum ControllerActionInput input;
 };
 
-void controllerActionRead();
+void controllerActionUpdate();
 
-void controllerSetDeadzone(float percent);
-struct Vector2 controllerDirectionGet(enum ControllerAction direction);
 int controllerActionGet(enum ControllerAction action);
+void controllerActionGetDirection(enum ControllerAction action, struct Vector2* direction);
 void controllerActionMuteActive();
 
-int controllerSourcesForAction(enum ControllerAction action, struct ControllerSourceWithController* sources, int maxSources);
+int controllerActionSources(enum ControllerAction action, struct ControllerActionSource* sources, int maxSources);
+int controllerActionReadAnySource(struct ControllerActionSource* source);
+int controllerActionSetSource(enum ControllerAction action, struct ControllerActionSource* source);
+void controllerActionSetDefaultSources();
 
-void controllerSetSource(enum ControllerAction action, enum ControllerActionSource source, int controller);
-void controllerSetDefaultSource();
-
-struct ControllerSourceWithController controllerReadAnySource();
-
-enum ControllerActionSource controllerSourceMapToDirection(enum ControllerActionSource source);
-enum ControllerActionSource controllerSourceMapAction(enum ControllerActionSource source);
+void controllerActionSetDeadzone(float percent);
 
 #endif
