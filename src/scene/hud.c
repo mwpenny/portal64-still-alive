@@ -218,7 +218,7 @@ void hudShowSubtitle(struct Hud* hud, enum StringId subtitleId, enum SubtitleTyp
         }
         return;
     }
-    else if (subtitleType == SubtitleTypeCloseCaption) {
+    else if (subtitleType == SubtitleTypeSubtitle) {
         if (hud->flags & HudFlagsShowingSubtitle){
             hud->flags |= HudFlagsSubtitleQueued;
             hud->queuedSubtitleId = subtitleId;
@@ -387,7 +387,7 @@ static void hudRenderSubtitle(char* message, float textOpacity, float background
 
     struct Coloru8 textColor;
 
-    if (subtitleType == SubtitleTypeCloseCaption) {
+    if (subtitleType == SubtitleTypeSubtitle) {
         textColor.r = sSubtitleTextColor.r;
         textColor.g = sSubtitleTextColor.g;
         textColor.b = sSubtitleTextColor.b;

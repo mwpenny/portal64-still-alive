@@ -11,7 +11,7 @@
 enum SubtitleType {
     SubtitleTypeNone,
     SubtitleTypeCaption,
-    SubtitleTypeCloseCaption,
+    SubtitleTypeSubtitle,
 };
 
 enum HudFlags {
