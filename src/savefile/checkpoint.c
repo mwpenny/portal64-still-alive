@@ -59,7 +59,7 @@ static int checkpointSlotIsValid(int slotIndex) {
 
 static void checkpointUpdateCurrentSlot() {
     // The player can delete saves, so look for the most relevant existing save
-    // Note that deleting saves only reorderes in menus, not in memory
+    // Note that deleting saves only reorders in menus, not in memory
 
     if (sCheckpointCurrentSlot == SAVEFILE_NO_SLOT) {
         // Not trying to load a checkpoint

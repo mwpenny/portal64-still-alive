@@ -44,8 +44,7 @@ void mainMenuInit(struct GameMenu* gameMenu) {
     mainMenuPlayAmbientSound();
 
     for (int i = 0; i < gScene.clockCount; ++i) {
-        // this shows the pause time for the main menu
-        gScene.clocks[i].timeLeft = -1.0f;
+        clockShowMainMenuTime(&gScene.clocks[i]);
     }
 }
 

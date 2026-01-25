@@ -153,7 +153,7 @@ int updateSchedulerModeAndGetFPS(int interlacedMode) {
     int fps = 60;
     
     schedulerMode = interlacedMode ? OS_VI_NTSC_LPF1 : OS_VI_NTSC_LPN1;
-    
+
     switch (osTvType) {
 	case 0: // PAL
 		schedulerMode = HIGH_RES ? (interlacedMode ? OS_VI_PAL_HPF1 : OS_VI_PAL_HPN1) : (interlacedMode ? OS_VI_PAL_LPF1 : OS_VI_PAL_LPN1);

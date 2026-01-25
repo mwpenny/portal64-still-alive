@@ -14,9 +14,10 @@
 #include "codegen/assets/models/signage/clock_digits.h"
 
 #define DIGIT_WIDTH     512
+#define MENU_TIME_LEFT  -1.0f
 
-u8 gCurrentClockDigits[7];
-Vtx* gClockDigits[] = {
+static u8 gCurrentClockDigits[7];
+static Vtx* gClockDigits[] = {
     signage_clock_digits_clock_digits_hour_01_color,
     signage_clock_digits_clock_digits_minute_10_color,
     signage_clock_digits_clock_digits_minute_01_color,
@@ -26,7 +27,7 @@ Vtx* gClockDigits[] = {
     signage_clock_digits_clock_digits_ms_01_color,
 };
 
-void clockSetDigit(int digitIndex, int currDigit) {
+static void clockSetDigit(int digitIndex, int currDigit) {
     int prevDigit = gCurrentClockDigits[digitIndex];
 
     if (prevDigit == currDigit) {
@@ -42,7 +43,7 @@ void clockSetDigit(int digitIndex, int currDigit) {
     osWritebackDCache(digitPointer, sizeof(Vtx) * 4);
 }
 
-void clockSetTime(float timeInSeconds) {
+static void clockSetTime(float timeInSeconds) {
     float minutes = floorf(timeInSeconds * (1.0f / 60.0f));
     clockSetDigit(0, (int)minutes);
     timeInSeconds -= minutes *= 60.0f;
@@ -63,15 +64,18 @@ void clockSetTime(float timeInSeconds) {
     clockSetDigit(4, (int)hundredthsOfSecond);
     timeInSeconds -= hundredthsOfSecond * 0.01f;
 
-    float thousandthsOfSecond = floorf(timeInSeconds * 1000.f);
-    clockSetDigit(5, (int)thousandthsOfSecond);
-    timeInSeconds -= thousandthsOfSecond * 0.001f;
-
-    float tenThousandthsOfSecond = floorf(timeInSeconds * 10000.f);
-    clockSetDigit(6, (int)tenThousandthsOfSecond);
+    // PAL timestep length + floating point imprecision results in these
+    // digits updating infrequently. The units are small so just fake it.
+    if (timeInSeconds > 0.0f) {
+        clockSetDigit(5, randomInRange(0, 10));
+        clockSetDigit(6, randomInRange(0, 10));
+    } else {
+        clockSetDigit(5, 0);
+        clockSetDigit(6, 0);
+    }
 }
 
-void clockRenderRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
+static void clockRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Clock* clock = (struct Clock*)data;
 
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
@@ -80,8 +84,8 @@ void clockRenderRender(void* data, struct DynamicRenderDataList* renderList, str
         return;
     }
 
-    // main menu clock time
-    if (clock->timeLeft == -1.0f) {
+    // Main menu clock time
+    if (clock->timeLeft == MENU_TIME_LEFT) {
         clockSetDigit(0, 1);
         clockSetDigit(1, 5);
         clockSetDigit(2, 9);
@@ -89,8 +93,6 @@ void clockRenderRender(void* data, struct DynamicRenderDataList* renderList, str
         clockSetDigit(4, 0);
         clockSetDigit(5, 0);
         clockSetDigit(6, 0);
-    } else {
-        clockSetTime(clock->timeLeft);    
     }
 
     transformToMatrixL(&clock->transform, matrix, SCENE_SCALE);
@@ -124,10 +126,14 @@ void clockInit(struct Clock* clock, struct ClockDefinition* definition) {
     clock->roomIndex = definition->roomIndex;
     clock->timeLeft = definition->duration;
 
-    int dynamicId = dynamicSceneAdd(clock, clockRenderRender, &clock->transform.position, 0.8f);
+    int dynamicId = dynamicSceneAdd(clock, clockRender, &clock->transform.position, 0.8f);
     dynamicSceneSetRoomFlags(dynamicId, ROOM_FLAG_FROM_INDEX(clock->roomIndex));
     
     zeroMemory(gCurrentClockDigits, sizeof(gCurrentClockDigits));
+}
+
+void clockShowMainMenuTime(struct Clock* clock) {
+    clock->timeLeft = MENU_TIME_LEFT;
 }
 
 void clockUpdate(struct Clock* clock) {
@@ -137,5 +143,7 @@ void clockUpdate(struct Clock* clock) {
         if (clock->timeLeft < 0.0f) {
             clock->timeLeft = 0.0f;
         }
+
+        clockSetTime(clock->timeLeft);
     }
 }
