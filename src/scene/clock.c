@@ -143,7 +143,7 @@ void clockUpdate(struct Clock* clock) {
         if (clock->timeLeft < 0.0f) {
             clock->timeLeft = 0.0f;
         }
-
-        clockSetTime(clock->timeLeft);
     }
+
+    clockSetTime(clock->timeLeft);
 }
