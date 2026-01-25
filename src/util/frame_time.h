@@ -9,7 +9,7 @@ extern Time  gLastFrameTime;
 #define FRAME_SKIP          1
 #define FIXED_DELTA_TIME    gFixedDeltaTime
 
+void frameTimeInit(int fps);
 void frameTimeUpdate();
-void frameTimeSetFixedDelta(int fps);
 
 #endif

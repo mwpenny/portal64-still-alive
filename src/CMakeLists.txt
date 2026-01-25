@@ -23,7 +23,7 @@ target_sources(engine INTERFACE
     audio/soundarray.c
     audio/soundplayer.c
     controls/controller_actions.c
-    controls/rumble_pak.c
+    controls/rumble_pak_clip.c
     decor/decor_object.c
     decor/decor_object_list.c
     effects/effect_definitions.c

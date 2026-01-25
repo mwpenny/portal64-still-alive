@@ -1,16 +1,18 @@
 #include "frame_time.h"
 
-float gFixedDeltaTime = ((1.0f + FRAME_SKIP) / 60.0f);
+#define FPS_TO_DELTA(fps) ((1.0f + FRAME_SKIP) / (float)(fps));
+
+float gFixedDeltaTime = FPS_TO_DELTA(60);
 
 static Time lastFrameStart;
 Time gLastFrameTime;
+
+void frameTimeInit(int fps) {
+    gFixedDeltaTime = FPS_TO_DELTA(fps);
+}
 
 void frameTimeUpdate() {
     Time currTime = timeGetTime();
     gLastFrameTime = currTime - lastFrameStart;
     lastFrameStart = currTime;
-}
-
-void frameTimeSetFixedDelta(int fps) {
-    gFixedDeltaTime = ((1.0f + FRAME_SKIP) / (float)fps);
 }

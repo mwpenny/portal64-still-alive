@@ -5,7 +5,7 @@
 #include "system/controller.h"
 #include "util/memory.h"
 
-#define ACTION_TO_BITMASK(action)       (1 << (action))
+#define INDEX_TO_BITMASK(index)         (1 << (index))
 #define ACTION_DIRECTION_INDEX(action)  ((action) - ControllerActionMove)
 
 #define ACTION_IS_HOLDABLE(action)      ((action) >= ControllerActionOpenPortal0 && (action) <= ControllerActionOpenPortal1)
@@ -16,6 +16,8 @@
 #define MAX_DEADZONE_RANGE              20
 #define DEFAULT_DEADZONE_SIZE           5
 #define JOYSTICK_MOVE_THRESHOLD         40
+
+static uint8_t sBoundControllers = 0;
 
 static int sActiveActions = 0;
 static int sMutedActions = 0;
@@ -67,6 +69,21 @@ static enum ControllerButtons sActionInputButtonMask[ControllerActionInputCount]
 
     [ControllerActionInputJoystick]        = ControllerButtonNone,
 };
+
+static void updateBoundControllers() {
+    sBoundControllers = 0;
+
+    for (int controllerIndex = 0; controllerIndex < MAX_BINDABLE_CONTROLLERS; ++controllerIndex) {
+        for (int inputIndex = 0; inputIndex < ControllerActionInputCount; ++inputIndex) {
+            enum ControllerAction action = gSaveData.controls.controllerBindings[controllerIndex][inputIndex];
+
+            if (action != ControllerActionNone) {
+                sBoundControllers |= INDEX_TO_BITMASK(controllerIndex);
+                break;
+            }
+        }
+    }
+}
 
 static float normalizeJoystickValue(int8_t input) {
     if (input > -sDeadzone && input < sDeadzone) {
@@ -132,12 +149,11 @@ static void controllerActionReadDirection(struct Vector2* direction, int control
 }
 
 static void controllerActionApply(enum ControllerAction action) {
-    sActiveActions |= ACTION_TO_BITMASK(action);
+    sActiveActions |= INDEX_TO_BITMASK(action);
 }
 
-void controllerActionSetDeadzone(float percent) {
-    sDeadzone = (short)(percent * MAX_DEADZONE_RANGE);
-    sDeadzoneScale = 1.0f / (MAX_JOYSTICK_RANGE - sDeadzone);
+void controllerActionInit() {
+    updateBoundControllers();
 }
 
 void controllerActionUpdate() {
@@ -158,8 +174,8 @@ void controllerActionUpdate() {
             if (ACTION_IS_DIRECTION(action)) {
                 controllerActionReadDirection(&sDirections[ACTION_DIRECTION_INDEX(action)], controllerIndex, inputIndex);
             } else if (ACTION_IS_HOLDABLE(action) && controllerGetButtons(controllerIndex, sActionInputButtonMask[inputIndex])) {
-                if (ACTION_TO_BITMASK(action) & sMutedActions) {
-                    nextMutedActions |= ACTION_TO_BITMASK(action);
+                if (INDEX_TO_BITMASK(action) & sMutedActions) {
+                    nextMutedActions |= INDEX_TO_BITMASK(action);
                 } else {
                     controllerActionApply(action);
                 }
@@ -178,7 +194,7 @@ void controllerActionUpdate() {
 }
 
 int controllerActionGet(enum ControllerAction action) {
-    return (sActiveActions & ACTION_TO_BITMASK(action)) != 0;
+    return (sActiveActions & INDEX_TO_BITMASK(action)) != 0;
 }
 
 void controllerActionGetDirection(enum ControllerAction action, struct Vector2* direction) {
@@ -213,6 +229,25 @@ int controllerActionSources(enum ControllerAction action, struct ControllerActio
     }
 
     return sourceIndex;
+}
+
+int controllerActionReadAnySource(struct ControllerActionSource* source) {
+    for (source->controllerIndex = 0; source->controllerIndex < MAX_BINDABLE_CONTROLLERS; ++source->controllerIndex) {
+        for (source->input = 0; source->input < ControllerActionInputCount; ++source->input) {
+            if (source->input == ControllerActionInputJoystick) {
+                struct ControllerStick padStick;
+                controllerGetStick(source->controllerIndex, &padStick);
+
+                if (abs(padStick.x) > JOYSTICK_MOVE_THRESHOLD || abs(padStick.y) > JOYSTICK_MOVE_THRESHOLD) {
+                    return 1;
+                }
+            } else if (controllerGetButtonsDown(source->controllerIndex, sActionInputButtonMask[source->input])) {
+                return 1;
+            }
+        }
+    }
+
+    return 0;
 }
 
 static int controllerActionSetDirectionSource(enum ControllerAction action, struct ControllerActionSource* source) {
@@ -264,33 +299,30 @@ static int controllerActionSetNonDirectionSource(enum ControllerAction action, s
 }
 
 int controllerActionSetSource(enum ControllerAction action, struct ControllerActionSource* source) {
+    int ret;
+
     if (ACTION_IS_DIRECTION(action)) {
-        return controllerActionSetDirectionSource(action, source);
+        ret = controllerActionSetDirectionSource(action, source);
     } else {
-        return controllerActionSetNonDirectionSource(action, source);
+        ret = controllerActionSetNonDirectionSource(action, source);
     }
+
+    updateBoundControllers();
+    return ret;
 }
 
 void controllerActionSetDefaultSources() {
     zeroMemory(gSaveData.controls.controllerBindings, sizeof(gSaveData.controls.controllerBindings));
     memCopy(gSaveData.controls.controllerBindings[0], sDefaultControllerBindings, sizeof(sDefaultControllerBindings));
+
+    updateBoundControllers();
 }
 
-int controllerActionReadAnySource(struct ControllerActionSource* source) {
-    for (source->controllerIndex = 0; source->controllerIndex < MAX_BINDABLE_CONTROLLERS; ++source->controllerIndex) {
-        for (source->input = 0; source->input < ControllerActionInputCount; ++source->input) {
-            if (source->input == ControllerActionInputJoystick) {
-                struct ControllerStick padStick;
-                controllerGetStick(source->controllerIndex, &padStick);
+int controllerActionUsesController(int controllerIndex) {
+    return (sBoundControllers & INDEX_TO_BITMASK(controllerIndex)) != 0;
+}
 
-                if (abs(padStick.x) > JOYSTICK_MOVE_THRESHOLD || abs(padStick.y) > JOYSTICK_MOVE_THRESHOLD) {
-                    return 1;
-                }
-            } else if (controllerGetButtonsDown(source->controllerIndex, sActionInputButtonMask[source->input])) {
-                return 1;
-            }
-        }
-    }
-
-    return 0;
+void controllerActionSetDeadzone(float percent) {
+    sDeadzone = (short)(percent * MAX_DEADZONE_RANGE);
+    sDeadzoneScale = 1.0f / (MAX_JOYSTICK_RANGE - sDeadzone);
 }

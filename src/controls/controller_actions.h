@@ -59,6 +59,7 @@ struct ControllerActionSource {
     enum ControllerActionInput input;
 };
 
+void controllerActionInit();
 void controllerActionUpdate();
 
 int controllerActionGet(enum ControllerAction action);
@@ -69,6 +70,7 @@ int controllerActionSources(enum ControllerAction action, struct ControllerActio
 int controllerActionReadAnySource(struct ControllerActionSource* source);
 int controllerActionSetSource(enum ControllerAction action, struct ControllerActionSource* source);
 void controllerActionSetDefaultSources();
+int controllerActionUsesController(int controllerIndex);
 
 void controllerActionSetDeadzone(float percent);
 

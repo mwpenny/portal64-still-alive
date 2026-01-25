@@ -6,7 +6,7 @@
 #include "audio/clips.h"
 #include "audio/soundplayer.h"
 #include "controls/controller_actions.h"
-#include "controls/rumble_pak.h"
+#include "controls/rumble_pak_clip.h"
 #include "debug_scene.h"
 #include "decor/decor_object_list.h"
 #include "dynamic_scene.h"
@@ -124,7 +124,6 @@ void sceneInit(struct Scene* scene) {
 
 void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     signalsInit(1);
-    rumblePakSetPaused(0);
 
     cameraInit(&scene->camera, DEFAULT_CAMERA_FOV, DEFAULT_NEAR_PLANE * SCENE_SCALE, DEFAULT_FAR_PLANE * SCENE_SCALE);
 
@@ -377,11 +376,10 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
 u8 gFireGunRumbleWaveData[] = {
     0xFF, 0xE9,
 };
-
 struct RumblePakWave gFireGunRumbleWave = {
     .samples = gFireGunRumbleWaveData,
     .sampleCount = 8,
-    .samplesPerTick = 1 << 6,
+    .samplesPerSecond = 30,
 };
 
 void sceneCheckPortals(struct Scene* scene) {
@@ -709,7 +707,7 @@ void sceneUpdate(struct Scene* scene) {
         if (gGameMenu.state == GameMenuStateResumeGame) {
             controllerActionMuteActive();
             soundPlayerResume();
-            rumblePakSetPaused(0);
+            rumblePakClipSetPaused(0);
         }
 
         if (gGameMenu.state == GameMenuStateQuit) {
@@ -723,7 +721,7 @@ void sceneUpdate(struct Scene* scene) {
         gGameMenu.state = GameMenuStateLanding;
         gGameMenu.landingMenu.selectedItem = 0;
         soundPlayerPause();
-        rumblePakSetPaused(1);
+        rumblePakClipSetPaused(1);
     }
 
     effectsUpdate(&scene->effects);

@@ -4,7 +4,7 @@
 #include "audio/audio.h"
 #include "audio/soundplayer.h"
 #include "controls/controller_actions.h"
-#include "controls/rumble_pak.h"
+#include "controls/rumble_pak_clip.h"
 #include "defs.h"
 #include "graphics/graphics.h"
 #include "graphics/profile_task.h"
@@ -232,9 +232,10 @@ static void gameProc(void* arg) {
     
     levelLoadWithCallbacks(INTRO_MENU);
     controllersInit();
+    controllerActionInit();
     rumblePakClipInit();
     initAudio(fps);
-    frameTimeSetFixedDelta(fps);
+    frameTimeInit(fps);
     soundPlayerInit();
     translationsLoad(gSaveData.video.textLanguage);
     gSceneCallbacks->initCallback(gSceneCallbacks->data);

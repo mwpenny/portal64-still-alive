@@ -2,7 +2,7 @@
 
 #include "audio/clips.h"
 #include "audio/soundplayer.h"
-#include "controls/rumble_pak.h"
+#include "controls/rumble_pak_clip.h"
 #include "levels/cutscene_runner.h"
 #include "math/mathf.h"
 #include "physics/collision_scene.h"
@@ -39,7 +39,7 @@ static unsigned char sElevatorRumbleData[] = {
 static struct RumblePakWave sElevatorRumbleWave = {
     .samples = sElevatorRumbleData,
     .sampleCount = 24,
-    .samplesPerTick = 1 << 4,
+    .samplesPerSecond = 7,
 };
 
 static struct ColliderTypeData sElevatorColliderType = {

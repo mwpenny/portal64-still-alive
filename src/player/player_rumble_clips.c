@@ -8,7 +8,7 @@ unsigned char gPlayerDamageRumbleData[] = {
 struct RumblePakWave gPlayerDamageRumbleWave = {
     .samples = gPlayerDamageRumbleData,
     .sampleCount = 8,
-    .samplesPerTick = 1 << 5,
+    .samplesPerSecond = 15,
 };
 
 unsigned char gPlayerDieRumbleData[] = {
@@ -17,7 +17,7 @@ unsigned char gPlayerDieRumbleData[] = {
 struct RumblePakWave gPlayerDieRumbleWave = {
     .samples = gPlayerDieRumbleData,
     .sampleCount = 24,
-    .samplesPerTick = 1 << 5,
+    .samplesPerSecond = 15,
 };
 
 unsigned char gPlayerClosePortalRumbleData[] = {
@@ -26,7 +26,7 @@ unsigned char gPlayerClosePortalRumbleData[] = {
 struct RumblePakWave gPlayerClosePortalRumble = {
     .samples = gPlayerClosePortalRumbleData,
     .sampleCount = 8,
-    .samplesPerTick = 1 << 5,
+    .samplesPerSecond = 15,
 };
 
 unsigned char gPlayerLandSoftData[] = {
@@ -45,17 +45,17 @@ struct RumblePakWave gPlayerLandWaves[PLAYER_LANDING_CLIP_COUNT] = {
     {
         .samples = gPlayerLandHardData,
         .sampleCount = 16,
-        .samplesPerTick = 1 << 5,
+        .samplesPerSecond = 15,
     },
     {
         .samples = gPlayerLandMediumData,
         .sampleCount = 10,
-        .samplesPerTick = 1 << 5,
+        .samplesPerSecond = 15,
     },
     {
         .samples = gPlayerLandSoftData,
         .sampleCount = 6,
-        .samplesPerTick = 1 << 5,
+        .samplesPerSecond = 15,
     },
 };
 

@@ -1,7 +1,7 @@
 #include "cutscene_runner.h"
 
 #include "audio/soundplayer.h"
-#include "controls/rumble_pak.h"
+#include "controls/rumble_pak_clip.h"
 #include "effects/effect_definitions.h"
 #include "levels/levels.h"
 #include "locales/locales.h"
@@ -18,7 +18,7 @@ unsigned char gPortalOpenRumbleData[] = {
 struct RumblePakWave gPortalOpenRumbleWave = {
     .samples = gPortalOpenRumbleData,
     .sampleCount = 8,
-    .samplesPerTick = 1 << 5,
+    .samplesPerSecond = 15,
 };
 
 #define RUMBLE_PLAYER_DISTANCE  8.0f
@@ -160,17 +160,17 @@ struct RumblePakWave gCutsceneRumbleWaves[CUTSCENE_RUMBLE_CLIP_COUNT] = {
     {
         .samples = gCutsceneRumbleSoftData,
         .sampleCount = 6,
-        .samplesPerTick = 1 << 5,
+        .samplesPerSecond = 15,
     },
     {
         .samples = gCutsceneRumbleMediumData,
         .sampleCount = 10,
-        .samplesPerTick = 1 << 5,
+        .samplesPerSecond = 15,
     },
     {
         .samples = gCutsceneRumbleHardData,
         .sampleCount = 16,
-        .samplesPerTick = 1 << 5,
+        .samplesPerSecond = 15,
     },
 };
 
