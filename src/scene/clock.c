@@ -43,7 +43,7 @@ static void clockSetDigit(int digitIndex, int currDigit) {
     osWritebackDCache(digitPointer, sizeof(Vtx) * 4);
 }
 
-static void clockSetTime(float timeInSeconds) {
+static void clockSetTime(float timeInSeconds, short tenThousandths) {
     float minutes = floorf(timeInSeconds * (1.0f / 60.0f));
     clockSetDigit(0, (int)minutes);
     timeInSeconds -= minutes *= 60.0f;
@@ -66,13 +66,10 @@ static void clockSetTime(float timeInSeconds) {
 
     // PAL timestep length + floating point imprecision results in these
     // digits updating infrequently. The units are small so just fake it.
-    if (timeInSeconds > 0.0f) {
-        clockSetDigit(5, randomInRange(0, 10));
-        clockSetDigit(6, randomInRange(0, 10));
-    } else {
-        clockSetDigit(5, 0);
-        clockSetDigit(6, 0);
-    }
+    short thousandths = tenThousandths / 10;
+    tenThousandths = tenThousandths % 10;
+    clockSetDigit(5, thousandths);
+    clockSetDigit(6, tenThousandths);
 }
 
 static void clockRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
@@ -93,6 +90,8 @@ static void clockRender(void* data, struct DynamicRenderDataList* renderList, st
         clockSetDigit(4, 0);
         clockSetDigit(5, 0);
         clockSetDigit(6, 0);
+    } else {
+        clockSetTime(clock->timeLeft, clock->tenThousandths);
     }
 
     transformToMatrixL(&clock->transform, matrix, SCENE_SCALE);
@@ -125,6 +124,7 @@ void clockInit(struct Clock* clock, struct ClockDefinition* definition) {
     clock->transform.scale = gOneVec;
     clock->roomIndex = definition->roomIndex;
     clock->timeLeft = definition->duration;
+    clock->tenThousandths = 0;
 
     int dynamicId = dynamicSceneAdd(clock, clockRender, &clock->transform.position, 0.8f);
     dynamicSceneSetRoomFlags(dynamicId, ROOM_FLAG_FROM_INDEX(clock->roomIndex));
@@ -139,11 +139,11 @@ void clockShowMainMenuTime(struct Clock* clock) {
 void clockUpdate(struct Clock* clock) {
     if (clock->timeLeft > 0.0f) {
         clock->timeLeft -= FIXED_DELTA_TIME;
+        clock->tenThousandths = randomInRange(0, 100);
 
         if (clock->timeLeft < 0.0f) {
             clock->timeLeft = 0.0f;
+            clock->tenThousandths = 0;
         }
     }
-
-    clockSetTime(clock->timeLeft);
 }

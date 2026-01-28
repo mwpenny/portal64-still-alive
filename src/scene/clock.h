@@ -8,6 +8,7 @@ struct Clock {
     struct Transform transform;
     short roomIndex;
     float timeLeft;
+    short tenThousandths;
 };
 
 void clockInit(struct Clock* clock, struct ClockDefinition* definition);
