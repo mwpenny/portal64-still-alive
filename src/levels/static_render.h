@@ -8,11 +8,11 @@
 #include "scene/render_plan.h"
 
 void staticRenderDetermineVisibleRooms(
-    struct FrustumCullingInformation* rootCullingInfo,
+    struct RenderProps* renderStage,
     struct FrustumCullingInformation* cullingInfo,
     u16 currentRoom,
-    u64* visitedRooms,
-    u64 nonVisibleRooms
+    u64 nonVisibleRooms,
+    u64* coveredDoorways
 );
 int staticRenderIsRoomVisible(u64 visibleRooms, u16 roomIndex);
 void staticRender(

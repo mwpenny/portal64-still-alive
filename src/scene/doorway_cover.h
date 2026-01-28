@@ -15,6 +15,6 @@ struct DoorwayCover {
 };
 
 void doorwayCoverInit(struct DoorwayCover* cover, struct DoorwayCoverDefinition* definition, struct World* world);
-void doorwayCoverUpdate(struct DoorwayCover* cover, struct Vector3* viewPosition);
+int doorwayCoverIsOpaqueFromView(struct DoorwayCover* cover, struct Vector3* viewPosition);
 
 #endif

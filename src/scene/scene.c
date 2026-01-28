@@ -1128,8 +1128,12 @@ int sceneClosePortal(struct Scene* scene, int portalIndex) {
     return 0;
 }
 
-void sceneUpdateDoorwayCovers(struct Scene* scene, struct Vector3* viewPosition) {
+void sceneGetCoveredDoorways(struct Scene* scene, struct Vector3* viewPosition, u64* coveredDoorways) {
     for (int i = 0; i < scene->doorwayCoverCount; ++i) {
-        doorwayCoverUpdate(&scene->doorwayCovers[i], viewPosition);
+        struct DoorwayCover* doorwayCover = &scene->doorwayCovers[i];
+
+        if (doorwayCoverIsOpaqueFromView(doorwayCover, viewPosition)) {
+            *coveredDoorways |= (1 << doorwayCover->definition->doorwayIndex);
+        }
     }
 }

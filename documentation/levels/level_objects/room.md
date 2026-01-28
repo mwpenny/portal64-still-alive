@@ -1,7 +1,6 @@
 # @room
 
-A 3D box which defines a portion of a level. Used for culling and broad phase
-collision.
+A 3D box which defines a portion of a level. Used for culling and collision.
 
 ## Name Structure
 

@@ -117,35 +117,37 @@ void staticRenderPopulateRooms(struct FrustumCullingInformation* cullingInfo, Mt
 
 #define FORCE_RENDER_DOORWAY_DISTANCE   0.1f
 
-void staticRenderDetermineVisibleRooms(struct FrustumCullingInformation* rootCullingInfo, struct FrustumCullingInformation* cullingInfo, u16 currentRoom, u64* visitedRooms, u64 nonVisibleRooms) {
+void staticRenderDetermineVisibleRooms(struct RenderProps* renderStage, struct FrustumCullingInformation* cullingInfo, u16 currentRoom, u64 nonVisibleRooms, u64* coveredDoorways) {
     if (currentRoom == RIGID_BODY_NO_ROOM) {
         return;
     }
 
     u64 roomMask = 1LL << currentRoom;
-    *visitedRooms |= roomMask;
+    renderStage->visiblerooms |= roomMask;
 
     nonVisibleRooms |= gCurrentLevel->world.rooms[currentRoom].nonVisibleRooms;
 
     for (int i = 0; i < gCurrentLevel->world.rooms[currentRoom].doorwayCount; ++i) {
-        struct Doorway* doorway = &gCurrentLevel->world.doorways[gCurrentLevel->world.rooms[currentRoom].doorwayIndices[i]];
+        short doorwayIndex = gCurrentLevel->world.rooms[currentRoom].doorwayIndices[i];
+        struct Doorway* doorway = &gCurrentLevel->world.doorways[doorwayIndex];
 
-        if ((doorway->flags & DoorwayFlagsOpen) == 0) {
+        if ((doorway->flags & DoorwayFlagsOpen) == 0 || (*coveredDoorways & (1 << doorwayIndex))) {
             continue;
         }
 
         int newRoom = currentRoom == doorway->roomA ? doorway->roomB : doorway->roomA;
         u64 newRoomMask = 1LL << newRoom;
-        if ((*visitedRooms & newRoomMask) || (nonVisibleRooms & newRoomMask)) {
+        if ((renderStage->visiblerooms & newRoomMask) || (nonVisibleRooms & newRoomMask)) {
             continue;
         }
 
+        struct FrustumCullingInformation* rootCullingInfo = &renderStage->cameraMatrixInfo.cullingInformation;
         float doorwayDistance = planePointDistance(&doorway->quad.plane, &cullingInfo->cameraPos);
 
         if (
             // if the player is close enough to the doorway it should still render it, even if facing the wrong way
             (fabsf(doorwayDistance) > FORCE_RENDER_DOORWAY_DISTANCE || collisionQuadDetermineEdges(&cullingInfo->cameraPos, &doorway->quad)) && 
-            (isQuadOutsideFrustum(cullingInfo, &doorway->quad) || isQuadOutsideFrustum(rootCullingInfo, &doorway->quad))
+            (isQuadOutsideFrustum(cullingInfo, &doorway->quad) || (cullingInfo != rootCullingInfo && isQuadOutsideFrustum(rootCullingInfo, &doorway->quad)))
          ) {
             continue;
         }
@@ -158,7 +160,7 @@ void staticRenderDetermineVisibleRooms(struct FrustumCullingInformation* rootCul
         struct FrustumCullingInformation doorwayFrustum;
         frustumFromQuad(&cullingInfo->cameraPos, &doorway->quad, &doorwayFrustum);
 
-        staticRenderDetermineVisibleRooms(rootCullingInfo, &doorwayFrustum, newRoom, visitedRooms, nonVisibleRooms);
+        staticRenderDetermineVisibleRooms(renderStage, &doorwayFrustum, newRoom, nonVisibleRooms, coveredDoorways);
     };
 }
 

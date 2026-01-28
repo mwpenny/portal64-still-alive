@@ -93,12 +93,8 @@ void doorwayCoverInit(struct DoorwayCover* cover, struct DoorwayCoverDefinition*
     cover->definition = definition;
 }
 
-void doorwayCoverUpdate(struct DoorwayCover* cover, struct Vector3* viewPosition) {
+int doorwayCoverIsOpaqueFromView(struct DoorwayCover* cover, struct Vector3* viewPosition) {
     float threshold = cover->definition->fadeEndDistance * cover->definition->fadeEndDistance;
 
-    if (vector3DistSqrd(&cover->definition->position, viewPosition) >= threshold) {
-        cover->forDoorway->flags &= ~DoorwayFlagsOpen;
-    } else {
-        cover->forDoorway->flags |= DoorwayFlagsOpen;
-    }
+    return vector3DistSqrd(&cover->definition->position, viewPosition) >= threshold;
 }
