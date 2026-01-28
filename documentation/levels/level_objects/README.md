@@ -44,7 +44,7 @@ See the linked pages below for details on specific level objects.
 | [@decor](./decor.md)                     | Generic dynamic object                               |
 | [@door](./door.md)                       | Sliding door                                         |
 | [@doorway](./doorway.md)                 | Level segment connection for rendering and collision |
-| [@doorway_cover](./doorway_cover.md)     | Distance-based mask to obscure and control doorways  |
+| [@doorway_cover](./doorway_cover.md)     | Distance-based mask to control doorway visibility    |
 | [@dynamic_box](./dynamic_box.md)         | Dynamic collision                                    |
 | [@elevator](./elevator.md)               | Level transition elevator                            |
 | [@fizzler](./fizzler.md)                 | Emancipation grill                                   |

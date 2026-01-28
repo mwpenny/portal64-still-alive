@@ -66,7 +66,7 @@ static void doorwayCoverRender(void* data, struct RenderScene* renderScene, stru
 
     struct Coloru8* color = &cover->definition->color;
 
-    gDPSetEnvColor(curr++, color->r, color->g, color->b, opacity * 255);
+    gDPSetEnvColor(curr++, color->r, color->g, color->b, opacity * 255.0f);
     gSPDisplayList(curr++, cover_gfx);
     gSPEndDisplayList(curr++);
 
