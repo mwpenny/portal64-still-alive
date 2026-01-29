@@ -318,6 +318,18 @@ void controllerActionSetDefaultSources() {
     updateBoundControllers();
 }
 
+int controllerActionUsedControllerCount() {
+    int count = 0;
+
+    for (int i = 0; i < MAX_BINDABLE_CONTROLLERS; ++i) {
+        if (sBoundControllers & INDEX_TO_BITMASK(i)) {
+            ++count;
+        }
+    }
+
+    return count;
+}
+
 int controllerActionUsesController(int controllerIndex) {
     return (sBoundControllers & INDEX_TO_BITMASK(controllerIndex)) != 0;
 }

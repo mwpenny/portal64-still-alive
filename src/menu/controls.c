@@ -50,6 +50,11 @@ struct ControllerIcon {
     char w, h;
 };
 
+struct ActionSourceIcon {
+    struct ControllerIcon* inputIcon;
+    struct ControllerIcon* controllerIndexIcon;
+};
+
 enum ControllerButtonIcon {
     ControllerButtonIconA,
     ControllerButtonIconB,
@@ -100,6 +105,11 @@ static struct ControllerIcon sControllerDirectionIcons[] = {
     [ControllerDirectionIconC] = {0, 12, 14, 12},
     [ControllerDirectionIconD] = {14, 12, 12, 12},
     [ControllerDirectionIconJ] = {26, 12, 15, 12},
+};
+
+static struct ControllerIcon sControllerIndexIcons[] = {
+    { 54, 0, 5, 7 },
+    { 59, 0, 5, 7 },
 };
 
 static uint8_t sControllerActionInputToButtonIcon[] = {
@@ -153,7 +163,7 @@ struct ControlActionDataRow sControllerDataRows[] = {
 
 static struct Coloru8 sButtonPromptTextColor = { 232, 206, 80, 255 };
 
-static int controlsGetActionSourceIcons(enum ControllerAction action, struct ControllerIcon** sourceIcons) {
+static int controlsGetActionSourceIcons(enum ControllerAction action, struct ActionSourceIcon* sourceIcons) {
     struct ControllerActionSource sources[MAX_SOURCES_PER_CONTROLLER_ACTION];
     int sourceCount = controllerActionSources(action, sources, MAX_SOURCES_PER_CONTROLLER_ACTION);
 
@@ -169,7 +179,11 @@ static int controlsGetActionSourceIcons(enum ControllerAction action, struct Con
     }
 
     for (int i = 0; i < sourceCount; ++i) {
-        sourceIcons[i] = &icons[iconMapping[sources[i].input]];
+        struct ControllerActionSource* source = &sources[i];
+        struct ActionSourceIcon* sourceIcon = &sourceIcons[i];
+
+        sourceIcon->inputIcon = &icons[iconMapping[source->input]];
+        sourceIcon->controllerIndexIcon = &sControllerIndexIcons[source->controllerIndex];
     }
 
     return sourceCount;
@@ -188,29 +202,40 @@ static Gfx* controlsRenderIcon(Gfx* dl, struct ControllerIcon* icon, int x, int 
     return dl;
 }
 
-static Gfx* controlsRenderActionSourceIcons(Gfx* dl, enum ControllerAction action, int x, int y) {
-    struct ControllerIcon* sourceIcons[MAX_SOURCES_PER_CONTROLLER_ACTION];
-    int sourceCount = controlsGetActionSourceIcons(action, sourceIcons);
-
+static Gfx* controlsRenderActionSourceInputIcons(Gfx* dl, struct ActionSourceIcon* sourceIcons, int sourceCount, int x, int y) {
     for (int i = 0; i < sourceCount; ++i) {
-        struct ControllerIcon* icon = sourceIcons[i];
+        struct ControllerIcon* inputIcon = sourceIcons[i].inputIcon;
 
-        x -= icon->w;
-        dl = controlsRenderIcon(dl, icon, x, y);
+        x -= inputIcon->w;
+        dl = controlsRenderIcon(dl, inputIcon, x, y);
     }
     
     return dl;
 }
 
-static int controlsActionSourceIconsWidth(enum ControllerAction action) {
-    struct ControllerIcon* sourceIcons[MAX_SOURCES_PER_CONTROLLER_ACTION];
-    int sourceCount = controlsGetActionSourceIcons(action, sourceIcons);
+static Gfx* controlsRenderActionSourceControllerIndexIcons(Gfx* dl, struct ActionSourceIcon* sourceIcons, int sourceCount, int x, int y) {
+    for (int i = 0; i < sourceCount; ++i) {
+        struct ActionSourceIcon* sourceIcon = &sourceIcons[i];
 
+        dl = controlsRenderIcon(
+            dl,
+            sourceIcon->controllerIndexIcon,
+            x - sourceIcon->controllerIndexIcon->w,
+            y + sourceIcon->inputIcon->h - sourceIcon->controllerIndexIcon->h
+        );
+
+        x -= sourceIcon->inputIcon->w;
+    }
+
+    return dl;
+}
+
+static int controlsActionSourceIconsWidth(struct ActionSourceIcon* sourceIcons, int sourceCount) {
     int result = 0;
 
     for (int i = 0; i < sourceCount; ++i) {
-        struct ControllerIcon* icon = sourceIcons[i];
-        result += icon->w;
+        struct ControllerIcon* inputIcon = sourceIcons[i].inputIcon;
+        result += inputIcon->w;
     }
 
     return result;
@@ -222,12 +247,31 @@ static void controlsMenuLayoutRow(struct ControlsMenuRow* row, struct ControlAct
     row->actionText = copy;
     prerenderedTextRelocate(row->actionText, x + ROW_PADDING_X, y);
 
-    Gfx* dl = controlsRenderActionSourceIcons(
-        row->sourceIcons,
-        data->action,
-        CONTROLS_X + CONTROLS_WIDTH - (ROW_PADDING_X * 2), y
+    struct ActionSourceIcon sourceIcons[MAX_SOURCES_PER_CONTROLLER_ACTION];
+    int sourceCount = controlsGetActionSourceIcons(data->action, sourceIcons);
+
+    x = CONTROLS_X + CONTROLS_WIDTH - (ROW_PADDING_X * 2);
+
+    Gfx* dl = controlsRenderActionSourceInputIcons(
+        row->sourceInputIcons,
+        sourceIcons,
+        sourceCount,
+        x, y
     );
     gSPEndDisplayList(dl++);
+
+    // Disambiguate between multiple bound controllers if necessary
+    dl = row->sourceControllerIndexIcons;
+    if (controllerActionUsedControllerCount() > 1) {
+        dl = controlsRenderActionSourceControllerIndexIcons(
+            dl,
+            sourceIcons,
+            sourceCount,
+            x, y
+        );
+    }
+    gSPEndDisplayList(dl++);
+
     row->y = y;
 }
 
@@ -274,9 +318,11 @@ static void controlsMenuLayout(struct ControlsMenu* controlsMenu) {
 static void controlsMenuInitRow(struct ControlsMenuRow* row, struct ControlActionDataRow* data) {
     row->actionText = menuBuildPrerenderedText(&gDejaVuSansFont, translationsGet(data->nameId), 0, 0, ROW_TEXT_MAX_WIDTH);
 
-    Gfx* dl = row->sourceIcons;
+    Gfx* inputIconsDL = row->sourceInputIcons;
+    Gfx* controllerIndexIconsDL = row->sourceControllerIndexIcons;
     for (int i = 0; i < SOURCE_ICON_COUNT; ++i) {
-        gSPEndDisplayList(dl++);
+        gSPEndDisplayList(inputIconsDL++);
+        gSPEndDisplayList(controllerIndexIconsDL++);
     }
 }
 
@@ -509,17 +555,33 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
     for (int i = 0; i < ControllerActionCount; ++i) {
         if (controlsMenu->selectedRow == i) {
             gDPPipeSync(renderState->dl++);
-
             gDPSetEnvColor(renderState->dl++, gColorBlack.r, gColorBlack.g, gColorBlack.b, gColorBlack.a);
+
+            renderStateAppendDL(renderState, controlsMenu->actionRows[i].sourceInputIcons);
+
+            gDPPipeSync(renderState->dl++);
+            gDPSetEnvColor(renderState->dl++, gColorWhite.r, gColorWhite.g, gColorWhite.b, gColorWhite.a);
+        } else {
+            renderStateAppendDL(renderState, controlsMenu->actionRows[i].sourceInputIcons);
         }
+    }
 
-        renderStateAppendDL(renderState, controlsMenu->actionRows[i].sourceIcons);
-
+    gDPPipeSync(renderState->dl++);
+    gDPSetEnvColor(renderState->dl++, gColorBlack.r, gColorBlack.g, gColorBlack.b, gColorBlack.a);
+    for (int i = 0; i < ControllerActionCount; ++i) {
         if (controlsMenu->selectedRow == i) {
             gDPPipeSync(renderState->dl++);
             gDPSetEnvColor(renderState->dl++, gColorWhite.r, gColorWhite.g, gColorWhite.b, gColorWhite.a);
+
+            renderStateAppendDL(renderState, controlsMenu->actionRows[i].sourceControllerIndexIcons);
+
+            gDPPipeSync(renderState->dl++);
+            gDPSetEnvColor(renderState->dl++, gColorBlack.r, gColorBlack.g, gColorBlack.b, gColorBlack.a);
+        } else {
+            renderStateAppendDL(renderState, controlsMenu->actionRows[i].sourceControllerIndexIcons);
         }
     }
+
     gSPDisplayList(renderState->dl++, ui_material_revert_list[BUTTON_ICONS_INDEX]);
 
     gDPSetScissor(renderState->dl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WD, SCREEN_HT);
@@ -533,7 +595,10 @@ void controlsRenderPrompt(enum ControllerAction action, char* message, float opa
     struct FontRenderer* fontRender = stackMalloc(sizeof(struct FontRenderer));
     fontRendererLayout(fontRender, &gDejaVuSansFont, message, SCREEN_WD - (PROMPT_MARGIN_X + (PROMPT_PADDING * 2)));
     
-    int iconsWidth = controlsActionSourceIconsWidth(action);
+    struct ActionSourceIcon sourceIcons[MAX_SOURCES_PER_CONTROLLER_ACTION];
+    int sourceCount = controlsGetActionSourceIcons(action, sourceIcons);
+
+    int iconsWidth = controlsActionSourceIconsWidth(sourceIcons, sourceCount);
     int opacityAsInt = (int)(255.0f * opacity);
 
     int textPositionX = (SCREEN_WD - PROMPT_MARGIN_X - PROMPT_PADDING) - fontRender->width;
@@ -559,12 +624,28 @@ void controlsRenderPrompt(enum ControllerAction action, char* message, float opa
 
     gSPDisplayList(renderState->dl++, ui_material_list[BUTTON_ICONS_INDEX]);
     gDPSetEnvColor(renderState->dl++, textColor.r, textColor.g, textColor.b, textColor.a);
-    renderState->dl = controlsRenderActionSourceIcons(
+    renderState->dl = controlsRenderActionSourceInputIcons(
         renderState->dl,
-        action,
+        sourceIcons,
+        sourceCount,
         textPositionX - PROMPT_PADDING,
         textPositionY
     );
+
+    // Disambiguate between multiple bound controllers if necessary
+    if (controllerActionUsedControllerCount() > 1) {
+        gDPPipeSync(renderState->dl++);
+        gDPSetEnvColor(renderState->dl++, gColorWhite.r, gColorWhite.g, gColorWhite.b, textColor.a);
+
+        renderState->dl = controlsRenderActionSourceControllerIndexIcons(
+            renderState->dl,
+            sourceIcons,
+            sourceCount,
+            textPositionX - PROMPT_PADDING,
+            textPositionY
+        );
+    }
+
     gSPDisplayList(renderState->dl++, ui_material_revert_list[BUTTON_ICONS_INDEX]);
     
     stackMallocFree(fontRender);

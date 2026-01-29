@@ -70,6 +70,8 @@ int controllerActionSources(enum ControllerAction action, struct ControllerActio
 int controllerActionReadAnySource(struct ControllerActionSource* source);
 int controllerActionSetSource(enum ControllerAction action, struct ControllerActionSource* source);
 void controllerActionSetDefaultSources();
+
+int controllerActionUsedControllerCount();
 int controllerActionUsesController(int controllerIndex);
 
 void controllerActionSetDeadzone(float percent);

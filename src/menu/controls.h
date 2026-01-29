@@ -16,7 +16,8 @@ struct ControlsMenuHeader {
 
 struct ControlsMenuRow {
     struct PrerenderedText* actionText;
-    Gfx sourceIcons[SOURCE_ICON_COUNT];
+    Gfx sourceInputIcons[SOURCE_ICON_COUNT];
+    Gfx sourceControllerIndexIcons[SOURCE_ICON_COUNT];
     short y;
 };
 
