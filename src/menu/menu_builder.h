@@ -34,7 +34,7 @@ typedef void (*MenuActionCalback)(void* data, int selection, struct MenuAction* 
 
 typedef void (*MenuItemInit)(struct MenuBuilderElement* element);
 typedef enum InputCapture (*MenuItemUpdate)(struct MenuBuilderElement* element, MenuActionCalback actionCallback, void* data);
-typedef void (*MenuItemRebuildText)(struct MenuBuilderElement* element);
+typedef void (*MenuItemRebuildText)(struct MenuBuilderElement* element, int deferFree);
 typedef void (*MenuItemRender)(struct MenuBuilderElement* element, int selection, int materialIndex, struct PrerenderedTextBatch* textBatch, struct RenderState* renderState);
 
 struct MenuBuilderCallbacks {
@@ -54,6 +54,7 @@ struct MenuElementParams {
             struct Font* font;
             short messageId;
             char* message;
+            char rightAlign;
         } text;
         struct {
             struct Font* font;

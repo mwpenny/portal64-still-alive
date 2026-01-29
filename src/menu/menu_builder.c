@@ -26,17 +26,28 @@ void textMenuItemInit(struct MenuBuilderElement* element) {
         message = translationsGet(element->params->params.text.messageId);
     }
 
-    element->data = menuBuildPrerenderedText(
+    struct PrerenderedText* text = menuBuildPrerenderedText(
         element->params->params.text.font, 
         message,
         element->params->x,
         element->params->y,
         SCREEN_WD
     );
+
+    if (element->params->params.text.rightAlign) {
+        prerenderedTextRelocate(text, text->x - text->width, text->y);
+    }
+
+    element->data = text;
 }
 
-void textMenuItemRebuildText(struct MenuBuilderElement* element) {
-    prerenderedTextFree(element->data);
+void textMenuItemRebuildText(struct MenuBuilderElement* element, int deferFree) {
+    if (deferFree) {
+        menuFreePrerenderedDeferred(element->data);
+    } else {
+        prerenderedTextFree(element->data);
+    }
+
     textMenuItemInit(element);
 }
 
@@ -86,10 +97,15 @@ enum InputCapture checkboxMenuItemUpdate(struct MenuBuilderElement* element, Men
     return InputCapturePass;
 }
 
-void checkboxMenuItemRebuildText(struct MenuBuilderElement* element) {
+void checkboxMenuItemRebuildText(struct MenuBuilderElement* element, int deferFree) {
     struct MenuCheckbox* checkbox = (struct MenuCheckbox*)element->data;
 
-    prerenderedTextFree(checkbox->prerenderedText);
+    if (deferFree) {
+        menuFreePrerenderedDeferred(checkbox->prerenderedText);
+    } else {
+        prerenderedTextFree(checkbox->prerenderedText);
+    }
+
     checkbox->prerenderedText = menuBuildPrerenderedText(
         element->params->params.checkbox.font, 
         translationsGet(element->params->params.checkbox.messageId),
@@ -323,7 +339,7 @@ enum InputCapture menuBuilderUpdate(struct MenuBuilder* menuBuilder) {
 void menuBuilderRebuildText(struct MenuBuilder* menuBuilder) {
     for (int i = 0; i < menuBuilder->elementCount; ++i) {
         if (menuBuilder->elements[i].callbacks->rebuildText) {
-            menuBuilder->elements[i].callbacks->rebuildText(&menuBuilder->elements[i]);
+            menuBuilder->elements[i].callbacks->rebuildText(&menuBuilder->elements[i], 0 /* deferFree */);
         }
     }
 }

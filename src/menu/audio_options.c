@@ -9,16 +9,16 @@
 #include "codegen/assets/audio/languages.h"
 #include "codegen/assets/strings/strings.h"
 
-#define GAMEPLAY_Y      54
-#define GAMEPLAY_WIDTH  252
-#define GAMEPLAY_HEIGHT 124
-#define GAMEPLAY_X      ((SCREEN_WD - GAMEPLAY_WIDTH) / 2)
+#define MENU_Y      54
+#define MENU_WIDTH  252
+#define MENU_HEIGHT 124
+#define MENU_X      ((SCREEN_WD - MENU_WIDTH) / 2)
 
 struct MenuElementParams gAudioMenuParams[] = {
     {
         .type = MenuElementTypeText,
-        .x = GAMEPLAY_X + 8, 
-        .y = GAMEPLAY_Y + 8,
+        .x = MENU_X + 8,
+        .y = MENU_Y + 8,
         .params = {
             .text = {
                 .font = &gDejaVuSansFont,
@@ -29,8 +29,8 @@ struct MenuElementParams gAudioMenuParams[] = {
     },
     {
         .type = MenuElementTypeSlider,
-        .x = GAMEPLAY_X + 8, 
-        .y = GAMEPLAY_Y + 24,
+        .x = MENU_X + 8,
+        .y = MENU_Y + 24,
         .params = {
             .slider = {
                 .width = 232,
@@ -42,8 +42,8 @@ struct MenuElementParams gAudioMenuParams[] = {
     },
     {
         .type = MenuElementTypeText,
-        .x = GAMEPLAY_X + 8, 
-        .y = GAMEPLAY_Y + 44,
+        .x = MENU_X + 8,
+        .y = MENU_Y + 44,
         .params = {
             .text = {
                 .font = &gDejaVuSansFont,
@@ -54,8 +54,8 @@ struct MenuElementParams gAudioMenuParams[] = {
     },
     {
         .type = MenuElementTypeSlider,
-        .x = GAMEPLAY_X + 8, 
-        .y = GAMEPLAY_Y + 60,
+        .x = MENU_X + 8,
+        .y = MENU_Y + 60,
         .params = {
             .slider = {
                 .width = 232,
@@ -67,8 +67,8 @@ struct MenuElementParams gAudioMenuParams[] = {
     },
     {
         .type = MenuElementTypeSlider,
-        .x = GAMEPLAY_X + 8, 
-        .y = GAMEPLAY_Y + 96,
+        .x = MENU_X + 8,
+        .y = MENU_Y + 96,
         .params = {
             .slider = {
                 .width = 232,
@@ -80,8 +80,8 @@ struct MenuElementParams gAudioMenuParams[] = {
     },
     {
         .type = MenuElementTypeText,
-        .x = GAMEPLAY_X + 8, 
-        .y = GAMEPLAY_Y + 80,
+        .x = MENU_X + 8,
+        .y = MENU_Y + 80,
         .params = {
             .text = {
                 .font = &gDejaVuSansFont,
@@ -92,12 +92,13 @@ struct MenuElementParams gAudioMenuParams[] = {
     },
     {
         .type = MenuElementTypeText,
-        .x = GAMEPLAY_X + 125, 
-        .y = GAMEPLAY_Y + 80,
+        .x = MENU_X + 8 + 232,
+        .y = MENU_Y + 80,
         .params = {
             .text = {
                 .font = &gDejaVuSansFont,
                 .message = "",
+                .rightAlign = 1,
             },
         },
         .selectionIndex = AudioOptionAudioLanguage,
@@ -124,7 +125,11 @@ void audioOptionsAction(void* data, int selection, struct MenuAction* action) {
             break;
         case AudioOptionAudioLanguage:
             gSaveData.audio.audioLanguage = action->state.iSlider.value;
-            audioOptions->menuBuilder.elements[AUDIO_LANGUAGE_TEXT_INDEX].data = menuBuildPrerenderedText(&gDejaVuSansFont, AudioLanguages[gSaveData.audio.audioLanguage], GAMEPLAY_X + 125, GAMEPLAY_Y + 80, SCREEN_WD);
+
+            struct MenuBuilderElement* element = &audioOptions->menuBuilder.elements[AUDIO_LANGUAGE_TEXT_INDEX];
+            element->params->params.text.message = AudioLanguages[gSaveData.audio.audioLanguage];
+            element->callbacks->rebuildText(element, 1 /* deferFree */);
+
             break;
     }
 }

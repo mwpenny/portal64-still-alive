@@ -101,12 +101,13 @@ struct MenuElementParams gVideoMenuParams[] = {
     },
     {
         .type = MenuElementTypeText,
-        .x = MENU_X + 125, 
+        .x = MENU_X + 8 + 232,
         .y = MENU_Y + 108,
         .params = {
             .text = {
                 .font = &gDejaVuSansFont,
                 .message = "",
+                .rightAlign = 1,
             },
         },
         .selectionIndex = VideoOptionTextLanguage,
