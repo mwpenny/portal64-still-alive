@@ -250,7 +250,7 @@ static void controlsMenuLayoutRow(struct ControlsMenuRow* row, struct ControlAct
     struct ActionSourceIcon sourceIcons[MAX_SOURCES_PER_CONTROLLER_ACTION];
     int sourceCount = controlsGetActionSourceIcons(data->action, sourceIcons);
 
-    x = CONTROLS_X + CONTROLS_WIDTH - (ROW_PADDING_X * 2);
+    x = CONTROLS_X + CONTROLS_WIDTH - ROW_PADDING_X;
 
     Gfx* dl = controlsRenderActionSourceInputIcons(
         row->sourceInputIcons,
@@ -299,7 +299,7 @@ static void controlsMenuLayout(struct ControlsMenu* controlsMenu) {
                     headerSeparators++,
                     CONTROLS_X + SEPARATOR_PADDING_X,
                     y,
-                    CONTROLS_X + CONTROLS_WIDTH - (SEPARATOR_PADDING_X * 2),
+                    CONTROLS_X + CONTROLS_WIDTH - SEPARATOR_PADDING_X,
                     y + SEPARATOR_THICKNESS
                 );
             }
@@ -497,7 +497,7 @@ void controlsMenuRender(struct ControlsMenu* controlsMenu, struct RenderState* r
             renderState->dl++,
             CONTROLS_X + ROW_PADDING_X,
             selectedAction->y,
-            CONTROLS_X + CONTROLS_WIDTH - (ROW_PADDING_X * 2),
+            CONTROLS_X + CONTROLS_WIDTH - ROW_PADDING_X,
             selectedAction->y + selectedAction->actionText->height
         );
     }
