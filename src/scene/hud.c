@@ -169,7 +169,7 @@ void hudPortalFired(struct Hud* hud, int index) {
 }
 
 void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType) {
-    if (promptType == CutscenePromptTypeNone) {
+    if (promptType == CutscenePromptTypeNone || (hud->resolvedPrompts & (1 << promptType)) != 0) {
         hud->flags &= ~HudFlagsShowingPrompt;
         return;
     }
