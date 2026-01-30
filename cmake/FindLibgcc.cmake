@@ -17,7 +17,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     )
 
     if (NOT GCC_COMMAND_RC EQUAL 0)
-        message(SEND_ERROR "Error locating libgcc: ${GCC_COMMAND_ERROR}")
+        message(FATAL_ERROR "Error locating libgcc: ${GCC_COMMAND_ERROR}")
     else()
         cmake_path(GET GCC_COMMAND_OUTPUT
             PARENT_PATH Libgcc_LIBRARY_DIR

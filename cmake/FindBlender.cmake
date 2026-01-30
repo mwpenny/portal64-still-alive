@@ -19,7 +19,7 @@ if (Blender_EXECUTABLE)
     )
 
     if (NOT VERSION_COMMAND_RC EQUAL 0)
-        message(SEND_ERROR "Error getting Blender version: ${VERSION_COMMAND_ERROR}")
+        message(FATAL_ERROR "Error getting Blender version: ${VERSION_COMMAND_ERROR}")
     elseif (VERSION_COMMAND_OUTPUT MATCHES "^Blender ([0-9\\.]+)")
         set(VERSION_NUMBER "${CMAKE_MATCH_1}")
     endif()
