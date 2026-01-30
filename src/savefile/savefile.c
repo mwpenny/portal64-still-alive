@@ -4,8 +4,9 @@
 #include "system/controller.h"
 #include "system/screen.h"
 #include "util/memory.h"
+#include "util/sort.h"
 
-#define SAVEFILE_MAGIC                      0xDF01
+#define SAVEFILE_MAGIC                      0xDF02
 
 #define SAVE_SLOT_OFFSET(index)             (((index) + 1) * SAVE_SLOT_SIZE)
 #define SAVE_SLOT_IMAGE_OFFSET(index)       (SAVE_SLOT_OFFSET(index) + MAX_CHECKPOINT_SIZE)
@@ -125,46 +126,8 @@ void savefileGetSlotInfo(int slotIndex, struct SaveSlotInfo* info) {
     info->testSubjectNumber = metadata->testSubjectNumber;
 }
 
-struct SlotAndOrder {
-    uint8_t slotIndex;
-    uint8_t sortOrder;
-};
-
-static void savefileMetadataSort(struct SlotAndOrder* result, struct SlotAndOrder* tmp, int start, int end) {
-    // Merge sort
-
-    if (start + 1 >= end) {
-        return;
-    }
-
-    int mid = (start + end) >> 1;
-
-    savefileMetadataSort(result, tmp, start, mid);
-    savefileMetadataSort(result, tmp, mid, end);
-
-    int currentOut = start;
-    int aRead = start;
-    int bRead = mid;
-
-    while (aRead < mid || bRead < end) {
-        if (bRead == end || (aRead < mid && result[aRead].sortOrder < result[bRead].sortOrder)) {
-            tmp[currentOut] = result[aRead];
-            ++currentOut;
-            ++aRead;
-        } else {
-            tmp[currentOut] = result[bRead];
-            ++currentOut;
-            ++bRead;
-        }
-    }
-
-    for (int i = start; i < end; ++i) {
-        result[i] = tmp[i];
-    }
-}
-
 int savefileGetAllSlotInfo(struct SaveSlotInfo* slots, int includeAuto) {
-    struct SlotAndOrder result[MAX_SAVE_SLOTS];
+    struct SortNode result[MAX_SAVE_SLOTS];
     int slotCount = 0;
 
     for (int i = 0; i < MAX_SAVE_SLOTS; ++i) {
@@ -176,16 +139,16 @@ int savefileGetAllSlotInfo(struct SaveSlotInfo* slots, int includeAuto) {
             continue;
         }
 
-        result[slotCount].slotIndex = i;
+        result[slotCount].index = i;
         result[slotCount].sortOrder = gSaveData.saveSlotMetadata[i].saveSlotOrder;
         ++slotCount;
     }
 
-    struct SlotAndOrder tmp[MAX_SAVE_SLOTS];
-    savefileMetadataSort(result, tmp, 0, slotCount);
+    struct SortNode tmp[MAX_SAVE_SLOTS];
+    mergeSort(result, tmp, 0, slotCount);
 
     for (int i = 0; i < slotCount; ++i) {
-        savefileGetSlotInfo(result[i].slotIndex, &slots[i]);
+        savefileGetSlotInfo(result[i].index, &slots[i]);
     }
 
     return slotCount;

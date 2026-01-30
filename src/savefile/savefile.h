@@ -42,8 +42,13 @@ struct SaveHeader {
     uint8_t nextTestSubject;
 };
 
+struct SortedControllerAction {
+    uint8_t sortOrder : 3;
+    uint8_t action : 5;
+};
+
 struct ControlSaveState {
-    uint8_t controllerBindings[MAX_BINDABLE_CONTROLLERS][ControllerActionInputCount];
+    struct SortedControllerAction controllerBindings[MAX_BINDABLE_CONTROLLERS][ControllerActionInputCount];
     enum ControlSaveFlags flags;
     uint16_t sensitivity;
     uint16_t acceleration;

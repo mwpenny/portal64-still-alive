@@ -5,9 +5,8 @@
 
 #include <stdint.h>
 
-#define ACTION_IS_DIRECTION(action)         ((action) >= ControllerActionMove && (action) <= ControllerActionRotate)
-#define MAX_BINDABLE_CONTROLLERS            2
-#define MAX_SOURCES_PER_CONTROLLER_ACTION   4
+#define ACTION_IS_DIRECTION(action) ((action) >= ControllerActionMove && (action) <= ControllerActionRotate)
+#define MAX_BINDABLE_CONTROLLERS    2
 
 enum ControllerActionInput {
     ControllerActionInputAButton,
@@ -68,7 +67,7 @@ void controllerActionMuteActive();
 
 int controllerActionSources(enum ControllerAction action, struct ControllerActionSource* sources, int maxSources);
 int controllerActionReadAnySource(struct ControllerActionSource* source);
-int controllerActionSetSource(enum ControllerAction action, struct ControllerActionSource* source);
+int controllerActionSetSource(enum ControllerAction action, struct ControllerActionSource* source, int maxSources);
 void controllerActionSetDefaultSources();
 
 int controllerActionUsedControllerCount();

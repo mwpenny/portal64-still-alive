@@ -4,6 +4,7 @@
 #include "savefile/savefile.h"
 #include "system/controller.h"
 #include "util/memory.h"
+#include "util/sort.h"
 
 #define INDEX_TO_BITMASK(index)         (1 << (index))
 #define ACTION_DIRECTION_INDEX(action)  ((action) - ControllerActionMove)
@@ -75,7 +76,7 @@ static void updateBoundControllers() {
 
     for (int controllerIndex = 0; controllerIndex < MAX_BINDABLE_CONTROLLERS; ++controllerIndex) {
         for (int inputIndex = 0; inputIndex < ControllerActionInputCount; ++inputIndex) {
-            enum ControllerAction action = gSaveData.controls.controllerBindings[controllerIndex][inputIndex];
+            enum ControllerAction action = gSaveData.controls.controllerBindings[controllerIndex][inputIndex].action;
 
             if (action != ControllerActionNone) {
                 sBoundControllers |= INDEX_TO_BITMASK(controllerIndex);
@@ -165,7 +166,7 @@ void controllerActionUpdate() {
 
     for (int controllerIndex = 0; controllerIndex < MAX_BINDABLE_CONTROLLERS; ++controllerIndex) {
         for (int inputIndex = 0; inputIndex < ControllerActionInputCount; ++inputIndex) {
-            enum ControllerAction action = gSaveData.controls.controllerBindings[controllerIndex][inputIndex];
+            enum ControllerAction action = gSaveData.controls.controllerBindings[controllerIndex][inputIndex].action;
 
             if (action == ControllerActionNone) {
                 continue;
@@ -210,25 +211,33 @@ void controllerActionMuteActive() {
 }
 
 int controllerActionSources(enum ControllerAction action, struct ControllerActionSource* sources, int maxSources) {
-    int sourceIndex = 0;
+    struct SortNode sorted[MAX_BINDABLE_CONTROLLERS * ControllerActionInputCount];
 
+    int sourceCount = 0;
     for (int controllerIndex = 0; controllerIndex < MAX_BINDABLE_CONTROLLERS; ++controllerIndex) {
         for (int inputIndex = 0; inputIndex < ControllerActionInputCount; ++inputIndex) {
-            if (gSaveData.controls.controllerBindings[controllerIndex][inputIndex] != action) {
+            struct SortedControllerAction* slot = &gSaveData.controls.controllerBindings[controllerIndex][inputIndex];
+
+            if (slot->action != action) {
                 continue;
             }
 
-            sources[sourceIndex].controllerIndex = controllerIndex;
-            sources[sourceIndex].input = inputIndex;
-            ++sourceIndex;
-
-            if (sourceIndex == maxSources) {
-                return sourceIndex;
-            }
+            sorted[sourceCount].index = (controllerIndex * ControllerActionInputCount) + inputIndex;
+            sorted[sourceCount].sortOrder = slot->sortOrder;
+            ++sourceCount;
         }
     }
 
-    return sourceIndex;
+    struct SortNode tmp[MAX_BINDABLE_CONTROLLERS * ControllerActionInputCount];
+    mergeSort(sorted, tmp, 0, sourceCount);
+
+    int sourceCountUnderLimit = MIN(maxSources, sourceCount);
+    for (int i = 0; i < sourceCountUnderLimit; ++i) {
+        sources[i].controllerIndex = (sorted[i].index / ControllerActionInputCount);
+        sources[i].input = (sorted[i].index % ControllerActionInputCount);
+    }
+
+    return sourceCountUnderLimit;
 }
 
 int controllerActionReadAnySource(struct ControllerActionSource* source) {
@@ -250,24 +259,58 @@ int controllerActionReadAnySource(struct ControllerActionSource* source) {
     return 0;
 }
 
-static int controllerActionSetDirectionSource(enum ControllerAction action, struct ControllerActionSource* source) {
-    uint8_t* bindings = gSaveData.controls.controllerBindings[source->controllerIndex];
+static void setInputAction(int controllerIndex, enum ControllerActionInput input, enum ControllerAction action, int maxSources) {
+    struct SortedControllerAction* dest = &gSaveData.controls.controllerBindings[controllerIndex][input];
 
+    // Shift existing input sort orders
+    for (controllerIndex = 0; controllerIndex < MAX_BINDABLE_CONTROLLERS; ++controllerIndex) {
+        for (input = 0; input < ControllerActionInputCount; ++input) {
+            struct SortedControllerAction* slot = &gSaveData.controls.controllerBindings[controllerIndex][input];
+
+            if (slot->action == ControllerActionNone) {
+                continue;
+            }
+
+            // Move inputs bound to the same action to make room at the front
+            // If the new input isn't bound to this action yet, everything moves
+            // If it is, only earlier inputs move to fill the gap
+            if (slot->action == action && (dest->action != action || slot->sortOrder < dest->sortOrder)) {
+                ++slot->sortOrder;
+
+                if (slot->sortOrder >= maxSources) {
+                    slot->action = ControllerActionNone;
+                    slot->sortOrder = 0;
+                }
+            }
+
+            // If binding the input unbinds it from a different action, move
+            // that action's later inputs back to fill the gap
+            if (slot->action == dest->action && dest->action != action && slot->sortOrder > dest->sortOrder) {
+                --slot->sortOrder;
+            }
+        }
+    }
+
+    dest->action = action;
+    dest->sortOrder = 0;
+}
+
+static int controllerActionSetDirectionSource(enum ControllerAction action, struct ControllerActionSource* source, int maxSources) {
     // If binding a button from a cluster (C buttons or D-pad), bind all of
     // its buttons. This is represented by binding the up button and leaving
     // the others unbound.
     if (INPUT_IS_C_BUTTON(source->input)) {
-        bindings[ControllerActionInputCUpButton]    = action;
-        bindings[ControllerActionInputCRightButton] = ControllerActionNone;
-        bindings[ControllerActionInputCDownButton]  = ControllerActionNone;
-        bindings[ControllerActionInputCLeftButton]  = ControllerActionNone;
+        setInputAction(source->controllerIndex, ControllerActionInputCUpButton,    action,               maxSources);
+        setInputAction(source->controllerIndex, ControllerActionInputCRightButton, ControllerActionNone, maxSources);
+        setInputAction(source->controllerIndex, ControllerActionInputCDownButton,  ControllerActionNone, maxSources);
+        setInputAction(source->controllerIndex, ControllerActionInputCLeftButton,  ControllerActionNone, maxSources);
     } else if (INPUT_IS_D_PAD(source->input)) {
-        bindings[ControllerActionInputDUpButton]    = action;
-        bindings[ControllerActionInputDRightButton] = ControllerActionNone;
-        bindings[ControllerActionInputDDownButton]  = ControllerActionNone;
-        bindings[ControllerActionInputDLeftButton]  = ControllerActionNone;
+        setInputAction(source->controllerIndex, ControllerActionInputDUpButton,    action              , maxSources);
+        setInputAction(source->controllerIndex, ControllerActionInputDRightButton, ControllerActionNone, maxSources);
+        setInputAction(source->controllerIndex, ControllerActionInputDDownButton,  ControllerActionNone, maxSources);
+        setInputAction(source->controllerIndex, ControllerActionInputDLeftButton,  ControllerActionNone, maxSources);
     } else if (source->input == ControllerActionInputJoystick) {
-        bindings[ControllerActionInputJoystick]     = action;
+        setInputAction(source->controllerIndex, ControllerActionInputJoystick,     action,               maxSources);
     } else {
         return 0;
     }
@@ -275,12 +318,12 @@ static int controllerActionSetDirectionSource(enum ControllerAction action, stru
     return 1;
 }
 
-static int controllerActionSetNonDirectionSource(enum ControllerAction action, struct ControllerActionSource* source) {
+static int controllerActionSetNonDirectionSource(enum ControllerAction action, struct ControllerActionSource* source, int maxSources) {
     if (source->input == ControllerActionInputJoystick) {
         return 0;
     }
 
-    uint8_t* bindings = gSaveData.controls.controllerBindings[source->controllerIndex];
+    struct SortedControllerAction* bindings = gSaveData.controls.controllerBindings[source->controllerIndex];
 
     // When a button from a cluster (C buttons or D-pad) is bound to a direction
     // action, all of its buttons are bound. This is represented by binding
@@ -288,23 +331,23 @@ static int controllerActionSetNonDirectionSource(enum ControllerAction action, s
     //
     // Unbind button cluster from direction action if rebinding one of its
     // buttons (don't allow both types of actions at the same time)
-    if (INPUT_IS_C_BUTTON(source->input) && ACTION_IS_DIRECTION(bindings[ControllerActionInputCUpButton])) {
-        bindings[ControllerActionInputCUpButton] = ControllerActionNone;
-    } else if (INPUT_IS_D_PAD(source->input) && ACTION_IS_DIRECTION(bindings[ControllerActionInputDUpButton])) {
-        bindings[ControllerActionInputDUpButton] = ControllerActionNone;
+    if (INPUT_IS_C_BUTTON(source->input) && ACTION_IS_DIRECTION(bindings[ControllerActionInputCUpButton].action)) {
+        setInputAction(source->controllerIndex, ControllerActionInputCUpButton, ControllerActionNone, maxSources);
+    } else if (INPUT_IS_D_PAD(source->input) && ACTION_IS_DIRECTION(bindings[ControllerActionInputDUpButton].action)) {
+        setInputAction(source->controllerIndex, ControllerActionInputDUpButton, ControllerActionNone, maxSources);
     }
 
-    bindings[source->input] = action;
+    setInputAction(source->controllerIndex, source->input, action, maxSources);
     return 1;
 }
 
-int controllerActionSetSource(enum ControllerAction action, struct ControllerActionSource* source) {
+int controllerActionSetSource(enum ControllerAction action, struct ControllerActionSource* source, int maxSources) {
     int ret;
 
     if (ACTION_IS_DIRECTION(action)) {
-        ret = controllerActionSetDirectionSource(action, source);
+        ret = controllerActionSetDirectionSource(action, source, maxSources);
     } else {
-        ret = controllerActionSetNonDirectionSource(action, source);
+        ret = controllerActionSetNonDirectionSource(action, source, maxSources);
     }
 
     updateBoundControllers();

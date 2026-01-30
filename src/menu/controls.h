@@ -7,8 +7,9 @@
 #include "menu.h"
 #include "scene/hud.h"
 
-#define SOURCE_ICON_COUNT       ((MAX_SOURCES_PER_CONTROLLER_ACTION * GFX_ENTRIES_PER_IMAGE) + GFX_ENTRIES_PER_END_DL)
-#define MAX_CONTROLS_SECTIONS   4
+#define MAX_CONTROLS_SECTIONS             4
+#define MAX_SOURCES_PER_CONTROLLER_ACTION 4
+#define SOURCE_ICON_COUNT                 ((MAX_SOURCES_PER_CONTROLLER_ACTION * GFX_ENTRIES_PER_IMAGE) + GFX_ENTRIES_PER_END_DL)
 
 struct ControlsMenuHeader {
     struct PrerenderedText* headerText;

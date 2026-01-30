@@ -397,7 +397,7 @@ enum InputCapture controlsMenuUpdate(struct ControlsMenu* controlsMenu) {
         struct ControllerActionSource source;
 
         if (controllerActionReadAnySource(&source)) {
-            if (controllerActionSetSource(controlsMenu->waitingForAction, &source)) {
+            if (controllerActionSetSource(controlsMenu->waitingForAction, &source, MAX_SOURCES_PER_CONTROLLER_ACTION)) {
                 controlsMenuLayout(controlsMenu);
                 soundPlayerPlay(SOUNDS_BUTTONCLICKRELEASE, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
             } else {

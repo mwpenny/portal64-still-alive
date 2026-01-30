@@ -160,6 +160,7 @@ target_sources(engine INTERFACE
     util/frame_time.c
     util/memory.c
     util/profile.c
+    util/sort.c
     util/string.c
 )
 
