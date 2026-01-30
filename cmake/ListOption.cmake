@@ -50,6 +50,7 @@ function(list_option LIST_NAME DEFAULT_VALUE DESCRIPTION CHOICES_LIST)
 
     # Need at least one entry
     if (NOT INPUT_LIST)
+        string(REPLACE ";" ", " CHOICES "${CHOICES_LIST}")
         message(FATAL_ERROR
             "No values specified for list '${LIST_NAME}'. "
             "Valid entries: ${CHOICES} - or 'all'"
