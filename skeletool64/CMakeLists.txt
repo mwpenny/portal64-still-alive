@@ -11,6 +11,13 @@ find_package(yaml-cpp   0.8         REQUIRED)
 find_package(PNG                    REQUIRED)
 find_package(TIFF                   REQUIRED)
 
+if (assimp_FOUND AND (
+    ((${assimp_VERSION_MAJOR} EQUAL 5) AND (${assimp_VERSION_MINOR} GREATER_EQUAL 4)) OR
+    ((${assimp_VERSION_MAJOR} EQUAL 6) AND (${assimp_VERSION_MINOR} EQUAL 0) AND (${assimp_VERSION_PATCH} LESS 4))
+))
+    message(SEND_ERROR "Found assimp version '${assimp_VERSION}'. Versions in range [5.4.0, 6.0.4) are buggy and unsupported.")
+endif()
+
 add_subdirectory(lua)
 
 add_executable(skeletool64
