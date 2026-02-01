@@ -32,7 +32,7 @@ cutscenes:
     - open_portal portal_gap 0
     - q_sound SOUNDS_01_PART2_ENTRY_1 CH_GLADOS PORTAL_01_PART2_ENTRY_1
   FINISH_03:
-    - q_sound SOUNDS_01_PART2_SUCCESS_1 CH_GLADOS PORTAL_01_PART2_SUCCESS_1
+    - q_sound SOUNDS_01_PART2_SUCCESS_1 CH_GLADOS PORTAL_01_PART2_SUCCESS_1 1.0 clear_existing
   portal_loop:
     - open_portal portal_exit 0
     - label loop_start

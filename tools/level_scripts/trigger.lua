@@ -107,6 +107,7 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
             sk_definition_writer.raw(step.args[2]),
             sk_definition_writer.raw(step.args[3] or "StringIdNone"),
             tonumber(step.args[4] or "1") * 255,
+            sk_scene.find_flag_argument(step.args, "clear_existing"),
         }
     elseif step.command == "wait_for_channel" and #step.args >= 1 then
         result.type = sk_definition_writer.raw('CutsceneStepTypeWaitForChannel')

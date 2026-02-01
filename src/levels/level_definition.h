@@ -110,6 +110,7 @@ struct CutsceneStep {
             u8 channel;
             u16 subtitleId;
             u8 volume;
+            u8 clearExisting;
         } queueSound;
         struct {
             u8 channel;

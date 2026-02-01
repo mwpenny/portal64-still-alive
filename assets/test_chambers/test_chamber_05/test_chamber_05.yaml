@@ -12,7 +12,7 @@ cutscenes:
     - start_cutscene NAG
     - wait_for_signal success
     - stop_cutscene NAG
-    - q_sound SOUNDS_05_PART1_SUCCESS_1 CH_GLADOS PORTAL_05_PART1_SUCCESS_1
+    - q_sound SOUNDS_05_PART1_SUCCESS_1 CH_GLADOS PORTAL_05_PART1_SUCCESS_1 1.0 clear_existing
   NAG:
     - delay 28
     - q_sound SOUNDS_05_PART1_NAG1_1 CH_GLADOS PORTAL_05_PART1_NAG1_1

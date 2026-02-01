@@ -138,6 +138,29 @@ void cutsceneQueueSound(int soundId, float volume, int channel, int subtitleId) 
     }
 }
 
+void cutsceneRunnerResetChannel(int channel) {
+    // Empty queue
+    struct QueuedSound* curr = gCutsceneSoundQueues[channel];
+    while (curr) {
+        struct QueuedSound* next = curr->next;
+
+        curr->next = gCutsceneNextFreeSound;
+        gCutsceneNextFreeSound = curr;
+
+        curr = next;
+    }
+    gCutsceneSoundQueues[channel] = NULL;
+
+    // Stop existing sound
+    if (gCutsceneCurrentSound[channel] != SOUND_ID_NONE) {
+        soundPlayerStop(gCutsceneCurrentSound[channel]);
+        gCutsceneCurrentSound[channel] = SOUND_ID_NONE;
+        gCutsceneCurrentSoundId[channel] = SOUND_ID_NONE;
+        gCutsceneCurrentSubtitleId[channel] = StringIdNone;
+        gCutsceneCurrentVolume[channel] = 0.0f;
+    }
+}
+
 float cutsceneRunnerConvertPlaybackSpeed(s8 asInt) {
     return asInt * (1.0f / 127.0f);
 }
@@ -197,6 +220,10 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         }
         case CutsceneStepTypeQueueSound:
         {
+            if (step->queueSound.clearExisting) {
+                cutsceneRunnerResetChannel(step->queueSound.channel);
+            }
+
             cutsceneQueueSoundInChannel(step->queueSound.soundId, step->queueSound.volume * (1.0f / 255.0f), step->queueSound.channel, step->queueSound.subtitleId);
             break;
         }
