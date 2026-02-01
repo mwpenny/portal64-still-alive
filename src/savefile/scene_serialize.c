@@ -361,7 +361,7 @@ void elevatorSerializeRW(struct Serializer* serializer, SerializeAction action, 
 void pedestalSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     for (int i = 0; i < scene->pedestalCount; ++i) {
         action(serializer, &scene->pedestals[i].flags, sizeof(short));
-        action(serializer, &scene->pedestals[i].pointAt, sizeof(struct Vector3));
+        action(serializer, &scene->pedestals[i].targetRotation, sizeof(struct Vector2));
         action(serializer, &scene->pedestals[i].currentRotation, sizeof(struct Vector2));
     }
 }
@@ -369,7 +369,7 @@ void pedestalSerialize(struct Serializer* serializer, SerializeAction action, st
 void pedestalDeserialize(struct Serializer* serializer, struct Scene* scene) {
     for (int i = 0; i < scene->pedestalCount; ++i) {
         serializeRead(serializer, &scene->pedestals[i].flags, sizeof(short));
-        serializeRead(serializer, &scene->pedestals[i].pointAt, sizeof(struct Vector3));
+        serializeRead(serializer, &scene->pedestals[i].targetRotation, sizeof(struct Vector2));
         serializeRead(serializer, &scene->pedestals[i].currentRotation, sizeof(struct Vector2));
 
         if (scene->pedestals[i].flags & PedestalFlagsDown) {

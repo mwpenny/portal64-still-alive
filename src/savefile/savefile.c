@@ -6,7 +6,7 @@
 #include "util/memory.h"
 #include "util/sort.h"
 
-#define SAVEFILE_MAGIC                      0xDF02
+#define SAVEFILE_MAGIC                      0xDF03
 
 #define SAVE_SLOT_OFFSET(index)             (((index) + 1) * SAVE_SLOT_SIZE)
 #define SAVE_SLOT_IMAGE_OFFSET(index)       (SAVE_SLOT_OFFSET(index) + MAX_CHECKPOINT_SIZE)

@@ -192,6 +192,7 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
         result.type = sk_definition_writer.raw('CutsceneStepTypePointPedestal')
         result.pointPedestal = {
             find_location_index(step.args[1]),
+            not sk_scene.find_flag_argument(step.args, "no_shooting_sound")
         }
     elseif step.command == "play_animation" then
         local armature = animation.get_armature_index_with_name(step.args[1])

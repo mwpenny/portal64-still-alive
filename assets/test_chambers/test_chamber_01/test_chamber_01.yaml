@@ -41,15 +41,15 @@ cutscenes:
     - point_pedestal portal_1
     - delay 4
     - open_portal portal_1 1 pedestal
-    - delay 3 2
+    - delay 3
     - point_pedestal portal_2
-    - delay 4 2
+    - delay 4
     - open_portal portal_2 1 pedestal
-    - delay 3 3
+    - delay 3
     - point_pedestal portal_3
-    - delay 4 3
+    - delay 4
     - open_portal portal_3 1 pedestal
-    - delay 3 4
+    - delay 3
     - point_pedestal portal_0
-    - delay 4 4
+    - delay 4
     - goto loop_start

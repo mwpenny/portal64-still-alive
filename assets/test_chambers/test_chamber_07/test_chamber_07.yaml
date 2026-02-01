@@ -18,15 +18,15 @@ cutscenes:
     - point_pedestal portal_1
     - delay 4
     - open_portal portal_1 0 pedestal
-    - delay 3 2
+    - delay 3
     - point_pedestal portal_2
-    - delay 4 2
+    - delay 4
     - open_portal portal_2 0 pedestal
-    - delay 3 3
-    - point_pedestal portal_3
-    - delay 4 3
+    - delay 3
+    - point_pedestal portal_3 no_shooting_sound
+    - delay 4
     - point_pedestal portal_0
-    - delay 4 4
+    - delay 4
     - goto loop_start
   platform_ferry:
     - wait_for_signal move_platform

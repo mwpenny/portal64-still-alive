@@ -1,16 +1,17 @@
 #ifndef __SCENE_PEDESTAL_H__
 #define __SCENE_PEDESTAL_H__
 
-#include "../sk64/skeletool_armature.h"
-#include "../sk64/skeletool_animator.h"
-#include "../levels/level_definition.h"
-#include "../audio/soundplayer.h"
-#include "../audio/clips.h"
+#include "audio/clips.h"
+#include "audio/soundplayer.h"
+#include "levels/level_definition.h"
+#include "sk64/skeletool_armature.h"
+#include "sk64/skeletool_animator.h"
 
 enum PedestalFlags {
     PedestalFlagsDown = (1 << 0),
     PedestalFlagsIsPointing = (1 << 1),
     PedestalFlagsAlreadyMoving  = (1 << 2),
+    PedestalFlagsPlayShootingSound = (1 << 3),
 };
 
 struct Pedestal {
@@ -23,7 +24,7 @@ struct Pedestal {
 
     short flags;
 
-    struct Vector3 pointAt;
+    struct Vector2 targetRotation;
     struct Vector2 currentRotation;
 };
 
@@ -31,7 +32,7 @@ void pedestalInit(struct Pedestal* pedestal, struct PedestalDefinition* definiti
 void pedestalUpdate(struct Pedestal* pedestal);
 
 void pedestalHide(struct Pedestal* pedestal);
-void pedestalPointAt(struct Pedestal* pedestal, struct Vector3* target);
+void pedestalPointAt(struct Pedestal* pedestal, struct Vector3* target, int playShootingSound);
 
 void pedestalSetDown(struct Pedestal* pedestal);
 

@@ -152,6 +152,7 @@ struct CutsceneStep {
         } cutscene;
         struct {
             u16 atLocation;
+            u8 playShootingSound;
         } pointPedestal;
         struct {
             u8 armatureIndex;
@@ -284,6 +285,7 @@ struct ElevatorDefinition {
 
 struct PedestalDefinition {
     struct Vector3 position;
+    struct Quaternion rotation;
     short roomIndex;
 };
 

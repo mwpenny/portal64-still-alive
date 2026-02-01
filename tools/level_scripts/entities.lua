@@ -118,12 +118,13 @@ sk_definition_writer.add_definition('fizzlers', 'struct FizzlerDefinition[]', '_
 local pedestals = {}
 
 for _, pedestal in pairs(sk_scene.nodes_for_type('@pedestal')) do
-    local position = pedestal.node.full_transformation:decompose()
+    local position, rotation = pedestal.node.full_transformation:decompose()
 
     local room_index = room_export.node_nearest_room_index(pedestal.node)
 
     table.insert(pedestals, {
         position = position,
+        rotation = rotation * sk_math.axis_angle(sk_math.vector3(1, 0, 0), math.pi * 0.5),
         roomIndex = room_index,
     })
 end

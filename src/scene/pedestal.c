@@ -13,9 +13,9 @@
 #include "codegen/assets/models/portal_gun/w_portalgun.h"
 
 struct Vector2 gMaxPedistalRotation;
-#define MAX_PEDISTAL_ROTATION_DEGREES_PER_SEC   (M_PI / 3.0f)
+#define MAX_PEDISTAL_ROTATION_DEGREES_PER_SEC   (M_PI / 6.0f)
 
-void pedestalRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
+static void pedestalRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Pedestal* pedestal = (struct Pedestal*)data;
 
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
@@ -57,6 +57,12 @@ void pedestalRender(void* data, struct DynamicRenderDataList* renderList, struct
     );
 }
 
+static void pedestalDetermineHolderAngle(struct Pedestal* pedestal, struct Vector3* direction, struct Vector2* output) {
+    output->x = direction->z;
+    output->y = direction->x;
+    vector2Normalize(output, output);
+}
+
 void pedestalInit(struct Pedestal* pedestal, struct PedestalDefinition* definition) {
     struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PEDESTAL_DYNAMIC_ANIMATED_MODEL);
 
@@ -78,26 +84,19 @@ void pedestalInit(struct Pedestal* pedestal, struct PedestalDefinition* definiti
     gMaxPedistalRotation.x = cosf(MAX_PEDISTAL_ROTATION_DEGREES_PER_SEC * FIXED_DELTA_TIME);
     gMaxPedistalRotation.y = sinf(MAX_PEDISTAL_ROTATION_DEGREES_PER_SEC * FIXED_DELTA_TIME);
 
-    pedestal->currentRotation.x = 1.0f;
-    pedestal->currentRotation.y = 0.0f;
-}
-
-void pedestalDetermineHolderAngle(struct Pedestal* pedestal, struct Vector2* output) {
-    output->x = pedestal->pointAt.z - pedestal->transform.position.z;
-    output->y = pedestal->pointAt.x - pedestal->transform.position.x;
-    vector2Normalize(output, output);
+    struct Vector3 startDir;
+    quatMultVector(&definition->rotation, &gForward, &startDir);
+    pedestalDetermineHolderAngle(pedestal, &startDir, &pedestal->currentRotation);
 }
 
 void pedestalUpdate(struct Pedestal* pedestal) {
     skAnimatorUpdate(&pedestal->animator, pedestal->armature.pose, FIXED_DELTA_TIME);
 
     if (pedestal->flags & PedestalFlagsIsPointing) {
-        struct Vector2 target;
-        pedestalDetermineHolderAngle(pedestal, &target);
-
-        if (vector2RotateTowards(&pedestal->currentRotation, &target, &gMaxPedistalRotation, &pedestal->currentRotation)) {
-            if (!(pedestal->flags & PedestalFlagsDown)){
+        if (vector2RotateTowards(&pedestal->currentRotation, &pedestal->targetRotation, &gMaxPedistalRotation, &pedestal->currentRotation)) {
+            if ((pedestal->flags & (PedestalFlagsDown | PedestalFlagsPlayShootingSound)) == PedestalFlagsPlayShootingSound) {
                 soundPlayerPlay(soundsPedestalShooting, 2.0f, 1.0f, &pedestal->transform.position, &gZeroVec, SoundTypeAll);
+                pedestal->flags &= ~PedestalFlagsPlayShootingSound;
             }
             pedestal->flags &= ~PedestalFlagsIsPointing;
         }
@@ -124,9 +123,16 @@ void pedestalHide(struct Pedestal* pedestal) {
     skAnimatorRunClip(&pedestal->animator, dynamicAssetClip(PEDESTAL_DYNAMIC_ANIMATED_MODEL, PEDESTAL_ARMATURE_HIDE_CLIP_INDEX), 0.0f, 0);
 }
 
-void pedestalPointAt(struct Pedestal* pedestal, struct Vector3* target) {
-    pedestal->pointAt = *target;
+void pedestalPointAt(struct Pedestal* pedestal, struct Vector3* target, int playShootingSound) {
+    struct Vector3 offset;
+    vector3Sub(target, &pedestal->transform.position, &offset);
+    pedestalDetermineHolderAngle(pedestal, &offset, &pedestal->targetRotation);
+
     pedestal->flags |= PedestalFlagsIsPointing;
+
+    if (playShootingSound) {
+        pedestal->flags |= PedestalFlagsPlayShootingSound;
+    }
 }
 
 void pedestalSetDown(struct Pedestal* pedestal) {

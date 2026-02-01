@@ -296,7 +296,11 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             break;
         case CutsceneStepTypePointPedestal:
             for (unsigned i = 0; i < gScene.pedestalCount; ++i) {
-                pedestalPointAt(&gScene.pedestals[i], &gCurrentLevel->locations[step->pointPedestal.atLocation].transform.position);
+                pedestalPointAt(
+                    &gScene.pedestals[i],
+                    &gCurrentLevel->locations[step->pointPedestal.atLocation].transform.position,
+                    step->pointPedestal.playShootingSound
+                );
             }
             break;
         case CutsceneStepPlayAnimation:
