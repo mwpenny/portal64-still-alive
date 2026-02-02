@@ -951,13 +951,10 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                 // the second portal is fully transparent right away
                 portal->opacity = 0.0f;
 
-                if (!fromPlayer) {
-                    // flash other portal to make it easier to tell
-                    // something changed and play sound near other portal
-                    struct Portal* otherPortal = &scene->portals[1 - portalIndex];
-                    otherPortal->opacity = 1.0f;
-                    soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &otherPortal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
-                }
+                // Flash other portal to make it easier to tell it changed
+                struct Portal* otherPortal = &scene->portals[1 - portalIndex];
+                otherPortal->opacity = 1.0f;
+                soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &otherPortal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
 
                 sceneCheckSecurityCamera(scene, portal);
 
