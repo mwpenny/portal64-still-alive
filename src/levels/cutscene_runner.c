@@ -263,7 +263,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         }
         case CutsceneStepTypeClosePortal:
         {
-            sceneClosePortal(&gScene, step->closePortal.portalIndex);
+            sceneClosePortal(&gScene, step->closePortal.portalIndex, 1 /* playSound */);
             break;
         }
         case CutsceneStepShowPrompt:

@@ -384,8 +384,8 @@ struct RumblePakWave gFireGunRumbleWave = {
 
 void sceneCheckPortals(struct Scene* scene) {
     if (playerIsDead(&scene->player)) {
-        sceneClosePortal(scene, 0);
-        sceneClosePortal(scene, 1);
+        sceneClosePortal(scene, 0, 0 /* playSound */);
+        sceneClosePortal(scene, 1, 0 /* playSound */);
         portalCheckForHoles(scene->portals);
         return;
     }
@@ -439,10 +439,10 @@ void sceneCheckPortals(struct Scene* scene) {
         int didClose = 0;
 
         if (scene->portals[0].flags & PortalFlagsPlayerPortal) {
-            didClose |= sceneClosePortal(scene, 0);
+            didClose |= sceneClosePortal(scene, 0, 0 /* playSound */);
         }
         if (scene->portals[1].flags & PortalFlagsPlayerPortal) {
-            didClose |= sceneClosePortal(scene, 1);
+            didClose |= sceneClosePortal(scene, 1, 0 /* playSound */);
         }
         scene->player.body.flags &= ~RigidBodyFizzled;
         scene->hud.lastPortalIndexShot = -1;
@@ -451,6 +451,7 @@ void sceneCheckPortals(struct Scene* scene) {
             rumblePakClipPlay(&gPlayerClosePortalRumble);
             portalGunFizzle(&scene->portalGun);
             soundPlayerPlay(soundsPortalFizzle, 0.6f, 1.0f, NULL, NULL, SoundTypeAll);
+            hudShowSubtitle(&gScene.hud, PORTAL_FIZZLE_MOVED, SubtitleTypeCaption);
         }
     }
 
@@ -549,7 +550,7 @@ void sceneUpdatePortalVelocity(struct Scene* scene) {
         vector3Sub(&newPos, &gCollisionScene.portalTransforms[i]->position, &offset);
 
         if (!vector3IsZero(&offset) && !(gSaveData.gameplay.flags & GameplaySaveFlagsMovablePortals)) {
-            sceneClosePortal(scene, i);
+            sceneClosePortal(scene, i, 1 /* playSound */);
             continue;
         }
 
@@ -601,9 +602,9 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
             // Close portals touched by moving dynamic collision not part of the same animation
             for (int portalIndex = 0; portalIndex < 2; ++portalIndex) {
                 if (boxDef->transformIndex != scene->portals[portalIndex].transformIndex &&
-                    sceneCheckObjectIsTouchingPortal(scene, collisionObject, portalIndex)) {
-
-                    sceneClosePortal(scene, portalIndex);
+                    sceneCheckObjectIsTouchingPortal(scene, collisionObject, portalIndex)
+                ) {
+                    sceneClosePortal(scene, portalIndex, 1 /* playSound */);
                 }
             }
         }
@@ -832,8 +833,8 @@ void sceneUpdate(struct Scene* scene) {
                     scene->elevators[teleportTo].rigidBody.currentRoom
                 );
                 sceneQueueCheckpoint(&gScene);
-                sceneClosePortal(&gScene, 0);
-                sceneClosePortal(&gScene, 1);
+                sceneClosePortal(&gScene, 0, 0 /* playSound */);
+                sceneClosePortal(&gScene, 1, 0 /* playSound */);
                 scene->player.lookTransform.position = scene->player.body.transform.position;
             }
         }
@@ -909,6 +910,10 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
             collisionScenePushObjectsOutOfPortal(portalIndex);
             collisionScenePushObjectsOutOfPortal(1 - portalIndex);
 
+            if (gCollisionScene.portalTransforms[portalIndex]) {
+                soundPlayerPlay(soundsPortalClose[portalIndex], 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position, &gZeroVec, SoundTypeAll);
+            }
+
             // the portal position may have been adjusted
             if (transformIndex != NO_TRANSFORM_INDEX) {
                 portal->relativePos = finalAt.position;
@@ -926,7 +931,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
             collisionSceneSetPortal(portalIndex, &portal->rigidBody.transform, roomIndex, portal->colliderIndex);
             collisionObjectUpdateBB(&portal->collisionObject);
 
-            soundPlayerPlay(soundsPortalOpen2, 1.5f, 1.0f, &portal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+            soundPlayerPlay(soundsPortalOpen[portalIndex], 1.5f, 1.0f, &portal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             if (portalIndex == 0){
                 hudShowSubtitle(&gScene.hud, PORTAL_OPEN_RED, SubtitleTypeCaption);
             } else {
@@ -954,7 +959,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                 // Flash other portal to make it easier to tell it changed
                 struct Portal* otherPortal = &scene->portals[1 - portalIndex];
                 otherPortal->opacity = 1.0f;
-                soundPlayerPlay(soundsPortalOpen2, 1.0f, 1.0f, &otherPortal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+                soundPlayerPlay(soundsPortalChange, 1.0f, 1.0f, &otherPortal->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
 
                 sceneCheckSecurityCamera(scene, portal);
 
@@ -1035,7 +1040,7 @@ int sceneOpenPortalFromHit(struct Scene* scene, struct Ray* ray, struct RaycastH
 
     if (!sceneOpenPortal(scene, &portalLocation, relativeIndex, portalIndex, mappingRange, hit->object, hit->roomIndex, fromPlayer, just_checking)) {
         if (!fromPlayer) {
-            sceneClosePortal(scene, 1-portalIndex);
+            sceneClosePortal(scene, 1 - portalIndex, 1 /* playSound */);
             scene->continuouslyAttemptingPortalOpen = 1;
             scene->savedPortal.portalIndex = portalIndex;
             scene->savedPortal.ray = *ray;
@@ -1058,61 +1063,27 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
         return 0;
     }
 
-    struct PortalSurfaceMappingRange mappingRange;
-    int relativeIndex = NO_TRANSFORM_INDEX;
-
-    if (!sceneDetermineSurfaceMapping(scene, hit.object, &mappingRange, &relativeIndex)) {
-        return 0;
-    }
-
-    struct Transform portalLocation;
-
-    struct Vector3 hitDirection = hit.normal;
-
-    if (portalIndex == 1) {
-        vector3Negate(&hitDirection, &hitDirection);
-    }
-
-    portalLocation.position = hit.at;
-    portalLocation.scale = gOneVec;
-    if (fabsf(hit.normal.y) < 0.8) {
-        quatLook(&hitDirection, &gUp, &portalLocation.rotation);
-    } else {
-        struct Vector3 upDir;
-
-        if (ray->dir.y > 0.0f) {
-            vector3Negate(playerUp, &upDir);
-        } else {
-            upDir = *playerUp;
-        }
-
-        quatLook(&hitDirection, &upDir, &portalLocation.rotation);
-    }
-
-    if (!sceneOpenPortal(scene, &portalLocation, relativeIndex, portalIndex, mappingRange, hit.object, hit.roomIndex, fromPlayer, just_checking)) {
-        if (!fromPlayer) {
-            sceneClosePortal(scene, 1-portalIndex);
-            scene->continuouslyAttemptingPortalOpen = 1;
-            scene->savedPortal.portalIndex = portalIndex;
-            scene->savedPortal.ray = *ray;
-            scene->savedPortal.roomIndex = roomIndex;
-            scene->savedPortal.transformUp = *playerUp;
-        }
-
-        return 0;
-    }
-    if (!fromPlayer){
-        scene->continuouslyAttemptingPortalOpen = 0;
-    }
-    return 1;
+    return sceneOpenPortalFromHit(
+        scene,
+        ray,
+        &hit,
+        playerUp,
+        portalIndex,
+        roomIndex,
+        fromPlayer,
+        just_checking
+    );
 }
 
-int sceneClosePortal(struct Scene* scene, int portalIndex) {
+int sceneClosePortal(struct Scene* scene, int portalIndex, int playSound) {
     if (gCollisionScene.portalTransforms[portalIndex]) {
         collisionScenePushObjectsOutOfPortal(portalIndex);
 
-        soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position, &gZeroVec, SoundTypeAll);
-        hudShowSubtitle(&gScene.hud, PORTAL_FIZZLE_MOVED, SubtitleTypeCaption);
+        if (playSound) {
+            soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position, &gZeroVec, SoundTypeAll);
+            hudShowSubtitle(&gScene.hud, PORTAL_FIZZLE_MOVED, SubtitleTypeCaption);
+        }
+
         gCollisionScene.portalTransforms[portalIndex] = NULL;
         gCollisionScene.portalColliderIndex[portalIndex] = -1;
         scene->portals[portalIndex].portalSurfaceIndex = -1;

@@ -118,8 +118,12 @@ set(SOUND_SCRIPTS
     weapons/physcannon/energy_sing_explosion2.sox
     weapons/physcannon/energy_sing_flyby1.sox
     weapons/physcannon/energy_sing_loop4.sox
+    weapons/portalgun/portal_close1.sox
+    weapons/portalgun/portal_close2.sox
     weapons/portalgun/portal_fizzle2.sox
+    weapons/portalgun/portal_open1.sox
     weapons/portalgun/portal_open2.sox
+    weapons/portalgun/portal_open3.sox
     weapons/portalgun/portalgun_shoot_blue1.sox
     weapons/portalgun/portalgun_shoot_red1.sox
     weapons/stunstick/alyx_stunner1.sox

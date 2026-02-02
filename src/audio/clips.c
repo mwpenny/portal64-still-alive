@@ -3,11 +3,13 @@
 
 #include "codegen/assets/audio/clips.h"
 
-unsigned short soundsSkippable[19] = {
+unsigned short soundsSkippable[21] = {
     SOUNDS_PORTAL_ENTER1,
     SOUNDS_PORTAL_ENTER2,
     SOUNDS_PORTAL_EXIT1,
     SOUNDS_PORTAL_EXIT2,
+    SOUNDS_PORTAL_CLOSE1,
+    SOUNDS_PORTAL_CLOSE2,
     SOUNDS_CONCRETE1, //left foot
     SOUNDS_CONCRETE2, //right foot
     SOUNDS_CONCRETE3, //land
@@ -70,7 +72,17 @@ unsigned short soundsPedestalMoving = SOUNDS_PORTALGUN_ROTATE1;
 unsigned short soundsFastFalling = SOUNDS_FAST_WINDLOOP1;
 unsigned short soundsBallCatcher = SOUNDS_ALYX_STUNNER1;
 
-unsigned short soundsPortalOpen2 = SOUNDS_PORTAL_OPEN2;
+unsigned short soundsPortalOpen[2] = {
+    SOUNDS_PORTAL_OPEN2,
+    SOUNDS_PORTAL_OPEN1,
+};
+unsigned short soundsPortalClose[2] = {
+    SOUNDS_PORTAL_CLOSE2,
+    SOUNDS_PORTAL_CLOSE1,
+};
+
+unsigned short soundsPortalChange = SOUNDS_PORTAL_OPEN3;
+
 unsigned short soundsTickTock = SOUNDS_TICKTOCK1;
 
 unsigned short soundsPortalFizzle = SOUNDS_PORTAL_FIZZLE2;

@@ -1,7 +1,7 @@
 #ifndef __AUDIO_CLIPS_H__
 #define __AUDIO_CLIPS_H__
 
-extern unsigned short soundsSkippable[19];
+extern unsigned short soundsSkippable[21];
 
 extern unsigned short soundsPortalEnter[2];
 extern unsigned short soundsPortalExit[2];
@@ -18,7 +18,9 @@ extern unsigned short soundsPedestalMoving;
 extern unsigned short soundsDoor;
 extern unsigned short soundsFastFalling;
 extern unsigned short soundsBallCatcher;
-extern unsigned short soundsPortalOpen2;
+extern unsigned short soundsPortalOpen[2];
+extern unsigned short soundsPortalClose[2];
+extern unsigned short soundsPortalChange;
 extern unsigned short soundsTickTock;
 
 extern unsigned short soundsPortalFizzle;
