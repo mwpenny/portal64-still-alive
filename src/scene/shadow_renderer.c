@@ -1,7 +1,6 @@
-
 #include "shadow_renderer.h"
+
 #include "util/memory.h"
-#include "defs.h"
 
 #define MATRIX_TRANSFORM_SEGMENT    0xC
 #define TOP_MATRIX_INDEX        0

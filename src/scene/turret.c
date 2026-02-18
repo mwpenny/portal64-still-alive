@@ -1,7 +1,6 @@
 #include "turret.h"
 
 #include "decor/decor_object.h"
-#include "defs.h"
 #include "effects/effect_definitions.h"
 #include "locales/locales.h"
 #include "physics/collision_scene.h"

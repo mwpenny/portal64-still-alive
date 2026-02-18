@@ -5,7 +5,6 @@
 #include "audio/soundplayer.h"
 #include "controls/controller_actions.h"
 #include "controls/rumble_pak_clip.h"
-#include "defs.h"
 #include "graphics/graphics.h"
 #include "graphics/profile_task.h"
 #include "levels/cutscene_runner.h"
@@ -23,6 +22,8 @@
 #include "strings/translations.h"
 #include "system/cartridge.h"
 #include "system/controller.h"
+#include "system/defs.h"
+#include "system/libultra/threads_libultra.h"
 #include "system/screen.h"
 #include "util/dynamic_asset_loader.h"
 #include "util/frame_time.h"
@@ -33,12 +34,14 @@
 #include "debugger/debug.h"
 #endif
 
+#define MAX_FRAME_BUFFER_MESGS 8
+
 static OSThread idleThread;
 static OSThread gameThread;
 
-u64    mainStack[STACKSIZEBYTES/sizeof(u64)];
-static u64 idleThreadStack[STACKSIZEBYTES/sizeof(u64)];
-static u64 gameThreadStack[STACKSIZEBYTES/sizeof(u64)];
+u64    mainStack[STACK_SIZE_BYTES/sizeof(u64)];
+static u64 idleThreadStack[STACK_SIZE_BYTES/sizeof(u64)];
+static u64 gameThreadStack[STACK_SIZE_BYTES/sizeof(u64)];
 
 static void idleProc(void *);
 static void gameProc(void *);
@@ -61,7 +64,7 @@ void boot(void *arg) {
         IDLE_THREAD_ID,
         idleProc,
         NULL,
-        idleThreadStack + (STACKSIZEBYTES / sizeof(u64)),
+        idleThreadStack + (STACK_SIZE_BYTES / sizeof(u64)),
         (OSPri)INIT_PRIORITY
     );
 
@@ -76,7 +79,7 @@ static void idleProc(void* arg) {
         GAME_THREAD_ID,
         gameProc, 
         0, 
-        gameThreadStack + (STACKSIZEBYTES / sizeof(u64)),
+        gameThreadStack + (STACK_SIZE_BYTES / sizeof(u64)),
         (OSPri)GAME_PRIORITY
     );
 

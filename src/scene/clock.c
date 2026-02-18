@@ -1,6 +1,5 @@
 #include "clock.h"
 
-#include "defs.h"
 #include "levels/cutscene_runner.h"
 #include "levels/levels.h"
 #include "math/mathf.h"

@@ -1,15 +1,14 @@
 #ifndef __PORTAL_H__
 #define __PORTAL_H__
 
-#include "../math/transform.h"
-#include "../math/plane.h"
-#include "../math/vector2s16.h"
-#include "../math/box3d.h"
-#include "../graphics/renderstate.h"
 #include "camera.h"
-#include "static_scene.h"
-#include "./portal_surface.h"
-#include "../physics/collision_object.h"
+#include "graphics/renderstate.h"
+#include "math/box3d.h"
+#include "math/plane.h"
+#include "math/transform.h"
+#include "math/vector2s16.h"
+#include "physics/collision_object.h"
+#include "portal_surface.h"
 
 #define PORTAL_RENDER_DEPTH_MAX  8
 #define PORTAL_LOOP_SIZE    8

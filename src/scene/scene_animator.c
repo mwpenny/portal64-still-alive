@@ -1,7 +1,6 @@
 #include "scene_animator.h"
 
 #include "audio/soundplayer.h"
-#include "defs.h"
 #include "math/mathf.h"
 #include "util/frame_time.h"
 #include "util/memory.h"

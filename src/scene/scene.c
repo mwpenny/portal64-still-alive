@@ -1,7 +1,4 @@
-
 #include "scene.h"
-
-#include "defs.h"
 
 #include "audio/clips.h"
 #include "audio/soundplayer.h"

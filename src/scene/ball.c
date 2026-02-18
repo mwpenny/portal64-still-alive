@@ -2,7 +2,6 @@
 
 #include "audio/soundplayer.h"
 #include "audio/clips.h"
-#include "defs.h"
 #include "dynamic_scene.h"
 #include "effects/effect_definitions.h"
 #include "physics/collision_scene.h"

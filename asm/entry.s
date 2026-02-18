@@ -1,4 +1,4 @@
-#include "../src/defs.h"
+#include "../src/system/defs.h"
 #include "macros.inc"
 
 .section .text, "ax"
@@ -14,5 +14,5 @@
     addi    $t1, $t1, -8
     bnez    $t1, .bss_clear
 
-    la      $sp, mainStack + STACKSIZEBYTES
+    la      $sp, mainStack + STACK_SIZE_BYTES
     j       boot

@@ -2,7 +2,6 @@
 
 #include <assert.h>
 
-#include "defs.h"
 #include "dynamic_scene.h"
 #include "graphics/color.h"
 #include "physics/collision_scene.h"

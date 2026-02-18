@@ -1,11 +1,10 @@
 #include "render_scene.h"
 
-#include "../util/memory.h"
-#include "defs.h"
-#include "../levels/levels.h"
+#include "levels/levels.h"
 #include "sk64/skeletool_defs.h"
+#include "util/memory.h"
 
-struct RenderScene* renderSceneNew(struct Transform* cameraTransform, struct RenderState *renderState, int capacity, u64 visibleRooms) {
+struct RenderScene* renderSceneNew(struct Transform* cameraTransform, struct RenderState *renderState, u64 visibleRooms) {
     struct RenderScene* result = stackMalloc(sizeof(struct RenderScene));
 
     struct Vector3 cameraForward;
@@ -14,8 +13,8 @@ struct RenderScene* renderSceneNew(struct Transform* cameraTransform, struct Ren
     planeInitWithNormalAndPoint(&result->forwardPlane, &cameraForward, &cameraTransform->position);
     
     result->currentRenderPart = 0;
-    result->maxRenderParts = capacity;
 
+    int capacity = MAX_RENDER_PART_COUNT;
     result->renderParts = stackMalloc(sizeof(struct RenderPart) * capacity);
     result->sortKeys = stackMalloc(sizeof(int) * capacity);
     result->materials = stackMalloc(sizeof(short) * capacity);
@@ -46,7 +45,7 @@ int renderSceneSortKey(int materialIndex, float distance) {
 }
 
 void renderSceneAdd(struct RenderScene* renderScene, Gfx* geometry, Mtx* matrix, int materialIndex, struct Vector3* at, Mtx* armature) {
-    if (renderScene->currentRenderPart == renderScene->maxRenderParts) {
+    if (renderScene->currentRenderPart == MAX_RENDER_PART_COUNT) {
         return;
     }
 

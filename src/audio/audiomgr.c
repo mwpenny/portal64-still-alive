@@ -1,7 +1,7 @@
 
 #include <assert.h>
 #include "audio.h"
-#include "defs.h"
+#include "system/libultra/threads_libultra.h"
 
 #ifdef PORTAL64_WITH_DEBUGGER
 #include "debugger/debug.h"

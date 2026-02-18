@@ -184,7 +184,7 @@ static void debugSceneRenderPerformanceMetrics(struct Scene* scene, struct Rende
     debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
 
     textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
-    sprintf(metricText, "GEO: %d/%d", debugSceneMaxRenderPartCount(renderPlan), MAX_RENDER_COUNT);
+    sprintf(metricText, "GEO: %d/%d", debugSceneMaxRenderPartCount(renderPlan), MAX_RENDER_PART_COUNT);
     debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
 
     textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;

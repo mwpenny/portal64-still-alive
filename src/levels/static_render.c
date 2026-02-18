@@ -1,6 +1,5 @@
 #include "static_render.h"
 
-#include "defs.h"
 #include "graphics/render_scene.h"
 #include "levels.h"
 #include "math/mathf.h"
@@ -177,7 +176,7 @@ void staticRender(struct RenderProps* renderStage, struct DynamicRenderDataList*
     struct FrustumCullingInformation* cullingInfo = &renderStage->cameraMatrixInfo.cullingInformation;
     u64* visibleRooms = &renderStage->visiblerooms;
 
-    struct RenderScene* renderScene = renderSceneNew(cameraTransform, renderState, MAX_RENDER_COUNT, *visibleRooms);
+    struct RenderScene* renderScene = renderSceneNew(cameraTransform, renderState, *visibleRooms);
 
     staticRenderPopulateRooms(cullingInfo, staticMatrices, staticTransforms, renderScene);
     dynamicRenderPopulateRenderScene(dynamicList, stageIndex, renderScene, cameraTransform, cullingInfo, *visibleRooms);

@@ -1,7 +1,6 @@
 #include "matrix.h"
 
-#include <ultra64.h>
-#include "defs.h"
+#include "graphics/graphics.h"
 
 void matrixPerspective(float matrix[4][4], unsigned short* perspNorm, float l, float r, float t, float b, float near, float far) {
 	guMtxIdentF(matrix);

@@ -1,7 +1,6 @@
 #include "security_camera.h"
 
 #include "decor/decor_object.h"
-#include "defs.h"
 #include "dynamic_scene.h"
 #include "levels/cutscene_runner.h"
 #include "physics/collision_box.h"

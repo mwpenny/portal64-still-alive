@@ -1,7 +1,6 @@
 #include "box_dropper.h"
 
 #include "decor/decor_object_list.h"
-#include "defs.h"
 #include "hud.h"
 #include "physics/config.h"
 #include "scene.h"

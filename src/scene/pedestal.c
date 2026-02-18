@@ -1,6 +1,5 @@
 #include "pedestal.h"
 
-#include "defs.h"
 #include "scene/dynamic_scene.h"
 #include "scene/hud.h"
 #include "scene/scene.h"

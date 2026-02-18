@@ -1,12 +1,10 @@
 #ifndef __SCENE_ANIMATOR_H__
 #define __SCENE_ANIMATOR_H__
 
-#include "../levels/level_definition.h"
-
-#include "../sk64/skeletool_armature.h"
-#include "../sk64/skeletool_animator.h"
-
-#include "../graphics/renderstate.h"
+#include "graphics/renderstate.h"
+#include "levels/level_definition.h"
+#include "sk64/skeletool_animator.h"
+#include "sk64/skeletool_armature.h"
 
 enum SceneAnimatorStateFlags {
     SceneAnimatorStateWasMoving = (1 << 0),

@@ -1,8 +1,8 @@
 #ifndef __SPLASH_PARTICLE_EFFECT_H__
 #define __SPLASH_PARTICLE_EFFECT_H__
 
-#include "../math/vector3.h"
-#include "../graphics/color.h"
+#include "graphics/color.h"
+#include "math/vector3.h"
 
 enum SplashParticleFlags {
     SplashParticleFlagsBillboarded = (1 << 0),

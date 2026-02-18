@@ -7,6 +7,7 @@
 
 #include "graphics/graphics.h"
 #include "util/memory.h"
+#include "system/libultra/threads_libultra.h"
 #include "system/screen.h"
 
 extern u16 __attribute__((aligned(64))) zbuffer[SCREEN_HT * SCREEN_WD];

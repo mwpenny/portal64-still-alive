@@ -1,7 +1,7 @@
 #include "dynamic_scene.h"
-#include "../levels/static_render.h"
-#include "defs.h"
-#include "../levels/levels.h"
+
+#include "levels/levels.h"
+#include "levels/static_render.h"
 
 struct DynamicScene gDynamicScene;
 

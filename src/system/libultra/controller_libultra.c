@@ -1,6 +1,6 @@
 #include "system/controller.h"
 
-#include "defs.h"
+#include "threads_libultra.h"
 #include "util/memory.h"
 
 #include <ultra64.h>
@@ -130,12 +130,12 @@ static void controllerThreadLoop(void* arg) {
         // Check the controller status
         memCopy(&prevStatus, &sControllerStatus, sizeof(sControllerStatus));
         osContStartQuery(&serialMsgQ);
-        osRecvMesg(&serialMsgQ, &serialMsg, OS_MESG_BLOCK);
+        osRecvMesg(&serialMsgQ, NULL, OS_MESG_BLOCK);
         osContGetQuery(sControllerStatus);
 
         // Read the controller
         osContStartReadData(&serialMsgQ);
-        osRecvMesg(&serialMsgQ, &serialMsg, OS_MESG_BLOCK);
+        osRecvMesg(&serialMsgQ, NULL, OS_MESG_BLOCK);
         osContGetReadData(controllerData);
 
         for (int i = 0; i < MAXCONTROLLERS; ++i) {
@@ -148,7 +148,7 @@ static void controllerThreadLoop(void* arg) {
         }
 
         // Add controller data to queue and block until it is recieved
-        // I.e., wait until application calls controllersTriggerRead()
+        // I.e., wait until application calls controllersPoll()
         osSendMesg(&sControllerDataQueue, &controllerData, OS_MESG_BLOCK);
     }
 }

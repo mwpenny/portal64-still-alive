@@ -2,16 +2,17 @@
 #define __COLLISION_SCENE_H__
 
 #include "collision_object.h"
-#include "defs.h"
 #include "math/ray.h"
 #include "point_constraint.h"
 #include "raycasting.h"
 #include "world.h"
 
-#define PORTAL_COVER_HEIGHT_RADIUS 0.708084f
-#define PORTAL_COVER_WIDTH_RADIUS  0.420425f
+#define PORTAL_COVER_HEIGHT_RADIUS  0.708084f
+#define PORTAL_COVER_WIDTH_RADIUS   0.420425f
 
-#define PORTAL_THICKNESS        0.11f
+#define PORTAL_THICKNESS            0.11f
+
+#define MAX_DYNAMIC_COLLISION       64
 
 struct CollisionScene {
     struct CollisionObject* quads;

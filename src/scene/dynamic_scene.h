@@ -1,10 +1,10 @@
 #ifndef __DYNAMIC_SCENE_H__
 #define __DYNAMIC_SCENE_H__
 
-#include "../graphics/renderstate.h"
-#include "../math/transform.h"
-#include "../scene/camera.h"
-#include "../graphics/render_scene.h"
+#include "graphics/render_scene.h"
+#include "graphics/renderstate.h"
+#include "math/transform.h"
+#include "scene/camera.h"
 
 struct DynamicRenderDataList;
 

@@ -4,7 +4,6 @@
 #include <sched.h>
 #include <ultra64.h>
 
-#include "defs.h"
 #include "renderstate.h"
 
 struct GraphicsTask {

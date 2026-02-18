@@ -3,10 +3,10 @@
 
 #include <ultra64.h>
 
-#include "math/vector3.h"
-#include "math/transform.h"
 #include "graphics/color.h"
 #include "graphics/renderstate.h"
+#include "math/transform.h"
+#include "math/vector3.h"
 
 struct PointLight {
     struct Vector3 position;

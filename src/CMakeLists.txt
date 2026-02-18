@@ -148,7 +148,6 @@ target_sources(engine INTERFACE
     scene/shadow_renderer.c
     scene/signage.c
     scene/signals.c
-    scene/static_scene.c
     scene/switch.c
     scene/trigger_listener.c
     scene/turret.c

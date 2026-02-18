@@ -2,8 +2,9 @@
 #define __SKELETOOL_OBJECT_H
 
 #include <ultra64.h>
-#include "math/transform.h"
+
 #include "graphics/renderstate.h"
+#include "math/transform.h"
 
 #define NO_BONE_PARENT      0xFFFF
 

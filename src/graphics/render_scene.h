@@ -2,9 +2,12 @@
 #define __RENDER_SCENE_H__
 
 #include <ultra64.h>
-#include "../math/transform.h"
-#include "../math/plane.h"
+
+#include "math/transform.h"
+#include "math/plane.h"
 #include "renderstate.h"
+
+#define MAX_RENDER_PART_COUNT 256
 
 struct RenderPart {
     Mtx* matrix;
@@ -21,11 +24,10 @@ struct RenderScene {
     short* renderOrder;
     short* renderOrderCopy;
     int currentRenderPart;
-    int maxRenderParts;
     struct RenderState *renderState;
 };
 
-struct RenderScene* renderSceneNew(struct Transform* cameraTransform, struct RenderState *renderState, int capacity, u64 visibleRooms);
+struct RenderScene* renderSceneNew(struct Transform* cameraTransform, struct RenderState *renderState, u64 visibleRooms);
 void renderSceneFree(struct RenderScene* renderScene);
 void renderSceneAdd(struct RenderScene* renderScene, Gfx* geometry, Mtx* matrix, int materialIndex, struct Vector3* at, Mtx* armature);
 void renderSceneGenerate(struct RenderScene* renderScene, struct RenderState* renderState);

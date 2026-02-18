@@ -1,6 +1,5 @@
 #include "debug_renderer.h"
 
-#include "defs.h"
 #include "collision_object.h"
 
 #define SOLID_SHADE_COLOR   0, 0, 0, SHADE, 0, 0, 0, SHADE

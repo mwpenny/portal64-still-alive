@@ -2,7 +2,6 @@
 
 #include "collision_scene.h"
 #include "contact_solver.h"
-#include "defs.h"
 #include "physics/config.h"
 #include "util/frame_time.h"
 

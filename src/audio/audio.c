@@ -1,7 +1,9 @@
 
 #include "audio.h"
 
-#include "defs.h"
+#include "system/libultra/threads_libultra.h"
+
+#define NUM_FIELDS      1
 
 /**** audio globals ****/
 u8* gAudioHeapBuffer;

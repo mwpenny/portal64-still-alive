@@ -3,7 +3,6 @@
 
 #include <ultra64.h>
 
-#include "defs.h"
 #include "math/transform.h"
 #include "physics/collision_box.h"
 #include "physics/collision_object.h"

@@ -24,6 +24,7 @@ void graphicsOutputMessageToDebugger(char* message, unsigned len) {
 #endif
 
 #define RDP_OUTPUT_SIZE 0x4000
+#define LEVEL_SEGMENT   2
 
 u64* rdpOutput;
 u64 __attribute__((aligned(16))) dram_stack[SP_DRAM_STACK_SIZE64 + 1];

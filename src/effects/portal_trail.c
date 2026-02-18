@@ -1,6 +1,5 @@
 #include "portal_trail.h"
 
-#include "defs.h"
 #include "graphics/color.h"
 #include "math/vector2.h"
 #include "math/mathf.h"

@@ -2,7 +2,6 @@
 
 #include <ultra64.h>
 
-#include "defs.h"
 #include "math/vector3.h"
 #include "math/matrix.h"
 

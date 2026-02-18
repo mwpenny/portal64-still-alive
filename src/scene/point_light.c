@@ -1,10 +1,8 @@
 
-#include "point_light.h"
-#include "defs.h"
-#include "util/memory.h"
-#include "math/mathf.h"
 #include "graphics/graphics.h"
-#include "defs.h"
+#include "math/mathf.h"
+#include "point_light.h"
+#include "util/memory.h"
 
 Light gLightBlack = {{{0, 0, 0}, 0, {0, 0, 0}, 0, {0, 0x7f, 0}, 0}};
 

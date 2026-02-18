@@ -1,6 +1,5 @@
 #include "splash_particle_effect.h"
 
-#include "defs.h"
 #include "math/mathf.h"
 #include "math/vector2.h"
 #include "physics/config.h"

@@ -3,6 +3,8 @@
 
 #include <ultra64.h>
 
+#define SCENE_SCALE             128
+
 #define MAX_DL_LENGTH           2000
 #define MAX_RENDER_STATE_MEMORY 12800
 #define MAX_RENDER_STATE_MEMORY_CHUNKS (MAX_RENDER_STATE_MEMORY / sizeof(u64))

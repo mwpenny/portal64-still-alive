@@ -3,10 +3,10 @@
 
 #include <ultra64.h>
 
+#include "graphics/color.h"
 #include "graphics/renderstate.h"
 #include "math/transform.h"
 #include "math/vector2.h"
-#include "graphics/color.h"
 #include "point_light.h"
 
 enum ShadowReceiverFlags {

@@ -5,7 +5,6 @@
 
 #include "audio/clips.h"
 #include "audio/soundplayer.h"
-#include "defs.h"
 #include "controls/controller_actions.h"
 #include "levels/levels.h"
 #include "math/mathf.h"

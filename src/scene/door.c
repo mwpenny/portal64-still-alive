@@ -1,6 +1,5 @@
 #include "door.h"
 
-#include "defs.h"
 #include "graphics/render_scene.h"
 #include "hud.h"
 #include "math/mathf.h"

@@ -1,6 +1,5 @@
 #include "button.h"
 
-#include "defs.h"
 #include "dynamic_scene.h"
 #include "graphics/renderstate.h"
 #include "physics/collision_cylinder.h"
