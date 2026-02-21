@@ -1,7 +1,6 @@
-#include <ultra64.h>
 #include <sched.h>
+#include <ultra64.h>
 
-#include "audio/audio.h"
 #include "audio/soundplayer.h"
 #include "controls/controller_actions.h"
 #include "controls/rumble_pak_clip.h"
@@ -158,14 +157,14 @@ int updateSchedulerModeAndGetFPS(int interlacedMode) {
     schedulerMode = interlacedMode ? OS_VI_NTSC_LPF1 : OS_VI_NTSC_LPN1;
 
     switch (osTvType) {
-	case 0: // PAL
+	case OS_TV_PAL:
 		schedulerMode = HIGH_RES ? (interlacedMode ? OS_VI_PAL_HPF1 : OS_VI_PAL_HPN1) : (interlacedMode ? OS_VI_PAL_LPF1 : OS_VI_PAL_LPN1);
 		fps = 50;
 		break;
-	case 1: // NTSC
+	case OS_TV_NTSC:
 		schedulerMode = HIGH_RES ? (interlacedMode ? OS_VI_NTSC_HPF1 : OS_VI_NTSC_HPN1) : (interlacedMode ? OS_VI_NTSC_LPF1 : OS_VI_NTSC_LPN1);
 		break;
-	case 2: // MPAL
+	case OS_TV_MPAL:
 		schedulerMode = HIGH_RES ? (interlacedMode ? OS_VI_MPAL_HPF1 : OS_VI_MPAL_HPN1) : (interlacedMode ? OS_VI_MPAL_LPF1 : OS_VI_MPAL_LPN1);
 		break;
     }
@@ -215,11 +214,7 @@ static void gameProc(void* arg) {
     u8 drawingEnabled = 0;
 
     u16* memoryEnd = graphicsLayoutScreenBuffers((u16*)PHYS_TO_K0(osMemSize));
-
-    gAudioHeapBuffer = (u8*)memoryEnd - AUDIO_HEAP_SIZE;
-
-    memoryEnd = (u16*)gAudioHeapBuffer;
-
+    memoryEnd = soundPlayerInit(memoryEnd);
     heapInit(_heapStart, memoryEnd);
 
 #ifdef PORTAL64_WITH_DEBUGGER
@@ -237,9 +232,7 @@ static void gameProc(void* arg) {
     controllersInit();
     controllerActionInit();
     rumblePakClipInit();
-    initAudio(fps);
     frameTimeInit(fps);
-    soundPlayerInit();
     translationsLoad(gSaveData.video.textLanguage);
     gSceneCallbacks->initCallback(gSceneCallbacks->data);
     // this prevents the intro from crashing

@@ -17,10 +17,7 @@ target_link_libraries(engine INTERFACE
 )
 
 target_sources(engine INTERFACE
-    audio/audio.c
-    audio/audiomgr.c
     audio/clips.c
-    audio/soundarray.c
     audio/soundplayer.c
     controls/controller_actions.c
     controls/rumble_pak_clip.c
@@ -220,6 +217,7 @@ add_dependencies(engine version_header)
 ###########################
 
 target_sources(engine INTERFACE
+    system/libultra/audio_libultra.c
     system/libultra/cartridge_libultra.c
     system/libultra/controller_libultra.c
     system/libultra/screen_libultra.c

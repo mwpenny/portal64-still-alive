@@ -7,6 +7,9 @@
 // Aligns size to 8 bytes
 #define ALIGN_8(size) (((size) + 0x7) & ~0x7)
 
+// Aligns size to 16 bytes
+#define ALIGN_16(size) (((size) + 0xf) & ~0xf)
+
 extern struct HeapSegment* gFirstHeapSegment;
 
 #define MALLOC_FREE_BLOCK 0xFEEE

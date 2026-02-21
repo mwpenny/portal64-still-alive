@@ -5,8 +5,6 @@
 #include "math/vector3.h"
 #include "math/quaternion.h"
 
-#define MAX_SOUNDS 32
-
 #define MAX_SOUND_LISTENERS 3
 
 #define SOUND_ID_NONE -1
@@ -21,7 +19,7 @@ enum SoundType {
 
 typedef ALSndId SoundId;
 
-void soundPlayerInit();
+void* soundPlayerInit(void* memoryEnd);
 void soundPlayerGameVolumeUpdate();
 void soundPlayerUpdate();
 ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType type);

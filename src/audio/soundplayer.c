@@ -1,26 +1,21 @@
 #include "soundplayer.h"
 
-#include "audio.h"
 #include "clips.h"
 #include "math/mathf.h"
 #include "math/transform.h"
 #include "physics/collision_scene.h"
 #include "savefile/savefile.h"
-#include "soundarray.h"
+#include "system/audio.h"
 #include "system/cartridge.h"
 #include "system/time.h"
 #include "util/frame_time.h"
 
-extern char _soundsSegmentRomStart[];
-extern char _soundsSegmentRomEnd[];
-extern char _soundsTblSegmentRomStart[];
-extern char _soundsTblSegmentRomEnd[];
+extern struct SoundArray* gSoundClipArray;
+extern ALSndPlayer gSoundPlayer;
 
-struct SoundArray* gSoundClipArray;
-ALSndPlayer gSoundPlayer;
+#define MAX_SKIPPABLE_SOUNDS    18
 
-#define MAX_SKIPPABLE_SOUNDS    6
-#define MAX_ACTIVE_SOUNDS       12
+#define MAX_ACTIVE_SOUNDS       24
 
 #define SOUND_FLAGS_3D          (1 << 0)
 #define SOUND_FLAGS_LOOPING     (1 << 1)
@@ -142,39 +137,12 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     *panOut = MAX(0, MIN((int)pan, 127));
 }
 
-static void soundInitDecayTimes(struct SoundArray* soundArray) {
-    for (int i = 0; i < soundArray->soundCount; ++i) {
-        ALSound* sound = soundArray->sounds[i];
-
-        // When pausing the game we also want to pause all sounds. Libultra
-        // doesn't provide a good way to do this, or to start sounds partway
-        // through. So to "pause" sounds the player sets the pitch to 0.
-        // Unfortunately mid-playback pitch changes don't affect the envelope
-        // and so sounds will end at the same time regardless of the pause.
-        //
-        // This is a bit of a hack to get around the problem. All sounds are
-        // given infinite duration and the sound player will stop them at
-        // the proper time.
-        sound->envelope->decayTime = -1;
-    }
-}
-
-void soundPlayerInit() {
-    gSoundClipArray = alHeapAlloc(&gAudioHeap, 1, _soundsSegmentRomEnd - _soundsSegmentRomStart);
-    romCopy(_soundsSegmentRomStart, (char*)gSoundClipArray, _soundsSegmentRomEnd - _soundsSegmentRomStart);
-    soundArrayInit(gSoundClipArray, _soundsTblSegmentRomStart);
-
-    soundInitDecayTimes(gSoundClipArray);
-
-    ALSndpConfig sndConfig;
-    sndConfig.maxEvents = MAX_EVENTS;
-    sndConfig.maxSounds = MAX_ACTIVE_SOUNDS;
-    sndConfig.heap = &gAudioHeap;
-    alSndpNew(&gSoundPlayer, &sndConfig);
-
+void* soundPlayerInit(void* memoryEnd) {
     for (int i = 0; i < MAX_ACTIVE_SOUNDS; ++i) {
         gActiveSounds[i].soundId = SOUND_ID_NONE;
     }
+
+    return audioInit(memoryEnd, MAX_ACTIVE_SOUNDS);
 }
 
 int soundPlayerIsLooped(ALSound* sound) {
@@ -206,7 +174,7 @@ Time soundPlayerCalculateLength(ALSound* sound, float speed) {
         sampleCount = sound->wavetable->len >> 1;
     }
 
-    return timeFromSeconds(sampleCount * (1.0f / OUTPUT_RATE) / speed);
+    return timeFromSeconds(sampleCount * (1.0f / AUDIO_OUTPUT_HZ) / speed);
 }
 
 ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType type) {
