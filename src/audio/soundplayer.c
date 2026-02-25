@@ -166,7 +166,7 @@ SoundId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     } else if (type == SoundTypeVoice) {
         echo = ECHO_VOICE_AMOUNT;
     } else if (type == SoundTypeAll) {
-        echo = ECHO_VOICE_AMOUNT;
+        echo = ECHO_DEFAULT_AMOUNT;
     }
 
     if (audioIsSoundClipLooped(soundClipId)) {
