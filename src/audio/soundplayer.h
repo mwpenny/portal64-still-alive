@@ -5,9 +5,9 @@
 #include "math/quaternion.h"
 #include "system/audio.h"
 
-#define MAX_SOUND_LISTENERS 3
-
-#define SOUND_ID_NONE -1
+#define MAX_SOUND_LISTENERS     3
+#define MAX_SKIPPABLE_SOUNDS    18
+#define MAX_ACTIVE_SOUNDS       24
 
 enum SoundType {
     SoundTypeNone,
@@ -23,6 +23,8 @@ void soundPlayerUpdate();
 SoundId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType type);
 void soundPlayerStop(SoundId soundId);
 void soundPlayerStopAll();
+
+int soundPlayerSoundCount();
 
 void soundPlayerPause();
 void soundPlayerResume();

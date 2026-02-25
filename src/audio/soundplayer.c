@@ -9,10 +9,6 @@
 #include "system/time.h"
 #include "util/frame_time.h"
 
-#define MAX_SKIPPABLE_SOUNDS    18
-
-#define MAX_ACTIVE_SOUNDS       24
-
 #define SOUND_FLAGS_3D          (1 << 0)
 #define SOUND_FLAGS_LOOPING     (1 << 1)
 #define SOUND_FLAGS_PAUSED      (1 << 2)
@@ -311,6 +307,10 @@ void soundPlayerStopAll() {
             audioStopSound(activeSound->soundId);
         }
     }
+}
+
+int soundPlayerSoundCount() {
+    return gActiveSoundCount;
 }
 
 void soundPlayerUpdatePosition(SoundId soundId, struct Vector3* at, struct Vector3* velocity) {

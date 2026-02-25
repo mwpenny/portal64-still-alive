@@ -169,6 +169,10 @@ static void debugSceneRenderPerformanceMetrics(struct Scene* scene, struct Rende
     uint64_t visibleRooms = debugSceneVisibleRooms(renderPlan);
     int roomCount = debugSceneVisibleRoomCount(visibleRooms);
 
+    sprintf(metricText, "SND: %d/%d", soundPlayerSoundCount(), MAX_ACTIVE_SOUNDS);
+    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+
+    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
     sprintf(metricText, "COL: %d/%d %d/%d",
         collisionSceneDynamicObjectCount(), MAX_DYNAMIC_COLLISION,
         contactSolverActiveManifoldCount(&gContactSolver), MAX_CONTACT_COUNT
