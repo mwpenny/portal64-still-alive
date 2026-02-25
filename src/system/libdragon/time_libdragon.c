@@ -2,9 +2,6 @@
 
 // TODO
 
-void timeInit() {
-}
-
 Time timeGetTime() {
     return 0;
 }
@@ -19,7 +16,4 @@ uint64_t timeMicroseconds(Time time) {
 
 uint64_t timeNanoseconds(Time time) {
     return 0;
-}
-
-void timeUSleep(uint64_t usec) {
 }

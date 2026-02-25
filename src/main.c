@@ -224,8 +224,7 @@ static void gameProc(void* arg) {
     dynamicSceneInit();
     contactSolverInit(&gContactSolver);
     portalSurfaceCleanupQueueInit();
-    
-    timeInit();
+
     savefileLoad();
     
     levelLoadWithCallbacks(INTRO_MENU);

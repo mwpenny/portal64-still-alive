@@ -1,5 +1,4 @@
 #include "system/cartridge.h"
-#include "system/time.h"
 #include "util/memory.h"
 
 #include <ultra64.h>
@@ -19,17 +18,20 @@
 static OSPiHandle*           sCartHandle;
 static OSPiHandle            sSramHandle;
 
-static OSMesgQueue           piMessageQ;
-static OSMesg                piMessages[PI_QUEUE_SIZE];
+static OSMesgQueue           sPiMessageQ;
+static OSMesg                sPiMessages[PI_QUEUE_SIZE];
 
-static OSMesgQueue           dmaMessageQ;
-static OSMesg                dmaMessages[DMA_QUEUE_SIZE];
+static OSMesgQueue           sDmaMessageQ;
+static OSMesg                sDmaMessages[DMA_QUEUE_SIZE];
 
-static OSMesgQueue           asyncDmaMessageQ;
-static OSMesg                asyncDmaMessages[DMA_ASYNC_QUEUE_SIZE];
-static OSIoMesg              asyncDmaMessageReqs[DMA_ASYNC_QUEUE_SIZE];
+static OSMesgQueue           sAsyncDmaMessageQ;
+static OSMesg                sAsyncDmaMessages[DMA_ASYNC_QUEUE_SIZE];
+static OSIoMesg              sAsyncDmaMessageReqs[DMA_ASYNC_QUEUE_SIZE];
 static int                   sNextAsyncDmaSlot;
 static int                   sPendingAsyncDmaCount;
+
+static OSMesgQueue           sSleepTimerQ;
+static OSMesg                sSleepTimerMsg;
 
 static void sramHandleInit() {
     sSramHandle.type = DEVICE_TYPE_SRAM;
@@ -47,19 +49,28 @@ static void sramHandleInit() {
     osEPiLinkHandle(&sSramHandle);
 }
 
+static void usleep(u64 usecs) {
+    OSTimer timer;
+    OSTime countdown = OS_USEC_TO_CYCLES(usecs);
+
+    osSetTimer(&timer, countdown, 0, &sSleepTimerQ, 0);
+    osRecvMesg(&sSleepTimerQ, NULL, OS_MESG_BLOCK);
+}
+
 void cartridgeInit() {
     osCreatePiManager(
         (OSPri)OS_PRIORITY_PIMGR,
-        &piMessageQ,
-        piMessages,
+        &sPiMessageQ,
+        sPiMessages,
         DMA_QUEUE_SIZE
     );
 
     sCartHandle = osCartRomInit();
     sramHandleInit();
 
-    osCreateMesgQueue(&dmaMessageQ, dmaMessages, DMA_QUEUE_SIZE);
-    osCreateMesgQueue(&asyncDmaMessageQ, asyncDmaMessages, DMA_ASYNC_QUEUE_SIZE);
+    osCreateMesgQueue(&sDmaMessageQ, sDmaMessages, DMA_QUEUE_SIZE);
+    osCreateMesgQueue(&sAsyncDmaMessageQ, sAsyncDmaMessages, DMA_ASYNC_QUEUE_SIZE);
+    osCreateMesgQueue(&sSleepTimerQ, &sSleepTimerMsg, 1);
     sNextAsyncDmaSlot = 0;
     sPendingAsyncDmaCount = 0;
 }
@@ -67,7 +78,7 @@ void cartridgeInit() {
 void romCopy(const void* romAddr, void* ramAddr, const int size) {
     OSIoMesg msgReq = {
         .hdr.pri      = OS_MESG_PRI_NORMAL,
-        .hdr.retQueue = &dmaMessageQ,
+        .hdr.retQueue = &sDmaMessageQ,
         .dramAddr     = ramAddr,
         .devAddr      = (u32)romAddr,
         .size         = size
@@ -75,21 +86,21 @@ void romCopy(const void* romAddr, void* ramAddr, const int size) {
 
     osInvalDCache(ramAddr, size);
     osEPiStartDma(sCartHandle, &msgReq, OS_READ);
-    osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
+    osRecvMesg(&sDmaMessageQ, NULL, OS_MESG_BLOCK);
 }
 
 void romCopyAsync(const void* romAddr, void* ramAddr, const int size) {
     if (sPendingAsyncDmaCount == DMA_ASYNC_QUEUE_SIZE) {
         // Free up a slot
-        osRecvMesg(&asyncDmaMessageQ, NULL, OS_MESG_BLOCK);
+        osRecvMesg(&sAsyncDmaMessageQ, NULL, OS_MESG_BLOCK);
         --sPendingAsyncDmaCount;
     }
 
-    OSIoMesg* msgReq = &asyncDmaMessageReqs[sNextAsyncDmaSlot];
+    OSIoMesg* msgReq = &sAsyncDmaMessageReqs[sNextAsyncDmaSlot];
     sNextAsyncDmaSlot = (sNextAsyncDmaSlot + 1) % DMA_ASYNC_QUEUE_SIZE;
 
     msgReq->hdr.pri = OS_MESG_PRI_NORMAL;
-    msgReq->hdr.retQueue = &asyncDmaMessageQ;
+    msgReq->hdr.retQueue = &sAsyncDmaMessageQ;
     msgReq->dramAddr = ramAddr;
     msgReq->devAddr = (u32)romAddr;
     msgReq->size = size;
@@ -101,7 +112,7 @@ void romCopyAsync(const void* romAddr, void* ramAddr, const int size) {
 
 void romCopyAsyncDrain() {
     while (sPendingAsyncDmaCount) {
-        osRecvMesg(&asyncDmaMessageQ, NULL, OS_MESG_BLOCK);
+        osRecvMesg(&sAsyncDmaMessageQ, NULL, OS_MESG_BLOCK);
         --sPendingAsyncDmaCount;
     }
 }
@@ -109,7 +120,7 @@ void romCopyAsyncDrain() {
 void sramWrite(void* sramAddr, const void* ramAddr, const int size) {
     OSIoMesg msgReq = {
         .hdr.pri      = OS_MESG_PRI_HIGH,
-        .hdr.retQueue = &dmaMessageQ,
+        .hdr.retQueue = &sDmaMessageQ,
         .dramAddr     = (void*)ramAddr,
         .devAddr      = (u32)sramAddr,
         .size         = size
@@ -122,14 +133,14 @@ void sramWrite(void* sramAddr, const void* ramAddr, const int size) {
         return;
     }
 
-    osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
-    timeUSleep(SRAM_DELAY_USECS);
+    osRecvMesg(&sDmaMessageQ, NULL, OS_MESG_BLOCK);
+    usleep(SRAM_DELAY_USECS);
 }
 
 int sramRead(const void* sramAddr, void* ramAddr, const int size) {
     OSIoMesg msgReq = {
         .hdr.pri      = OS_MESG_PRI_HIGH,
-        .hdr.retQueue = &dmaMessageQ,
+        .hdr.retQueue = &sDmaMessageQ,
         .dramAddr     = ramAddr,
         .devAddr      = (u32)sramAddr,
         .size         = size
@@ -142,7 +153,7 @@ int sramRead(const void* sramAddr, void* ramAddr, const int size) {
         return 0;
     }
 
-    osRecvMesg(&dmaMessageQ, NULL, OS_MESG_BLOCK);
-    timeUSleep(SRAM_DELAY_USECS);
+    osRecvMesg(&sDmaMessageQ, NULL, OS_MESG_BLOCK);
+    usleep(SRAM_DELAY_USECS);
     return 1;
 }
