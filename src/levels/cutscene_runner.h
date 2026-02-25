@@ -4,12 +4,13 @@
 #include <ultra64.h>
 
 #include "audio/clips.h"
+#include "audio/soundplayer.h"
 #include "level_definition.h"
 #include "savefile/serializer.h"
 
 union CutsceneStepState {
     struct {
-        ALSndId soundId;
+        SoundId soundId;
     } playSound;
     struct {
         u8 currentFrame;

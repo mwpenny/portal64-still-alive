@@ -1,6 +1,7 @@
 #ifndef __SCENE_ANIMATOR_H__
 #define __SCENE_ANIMATOR_H__
 
+#include "audio/soundplayer.h"
 #include "graphics/renderstate.h"
 #include "levels/level_definition.h"
 #include "sk64/skeletool_animator.h"
@@ -12,7 +13,7 @@ enum SceneAnimatorStateFlags {
 
 struct SceneAnimatorState {
     float playbackSpeed;
-    ALSndId soundId;
+    SoundId soundId;
     short flags;
     struct Vector3 lastPosition;
 };

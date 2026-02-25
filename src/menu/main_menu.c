@@ -25,9 +25,9 @@ void mainMenuReadCamera(struct GameMenu* gameMenu) {
 }
 
 void mainMenuPlayAmbientSound() {
-    static ALSndId soundId = -1;
+    static SoundId soundId = SOUND_ID_NONE;
     
-    if (soundId == -1 || !soundPlayerIsPlaying(soundId)) {
+    if (soundId == SOUND_ID_NONE || !soundPlayerIsPlaying(soundId)) {
         soundId = soundPlayerPlay(SOUNDS_PORTAL_PROCEDURAL_JIGGLE_BONE, 1.0f, 1.0f, NULL, NULL, SoundTypeMusic);
     }
 }

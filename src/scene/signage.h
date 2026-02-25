@@ -1,6 +1,7 @@
 #ifndef __SCENE_SIGNAGE_H__
 #define __SCENE_SIGNAGE_H__
 
+#include "audio/soundplayer.h"
 #include "levels/level_definition.h"
 #include "math/transform.h"
 
@@ -9,7 +10,7 @@ struct Signage {
     short roomIndex;
     short testChamberNumber;
     short currentFrame;
-    ALSndId currentSoundId;
+    SoundId currentSoundId;
     float currentHumVolume;
     float humFadeElapTime;
 };

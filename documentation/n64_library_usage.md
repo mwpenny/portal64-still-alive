@@ -10,8 +10,7 @@ Portal 64's high-level usage of proprietary libraries is listed in the following
 
 | Library  | Subsystem                     | Usage                                        | Game code abstracted ? | Free equivalent implemented? |
 | -------- | ----------------------------- | -------------------------------------------- | ---------------------- | ---------------------------- |
-| libultra | Audio (al)                    | Music                                        | ❌                     | ❌                           |
-|          |                               | Sound effects                                | ❌                     | ❌                           |
+| libultra | Audio (al)                    | Music, dialogue, and sound effects           | ✅                     | ❌                           |
 |          | Display processing (gDP/gsDP) | Graphics rendering<sup>*</sup>               | ❌                     | ❌                           |
 |          | Signal processing (gSP/gsSP)  | 3D Math, lighting, culling, etc.<sup>*</sup> | ❌                     | ❌                           |
 |          | Graphics common (gdSP)        | Lighting                                     | ❌                     | ❌                           |
@@ -22,10 +21,10 @@ Portal 64's high-level usage of proprietary libraries is listed in the following
 |          |                               | Interrupts                                   | ❌                     | ❌                           |
 |          |                               | Task scheduling                              | ❌                     | ❌                           |
 |          |                               | Message passing                              | ❌                     | ❌                           |
-|          |                               | Peripheral access                            | ✅                     | ❌                           |
+|          |                               | Peripheral access (controller and rumble)    | ✅                     | ❌                           |
 |          |                               | Video initialization                         | ❌                     | ❌                           |
 |          |                               | Frame buffer reading                         | ✅                     | ❌                           |
-|          | Math                          | Trig functions                               | ❌                     | ❌                           |
+|          | Math                          | Trig functions                               | ✅                     | ❌                           |
 | libnustd | Math                          | `floor()`                                    | ✅                     | ✅                           |
 |          | String                        | `strcpy()`, `memset()`                       | ✅                     | ✅                           |
 

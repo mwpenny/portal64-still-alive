@@ -1,6 +1,5 @@
 #include "cutscene_runner.h"
 
-#include "audio/soundplayer.h"
 #include "controls/rumble_pak_clip.h"
 #include "effects/effect_definitions.h"
 #include "levels/levels.h"
@@ -40,7 +39,7 @@ struct QueuedSound gCutsceneSoundNodes[MAX_QUEUE_LENGTH];
 struct QueuedSound* gCutsceneNextFreeSound;
 
 struct QueuedSound* gCutsceneSoundQueues[CH_COUNT];
-ALSndId gCutsceneCurrentSound[CH_COUNT];
+SoundId gCutsceneCurrentSound[CH_COUNT];
 u16 gCutsceneCurrentSoundId[CH_COUNT];
 u16 gCutsceneCurrentSubtitleId[CH_COUNT];
 float   gCutsceneCurrentVolume[CH_COUNT];
@@ -391,7 +390,10 @@ int cutsceneRunnerUpdateCurrentStep(struct CutsceneRunner* runner) {
     struct CutsceneStep* step = &runner->currentCutscene->steps[runner->currentStep];
     switch (step->type) {
         case CutsceneStepTypePlaySound:
-            return soundPlayerIsLoopedById(runner->state.playSound.soundId) || !soundPlayerIsPlaying(runner->state.playSound.soundId);
+        {
+            SoundId soundId = runner->state.playSound.soundId;
+            return !soundPlayerIsPlaying(soundId) || soundPlayerIsLooped(soundId);
+        }
         case CutsceneStepTypeWaitForChannel:
         {
             int result = !cutsceneRunnerIsChannelPlaying(step->waitForChannel.channel);

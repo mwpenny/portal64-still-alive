@@ -3,6 +3,7 @@
 
 #include <ultra64.h>
 
+#include "audio/soundplayer.h"
 #include "graphics/renderstate.h"
 #include "math/transform.h"
 #include "physics/collision_object.h"
@@ -34,7 +35,7 @@ struct DecorObject {
     struct Quaternion originalRotation;
     short originalRoom;
     short dynamicId;
-    ALSndId playingSound;
+    SoundId playingSound;
     float fizzleTime;
 };
 

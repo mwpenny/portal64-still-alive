@@ -1,15 +1,21 @@
-#include <assert.h>
-#include <sched.h>
-#include <ultra64.h>
-
 #include "system/audio.h"
 
 #include "math/mathf.h"
 #include "system/cartridge.h"
+#include "system/time.h"
 #include "threads_libultra.h"
 #include "util/memory.h"
 
+#include <assert.h>
+#include <sched.h>
+#include <ultra64.h>
+
 #define AUDIO_HEAP_SIZE_BYTES       300000
+
+// Flags used to manage the state of each available voice
+#define AUDIO_VOICE_FLAG_PLAYING    (1 << 0)  // Playback is in progress
+#define AUDIO_VOICE_FLAG_DID_OUTPUT (1 << 1)  // Samples have been output
+#define AUDIO_VOICE_FLAG_PAUSED     (1 << 2)  // Playback is paused
 
 // The number of frames of lag that can be detected.
 //
@@ -57,6 +63,19 @@
 // Stack size for the audio thread
 #define AUDIO_STACK_SIZE_BYTES      2048
 
+// Format of sfz2n64 output
+struct SoundArray {
+    u32 soundCount;
+    ALSound* sounds[];
+};
+
+struct VoiceState {
+    Time timeRemaining;
+    f32 pitch;
+    s16 volume;
+    u8 flags;
+};
+
 struct DmaBufferMetadata {
     u32 address;
     u32 framesOld;
@@ -67,10 +86,12 @@ static ALHeap                   sAudioHeap;
 extern char                     _soundsSegmentRomStart[];
 extern char                     _soundsSegmentRomEnd[];
 extern char                     _soundsTblSegmentRomStart[];
-struct SoundArray*              gSoundClipArray;
+static struct SoundArray*       sSoundClipArray;
+static struct VoiceState*       sVoiceStates;
+static int                      sMaxVoices;
 
 static ALGlobals                sAudioGlobals;
-ALSndPlayer                     gSoundPlayer;
+static ALSndPlayer              sSoundPlayer;
 
 static u8*                      sDmaBuffers[AUDIO_DMA_BUFFER_COUNT];
 static struct DmaBufferMetadata sDmaBufferMetadata[AUDIO_DMA_BUFFER_COUNT];
@@ -318,7 +339,9 @@ void* audioInit(void* heapEnd, int maxVoices) {
     void* heapStart = heapEnd - AUDIO_HEAP_SIZE_BYTES;
     alHeapInit(&sAudioHeap, heapStart, AUDIO_HEAP_SIZE_BYTES);
 
-    gSoundClipArray = audioLoadSounds();
+    sSoundClipArray = audioLoadSounds();
+    sVoiceStates = alHeapAlloc(&sAudioHeap, 1, maxVoices * sizeof(struct VoiceState));
+    sMaxVoices = maxVoices;
 
     // Library
     ALSynConfig audioConfig = {
@@ -337,7 +360,7 @@ void* audioInit(void* heapEnd, int maxVoices) {
         .maxEvents  = AUDIO_MAX_EVENTS,
         .heap       = &sAudioHeap
     };
-    alSndpNew(&gSoundPlayer, &soundPlayerConfig);
+    alSndpNew(&sSoundPlayer, &soundPlayerConfig);
 
     // DMA
     sPiHandle = osCartRomInit();
@@ -366,4 +389,173 @@ void* audioInit(void* heapEnd, int maxVoices) {
     osStartThread(&sAudioThread);
 
     return heapStart;
+}
+
+void audioUpdate() {
+    static Time lastUpdate = 0;
+
+    Time now = timeGetTime();
+    Time timeDelta = now - lastUpdate;
+    lastUpdate = now;
+
+    for (int i = 0; i < sMaxVoices; ++i) {
+        struct VoiceState* voiceState = &sVoiceStates[i];
+        if ((voiceState->flags & (AUDIO_VOICE_FLAG_PLAYING | AUDIO_VOICE_FLAG_PAUSED)) != AUDIO_VOICE_FLAG_PLAYING) {
+            continue;
+        }
+
+        alSndpSetSound(&sSoundPlayer, i);
+
+        // Check if it is time for the sound to stop. We must manage this
+        // ourselves due how sounds are paused. See audioLoadSounds().
+        //
+        // Do this before the started check below to avoid ending early.
+        if ((voiceState->flags & AUDIO_VOICE_FLAG_DID_OUTPUT) &&
+            voiceState->timeRemaining > 0 &&
+            voiceState->timeRemaining != ((Time)-1)  // Not looped
+        ) {
+            if (voiceState->timeRemaining > timeDelta) {
+                voiceState->timeRemaining -= timeDelta;
+            } else {
+                voiceState->timeRemaining = 0;
+                alSndpStop(&sSoundPlayer);
+            }
+        }
+
+        int state = alSndpGetState(&sSoundPlayer);
+        if (state == AL_STOPPED && (voiceState->flags & AUDIO_VOICE_FLAG_DID_OUTPUT)) {
+            voiceState->flags = 0;
+        } else if (state == AL_PLAYING || voiceState->timeRemaining == 0) {
+            voiceState->flags |= AUDIO_VOICE_FLAG_DID_OUTPUT;
+        }
+    }
+}
+
+static Time audioSoundLength(int soundClipId, float pitch) {
+    if (audioIsSoundClipLooped(soundClipId)) {
+        return -1;
+    }
+
+    ALSound* soundClip = sSoundClipArray->sounds[soundClipId];
+    ALWaveTable* wavetable = soundClip->wavetable;
+    int sampleCount = 0;
+
+    if (wavetable) {
+        if (wavetable->type == AL_ADPCM_WAVE) {
+            // N64 ADPCM encodes groups of 16 samples into 9-byte blocks
+            sampleCount = wavetable->len * 16 / 9;
+        } else if (wavetable->type == AL_RAW16_WAVE) {
+            // 16-bit samples
+            sampleCount = wavetable->len / 2;
+        }
+    }
+
+    return timeFromSeconds(sampleCount * (1.0f / AUDIO_OUTPUT_HZ) / pitch);
+}
+
+SoundId audioPlaySound(int soundClipId, float volume, float pitch, float pan, float echo) {
+    if (soundClipId < 0 || soundClipId >= sSoundClipArray->soundCount) {
+        return SOUND_ID_NONE;
+    }
+
+    ALSound* soundClip = sSoundClipArray->sounds[soundClipId];
+    ALSndId soundId = alSndpAllocate(&sSoundPlayer, soundClip);
+    if (soundId == SOUND_ID_NONE) {
+        return soundId;
+    }
+
+    struct VoiceState* VoiceState = &sVoiceStates[soundId];
+    VoiceState->timeRemaining = audioSoundLength(soundClipId, pitch);
+    VoiceState->pitch = 0.0f;
+    VoiceState->volume = 0;
+    VoiceState->flags = AUDIO_VOICE_FLAG_PLAYING;
+
+    audioSetSoundParams(soundId, volume, pitch, pan, echo);
+    alSndpPlay(&sSoundPlayer);
+
+    return soundId;
+}
+
+void audioSetSoundParams(SoundId soundId, float volume, float pitch, float pan, float echo) {
+    struct VoiceState* voiceState = &sVoiceStates[soundId];
+    alSndpSetSound(&sSoundPlayer, soundId);
+
+    if (volume >= 0.0f) {
+        voiceState->volume = 32767 * volume;
+
+        if (!(voiceState->flags & AUDIO_VOICE_FLAG_PAUSED)) {
+            alSndpSetVol(&sSoundPlayer, voiceState->volume);
+        }
+    }
+
+    if (pitch >= 0.0f) {
+        voiceState->pitch = pitch;
+
+        if (!(voiceState->flags & AUDIO_VOICE_FLAG_PAUSED)) {
+            alSndpSetPitch(&sSoundPlayer, pitch);
+        }
+    }
+
+    if (pan >= 0.0f) {
+        alSndpSetPan(&sSoundPlayer, 127 * pan);
+    }
+
+    if (echo >= 0.0f) {
+        alSndpSetFXMix(&sSoundPlayer, 127 * echo);
+    }
+}
+
+int audioIsSoundPlaying(SoundId soundId) {
+    return sVoiceStates[soundId].flags & AUDIO_VOICE_FLAG_PLAYING;
+}
+
+void audioPauseSound(SoundId soundId) {
+    // No good way to pause or start sounds partway through, so play at pitch ~0
+    // This doesn't affect the end time, so stopping is handled by us, not the library
+    sVoiceStates[soundId].flags |= AUDIO_VOICE_FLAG_PAUSED;
+
+    alSndpSetSound(&sSoundPlayer, soundId);
+    alSndpSetVol(&sSoundPlayer, 0);
+    alSndpSetPitch(&sSoundPlayer, 0.0f);
+}
+
+void audioResumeSound(SoundId soundId) {
+    struct VoiceState* voiceState = &sVoiceStates[soundId];
+    voiceState->flags &= ~AUDIO_VOICE_FLAG_PAUSED;
+
+    alSndpSetSound(&sSoundPlayer, soundId);
+    alSndpSetVol(&sSoundPlayer, voiceState->volume);
+    alSndpSetPitch(&sSoundPlayer, voiceState->pitch);
+}
+
+void audioStopSound(SoundId soundId) {
+    struct VoiceState* voiceState = &sVoiceStates[soundId];
+    voiceState->timeRemaining = 0;
+    voiceState->flags &= ~AUDIO_VOICE_FLAG_PAUSED;
+
+    alSndpSetSound(&sSoundPlayer, soundId);
+    alSndpStop(&sSoundPlayer);
+}
+
+void audioFreeSound(SoundId soundId) {
+    alSndpDeallocate(&sSoundPlayer, soundId);
+}
+
+int audioIsSoundClipLooped(int soundClipId) {
+    if (soundClipId < 0 || soundClipId >= sSoundClipArray->soundCount) {
+        return 0;
+    }
+
+    ALSound* soundClip = sSoundClipArray->sounds[soundClipId];
+    ALWaveTable* wavetable = soundClip->wavetable;
+
+    if (wavetable) {
+        if (wavetable->type == AL_ADPCM_WAVE) {
+            return wavetable->waveInfo.adpcmWave.loop != NULL;
+        } else if (wavetable->type == AL_RAW16_WAVE) {
+            return wavetable->waveInfo.rawWave.loop != NULL;
+        }
+    }
+
+    return 0;
 }

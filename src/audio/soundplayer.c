@@ -5,13 +5,9 @@
 #include "math/transform.h"
 #include "physics/collision_scene.h"
 #include "savefile/savefile.h"
-#include "system/audio.h"
 #include "system/cartridge.h"
 #include "system/time.h"
 #include "util/frame_time.h"
-
-extern struct SoundArray* gSoundClipArray;
-extern ALSndPlayer gSoundPlayer;
 
 #define MAX_SKIPPABLE_SOUNDS    18
 
@@ -19,24 +15,22 @@ extern ALSndPlayer gSoundPlayer;
 
 #define SOUND_FLAGS_3D          (1 << 0)
 #define SOUND_FLAGS_LOOPING     (1 << 1)
-#define SOUND_HAS_STARTED       (1 << 2)
-#define SOUND_FLAGS_PAUSED      (1 << 3)
+#define SOUND_FLAGS_PAUSED      (1 << 2)
 
 #define SPEED_OF_SOUND          343.2f
 #define VOLUME_FADE_THRESHOLD   0.055f
 #define VOLUME_FADE_DISTANCE    3.5f
 #define VOLUME_CURVE_PAD        0.0125f
 #define VOLUME_AMPLIFICATION    1.538f
-#define VOICE_FX_MIX            32
-#define FX_PEAK_DISTANCE        25.0f
-#define FX_MIN_AMOUNT           0.1f
-#define FX_MAX_AMOUNT           0.6f
-#define DEFAULT_FX_MIX          8 // Small amount of FX mix for all sounds.
+#define ECHO_VOICE_AMOUNT       0.25f
+#define ECHO_SPATIAL_PEAK_DIST  25.0f
+#define ECHO_SPATIAL_MIN        0.1f
+#define ECHO_SPATIAL_MAX        0.6f
+#define ECHO_DEFAULT_AMOUNT     0.0625f  // Small amount of echo for all non-3D sounds
 
 struct ActiveSound {
-    ALSndId soundId;
+    SoundId soundId;
     u16 flags;
-    Time timeRemaining;
     struct Vector3 pos3D;
     struct Vector3 velocity3D;
     float volume;
@@ -57,10 +51,10 @@ int gActiveSoundCount = 0;
 struct SoundListener gSoundListeners[MAX_SOUND_LISTENERS];
 int gActiveListenerCount = 0;
 
-void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, float* volumeIn, float* volumeOut, int* panOut, float* pitchBend, int* fxMix) {
-    *panOut = 64;
+void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, float* volumeIn, float* volumeOut, float* panOut, float* pitchBend, float* echo) {
+    *panOut = 0.5f;
     *pitchBend = 1.0f;
-    *fxMix = 0;
+    *echo = 0.0f;
 
     if (!gActiveListenerCount) {
         *volumeOut = *volumeIn;
@@ -111,12 +105,12 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
 
     *volumeOut = volumeLevel;
 
-    // Add FX/reverb amount.
-    float fxDistCurve = clampf(
-        mathfLerp(FX_MIN_AMOUNT, FX_MAX_AMOUNT, distanceSqrt / FX_PEAK_DISTANCE),
-        FX_MIN_AMOUNT, FX_MAX_AMOUNT
+    // Add echo/reverb amount
+    float echoDistCurve = clampf(
+        mathfLerp(ECHO_SPATIAL_MIN, ECHO_SPATIAL_MAX, distanceSqrt / ECHO_SPATIAL_PEAK_DIST),
+        ECHO_SPATIAL_MIN, ECHO_SPATIAL_MAX
     );
-    *fxMix = (int)(127.0f * fxDistCurve);
+    *echo = echoDistCurve;
 
     struct Vector3 offset;
     vector3Sub(at, &nearestListener->worldPos, &offset);
@@ -131,10 +125,8 @@ void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, f
     *pitchBend = (SPEED_OF_SOUND + directionalVelocity) * (1.0f / SPEED_OF_SOUND);
 
     float pan = vector3Dot(&offset, &nearestListener->rightVector) * invDist;
-
-    pan = pan * 64.0f + 64.0f;
-
-    *panOut = MAX(0, MIN((int)pan, 127));
+    pan = (pan * 0.5f) + 0.5f;
+    *panOut = clampf(pan, 0.0f, 1.0f);
 }
 
 void* soundPlayerInit(void* memoryEnd) {
@@ -145,109 +137,67 @@ void* soundPlayerInit(void* memoryEnd) {
     return audioInit(memoryEnd, MAX_ACTIVE_SOUNDS);
 }
 
-int soundPlayerIsLooped(ALSound* sound) {
-    if (!sound->wavetable) {
-        return 0;
-    }
-
-    if (sound->wavetable->type == AL_ADPCM_WAVE) {
-        return sound->wavetable->waveInfo.adpcmWave.loop != NULL;
-    } else {
-        return sound->wavetable->waveInfo.rawWave.loop != NULL;
-    }
-}
-
-Time soundPlayerCalculateLength(ALSound* sound, float speed) {
-    if (!sound->wavetable) {
-        return 0.0f;
-    }
-
-    if (soundPlayerIsLooped(sound)) {
-        return -1;
-    }
-
-    int sampleCount = 0;
-
-    if (sound->wavetable->type == AL_ADPCM_WAVE) {
-        sampleCount = sound->wavetable->len * 16 / 9;
-    } else {
-        sampleCount = sound->wavetable->len >> 1;
-    }
-
-    return timeFromSeconds(sampleCount * (1.0f / AUDIO_OUTPUT_HZ) / speed);
-}
-
-ALSndId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType type) {
-    if (gActiveSoundCount >= MAX_ACTIVE_SOUNDS || soundClipId < 0 || soundClipId >= gSoundClipArray->soundCount) {
+SoundId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType type) {
+    if (gActiveSoundCount >= MAX_ACTIVE_SOUNDS ||
+        (gActiveSoundCount >= MAX_SKIPPABLE_SOUNDS && clipsCheckSoundSkippable(soundClipId))
+    ) {
         return SOUND_ID_NONE;
-    }
-    if (gActiveSoundCount >= MAX_SKIPPABLE_SOUNDS && clipsCheckSoundSkippable(soundClipId)) {
-        return SOUND_ID_NONE;
-    }
-
-    ALSound* alSound = gSoundClipArray->sounds[soundClipId];
-
-    ALSndId result = alSndpAllocate(&gSoundPlayer, alSound);
-
-    if (result == SOUND_ID_NONE) {
-        return result;
     }
 
     struct ActiveSound* sound = &gActiveSounds[gActiveSoundCount];
-
-    sound->soundId = result;
     sound->flags = 0;
-    sound->timeRemaining = soundPlayerCalculateLength(alSound, pitch);
-    sound->volume = volume;
     sound->originalVolume = volume;
     sound->basePitch = pitch;
     sound->soundType = type;
 
-    float newVolume = sound->originalVolume * gSaveData.audio.soundVolume/0xFFFF;
+    volume = (volume * gSaveData.audio.soundVolume) / 0xFFFF;
     if (type == SoundTypeMusic) {
-        newVolume = newVolume * gSaveData.audio.musicVolume/0xFFFF;
+        volume = (volume * gSaveData.audio.musicVolume) / 0xFFFF;
     }
-    sound->volume = newVolume;
+    sound->volume = volume;
 
-    int panning = 64;
-    int fxMix = DEFAULT_FX_MIX;
+    float pan = 0.5f;
+    float echo = 0.0f;
 
     if (at) {
         sound->flags |= SOUND_FLAGS_3D;
         sound->pos3D = *at;
         sound->velocity3D = *velocity;
+
         float pitchBend;
-        soundPlayerDetermine3DSound(at, velocity, &newVolume, &newVolume, &panning, &pitchBend, &fxMix);
-        pitch = pitch * pitchBend;
+        soundPlayerDetermine3DSound(at, velocity, &volume, &volume, &pan, &pitchBend, &echo);
+        pitch *= pitchBend;
+    } else if (type == SoundTypeVoice) {
+        echo = ECHO_VOICE_AMOUNT;
+    } else if (type == SoundTypeAll) {
+        echo = ECHO_VOICE_AMOUNT;
     }
 
-    if (soundPlayerIsLooped(alSound)) {
+    if (audioIsSoundClipLooped(soundClipId)) {
         sound->flags |= SOUND_FLAGS_LOOPING;
     }
 
-    alSndpSetSound(&gSoundPlayer, result);
-    alSndpSetVol(&gSoundPlayer, (short)(32767 * newVolume));
-    alSndpSetPitch(&gSoundPlayer, pitch);
-    alSndpSetPan(&gSoundPlayer, panning);
-
-    // Add reverb effect.
-    if (type == SoundTypeAll) {
-        alSndpSetFXMix(&gSoundPlayer, fxMix);
-    } else if (type == SoundTypeVoice) {
-        alSndpSetFXMix(&gSoundPlayer, VOICE_FX_MIX);
+    SoundId soundId = audioPlaySound(
+        soundClipId,
+        volume,
+        pitch,
+        pan,
+        echo
+    );
+    if (soundId == SOUND_ID_NONE) {
+        return soundId;
     }
 
-    alSndpPlay(&gSoundPlayer);
-
+    sound->soundId = soundId;
     ++gActiveSoundCount;
 
-    return result;
+    return soundId;
 }
 
 void soundPlayerGameVolumeUpdate() {
     for (int i = 0; i < gActiveSoundCount; ++i) {
         struct ActiveSound* sound = &gActiveSounds[i];
-        if (!sound){
+        if (sound->soundId == SOUND_ID_NONE) {
             continue;
         }
 
@@ -262,17 +212,12 @@ void soundPlayerGameVolumeUpdate() {
             sound->volume = newVolume;
             float volume;
             float pitch;
-            int panning;
-            int fxMix;
-            soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &panning, &pitch, &fxMix);
-            alSndpSetSound(&gSoundPlayer, sound->soundId);
-            alSndpSetVol(&gSoundPlayer, (short)(32767 * volume));
-            alSndpSetPan(&gSoundPlayer, panning);
-            alSndpSetPitch(&gSoundPlayer, sound->basePitch * pitch);
-            alSndpSetFXMix(&gSoundPlayer, fxMix);
+            float pan;
+            float echo;
+            soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &pan, &pitch, &echo);
+            audioSetSoundParams(sound->soundId, volume, sound->basePitch * pitch, pan, echo);
         } else {
-            alSndpSetSound(&gSoundPlayer, sound->soundId);
-            alSndpSetVol(&gSoundPlayer, (short)(32767 * newVolume));
+            audioSetSoundParams(sound->soundId, newVolume, -1.0f, -1.0f, -1.0f);
             sound->volume = newVolume;
         }
     }
@@ -282,15 +227,12 @@ void soundPlayerGameVolumeUpdate() {
 
 void soundPlayerUpdate() {
     static float soundDamping = 1.0f;
-    static Time lastUpdate = 0;
 
     int index = 0;
     int writeIndex = 0;
     int isVoiceActive = 0;
 
-    Time now = timeGetTime();
-    Time timeDelta = now - lastUpdate;
-    lastUpdate = now;
+    audioUpdate();
 
     while (index < gActiveSoundCount) {
         struct ActiveSound* sound = &gActiveSounds[index];
@@ -301,51 +243,27 @@ void soundPlayerUpdate() {
             continue;
         }
 
-        alSndpSetSound(&gSoundPlayer, sound->soundId);
-
-        if ((sound->flags & (SOUND_HAS_STARTED | SOUND_FLAGS_LOOPING)) == SOUND_HAS_STARTED &&
-            sound->timeRemaining > 0
-        ) {
-            // Check if it is time for the sound to stop. We must manage this
-            // ourselves due how sounds are paused. See soundInitDecayTimes().
-            if (sound->timeRemaining > timeDelta) {
-                sound->timeRemaining -= timeDelta;
-            } else {
-                sound->timeRemaining = 0;
-                alSndpStop(&gSoundPlayer);
-            }
-        }
-
         if (sound->soundType == SoundTypeVoice) {
             isVoiceActive = 1;
         }
 
-        int soundState = alSndpGetState(&gSoundPlayer);
-
-        if (soundState == AL_STOPPED && (sound->flags & SOUND_HAS_STARTED) != 0) {
-            alSndpDeallocate(&gSoundPlayer, sound->soundId);
+        if (!audioIsSoundPlaying(sound->soundId)) {
+            audioFreeSound(sound->soundId);
             sound->soundId = SOUND_ID_NONE;
         } else {
-            if (soundState == AL_PLAYING || sound->timeRemaining == 0) {
-                sound->flags |= SOUND_HAS_STARTED;
-            }
-
             if (sound->flags & SOUND_FLAGS_3D) {
                 float volume;
                 float pitch;
-                int panning;
-                int fxMix;
+                float pan;
+                float echo;
 
-                soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &panning, &pitch, &fxMix);
+                soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &pan, &pitch, &echo);
 
                 if (sound->soundType != SoundTypeVoice) {
                     volume *= soundDamping;
                 }
 
-                alSndpSetVol(&gSoundPlayer, (short)(32767 * volume));
-                alSndpSetPan(&gSoundPlayer, panning);
-                alSndpSetPitch(&gSoundPlayer, sound->basePitch * pitch);
-                alSndpSetFXMix(&gSoundPlayer, fxMix);
+                audioSetSoundParams(sound->soundId, volume, sound->basePitch * pitch, pan, echo);
             }
 
             ++writeIndex;
@@ -363,7 +281,7 @@ void soundPlayerUpdate() {
     gActiveSoundCount = writeIndex;
 }
 
-struct ActiveSound* soundPlayerFindActiveSound(ALSndId soundId) {
+struct ActiveSound* soundPlayerFindActiveSound(SoundId soundId) {
     if (soundId == SOUND_ID_NONE) {
         return NULL;
     }
@@ -378,13 +296,11 @@ struct ActiveSound* soundPlayerFindActiveSound(ALSndId soundId) {
 }
 
 
-void soundPlayerStop(ALSndId soundId) {
+void soundPlayerStop(SoundId soundId) {
     struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
 
     if (activeSound) {
-        alSndpSetSound(&gSoundPlayer, soundId);
-        alSndpStop(&gSoundPlayer);
-        activeSound->timeRemaining = 0;
+        audioStopSound(soundId);
     }
 }
 
@@ -392,14 +308,12 @@ void soundPlayerStopAll() {
     for (int i = 0; i < gActiveSoundCount; ++i) {
         struct ActiveSound* activeSound = &gActiveSounds[i];
         if (activeSound->soundId != SOUND_ID_NONE) {
-            alSndpSetSound(&gSoundPlayer, activeSound->soundId);
-            alSndpStop(&gSoundPlayer);
-            activeSound->timeRemaining = 0;
+            audioStopSound(activeSound->soundId);
         }
     }
 }
 
-void soundPlayerUpdatePosition(ALSndId soundId, struct Vector3* at, struct Vector3* velocity) {
+void soundPlayerUpdatePosition(SoundId soundId, struct Vector3* at, struct Vector3* velocity) {
     struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
 
     if (activeSound) {
@@ -409,7 +323,7 @@ void soundPlayerUpdatePosition(ALSndId soundId, struct Vector3* at, struct Vecto
     }
 }
 
-float soundPlayerGetOriginalVolume(ALSndId soundId) {
+float soundPlayerGetOriginalVolume(SoundId soundId) {
     struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
 
     if (activeSound) {
@@ -419,7 +333,7 @@ float soundPlayerGetOriginalVolume(ALSndId soundId) {
     return 0.0f;
 }
 
-void soundPlayerAdjustVolume(ALSndId soundId, float newVolume) {
+void soundPlayerAdjustVolume(SoundId soundId, float newVolume) {
     struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
 
     if (activeSound) {
@@ -432,15 +346,9 @@ void soundPlayerAdjustVolume(ALSndId soundId, float newVolume) {
 
         if (activeSound->flags & SOUND_FLAGS_3D) {
             activeSound->volume = newVolume;
-        } else {
-            short newVolumeInt = (short)(32767 * newVolume);
-            short existingVolume = (short)(32767 * activeSound->volume);
-
-            if (newVolumeInt != existingVolume) {
-                alSndpSetSound(&gSoundPlayer, activeSound->soundId);
-                alSndpSetVol(&gSoundPlayer, newVolumeInt);
-                activeSound->volume = newVolume;
-            }
+        } else if (newVolume != activeSound->volume) {
+            audioSetSoundParams(activeSound->soundId, newVolume, -1.0f, -1.0f, -1.0f);
+            activeSound->volume = newVolume;
         }
     }
 }
@@ -451,7 +359,7 @@ void soundPlayerFadeOutsideRadius(float volumePercent, struct Vector3* origin, f
     for (int i = 0; i < gActiveSoundCount; ++i) {
         struct ActiveSound* sound = &gActiveSounds[i];
 
-        if (!sound ||
+        if (sound->soundId == SOUND_ID_NONE ||
             sound->soundType != SoundTypeAll ||
             !(sound->flags & SOUND_FLAGS_3D) ||
             vector3DistSqrd(origin, &sound->pos3D) <= radiusSquared
@@ -468,33 +376,14 @@ void soundPlayerFadeOutsideRadius(float volumePercent, struct Vector3* origin, f
     }
 }
 
-int soundPlayerIsPlaying(ALSndId soundId) {
+int soundPlayerIsPlaying(SoundId soundId) {
     struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
-
-    if (!activeSound) {
-        return 0;
-    }
-
-    if (!(activeSound->flags & SOUND_HAS_STARTED)) {
-        return 1;
-    }
-
-    alSndpSetSound(&gSoundPlayer, soundId);
-    return activeSound->timeRemaining > 0 && alSndpGetState(&gSoundPlayer) != AL_STOPPED;
+    return activeSound && audioIsSoundPlaying(activeSound->soundId);
 }
 
-int soundPlayerIsLoopedById(int soundId){
+int soundPlayerIsLooped(SoundId soundId) {
     struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
-
-    if (!activeSound) {
-        return 0;
-    }
-
-    if (activeSound->flags & SOUND_FLAGS_LOOPING){
-        return 1;
-    }
-
-    return 0;
+    return activeSound && (activeSound->flags & SOUND_FLAGS_LOOPING);
 }
 
 void soundListenerUpdate(struct Vector3* position, struct Vector3* right, struct Vector3* velocity, int listenerIndex) {
@@ -510,26 +399,24 @@ void soundListenerSetCount(int count) {
 void soundPlayerPause() {
     for (int i = 0; i < gActiveSoundCount; ++i) {
         struct ActiveSound* activeSound = &gActiveSounds[i];
-        if (activeSound->soundId != SOUND_ID_NONE) {
-            activeSound->flags |= SOUND_FLAGS_PAUSED;
-
-            alSndpSetSound(&gSoundPlayer, activeSound->soundId);
-            alSndpSetPitch(&gSoundPlayer, 0.0f);
-            alSndpSetVol(&gSoundPlayer, 0);
+        if (activeSound->soundId == SOUND_ID_NONE) {
+            continue;
         }
+
+        activeSound->flags |= SOUND_FLAGS_PAUSED;
+        audioPauseSound(activeSound->soundId);
     }
 }
 
 void soundPlayerResume() {
     for (int i = 0; i < gActiveSoundCount; ++i) {
         struct ActiveSound* activeSound = &gActiveSounds[i];
-        if (activeSound->flags & SOUND_FLAGS_PAUSED) {
-            activeSound->flags &= ~SOUND_FLAGS_PAUSED;
-
-            alSndpSetSound(&gSoundPlayer, activeSound->soundId);
-            alSndpSetPitch(&gSoundPlayer, activeSound->basePitch);
-            alSndpSetVol(&gSoundPlayer, (short)(32767 * activeSound->volume));
+        if (!(activeSound->flags & SOUND_FLAGS_PAUSED)) {
+            continue;
         }
+
+        activeSound->flags &= ~SOUND_FLAGS_PAUSED;
+        audioResumeSound(activeSound->soundId);
     }
     soundPlayerGameVolumeUpdate();
 }

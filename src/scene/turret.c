@@ -262,12 +262,13 @@ static void turretPlaySound(struct Turret* turret, enum TurretSoundType soundTyp
 
 static void turretStopAllSounds(struct Turret* turret) {
     for (enum TurretSoundType t = 0; t < TurretSoundTypeCount; ++t) {
-        SoundId soundId = turret->currentSounds[t];
-        if (soundId == SOUND_ID_NONE) {
+        SoundId* soundId = &turret->currentSounds[t];
+        if (*soundId == SOUND_ID_NONE) {
             continue;
         }
 
-        soundPlayerStop(soundId);
+        soundPlayerStop(*soundId);
+        *soundId = SOUND_ID_NONE;
     }
 }
 
@@ -606,6 +607,8 @@ static void turretStartShooting(struct Turret* turret) {
 
 static void turretStopShooting(struct Turret* turret) {
     soundPlayerStop(turret->currentSounds[TurretSoundTypeSfx]);
+    turret->currentSounds[TurretSoundTypeSfx] = SOUND_ID_NONE;
+
     turret->flags &= ~TurretFlagsShooting;
 }
 
