@@ -30,7 +30,7 @@ u64 gTriggeredCutscenes;
 
 struct QueuedSound {
     struct QueuedSound* next;
-    u16 soundId;
+    s16 soundId;
     u16 subtitleId;
     float volume;
 };
@@ -40,7 +40,7 @@ struct QueuedSound* gCutsceneNextFreeSound;
 
 struct QueuedSound* gCutsceneSoundQueues[CH_COUNT];
 SoundId gCutsceneCurrentSound[CH_COUNT];
-u16 gCutsceneCurrentSoundId[CH_COUNT];
+s16 gCutsceneCurrentSoundId[CH_COUNT];
 u16 gCutsceneCurrentSubtitleId[CH_COUNT];
 float   gCutsceneCurrentVolume[CH_COUNT];
 
@@ -634,10 +634,7 @@ void cutsceneSerializeWrite(struct Serializer* serializer, SerializeAction actio
     action(serializer, &gTriggeredCutscenes, sizeof(gTriggeredCutscenes));
 
     for (int i = 0; i < CH_COUNT; ++i) {
-        s16 curr = gCutsceneCurrentSound[i];
-        action(serializer, &curr, sizeof(curr));
-
-        u16 currId = gCutsceneCurrentSoundId[i];
+        s16 currId = gCutsceneCurrentSoundId[i];
         action(serializer, &currId, sizeof(currId));
 
         u16 subtitleId = gCutsceneCurrentSubtitleId[i];
@@ -651,7 +648,7 @@ void cutsceneSerializeWrite(struct Serializer* serializer, SerializeAction actio
         struct QueuedSound* curr = gCutsceneSoundQueues[i];
 
         while (curr) {
-            action(serializer, &curr->soundId, sizeof(u16));
+            action(serializer, &curr->soundId, sizeof(s16));
             action(serializer, &curr->subtitleId, sizeof(s16));
             u8 volume = (u8)(clampf(curr->volume, 0.0f, 1.0f) * 255.0f);
             action(serializer, &volume, sizeof(volume));
@@ -678,23 +675,17 @@ void cutsceneSerializeRead(struct Serializer* serializer) {
     serializeRead(serializer, &gTriggeredCutscenes, sizeof (gTriggeredCutscenes));
 
     for (int i = 0; i < CH_COUNT; ++i) {
-        s16 curr;
-        serializeRead(serializer, &curr, sizeof(curr));
-        gCutsceneCurrentSound[i] = curr;
-
-        u16 currId;
+        s16 currId;
         serializeRead(serializer, &currId, sizeof(currId));
-        gCutsceneCurrentSoundId[i] = currId;
 
         u16 subtitleId;
         serializeRead(serializer, &subtitleId, sizeof(subtitleId));
-        gCutsceneCurrentSubtitleId[i] = subtitleId;
 
         u8 volume;
         serializeRead(serializer, &volume, sizeof(volume));
-        gCutsceneCurrentVolume[i] = volume * (1.0f / 255.0f);
-        if (curr != SOUND_ID_NONE){
-            cutsceneQueueSound(gCutsceneCurrentSoundId[i], gCutsceneCurrentVolume[i], i, gCutsceneCurrentSubtitleId[i]);
+
+        if (currId != SOUND_ID_NONE) {
+            cutsceneQueueSound(currId, volume * (1.0f / 255.0f), i, subtitleId);
         }
     }
 
