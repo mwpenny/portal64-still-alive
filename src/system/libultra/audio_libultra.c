@@ -2,8 +2,8 @@
 
 #include "math/mathf.h"
 #include "system/cartridge.h"
-#include "system/time.h"
 #include "threads_libultra.h"
+#include "util/frame_time.h"
 #include "util/memory.h"
 
 #include <assert.h>
@@ -70,8 +70,8 @@ struct SoundArray {
 };
 
 struct VoiceState {
-    Time timeRemaining;
-    f32 pitch;
+    float timeRemaining;
+    float pitch;
     s16 volume;
     u8 flags;
 };
@@ -392,12 +392,6 @@ void* audioInit(void* heapEnd, int maxVoices) {
 }
 
 void audioUpdate() {
-    static Time lastUpdate = 0;
-
-    Time now = timeGetTime();
-    Time timeDelta = now - lastUpdate;
-    lastUpdate = now;
-
     for (int i = 0; i < sMaxVoices; ++i) {
         struct VoiceState* voiceState = &sVoiceStates[i];
         if ((voiceState->flags & (AUDIO_VOICE_FLAG_PLAYING | AUDIO_VOICE_FLAG_PAUSED)) != AUDIO_VOICE_FLAG_PLAYING) {
@@ -410,14 +404,11 @@ void audioUpdate() {
         // ourselves due how sounds are paused. See audioLoadSounds().
         //
         // Do this before the started check below to avoid ending early.
-        if ((voiceState->flags & AUDIO_VOICE_FLAG_DID_OUTPUT) &&
-            voiceState->timeRemaining > 0 &&
-            voiceState->timeRemaining != ((Time)-1)  // Not looped
-        ) {
-            if (voiceState->timeRemaining > timeDelta) {
-                voiceState->timeRemaining -= timeDelta;
+        if ((voiceState->flags & AUDIO_VOICE_FLAG_DID_OUTPUT) && voiceState->timeRemaining > 0.0f) {
+            if (voiceState->timeRemaining > FIXED_DELTA_TIME) {
+                voiceState->timeRemaining -= FIXED_DELTA_TIME;
             } else {
-                voiceState->timeRemaining = 0;
+                voiceState->timeRemaining = 0.0f;
                 alSndpStop(&sSoundPlayer);
             }
         }
@@ -425,15 +416,15 @@ void audioUpdate() {
         int state = alSndpGetState(&sSoundPlayer);
         if (state == AL_STOPPED && (voiceState->flags & AUDIO_VOICE_FLAG_DID_OUTPUT)) {
             voiceState->flags = 0;
-        } else if (state == AL_PLAYING || voiceState->timeRemaining == 0) {
+        } else if (state == AL_PLAYING || voiceState->timeRemaining == 0.0f) {
             voiceState->flags |= AUDIO_VOICE_FLAG_DID_OUTPUT;
         }
     }
 }
 
-static Time audioSoundLength(int soundClipId, float pitch) {
+static float audioSoundLength(int soundClipId, float pitch) {
     if (audioIsSoundClipLooped(soundClipId)) {
-        return -1;
+        return -1.0f;
     }
 
     ALSound* soundClip = sSoundClipArray->sounds[soundClipId];
@@ -450,7 +441,7 @@ static Time audioSoundLength(int soundClipId, float pitch) {
         }
     }
 
-    return timeFromSeconds(sampleCount * (1.0f / AUDIO_OUTPUT_HZ) / pitch);
+    return sampleCount * (1.0f / AUDIO_OUTPUT_HZ) / pitch;
 }
 
 SoundId audioPlaySound(int soundClipId, float volume, float pitch, float pan, float echo) {
@@ -530,7 +521,7 @@ void audioResumeSound(SoundId soundId) {
 
 void audioStopSound(SoundId soundId) {
     struct VoiceState* voiceState = &sVoiceStates[soundId];
-    voiceState->timeRemaining = 0;
+    voiceState->timeRemaining = 0.0f;
     voiceState->flags &= ~AUDIO_VOICE_FLAG_PAUSED;
 
     alSndpSetSound(&sSoundPlayer, soundId);
