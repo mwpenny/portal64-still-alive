@@ -117,11 +117,11 @@ void audioOptionsAction(void* data, int selection, struct MenuAction* action) {
     switch (selection) {
         case AudioOptionGameVolume:
             gSaveData.audio.soundVolume = (int)(0xFFFF * action->state.fSlider.value + 0.5f);
-            soundPlayerGameVolumeUpdate();
+            soundPlayerRecalculateAllVolume();
             break;
         case AudioOptionMusicVolume:
             gSaveData.audio.musicVolume = (int)(0xFFFF * action->state.fSlider.value + 0.5f);
-            soundPlayerGameVolumeUpdate();
+            soundPlayerRecalculateAllVolume();
             break;
         case AudioOptionAudioLanguage:
             gSaveData.audio.audioLanguage = action->state.iSlider.value;

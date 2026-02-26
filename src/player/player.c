@@ -614,7 +614,7 @@ void playerUpdateSounds(struct Player* player) {
         if (player->flyingSoundLoopId == SOUND_ID_NONE) {
             player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, flyingSoundVolume, 1.0f, NULL, NULL, SoundTypeAll);
         } else {
-            soundPlayerAdjustVolume(player->flyingSoundLoopId, flyingSoundVolume);
+            soundPlayerSetVolume(player->flyingSoundLoopId, flyingSoundVolume);
         }
 
         if (flyingSoundVolume >= FLY_CAPTION_THRESHOLD) {

@@ -14,11 +14,11 @@ void audioUpdate();
 SoundId audioPlaySound(int soundClipId, float volume, float pitch, float pan, float echo);
 void audioSetSoundParams(SoundId soundId, float volume, float pitch, float pan, float echo);
 int audioIsSoundPlaying(SoundId soundId);
+int audioIsSoundLooped(SoundId soundId);
 void audioPauseSound(SoundId soundId);
+int audioIsSoundPaused(SoundId soundId);
 void audioResumeSound(SoundId soundId);
 void audioStopSound(SoundId soundId);
 void audioFreeSound(SoundId soundId);
-
-int audioIsSoundClipLooped(int soundClipId);
 
 #endif

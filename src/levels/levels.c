@@ -163,7 +163,6 @@ void levelLoad(int index) {
     gCurrentLevelIndex = index;
 
     collisionSceneInit(&gCollisionScene, gCurrentLevel->collisionQuads, gCurrentLevel->collisionQuadCount, &gCurrentLevel->world);
-    soundPlayerResume();
     cutsceneRunnerReset();
 }
 

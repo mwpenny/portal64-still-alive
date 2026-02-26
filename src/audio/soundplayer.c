@@ -2,37 +2,36 @@
 
 #include "clips.h"
 #include "math/mathf.h"
-#include "math/transform.h"
-#include "physics/collision_scene.h"
 #include "savefile/savefile.h"
-#include "system/cartridge.h"
-#include "system/time.h"
 #include "util/frame_time.h"
 
-#define SOUND_FLAGS_3D          (1 << 0)
-#define SOUND_FLAGS_LOOPING     (1 << 1)
-#define SOUND_FLAGS_PAUSED      (1 << 2)
+#define MAX_SOUND_LISTENERS     3
 
-#define SPEED_OF_SOUND          343.2f
+#define SOUND_FLAGS_3D          (1 << 0)
+
 #define VOLUME_FADE_THRESHOLD   0.055f
-#define VOLUME_FADE_DISTANCE    3.5f
+#define VOLUME_FADE_LENGTH      3.5f
 #define VOLUME_CURVE_PAD        0.0125f
 #define VOLUME_AMPLIFICATION    1.538f
-#define ECHO_VOICE_AMOUNT       0.25f
+#define VOLUME_VOICE_DAMPING    0.5f
+
+#define SPEED_OF_SOUND          343.2f
+
 #define ECHO_SPATIAL_PEAK_DIST  25.0f
 #define ECHO_SPATIAL_MIN        0.1f
 #define ECHO_SPATIAL_MAX        0.6f
-#define ECHO_DEFAULT_AMOUNT     0.0625f  // Small amount of echo for all non-3D sounds
+#define ECHO_VOICE_AMOUNT       0.25f
+#define ECHO_DEFAULT_AMOUNT     0.0625f
 
-struct ActiveSound {
+struct Sound {
     SoundId soundId;
-    u16 flags;
+    u8 flags;
     struct Vector3 pos3D;
     struct Vector3 velocity3D;
-    float volume;
     float originalVolume;
+    float volume;
     float basePitch;
-    enum SoundType soundType;
+    enum SoundType type;
 };
 
 struct SoundListener {
@@ -41,136 +40,210 @@ struct SoundListener {
     struct Vector3 velocity;
 };
 
-struct ActiveSound gActiveSounds[MAX_ACTIVE_SOUNDS];
-int gActiveSoundCount = 0;
+static struct Sound sSounds[MAX_ACTIVE_SOUNDS];
+static int sActiveSoundCount = 0;
 
-struct SoundListener gSoundListeners[MAX_SOUND_LISTENERS];
-int gActiveListenerCount = 0;
+static struct SoundListener sSoundListeners[MAX_SOUND_LISTENERS];
+static int sActiveListenerCount = 0;
 
-void soundPlayerDetermine3DSound(struct Vector3* at, struct Vector3* velocity, float* volumeIn, float* volumeOut, float* panOut, float* pitchBend, float* echo) {
-    *panOut = 0.5f;
-    *pitchBend = 1.0f;
-    *echo = 0.0f;
-
-    if (!gActiveListenerCount) {
-        *volumeOut = *volumeIn;
-        return;
+static struct Sound* soundPlayerFindActiveSound(SoundId soundId) {
+    if (soundId == SOUND_ID_NONE) {
+        return NULL;
     }
 
-    struct SoundListener* nearestListener = &gSoundListeners[0];
-    float distance = vector3DistSqrd(at, &gSoundListeners[0].worldPos);
-
-    for (int i = 1; i < gActiveListenerCount; ++i) {
-        float check = vector3DistSqrd(at, &gSoundListeners[i].worldPos);
-
-        if (check < distance) {
-            distance = check;
-            nearestListener = &gSoundListeners[i];
+    for (int i = 0; i < sActiveSoundCount; ++i) {
+        if (sSounds[i].soundId == soundId) {
+            return &sSounds[i];
         }
     }
 
-    if (distance < 0.0000001f) {
-        *volumeOut = *volumeIn;
+    return NULL;
+}
+
+static void soundPlayerRecalculateVolume(struct Sound* sound) {
+    sound->volume = (sound->originalVolume * gSaveData.audio.soundVolume) / 0xFFFF;
+
+    if (sound->type == SoundTypeMusic) {
+        sound->volume *= (float)gSaveData.audio.musicVolume / 0xFFFF;
+    }
+}
+
+static void soundPlayerCalc3DSoundParams(struct Sound* sound, float* volume, float* pitchBend, float* pan, float* echo) {
+    *pitchBend = 1.0f;
+    *pan = 0.5f;
+    *echo = 0.0f;
+
+    if (sActiveListenerCount == 0) {
+        *volume = sound->volume;
         return;
     }
 
-    float distanceSqrt = sqrtf(distance);
+    // Find nearest listener
+    struct SoundListener* listener = NULL;
+    float listenerDist = 0.0f;
+
+    for (int i = 0; i < sActiveListenerCount; ++i) {
+        float dist = vector3DistSqrd(&sound->pos3D, &sSoundListeners[i].worldPos);
+
+        if (!listener || dist < listenerDist) {
+            listener = &sSoundListeners[i];
+            listenerDist = dist;
+        }
+    }
+
+    if (listenerDist < 0.0000001f) {
+        *volume = sound->volume;
+        return;
+    }
+
+    listenerDist = sqrtf(listenerDist);
 
     // Initial linear volume level
-    float volumeLevel = clampf(*volumeIn / distanceSqrt, 0.0f, 1.0f);
+    float newVolume = clampf(sound->volume / listenerDist, 0.0f, 1.0f);
 
     // Fade quiet sounds more aggressively
-    if (volumeLevel > 0.0f && volumeLevel < VOLUME_FADE_THRESHOLD) {
+    if (newVolume > 0.0f && newVolume < VOLUME_FADE_THRESHOLD) {
         // How far is the listener from where the threshold volume was reached?
-        float fadeStartDist = *volumeIn * (1.0f / VOLUME_FADE_THRESHOLD);
-        float distFromFadeStart = distanceSqrt - fadeStartDist;
+        float fadeStartDist = sound->volume * (1.0f / VOLUME_FADE_THRESHOLD);
+        float distFromFadeStart = listenerDist - fadeStartDist;
 
-        float fadeAmount = clampf(distFromFadeStart * (1.0f / VOLUME_FADE_DISTANCE), 0.0f, 1.0f);
-        volumeLevel *= (1.0f - fadeAmount);
+        float fadeAmount = clampf(distFromFadeStart * (1.0f / VOLUME_FADE_LENGTH), 0.0f, 1.0f);
+        newVolume *= (1.0f - fadeAmount);
     }
 
-    // Fudge with the volume curve a bit. 
-    // Try to make distant sounds more apparent while
-    // compressing the volume of closer sounds.
-    volumeLevel = clampf((volumeLevel - VOLUME_CURVE_PAD) * VOLUME_AMPLIFICATION, 0.0f, 1.0f);
-
-    if (volumeLevel == 0.0f) {
-        *volumeOut = 0.0f;
+    // Fudge with the volume curve a bit
+    // Try to make distant sounds more apparent while compressing the volume of closer sounds
+    *volume = clampf((newVolume - VOLUME_CURVE_PAD) * VOLUME_AMPLIFICATION, 0.0f, 1.0f);
+    if (*volume == 0.0f) {
         return;
     }
 
-    *volumeOut = volumeLevel;
-
-    // Add echo/reverb amount
-    float echoDistCurve = clampf(
-        mathfLerp(ECHO_SPATIAL_MIN, ECHO_SPATIAL_MAX, distanceSqrt / ECHO_SPATIAL_PEAK_DIST),
-        ECHO_SPATIAL_MIN, ECHO_SPATIAL_MAX
-    );
-    *echo = echoDistCurve;
-
-    struct Vector3 offset;
-    vector3Sub(at, &nearestListener->worldPos, &offset);
+    // Doppler effect
+    struct Vector3 listenerOffset;
+    vector3Sub(&sound->pos3D, &listener->worldPos, &listenerOffset);
 
     struct Vector3 relativeVelocity;
-    vector3Sub(velocity, &nearestListener->velocity, &relativeVelocity);
+    vector3Sub(&sound->velocity3D, &listener->velocity, &relativeVelocity);
 
-    float invDist = 1.0f / distanceSqrt;
-
-    float directionalVelocity = -vector3Dot(&offset, &relativeVelocity) * invDist;
-
+    float invDist = 1.0f / listenerDist;
+    float directionalVelocity = -vector3Dot(&listenerOffset, &relativeVelocity) * invDist;
     *pitchBend = (SPEED_OF_SOUND + directionalVelocity) * (1.0f / SPEED_OF_SOUND);
 
-    float pan = vector3Dot(&offset, &nearestListener->rightVector) * invDist;
-    pan = (pan * 0.5f) + 0.5f;
-    *panOut = clampf(pan, 0.0f, 1.0f);
+    // Pan
+    float panAmount = vector3Dot(&listenerOffset, &listener->rightVector) * invDist;
+    panAmount = (panAmount * 0.5f) + 0.5f;
+    *pan = clampf(panAmount, 0.0f, 1.0f);
+
+    // Echo/reverb
+    *echo = clampf(
+        mathfLerp(ECHO_SPATIAL_MIN, ECHO_SPATIAL_MAX, listenerDist / ECHO_SPATIAL_PEAK_DIST),
+        ECHO_SPATIAL_MIN, ECHO_SPATIAL_MAX
+    );
 }
 
 void* soundPlayerInit(void* memoryEnd) {
     for (int i = 0; i < MAX_ACTIVE_SOUNDS; ++i) {
-        gActiveSounds[i].soundId = SOUND_ID_NONE;
+        sSounds[i].soundId = SOUND_ID_NONE;
     }
+
+    sActiveSoundCount = 0;
+    sActiveListenerCount = 0;
 
     return audioInit(memoryEnd, MAX_ACTIVE_SOUNDS);
 }
 
-SoundId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType type) {
-    if (gActiveSoundCount >= MAX_ACTIVE_SOUNDS ||
-        (gActiveSoundCount >= MAX_SKIPPABLE_SOUNDS && clipsCheckSoundSkippable(soundClipId))
+void soundPlayerUpdate() {
+    static float soundDamping = 1.0f;
+
+    int index = 0;
+    int writeIndex = 0;
+    int isVoiceActive = 0;
+
+    audioUpdate();
+
+    while (index < sActiveSoundCount) {
+        struct Sound* sound = &sSounds[index];
+
+        if (audioIsSoundPaused(sound->soundId)) {
+            ++writeIndex;
+            ++index;
+            continue;
+        }
+
+        if (sound->type == SoundTypeVoice) {
+            isVoiceActive = 1;
+        }
+
+        if (!audioIsSoundPlaying(sound->soundId)) {
+            audioFreeSound(sound->soundId);
+            sound->soundId = SOUND_ID_NONE;
+        } else {
+            if (sound->flags & SOUND_FLAGS_3D) {
+                float volume;
+                float pitch;
+                float pan;
+                float echo;
+                soundPlayerCalc3DSoundParams(sound, &volume, &pitch, &pan, &echo);
+
+                if (sound->type != SoundTypeVoice) {
+                    volume *= soundDamping;
+                }
+
+                audioSetSoundParams(sound->soundId, volume, sound->basePitch * pitch, pan, echo);
+            }
+
+            ++writeIndex;
+        }
+        
+        ++index;
+
+        if (writeIndex != index) {
+            sSounds[writeIndex] = sSounds[index];
+        }
+    }
+
+    soundDamping = mathfMoveTowards(
+        soundDamping,
+        isVoiceActive ? VOLUME_VOICE_DAMPING : 1.0f,
+        FIXED_DELTA_TIME
+    );
+    sActiveSoundCount = writeIndex;
+}
+
+int soundPlayerSoundCount() {
+    return sActiveSoundCount;
+}
+
+SoundId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* position, struct Vector3* velocity, enum SoundType type) {
+    if (sActiveSoundCount >= MAX_ACTIVE_SOUNDS ||
+        (sActiveSoundCount >= MAX_SKIPPABLE_SOUNDS && clipsCheckSoundSkippable(soundClipId))
     ) {
         return SOUND_ID_NONE;
     }
 
-    struct ActiveSound* sound = &gActiveSounds[gActiveSoundCount];
+    struct Sound* sound = &sSounds[sActiveSoundCount];
     sound->flags = 0;
     sound->originalVolume = volume;
     sound->basePitch = pitch;
-    sound->soundType = type;
-
-    volume = (volume * gSaveData.audio.soundVolume) / 0xFFFF;
-    if (type == SoundTypeMusic) {
-        volume = (volume * gSaveData.audio.musicVolume) / 0xFFFF;
-    }
-    sound->volume = volume;
+    sound->type = type;
+    soundPlayerRecalculateVolume(sound);
 
     float pan = 0.5f;
     float echo = 0.0f;
+    volume = sound->volume;
 
-    if (at) {
+    if (position) {
         sound->flags |= SOUND_FLAGS_3D;
-        sound->pos3D = *at;
+        sound->pos3D = *position;
         sound->velocity3D = *velocity;
 
         float pitchBend;
-        soundPlayerDetermine3DSound(at, velocity, &volume, &volume, &pan, &pitchBend, &echo);
+        soundPlayerCalc3DSoundParams(sound, &volume, &pitchBend, &pan, &echo);
         pitch *= pitchBend;
     } else if (type == SoundTypeVoice) {
         echo = ECHO_VOICE_AMOUNT;
     } else if (type == SoundTypeAll) {
         echo = ECHO_DEFAULT_AMOUNT;
-    }
-
-    if (audioIsSoundClipLooped(soundClipId)) {
-        sound->flags |= SOUND_FLAGS_LOOPING;
     }
 
     SoundId soundId = audioPlaySound(
@@ -185,170 +258,82 @@ SoundId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     }
 
     sound->soundId = soundId;
-    ++gActiveSoundCount;
+    ++sActiveSoundCount;
 
     return soundId;
 }
 
-void soundPlayerGameVolumeUpdate() {
-    for (int i = 0; i < gActiveSoundCount; ++i) {
-        struct ActiveSound* sound = &gActiveSounds[i];
-        if (sound->soundId == SOUND_ID_NONE) {
-            continue;
-        }
-
-        float newVolume = (sound->originalVolume * gSaveData.audio.soundVolume) / 0xFFFF;
-        if (sound->soundType == SoundTypeMusic) {
-            newVolume = (newVolume * gSaveData.audio.musicVolume) / 0xFFFF;
-        }
-        
-        if (sound->flags & SOUND_FLAGS_PAUSED) {
-            sound->volume = newVolume;
-        } else if (sound->flags & SOUND_FLAGS_3D) {
-            sound->volume = newVolume;
-            float volume;
-            float pitch;
-            float pan;
-            float echo;
-            soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &pan, &pitch, &echo);
-            audioSetSoundParams(sound->soundId, volume, sound->basePitch * pitch, pan, echo);
-        } else {
-            audioSetSoundParams(sound->soundId, newVolume, -1.0f, -1.0f, -1.0f);
-            sound->volume = newVolume;
-        }
-    }
+int soundPlayerIsPlaying(SoundId soundId) {
+    struct Sound* sound = soundPlayerFindActiveSound(soundId);
+    return sound && audioIsSoundPlaying(sound->soundId);
 }
 
-#define SOUND_DAMPING_LEVEL 0.5f
-
-void soundPlayerUpdate() {
-    static float soundDamping = 1.0f;
-
-    int index = 0;
-    int writeIndex = 0;
-    int isVoiceActive = 0;
-
-    audioUpdate();
-
-    while (index < gActiveSoundCount) {
-        struct ActiveSound* sound = &gActiveSounds[index];
-
-        if (sound->flags & SOUND_FLAGS_PAUSED) {
-            ++writeIndex;
-            ++index;
-            continue;
-        }
-
-        if (sound->soundType == SoundTypeVoice) {
-            isVoiceActive = 1;
-        }
-
-        if (!audioIsSoundPlaying(sound->soundId)) {
-            audioFreeSound(sound->soundId);
-            sound->soundId = SOUND_ID_NONE;
-        } else {
-            if (sound->flags & SOUND_FLAGS_3D) {
-                float volume;
-                float pitch;
-                float pan;
-                float echo;
-
-                soundPlayerDetermine3DSound(&sound->pos3D, &sound->velocity3D, &sound->volume, &volume, &pan, &pitch, &echo);
-
-                if (sound->soundType != SoundTypeVoice) {
-                    volume *= soundDamping;
-                }
-
-                audioSetSoundParams(sound->soundId, volume, sound->basePitch * pitch, pan, echo);
-            }
-
-            ++writeIndex;
-        }
-        
-        ++index;
-
-        if (writeIndex != index) {
-            gActiveSounds[writeIndex] = gActiveSounds[index];
-        }
-    }
-
-    soundDamping = mathfMoveTowards(soundDamping, isVoiceActive ? SOUND_DAMPING_LEVEL : 1.0f, FIXED_DELTA_TIME);
-
-    gActiveSoundCount = writeIndex;
+int soundPlayerIsLooped(SoundId soundId) {
+    struct Sound* sound = soundPlayerFindActiveSound(soundId);
+    return sound && audioIsSoundLooped(sound->soundId);
 }
 
-struct ActiveSound* soundPlayerFindActiveSound(SoundId soundId) {
-    if (soundId == SOUND_ID_NONE) {
-        return NULL;
-    }
-    
-    for (int i = 0; i < gActiveSoundCount; ++i) {
-        if (gActiveSounds[i].soundId == soundId) {
-            return &gActiveSounds[i];
-        }
-    }
-
-    return NULL;
+int soundPlayerIsMuted(SoundId soundId) {
+    struct Sound* sound = soundPlayerFindActiveSound(soundId);
+    return !sound || sound->originalVolume == 0.0f;
 }
 
+void soundPlayerSetPosition(SoundId soundId, struct Vector3* position, struct Vector3* velocity) {
+    struct Sound* sound = soundPlayerFindActiveSound(soundId);
+    if (!sound) {
+        return;
+    }
+
+    sound->flags |= SOUND_FLAGS_3D;
+    sound->pos3D = *position;
+    sound->velocity3D = *velocity;
+}
+
+void soundPlayerSetVolume(SoundId soundId, float newVolume) {
+    struct Sound* sound = soundPlayerFindActiveSound(soundId);
+    if (!sound || sound->originalVolume == newVolume) {
+        return;
+    }
+
+    sound->originalVolume = newVolume;
+    soundPlayerRecalculateVolume(sound);
+
+    // 3D sound volume will be updated in next call to soundPlayerUpdate()
+    if (!(sound->flags & SOUND_FLAGS_3D)) {
+        audioSetSoundParams(sound->soundId, sound->volume, -1.0f, -1.0f, -1.0f);
+    }
+}
 
 void soundPlayerStop(SoundId soundId) {
-    struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
-
-    if (activeSound) {
+    struct Sound* sound = soundPlayerFindActiveSound(soundId);
+    if (sound) {
         audioStopSound(soundId);
     }
 }
 
 void soundPlayerStopAll() {
-    for (int i = 0; i < gActiveSoundCount; ++i) {
-        struct ActiveSound* activeSound = &gActiveSounds[i];
-        if (activeSound->soundId != SOUND_ID_NONE) {
-            audioStopSound(activeSound->soundId);
+    for (int i = 0; i < sActiveSoundCount; ++i) {
+        struct Sound* sound = &sSounds[i];
+        if (sound->soundId != SOUND_ID_NONE) {
+            audioStopSound(sound->soundId);
         }
     }
 }
 
-int soundPlayerSoundCount() {
-    return gActiveSoundCount;
-}
-
-void soundPlayerUpdatePosition(SoundId soundId, struct Vector3* at, struct Vector3* velocity) {
-    struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
-
-    if (activeSound) {
-        activeSound->flags |= SOUND_FLAGS_3D;
-        activeSound->pos3D = *at;
-        activeSound->velocity3D = *velocity;
-    }
-}
-
-float soundPlayerGetOriginalVolume(SoundId soundId) {
-    struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
-
-    if (activeSound) {
-        return activeSound->originalVolume;
-    }
-
-    return 0.0f;
-}
-
-void soundPlayerAdjustVolume(SoundId soundId, float newVolume) {
-    struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
-
-    if (activeSound) {
-        activeSound->originalVolume = newVolume;
-
-        newVolume = newVolume * gSaveData.audio.soundVolume / 0xFFFF;
-        if (activeSound->soundType == SoundTypeMusic) {
-            newVolume = newVolume * gSaveData.audio.musicVolume / 0xFFFF;
+void soundPlayerPause() {
+    for (int i = 0; i < sActiveSoundCount; ++i) {
+        struct Sound* sound = &sSounds[i];
+        if (sound->soundId != SOUND_ID_NONE) {
+            audioPauseSound(sound->soundId);
         }
+    }
+}
 
-        if (activeSound->flags & SOUND_FLAGS_3D) {
-            activeSound->volume = newVolume;
-        } else if (newVolume != activeSound->volume) {
-            audioSetSoundParams(activeSound->soundId, newVolume, -1.0f, -1.0f, -1.0f);
-            activeSound->volume = newVolume;
+void soundPlayerResume() {
+    for (int i = 0; i < sActiveSoundCount; ++i) {
+        struct Sound* sound = &sSounds[i];
+        if (sound->soundId != SOUND_ID_NONE && audioIsSoundPaused(sound->soundId)) {
+            audioResumeSound(sound->soundId);
         }
     }
 }
@@ -356,11 +341,11 @@ void soundPlayerAdjustVolume(SoundId soundId, float newVolume) {
 void soundPlayerFadeOutsideRadius(float volumePercent, struct Vector3* origin, float radius, int persistent) {
     float radiusSquared = radius * radius;
 
-    for (int i = 0; i < gActiveSoundCount; ++i) {
-        struct ActiveSound* sound = &gActiveSounds[i];
+    for (int i = 0; i < sActiveSoundCount; ++i) {
+        struct Sound* sound = &sSounds[i];
 
         if (sound->soundId == SOUND_ID_NONE ||
-            sound->soundType != SoundTypeAll ||
+            sound->type != SoundTypeAll ||
             !(sound->flags & SOUND_FLAGS_3D) ||
             vector3DistSqrd(origin, &sound->pos3D) <= radiusSquared
         ) {
@@ -376,47 +361,36 @@ void soundPlayerFadeOutsideRadius(float volumePercent, struct Vector3* origin, f
     }
 }
 
-int soundPlayerIsPlaying(SoundId soundId) {
-    struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
-    return activeSound && audioIsSoundPlaying(activeSound->soundId);
+void soundPlayerRecalculateAllVolume() {
+    for (int i = 0; i < sActiveSoundCount; ++i) {
+        struct Sound* sound = &sSounds[i];
+        if (sound->soundId == SOUND_ID_NONE) {
+            continue;
+        }
+
+        soundPlayerRecalculateVolume(sound);
+
+        float volume = sound->volume;
+
+        // Don't wait for soundPlayerUpdate(), to avoid harsh transitions on config change
+        if (sound->flags & SOUND_FLAGS_3D) {
+            float _pitch;
+            float _pan;
+            float _echo;
+            soundPlayerCalc3DSoundParams(sound, &volume, &_pitch, &_pan, &_echo);
+        }
+
+        audioSetSoundParams(sound->soundId, volume, -1.0f, -1.0f, -1.0f);
+    }
 }
 
-int soundPlayerIsLooped(SoundId soundId) {
-    struct ActiveSound* activeSound = soundPlayerFindActiveSound(soundId);
-    return activeSound && (activeSound->flags & SOUND_FLAGS_LOOPING);
-}
-
-void soundListenerUpdate(struct Vector3* position, struct Vector3* right, struct Vector3* velocity, int listenerIndex) {
-    gSoundListeners[listenerIndex].worldPos = *position;
-    gSoundListeners[listenerIndex].rightVector = *right;
-    gSoundListeners[listenerIndex].velocity = *velocity;
+void soundListenerUpdate(int listenerIndex, struct Vector3* position, struct Vector3* right, struct Vector3* velocity) {
+    struct SoundListener* listener = &sSoundListeners[listenerIndex];
+    listener->worldPos = *position;
+    listener->rightVector = *right;
+    listener->velocity = *velocity;
 }
 
 void soundListenerSetCount(int count) {
-    gActiveListenerCount = count;
-}
-
-void soundPlayerPause() {
-    for (int i = 0; i < gActiveSoundCount; ++i) {
-        struct ActiveSound* activeSound = &gActiveSounds[i];
-        if (activeSound->soundId == SOUND_ID_NONE) {
-            continue;
-        }
-
-        activeSound->flags |= SOUND_FLAGS_PAUSED;
-        audioPauseSound(activeSound->soundId);
-    }
-}
-
-void soundPlayerResume() {
-    for (int i = 0; i < gActiveSoundCount; ++i) {
-        struct ActiveSound* activeSound = &gActiveSounds[i];
-        if (!(activeSound->flags & SOUND_FLAGS_PAUSED)) {
-            continue;
-        }
-
-        activeSound->flags &= ~SOUND_FLAGS_PAUSED;
-        audioResumeSound(activeSound->soundId);
-    }
-    soundPlayerGameVolumeUpdate();
+    sActiveListenerCount = count;
 }

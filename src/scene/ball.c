@@ -196,7 +196,7 @@ void ballUpdate(struct Ball* ball) {
         vector3Scale(&ball->rigidBody.velocity, &ball->rigidBody.velocity, ball->targetSpeed / currentSpeed);
     }
 
-    soundPlayerUpdatePosition(ball->soundLoopId, &ball->rigidBody.transform.position, &ball->rigidBody.velocity);
+    soundPlayerSetPosition(ball->soundLoopId, &ball->rigidBody.transform.position, &ball->rigidBody.velocity);
 
     ball->rigidBody.angularVelocity = gOneVec;
     

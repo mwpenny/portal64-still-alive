@@ -350,7 +350,7 @@ void signageUpdateSound(struct Signage* signage) {
 
         if (signage->currentHumVolume != humVolume) {
             signage->currentHumVolume = humVolume;
-            soundPlayerAdjustVolume(signage->currentSoundId, humVolume);
+            soundPlayerSetVolume(signage->currentSoundId, humVolume);
         }
     } else if (signage->humFadeElapTime == 0.0f) {
         // Start the sound if it is not currently playing and not faded out

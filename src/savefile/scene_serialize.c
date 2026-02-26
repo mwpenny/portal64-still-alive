@@ -201,8 +201,8 @@ void decorSerialize(struct Serializer* serializer, SerializeAction action, struc
         }
 
         if (entry->definition->soundClipId != -1) {
-            uint8_t shouldMute = soundPlayerGetOriginalVolume(entry->playingSound) == 0.0f;
-            action(serializer, &shouldMute, sizeof(uint8_t));
+            uint8_t muted = soundPlayerIsMuted(entry->playingSound);
+            action(serializer, &muted, sizeof(uint8_t));
         }
 
         rigidBodySerialize(serializer, action, &entry->rigidBody);

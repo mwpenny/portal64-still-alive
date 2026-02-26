@@ -422,6 +422,25 @@ void audioUpdate() {
     }
 }
 
+static int audioIsSoundClipLooped(int soundClipId) {
+    if (soundClipId < 0 || soundClipId >= sSoundClipArray->soundCount) {
+        return 0;
+    }
+
+    ALSound* soundClip = sSoundClipArray->sounds[soundClipId];
+    ALWaveTable* wavetable = soundClip->wavetable;
+
+    if (wavetable) {
+        if (wavetable->type == AL_ADPCM_WAVE) {
+            return wavetable->waveInfo.adpcmWave.loop != NULL;
+        } else if (wavetable->type == AL_RAW16_WAVE) {
+            return wavetable->waveInfo.rawWave.loop != NULL;
+        }
+    }
+
+    return 0;
+}
+
 static float audioSoundLength(int soundClipId, float pitch) {
     if (audioIsSoundClipLooped(soundClipId)) {
         return -1.0f;
@@ -500,6 +519,10 @@ int audioIsSoundPlaying(SoundId soundId) {
     return sVoiceStates[soundId].flags & AUDIO_VOICE_FLAG_PLAYING;
 }
 
+int audioIsSoundLooped(SoundId soundId) {
+    return sVoiceStates[soundId].timeRemaining == -1.0f;
+}
+
 void audioPauseSound(SoundId soundId) {
     // No good way to pause or start sounds partway through, so play at pitch ~0
     // This doesn't affect the end time, so stopping is handled by us, not the library
@@ -508,6 +531,10 @@ void audioPauseSound(SoundId soundId) {
     alSndpSetSound(&sSoundPlayer, soundId);
     alSndpSetVol(&sSoundPlayer, 0);
     alSndpSetPitch(&sSoundPlayer, 0.0f);
+}
+
+int audioIsSoundPaused(SoundId soundId) {
+    return sVoiceStates[soundId].flags & AUDIO_VOICE_FLAG_PAUSED;
 }
 
 void audioResumeSound(SoundId soundId) {
@@ -530,23 +557,4 @@ void audioStopSound(SoundId soundId) {
 
 void audioFreeSound(SoundId soundId) {
     alSndpDeallocate(&sSoundPlayer, soundId);
-}
-
-int audioIsSoundClipLooped(int soundClipId) {
-    if (soundClipId < 0 || soundClipId >= sSoundClipArray->soundCount) {
-        return 0;
-    }
-
-    ALSound* soundClip = sSoundClipArray->sounds[soundClipId];
-    ALWaveTable* wavetable = soundClip->wavetable;
-
-    if (wavetable) {
-        if (wavetable->type == AL_ADPCM_WAVE) {
-            return wavetable->waveInfo.adpcmWave.loop != NULL;
-        } else if (wavetable->type == AL_RAW16_WAVE) {
-            return wavetable->waveInfo.rawWave.loop != NULL;
-        }
-    }
-
-    return 0;
 }

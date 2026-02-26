@@ -2,10 +2,8 @@
 #define _SOUND_PLAYER_H
 
 #include "math/vector3.h"
-#include "math/quaternion.h"
 #include "system/audio.h"
 
-#define MAX_SOUND_LISTENERS     3
 #define MAX_SKIPPABLE_SOUNDS    18
 #define MAX_ACTIVE_SOUNDS       24
 
@@ -18,26 +16,24 @@ enum SoundType {
 };
 
 void* soundPlayerInit(void* memoryEnd);
-void soundPlayerGameVolumeUpdate();
 void soundPlayerUpdate();
-SoundId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* at, struct Vector3* velocity, enum SoundType type);
-void soundPlayerStop(SoundId soundId);
-void soundPlayerStopAll();
-
 int soundPlayerSoundCount();
 
-void soundPlayerPause();
-void soundPlayerResume();
-
-void soundPlayerUpdatePosition(SoundId soundId, struct Vector3* at, struct Vector3* velocity);
-float soundPlayerGetOriginalVolume(SoundId soundId);
-void soundPlayerAdjustVolume(SoundId soundId, float newVolume);
-void soundPlayerFadeOutsideRadius(float volumePercent, struct Vector3* origin, float radius, int persistent);
-
+SoundId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* position, struct Vector3* velocity, enum SoundType type);
 int soundPlayerIsPlaying(SoundId soundId);
 int soundPlayerIsLooped(SoundId soundId);
+int soundPlayerIsMuted(SoundId soundId);
+void soundPlayerSetPosition(SoundId soundId, struct Vector3* position, struct Vector3* velocity);
+void soundPlayerSetVolume(SoundId soundId, float newVolume);
+void soundPlayerStop(SoundId soundId);
 
-void soundListenerUpdate(struct Vector3* position, struct Vector3* right, struct Vector3* velocity, int listenerIndex);
+void soundPlayerStopAll();
+void soundPlayerPause();
+void soundPlayerResume();
+void soundPlayerFadeOutsideRadius(float volumePercent, struct Vector3* origin, float radius, int persistent);
+void soundPlayerRecalculateAllVolume();
+
+void soundListenerUpdate(int listenerIndex, struct Vector3* position, struct Vector3* right, struct Vector3* velocity);
 void soundListenerSetCount(int count);
 
 #endif

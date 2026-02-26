@@ -157,7 +157,7 @@ int decorObjectUpdate(struct DecorObject* decorObject) {
     }
 
     if (decorObject->playingSound != SOUND_ID_NONE) {
-        soundPlayerUpdatePosition(
+        soundPlayerSetPosition(
             decorObject->playingSound, 
             &decorObject->rigidBody.transform.position, 
             &decorObject->rigidBody.velocity

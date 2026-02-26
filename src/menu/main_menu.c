@@ -21,7 +21,7 @@ void mainMenuReadCamera(struct GameMenu* gameMenu) {
 
     struct Vector3 cameraListenRight;
     quatMultVector(&gScene.camera.transform.rotation, &gRight, &cameraListenRight);
-    soundListenerUpdate(&gScene.camera.transform.position, &cameraListenRight, &gZeroVec, 0);
+    soundListenerUpdate(0, &gScene.camera.transform.position, &cameraListenRight, &gZeroVec);
 }
 
 void mainMenuPlayAmbientSound() {

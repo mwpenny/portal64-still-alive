@@ -280,7 +280,7 @@ static void turretUpdateSounds(struct Turret* turret) {
         }
 
         if (soundPlayerIsPlaying(soundId)) {
-            soundPlayerUpdatePosition(
+            soundPlayerSetPosition(
                 soundId,
                 &turret->rigidBody.transform.position,
                 &turret->rigidBody.velocity

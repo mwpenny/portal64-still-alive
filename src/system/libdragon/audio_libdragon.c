@@ -19,7 +19,15 @@ int audioIsSoundPlaying(SoundId soundId) {
     return 0;
 }
 
+int audioIsSoundLooped(SoundId soundId) {
+    return 0;
+}
+
 void audioPauseSound(SoundId soundId) {
+}
+
+int audioIsSoundPaused(SoundId soundId) {
+    return 0;
 }
 
 void audioResumeSound(SoundId soundId) {
@@ -29,8 +37,4 @@ void audioStopSound(SoundId soundId) {
 }
 
 void audioFreeSound(SoundId soundId) {
-}
-
-int audioIsSoundClipLooped(int soundClipId) {
-    return 0;
 }
