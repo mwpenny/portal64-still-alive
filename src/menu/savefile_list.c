@@ -198,6 +198,10 @@ enum InputCapture savefileListUpdate(struct SavefileListMenu* savefileList) {
         return InputCaptureExit;
     }
 
+    if (savefileList->numberOfSaves == 0) {
+        return InputCapturePass;
+    }
+
     int controllerDir = controllerGetDirectionDown(0);
     if (controllerDir & ControllerDirectionDown) {
         savefileList->selectedSave = savefileList->selectedSave + 1;
