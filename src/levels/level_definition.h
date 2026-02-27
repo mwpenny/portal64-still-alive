@@ -315,7 +315,8 @@ enum AnimationSoundType {
     AnimationSoundTypePiston,
     AnimationSoundTypeArm,
     AnimationSoundTypeStairs,
-    AnimationSoundTypeDoor
+    AnimationSoundTypeDoor,
+    AnimationSoundTypeElevator,
 };
 
 struct AnimationInfo {

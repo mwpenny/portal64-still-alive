@@ -15,12 +15,13 @@ struct AnimatedAudioInfo {
 };
 
 struct AnimatedAudioInfo gAnimatedAudioInfo[] = {
-    {.startSoundId = SOUND_ID_NONE, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUND_ID_NONE},
-    {.startSoundId = SOUND_ID_NONE, .loopSoundId = SOUNDS_BEAM_PLATFORM_LOOP1, .endSoundId = SOUND_ID_NONE, .volume = 1.0f, .pitch = 0.8f},
-    {.startSoundId = SOUNDS_APC_START_LOOP3, .loopSoundId = SOUNDS_APC_IDLE1, .endSoundId = SOUNDS_APC_SHUTDOWN, .volume = 0.9f, .pitch = 1.0f},
-    {.startSoundId = SOUNDS_APC_START_LOOP3, .loopSoundId = SOUNDS_APC_IDLE1, .endSoundId = SOUNDS_APC_SHUTDOWN, .volume = 2.0f, .pitch = 1.0f},
-    {.startSoundId = SOUNDS_APC_START_LOOP3, .loopSoundId = SOUNDS_DOOR_METAL_MEDIUM_OPEN1, .endSoundId = SOUNDS_APC_SHUTDOWN, .volume = 1.0f, .pitch = 1.0f},
-    {.startSoundId = SOUNDS_DOOR_METAL_THIN_CLOSE2, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUND_ID_NONE, .volume = 1.0f, .pitch = 1.0f},
+/* None      */ {.startSoundId = SOUND_ID_NONE, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUND_ID_NONE},
+/* LightRail */ {.startSoundId = SOUND_ID_NONE, .loopSoundId = SOUNDS_BEAM_PLATFORM_LOOP1, .endSoundId = SOUND_ID_NONE, .volume = 1.0f, .pitch = 0.8f},
+/* Piston    */ {.startSoundId = SOUNDS_APC_START_LOOP3, .loopSoundId = SOUNDS_APC_IDLE1, .endSoundId = SOUNDS_APC_SHUTDOWN, .volume = 0.9f, .pitch = 1.0f},
+/* Arm       */ {.startSoundId = SOUNDS_APC_START_LOOP3, .loopSoundId = SOUNDS_APC_IDLE1, .endSoundId = SOUNDS_APC_SHUTDOWN, .volume = 2.0f, .pitch = 1.0f},
+/* Stairs    */ {.startSoundId = SOUNDS_APC_START_LOOP3, .loopSoundId = SOUNDS_DOOR_METAL_MEDIUM_OPEN1, .endSoundId = SOUNDS_APC_SHUTDOWN, .volume = 1.0f, .pitch = 1.0f},
+/* Door      */ {.startSoundId = SOUNDS_DOOR_METAL_THIN_CLOSE2, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUND_ID_NONE, .volume = 1.0f, .pitch = 1.0f},
+/* Elevator  */ {.startSoundId = SOUNDS_ELEVATOR_STOP1, .loopSoundId = SOUND_ID_NONE, .endSoundId = SOUNDS_ELEVATOR_STOP1, .volume = 0.7f, .pitch = 1.0f},
 };
 
 void sceneAnimatorInit(struct SceneAnimator* sceneAnimator, struct AnimationInfo* animationInfo, int animatorCount) {

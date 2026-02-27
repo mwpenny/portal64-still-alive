@@ -42,3 +42,4 @@ The possible values for `SOUND_TYPE_NAME` are:
 * `Arm`: Horizontal moving wall sound
 * `Stairs`: Ascending/descending staircase sound
 * `Door`: Door open/close sound
+* `Elevator`: Elevator stop sound

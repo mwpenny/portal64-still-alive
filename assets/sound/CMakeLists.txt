@@ -97,6 +97,7 @@ set(SOUND_SCRIPTS
     physics/flesh/flesh_impact_bullet3.sox
     physics/flesh/flesh_impact_bullet4.sox
     physics/flesh/flesh_impact_bullet5.sox
+    plats/elevator_stop1.sox
     player/footsteps/concrete1.sox
     player/footsteps/concrete2.sox
     player/footsteps/concrete3.sox
