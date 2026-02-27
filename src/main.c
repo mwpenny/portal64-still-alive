@@ -207,6 +207,8 @@ static void gameProc(void* arg) {
     osScAddClient(&scheduler, &gfxClient, &gfxFrameMsgQ);
     osViBlack(1);
 
+    savefileLoad();
+
     u32 pendingGFX = 0;
     u32 drawBufferIndex = 0;
     u8 frameControl = 0;
@@ -224,8 +226,6 @@ static void gameProc(void* arg) {
     dynamicSceneInit();
     contactSolverInit(&gContactSolver);
     portalSurfaceCleanupQueueInit();
-
-    savefileLoad();
     
     levelLoadWithCallbacks(INTRO_MENU);
     controllersInit();

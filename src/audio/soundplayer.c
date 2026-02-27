@@ -29,7 +29,7 @@ struct Sound {
     struct Vector3 pos3D;
     struct Vector3 velocity3D;
     float originalVolume;
-    float volume;
+    float volumePercent;
     float basePitch;
     enum SoundType type;
 };
@@ -46,6 +46,9 @@ static int sActiveSoundCount = 0;
 static struct SoundListener sSoundListeners[MAX_SOUND_LISTENERS];
 static int sActiveListenerCount = 0;
 
+static float sGameVolumePercent = 1.0f;
+static float sMusicVolumePercent = 0.5f;
+
 static struct Sound* soundPlayerFindActiveSound(SoundId soundId) {
     if (soundId == SOUND_ID_NONE) {
         return NULL;
@@ -60,12 +63,8 @@ static struct Sound* soundPlayerFindActiveSound(SoundId soundId) {
     return NULL;
 }
 
-static void soundPlayerRecalculateVolume(struct Sound* sound) {
-    sound->volume = (sound->originalVolume * gSaveData.audio.soundVolume) / 0xFFFF;
-
-    if (sound->type == SoundTypeMusic) {
-        sound->volume *= (float)gSaveData.audio.musicVolume / 0xFFFF;
-    }
+static void soundPlayerSetVolumePercent(struct Sound* sound) {
+    sound->volumePercent = (sound->type == SoundTypeMusic) ? sMusicVolumePercent : sGameVolumePercent;
 }
 
 static void soundPlayerCalc3DSoundParams(struct Sound* sound, float* volume, float* pitchBend, float* pan, float* echo) {
@@ -74,7 +73,7 @@ static void soundPlayerCalc3DSoundParams(struct Sound* sound, float* volume, flo
     *echo = 0.0f;
 
     if (sActiveListenerCount == 0) {
-        *volume = sound->volume;
+        *volume = sound->originalVolume;
         return;
     }
 
@@ -92,19 +91,19 @@ static void soundPlayerCalc3DSoundParams(struct Sound* sound, float* volume, flo
     }
 
     if (listenerDist < 0.0000001f) {
-        *volume = sound->volume;
+        *volume = sound->originalVolume;
         return;
     }
 
     listenerDist = sqrtf(listenerDist);
 
     // Initial linear volume level
-    float newVolume = clampf(sound->volume / listenerDist, 0.0f, 1.0f);
+    float newVolume = clampf(sound->originalVolume / listenerDist, 0.0f, 1.0f);
 
     // Fade quiet sounds more aggressively
     if (newVolume > 0.0f && newVolume < VOLUME_FADE_THRESHOLD) {
         // How far is the listener from where the threshold volume was reached?
-        float fadeStartDist = sound->volume * (1.0f / VOLUME_FADE_THRESHOLD);
+        float fadeStartDist = sound->originalVolume * (1.0f / VOLUME_FADE_THRESHOLD);
         float distFromFadeStart = listenerDist - fadeStartDist;
 
         float fadeAmount = clampf(distFromFadeStart * (1.0f / VOLUME_FADE_LENGTH), 0.0f, 1.0f);
@@ -148,6 +147,7 @@ void* soundPlayerInit(void* memoryEnd) {
 
     sActiveSoundCount = 0;
     sActiveListenerCount = 0;
+    soundPlayerUpdateVolumeLevels();
 
     return audioInit(memoryEnd, MAX_ACTIVE_SOUNDS);
 }
@@ -189,7 +189,7 @@ void soundPlayerUpdate() {
                     volume *= soundDamping;
                 }
 
-                audioSetSoundParams(sound->soundId, volume, sound->basePitch * pitch, pan, echo);
+                audioSetSoundParams(sound->soundId, volume * sound->volumePercent, sound->basePitch * pitch, pan, echo);
             }
 
             ++writeIndex;
@@ -226,11 +226,11 @@ SoundId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
     sound->originalVolume = volume;
     sound->basePitch = pitch;
     sound->type = type;
-    soundPlayerRecalculateVolume(sound);
+    soundPlayerSetVolumePercent(sound);
 
     float pan = 0.5f;
     float echo = 0.0f;
-    volume = sound->volume;
+    volume = sound->originalVolume;
 
     if (position) {
         sound->flags |= SOUND_FLAGS_3D;
@@ -248,7 +248,7 @@ SoundId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vecto
 
     SoundId soundId = audioPlaySound(
         soundClipId,
-        volume,
+        volume * sound->volumePercent,
         pitch,
         pan,
         echo
@@ -296,11 +296,10 @@ void soundPlayerSetVolume(SoundId soundId, float newVolume) {
     }
 
     sound->originalVolume = newVolume;
-    soundPlayerRecalculateVolume(sound);
 
     // 3D sound volume will be updated in next call to soundPlayerUpdate()
     if (!(sound->flags & SOUND_FLAGS_3D)) {
-        audioSetSoundParams(sound->soundId, sound->volume, -1.0f, -1.0f, -1.0f);
+        audioSetSoundParams(sound->soundId, sound->originalVolume * sound->volumePercent, -1.0f, -1.0f, -1.0f);
     }
 }
 
@@ -352,25 +351,28 @@ void soundPlayerFadeOutsideRadius(float volumePercent, struct Vector3* origin, f
             continue;
         }
 
-        float newVolume = volumePercent * sound->originalVolume * (gSaveData.audio.soundVolume / 0xFFFF);
-        sound->volume = newVolume;
+        soundPlayerSetVolumePercent(sound);
+        sound->volumePercent *= volumePercent;
 
         if (persistent) {
-            sound->originalVolume = newVolume;
+            sound->originalVolume *= sound->volumePercent;
         }
     }
 }
 
-void soundPlayerRecalculateAllVolume() {
+void soundPlayerUpdateVolumeLevels() {
+    sGameVolumePercent = (float)gSaveData.audio.soundVolume / 0xFFFF;
+    sMusicVolumePercent = (sGameVolumePercent * gSaveData.audio.musicVolume) / 0xFFFF;
+
     for (int i = 0; i < sActiveSoundCount; ++i) {
         struct Sound* sound = &sSounds[i];
         if (sound->soundId == SOUND_ID_NONE) {
             continue;
         }
 
-        soundPlayerRecalculateVolume(sound);
+        soundPlayerSetVolumePercent(sound);
 
-        float volume = sound->volume;
+        float volume = sound->originalVolume;
 
         // Don't wait for soundPlayerUpdate(), to avoid harsh transitions on config change
         if (sound->flags & SOUND_FLAGS_3D) {
@@ -380,7 +382,7 @@ void soundPlayerRecalculateAllVolume() {
             soundPlayerCalc3DSoundParams(sound, &volume, &_pitch, &_pan, &_echo);
         }
 
-        audioSetSoundParams(sound->soundId, volume, -1.0f, -1.0f, -1.0f);
+        audioSetSoundParams(sound->soundId, volume * sound->volumePercent, -1.0f, -1.0f, -1.0f);
     }
 }
 
