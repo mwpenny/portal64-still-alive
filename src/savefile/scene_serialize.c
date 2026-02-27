@@ -241,11 +241,11 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
             originalRoom = 0;
         }
 
-        uint8_t shouldMute = 0;
+        uint8_t muted = 0;
         if (definition->soundClipId != -1) {
-            serializeRead(serializer, &shouldMute, sizeof(uint8_t));
+            serializeRead(serializer, &muted, sizeof(uint8_t));
         }
-        if (shouldMute) {
+        if (muted) {
             definition->flags |= DecorObjectFlagsMuted;
         } else {
             definition->flags &= ~DecorObjectFlagsMuted;

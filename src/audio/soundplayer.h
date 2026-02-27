@@ -1,5 +1,5 @@
-#ifndef _SOUND_PLAYER_H
-#define _SOUND_PLAYER_H
+#ifndef __SOUND_PLAYER_H__
+#define __SOUND_PLAYER_H__
 
 #include "math/vector3.h"
 #include "system/audio.h"
