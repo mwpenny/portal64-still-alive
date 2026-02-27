@@ -1,8 +1,17 @@
 # N64 Library Usage
 
-Portal 64 was originally written using Nintendo's proprietary libraries and tools. This material is not included in this repository, but ROMs built with it will necessarily contain Nintendo code. This is the reason Portal64: Still Alive currently does not distribute compiled ROMs in any form.
+Portal 64 was originally written using Nintendo's proprietary libraries and
+tools. This material is not included in this repository, but ROMs built with it
+will necessarily contain Nintendo code. This is the reason Portal64: Still Alive
+currently does not distribute compiled ROMs in any form.
 
-One major goal of this fork is to remove the requirement on proprietary code. The most mature open-source option is [libdragon](https://github.com/DragonMinded/libdragon). When Portal 64 originally began development, libdragon did not support 3D graphics. Since then, a full OpenGL 1.1 port has been implemented in its [unstable](https://github.com/DragonMinded/libdragon/tree/unstable) branch, along with open-source boot code (IPL3) and many other features!
+One major goal of this fork is to remove the requirement on proprietary code.
+The most mature open-source option is [libdragon](https://github.com/DragonMinded/libdragon).
+When Portal 64 originally began development, libdragon did not support 3D graphics.
+Since then, a full OpenGL 1.1 port has been implemented in its
+[preview](https://github.com/DragonMinded/libdragon/tree/preview) branch,
+along with open-source boot code (IPL3) and many other features! There is also
+the impressive [tiny3d](https://github.com/HailToDodongo/tiny3d) microcode.
 
 ## Current Non-Free Library Usage
 

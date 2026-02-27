@@ -54,7 +54,7 @@ significant progress in both gameplay systems and fidelity including:
 - Much more!
 
 This is a community driven project that welcomes any and all game testers and or
-[Contributors](./documentation/contributing.md).
+[contributors](./documentation/contributing.md).
 
 ## How to Build
 

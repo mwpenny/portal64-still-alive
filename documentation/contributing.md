@@ -1,20 +1,22 @@
 # Contributing
 
-When contributing to this repository, please first discuss the change you wish to make via issue,
-email, or verify that the new feature or bug fix is a checklist item in a [Development Progress](./development_progress.md) todo list.
+When contributing to this repository, please first discuss the change you wish
+to make via an issue or email.
 
-Please note we have a code of conduct, please follow it in all your interactions with the project.
+Please note we have a code of conduct, please follow it in all your interactions
+with the project.
 
 ## Pull Request Process
 
-1. Make a fork of the repository.
-2. Make a feature branch that implements the desired changes.
-3. Changes to code should be tested thoroughly on either N64 emulator or N64 Hardware (Hardware preferred)
-prior to submitting a pull request.
-4. Update the [Development Progress](./development_progress.md) if an item on the TODO checklist is completed by the PR.
-5. Including screenshots or videos of new or improved features is welcome and encouraged. Detailed writeup of 
-new or improved features in PR are welcome and encouraged.
-6. Once the PR has been submitted, a repository maintainer will merge or provide feedback promptly.
+1. Fork the repository.
+2. Create a feature branch that implements the desired changes.
+3. Test code changes thoroughly on either an N64 emulator or original hardware
+   prior to submitting the pull request. Original hardware is preferred. If using
+   emulation, use an accurate emulator such as [Ares](https://ares-emu.net/).
+4. Detailed writeups of bug fixes or new/improved features, including
+   screenshots and/or videos, are welcome and encouraged.
+5. Once the PR has been submitted, a repository maintainer will merge or provide
+   feedback promptly.
 
 ## Code of Conduct
 
@@ -41,7 +43,7 @@ include:
 Examples of unacceptable behavior by participants include:
 
 * The use of sexualized language or imagery and unwelcome sexual attention or
-advances
+  advances
 * Trolling, insulting/derogatory comments, and personal or political attacks
 * Public or private harassment
 * Publishing others' private information, such as a physical or electronic
