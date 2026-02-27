@@ -4,21 +4,21 @@
 #include <stdint.h>
 
 #define AUDIO_OUTPUT_HZ 22050
-#define SOUND_ID_NONE   -1
+#define VOICE_ID_NONE   -1
 
-typedef int16_t SoundId;
+typedef int16_t VoiceId;
 
 void* audioInit(void* memoryEnd, int maxVoices);
 void audioUpdate();
 
-SoundId audioPlaySound(int soundClipId, float volume, float pitch, float pan, float echo);
-void audioSetSoundParams(SoundId soundId, float volume, float pitch, float pan, float echo);
-int audioIsSoundPlaying(SoundId soundId);
-int audioIsSoundLooped(SoundId soundId);
-void audioPauseSound(SoundId soundId);
-int audioIsSoundPaused(SoundId soundId);
-void audioResumeSound(SoundId soundId);
-void audioStopSound(SoundId soundId);
-void audioFreeSound(SoundId soundId);
+VoiceId audioPlaySound(int soundClipId, float volume, float pitch, float pan, float echo);
+void audioSetSoundParams(VoiceId voiceId, float volume, float pitch, float pan, float echo);
+int audioIsSoundPlaying(VoiceId voiceId);
+int audioIsSoundLooped(VoiceId voiceId);
+void audioPauseSound(VoiceId voiceId);
+int audioIsSoundPaused(VoiceId voiceId);
+void audioResumeSound(VoiceId voiceId);
+void audioStopSound(VoiceId voiceId);
+void audioReleaseVoice(VoiceId voiceId);
 
 #endif

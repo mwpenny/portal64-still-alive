@@ -242,7 +242,6 @@ static short turretRandomSoundId(short* list, short listSize) {
 }
 
 static void turretPlaySound(struct Turret* turret, enum TurretSoundType soundType, short soundId, short subtitleId) {
-    // TODO: fix sound ID use-after-free issue
     SoundId* currentSound = &turret->currentSounds[soundType];
     soundPlayerStop(*currentSound);
 

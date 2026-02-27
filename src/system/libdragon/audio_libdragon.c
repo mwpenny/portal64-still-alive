@@ -8,33 +8,33 @@ void* audioInit(void* memoryEnd, int maxVoices) {
 void audioUpdate() {
 }
 
-SoundId audioPlaySound(int soundClipId, float volume, float pitch, float pan, float echo) {
-    return SOUND_ID_NONE;
+VoiceId audioPlaySound(int soundClipId, float volume, float pitch, float pan, float echo) {
+    return VOICE_ID_NONE;
 }
 
-void audioSetSoundParams(SoundId soundId, float volume, float pitch, float pan, float echo) {
+void audioSetSoundParams(VoiceId voiceId, float volume, float pitch, float pan, float echo) {
 }
 
-int audioIsSoundPlaying(SoundId soundId) {
+int audioIsSoundPlaying(VoiceId voiceId) {
     return 0;
 }
 
-int audioIsSoundLooped(SoundId soundId) {
+int audioIsSoundLooped(VoiceId voiceId) {
     return 0;
 }
 
-void audioPauseSound(SoundId soundId) {
+void audioPauseSound(VoiceId voiceId) {
 }
 
-int audioIsSoundPaused(SoundId soundId) {
+int audioIsSoundPaused(VoiceId voiceId) {
     return 0;
 }
 
-void audioResumeSound(SoundId soundId) {
+void audioResumeSound(VoiceId voiceId) {
 }
 
-void audioStopSound(SoundId soundId) {
+void audioStopSound(VoiceId voiceId) {
 }
 
-void audioFreeSound(SoundId soundId) {
+void audioReleaseVoice(VoiceId voiceId) {
 }

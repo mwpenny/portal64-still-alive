@@ -463,32 +463,32 @@ static float audioSoundLength(int soundClipId, float pitch) {
     return sampleCount * (1.0f / AUDIO_OUTPUT_HZ) / pitch;
 }
 
-SoundId audioPlaySound(int soundClipId, float volume, float pitch, float pan, float echo) {
+VoiceId audioPlaySound(int soundClipId, float volume, float pitch, float pan, float echo) {
     if (soundClipId < 0 || soundClipId >= sSoundClipArray->soundCount) {
-        return SOUND_ID_NONE;
+        return VOICE_ID_NONE;
     }
 
     ALSound* soundClip = sSoundClipArray->sounds[soundClipId];
-    ALSndId soundId = alSndpAllocate(&sSoundPlayer, soundClip);
-    if (soundId == SOUND_ID_NONE) {
-        return soundId;
+    ALSndId voiceId = alSndpAllocate(&sSoundPlayer, soundClip);
+    if (voiceId == VOICE_ID_NONE) {
+        return voiceId;
     }
 
-    struct VoiceState* VoiceState = &sVoiceStates[soundId];
-    VoiceState->timeRemaining = audioSoundLength(soundClipId, pitch);
-    VoiceState->pitch = 0.0f;
-    VoiceState->volume = 0;
-    VoiceState->flags = AUDIO_VOICE_FLAG_PLAYING;
+    struct VoiceState* voiceState = &sVoiceStates[voiceId];
+    voiceState->timeRemaining = audioSoundLength(soundClipId, pitch);
+    voiceState->pitch = 0.0f;
+    voiceState->volume = 0;
+    voiceState->flags = AUDIO_VOICE_FLAG_PLAYING;
 
-    audioSetSoundParams(soundId, volume, pitch, pan, echo);
+    audioSetSoundParams(voiceId, volume, pitch, pan, echo);
     alSndpPlay(&sSoundPlayer);
 
-    return soundId;
+    return voiceId;
 }
 
-void audioSetSoundParams(SoundId soundId, float volume, float pitch, float pan, float echo) {
-    struct VoiceState* voiceState = &sVoiceStates[soundId];
-    alSndpSetSound(&sSoundPlayer, soundId);
+void audioSetSoundParams(VoiceId voiceId, float volume, float pitch, float pan, float echo) {
+    struct VoiceState* voiceState = &sVoiceStates[voiceId];
+    alSndpSetSound(&sSoundPlayer, voiceId);
 
     if (volume >= 0.0f) {
         voiceState->volume = 32767 * volume;
@@ -515,46 +515,46 @@ void audioSetSoundParams(SoundId soundId, float volume, float pitch, float pan, 
     }
 }
 
-int audioIsSoundPlaying(SoundId soundId) {
-    return sVoiceStates[soundId].flags & AUDIO_VOICE_FLAG_PLAYING;
+int audioIsSoundPlaying(VoiceId voiceId) {
+    return sVoiceStates[voiceId].flags & AUDIO_VOICE_FLAG_PLAYING;
 }
 
-int audioIsSoundLooped(SoundId soundId) {
-    return sVoiceStates[soundId].timeRemaining == -1.0f;
+int audioIsSoundLooped(VoiceId voiceId) {
+    return sVoiceStates[voiceId].timeRemaining == -1.0f;
 }
 
-void audioPauseSound(SoundId soundId) {
+void audioPauseSound(VoiceId voiceId) {
     // No good way to pause or start sounds partway through, so play at pitch ~0
     // This doesn't affect the end time, so stopping is handled by us, not the library
-    sVoiceStates[soundId].flags |= AUDIO_VOICE_FLAG_PAUSED;
+    sVoiceStates[voiceId].flags |= AUDIO_VOICE_FLAG_PAUSED;
 
-    alSndpSetSound(&sSoundPlayer, soundId);
+    alSndpSetSound(&sSoundPlayer, voiceId);
     alSndpSetVol(&sSoundPlayer, 0);
     alSndpSetPitch(&sSoundPlayer, 0.0f);
 }
 
-int audioIsSoundPaused(SoundId soundId) {
-    return sVoiceStates[soundId].flags & AUDIO_VOICE_FLAG_PAUSED;
+int audioIsSoundPaused(VoiceId voiceId) {
+    return sVoiceStates[voiceId].flags & AUDIO_VOICE_FLAG_PAUSED;
 }
 
-void audioResumeSound(SoundId soundId) {
-    struct VoiceState* voiceState = &sVoiceStates[soundId];
+void audioResumeSound(VoiceId voiceId) {
+    struct VoiceState* voiceState = &sVoiceStates[voiceId];
     voiceState->flags &= ~AUDIO_VOICE_FLAG_PAUSED;
 
-    alSndpSetSound(&sSoundPlayer, soundId);
+    alSndpSetSound(&sSoundPlayer, voiceId);
     alSndpSetVol(&sSoundPlayer, voiceState->volume);
     alSndpSetPitch(&sSoundPlayer, voiceState->pitch);
 }
 
-void audioStopSound(SoundId soundId) {
-    struct VoiceState* voiceState = &sVoiceStates[soundId];
+void audioStopSound(VoiceId voiceId) {
+    struct VoiceState* voiceState = &sVoiceStates[voiceId];
     voiceState->timeRemaining = 0.0f;
     voiceState->flags &= ~AUDIO_VOICE_FLAG_PAUSED;
 
-    alSndpSetSound(&sSoundPlayer, soundId);
+    alSndpSetSound(&sSoundPlayer, voiceId);
     alSndpStop(&sSoundPlayer);
 }
 
-void audioFreeSound(SoundId soundId) {
-    alSndpDeallocate(&sSoundPlayer, soundId);
+void audioReleaseVoice(VoiceId voiceId) {
+    alSndpDeallocate(&sSoundPlayer, voiceId);
 }

@@ -6,6 +6,7 @@
 
 #define MAX_SKIPPABLE_SOUNDS    18
 #define MAX_ACTIVE_SOUNDS       24
+#define SOUND_ID_NONE           -1
 
 enum SoundType {
     SoundTypeNone,
@@ -14,6 +15,8 @@ enum SoundType {
     SoundTypeAmbience,
     SoundTypeAll,
 };
+
+typedef int16_t SoundId;
 
 void* soundPlayerInit(void* memoryEnd);
 void soundPlayerUpdate();
