@@ -710,7 +710,6 @@ void sceneUpdate(struct Scene* scene) {
 
         if (gGameMenu.state == GameMenuStateQuit) {
             levelQueueLoad(MAIN_MENU, NULL, NULL, 0);
-            return;
         }
 
         return;
@@ -720,6 +719,8 @@ void sceneUpdate(struct Scene* scene) {
         gGameMenu.landingMenu.selectedItem = 0;
         soundPlayerPause();
         rumblePakClipSetPaused(1);
+
+        return;
     }
 
     effectsUpdate(&scene->effects);
