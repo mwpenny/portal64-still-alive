@@ -367,7 +367,7 @@ void soundPlayerFadeOutsideRadius(float volumePercent, struct Vector3* origin, f
         sound->volumePercent *= volumePercent;
 
         if (persistent) {
-            sound->originalVolume *= sound->volumePercent;
+            sound->originalVolume *= volumePercent;
         }
     }
 }
