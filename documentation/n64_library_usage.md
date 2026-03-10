@@ -2,8 +2,8 @@
 
 Portal 64 was originally written using Nintendo's proprietary libraries and
 tools. This material is not included in this repository, but ROMs built with it
-will necessarily contain Nintendo code. This is the reason Portal64: Still Alive
-currently does not distribute compiled ROMs in any form.
+will necessarily contain Nintendo code. This is the reason Portal 64: Still
+Alive currently does not distribute compiled ROMs in any form.
 
 One major goal of this fork is to remove the requirement on proprietary code.
 The most mature open-source option is [libdragon](https://github.com/DragonMinded/libdragon).

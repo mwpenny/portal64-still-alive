@@ -285,7 +285,7 @@ static void audioThread(void* arg) {
     // It takes time to execute the audio thread and queue sample buffers to be
     // output, so generate some extra samples to cover it.
     //
-    // The minimum sample count ensures no gaps between frames. It is less then
+    // The minimum sample count ensures no gaps between frames. It is less than
     // one frame so accumulated samples can be gradually drained.
     int fps = (osTvType == OS_TV_PAL) ? 50 : 60;
     int frameSampleCount = ALIGN_16((int)ceilf(AUDIO_OUTPUT_HZ / (float)fps));

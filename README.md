@@ -1,4 +1,4 @@
-# Portal64: Still Alive
+# Portal 64: Still Alive
 
 A demake *(remake for an older platform)* of Portal for the Nintendo 64.
 Originally created by [James Lambert](https://github.com/lambertjamesd).
