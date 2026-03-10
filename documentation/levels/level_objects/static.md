@@ -53,4 +53,8 @@ placing a coplanar static collision object or through animation with a
 A mesh's UV coordinates are only used if its material does not have the
 `tileSizeS` and `tileSizeT` properties in its YAML definition. Otherwise, the
 `uvtransx`/`uvtransy`/`uvtransz`, `uvrotx`/`uvroty`/`uvrotz`, and `uvscale`
-arguments can be specified to manipulate UV maps.
+arguments can be specified to manipulate UV maps. The
+[tools/blender/auto_uv.py](../../../tools/blender/auto_uv.py) Blender script can
+be used to generate matching UV maps to visualize how such materials will look
+in the game. After running once, it can be re-run directly or from
+`View > Generate UVs`.

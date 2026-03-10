@@ -1,6 +1,4 @@
 import bpy
-import sys
-import operator
 import math
 import mathutils
 
@@ -14,70 +12,8 @@ def get_tile_sizes(obj):
     mat = obj.material_slots[0].material
     return float(mat['tileSizeS']), float(mat['tileSizeT'])
 
-def vector_add(a, b):
-    return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
-
-def vector_sub(a, b):
-    return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
-
-def vector_min(a, b):
-    return [min(a[0], b[0]), min(a[1], b[1]), min(a[2], b[2])]
-
-def vector_max(a, b):
-    return [max(a[0], b[0]), max(a[1], b[1]), max(a[2], b[2])]
-
-def vector_mul(a, b):
-    if isinstance(a, float):
-        return [x * a for x in b]
-    
-    if isinstance(b, float):
-        return [x * b for x in a]
-
-    return [a[0] * b[0], a[1] * b[1], a[2] * b[2]]
-
-def vector_div(a, b):
-    if isinstance(a, float):
-        return [a / x for x in b]
-    
-    if isinstance(b, float):
-        return [x / b for x in a]
-
-    return [a[0] / b[0], a[1] / b[1], a[2] / b[2]]
-
 def vector_dot(a, b):
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
-
-def vector_lerp(a, b, t):
-    if isinstance(t, float):
-        t_inv = 1 - t
-    else:
-        t_inv = vector_sub([1, 1, 1], t)
-
-    t_inv = 1 - t
-    return vector_add(vector_mul(a, t_inv), vector_mul(b, t))
-
-def vector_unlerp(a, b, pos):
-    return vector_div(vector_sub(pos, a), vector_sub(b, a))
-    
-
-def color_lerp(a, b, t):
-    t_inv = 1 - t
-
-    return [
-        a[0] * t_inv + b[0] * t,
-        a[1] * t_inv + b[1] * t,
-        a[2] * t_inv + b[2] * t,
-        a[3] * t_inv + b[3] * t
-    ]
-
-
-def calc_midpoint(vertices):
-    result = [0, 0, 0]
-
-    for vertex in vertices:
-        result = vector_add(result, vertex)
-
-    return vector_mul(result, 1 / len(vertices))
 
 def world_space_verts(obj):
     if obj.type != 'MESH':
@@ -92,11 +28,6 @@ def world_space_verts(obj):
 
     return vertices
 
-class BoundingBox:
-    def __init__(self, min, max):
-        self.min = min
-        self.max = max
-
 def parse_args(obj_name):
     return obj_name.split(' ')
 
@@ -110,6 +41,10 @@ def find_named_arg(args, name):
             return arg
 
     return None
+
+def find_number_arg(args, name, default):
+    value = find_named_arg(args, name)
+    return float(value) if value else default
 
 def is_coplanar(a, b):
     return vector_dot(a.normal, b.normal) > 0.9
@@ -173,10 +108,16 @@ def get_polygon_groups(mesh):
 
     return polygon_groups
 
-def auto_uv_group(obj, world_verts, group, uv_scale):
+def auto_uv_group(obj, world_verts, group, uv_scale, translation):
     normal = mathutils.Vector([0, 0, 0])
 
-    matrix_rotate = obj.matrix_world.to_3x3()
+    # Blender uses up=Z, Skeletool uses up=Y
+    flip_y_z = mathutils.Matrix([
+        [1, 0, 0],
+        [0, 0, 1],
+        [0, -1, 0],
+    ])
+    matrix_rotate = obj.matrix_world.to_3x3() @ flip_y_z
 
     for polygon in group:
         normal = normal + polygon.normal
@@ -190,21 +131,23 @@ def auto_uv_group(obj, world_verts, group, uv_scale):
     max_left = -min_left
     max_up = -min_up
 
-    if abs(normal.z) > 0.7:
+    if abs(normal.y) > 0.7:
+        up = mathutils.Vector([0, 0, 1])
+        left = mathutils.Vector([1, 0, 0])
+    elif abs(normal.z) > 0.7:
         up = mathutils.Vector([0, 1, 0])
         left = mathutils.Vector([1, 0, 0])
-    elif abs(normal.y) > 0.7:
-        up = mathutils.Vector([0, 0, 1])
-        left = mathutils.Vector([1, 0, 0])
     else:
-        up = mathutils.Vector([0, 0, 1])
-        left = mathutils.Vector([0, 1, 0])
+        up = mathutils.Vector([0, 1, 0])
+        left = mathutils.Vector([0, 0, 1])
+
+    translation = matrix_rotate @ translation
 
     for polygon in group:
         for loop_index in polygon.loop_indices:
             loop = obj.data.loops[loop_index]
 
-            vertex = world_verts[loop.vertex_index]
+            vertex = matrix_rotate @ world_verts[loop.vertex_index]
 
             left_dot = vertex @ left
             up_dot = vertex @ up
@@ -232,7 +175,7 @@ def auto_uv_group(obj, world_verts, group, uv_scale):
         for loop_index in polygon.loop_indices:
             loop = obj.data.loops[loop_index]
 
-            vertex = world_verts[loop.vertex_index]
+            vertex = (matrix_rotate @ world_verts[loop.vertex_index]) + translation
 
             s_coord = vertex @ left - min_left
             t_coord = vertex @ up - min_up
@@ -244,21 +187,46 @@ def auto_uv_group(obj, world_verts, group, uv_scale):
 
 def auto_uv(obj):
     args = parse_args(obj.name)
-    uv_scale = find_named_arg(args, "uvscale")
-
-    if uv_scale:
-        uv_scale = float(uv_scale)
-    else:
-        uv_scale = 1.0
+    uv_scale = find_number_arg(args, "uvscale", 1)
+    translation = mathutils.Vector([
+        find_number_arg(args, "uvtransx", 0),
+        find_number_arg(args, "uvtransy", 0),
+        find_number_arg(args, "uvtransz", 0)
+    ])
 
     polygon_groups = get_polygon_groups(obj.data)
 
     world_verts = world_space_verts(obj)
 
     for group in polygon_groups:
-        auto_uv_group(obj, world_verts, group, uv_scale)
+        auto_uv_group(obj, world_verts, group, uv_scale, translation)
+
+def auto_uv_all():
+    for obj in bpy.data.objects:
+        if should_auto_uv_object(obj):
+            auto_uv(obj)
 
 
-for obj in bpy.data.objects:
-    if should_auto_uv_object(obj):
-        auto_uv(obj)
+class AutoUV(bpy.types.Operator):
+    bl_idname = "wm.auto_uv"
+    bl_label = "Generate UVs"
+
+    def execute(self, context):
+        auto_uv_all()
+        self.report({'INFO'}, "UVs generated!")
+
+        return {'FINISHED'}
+
+    @classmethod
+    def create(cls):
+        registered_before = hasattr(bpy.types, bpy.ops.wm.auto_uv.idname())
+        bpy.utils.register_class(cls)
+
+        if not registered_before:
+            menu_func = lambda self, context: self.layout.operator(cls.bl_idname, text=cls.bl_label)
+            bpy.types.VIEW3D_MT_view.append(menu_func)
+
+AutoUV.create()
+
+# Test call the operator
+bpy.ops.wm.auto_uv()

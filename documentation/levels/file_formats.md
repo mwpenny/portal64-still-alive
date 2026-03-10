@@ -55,7 +55,6 @@ apply them and also get a reasonable visual approximation while editing.
 
 ## TODO
 
-* Blender scripts
 * Skeletool
 * Exporter scripts
 * Material YAML file structure (ideally after library-independent abstraction is done)
