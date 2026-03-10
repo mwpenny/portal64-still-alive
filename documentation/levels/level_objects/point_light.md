@@ -15,7 +15,8 @@ A point in space which allows omnidirectional light to be calculated for
 Point light sources are not used at runtime. Rather, they are used by the
 [tools/blender/bake_lighting.py](../../../tools/blender/bake_lighting.py)
 Blender script to precompute vertex colors for static geometry. This script
-must be run manually in Blender prior to exporting a level.
+must be run manually in Blender prior to exporting a level. After running once,
+it can be re-run directly or from `View > Vertex Bake Lighting`.
 
 Each point light must be defined as a
 [light object](https://docs.blender.org/manual/en/latest/render/lights/light_object.html#)

@@ -1,12 +1,6 @@
 import bpy
-import sys
-import operator
 import math
 import mathutils
-
-debug = False
-
-print("Blender export scene in FBX Format in file "+sys.argv[-1])
 
 def should_bake_material(mat):
     return 'bakeType' in mat and mat['bakeType'] == 'lit'
@@ -38,7 +32,7 @@ def vector_max(a, b):
 def vector_mul(a, b):
     if isinstance(a, float):
         return [x * a for x in b]
-    
+
     if isinstance(b, float):
         return [x * b for x in a]
 
@@ -47,7 +41,7 @@ def vector_mul(a, b):
 def vector_div(a, b):
     if isinstance(a, float):
         return [a / x for x in b]
-    
+
     if isinstance(b, float):
         return [x / b for x in a]
 
@@ -56,18 +50,8 @@ def vector_div(a, b):
 def vector_dot(a, b):
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 
-def vector_lerp(a, b, t):
-    if isinstance(t, float):
-        t_inv = 1 - t
-    else:
-        t_inv = vector_sub([1, 1, 1], t)
-
-    t_inv = 1 - t
-    return vector_add(vector_mul(a, t_inv), vector_mul(b, t))
-
 def vector_unlerp(a, b, pos):
     return vector_div(vector_sub(pos, a), vector_sub(b, a))
-    
 
 def color_lerp(a, b, t):
     t_inv = 1 - t
@@ -77,7 +61,6 @@ def color_lerp(a, b, t):
         a[1] * t_inv + b[1] * t,
         a[2] * t_inv + b[2] * t
     ])
-
 
 def calc_midpoint(vertices):
     result = [0, 0, 0]
@@ -215,7 +198,7 @@ def build_ambient_blocks():
 
 def min_indices(elements, count):
     result = []
-    
+
     for index in range(len(elements)):
         insert_index = len(result)
 
@@ -262,7 +245,6 @@ def bake_object(obj, ambient_blocks):
         obj.select_set(True)
         bpy.ops.object.make_single_user(obdata = True)
 
-    global debug
     color_layer = get_or_make_color_layer(obj.data)
 
     vertices, normals = world_space_verts(obj)
@@ -273,7 +255,7 @@ def bake_object(obj, ambient_blocks):
         for loop_index in polygon.loop_indices:
             loop = obj.data.loops[loop_index]
             vertex_index = loop.vertex_index
-            
+
             if polygon.use_smooth:
                 normal = normals[vertex_index]
             else:
@@ -286,8 +268,8 @@ def bake_object(obj, ambient_blocks):
             )
 
             color_layer.data[loop.index].color = [
-                min(vertex_color[0], 1), 
-                min(vertex_color[1], 1), 
+                min(vertex_color[0], 1),
+                min(vertex_color[1], 1),
                 min(vertex_color[2], 1),
                 1
             ]
@@ -301,9 +283,6 @@ def bake_scene():
         if should_bake_object(obj):
             bake_object(obj, ambient_blocks)
 
-
-bake_scene()
-
 class VertexBake(bpy.types.Operator):
     bl_idname = "wm.vertex_bake"
     bl_label = "Vertex Bake Lighting"
@@ -314,11 +293,16 @@ class VertexBake(bpy.types.Operator):
 
         return {'FINISHED'}
 
-def vertex_bake_func(self, context):
-    self.layout.operator(VertexBake.bl_idname, text="Vertex Bake Lighting")
+    @classmethod
+    def create(cls):
+        registered_before = hasattr(bpy.types, bpy.ops.wm.vertex_bake.idname())
+        bpy.utils.register_class(cls)
 
-bpy.utils.register_class(VertexBake)
-bpy.types.VIEW3D_MT_view.append(vertex_bake_func)
+        if not registered_before:
+            menu_func = lambda self, context: self.layout.operator(cls.bl_idname, text=cls.bl_label)
+            bpy.types.VIEW3D_MT_view.append(menu_func)
 
-# test call the operator
+VertexBake.create()
+
+# Test call the operator
 bpy.ops.wm.vertex_bake()
