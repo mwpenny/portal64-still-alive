@@ -141,8 +141,6 @@ def auto_uv_group(obj, world_verts, group, uv_scale, translation):
         up = mathutils.Vector([0, 1, 0])
         left = mathutils.Vector([0, 0, 1])
 
-    translation = matrix_rotate @ translation
-
     for polygon in group:
         for loop_index in polygon.loop_indices:
             loop = obj.data.loops[loop_index]
