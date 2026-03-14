@@ -108,7 +108,7 @@ def get_polygon_groups(mesh):
 
     return polygon_groups
 
-def auto_uv_group(obj, world_verts, group, uv_scale, translation):
+def auto_uv_group(obj, world_verts, group, uv_scale, rotation, translation):
     normal = mathutils.Vector([0, 0, 0])
 
     # Blender uses up=Z, Skeletool uses up=Y
@@ -117,7 +117,7 @@ def auto_uv_group(obj, world_verts, group, uv_scale, translation):
         [0, 0, 1],
         [0, -1, 0],
     ])
-    matrix_rotate = obj.matrix_world.to_3x3() @ flip_y_z
+    matrix_rotate = obj.matrix_world.to_3x3() @ rotation @ flip_y_z
 
     for polygon in group:
         normal = normal + polygon.normal
@@ -186,6 +186,11 @@ def auto_uv_group(obj, world_verts, group, uv_scale, translation):
 def auto_uv(obj):
     args = parse_args(obj.name)
     uv_scale = find_number_arg(args, "uvscale", 1)
+    rotation = (
+        mathutils.Quaternion((1, 0, 0), math.radians(find_number_arg(args, "uvrotx", 0))) @ \
+        mathutils.Quaternion((0, 1, 0), math.radians(find_number_arg(args, "uvroty", 0))) @ \
+        mathutils.Quaternion((0, 0, 1), math.radians(find_number_arg(args, "uvrotz", 0)))
+    ).to_matrix()
     translation = mathutils.Vector([
         find_number_arg(args, "uvtransx", 0),
         find_number_arg(args, "uvtransy", 0),
@@ -197,7 +202,7 @@ def auto_uv(obj):
     world_verts = world_space_verts(obj)
 
     for group in polygon_groups:
-        auto_uv_group(obj, world_verts, group, uv_scale, translation)
+        auto_uv_group(obj, world_verts, group, uv_scale, rotation, translation)
 
 def auto_uv_all():
     for obj in bpy.data.objects:
