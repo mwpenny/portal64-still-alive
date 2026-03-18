@@ -93,6 +93,8 @@ set(TEXTURES
     signage/signage_overlay_boxdispenser
     signage/signage_overlay_boxhurt
     signage/signage_overlay_catcher
+    signage/signage_overlay_companioncube
+    signage/signage_overlay_companioncube_broken
     signage/signage_overlay_dots1
     signage/signage_overlay_dots2
     signage/signage_overlay_dots3
@@ -101,6 +103,7 @@ set(TEXTURES
     signage/signage_overlay_fling1
     signage/signage_overlay_fling2
     signage/signage_overlay_fountain
+    signage/signage_overlay_incinerator
     signage/signage_overlay_midair1
     signage/signage_overlay_midair2
     signage/signage_overlay_toxic
@@ -413,6 +416,9 @@ set_property(SOURCE signage/signage_overlay_fling1.ims
 )
 set_property(SOURCE signage/signage_overlay_midair1.ims
     PROPERTY ADDITIONAL_DEPS
+        signage/signage_overlay_companioncube
+        signage/signage_overlay_companioncube_broken
+        signage/signage_overlay_incinerator
         signage/signage_overlay_midair2
         signage/signage_overlay_turret
 )

@@ -221,6 +221,7 @@ static short gLevelWarnings[] = {
     LevelWarningsCubeHit | LevelWarningsBallHit | LevelWarningsBallCollect | LevelWarningsLiquid | LevelWarningsDrinking | LevelWarningsSpeedyIn | LevelWarningsSpeedyOut,
     LevelWarningsBallHit | LevelWarningsBallCollect | LevelWarningsLiquid | LevelWarningsSpeedyIn | LevelWarningsSpeedyOut | LevelWarningsDrinking,
     LevelWarningsCubeDispense | LevelWarningsCubeHit | LevelWarningsTurret,
+    LevelWarningsCubeDispense | LevelWarningsCubeHit | LevelWarningsBallHit | LevelWarningsBallCollect,
 };
 
 static void signageSetWarnings(int warningMask, struct SignStateFrame signState) {

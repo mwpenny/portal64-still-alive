@@ -2,7 +2,9 @@
 -resize 32x32 -repage +0+0
 \( portal_pak_dir/materials/signage/signage_overlay_midair2.png -alpha off -resize 32x32 -repage +32+0 \)
 \( portal_pak_dir/materials/signage/signage_overlay_turret.png -alpha off -resize 32x32 -repage +0+32 \)
-\( portal_pak_dir/materials/signage/signage_overlay_turret.png -alpha off -resize 32x32 -repage +32+32 \)
+\( portal_pak_dir/materials/signage/signage_overlay_companioncube.png -alpha off -resize 32x32 -repage +32+32 \)
+\( portal_pak_dir/materials/signage/signage_overlay_companioncube_broken.png -alpha off -resize 32x32 -repage +0+64 \)
+\( portal_pak_dir/materials/signage/signage_overlay_incinerator.png -alpha off -resize 32x32 -repage +32+64 \)
 
 -compose Copy
 -layers merge
