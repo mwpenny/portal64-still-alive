@@ -96,7 +96,7 @@ struct Scene {
     u8 isZoomedIn;
     float zoomTimer;
 
-    u8 showPerformanceMetrics;
+    u8 showDebugMetrics;
     u8 showCollisionContacts;
     u8 hideCurrentRoom;
 };

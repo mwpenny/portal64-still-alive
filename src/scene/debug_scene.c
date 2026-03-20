@@ -115,7 +115,7 @@ static float debugSceneAveragedTimeMs(Time value, float* prevValue) {
     return averaged;
 }
 
-static void debugSceneRenderPerformanceMetrics(struct Scene* scene, struct RenderState* renderState, struct RenderPlan* renderPlan) {
+static void debugSceneRenderMetrics(struct Scene* scene, struct RenderState* renderState, struct RenderPlan* renderPlan) {
     if (!gLastFrameTime) {
         return;
     }
@@ -214,7 +214,7 @@ static void debugSceneRenderPerformanceMetrics(struct Scene* scene, struct Rende
 
 void debugSceneInit(struct Scene* scene) {
     scene->freeCameraOffset = gZeroVec;
-    scene->showPerformanceMetrics = 0;
+    scene->showDebugMetrics = 0;
     scene->showCollisionContacts = 0;
     scene->hideCurrentRoom = 0;
 }
@@ -235,7 +235,7 @@ void debugSceneUpdate(struct Scene* scene) {
     }
 
     if (controllerGetButtonsDown(2, ControllerButtonLeft)) {
-        scene->showPerformanceMetrics ^= 1;
+        scene->showDebugMetrics ^= 1;
     }
 
     if (controllerGetButtonsDown(2, ControllerButtonRight)) {
@@ -244,7 +244,7 @@ void debugSceneUpdate(struct Scene* scene) {
 }
 
 void debugSceneRender(struct Scene* scene, struct RenderState* renderState, struct RenderPlan* renderPlan) {
-    if (scene->showPerformanceMetrics) {
-        debugSceneRenderPerformanceMetrics(scene, renderState, renderPlan);
+    if (scene->showDebugMetrics) {
+        debugSceneRenderMetrics(scene, renderState, renderPlan);
     }
 }
