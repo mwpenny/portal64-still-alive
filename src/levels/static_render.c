@@ -114,7 +114,7 @@ void staticRenderPopulateRooms(struct FrustumCullingInformation* cullingInfo, Mt
     }
 }
 
-#define FORCE_RENDER_DOORWAY_DISTANCE   0.1f
+#define FORCE_RENDER_DOORWAY_DISTANCE   0.125f
 
 void staticRenderDetermineVisibleRooms(struct RenderProps* renderStage, struct FrustumCullingInformation* cullingInfo, u16 currentRoom, u64 nonVisibleRooms, u64* coveredDoorways) {
     if (currentRoom == RIGID_BODY_NO_ROOM) {
@@ -144,7 +144,9 @@ void staticRenderDetermineVisibleRooms(struct RenderProps* renderStage, struct F
         float doorwayDistance = planePointDistance(&doorway->quad.plane, &cullingInfo->cameraPos);
 
         if (
-            // if the player is close enough to the doorway it should still render it, even if facing the wrong way
+            // Render the doorway when near, even if not in frustum
+            // * Avoids false rejections due to accumulated error in camera matrix calculations
+            // * Allows seeing geometry around doorway if standing in it facing the wrong way
             (fabsf(doorwayDistance) > FORCE_RENDER_DOORWAY_DISTANCE || collisionQuadDetermineEdges(&cullingInfo->cameraPos, &doorway->quad)) && 
             (isQuadOutsideFrustum(cullingInfo, &doorway->quad) || (cullingInfo != rootCullingInfo && isQuadOutsideFrustum(rootCullingInfo, &doorway->quad)))
          ) {
