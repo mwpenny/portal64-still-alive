@@ -300,6 +300,7 @@ struct SignageDefinition {
 enum BoxDropperCubeType {
     BoxDropperCubeTypeNone,
     BoxDropperCubeTypeStandard,
+    BoxDropperCubeTypeCompanion,
 };
 
 struct BoxDropperDefinition {

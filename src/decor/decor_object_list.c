@@ -8,74 +8,74 @@
 #include "codegen/assets/models/dynamic_model_list.h"
 #include "codegen/assets/models/props/light_rail_endcap.h"
 
-struct Vector2 gCylinderColliderEdgeVectors[] = {
+static struct Vector2 sCylinderColliderEdgeVectors[] = {
     {0.0f, 1.0f},
     {0.707f, 0.707f},
     {1.0f, 0.0f},
     {0.707f, -0.707f},
 };
 
-struct CollisionQuad gCylinderColliderFaces[8];
-struct CollisionCylinder gCylinderCollider = {
+static struct CollisionQuad sCylinderColliderFaces[8];
+static struct CollisionCylinder sCylinderCollider = {
     0.3f,
     0.35f,
-    gCylinderColliderEdgeVectors,
-    sizeof(gCylinderColliderEdgeVectors) / sizeof(*gCylinderColliderEdgeVectors),
-    gCylinderColliderFaces,
+    sCylinderColliderEdgeVectors,
+    sizeof(sCylinderColliderEdgeVectors) / sizeof(*sCylinderColliderEdgeVectors),
+    sCylinderColliderFaces,
 };
 
-struct CollisionBox gRadioCollider = {
+static struct CollisionBox sRadioCollider = {
     {0.23351f, 0.20597f, 0.154298f},
 };
 
-struct CollisionBox gCubeCollisionBox = {
+static struct CollisionBox sCubeCollider = {
     {0.3165f, 0.3165f, 0.3165f}
 };
 
-struct CollisionQuad gFoodCanColliderFaces[8];
-struct CollisionCylinder gFoodCanCollider = {
+static struct CollisionQuad sFoodCanColliderFaces[8];
+static struct CollisionCylinder sFoodCanCollider = {
     0.11f,
     0.125f,
-    gCylinderColliderEdgeVectors,
-    sizeof(gCylinderColliderEdgeVectors) / sizeof(*gCylinderColliderEdgeVectors),
-    gFoodCanColliderFaces,
+    sCylinderColliderEdgeVectors,
+    sizeof(sCylinderColliderEdgeVectors) / sizeof(*sCylinderColliderEdgeVectors),
+    sFoodCanColliderFaces,
 };
 
-struct CollisionQuad gWaterBottleColliderFaces[8];
-struct CollisionCylinder gWaterBottleCollider = {
+static struct CollisionQuad sWaterBottleColliderFaces[8];
+static struct CollisionCylinder sWaterBottleCollider = {
     0.24f,
     0.25f,
-    gCylinderColliderEdgeVectors,
-    sizeof(gCylinderColliderEdgeVectors) / sizeof(*gCylinderColliderEdgeVectors),
-    gWaterBottleColliderFaces,
+    sCylinderColliderEdgeVectors,
+    sizeof(sCylinderColliderEdgeVectors) / sizeof(*sCylinderColliderEdgeVectors),
+    sWaterBottleColliderFaces,
 };
 
-struct CollisionBox gSaucepanCollisionBox = {
+static struct CollisionBox sSaucepanCollider = {
     {0.15f, 0.15f, 0.1f}
 };
 
-struct CollisionQuad gBucketColliderFaces[8];
-struct CollisionCylinder gBucketCollider = {
+static struct CollisionQuad sBucketColliderFaces[8];
+static struct CollisionCylinder sBucketCollider = {
     0.2f,
     0.2f,
-    gCylinderColliderEdgeVectors,
-    sizeof(gCylinderColliderEdgeVectors) / sizeof(*gCylinderColliderEdgeVectors),
-    gBucketColliderFaces,
+    sCylinderColliderEdgeVectors,
+    sizeof(sCylinderColliderEdgeVectors) / sizeof(*sCylinderColliderEdgeVectors),
+    sBucketColliderFaces,
 };
 
-struct CollisionBox gMilkCartonCollisionBox = {
+static struct CollisionBox sMilkCartonCollider = {
     {0.125f, 0.125f, 0.2f}
 };
 
-struct CollisionBox gPCCaseCollisionBox = {
+static struct CollisionBox sPCCaseCollider = {
     {0.25f, 0.25f, 0.15f}
 };
 
-struct DecorObjectDefinition gDecorObjectDefinitions[] = {
+static struct DecorObjectDefinition sDecorObjectDefinitions[] = {
     [DECOR_TYPE_CYLINDER] = {
         {
             CollisionShapeTypeCylinder,
-            &gCylinderCollider,
+            &sCylinderCollider,
             0.0f,
             0.6f,
             &gCollisionCylinderCallbacks,
@@ -90,7 +90,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
     [DECOR_TYPE_RADIO] = {
         {
             CollisionShapeTypeBox,
-            &gRadioCollider,
+            &sRadioCollider,
             0.0f,
             0.6f,
             &gCollisionBoxCallbacks,
@@ -106,7 +106,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
     [DECOR_TYPE_CUBE] = {
         {
             CollisionShapeTypeBox,
-            &gCubeCollisionBox,
+            &sCubeCollider,
             0.0f,
             0.5f,
             &gCollisionBoxCallbacks,  
@@ -123,7 +123,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
     [DECOR_TYPE_CUBE_UNIMPORTANT] = {
         {
             CollisionShapeTypeBox,
-            &gCubeCollisionBox,
+            &sCubeCollider,
             0.0f,
             0.5f,
             &gCollisionBoxCallbacks,  
@@ -133,6 +133,22 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
         CUBE_CUBE_DYNAMIC_MODEL,
         .materialIndex = CUBE_INDEX,
         .materialIndexFizzled = CUBE_FIZZLED_INDEX,
+        .soundClipId = -1,
+        .soundFizzleId = -1,
+    },
+    [DECOR_TYPE_COMPANION_CUBE] = {
+        {
+            CollisionShapeTypeBox,
+            &sCubeCollider,
+            0.0f,
+            0.5f,
+            &gCollisionBoxCallbacks,
+        },
+        2.5f,
+        0.55f,
+        CUBE_CUBE_DYNAMIC_MODEL,
+        .materialIndex = COMPANION_CUBE_INDEX,
+        .materialIndexFizzled = COMPANION_CUBE_FIZZLED_INDEX,
         .soundClipId = -1,
         .soundFizzleId = -1,
     },
@@ -274,7 +290,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
     [DECOR_TYPE_FOOD_CAN] = {
         {
             CollisionShapeTypeCylinder,
-            &gFoodCanCollider,
+            &sFoodCanCollider,
             0.0f,
             0.4f,
             &gCollisionCylinderCallbacks,
@@ -290,7 +306,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
     [DECOR_TYPE_WATER_BOTTLE] = {
         {
             CollisionShapeTypeCylinder,
-            &gWaterBottleCollider,
+            &sWaterBottleCollider,
             0.0f,
             0.75f,
             &gCollisionCylinderCallbacks,
@@ -306,7 +322,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
     [DECOR_TYPE_SAUCEPAN] = {
         {
             CollisionShapeTypeBox,
-            &gSaucepanCollisionBox,
+            &sSaucepanCollider,
             0.0f,
             0.5f,
             &gCollisionBoxCallbacks,
@@ -322,7 +338,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
     [DECOR_TYPE_METALBUCKET01A] = {
         {
             CollisionShapeTypeCylinder,
-            &gBucketCollider,
+            &sBucketCollider,
             0.0f,
             0.75f,
             &gCollisionCylinderCallbacks,
@@ -338,7 +354,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
     [DECOR_TYPE_MILK_CARTON] = {
         {
             CollisionShapeTypeBox,
-            &gMilkCartonCollisionBox,
+            &sMilkCartonCollider,
             0.0f,
             0.4f,
             &gCollisionBoxCallbacks,
@@ -354,7 +370,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
     [DECOR_TYPE_MILK_CARTON_OPEN] = {
         {
             CollisionShapeTypeBox,
-            &gMilkCartonCollisionBox,
+            &sMilkCartonCollider,
             0.0f,
             0.4f,
             &gCollisionBoxCallbacks,
@@ -370,7 +386,7 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
     [DECOR_TYPE_PC_CASE_OPEN] = {
         {
             CollisionShapeTypeBox,
-            &gPCCaseCollisionBox,
+            &sPCCaseCollider,
             0.0f,
             0.5f,
             &gCollisionBoxCallbacks,
@@ -386,17 +402,17 @@ struct DecorObjectDefinition gDecorObjectDefinitions[] = {
 };
 
 struct DecorObjectDefinition* decorObjectDefinitionForId(int id) {
-    if (id < 0 || id >= sizeof(gDecorObjectDefinitions) / sizeof(*gDecorObjectDefinitions)) {
+    if (id < 0 || id >= sizeof(sDecorObjectDefinitions) / sizeof(*sDecorObjectDefinitions)) {
         return NULL;
     }
 
-    return &gDecorObjectDefinitions[id];
+    return &sDecorObjectDefinitions[id];
 }
 
 int decorIdForObjectDefinition(struct DecorObjectDefinition* def) {
-    int result = def - gDecorObjectDefinitions;
+    int result = def - sDecorObjectDefinitions;
 
-    if (result < 0 || result >= sizeof(gDecorObjectDefinitions) / sizeof(*gDecorObjectDefinitions)) {
+    if (result < 0 || result >= sizeof(sDecorObjectDefinitions) / sizeof(*sDecorObjectDefinitions)) {
         return -1;
     }
 

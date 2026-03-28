@@ -20,6 +20,7 @@ A spawner for cube [decor](./decor.md) objects.
 The possible values for `CUBE_TYPE` are:
 * `None`: The dropper will contain no cubes and only open/close
 * `Standard`: The dropper will dispense standard cubes
+* `Companion`: The dropper will dispense companion cubes
 
 When its [signal](../signals.md) transitions from unset to set, the dropper
 will open. If it previously spawned a cube that exists, the cube will be

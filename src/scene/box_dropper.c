@@ -14,13 +14,19 @@
 #include "codegen/assets/models/dynamic_animated_model_list.h"
 #include "codegen/assets/models/props/box_dropper.h"
 
-#define DROPPER_RELOAD_TIME     2.0f
-#define DROPPER_DROP_TIME       0.5f
+#define DROPPER_PENDING_CUBE_OFFSET 0.4f;
+#define DROPPER_RELOAD_TIME         2.0f
+#define DROPPER_DROP_TIME           0.5f
 
-void boxDropperFakePos(struct BoxDropper* dropper, struct Transform* result) {
+static int sCubeTypeToDecorId[] = {
+    [BoxDropperCubeTypeStandard] = DECOR_TYPE_CUBE_UNIMPORTANT,
+    [BoxDropperCubeTypeCompanion] = DECOR_TYPE_COMPANION_CUBE
+};
+
+static void boxDropperPendingCubeTransform(struct BoxDropper* dropper, struct Transform* result) {
     *result = dropper->transform;
 
-    result->position.y += 0.4f;
+    result->position.y += DROPPER_PENDING_CUBE_OFFSET;
 
     if (dropper->reloadTimer) {
         float timeSinceDrop = (DROPPER_DROP_TIME - dropper->reloadTimer);
@@ -29,7 +35,7 @@ void boxDropperFakePos(struct BoxDropper* dropper, struct Transform* result) {
     }
 }
 
-void boxDropperRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
+static void boxDropperRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct BoxDropper* dropper = (struct BoxDropper*)data;
 
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
@@ -66,23 +72,23 @@ void boxDropperRender(void* data, struct DynamicRenderDataList* renderList, stru
         NULL
     );
 
-    if (dropper->reloadTimer < DROPPER_DROP_TIME && dropper->cubeType != BoxDropperCubeTypeNone) {
-        struct Transform pendingCubePos;
-        boxDropperFakePos(dropper, &pendingCubePos);
+    if (dropper->reloadTimer < DROPPER_DROP_TIME && dropper->cubeDef) {
+        struct Transform pendingCubeTransform;
+        boxDropperPendingCubeTransform(dropper, &pendingCubeTransform);
 
-        Mtx* pendingBoxMatrix = renderStateRequestMatrices(renderState, 1);
+        Mtx* pendingCubeMatrix = renderStateRequestMatrices(renderState, 1);
 
-        if (!pendingBoxMatrix) {
+        if (!pendingCubeMatrix) {
             return;
         }
 
-        transformToMatrixL(&pendingCubePos, pendingBoxMatrix, SCENE_SCALE);
+        transformToMatrixL(&pendingCubeTransform, pendingCubeMatrix, SCENE_SCALE);
 
         dynamicRenderListAddData(
-            renderList, 
-            dynamicAssetModel(CUBE_CUBE_DYNAMIC_MODEL), 
-            pendingBoxMatrix, 
-            CUBE_INDEX, 
+            renderList,
+            dynamicAssetModel(dropper->cubeDef->dynamicModelIndex),
+            pendingCubeMatrix,
+            dropper->cubeDef->materialIndex,
             &dropper->transform.position, 
             NULL
         );  
@@ -102,16 +108,23 @@ void boxDropperInit(struct BoxDropper* dropper, struct BoxDropperDefinition* def
     dropper->signalIndex = definition->signalIndex;
 
     skArmatureInit(&dropper->armature, armature->armature);
-
     skAnimatorInit(&dropper->animator, PROPS_BOX_DROPPER_DEFAULT_BONES_COUNT);
 
-    dropper->cubeType = definition->cubeType;
     dropper->flags = 0;
     dropper->reloadTimer = DROPPER_RELOAD_TIME;
 
     dynamicSceneSetRoomFlags(dropper->dynamicId, ROOM_FLAG_FROM_INDEX(dropper->roomIndex));
 
-    dynamicAssetModelPreload(CUBE_CUBE_DYNAMIC_MODEL);
+    if (definition->cubeType != BoxDropperCubeTypeNone) {
+        int cubeDecorId = sCubeTypeToDecorId[definition->cubeType];
+        struct DecorObjectDefinition* cubeDef = decorObjectDefinitionForId(cubeDecorId);
+
+        dynamicAssetModelPreload(cubeDef->dynamicModelIndex);
+        dropper->cubeDef = cubeDef;
+    } else {
+        dropper->cubeDef = NULL;
+    }
+
     dynamicAssetModelPreload(PROPS_BOX_DROPPER_GLASS_DYNAMIC_MODEL);
 }
 
@@ -141,16 +154,16 @@ void boxDropperUpdate(struct BoxDropper* dropper) {
         dropper->flags |= BoxDropperFlagsCubeRequested;
     }
 
-    if (signalIsSet && dropper->cubeType != BoxDropperCubeTypeNone && !(dropper->flags & BoxDropperFlagsCubeIsActive)) {
+    if (signalIsSet && dropper->cubeDef && !(dropper->flags & BoxDropperFlagsCubeIsActive)) {
         dropper->flags |= BoxDropperFlagsCubeRequested;
     }
 
     if (dropper->reloadTimer == 0.0f && ((dropper->flags & (BoxDropperFlagsCubeIsActive | BoxDropperFlagsCubeRequested)) == BoxDropperFlagsCubeRequested)) {
-        if (dropper->cubeType != BoxDropperCubeTypeNone) {
-            struct Transform pendingCubePos;
-            boxDropperFakePos(dropper, &pendingCubePos);
+        if (dropper->cubeDef) {
+            struct Transform pendingCubeTransform;
+            boxDropperPendingCubeTransform(dropper, &pendingCubeTransform);
 
-            decorObjectInit(&dropper->activeCube, decorObjectDefinitionForId(DECOR_TYPE_CUBE_UNIMPORTANT), &pendingCubePos, dropper->roomIndex);
+            decorObjectInit(&dropper->activeCube, dropper->cubeDef, &pendingCubeTransform, dropper->roomIndex);
             dropper->flags |= BoxDropperFlagsCubeIsActive;
 
             // Only show this for non-empty droppers to avoid non-gameplay-critical spam
@@ -164,8 +177,9 @@ void boxDropperUpdate(struct BoxDropper* dropper) {
         dropper->reloadTimer = DROPPER_RELOAD_TIME;
     }
 
-    dropper->flags &= ~BoxDropperFlagsSignalWasSet;
     if (signalIsSet) {
         dropper->flags |= BoxDropperFlagsSignalWasSet;
+    } else {
+        dropper->flags &= ~BoxDropperFlagsSignalWasSet;
     }
 }

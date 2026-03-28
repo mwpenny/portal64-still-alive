@@ -336,7 +336,7 @@ void boxDropperDeserialize(struct Serializer* serializer, struct Scene* scene) {
         short dummyOriginalCubeRoom = 0;
         transformInitIdentity(&dummyOriginalCubePosition);
 
-        decorObjectInit(&dropper->activeCube, decorObjectDefinitionForId(DECOR_TYPE_CUBE_UNIMPORTANT), &dummyOriginalCubePosition, dummyOriginalCubeRoom);
+        decorObjectInit(&dropper->activeCube, dropper->cubeDef, &dummyOriginalCubePosition, dummyOriginalCubeRoom);
 
         rigidBodyDeserialize(serializer, &dropper->activeCube.rigidBody);
         if (dropper->activeCube.rigidBody.flags & RigidBodyFizzled) {

@@ -52,6 +52,7 @@ set(TEXTURES
     models/props/lab_monitor/lab_monitor_screen_text
     models/props/light_rail_endcap
     models/props/metal_box
+    models/props/metal_box_skin001
     models/props/milk_carton/milk_carton
     models/props/pc_case_open/pc_case_open
     models/props/portal_cleanser
