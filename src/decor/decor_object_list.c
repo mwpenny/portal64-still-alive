@@ -422,3 +422,9 @@ int decorIdForObjectDefinition(struct DecorObjectDefinition* def) {
 int decorIdForCollisionObject(struct CollisionObject* collisionObject) {
     return decorIdForObjectDefinition((struct DecorObjectDefinition*)collisionObject->collider);
 }
+
+int decorIdIsCube(int id) {
+    return id == DECOR_TYPE_CUBE ||
+        id == DECOR_TYPE_CUBE_UNIMPORTANT ||
+        id == DECOR_TYPE_COMPANION_CUBE;
+}

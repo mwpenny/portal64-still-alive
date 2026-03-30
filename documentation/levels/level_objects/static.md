@@ -37,6 +37,7 @@ name, which serves as a key to look up their actual data elsewhere
 (see [Level File Formats](../file_formats.md#materials)) and to denote which
 surfaces are portalable. The following material names allow portals to be placed:
 
+* `concrete_bts_modular_wall001b`
 * `concrete_bts_modular_wall001c`
 * `concrete_modular_ceiling001a`
 * `concrete_modular_floor001a`

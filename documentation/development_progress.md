@@ -27,7 +27,7 @@ Progress is tracked below.
 - [x] Chamber 16
     - [x] Turrets
 - [ ] Chamber 17
-    - [ ] Companion Cube
+    - [x] Companion Cube
     - [ ] Incinerator
 - [ ] Chamber 18
 - [ ] Chamber 19

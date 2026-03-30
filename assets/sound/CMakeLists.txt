@@ -256,6 +256,24 @@ set(LOCALIZED_SOUND_SCRIPTS
     vo/aperture_ai/11_part1_entry-2.sox
     vo/aperture_ai/11_part1_entry-3.sox
     vo/aperture_ai/11_part1_success-1.sox
+    vo/aperture_ai/13_part1_end-1.sox
+    vo/aperture_ai/13_part1_end-2.sox
+    vo/aperture_ai/13_part1_end-3.sox
+    vo/aperture_ai/13_part1_endnag-1.sox
+    vo/aperture_ai/13_part1_endnag-2.sox
+    vo/aperture_ai/13_part1_endnag-3.sox
+    vo/aperture_ai/13_part1_endnag-4.sox
+    vo/aperture_ai/13_part1_endnag-5.sox
+    vo/aperture_ai/13_part1_endnag-6.sox
+    vo/aperture_ai/13_part1_endnag-7.sox
+    vo/aperture_ai/13_part1_endnag-8.sox
+    vo/aperture_ai/13_part1_entry-1.sox
+    vo/aperture_ai/13_part1_euthanized-1.sox
+    vo/aperture_ai/13_part1_middle-1.sox
+    vo/aperture_ai/13_part1_middle-2b-1.sox
+    vo/aperture_ai/13_part1_middle-2b-2.sox
+    vo/aperture_ai/13_part1_middle-2.sox
+    vo/aperture_ai/13_part1_pickup-1.sox
     vo/aperture_ai/escape_01_part1_nag01-1.sox
     vo/aperture_ai/generic_crate_vaporized_in_emancipation_grid-1.sox
     vo/aperture_ai/generic_crate_vaporized_in_emancipation_grid-2.sox

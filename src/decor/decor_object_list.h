@@ -27,7 +27,8 @@
 
 struct DecorObjectDefinition* decorObjectDefinitionForId(int id);
 int decorIdForObjectDefinition(struct DecorObjectDefinition* def);
-
 int decorIdForCollisionObject(struct CollisionObject* collisionObject); // evil hack
+
+int decorIdIsCube(int id);
 
 #endif
