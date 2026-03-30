@@ -14,13 +14,18 @@ cutscenes:
     - stop_cutscene NAG
     - q_sound SOUNDS_05_PART1_SUCCESS_1 CH_GLADOS PORTAL_05_PART1_SUCCESS_1 1.0 clear_existing
   NAG:
-    - delay 28
-    - q_sound SOUNDS_05_PART1_NAG1_1 CH_GLADOS PORTAL_05_PART1_NAG1_1
+    - wait_for_channel CH_GLADOS
     - delay 20
+    - q_sound SOUNDS_05_PART1_NAG1_1 CH_GLADOS PORTAL_05_PART1_NAG1_1
+    - wait_for_channel CH_GLADOS
+    - delay 15
     - q_sound SOUNDS_05_PART1_NAG2_1 CH_GLADOS PORTAL_05_PART1_NAG2_1
-    - delay 25
+    - wait_for_channel CH_GLADOS
+    - delay 15
     - q_sound SOUNDS_05_PART1_NAG3_1 CH_GLADOS PORTAL_05_PART1_NAG3_1
-    - delay 25.001
+    - wait_for_channel CH_GLADOS
+    - delay 15
     - q_sound SOUNDS_05_PART1_NAG4_1 CH_GLADOS PORTAL_05_PART1_NAG4_1
-    - delay 26
+    - wait_for_channel CH_GLADOS
+    - delay 15
     - q_sound SOUNDS_05_PART1_NAG5_1 CH_GLADOS PORTAL_05_PART1_NAG5_1
