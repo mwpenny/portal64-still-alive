@@ -99,7 +99,7 @@ def get_args():
     parser.add_argument(
         "output_file",
         metavar="OUTPUT_FILE",
-        help="Output header ile name"
+        help="Output header file name"
     )
 
     return parser.parse_args()

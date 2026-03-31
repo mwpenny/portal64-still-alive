@@ -14,6 +14,7 @@
 
 #include "codegen/assets/materials/ui.h"
 
+#define FREE_CAM_DEADZONE        5
 #define FREE_CAM_VELOCITY        (2.0f / 80.0f)
 
 #define PERF_METRICS_MARGIN      33
@@ -28,6 +29,13 @@ static float lastUpdateTimeMs    = 0.0f;
 static void debugSceneUpdateFreeCamera(struct Scene* scene) {
     struct ControllerStick freecamStick;
     controllerGetStick(2, &freecamStick);
+
+    if (abs(freecamStick.x) < FREE_CAM_DEADZONE) {
+        freecamStick.x = 0;
+    }
+    if (abs(freecamStick.y) < FREE_CAM_DEADZONE) {
+        freecamStick.y = 0;
+    }
 
     if (freecamStick.x || freecamStick.y) {
         struct Vector3 lookDir;
