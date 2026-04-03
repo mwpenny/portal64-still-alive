@@ -143,6 +143,12 @@ void staticRenderDetermineVisibleRooms(struct RenderProps* renderStage, struct F
         struct FrustumCullingInformation* rootCullingInfo = &renderStage->cameraMatrixInfo.cullingInformation;
         float doorwayDistance = planePointDistance(&doorway->quad.plane, &cullingInfo->cameraPos);
 
+        int expectedRoom = doorwayDistance <= 0.0f ? doorway->roomA : doorway->roomB;
+        if (newRoom != expectedRoom) {
+            // Not on the side opposite the new room
+            continue;
+        }
+
         if (
             // Render the doorway when near, even if not in frustum
             // * Avoids false rejections due to accumulated error in camera matrix calculations

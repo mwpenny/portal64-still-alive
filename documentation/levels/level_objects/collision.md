@@ -14,13 +14,13 @@ Static level collision geometry. Must be a quad.
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `transparent` (optional)     | If specified, the `TRANSPARENT` collision layer will be added                                                                                     |
 | `thickness DEPTH` (optional) | If specified, the quad's thickness will be set to `depth` (in opposite direction to normal). Defaults to 0, which results in one sided collision. |
-| `CL_X` (optional)            | Space-separated list of colllision layer names. Only those prefixed with `CL_` are used.                                                          |
+| `CL_X` (optional)            | Space-separated list of collision layer names. Only those prefixed with `CL_` are used.                                                           |
 
 ## Notes
 
 Game objects can collide if they share a collision layer. Some layers are also
-used for certain checks by the game. Static collision is only collidable if it
-is in the same [room](./room.md)
+used for certain checks by the game. Static collision is only collidable if an
+object is in the same [room](./room.md).
 
 If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`,
 `BLOCK_BALL`, and `BLOCK_TURRET_SIGHT`. The possible layers and their uses are
