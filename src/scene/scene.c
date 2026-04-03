@@ -753,7 +753,6 @@ void sceneUpdate(struct Scene* scene) {
     sceneCheckPortals(scene);
 
     if ((playerIsDead(&scene->player) && (
-        controllerActionGet(ControllerActionPause) ||
         controllerActionGet(ControllerActionJump) ||
         controllerActionGet(ControllerActionUseItem) ||
         controllerActionGet(ControllerActionOpenPortal0) ||
