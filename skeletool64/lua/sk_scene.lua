@@ -43,10 +43,12 @@ end
 ---@tfield {string,...} arg_list
 ---@tfield string name
 ---@treturn string|nil
-local function find_named_argument(arg_list, name)
+local function find_named_argument(arg_list, name, value_count)
+    value_count = value_count or 1
+
     for i = 1,#arg_list do
         if (arg_list[i] == name) then
-            return arg_list[i + 1]
+            return table.unpack(arg_list, i + 1, i + value_count)
         end
     end
 

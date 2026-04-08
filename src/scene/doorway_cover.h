@@ -1,6 +1,8 @@
 #ifndef __DOORWAY_COVER_H__
 #define __DOORWAY_COVER_H__
 
+#include <stdint.h>
+
 #include "graphics/color.h"
 #include "levels/level_definition.h"
 #include "math/vector3.h"
@@ -9,6 +11,8 @@
 #include "scene/portal.h"
 
 struct DoorwayCover {
+    uint64_t roomFlags;
+
     struct Doorway* forDoorway;
     struct DoorwayCoverDefinition* definition;
     short dynamicId;

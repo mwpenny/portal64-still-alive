@@ -31,30 +31,30 @@ easy.
 
 See the linked pages below for details on specific level objects.
 
-| Type                                     | Description                                          |
-| ---------------------------------------- | ---------------------------------------------------- |
-| [@ambient](./ambient.md)                 | Ambient light source for baked lighting              |
-| [@anim](./anim.md)                       | Animatable armature bone                             |
-| [@ball_catcher](./ball_catcher.md)       | High energy pellet receptacle                        |
-| [@ball_launcher](./ball_launcher.md)     | High energy pellet spawner                           |
-| [@box_dropper](./box_dropper.md)         | Cube spawner                                         |
-| [@button](./button.md)                   | Flat, circular button                                |
-| [@clock](./clock.md)                     | Countdown clock                                      |
-| [@collision](./collision.md)             | Static collision                                     |
-| [@decor](./decor.md)                     | Generic dynamic object                               |
-| [@door](./door.md)                       | Sliding door                                         |
-| [@doorway](./doorway.md)                 | Level segment connection for rendering and collision |
-| [@doorway_cover](./doorway_cover.md)     | Distance-based mask to control doorway visibility    |
-| [@dynamic_box](./dynamic_box.md)         | Dynamic collision                                    |
-| [@elevator](./elevator.md)               | Level transition elevator                            |
-| [@fizzler](./fizzler.md)                 | Emancipation grill                                   |
-| [@location](./location.md)               | Referenceable point in the world                     |
-| [@pedestal](./pedestal.md)               | Portal gun holder                                    |
-| [@point_light](./point_light.md)         | Omnidirectional light source for baked lighting      |
-| [@room](./room.md)                       | Discrete level segment for rendering and collision   |
-| [@security_camera](./security_camera.md) | Wall-mounted camera                                  |
-| [@signage](./signage.md)                 | Start of level informational sign                    |
-| [@static](./static.md)                   | Static geometry                                      |
-| [@switch](./switch.md)                   | Button on pedestal                                   |
-| [@trigger](./trigger.md)                 | Signal and cutscene activating volume                |
-| [@turret](./turret.md)                   | Sentry turret enemy                                  |
+| Type                                     | Description                                             |
+| ---------------------------------------- | ------------------------------------------------------- |
+| [@ambient](./ambient.md)                 | Ambient light source for baked lighting                 |
+| [@anim](./anim.md)                       | Animatable armature bone                                |
+| [@ball_catcher](./ball_catcher.md)       | High energy pellet receptacle                           |
+| [@ball_launcher](./ball_launcher.md)     | High energy pellet spawner                              |
+| [@box_dropper](./box_dropper.md)         | Cube spawner                                            |
+| [@button](./button.md)                   | Flat, circular button                                   |
+| [@clock](./clock.md)                     | Countdown clock                                         |
+| [@collision](./collision.md)             | Static collision                                        |
+| [@decor](./decor.md)                     | Generic dynamic object                                  |
+| [@door](./door.md)                       | Sliding door                                            |
+| [@doorway](./doorway.md)                 | Level segment connection for rendering and collision    |
+| [@doorway_cover](./doorway_cover.md)     | Mask to hide non-visible doorways or fade over distance |
+| [@dynamic_box](./dynamic_box.md)         | Dynamic collision                                       |
+| [@elevator](./elevator.md)               | Level transition elevator                               |
+| [@fizzler](./fizzler.md)                 | Emancipation grill                                      |
+| [@location](./location.md)               | Referenceable point in the world                        |
+| [@pedestal](./pedestal.md)               | Portal gun holder                                       |
+| [@point_light](./point_light.md)         | Omnidirectional light source for baked lighting         |
+| [@room](./room.md)                       | Discrete level segment for rendering and collision      |
+| [@security_camera](./security_camera.md) | Wall-mounted camera                                     |
+| [@signage](./signage.md)                 | Start of level informational sign                       |
+| [@static](./static.md)                   | Static geometry                                         |
+| [@switch](./switch.md)                   | Button on pedestal                                      |
+| [@trigger](./trigger.md)                 | Signal and cutscene activating volume                   |
+| [@turret](./turret.md)                   | Sentry turret enemy                                     |

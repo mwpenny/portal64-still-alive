@@ -10,10 +10,10 @@ A 3D box which defines a portion of a level. Used for culling and collision.
 
 ## Arguments
 
-| Name                              | Description                                                                                                                                                                                      |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `INDEX`                           | The index number of the room the box defines                                                                                                                                                     |
-| `can_see R1,R2,...,RN` (optional) | If specified, rooms outside the comma-separated list will not be considered visible from the current room. This is useful for room shapes which cannot be handled by standard visibility checks. |
+| Name                              | Description                                  |
+| --------------------------------- | -------------------------------------------- |
+| `INDEX`                           | The index number of the room the box defines |
+| `can_see R1,R2,...,RN` (optional) | If specified, rooms outside the comma-separated list will not be considered visible from the current room. This is useful for room shapes and occlusions not handled by standard visibility checks, and for combining with [doorway covers](./doorway_cover.md) to reduce draw distance. |
 
 ## Notes
 

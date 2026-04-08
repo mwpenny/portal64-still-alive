@@ -13,7 +13,7 @@ Static level collision geometry. Must be a quad.
 | Name                         | Description                                                                                                                                       |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `transparent` (optional)     | If specified, the `TRANSPARENT` collision layer will be added                                                                                     |
-| `thickness DEPTH` (optional) | If specified, the quad's thickness will be set to `depth` (in opposite direction to normal). Defaults to 0, which results in one sided collision. |
+| `thickness DEPTH` (optional) | If specified, the quad's thickness will be set to `DEPTH` (in opposite direction to normal). Defaults to 0, which results in one-sided collision. |
 | `CL_X` (optional)            | Space-separated list of collision layer names. Only those prefixed with `CL_` are used.                                                           |
 
 ## Notes

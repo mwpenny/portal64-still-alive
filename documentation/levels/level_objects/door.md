@@ -20,4 +20,4 @@ A sliding door which can open or close in response to a [signal](../signals.md).
 At level export time, if a [doorway](./doorway.md) contains a door (coplanar and
 contains the door's origin), the two are linked and the doorway will open and
 close with the door. In such cases, the door is considered to exist inside both
-of its connected [rooms](./room.md).
+of its connected [rooms](./room.md). No room-based culling is applied otherwise.

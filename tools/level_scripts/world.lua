@@ -4,6 +4,7 @@ local room_export = require('tools.level_scripts.room_export')
 local collision_export = require('tools.level_scripts.collision_export')
 local signals = require('tools.level_scripts.signals')
 local sk_math = require('sk_math')
+local util = require('tools.level_scripts.util')
 
 local room_doorways = {}
 
@@ -106,13 +107,31 @@ for _, cover in pairs(sk_scene.nodes_for_type('@doorway_cover')) do
         z = doorway.edgeA:cross(doorway.edgeB)
     }
 
+    local color = sk_math.color4_from_hex(cover.arguments[1] or '000000')
+    local fade_start, fade_end, fade_axis = sk_scene.find_named_argument(cover.arguments, "fade", 3)
+
+    if fade_axis then
+        fade_axis = util.string_split(util.trim(fade_axis), ',')
+
+        if #fade_axis ~= 3 then
+            error('Expected 3 vector components for doorway_cover fade axis. Found ' .. table.concat(fade_axis, ',') .. '.')
+        end
+
+        fade_axis = sk_math.vector3(
+            tonumber(fade_axis[1]),
+            tonumber(fade_axis[2]),
+            tonumber(fade_axis[3])
+        )
+    end
+
     table.insert(doorway_covers, {
-        position = center,
         basis = basis,
-        fadeStartDistance = tonumber(cover.arguments[1]),
-        fadeEndDistance = tonumber(cover.arguments[2]),
-        color = sk_math.color4_from_hex(cover.arguments[3] or '000000'),
-        doorwayIndex = doorway_index - 1
+        position = center,
+        fadeAxis = fade_axis or sk_math.vector3(),
+        fadeStartDistance = tonumber(fade_start or '-1'),
+        fadeEndDistance = tonumber(fade_end or '-1'),
+        color = sk_math.color4_from_hex(cover.arguments[1] or '000000'),
+        doorwayIndex = doorway_index - 1,
     })
 end
 
