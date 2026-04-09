@@ -124,7 +124,7 @@ void staticRenderDetermineVisibleRooms(struct RenderProps* renderStage, struct F
     u64 roomMask = 1LL << currentRoom;
     renderStage->visiblerooms |= roomMask;
 
-    nonVisibleRooms |= gCurrentLevel->world.rooms[currentRoom].nonVisibleRooms;
+    nonVisibleRooms |= gCurrentLevel->world.rooms[currentRoom].nonVisibleRooms | roomMask;
 
     for (int i = 0; i < gCurrentLevel->world.rooms[currentRoom].doorwayCount; ++i) {
         short doorwayIndex = gCurrentLevel->world.rooms[currentRoom].doorwayIndices[i];
@@ -136,7 +136,7 @@ void staticRenderDetermineVisibleRooms(struct RenderProps* renderStage, struct F
 
         int newRoom = currentRoom == doorway->roomA ? doorway->roomB : doorway->roomA;
         u64 newRoomMask = 1LL << newRoom;
-        if ((renderStage->visiblerooms & newRoomMask) || (nonVisibleRooms & newRoomMask)) {
+        if (nonVisibleRooms & newRoomMask) {
             continue;
         }
 
@@ -162,8 +162,8 @@ void staticRenderDetermineVisibleRooms(struct RenderProps* renderStage, struct F
         // Narrow the view to what can be seen through the doorway.
         //
         // This can be improved by first clipping the quad to the current
-        // frustum and using the clipped quad to generate the new frustum.
-        // Need to measure performance to see if it's worth it.
+        // frustum and using the polygon to generate new culling planes.
+        // The simpler way works well enough for now.
         struct FrustumCullingInformation doorwayFrustum;
         frustumFromQuad(&cullingInfo->cameraPos, &doorway->quad, &doorwayFrustum);
 
