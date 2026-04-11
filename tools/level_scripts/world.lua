@@ -71,10 +71,12 @@ end
 
 for _, door in pairs(sk_scene.nodes_for_type('@door')) do
     local position, rotation = door.node.full_transformation:decompose()
+    local room_index = room_export.node_nearest_room_index(door.node)
 
     table.insert(doors, {
         location = position,
         rotation = rotation,
+        roomIndex = room_index,
         doorwayIndex = find_coplanar_doorway(position) - 1,
         signalIndex = signals.signal_index_for_name(door.arguments[1]),
         doorType = parse_door_type(door.arguments[2])

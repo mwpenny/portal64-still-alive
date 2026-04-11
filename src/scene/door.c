@@ -108,6 +108,7 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct W
         dynamicSceneSetRoomFlags(door->dynamicId, ROOM_FLAG_FROM_INDEX(door->forDoorway->roomA) | ROOM_FLAG_FROM_INDEX(door->forDoorway->roomB));
     } else {
         door->forDoorway = NULL;
+        dynamicSceneSetRoomFlags(door->dynamicId, ROOM_FLAG_FROM_INDEX(doorDefinition->roomIndex));
     }
     door->flags = 0;
 
