@@ -229,8 +229,7 @@ enum DoorType {
 };
 
 struct DoorDefinition {
-    struct Vector3 location;
-    struct Quaternion rotation;
+    struct Transform transform;
     short roomIndex;
     short doorwayIndex;
     short signalIndex;

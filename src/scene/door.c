@@ -61,12 +61,7 @@ void doorRender(void* data, struct DynamicRenderDataList* renderList, struct Ren
         return;
     }
 
-    struct Transform originalTransform;
-    originalTransform.position = door->doorDefinition->location;
-    originalTransform.rotation = door->doorDefinition->rotation;
-    originalTransform.scale = gOneVec;
-
-    transformToMatrixL(&originalTransform, matrix, SCENE_SCALE);
+    transformToMatrixL(&door->doorDefinition->transform, matrix, SCENE_SCALE);
 
     Mtx* armature = renderStateRequestMatrices(renderState, door->armature.numberOfBones);
 
@@ -90,12 +85,12 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct W
     skArmatureInit(&door->armature, armature->armature);
     skAnimatorInit(&door->animator, armature->armature->numberOfBones);
 
-    quatMultiply(&doorDefinition->rotation, &typeDefinition->relativeRotation, &door->rigidBody.transform.rotation);
+    quatMultiply(&doorDefinition->transform.rotation, &typeDefinition->relativeRotation, &door->rigidBody.transform.rotation);
     door->rigidBody.transform.scale = gOneVec;
 
     struct Vector3 collisionOffset = { 0.0f, DOOR_COLLISION_Y_OFFSET, 0.0f };
     quatMultVector(&door->rigidBody.transform.rotation, &collisionOffset, &collisionOffset);
-    vector3Add(&doorDefinition->location, &collisionOffset, &door->rigidBody.transform.position);
+    vector3Add(&doorDefinition->transform.position, &collisionOffset, &door->rigidBody.transform.position);
 
     collisionObjectUpdateBB(&door->collisionObject);
 
@@ -159,7 +154,7 @@ void doorUpdate(struct Door* door) {
         finalPos.y = DOOR_COLLISION_Y_OFFSET + (finalPos.z * (1.0f / SCENE_SCALE));
         finalPos.z = 0.0f;
 
-        door->rigidBody.transform.position = door->doorDefinition->location;
+        door->rigidBody.transform.position = door->doorDefinition->transform.position;
         quatMultVector(&door->rigidBody.transform.rotation, &finalPos, &finalPos);
         vector3Add(&door->rigidBody.transform.position, &finalPos, &door->rigidBody.transform.position);
     }
