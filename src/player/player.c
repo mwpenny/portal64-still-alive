@@ -1162,8 +1162,6 @@ void playerUpdate(struct Player* player) {
     playerProcessInput(player, &forward, &right, &moveInput, &lookInput);
 
     struct Vector3 prevPos = player->body.transform.position;
-    int doorwayMask = worldCheckDoorwaySides(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom);
-
     playerMove(player, &moveInput, &forward, &right);
 
     struct Box3D sweptBB = player->collisionObject.boundingBox;
@@ -1200,7 +1198,12 @@ void playerUpdate(struct Player* player) {
     collisionObjectUpdateBB(&player->collisionObject);
 
     if (!didPassThroughPortal) {
-        player->body.currentRoom = worldCheckDoorwayCrossings(&gCurrentLevel->world, &player->lookTransform.position, player->body.currentRoom, doorwayMask);
+        player->body.currentRoom = worldCheckDoorwayCrossings(
+            &gCurrentLevel->world,
+            &prevPos,
+            &player->body.transform.position,
+            player->body.currentRoom
+        );
     }
     dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
 

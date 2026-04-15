@@ -798,8 +798,12 @@ void collisionSceneWalkBroadphase(struct CollisionScene* collisionScene, struct 
 
 void collisionSceneUpdateObjectCurrentRooms(struct Vector3* prevPosList){
     for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
-        int doorwayMask = worldCheckDoorwaySides(&gCurrentLevel->world, &prevPosList[i], gCollisionScene.dynamicObjects[i]->body->currentRoom);
-        gCollisionScene.dynamicObjects[i]->body->currentRoom = worldCheckDoorwayCrossings(&gCurrentLevel->world, &gCollisionScene.dynamicObjects[i]->body->transform.position, gCollisionScene.dynamicObjects[i]->body->currentRoom, doorwayMask);
+        gCollisionScene.dynamicObjects[i]->body->currentRoom = worldCheckDoorwayCrossings(
+            &gCurrentLevel->world,
+            &prevPosList[i],
+            &gCollisionScene.dynamicObjects[i]->body->transform.position,
+            gCollisionScene.dynamicObjects[i]->body->currentRoom
+        );
     }
 }
 

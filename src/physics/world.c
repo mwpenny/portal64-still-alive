@@ -1,24 +1,6 @@
 #include "world.h"
 
-int worldCheckDoorwaySides(struct World* world, struct Vector3* position, int currentRoom) {
-    if (currentRoom == -1) {
-        return 0;
-    }
-
-    struct Room* room = &world->rooms[currentRoom];
-
-    int sideMask = 0;
-
-    for (int i = 0; i < room->doorwayCount; ++i) {
-        if (planePointDistance(&world->doorways[room->doorwayIndices[i]].quad.plane, position) > 0) {
-            sideMask |= 1 << i;
-        }
-    }
-
-    return sideMask;
-}
-
-int worldCheckDoorwayCrossings(struct World* world, struct Vector3* position, int currentRoom, int sideMask) {
+int worldCheckDoorwayCrossings(struct World* world, struct Vector3* prevPosition, struct Vector3* position, int currentRoom) {
     if (currentRoom == RIGID_BODY_NO_ROOM) {
         return RIGID_BODY_NO_ROOM;
     }
@@ -28,14 +10,25 @@ int worldCheckDoorwayCrossings(struct World* world, struct Vector3* position, in
     for (int i = 0; i < room->doorwayCount; ++i) {
         struct Doorway* doorway = &world->doorways[room->doorwayIndices[i]];
 
-        int prevSide = (sideMask & (1 << i)) != 0;
+        int prevSide = planePointDistance(&doorway->quad.plane, prevPosition) > 0.0f;
         int currSide = planePointDistance(&doorway->quad.plane, position) > 0.0f;
 
         if (prevSide != currSide) {
-            struct Vector3 posOnFace;
-            planeProjectPoint(&doorway->quad.plane, position, &posOnFace);
+            // Make sure vector from previous to current position is in bounds.
+            // It's not enough to check the before/after position: fast objects
+            // could pass through without being in bounds on one or both sides.
+            struct Vector3 crossing;
+            vector3Sub(position, prevPosition, &crossing);
 
-            if (collisionQuadDetermineEdges(&posOnFace, &doorway->quad)) {
+            float distance;
+            if (planeRayIntersection(&doorway->quad.plane, prevPosition, &crossing, &distance)) {
+                vector3AddScaled(prevPosition, &crossing, distance, &crossing);
+            } else {
+                // Near-parallel crossing
+                crossing = *position;
+            }
+
+            if (collisionQuadDetermineEdges(&crossing, &doorway->quad)) {
                 continue;
             }
 

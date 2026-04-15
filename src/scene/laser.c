@@ -124,16 +124,11 @@ void laserUpdate(struct Laser* laser) {
     rayTransform(&laser->parent->transform, &startPosition, &startPosition);
 
     // Handle laser and parent in different rooms
-    int doorwayMask = worldCheckDoorwaySides(
-        gCollisionScene.world,
-        &laser->parent->transform.position,
-        laser->parent->currentRoom
-    );
     int currentRoom = worldCheckDoorwayCrossings(
         gCollisionScene.world,
+        &laser->parent->transform.position,
         &startPosition.origin,
-        laser->parent->currentRoom,
-        doorwayMask
+        laser->parent->currentRoom
     );
 
     uint64_t beamRooms = ROOM_FLAG_FROM_INDEX(currentRoom);

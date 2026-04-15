@@ -14,7 +14,9 @@ end
 
 local doorways = {}
 
-local DOORWAY_PADDING = 0.5
+-- Protects against false visibility rejections due to accumulated error in
+-- camera matrix calculations
+local DOORWAY_PADDING = 0.125
 
 for doorway_index, doorway in pairs(sk_scene.nodes_for_type('@doorway')) do
     local quad = collision_export.collision_quad_from_mesh(

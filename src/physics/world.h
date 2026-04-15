@@ -40,8 +40,7 @@ struct World {
     short doorwayCount;
 };
 
-int worldCheckDoorwaySides(struct World* world, struct Vector3* position, int currentRoom);
-int worldCheckDoorwayCrossings(struct World* world, struct Vector3* position, int currentRoom, int sideMask);
+int worldCheckDoorwayCrossings(struct World* world, struct Vector3* prevPosition, struct Vector3* position, int currentRoom);
 
 float worldMaxDistanceInDirection(struct World* world, struct Ray* ray, u64 roomMask);
 
