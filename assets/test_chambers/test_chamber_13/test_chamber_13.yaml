@@ -14,6 +14,7 @@ cutscenes:
     - save_checkpoint
 
     - wait_for_signal cube_incinerated
+    - clear_signal cube_dropper
     - stop_cutscene CHECK_END_BUTTON
     - q_sound 13_PART1_EUTHANIZED_1 CH_GLADOS PORTAL_13_PART1_EUTHANIZED_1 1.0 clear_existing
     - set_signal exit_door
@@ -74,6 +75,12 @@ cutscenes:
     - wait_for_channel CH_GLADOS
     - delay 15
     - q_sound 13_PART1_ENDNAG_8 CH_GLADOS PORTAL_13_PART1_ENDNAG_8
+  INCINERATE_PLAYER:
+    - label incinerate_loop
+    - wait_for_signal player_in_incinerator
+    - damage_player 25 FF0000
+    - delay 0.5
+    - goto incinerate_loop
 
 operators:
   - ball_catchers_1_2 = ball_catcher_1 and ball_catcher_2
