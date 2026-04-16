@@ -2,6 +2,7 @@
 
 #include "audio/soundplayer.h"
 #include "audio/clips.h"
+#include "controls/rumble_pak_clip.h"
 #include "dynamic_scene.h"
 #include "effects/effect_definitions.h"
 #include "physics/collision_scene.h"
@@ -15,32 +16,41 @@
 
 #define BALL_RADIUS 0.1f
 
-struct CollisionBox gBallCollisionBox = {
+static struct CollisionBox sBallCollisionBox = {
     {BALL_RADIUS, BALL_RADIUS, BALL_RADIUS}
 };
 
-struct ColliderTypeData gBallCollider = {
+static struct ColliderTypeData sBallCollider = {
     CollisionShapeTypeBox,
-    &gBallCollisionBox,
+    &sBallCollisionBox,
     1.0f,
     0.0f,
     &gCollisionBoxCallbacks,
 };
 
-struct BallBurnMark gBurnMarks[MAX_BURN_MARKS];
-short gCurrentBurnIndex;
+static struct BallBurnMark sBurnMarks[MAX_BURN_MARKS];
+static short sCurrentBurnIndex;
+
+static unsigned char sBallBounceRumbleData[] = {
+    0xFA
+};
+static struct RumblePakWave sBallBounceRumbleWave = {
+    .samples = sBallBounceRumbleData,
+    .sampleCount = 4,
+    .samplesPerSecond = 20,
+};
 
 void ballBurnMarkInit() {
-    gCurrentBurnIndex = 0;
+    sCurrentBurnIndex = 0;
 
     for (int i = 0; i < 3; ++i) {
-        gBurnMarks[i].dynamicId = -1;
+        sBurnMarks[i].dynamicId = INVALID_DYNAMIC_OBJECT;
     }
 }
 
 void ballBurnFilterOnPortal(struct Transform* portalTransform, int portalIndex) {
     for (int i = 0; i < MAX_BURN_MARKS; ++i) {
-        struct BallBurnMark* burnMark = &gBurnMarks[i];
+        struct BallBurnMark* burnMark = &sBurnMarks[i];
         
         if (burnMark->dynamicId == -1) {
             continue;
@@ -48,7 +58,7 @@ void ballBurnFilterOnPortal(struct Transform* portalTransform, int portalIndex) 
 
         if (collisionSceneIsTouchingSinglePortal(&burnMark->at, &burnMark->normal, portalTransform, portalIndex)) {
             dynamicSceneRemove(burnMark->dynamicId);
-            burnMark->dynamicId = -1;
+            burnMark->dynamicId = INVALID_DYNAMIC_OBJECT;
         }
     }
 }
@@ -81,7 +91,7 @@ void ballBurnRender(void* data, struct DynamicRenderDataList* renderList, struct
 }
 
 void ballInitInactive(struct Ball* ball) {
-    collisionObjectInit(&ball->collisionObject, &gBallCollider, &ball->rigidBody, 1.0f, 0);
+    collisionObjectInit(&ball->collisionObject, &sBallCollider, &ball->rigidBody, 1.0f, 0);
 
     ball->targetSpeed = 0.0f;
     ball->flags = 0;
@@ -90,7 +100,7 @@ void ballInitInactive(struct Ball* ball) {
 }
 
 void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* velocity, short startingRoom, float ballLifetime) {
-    collisionObjectInit(&ball->collisionObject, &gBallCollider, &ball->rigidBody, 1.0f, 0);
+    collisionObjectInit(&ball->collisionObject, &sBallCollider, &ball->rigidBody, 1.0f, 0);
 
     collisionSceneAddDynamicObject(&ball->collisionObject);
 
@@ -118,65 +128,72 @@ void ballTurnOnCollision(struct Ball* ball) {
     ball->collisionObject.collisionLayers |= COLLISION_LAYERS_BLOCK_BALL;
 }
 
-void ballInitBurn(struct Ball* ball, struct ContactManifold* manifold) {
+void ballCheckBounced(struct Ball* ball) {
+    struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &ball->collisionObject, NULL);
     if (!manifold || manifold->contactCount == 0) {
         ball->flags &= ~BallJustBounced;
         return;
     }
 
-    if (!(ball->flags & BallJustBounced)) {
-        struct Vector3 normal = manifold->normal;
-        if (&ball->collisionObject == manifold->shapeA) {
-            vector3Negate(&normal, &normal);
-        }
-        effectsSplashPlay(&gScene.effects, &gBallBounce, &ball->rigidBody.transform.position, &manifold->normal, NULL);
-        struct Vector3 position = manifold->contacts[0].contactAWorld;
-        if (manifold->shapeA->body) {
-            transformPoint(&manifold->shapeA->body->transform, &position, &position);
-        }
-        soundPlayerPlay(soundsBallBounce, 1.5f, 1.0f, &position, &gZeroVec, SoundTypeAll);
-        hudShowSubtitle(&gScene.hud, ENERGYBALL_IMPACT, SubtitleTypeCaption);
-        ball->flags |= BallJustBounced;
-    }
-
-    // only add burn marks to static objects
-    if (manifold->shapeA->body != NULL) {
+    if (ball->flags & BallJustBounced) {
         return;
     }
 
-    struct BallBurnMark* burn = &gBurnMarks[gCurrentBurnIndex];
+    struct CollisionObject* other;
+    struct Vector3 normal;
+    if (manifold->shapeA == &ball->collisionObject) {
+        other = manifold->shapeB;
+        vector3Negate(&manifold->normal, &normal);
+    } else {
+        other = manifold->shapeA;
+        normal = manifold->normal;
+    }
 
-    struct BallBurnMark* lastBurn = &gBurnMarks[(gCurrentBurnIndex == 0 ? MAX_BURN_MARKS : gCurrentBurnIndex) - 1];
+    effectsSplashPlay(&gScene.effects, &gBallBounce, &ball->rigidBody.transform.position, &normal, NULL);
+    soundPlayerPlay(soundsBallBounce, 1.5f, 1.0f, &ball->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
+    hudShowSubtitle(&gScene.hud, ENERGYBALL_IMPACT, SubtitleTypeCaption);
+    ball->flags |= BallJustBounced;
+
+    if (other->body != NULL) {
+        if (playerIsGrabbingObject(&gScene.player, other)) {
+            rumblePakClipPlay(&sBallBounceRumbleWave);
+        }
+
+        // Only add burn marks to static objects
+        return;
+    }
+
+    struct BallBurnMark* burn = &sBurnMarks[sCurrentBurnIndex];
+    struct BallBurnMark* lastBurn = &sBurnMarks[(sCurrentBurnIndex == 0 ? MAX_BURN_MARKS : sCurrentBurnIndex) - 1];
 
     struct Transform burnTransform;
     burnTransform.position = manifold->contacts[0].contactAWorld;
 
-    // don't double up burns
-    if (vector3DistSqrd(&burnTransform.position, &lastBurn->at) < 0.1f) {
+    // Don't double up burns
+    if (lastBurn->dynamicId != INVALID_DYNAMIC_OBJECT && vector3DistSqrd(&burnTransform.position, &lastBurn->at) < 0.1f) {
         return;
     }
 
-    ++gCurrentBurnIndex;
-
-    if (gCurrentBurnIndex == MAX_BURN_MARKS) {
-        gCurrentBurnIndex = 0;
+    ++sCurrentBurnIndex;
+    if (sCurrentBurnIndex == MAX_BURN_MARKS) {
+        sCurrentBurnIndex = 0;
     }
 
-    if (burn->dynamicId == -1) {
+    if (burn->dynamicId == INVALID_DYNAMIC_OBJECT) {
         burn->dynamicId = dynamicSceneAdd(burn, ballBurnRender, &burn->at, 0.2f);
     }
 
-    if (fabsf(manifold->normal.y) > 0.714f) {
-        quatLook(&manifold->normal, &gRight, &burnTransform.rotation);
+    if (fabsf(normal.y) > 0.714f) {
+        quatLook(&normal, &gRight, &burnTransform.rotation);
     } else {
-        quatLook(&manifold->normal, &gUp, &burnTransform.rotation);
+        quatLook(&normal, &gUp, &burnTransform.rotation);
     }
     burnTransform.scale = gOneVec;
 
     transformToMatrixL(&burnTransform, &burn->matrix, SCENE_SCALE);
 
     burn->at = burnTransform.position;
-    burn->normal = manifold->normal;
+    burn->normal = normal;
 }
 
 void ballUpdate(struct Ball* ball) {
@@ -217,8 +234,7 @@ void ballUpdate(struct Ball* ball) {
         }
     }
 
-    struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &ball->collisionObject, NULL);
-    ballInitBurn(ball, manifold);
+    ballCheckBounced(ball);
 }
 
 int ballIsActive(struct Ball* ball) {
@@ -242,5 +258,5 @@ void ballMarkCaught(struct Ball* ball) {
 }
 
 int isColliderForBall(struct CollisionObject* collisionObject) {
-    return collisionObject->collider->data == &gBallCollisionBox;
+    return collisionObject->collider->data == &sBallCollisionBox;
 }

@@ -65,6 +65,7 @@ as follows.
     * [Fizzlers](./fizzler.md)
     * [Switches](./switch.md)
 * `BLOCK_BALL`: Used by:
+    * [Decor](./decor.md) (with collision)
     * [Doors](./door.md) (when closed)
     * Energy balls
     * [Ball launchers](./ball_launcher.md)
@@ -72,6 +73,7 @@ as follows.
     * [Elevators](./elevator.md)
     * [Fizzler](./fizzler.md) frames
     * Player
+    * [Security cameras](./security_camera.md)
 * `BLOCK_TURRET_SIGHT`: Used to block turret line of sight, and by:
     * [Doors](./door.md) (when closed)
     * [Elevators](./elevator.md)
