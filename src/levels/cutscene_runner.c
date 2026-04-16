@@ -349,7 +349,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             sceneQueueCheckpoint(&gScene);
             break;
         case CutsceneStepDamagePlayer:
-            playerDamage(&gScene.player, step->damagePlayer.amount, PlayerDamageTypeEnvironment);
+            playerDamage(&gScene.player, step->damagePlayer.amount, &step->damagePlayer.overlayColor);
             break;
         case CutsceneStepRumble:
             rumblePakClipPlay(&gCutsceneRumbleWaves[step->rumble.rumbleLevel]);

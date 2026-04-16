@@ -30,11 +30,6 @@ enum PlayerFlags {
     PlayerIsInvincible = (1 << 11),
 };
 
-enum PlayerDamageType {
-    PlayerDamageTypeEnemy,
-    PlayerDamageTypeEnvironment,
-};
-
 struct Player {
     struct CollisionObject collisionObject;
     struct RigidBody body;
@@ -73,7 +68,7 @@ void playerInitGrabRotationBase(struct Player* player);
 void playerGivePortalGun(struct Player* player, int flags);
 void playerSetLocation(struct Player* player, struct Location* location);
 
-void playerDamage(struct Player* player, float amount, enum PlayerDamageType damageType);
+void playerDamage(struct Player* player, float amount, struct Coloru8* overlayColor);
 
 int playerIsDead(struct Player* player);
 void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing);

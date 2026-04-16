@@ -31,8 +31,8 @@
 #define STAND_SPEED             1.5f
 #define SHAKE_DISTANCE          0.02f
 
-#define ENV_DAMAGE_OVERLAY_TIME 0.5f
-#define ENV_DAMAGE_OVERLAY_FADE 0.75f
+#define DAMAGE_OVERLAY_TIME     0.5f
+#define DAMAGE_OVERLAY_FADE     0.75f
 #define HEALTH_REGEN_DELAY      1.0f
 #define HEALTH_REGEN_SPEED      60.0f
 #define DEAD_OFFSET             -0.4f
@@ -243,7 +243,7 @@ void playerHandleCollision(struct Player* player) {
             !playerIsDead(player) &&
             (isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB))
         ) {
-            playerDamage(player, PLAYER_MAX_HEALTH, PlayerDamageTypeEnemy);
+            playerDamage(player, PLAYER_MAX_HEALTH, NULL);
             soundPlayerPlay(soundsBallKill, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         }
     }
@@ -642,17 +642,17 @@ void playerUpdateHealth(struct Player* player) {
     }
 }
 
-void playerDamage(struct Player* player, float amount, enum PlayerDamageType damageType) {
+void playerDamage(struct Player* player, float amount, struct Coloru8* overlayColor) {
     if ((player->flags & PlayerIsInvincible) || player->health <= 0.0f) {
         return;
     }
 
-    if (damageType == PlayerDamageTypeEnvironment) {
+    if (overlayColor) {
         hudShowColoredOverlay(
             &gScene.hud,
-            &gColorWhite,
-            ENV_DAMAGE_OVERLAY_TIME,
-            ENV_DAMAGE_OVERLAY_FADE
+            overlayColor,
+            DAMAGE_OVERLAY_TIME,
+            DAMAGE_OVERLAY_FADE
         );
     }
 

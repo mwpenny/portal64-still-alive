@@ -1,6 +1,6 @@
-
 local sk_definition_writer = require('sk_definition_writer')
 local sk_scene = require('sk_scene')
+local sk_math = require('sk_math')
 local room_export = require('tools.level_scripts.room_export')
 local signals = require('tools.level_scripts.signals')
 local animation = require('tools.level_scripts.animation')
@@ -249,7 +249,8 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
     elseif step.command == "damage_player" then
         result.type = sk_definition_writer.raw('CutsceneStepDamagePlayer')
         result.damagePlayer = {
-            tonumber(step.args[1])
+            tonumber(step.args[1]),
+            sk_math.color4_from_hex(step.args[2] or 'FFFFFF')
         }
     elseif step.command == "show_prompt" then
         result.type = sk_definition_writer.raw('CutsceneStepShowPrompt')

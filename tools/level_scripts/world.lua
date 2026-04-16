@@ -1,9 +1,9 @@
-local sk_scene = require('sk_scene')
 local sk_definition_writer = require('sk_definition_writer')
+local sk_scene = require('sk_scene')
+local sk_math = require('sk_math')
 local room_export = require('tools.level_scripts.room_export')
 local collision_export = require('tools.level_scripts.collision_export')
 local signals = require('tools.level_scripts.signals')
-local sk_math = require('sk_math')
 local util = require('tools.level_scripts.util')
 
 local room_doorways = {}

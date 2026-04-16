@@ -629,7 +629,7 @@ static void turretPushObject(struct RigidBody* body, struct Vector3* hitDir, flo
 }
 
 static void turretHitPlayer(struct Turret* turret, struct Player* player, struct Vector3* hitDir) {
-    playerDamage(player, TURRET_BULLET_DAMAGE, PlayerDamageTypeEnemy);
+    playerDamage(player, TURRET_BULLET_DAMAGE, NULL);
 
     float velocityTowardTurret = vector3Dot(&player->body.velocity, hitDir);
     if (velocityTowardTurret < 0.0f ||

@@ -170,6 +170,7 @@ struct CutsceneStep {
         } waitForAnimation;
         struct {
             float amount;
+            struct Coloru8 overlayColor;
         } damagePlayer;
         struct {
             u8 actionPromptType;
