@@ -5,15 +5,16 @@
 #include "math/box3d.h"
 #include "rigid_body.h"
 
-#define COLLISION_LAYERS_STATIC             (1 << 0)
-#define COLLISION_LAYERS_TRANSPARENT        (1 << 1)
-#define COLLISION_LAYERS_TANGIBLE           (1 << 2)
-#define COLLISION_LAYERS_GRABBABLE          (1 << 3)
-#define COLLISION_LAYERS_FIZZLER            (1 << 4)
-#define COLLISION_LAYERS_BLOCK_PORTAL       (1 << 5)
-#define COLLISION_LAYERS_BLOCK_BALL         (1 << 6)
-#define COLLISION_LAYERS_BLOCK_TURRET_SIGHT (1 << 7)
-#define COLLISION_LAYERS_BLOCK_TURRET_SHOTS (1 << 8)
+#define COLLISION_LAYERS_PLAYER             (1 << 0)
+#define COLLISION_LAYERS_STATIC             (1 << 1)
+#define COLLISION_LAYERS_TRANSPARENT        (1 << 2)
+#define COLLISION_LAYERS_TANGIBLE           (1 << 3)
+#define COLLISION_LAYERS_GRABBABLE          (1 << 4)
+#define COLLISION_LAYERS_FIZZLER            (1 << 5)
+#define COLLISION_LAYERS_BLOCK_PORTAL       (1 << 6)
+#define COLLISION_LAYERS_BLOCK_BALL         (1 << 7)
+#define COLLISION_LAYERS_BLOCK_TURRET_SIGHT (1 << 8)
+#define COLLISION_LAYERS_BLOCK_TURRET_SHOTS (1 << 9)
 
 #define COLLISION_OBJECT_HAS_CONTACTS       (1 << 0)
 #define COLLISION_OBJECT_PLAYER_STANDING    (1 << 1)

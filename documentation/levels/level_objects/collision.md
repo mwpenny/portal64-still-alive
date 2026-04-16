@@ -26,6 +26,7 @@ If no collision layers are specified, the defaults are `STATIC`, `TANGIBLE`,
 `BLOCK_BALL`, and `BLOCK_TURRET_SIGHT`. The possible layers and their uses are
 as follows.
 
+* `PLAYER`: Used only by the player
 * `STATIC`: Used for portal raycasts, and by:
     * [Doors](./door.md) (when closed)
     * [Dynamic boxes](./dynamic_box.md)
