@@ -24,7 +24,9 @@ if (ImageMagickConvert_EXECUTABLE)
 
     if (NOT VERSION_COMMAND_RC EQUAL 0)
         message(FATAL_ERROR "Error getting ImageMagick version: ${VERSION_COMMAND_ERROR}")
-    elseif (VERSION_COMMAND_OUTPUT MATCHES "^Version: ImageMagick ([-0-9\\.]+)")
+    elseif (NOT VERSION_COMMAND_OUTPUT MATCHES "^Version: ImageMagick ([-0-9\\.]+)")
+        message(FATAL_ERROR "Unexpected output getting ImageMagick version:\n${VERSION_COMMAND_OUTPUT}")
+    else()
         set(VERSION_NUMBER "${CMAKE_MATCH_1}")
 
         string(REPLACE "-" "." VERSION_NUMBER "${VERSION_NUMBER}")

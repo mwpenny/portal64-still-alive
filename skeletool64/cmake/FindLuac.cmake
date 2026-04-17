@@ -4,7 +4,12 @@
 
 include(FindPackageHandleStandardArgs)
 
-find_program(Luac_EXECUTABLE luac)
+set(PROGRAM_NAMES luac)
+if (Luac_FIND_VERSION_COUNT GREATER 1)
+    list(PREPEND PROGRAM_NAMES luac${Luac_FIND_VERSION_MAJOR}.${Luac_FIND_VERSION_MINOR})
+endif()
+
+find_program(Luac_EXECUTABLE NAMES ${PROGRAM_NAMES})
 
 if (Luac_EXECUTABLE)
     execute_process(
@@ -20,7 +25,9 @@ if (Luac_EXECUTABLE)
 
     if (NOT VERSION_COMMAND_RC EQUAL 0)
         message(FATAL_ERROR "Error getting luac version: ${VERSION_COMMAND_ERROR}")
-    elseif (VERSION_COMMAND_OUTPUT MATCHES "^Luac ([0-9\\.]+)")
+    elseif (NOT VERSION_COMMAND_OUTPUT MATCHES "^Lua ([0-9\\.]+)")
+        message(FATAL_ERROR "Unexpected output getting luac version:\n${VERSION_COMMAND_OUTPUT}")
+    else()
         set(VERSION_NUMBER "${CMAKE_MATCH_1}")
     endif()
 endif()
