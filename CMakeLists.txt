@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
 project(portal64 C ASM)
+set(C_STANDARD 17)
+set(C_STANDARD_REQUIRED TRUE)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(AddExternalProjectExecutable)
