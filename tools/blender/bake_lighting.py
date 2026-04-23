@@ -275,7 +275,8 @@ def bake_object(obj, ambient_blocks):
             ]
 
 def bake_scene():
-    bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+    if bpy.ops.object.mode_set.poll():
+        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
     ambient_blocks = build_ambient_blocks()
 
