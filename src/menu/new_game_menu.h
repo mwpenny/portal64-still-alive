@@ -9,7 +9,7 @@
 #define CHAPTER_IMAGE_WIDTH     84
 #define CHAPTER_IMAGE_HEIGHT    48
 
-#define CHAPTER_IMAGE_SIZE  (CHAPTER_IMAGE_WIDTH * CHAPTER_IMAGE_HEIGHT * 2)
+#define CHAPTER_IMAGE_SIZE      (CHAPTER_IMAGE_WIDTH * CHAPTER_IMAGE_HEIGHT * 2)
 
 struct Chapter {
     void* imageData;
@@ -17,7 +17,7 @@ struct Chapter {
     short testChamberNumber;
 };
 
-struct ChapterMenu {
+struct ChapterMenuItem {
     struct PrerenderedText* chapterText;
     struct PrerenderedText* testChamberText;
     Gfx* border;
@@ -27,20 +27,18 @@ struct ChapterMenu {
     int y;
 };
 
-void chapterMenuInit(struct ChapterMenu* chapterMenu, int x, int y);
-
 struct NewGameMenu {
-    Gfx* menuOutline;
     struct PrerenderedText* newGameText;
+    Gfx* menuOutline;
     Gfx* topLine;
 
     struct ConfirmationDialog confirmationDialog;
 
-    struct ChapterMenu displayedChapter0_left;
-    struct ChapterMenu displayedChapter1_right;
+    struct ChapterMenuItem leftChapter;
+    struct ChapterMenuItem rightChapter;
 
-    short selectedChapter;
-    short chapterOffset;
+    short leftChapterIndex;
+    short selectedChapterIndex;
     short chapterCount;
 };
 
