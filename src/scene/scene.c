@@ -349,20 +349,18 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
         contactSolverDebugDraw(&gContactSolver, renderState);
     }
 
-    portalGunRenderReal(
-        &scene->portalGun,
-        renderState,
-        &scene->camera,
-        scene->hud.lastPortalIndexShot
-    );
+    if (!scene->hideHud) {
+        portalGunRenderReal(
+            &scene->portalGun,
+            renderState,
+            &scene->camera,
+            scene->hud.lastPortalIndexShot
+        );
 
-    gDPPipeSync(renderState->dl++);
-    gDPSetRenderMode(renderState->dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-    gSPGeometryMode(renderState->dl++, G_ZBUFFER | G_LIGHTING | G_CULL_BOTH, G_SHADE);
-
-    if (gGameMenu.state == GameMenuStateResumeGame || hudOverlayVisible(&scene->hud, &scene->player)) {
-        hudRender(&scene->hud, &scene->player, renderState);
-        debugSceneRender(scene, renderState, &renderPlan);
+        if (gGameMenu.state == GameMenuStateResumeGame || hudOverlayVisible(&scene->hud, &scene->player)) {
+            hudRender(&scene->hud, &scene->player, renderState);
+            debugSceneRender(scene, renderState, &renderPlan);
+        }
     }
 
     if (gGameMenu.state != GameMenuStateResumeGame) {

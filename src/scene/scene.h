@@ -99,6 +99,7 @@ struct Scene {
     u8 showDebugMetrics;
     u8 showCollisionContacts;
     u8 hideCurrentRoom;
+    u8 hideHud;
 };
 
 extern struct Scene gScene;

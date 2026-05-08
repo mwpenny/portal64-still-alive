@@ -225,6 +225,7 @@ void debugSceneInit(struct Scene* scene) {
     scene->showDebugMetrics = 0;
     scene->showCollisionContacts = 0;
     scene->hideCurrentRoom = 0;
+    scene->hideHud = 0;
 }
 
 void debugSceneUpdate(struct Scene* scene) {
@@ -248,6 +249,10 @@ void debugSceneUpdate(struct Scene* scene) {
 
     if (controllerGetButtonsDown(2, ControllerButtonRight)) {
         scene->showCollisionContacts ^= 1;
+    }
+
+    if (controllerGetButtonsDown(2, ControllerButtonUp)) {
+        scene->hideHud ^= 1;
     }
 }
 
