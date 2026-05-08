@@ -40,6 +40,7 @@ set(LEVELS
     test_chamber_09
     test_chamber_10
     test_chamber_11
+    test_chamber_13
 )
 
 set(ANIMATED_LEVELS
@@ -52,6 +53,7 @@ set(ANIMATED_LEVELS
     test_chamber_09
     test_chamber_10
     test_chamber_11
+    test_chamber_13
 )
 
 set(LEVEL_MATERIALS
