@@ -11,17 +11,17 @@
 #include "codegen/assets/models/dynamic_animated_model_list.h"
 #include "codegen/assets/models/props/combine_ball_catcher.h"
 
-struct CollisionBox gBallCatcherBox = {
+static struct CollisionBox sBallCatcherBox = {
     {0.5f, 0.5f, 0.5f},
 };
 
-struct Vector3 gLocalCatcherLocation = {
+static struct Vector3 sLocalCatcherLocation = {
     0.0f, 0.0f, -0.125f
 };
 
-struct ColliderTypeData gBallCatcherCollider = {
+static struct ColliderTypeData sBallCatcherCollider = {
     CollisionShapeTypeBox,
-    &gBallCatcherBox,
+    &sBallCatcherBox,
     0.0f,
     1.0f,
     &gCollisionBoxCallbacks
@@ -57,9 +57,7 @@ void ballCatcherRender(void* data, struct DynamicRenderDataList* renderList, str
 }
 
 void ballCatcherInit(struct BallCatcher* catcher, struct BallCatcherDefinition* definition) {
-    struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_COMBINE_BALL_CATCHER_DYNAMIC_ANIMATED_MODEL);
-
-    collisionObjectInit(&catcher->collisionObject, &gBallCatcherCollider, &catcher->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
+    collisionObjectInit(&catcher->collisionObject, &sBallCatcherCollider, &catcher->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
     rigidBodyMarkKinematic(&catcher->rigidBody); 
     collisionSceneAddDynamicObject(&catcher->collisionObject);
 
@@ -67,17 +65,15 @@ void ballCatcherInit(struct BallCatcher* catcher, struct BallCatcherDefinition* 
     catcher->rigidBody.transform.rotation = definition->rotation;
     catcher->rigidBody.transform.scale = gOneVec;
     catcher->rigidBody.currentRoom = definition->roomIndex;
-
-    catcher->signalIndex = definition->signalIndex;
-
-    catcher->caughtBall = NULL;
-
     collisionObjectUpdateBB(&catcher->collisionObject);
 
-    catcher->dynamicId = dynamicSceneAdd(catcher, ballCatcherRender, &catcher->rigidBody.transform.position, 1.0f);
+    catcher->caughtBall = NULL;
+    catcher->signalIndex = definition->signalIndex;
 
+    catcher->dynamicId = dynamicSceneAdd(catcher, ballCatcherRender, &catcher->rigidBody.transform.position, 1.0f);
     dynamicSceneSetRoomFlags(catcher->dynamicId, ROOM_FLAG_FROM_INDEX(catcher->rigidBody.currentRoom));
 
+    struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_COMBINE_BALL_CATCHER_DYNAMIC_ANIMATED_MODEL);
     skAnimatorInit(&catcher->animator, PROPS_COMBINE_BALL_CATCHER_DEFAULT_BONES_COUNT);
     skArmatureInit(&catcher->armature, armature->armature);
 }
@@ -120,19 +116,18 @@ void ballCatcherUpdate(struct BallCatcher* catcher, struct BallLauncher* ballLau
             signalsSend(catcher->signalIndex);
         } else {
             struct Vector3 targetPosition;
-            transformPoint(&catcher->rigidBody.transform, &gLocalCatcherLocation, &targetPosition);
+            transformPoint(&catcher->rigidBody.transform, &sLocalCatcherLocation, &targetPosition);
 
-            vector3MoveTowards(
+            int reachedTarget = vector3MoveTowards(
                 &catcher->caughtBall->rigidBody.transform.position, 
                 &targetPosition, 
                 FIXED_DELTA_TIME * BALL_VELOCITY, 
                 &catcher->caughtBall->rigidBody.transform.position
             );
 
-            if (targetPosition.x == catcher->caughtBall->rigidBody.transform.position.x && 
-                targetPosition.y == catcher->caughtBall->rigidBody.transform.position.y && 
-                targetPosition.z == catcher->caughtBall->rigidBody.transform.position.z) {
+            if (reachedTarget) {
                 catcher->caughtBall->flags |= BallFlagsPowering;
+                collisionSceneRemoveDynamicObject(&catcher->collisionObject);
             }
         }
     } else {
@@ -141,9 +136,9 @@ void ballCatcherUpdate(struct BallCatcher* catcher, struct BallLauncher* ballLau
 }
 
 void ballCatcherHandBall(struct BallCatcher* catcher, struct Ball* caughtBall) {
+    collisionSceneRemoveDynamicObject(&catcher->collisionObject);
+
+    transformPoint(&catcher->rigidBody.transform, &sLocalCatcherLocation, &caughtBall->rigidBody.transform.position);
+    caughtBall->flags |= BallFlagsPowering;
     catcher->caughtBall = caughtBall;
-    struct Vector3 targetPosition;
-    transformPoint(&catcher->rigidBody.transform, &gLocalCatcherLocation, &targetPosition);
-    catcher->caughtBall->rigidBody.transform.position = targetPosition;
-    catcher->caughtBall->flags |= BallFlagsPowering;
 }

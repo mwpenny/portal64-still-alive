@@ -15,9 +15,9 @@ struct BallCatcher {
     struct RigidBody rigidBody;
     struct SKArmature armature;
     struct SKAnimator animator;
+    struct Ball* caughtBall;
     short dynamicId;
     short signalIndex;
-    struct Ball* caughtBall;
 };
 
 void ballCatcherInit(struct BallCatcher* catcher, struct BallCatcherDefinition* definition);
