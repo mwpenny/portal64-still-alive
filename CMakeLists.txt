@@ -47,10 +47,6 @@ set(PAK_MODIFIED_DIR   "${PROJECT_SOURCE_DIR}/portal_pak_modified")
 add_library(platform INTERFACE)
 find_package(Libultra REQUIRED)
 target_link_libraries(platform INTERFACE libultra::libultra)
-target_include_directories(platform INTERFACE
-    "${PROJECT_BINARY_DIR}"
-    "${PROJECT_SOURCE_DIR}/src"
-)
 
 add_subdirectory(${ASSETS_DIR})
 add_subdirectory(${ASM_DIR})

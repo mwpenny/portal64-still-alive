@@ -194,7 +194,10 @@ function(_add_model_lib LIB_NAME LIB_SOURCES)
     target_sources(${LIB_NAME} PRIVATE
         ${LIB_SOURCES}
     )
-    target_link_libraries(${LIB_NAME}
+    target_include_directories(${LIB_NAME} PRIVATE
+        ${SRC_DIR}
+    )
+    target_link_libraries(${LIB_NAME} PRIVATE
         platform
     )
 endfunction()
