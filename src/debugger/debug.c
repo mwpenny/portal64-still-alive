@@ -505,7 +505,7 @@ https://github.com/buu342/N64-UNFLoader
         #ifndef LIBDRAGON
             len = _Printf(&printf_handler, debug_buffer, message, args);
         #else
-            len = vsprintf(debug_buffer, message, args);
+            len = vsnprintf(debug_buffer, sizeof(debug_buffer), message, args);
         #endif
         va_end(args);
 
@@ -1437,7 +1437,7 @@ https://github.com/buu342/N64-UNFLoader
 
         static void debug_rdb_qsupported(OSThread* t)
         {
-            sprintf(debug_buffer, "swbreak+");
+            snprintf(debug_buffer, sizeof(debug_buffer), "swbreak+");
             usb_purge();
             usb_write(DATATYPE_RDBPACKET, debug_buffer, strLength(debug_buffer)+1);
         }
@@ -1566,9 +1566,9 @@ https://github.com/buu342/N64-UNFLoader
 
                 // Read the register value into a string
                 if (reg.size == 8)
-                    sprintf(temp, "%016llx", (u64)(*(u64*)reg.ptr));
+                    snprintf(temp, sizeof(temp), "%016llx", (u64)(*(u64*)reg.ptr));
                 else
-                    sprintf(temp, "%016llx", (u64)(*(u32*)reg.ptr));
+                    snprintf(temp, sizeof(temp), "%016llx", (u64)(*(u32*)reg.ptr));
                 last = temp[0];
                 count = 1;
 
@@ -1582,11 +1582,11 @@ https://github.com/buu342/N64-UNFLoader
                         {
                             // Because 6 (#) and 7 ($) are special characters in GDB, we have to do them differently
                             if (count == 7)
-                                totalwrote += sprintf(buf+totalwrote, "%c*\"%c", last, last);
+                                totalwrote += snprintf(buf+totalwrote, REGISTER_SIZE, "%c*\"%c", last, last);
                             else if (count == 8)
-                                totalwrote += sprintf(buf+totalwrote, "%c*\"%c%c", last, last, last);
+                                totalwrote += snprintf(buf+totalwrote, REGISTER_SIZE, "%c*\"%c%c", last, last, last);
                             else
-                                totalwrote += sprintf(buf+totalwrote, "%c*%c", last, ' '+(count-4));
+                                totalwrote += snprintf(buf+totalwrote, REGISTER_SIZE, "%c*%c", last, ' '+(count-4));
                         }
                         else
                         {
@@ -1604,7 +1604,7 @@ https://github.com/buu342/N64-UNFLoader
                 }
                 return totalwrote;
             }
-            return sprintf(buf, "x*,");
+            return snprintf(buf, 4, "x*,");
         }
 
 
@@ -1635,16 +1635,16 @@ https://github.com/buu342/N64-UNFLoader
                 usb_write(DATATYPE_HEADER, &header, sizeof(u32)*2);
 
                 // Perform the humpty dumpty
-                offset += sprintf(debug_buffer+offset, "0*,"); // Zero register
+                offset += snprintf(debug_buffer+offset, BUFFER_SIZE-offset, "0*,"); // Zero register
                 for (i=1; i<REGISTER_COUNT; i++)
                 {
                     if (i == 71)
-                        offset += sprintf(debug_buffer+offset, "0*&800b11"); // FCR0 is an edge case
+                        offset += snprintf(debug_buffer+offset, BUFFER_SIZE-offset, "0*&800b11"); // FCR0 is an edge case
                     #ifdef LIBDRAGON
                         else if (i == 35)
-                            offset += sprintf(debug_buffer+offset, "%016llx", (s64)C0_BADVADDR());
+                            offset += snprintf(debug_buffer+offset, BUFFER_SIZE-offset, "%016llx", (s64)C0_BADVADDR());
                         else if (i == 37)
-                            offset += sprintf(debug_buffer+offset, "%016llx", (s64)((s32)context->epc));
+                            offset += snprintf(debug_buffer+offset, BUFFER_SIZE-offset, "%016llx", (s64)((s32)context->epc));
                     #endif
                     else
                     {
@@ -1804,6 +1804,7 @@ https://github.com/buu342/N64-UNFLoader
             u8 validaddress = FALSE;
             char command[32];
             char* commandp = &command[0];
+            char* saveptr;
             #ifdef LIBDRAGON
                 u32 osMemSize = get_memory_size();
             #endif
@@ -1813,11 +1814,11 @@ https://github.com/buu342/N64-UNFLoader
             commandp++;
 
             // Extract the address value
-            strtok(commandp, ",");
+            strtok_r(commandp, ",", &saveptr);
             addr = (u32)hex2u64(commandp);
 
             // Extract the size value
-            commandp = strtok(NULL, ",");
+            commandp = strtok_r(NULL, ",", &saveptr);
             size = (u32)hex2u64(commandp);
             chunkcount = 2+size/128;
 
@@ -1847,7 +1848,7 @@ https://github.com/buu342/N64-UNFLoader
                 u8 val = 0;
                 if (validaddress)
                     val = *((vu8*)(addr+read));
-                written += sprintf(debug_buffer+written, "%02x", val);
+                written += snprintf(debug_buffer+written, BUFFER_SIZE-written, "%02x", val);
 
                 // Send the partial address dump if we're almost overrunning the buffer, or if we've finished
                 read++;
@@ -1876,6 +1877,7 @@ https://github.com/buu342/N64-UNFLoader
             int i;
             u32 addr;
             u32 size;
+            char* saveptr;
             #ifdef LIBDRAGON
                 u32 osMemSize = get_memory_size();
             #endif
@@ -1885,15 +1887,15 @@ https://github.com/buu342/N64-UNFLoader
             commandp++;
 
             // Extract the address value
-            strtok(commandp, ",");
+            strtok_r(commandp, ",", &saveptr);
             addr = (u32)hex2u64(commandp);
 
             // Extract the size value
-            commandp = strtok(NULL, ":");
+            commandp = strtok_r(NULL, ":", &saveptr);
             size = (u32)hex2u64(commandp);
 
             // Finally, point to the data we're actually gonna write
-            commandp = strtok(NULL, "\0");
+            commandp = strtok_r(NULL, "\0", &saveptr);
 
             // We need to translate the address before trying to read it
             addr = debug_rdb_translateaddr(addr);
@@ -1905,7 +1907,7 @@ https://github.com/buu342/N64-UNFLoader
                 for (i=0; i<size; i++)
                 {
                     char byte[3];
-                    sprintf(byte, "%.2s", commandp+(i*2));
+                    snprintf(byte, sizeof(byte), "%.2s", commandp+(i*2));
                     *(((vu8*)addr)+i) = (u8)hex2u64(byte);
                 }
 
@@ -1938,16 +1940,17 @@ https://github.com/buu342/N64-UNFLoader
             u32 addr;
             char command[32];
             char* token = &command[0];
+            char* saveptr;
             #ifdef LIBDRAGON
                 u32 osMemSize = get_memory_size();
             #endif
             strCopy(command, debug_buffer);
 
             // Skip the Z0 at the start
-            token = strtok(command, ",");
+            token = strtok_r(command, ",", &saveptr);
 
             // Extract the address value
-            token = strtok(NULL, ",");
+            token = strtok_r(NULL, ",", &saveptr);
             addr = (u32)hex2u64(token);
 
             // There's still one more byte left (the breakpoint kind) which we can ignore
@@ -2010,16 +2013,17 @@ https://github.com/buu342/N64-UNFLoader
             u32 addr;
             char command[32];
             char* commandp = &command[0];
+            char* saveptr;
             #ifdef LIBDRAGON
                 u32 osMemSize = get_memory_size();
             #endif
             strCopy(commandp, debug_buffer);
 
             // Skip the Z0 at the start
-            strtok(commandp, ",");
+            strtok_r(commandp, ",", &saveptr);
 
             // Extract the address value
-            commandp = strtok(NULL, ",");
+            commandp = strtok_r(NULL, ",", &saveptr);
             addr = (u32)hex2u64(commandp);
 
             // There's still one more byte left (the breakpoint kind) which we can ignore
