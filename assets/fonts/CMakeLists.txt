@@ -1,4 +1,4 @@
-set(FONT_CONVERTER "${PROJECT_SOURCE_DIR}/tools/text/font_converter.js")
+set(FONT_CONVERTER "${TOOLS_DIR}/text/font_converter.js")
 
 ###########
 ## Fonts ##

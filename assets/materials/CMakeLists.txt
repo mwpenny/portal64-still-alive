@@ -504,26 +504,26 @@ endfunction()
 
 set_property(SOURCE static.skm.yaml
     PROPERTY ADDITIONAL_DEPS
-        ${PROJECT_SOURCE_DIR}/assets/images/turret.png
+        ${ASSETS_DIR}/images/turret.png
 )
 
 set_property(SOURCE hud.skm.yaml
     PROPERTY ADDITIONAL_DEPS
-        ${PROJECT_SOURCE_DIR}/assets/images/center_reticle.png
+        ${ASSETS_DIR}/images/center_reticle.png
 )
 
 set_property(SOURCE ui.skm.yaml
     PROPERTY ADDITIONAL_DEPS
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_0.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_1.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_2.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_3.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_4.png
-        ${PROJECT_SOURCE_DIR}/assets/fonts/liberation_mono/liberation_mono_0.png
-        ${PROJECT_SOURCE_DIR}/assets/images/button_icons.png
-        ${PROJECT_SOURCE_DIR}/assets/images/credits_icons.png
-        ${PROJECT_SOURCE_DIR}/assets/images/github_qr.png
-        ${PROJECT_SOURCE_DIR}/assets/images/rounded_corners.png
+        ${ASSETS_DIR}/fonts/dejavu_sans/dejavu_sans_0.png
+        ${ASSETS_DIR}/fonts/dejavu_sans/dejavu_sans_1.png
+        ${ASSETS_DIR}/fonts/dejavu_sans/dejavu_sans_2.png
+        ${ASSETS_DIR}/fonts/dejavu_sans/dejavu_sans_3.png
+        ${ASSETS_DIR}/fonts/dejavu_sans/dejavu_sans_4.png
+        ${ASSETS_DIR}/fonts/liberation_mono/liberation_mono_0.png
+        ${ASSETS_DIR}/images/button_icons.png
+        ${ASSETS_DIR}/images/credits_icons.png
+        ${ASSETS_DIR}/images/github_qr.png
+        ${ASSETS_DIR}/images/rounded_corners.png
 )
 
 set(GENERATED_CORE_MATERIALS "")

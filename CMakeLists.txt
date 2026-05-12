@@ -36,6 +36,7 @@ set(ASM_DIR            "${PROJECT_SOURCE_DIR}/asm")
 set(ASSETS_DIR         "${PROJECT_SOURCE_DIR}/assets")
 set(LINKER_DIR         "${PROJECT_SOURCE_DIR}/linker")
 set(SRC_DIR            "${PROJECT_SOURCE_DIR}/src")
+set(TOOLS_DIR          "${PROJECT_SOURCE_DIR}/tools")
 set(VPK_DIR            "${PROJECT_SOURCE_DIR}/vpk")
 
 # Extracted/generated file output directories

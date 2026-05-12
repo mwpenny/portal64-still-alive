@@ -1,21 +1,21 @@
-set(EXPORT_LEVEL ${PROJECT_SOURCE_DIR}/tools/level_scripts/export_level.lua)
+set(EXPORT_LEVEL ${TOOLS_DIR}/level_scripts/export_level.lua)
 set(EXPORT_SCRIPTS
     ${EXPORT_LEVEL}
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/animation.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/collision_export.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/dynamic_collision_export.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/entities.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/portal_surfaces.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/room_export.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/signals.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/static_export.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/trigger.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/util.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/world.lua
-    ${PROJECT_SOURCE_DIR}/tools/level_scripts/yaml_loader.lua
+    ${TOOLS_DIR}/level_scripts/animation.lua
+    ${TOOLS_DIR}/level_scripts/collision_export.lua
+    ${TOOLS_DIR}/level_scripts/dynamic_collision_export.lua
+    ${TOOLS_DIR}/level_scripts/entities.lua
+    ${TOOLS_DIR}/level_scripts/portal_surfaces.lua
+    ${TOOLS_DIR}/level_scripts/room_export.lua
+    ${TOOLS_DIR}/level_scripts/signals.lua
+    ${TOOLS_DIR}/level_scripts/static_export.lua
+    ${TOOLS_DIR}/level_scripts/trigger.lua
+    ${TOOLS_DIR}/level_scripts/util.lua
+    ${TOOLS_DIR}/level_scripts/world.lua
+    ${TOOLS_DIR}/level_scripts/yaml_loader.lua
 )
 
-set(GEN_LEVEL_LIST "${PROJECT_SOURCE_DIR}/tools/models/generate_level_list.js")
+set(GEN_LEVEL_LIST "${TOOLS_DIR}/models/generate_level_list.js")
 
 cmake_path(
     RELATIVE_PATH CMAKE_CURRENT_SOURCE_DIR

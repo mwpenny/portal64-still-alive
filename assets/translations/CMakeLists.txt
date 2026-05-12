@@ -1,7 +1,7 @@
 set(BUILD_STRINGS_DIR "${GENERATED_CODE_DIR}/assets/strings")
 
-set(FONT_DEF          "${PROJECT_SOURCE_DIR}/assets/fonts/dejavu_sans/dejavu_sans_all.json")
-set(GENERATE_STRINGS  "${PROJECT_SOURCE_DIR}/tools/text/generate_strings.py")
+set(FONT_DEF          "${ASSETS_DIR}/fonts/dejavu_sans/dejavu_sans_all.json")
+set(GENERATE_STRINGS  "${TOOLS_DIR}/text/generate_strings.py")
 
 ##################
 ## Translations ##

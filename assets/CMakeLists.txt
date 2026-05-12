@@ -25,10 +25,10 @@ set(MODEL_SCALE 0.01)
 set(SCENE_SCALE 128)
 
 # Tools for asset conversion
-set(EXPORT_FBX       "${PROJECT_SOURCE_DIR}/tools/models/export_fbx.py")
-set(GEN_SEGMENT_LD   "${PROJECT_SOURCE_DIR}/tools/generate_segment_ld.js")
-set(MODEL_LIST_UTILS "${PROJECT_SOURCE_DIR}/tools/models/model_list_utils.js")
-set(RUN_COMMAND      "${PROJECT_SOURCE_DIR}/tools/run_command.py")
+set(EXPORT_FBX       "${TOOLS_DIR}/models/export_fbx.py")
+set(GEN_SEGMENT_LD   "${TOOLS_DIR}/generate_segment_ld.js")
+set(MODEL_LIST_UTILS "${TOOLS_DIR}/models/model_list_utils.js")
+set(RUN_COMMAND      "${TOOLS_DIR}/run_command.py")
 
 add_subdirectory(fonts)
 add_subdirectory(materials)
