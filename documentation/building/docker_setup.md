@@ -1,8 +1,15 @@
 # Docker Build Setup
 
-This project provides a Docker image for easy and consistent builds regardless
-of platform. This is the recommended setup if you don't want to make system-wide
-changes just for this project, or are unfamiliar with Linux.
+This project provides a Dockerfile, which allows you to create a containerized
+environment for easy and consistent builds regardless of platform. This is
+the recommended setup if you don't want to make system-wide changes just for
+this project, or are unfamiliar with Linux.
+
+> **Note:** The steps and commands below use Docker. It is also possible to use
+other OCI-compliant container management software (such as
+[Podman](https://podman.io/) or [container](https://github.com/apple/container)),
+but doing so is considered advanced -- you should know what you're doing if trying
+something different.
 
 ## Install Docker
 
@@ -49,7 +56,7 @@ and access an interactive shell.
 
 ```sh
 cd portal64
-docker run --rm -v .:/usr/src/app -it portal64 bash
+docker run --rm -v ./:/usr/src/app -it portal64 bash
 ```
 
 This mounts the current directory (the project root) inside the container at

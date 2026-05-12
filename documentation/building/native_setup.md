@@ -1,15 +1,15 @@
 # Native Build Setup
 
-These steps will install and configure the project dependencies system-wide.
-You can also follow the same steps to set up the dependencies in a virtual
-machine or using Windows Subsystem for Linux (WSL). Follow them manually, or
-execute the [tools/setup_ubuntu.sh](../../tools/setup_ubuntu.sh) script.
-
 > **Note:** The steps and commands below assume you are using Ubuntu Linux or
 a similar Debian derivative (we test the same version as the
 [Docker image](../../Dockerfile#L1)). Building in other environments is possible
 but considered advanced -- you should know what you're doing if trying something
 different. Otherwise, consider [using Docker](./docker_setup.md).
+
+These steps will install and configure the project dependencies system-wide.
+You can also follow the same steps to set up the dependencies in a virtual
+machine or using Windows Subsystem for Linux (WSL). Follow them manually, or
+execute the [tools/setup_ubuntu.sh](../../tools/setup_ubuntu.sh) script.
 
 ## SDK
 
