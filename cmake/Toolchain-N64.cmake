@@ -99,7 +99,7 @@ function(add_n64_rom TARGET)
     set(INPUT_FILE "$<TARGET_FILE:${TARGET}>")
     set(OUTPUT_ROM "$<PATH:REPLACE_EXTENSION,$<TARGET_FILE:${TARGET}>,z64>")
 
-    add_custom_command(TARGET portal POST_BUILD
+    add_custom_command(TARGET ${TARGET} POST_BUILD
         COMMAND
             ${CMAKE_OBJCOPY} -O binary
             ${INPUT_FILE}
