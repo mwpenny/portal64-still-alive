@@ -20,9 +20,14 @@ cutscenes:
     - open_portal stationary_portal 0
     - set_signal launch_ball
     - wait_for_signal exit_activate
+    - delay 1.5
     - label horizontal_loop
     - play_animation horizontal horizontal_slide
     - wait_for_animation horizontal
+    - delay 3
+    - play_animation horizontal horizontal_slide -1
+    - wait_for_animation horizontal
+    - delay 3
     - goto horizontal_loop
 operators:
   []
