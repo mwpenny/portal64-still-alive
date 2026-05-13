@@ -55,8 +55,6 @@ void ballLauncherRender(void* data, struct DynamicRenderDataList* renderList, st
 }
 
 void ballLauncherInit(struct BallLauncher* launcher, struct BallLauncherDefinition* definition) {
-    struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_COMBINE_BALL_LAUNCHER_DYNAMIC_ANIMATED_MODEL);
-
     collisionObjectInit(&launcher->collisionObject, &gBallLauncherCollider, &launcher->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_BLOCK_BALL);
     rigidBodyMarkKinematic(&launcher->rigidBody);
     collisionSceneAddDynamicObject(&launcher->collisionObject);
@@ -65,21 +63,20 @@ void ballLauncherInit(struct BallLauncher* launcher, struct BallLauncherDefiniti
     launcher->rigidBody.transform.rotation = definition->rotation;
     launcher->rigidBody.transform.scale = gOneVec;
     launcher->rigidBody.currentRoom = definition->roomIndex;
-
-    launcher->signalIndex = definition->signalIndex;
-    launcher->ballLifetime = definition->ballLifetime;
-    launcher->ballVelocity = definition->ballVelocity;
-
     collisionObjectUpdateBB(&launcher->collisionObject);
 
-    launcher->dynamicId = dynamicSceneAdd(launcher, ballLauncherRender, &launcher->rigidBody.transform.position, 1.0f);
+    launcher->ballLifetime = definition->ballLifetime;
+    launcher->ballVelocity = definition->ballVelocity;
+    ballInitInactive(&launcher->currentBall);
 
+    launcher->signalIndex = definition->signalIndex;
+
+    launcher->dynamicId = dynamicSceneAdd(launcher, ballLauncherRender, &launcher->rigidBody.transform.position, 1.0f);
     dynamicSceneSetRoomFlags(launcher->dynamicId, ROOM_FLAG_FROM_INDEX(launcher->rigidBody.currentRoom));
 
+    struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_COMBINE_BALL_LAUNCHER_DYNAMIC_ANIMATED_MODEL);
     skAnimatorInit(&launcher->animator, PROPS_COMBINE_BALL_LAUNCHER_DEFAULT_BONES_COUNT);
     skArmatureInit(&launcher->armature, armature->armature);
-
-    ballInitInactive(&launcher->currentBall);
 }
 
 void ballLauncherUpdate(struct BallLauncher* launcher) {
@@ -96,20 +93,33 @@ void ballLauncherUpdate(struct BallLauncher* launcher) {
         quatMultVector(&launcher->rigidBody.transform.rotation, &gForward, &initialVelocity);
         vector3Scale(&initialVelocity, &initialVelocity, launcher->ballVelocity);
 
-        ballInit(&launcher->currentBall, &launcher->rigidBody.transform.position, &initialVelocity, launcher->rigidBody.currentRoom, launcher->ballLifetime);
-        skAnimatorRunClip(&launcher->animator, dynamicAssetClip(PROPS_COMBINE_BALL_LAUNCHER_DYNAMIC_ANIMATED_MODEL, PROPS_COMBINE_BALL_LAUNCHER_ARMATURE_LAUNCH_CLIP_INDEX), 0.0f, 0);
+        ballInit(
+            &launcher->currentBall,
+            &launcher->rigidBody.transform.position,
+            &initialVelocity,
+            launcher->rigidBody.currentRoom,
+            launcher->ballLifetime
+        );
+        skAnimatorRunClip(
+            &launcher->animator,
+            dynamicAssetClip(PROPS_COMBINE_BALL_LAUNCHER_DYNAMIC_ANIMATED_MODEL, PROPS_COMBINE_BALL_LAUNCHER_ARMATURE_LAUNCH_CLIP_INDEX),
+            0.0f,
+            0
+        );
         soundPlayerPlay(soundsBallLaunch, 1.0f, 1.0f, &launcher->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
     }
 
     if (ballIsActive(&launcher->currentBall) && !ballIsCollisionOn(&launcher->currentBall)) {
+        // Wait until ball is clear of launcher to turn on collision
         struct Simplex simplex;
         if (!gjkCheckForOverlap(
-            &simplex, 
-            &launcher->collisionObject, 
+            &simplex,
+            &launcher->collisionObject,
             objectMinkowskiSupport,
             &launcher->currentBall.collisionObject,
             objectMinkowskiSupport,
-            &launcher->currentBall.rigidBody.velocity)) {
+            &launcher->currentBall.rigidBody.velocity)
+        ) {
             ballTurnOnCollision(&launcher->currentBall);
         }
     }

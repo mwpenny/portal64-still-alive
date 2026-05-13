@@ -28,8 +28,9 @@ struct Ball {
     float targetSpeed;
     float lifetime;
     float originalLifetime;
-    short dynamicId;
     short flags;
+
+    short dynamicId;
     short soundLoopId;
 };
 

@@ -445,7 +445,16 @@ void catcherDeserialize(struct Serializer* serializer, struct Scene* scene) {
         }
 
         struct BallCatcher* catcher = &scene->ballCatchers[i];
-        ballCatcherHandBall(catcher, &scene->ballLaunchers[caughtIndex].currentBall);
+        struct Ball* caughtBall = &scene->ballLaunchers[caughtIndex].currentBall;
+
+        ballInit(
+            caughtBall,
+            &catcher->rigidBody.transform.position,
+            &gZeroVec,
+            catcher->rigidBody.currentRoom,
+            0.0f
+        );
+        ballCatcherHandBall(catcher, caughtBall);
     }
 }
 

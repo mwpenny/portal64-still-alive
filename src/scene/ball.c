@@ -51,8 +51,8 @@ void ballBurnMarkInit() {
 void ballBurnFilterOnPortal(struct Transform* portalTransform, int portalIndex) {
     for (int i = 0; i < MAX_BURN_MARKS; ++i) {
         struct BallBurnMark* burnMark = &sBurnMarks[i];
-        
-        if (burnMark->dynamicId == -1) {
+
+        if (burnMark->dynamicId == INVALID_DYNAMIC_OBJECT) {
             continue;
         }
 
@@ -63,7 +63,7 @@ void ballBurnFilterOnPortal(struct Transform* portalTransform, int portalIndex) 
     }
 }
 
-void ballRender(void* data, struct RenderScene* renderScene, struct Transform* fromView) {
+static void ballRender(void* data, struct RenderScene* renderScene, struct Transform* fromView) {
     struct Ball* ball = (struct Ball*)data;
     struct Transform transform;
     transform.position = ball->rigidBody.transform.position;
@@ -91,37 +91,50 @@ void ballBurnRender(void* data, struct DynamicRenderDataList* renderList, struct
 }
 
 void ballInitInactive(struct Ball* ball) {
-    collisionObjectInit(&ball->collisionObject, &sBallCollider, &ball->rigidBody, 1.0f, 0);
-
     ball->targetSpeed = 0.0f;
+    ball->lifetime = 0.0f;
+    ball->originalLifetime = 0.0f;
     ball->flags = 0;
     ball->soundLoopId = SOUND_ID_NONE;
-    ball->lifetime = 0.0f;
 }
 
 void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* velocity, short startingRoom, float ballLifetime) {
     collisionObjectInit(&ball->collisionObject, &sBallCollider, &ball->rigidBody, 1.0f, 0);
-
     collisionSceneAddDynamicObject(&ball->collisionObject);
 
-    ball->rigidBody.flags |= RigidBodyDisableGravity;
-
-    ball->rigidBody.velocity = *velocity;
     ball->rigidBody.transform.position = *position;
     quatIdent(&ball->rigidBody.transform.rotation);
     ball->rigidBody.transform.scale = gOneVec;
+
+    ball->rigidBody.velocity = *velocity;
     ball->rigidBody.currentRoom = startingRoom;
-    ball->flags = 0;
-    ball->lifetime = ballLifetime;
-    ball->originalLifetime = ballLifetime;
+    ball->rigidBody.flags |= RigidBodyDisableGravity;
 
     ball->targetSpeed = sqrtf(vector3MagSqrd(&ball->rigidBody.velocity));
+    ball->lifetime = ballLifetime;
+    ball->originalLifetime = ballLifetime;
+    ball->flags = 0;
 
-    ball->dynamicId = dynamicSceneAddViewDependent(ball, ballRender, &ball->rigidBody.transform.position, BALL_RADIUS);
-
+    ball->dynamicId = dynamicSceneAddViewDependent(
+        ball,
+        ballRender,
+        &ball->rigidBody.transform.position,
+        BALL_RADIUS
+    );
     dynamicSceneSetRoomFlags(ball->dynamicId, ROOM_FLAG_FROM_INDEX(startingRoom));
 
-    ball->soundLoopId = soundPlayerPlay(soundsBallLoop, 1.3f, 1.0f, &ball->rigidBody.transform.position, &ball->rigidBody.velocity, SoundTypeAll);
+    if (ballIsActive(ball)) {
+        ball->soundLoopId = soundPlayerPlay(
+            soundsBallLoop,
+            1.3f,
+            1.0f,
+            &ball->rigidBody.transform.position,
+            &ball->rigidBody.velocity,
+            SoundTypeAll
+        );
+    } else {
+        ball->soundLoopId = SOUND_ID_NONE;
+    }
 }
 
 void ballTurnOnCollision(struct Ball* ball) {
@@ -201,36 +214,37 @@ void ballUpdate(struct Ball* ball) {
         return;
     }
 
-    if (ball->rigidBody.flags & (RigidBodyFlagsCrossedPortal0 | RigidBodyFlagsCrossedPortal1)){
+    if (ball->rigidBody.flags & (RigidBodyFlagsCrossedPortal0 | RigidBodyFlagsCrossedPortal1)) {
         ball->lifetime = ball->originalLifetime;
     }
 
     float currentSpeed = sqrtf(vector3MagSqrd(&ball->rigidBody.velocity));
-
     if (currentSpeed == 0.0f) {
         vector3Scale(&gRight, &ball->rigidBody.velocity, ball->targetSpeed);
     } else {
         vector3Scale(&ball->rigidBody.velocity, &ball->rigidBody.velocity, ball->targetSpeed / currentSpeed);
     }
 
-    soundPlayerSetPosition(ball->soundLoopId, &ball->rigidBody.transform.position, &ball->rigidBody.velocity);
-
     ball->rigidBody.angularVelocity = gOneVec;
-    
+
     dynamicSceneSetRoomFlags(ball->dynamicId, ROOM_FLAG_FROM_INDEX(ball->rigidBody.currentRoom));
+
+    soundPlayerSetPosition(ball->soundLoopId, &ball->rigidBody.transform.position, &ball->rigidBody.velocity);
 
     if (ball->lifetime > 0.0f) {
         ball->lifetime -= FIXED_DELTA_TIME;
 
         if (ball->lifetime <= 0.0f) {
-            ball->targetSpeed = 0.0f;
             collisionSceneRemoveDynamicObject(&ball->collisionObject);
             dynamicSceneRemove(ball->dynamicId);
+            ball->dynamicId = INVALID_DYNAMIC_OBJECT;
+            ball->targetSpeed = 0.0f;
+
             soundPlayerStop(ball->soundLoopId);
+            ball->soundLoopId = SOUND_ID_NONE;
             soundPlayerPlay(soundsBallExplode, 2.0f, 1.0f, &ball->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             hudShowSubtitle(&gScene.hud, ENERGYBALL_EXPLOSION, SubtitleTypeCaption);
             effectsSplashPlay(&gScene.effects, &gBallBurst, &ball->rigidBody.transform.position, &gUp, NULL);
-            ball->soundLoopId = SOUND_ID_NONE;
         }
     }
 
@@ -250,9 +264,10 @@ int ballIsCaught(struct Ball* ball) {
 }
 
 void ballMarkCaught(struct Ball* ball) {
-    ball->flags |= BallFlagsCaught;
     collisionSceneRemoveDynamicObject(&ball->collisionObject);
     rigidBodyMarkKinematic(&ball->rigidBody);
+    ball->flags |= BallFlagsCaught;
+
     soundPlayerStop(ball->soundLoopId);
     ball->soundLoopId = SOUND_ID_NONE;
 }

@@ -58,7 +58,7 @@ void ballCatcherRender(void* data, struct DynamicRenderDataList* renderList, str
 
 void ballCatcherInit(struct BallCatcher* catcher, struct BallCatcherDefinition* definition) {
     collisionObjectInit(&catcher->collisionObject, &sBallCatcherCollider, &catcher->rigidBody, 1.0f, COLLISION_LAYERS_TANGIBLE);
-    rigidBodyMarkKinematic(&catcher->rigidBody); 
+    rigidBodyMarkKinematic(&catcher->rigidBody);
     collisionSceneAddDynamicObject(&catcher->collisionObject);
 
     catcher->rigidBody.transform.position = definition->position;
@@ -97,20 +97,27 @@ void ballCatcherCheckBalls(struct BallCatcher* catcher, struct BallLauncher* bal
             objectMinkowskiSupport,
             &launcher->currentBall.collisionObject,
             objectMinkowskiSupport,
-            &launcher->currentBall.rigidBody.velocity)) {
+            &launcher->currentBall.rigidBody.velocity)
+        ) {
             continue;
         }
 
         catcher->caughtBall = &launcher->currentBall;
-        soundPlayerPlay(soundsBallCatcher, 2.5f, 1.0f, &catcher->rigidBody.transform.position, &catcher->rigidBody.velocity, SoundTypeAll);
         ballMarkCaught(catcher->caughtBall);
-        skAnimatorRunClip(&catcher->animator, dynamicAssetClip(PROPS_COMBINE_BALL_CATCHER_DYNAMIC_ANIMATED_MODEL, PROPS_COMBINE_BALL_CATCHER_ARMATURE_CATCH_CLIP_INDEX), 0.0f, 0);
+
+        soundPlayerPlay(soundsBallCatcher, 2.5f, 1.0f, &catcher->rigidBody.transform.position, &catcher->rigidBody.velocity, SoundTypeAll);
+        skAnimatorRunClip(
+            &catcher->animator,
+            dynamicAssetClip(PROPS_COMBINE_BALL_CATCHER_DYNAMIC_ANIMATED_MODEL, PROPS_COMBINE_BALL_CATCHER_ARMATURE_CATCH_CLIP_INDEX),
+            0.0f,
+            0
+        );
     }
 }
 
 void ballCatcherUpdate(struct BallCatcher* catcher, struct BallLauncher* ballLaunchers, int ballLauncherCount) {
     skAnimatorUpdate(&catcher->animator, catcher->armature.pose, FIXED_DELTA_TIME);
-    
+
     if (catcher->caughtBall) {
         if (catcher->caughtBall->flags & BallFlagsPowering) {
             signalsSend(catcher->signalIndex);
@@ -119,9 +126,9 @@ void ballCatcherUpdate(struct BallCatcher* catcher, struct BallLauncher* ballLau
             transformPoint(&catcher->rigidBody.transform, &sLocalCatcherLocation, &targetPosition);
 
             int reachedTarget = vector3MoveTowards(
-                &catcher->caughtBall->rigidBody.transform.position, 
-                &targetPosition, 
-                FIXED_DELTA_TIME * BALL_VELOCITY, 
+                &catcher->caughtBall->rigidBody.transform.position,
+                &targetPosition,
+                FIXED_DELTA_TIME * BALL_VELOCITY,
                 &catcher->caughtBall->rigidBody.transform.position
             );
 
@@ -136,9 +143,16 @@ void ballCatcherUpdate(struct BallCatcher* catcher, struct BallLauncher* ballLau
 }
 
 void ballCatcherHandBall(struct BallCatcher* catcher, struct Ball* caughtBall) {
-    collisionSceneRemoveDynamicObject(&catcher->collisionObject);
-
-    transformPoint(&catcher->rigidBody.transform, &sLocalCatcherLocation, &caughtBall->rigidBody.transform.position);
-    caughtBall->flags |= BallFlagsPowering;
     catcher->caughtBall = caughtBall;
+    catcher->caughtBall->flags |= BallFlagsPowering;
+    ballMarkCaught(catcher->caughtBall);
+    transformPoint(&catcher->rigidBody.transform, &sLocalCatcherLocation, &catcher->caughtBall->rigidBody.transform.position);
+
+    skAnimatorRunClip(
+        &catcher->animator,
+        dynamicAssetClip(PROPS_COMBINE_BALL_CATCHER_DYNAMIC_ANIMATED_MODEL, PROPS_COMBINE_BALL_CATCHER_ARMATURE_CAUGHT_CLIP_INDEX),
+        0.0f,
+        0
+    );
+    collisionSceneRemoveDynamicObject(&catcher->collisionObject);
 }

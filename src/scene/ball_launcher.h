@@ -13,11 +13,11 @@ struct BallLauncher {
     struct RigidBody rigidBody;
     struct SKArmature armature;
     struct SKAnimator animator;
+    struct Ball currentBall;
     short dynamicId;
     short signalIndex;
     float ballLifetime;
     float ballVelocity;
-    struct Ball currentBall;
 };
 
 void ballLauncherInit(struct BallLauncher* launcher, struct BallLauncherDefinition* definition);
