@@ -2,10 +2,14 @@
 
 #include "scene/dynamic_scene.h"
 #include "util/dynamic_asset_loader.h"
+#include "util/frame_time.h"
 
 #include "codegen/assets/materials/static.h"
 #include "codegen/assets/models/dynamic_animated_model_list.h"
 #include "codegen/assets/models/props_bts/glados_aperturedoor.h"
+
+// Avoids z-fighting
+#define INCINERATOR_SCALE 1024.0f
 
 void incineratorRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Incinerator* incinerator = (struct Incinerator*)data;
@@ -41,9 +45,10 @@ void incineratorInit(struct Incinerator* incinerator, struct IncineratorDefiniti
 
     incinerator->transform.position = definition->position;
     incinerator->transform.rotation = definition->rotation;
-    incinerator->transform.scale = gOneVec;
+    vector3Scale(&gOneVec, &incinerator->transform.scale, SCENE_SCALE / INCINERATOR_SCALE);
 
     incinerator->signalIndex = definition->signalIndex;
+    incinerator->isOpen = 0;
 
     incinerator->dynamicId = dynamicSceneAdd(
         incinerator,
@@ -52,4 +57,33 @@ void incineratorInit(struct Incinerator* incinerator, struct IncineratorDefiniti
         2.0f
     );
     dynamicSceneSetRoomFlags(incinerator->dynamicId, ROOM_FLAG_FROM_INDEX(definition->roomIndex));
+}
+
+void incineratorUpdate(struct Incinerator* incinerator) {
+    int animationDirection = incinerator->isOpen ? 1 : -1;
+    skAnimatorUpdate(
+        &incinerator->animator,
+        incinerator->armature.pose,
+        FIXED_DELTA_TIME * animationDirection
+    );
+
+    if (signalsRead(incinerator->signalIndex) != incinerator->isOpen) {
+        struct SKAnimationClip* clip = dynamicAssetClip(
+            PROPS_BTS_GLADOS_APERTUREDOOR_DYNAMIC_ANIMATED_MODEL,
+            PROPS_BTS_GLADOS_APERTUREDOOR_ARMATURE_OPEN_CLIP_INDEX
+        );
+
+        float startTime;
+
+        if (skAnimatorIsRunning(&incinerator->animator)) {
+            startTime = incinerator->animator.currentTime;
+        } else if (incinerator->isOpen) {
+            startTime = clip->nFrames / clip->fps;
+        } else {
+            startTime = 0.0f;
+        }
+
+        skAnimatorRunClip(&incinerator->animator, clip, startTime, 0);
+        incinerator->isOpen ^= 1;
+    }
 }

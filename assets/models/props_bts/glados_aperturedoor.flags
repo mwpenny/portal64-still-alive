@@ -1,1 +1,1 @@
--m assets/materials/static.skm.yaml -m assets/materials/objects.skm.yaml --default-material incinerator
+--fixed-point-scale 1024 -m assets/materials/static.skm.yaml -m assets/materials/objects.skm.yaml --default-material incinerator

@@ -805,6 +805,10 @@ void sceneUpdate(struct Scene* scene) {
         ballLauncherUpdate(&scene->ballLaunchers[i]);
     }
 
+    for (int i = 0; i < scene->incineratorCount; ++i) {
+        incineratorUpdate(&scene->incinerators[i]);
+    }
+
     for (int i = 0; i < scene->elevatorCount; ++i) {
         int teleportTo = elevatorUpdate(&scene->elevators[i], &scene->player);
 
