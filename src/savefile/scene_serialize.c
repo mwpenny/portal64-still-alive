@@ -773,7 +773,7 @@ void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
     READ_ALIGN_CHECK;
 
     for (int i = 0; i < scene->doorCount; ++i) {
-        doorCheckForOpenState(&scene->doors[i]);
+        doorOnDeserialize(&scene->doors[i]);
     }
 
     if (scene->player.flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
