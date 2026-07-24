@@ -220,10 +220,10 @@ void skAnimatorStep(struct SKAnimator* animator, float deltaTime) {
         // Only one frame is needed and is already present
         animator->blendLerp = 1.0f;
         animator->nextFrameStateIndex = existingNextFrame;
-    } else if (existingNextFrame == 1) {
-        animator->blendLerp = lerpValue;
     } else {
-        animator->blendLerp = 1.0f - lerpValue;
+        // Both frames are needed and present
+        animator->blendLerp = lerpValue;
+        animator->nextFrameStateIndex = existingNextFrame;
     }
 }
 
