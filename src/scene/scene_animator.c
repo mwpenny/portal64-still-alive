@@ -145,18 +145,10 @@ void sceneAnimatorPlay(struct SceneAnimator* sceneAnimator, int animatorIndex, i
     }
 
     struct SKAnimationClip* clip = &info->clips[animationIndex];
-
     sceneAnimator->state[animatorIndex].playbackSpeed = speed;
-
-    if (animator->currentClip == clip) {
-        // Make sure speed changes take effect on the last frame. This delays
-        // the ending by 1 frame if the playback direction is the same.
-        animator->flags &= ~SKAnimatorFlagsDone;
-
-        return;
-    }
     
-    skAnimatorRunClip(&sceneAnimator->animators[animatorIndex], clip, speed >= 0.0f ? 0.0f : clip->nFrames / clip->fps, flags);
+    float startTime = SK_ANIMATION_CLIP_START(clip, speed < 0.0f);
+    skAnimatorEnsureClipRunning(animator, clip, startTime, flags);
 }
 
 void sceneAnimatorSetSpeed(struct SceneAnimator* sceneAnimator, int animatorIndex, float speed) {

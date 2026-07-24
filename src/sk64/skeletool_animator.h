@@ -25,6 +25,7 @@ void skAnimatorCleanup(struct SKAnimator* animator);
 void skAnimatorUpdate(struct SKAnimator* animator, struct Transform* transforms, float deltaTime);
 
 void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip, float startTime, int flags);
+void skAnimatorEnsureClipRunning(struct SKAnimator* animator, struct SKAnimationClip* clip, float startTime, int flags);
 int skAnimatorIsRunning(struct SKAnimator* animator);
 
 struct SKAnimatorBlender {

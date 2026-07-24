@@ -266,6 +266,15 @@ void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip
     skAnimatorStep(animator, 0.0f);
 }
 
+void skAnimatorEnsureClipRunning(struct SKAnimator* animator, struct SKAnimationClip* clip, float startTime, int flags) {
+    if (animator->currentClip == clip) {
+        // Make sure the clip doesn't end this frame, so callers can reverse it
+        animator->flags &= ~SKAnimatorFlagsDone;
+    } else {
+        skAnimatorRunClip(animator, clip, startTime, flags);
+    }
+}
+
 int skAnimatorIsRunning(struct SKAnimator* animator) {
     return animator->currentClip != NULL;
 }

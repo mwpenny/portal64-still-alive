@@ -19,6 +19,14 @@
 #define DOOR_COLLISION_Y_OFFSET 1.0f
 #define DOOR_COLLISION_LAYERS   (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_BALL | COLLISION_LAYERS_BLOCK_TURRET_SIGHT)
 
+struct DoorTypeDefinition {
+    short armatureIndex;
+    short openClipIndex;
+    short materialIndex;
+    short colliderBoneIndex;
+    struct Quaternion relativeRotation;
+};
+
 static struct CollisionBox sDoorCollisionBox = {
     {1.0f, 1.0f, 0.1125f}
 };
@@ -35,7 +43,6 @@ static struct DoorTypeDefinition sDoorTypeDefinitions[] = {
     [DoorType01] = {
         PROPS_DOOR_01_DYNAMIC_ANIMATED_MODEL,
         PROPS_DOOR_01_ARMATURE_OPEN_CLIP_INDEX,
-        PROPS_DOOR_01_ARMATURE_OPENED_CLIP_INDEX,
         DOOR_01_INDEX,
         -1,
         {0.0f, 0.0f, 0.0f, 1.0f},
@@ -43,7 +50,6 @@ static struct DoorTypeDefinition sDoorTypeDefinitions[] = {
     [DoorType02] = {
         PROPS_DOOR_02_DYNAMIC_ANIMATED_MODEL,
         PROPS_DOOR_02_ARMATURE_OPEN_CLIP_INDEX,
-        PROPS_DOOR_02_ARMATURE_OPENED_CLIP_INDEX,
         DOOR_02_INDEX,
         PROPS_DOOR_02_DOOR_BONE,
         {0.707106781f, 0.0f, 0.0f, 0.707106781f},
@@ -123,17 +129,8 @@ void doorUpdate(struct Door* door) {
             typeDefinition->openClipIndex
         );
 
-        float startTime;
-
-        if (skAnimatorIsRunning(&door->animator)) {
-            startTime = door->animator.currentTime;
-        } else if (door->isOpen) {
-            startTime = clip->nFrames / clip->fps;
-        } else {
-            startTime = 0.0f;
-        }
-
-        skAnimatorRunClip(&door->animator, clip, startTime, 0);
+        float startTime = SK_ANIMATION_CLIP_START(clip, door->isOpen);
+        skAnimatorEnsureClipRunning(&door->animator, clip, startTime, 0);
 
         soundPlayerPlay(soundsDoor, 3.0f, 1.0f, &door->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTAL_DOORCLOSE, SubtitleTypeCaption);
@@ -169,8 +166,14 @@ void doorOnDeserialize(struct Door* door) {
     struct DoorTypeDefinition* typeDefinition = &sDoorTypeDefinitions[door->doorDefinition->doorType];
 
     if (signalsRead(door->signalIndex)) {
-        door->isOpen = 1;
-        skAnimatorRunClip(&door->animator, dynamicAssetClip(typeDefinition->armatureIndex, typeDefinition->openedClipIndex), 0.0f, 0);
+        struct SKAnimationClip* clip = dynamicAssetClip(
+            typeDefinition->armatureIndex,
+            typeDefinition->openedClipIndex
+        );
+
+        skAnimatorRunClip(&door->animator, clip, SK_ANIMATION_CLIP_DURATION(clip), 0);
         skAnimatorUpdate(&door->animator, door->armature.pose, FIXED_DELTA_TIME);
+
+        door->isOpen = 1;
     }
 }

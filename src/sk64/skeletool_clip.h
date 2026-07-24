@@ -1,10 +1,8 @@
-#ifndef _SKELETOOL_ANIMATION_CLIP_H
-#define _SKELETOOL_ANIMATION_CLIP_H
-
-#define SK_ANIMATION_EVENT_END      0xFFFF
-#define SK_ANIMATION_EVENT_START    0xFFFE
+#ifndef __SKELETOOL_ANIMATION_CLIP_H__
+#define __SKELETOOL_ANIMATION_CLIP_H__
 
 #define SK_ANIMATION_CLIP_DURATION(clip) ((clip)->nFrames / (clip)->fps)
+#define SK_ANIMATION_CLIP_START(clip, isReversed) ((isReversed) ? SK_ANIMATION_CLIP_DURATION(clip) : 0.0f)
 
 struct SKU16Vector3 {
     short x;

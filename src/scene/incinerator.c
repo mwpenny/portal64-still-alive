@@ -73,17 +73,9 @@ void incineratorUpdate(struct Incinerator* incinerator) {
             PROPS_BTS_GLADOS_APERTUREDOOR_ARMATURE_OPEN_CLIP_INDEX
         );
 
-        float startTime;
+        float startTime = SK_ANIMATION_CLIP_START(clip, incinerator->isOpen);
+        skAnimatorEnsureClipRunning(&incinerator->animator, clip, startTime, 0);
 
-        if (skAnimatorIsRunning(&incinerator->animator)) {
-            startTime = incinerator->animator.currentTime;
-        } else if (incinerator->isOpen) {
-            startTime = clip->nFrames / clip->fps;
-        } else {
-            startTime = 0.0f;
-        }
-
-        skAnimatorRunClip(&incinerator->animator, clip, startTime, 0);
         incinerator->isOpen ^= 1;
     }
 }

@@ -10,15 +10,6 @@
 #include "sk64/skeletool_animator.h"
 #include "sk64/skeletool_armature.h"
 
-struct DoorTypeDefinition {
-    short armatureIndex;
-    short openClipIndex;
-    short openedClipIndex;
-    short materialIndex;
-    short colliderBoneIndex;
-    struct Quaternion relativeRotation;
-};
-
 struct Door {
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
