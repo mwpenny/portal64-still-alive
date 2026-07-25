@@ -168,7 +168,7 @@ void doorOnDeserialize(struct Door* door) {
     if (signalsRead(door->signalIndex)) {
         struct SKAnimationClip* clip = dynamicAssetClip(
             typeDefinition->armatureIndex,
-            typeDefinition->openedClipIndex
+            typeDefinition->openClipIndex
         );
 
         skAnimatorRunClip(&door->animator, clip, SK_ANIMATION_CLIP_DURATION(clip), 0);
