@@ -8,9 +8,10 @@
 #include "sk64/skeletool_armature.h"
 
 struct Incinerator {
+    struct CollisionObject collisionObject;
+    struct RigidBody rigidBody;
     struct SKAnimator animator;
     struct SKArmature armature;
-    struct Transform transform;
     short signalIndex;
     short dynamicId;
     uint8_t isOpen;

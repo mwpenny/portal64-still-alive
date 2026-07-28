@@ -1,5 +1,6 @@
 #include "incinerator.h"
 
+#include "physics/collision_scene.h"
 #include "scene/dynamic_scene.h"
 #include "util/dynamic_asset_loader.h"
 #include "util/frame_time.h"
@@ -7,11 +8,19 @@
 #include "codegen/assets/materials/static.h"
 #include "codegen/assets/models/dynamic_animated_model_list.h"
 #include "codegen/assets/models/props_bts/glados_aperturedoor.h"
+#include "codegen/assets/models/props_bts/glados_aperturedoor_collision.h"
 
-// Avoids z-fighting
-#define INCINERATOR_SCALE 1024.0f
+#define INCINERATOR_SCALE               1024.0f  // Avoids z-fighting
+#define INCINERATOR_COLLISION_LAYERS    (COLLISION_LAYERS_STATIC | COLLISION_LAYERS_TANGIBLE)
 
-void incineratorRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
+static struct ColliderTypeData sIncineratorColliderType = {
+    CollisionShapeTypeMesh,
+    &props_bts_glados_aperturedoor_collision_collider,
+    0.0f, 0.6f,
+    &gMeshColliderCallbacks
+};
+
+static void incineratorRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Incinerator* incinerator = (struct Incinerator*)data;
 
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
@@ -19,7 +28,9 @@ void incineratorRender(void* data, struct DynamicRenderDataList* renderList, str
         return;
     }
 
-    transformToMatrixL(&incinerator->transform, matrix, SCENE_SCALE);
+    struct Transform transform = incinerator->rigidBody.transform;
+    vector3Scale(&transform.scale, &transform.scale, SCENE_SCALE / INCINERATOR_SCALE);
+    transformToMatrixL(&transform, matrix, SCENE_SCALE);
 
     Mtx* armature = renderStateRequestMatrices(renderState, incinerator->armature.numberOfBones);
     if (!armature) {
@@ -33,30 +44,42 @@ void incineratorRender(void* data, struct DynamicRenderDataList* renderList, str
         incinerator->armature.displayList,
         matrix,
         INCINERATOR_INDEX,
-        &incinerator->transform.position,
+        &incinerator->rigidBody.transform.position,
         armature
     );
 }
 
 void incineratorInit(struct Incinerator* incinerator, struct IncineratorDefinition* definition) {
+    collisionObjectInit(
+        &incinerator->collisionObject,
+        &sIncineratorColliderType,
+        &incinerator->rigidBody,
+        1.0f,
+        INCINERATOR_COLLISION_LAYERS
+    );
+    rigidBodyMarkKinematic(&incinerator->rigidBody);
+    collisionSceneAddDynamicObject(&incinerator->collisionObject);
+
+    incinerator->rigidBody.transform.position = definition->position;
+    incinerator->rigidBody.transform.rotation = definition->rotation;
+    incinerator->rigidBody.transform.scale = gOneVec;
+
+    collisionObjectUpdateBB(&incinerator->collisionObject);
+
     struct SKArmatureWithAnimations* armature = dynamicAssetAnimatedModel(PROPS_BTS_GLADOS_APERTUREDOOR_DYNAMIC_ANIMATED_MODEL);
     skArmatureInit(&incinerator->armature, armature->armature);
     skAnimatorInit(&incinerator->animator, armature->armature->numberOfBones);
 
-    incinerator->transform.position = definition->position;
-    incinerator->transform.rotation = definition->rotation;
-    vector3Scale(&gOneVec, &incinerator->transform.scale, SCENE_SCALE / INCINERATOR_SCALE);
-
-    incinerator->signalIndex = definition->signalIndex;
-    incinerator->isOpen = 0;
-
     incinerator->dynamicId = dynamicSceneAdd(
         incinerator,
         incineratorRender,
-        &incinerator->transform.position,
+        &incinerator->rigidBody.transform.position,
         2.0f
     );
     dynamicSceneSetRoomFlags(incinerator->dynamicId, ROOM_FLAG_FROM_INDEX(definition->roomIndex));
+
+    incinerator->signalIndex = definition->signalIndex;
+    incinerator->isOpen = 0;
 }
 
 void incineratorUpdate(struct Incinerator* incinerator) {
@@ -77,5 +100,10 @@ void incineratorUpdate(struct Incinerator* incinerator) {
         skAnimatorEnsureClipRunning(&incinerator->animator, clip, startTime, 0);
 
         incinerator->isOpen ^= 1;
+
+        short* faceCollisionLayers = &props_bts_glados_aperturedoor_collision_collider
+            .children[PROPS_BTS_GLADOS_APERTUREDOOR_COLLISION_BLADES_COLLISION_INDEX]
+            .collisionLayers;
+        *faceCollisionLayers = (incinerator->isOpen ? 0 : INCINERATOR_COLLISION_LAYERS);
     }
 }

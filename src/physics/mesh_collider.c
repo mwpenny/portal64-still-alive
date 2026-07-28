@@ -10,6 +10,7 @@ struct CollisionObjectWithTransform {
     struct CollisionObject* object;
     struct Transform relativeTransform;
     struct Basis relativeBasis;
+    struct Box3D relativeBoundingBox;
 };
 
 int relativeObjectMinkowskiSupport(void* data, struct Vector3* direction, struct Vector3* output) {
@@ -21,6 +22,10 @@ int relativeObjectMinkowskiSupport(void* data, struct Vector3* direction, struct
 
 int meshColliderCollideObjectWithSingleQuad(struct CollisionObject* quadObject, struct CollisionObjectWithTransform* other, struct EpaResult* result) {
     if ((quadObject->collisionLayers & other->object->collisionLayers) == 0) {
+        return 0;
+    }
+
+    if (!box3DHasOverlap(&quadObject->boundingBox, &other->relativeBoundingBox)) {
         return 0;
     }
 
@@ -55,6 +60,8 @@ void meshColliderCollidePrimitiveObject(struct CollisionObject* meshColliderObje
     basisFromQuat(&relativeObject.relativeBasis, &relativeObject.relativeTransform.rotation);
 
     collisionObjectAddBodyOffset(other, &relativeObject.relativeTransform.position);
+
+    other->collider->callbacks->boundingBoxCalculator(other->collider, &relativeObject.relativeTransform, &relativeObject.relativeBoundingBox);
 
     struct MeshCollider* meshCollider = (struct MeshCollider*)meshColliderObject->collider->data;
 

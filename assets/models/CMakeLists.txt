@@ -31,6 +31,7 @@ set(STATIC_MODELS
     props/round_elevator_collision
     props/round_elevator_interior
     props/signage
+    props_bts/glados_aperturedoor_collision
 )
 
 # Models whose data is loaded/unloaded as needed
