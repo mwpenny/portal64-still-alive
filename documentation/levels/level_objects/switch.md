@@ -20,4 +20,4 @@ A button on a cylindrical pedestal which, on press, emits a
 
 A tick-tock sound will be played while the signal is being emitted.
 
-Pressing the switch again before the timeout has elapsed will not reset the timer.
+Pressing the switch again before the timeout has elapsed will reset the timer.
