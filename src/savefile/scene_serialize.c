@@ -776,6 +776,10 @@ void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
         doorOnDeserialize(&scene->doors[i]);
     }
 
+    for (int i = 0; i < scene->incineratorCount; ++i) {
+        incineratorOnDeserialize(&scene->incinerators[i]);
+    }
+
     if (scene->player.flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
         scene->portalGun.rotation = scene->player.lookTransform.rotation;
     }

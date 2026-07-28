@@ -48,6 +48,7 @@ See the linked pages below for details on specific level objects.
 | [@dynamic_box](./dynamic_box.md)         | Dynamic collision                                       |
 | [@elevator](./elevator.md)               | Level transition elevator                               |
 | [@fizzler](./fizzler.md)                 | Emancipation grill                                      |
+| [@incinerator](./incinerator.md)         | Emergency intelligence incinerator                      |
 | [@location](./location.md)               | Referenceable point in the world                        |
 | [@pedestal](./pedestal.md)               | Portal gun holder                                       |
 | [@point_light](./point_light.md)         | Omnidirectional light source for baked lighting         |

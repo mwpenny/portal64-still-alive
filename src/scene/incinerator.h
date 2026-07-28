@@ -19,5 +19,6 @@ struct Incinerator {
 
 void incineratorInit(struct Incinerator* incinerator, struct IncineratorDefinition* definition);
 void incineratorUpdate(struct Incinerator* incinerator);
+void incineratorOnDeserialize(struct Incinerator* incinerator);
 
 #endif

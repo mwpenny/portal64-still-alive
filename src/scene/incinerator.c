@@ -49,6 +49,15 @@ static void incineratorRender(void* data, struct DynamicRenderDataList* renderLi
     );
 }
 
+static void incineratorUpdateCollision(struct Incinerator* incinerator) {
+    // This is global - the last incinerator wins
+    short* faceCollisionLayers = &props_bts_glados_aperturedoor_collision_collider
+        .children[PROPS_BTS_GLADOS_APERTUREDOOR_COLLISION_BLADES_COLLISION_INDEX]
+        .collisionLayers;
+
+    *faceCollisionLayers = (incinerator->isOpen ? 0 : INCINERATOR_COLLISION_LAYERS);
+}
+
 void incineratorInit(struct Incinerator* incinerator, struct IncineratorDefinition* definition) {
     collisionObjectInit(
         &incinerator->collisionObject,
@@ -80,6 +89,7 @@ void incineratorInit(struct Incinerator* incinerator, struct IncineratorDefiniti
 
     incinerator->signalIndex = definition->signalIndex;
     incinerator->isOpen = 0;
+    incineratorUpdateCollision(incinerator);
 }
 
 void incineratorUpdate(struct Incinerator* incinerator) {
@@ -100,10 +110,20 @@ void incineratorUpdate(struct Incinerator* incinerator) {
         skAnimatorEnsureClipRunning(&incinerator->animator, clip, startTime, 0);
 
         incinerator->isOpen ^= 1;
+        incineratorUpdateCollision(incinerator);
+    }
+}
 
-        short* faceCollisionLayers = &props_bts_glados_aperturedoor_collision_collider
-            .children[PROPS_BTS_GLADOS_APERTUREDOOR_COLLISION_BLADES_COLLISION_INDEX]
-            .collisionLayers;
-        *faceCollisionLayers = (incinerator->isOpen ? 0 : INCINERATOR_COLLISION_LAYERS);
+void incineratorOnDeserialize(struct Incinerator* incinerator) {
+    if (signalsRead(incinerator->signalIndex)) {
+        struct SKAnimationClip* clip = dynamicAssetClip(
+            PROPS_BTS_GLADOS_APERTUREDOOR_DYNAMIC_ANIMATED_MODEL,
+            PROPS_BTS_GLADOS_APERTUREDOOR_ARMATURE_OPEN_CLIP_INDEX
+        );
+
+        skAnimatorRunClip(&incinerator->animator, clip, SK_ANIMATION_CLIP_DURATION(clip), 0);
+
+        incinerator->isOpen = 1;
+        incineratorUpdateCollision(incinerator);
     }
 }
