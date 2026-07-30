@@ -15,7 +15,7 @@
 static struct Coloru8 laserColor = { 255, 0, 0, 100 };
 
 static void laserBeamBuildVertices(Vtx* vtx, struct LaserBeam* beam, struct Vector3* cameraPosition) {
-    // Determine screen-space up direction for billboard
+    // Determine camera-facing up direction for billboard
     struct Vector3 tmp;
     struct Vector3 laserUp;
     vector3Sub(&beam->startPosition.origin, cameraPosition, &tmp);
@@ -73,12 +73,15 @@ static void laserRender(void* data, struct RenderScene* renderScene, struct Tran
 
     for (short i = 0; i < laser->beamCount; ++i) {
         short relativeVertex = i << 2;
-        gSP1Quadrangle(
+        gSP2Triangles(
             dl++,
             relativeVertex,
             relativeVertex + 1,
-            relativeVertex + 3,
             relativeVertex + 2,
+            0,
+            relativeVertex + 2,
+            relativeVertex + 1,
+            relativeVertex + 3,
             0
         );
     }
