@@ -292,7 +292,7 @@ int luaAddMacro(lua_State* L) {
     return 1;
 }
 
-int luaDefinitonWriterAppend(lua_State* L) {
+int luaDefinitionWriterAppend(lua_State* L) {
     int moduleIndex = luaGetPrevModuleLoader(L);
     CFileDefinition* fileDef = (CFileDefinition*)lua_touserdata(L, lua_upvalueindex(2));
     
@@ -309,5 +309,5 @@ int luaDefinitonWriterAppend(lua_State* L) {
 
 void populateLuaDefinitionWrite(lua_State* L, CFileDefinition& fileDef) {
     lua_pushlightuserdata(L, &fileDef);
-    luaChainModuleLoader(L, "sk_definition_writer", luaDefinitonWriterAppend, 1);
+    luaChainModuleLoader(L, "sk_definition_writer", luaDefinitionWriterAppend, 1);
 }

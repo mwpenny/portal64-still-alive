@@ -1,5 +1,5 @@
-#ifndef __LUA_DEFINITON_WRITER_H__
-#define __LUA_DEFINITON_WRITER_H__
+#ifndef __LUA_DEFINITION_WRITER_H__
+#define __LUA_DEFINITION_WRITER_H__
 
 #include <lua.hpp>
 #include "../CFileDefinition.h"

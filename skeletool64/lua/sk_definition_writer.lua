@@ -170,7 +170,7 @@ local function validate_definition(data, visited, name_path)
         local key_type = type(k)
 
         if (key_type ~= "string" and key_type ~= "number") then
-            error("Cannot use '" .. data_type .. "' as a key in a c file definiton for path '" .. name_path .. "'")
+            error("Cannot use '" .. data_type .. "' as a key in a c file definition for path '" .. name_path .. "'")
             return false
         end
 
@@ -196,7 +196,7 @@ end
 ---@function add_definition
 ---@tparam string nameHint
 ---@tparam string dataType the c type the definition is, if it is an array it should end in []
----@tparam string location the file suffix where this definiton should be located in
+---@tparam string location the file suffix where this definition should be located in
 ---@tparam any data The data of the file definition
 local function add_definition(nameHint, dataType, location, data)
     if (type(nameHint) ~= "string") then
@@ -319,7 +319,7 @@ end
 ---@tfield string location 
 ---@tfield any data 
 
---- Returns and clears all definitions that have been created using add_definiton
+--- Returns and clears all definitions that have been created using add_definition
 --- meant for use in the c code
 ---@function consume_pending_definitions
 ---@treturn {PendingDefinition,...} result
