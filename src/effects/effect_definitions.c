@@ -81,7 +81,7 @@ struct SplashParticleDefinition gMuzzleFlash = {
     .materialIndex = MUZZLEFLASH2_INDEX,
     .particleHalfWidth = 0.15f,
     .particleColor = {210, 135, 50, 255},
-    .flags = SplashParticleFlagsBillboarded | SplashParticleFlagsNoGravity
+    .flags = SplashParticleFlagsBillboarded | SplashParticleFlagsNoGravity,
 };
 
 struct SplashParticleDefinition gSpark = {

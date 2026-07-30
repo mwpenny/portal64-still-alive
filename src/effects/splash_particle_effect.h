@@ -4,6 +4,8 @@
 #include "graphics/color.h"
 #include "math/vector3.h"
 
+#define MAX_SPLASH_PARTICLES    16
+
 enum SplashParticleFlags {
     SplashParticleFlagsBillboarded = (1 << 0),
     SplashParticleFlagsNoGravity   = (1 << 1)
@@ -31,10 +33,8 @@ struct SplashParticle {
     struct Vector3 widthOffset;
 };
 
-#define MAX_SPLASH_PARTICLES    16
-
 struct SplashParticleEffect {
-    struct SplashParticleDefinition* def;
+    struct SplashParticleDefinition* definition;
     struct SplashParticle particles[MAX_SPLASH_PARTICLES];
     struct Vector3 startPosition;
     struct Vector3* position;
@@ -44,7 +44,13 @@ struct SplashParticleEffect {
 };
 
 void splashParticleEffectInit(struct SplashParticleEffect* effect);
-void splashParticleEffectPlay(struct SplashParticleEffect* effect, struct SplashParticleDefinition* definition, struct Vector3* origin, struct Vector3* normal, struct Transform* parent);
+void splashParticleEffectPlay(
+    struct SplashParticleEffect* effect,
+    struct SplashParticleDefinition* definition,
+    struct Vector3* origin,
+    struct Vector3* normal,
+    struct Transform* parent
+);
 void splashParticleEffectUpdate(struct SplashParticleEffect* effect);
 
 #endif

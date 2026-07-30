@@ -6,149 +6,130 @@
 #include "scene/dynamic_scene.h"
 #include "util/frame_time.h"
 
-void splashParticleEffectBuildVerticesBillboarded(Vtx* vtx, struct SplashParticleEffect* effect, struct Coloru8* color, float widthScalar, struct Vector3* cameraPosition) {
-    for (short pidx = 0; pidx < effect->def->particleCount; ++pidx) {
+static Vtx* splashParticleEffectBuildQuad(
+    Vtx* vtx,
+    struct SplashParticle* particle,
+    struct Vector3* position,
+    struct Coloru8* color,
+    float widthScalar
+) {
+    for (int i = 0; i < 4; ++i, ++vtx) {
+        int posIndex = i >> 1;
+        int widthSign = i & 0x1;
+        struct Vector3 finalPos;
+
+        vector3AddScaled(
+            &position[posIndex],
+            &particle->widthOffset,
+            widthSign ? widthScalar : -widthScalar,
+            &finalPos
+        );
+
+        vtx->v.ob[0] = finalPos.x * SCENE_SCALE;
+        vtx->v.ob[1] = finalPos.y * SCENE_SCALE;
+        vtx->v.ob[2] = finalPos.z * SCENE_SCALE;
+
+        vtx->v.flag = 0;
+        vtx->v.tc[0] = widthSign ? 0 : (32 << 5);
+        vtx->v.tc[1] = posIndex ? 0 : (32 << 5);
+
+        vtx->v.cn[0] = color->r;
+        vtx->v.cn[1] = color->g;
+        vtx->v.cn[2] = color->b;
+        vtx->v.cn[3] = color->a;
+    }
+
+    return vtx;
+}
+
+static void splashParticleEffectBuildVerticesBillboarded(
+    Vtx* vtx,
+    struct SplashParticleEffect* effect,
+    struct Coloru8* color,
+    float widthScalar,
+    struct Vector3* cameraPosition
+) {
+    for (int pidx = 0; pidx < effect->definition->particleCount; ++pidx) {
         struct SplashParticle* particle = &effect->particles[pidx];
 
         struct Vector3 tmp;
-        struct Vector3 widthOffset, heightOffset;
-        struct Vector3 startPosition, endPosition;
+        struct Vector3 heightOffset;
+        struct Vector3 position[2];
 
         struct Vector3 particleDir;
         vector3Sub(&particle->position[1], &particle->position[0], &particleDir);
 
-        // Determine screen space basis for billboard
+        // Determine camera-facing basis for billboard
         vector3Sub(&particle->position[0], cameraPosition, &tmp);
-        vector3Cross(&tmp, &particleDir, &widthOffset);
-        vector3Scale(&widthOffset, &widthOffset, effect->def->particleHalfWidth / sqrtf(vector3MagSqrd(&widthOffset)));
+        vector3Cross(&tmp, &particleDir, &particle->widthOffset);
+        vector3Scale(&particle->widthOffset, &particle->widthOffset, effect->definition->particleHalfWidth / sqrtf(vector3MagSqrd(&particle->widthOffset)));
 
-        vector3Cross(&tmp, &widthOffset, &heightOffset);
+        vector3Cross(&tmp, &particle->widthOffset, &heightOffset);
         vector3Scale(&heightOffset, &heightOffset, sqrtf(vector3MagSqrd(&particleDir)) / sqrtf(vector3MagSqrd(&heightOffset)));
 
         // Start/end relative to center
         vector3AddScaled(&particle->position[0], &particleDir, 0.5f, &tmp);
-        vector3Sub(&tmp, &heightOffset, &startPosition);
-        vector3Add(&tmp, &heightOffset, &endPosition);
+        vector3Sub(&tmp, &heightOffset, &position[0]);
+        vector3Add(&tmp, &heightOffset, &position[1]);
 
-        if (effect->parent) {
-            transformPointNoScale(effect->parent, &startPosition, &startPosition);
-            transformPointNoScale(effect->parent, &endPosition, &endPosition);
-            quatMultVector(&effect->parent->rotation, &widthOffset, &widthOffset);
-        }
-
-        for (short i = 0; i < 4; ++i, ++vtx) {
-            short posIndex = i >> 1;
-            short widthSign = i & 0x1;
-
-            vector3AddScaled(
-                posIndex ? &endPosition : &startPosition,
-                &widthOffset,
-                widthSign ? widthScalar : -widthScalar,
-                &tmp
-            );
-
-            vtx->v.ob[0] = tmp.x * SCENE_SCALE;
-            vtx->v.ob[1] = tmp.y * SCENE_SCALE;
-            vtx->v.ob[2] = tmp.z * SCENE_SCALE;
-
-            vtx->v.flag = 0;
-            vtx->v.tc[0] = widthSign ? 0 : (32 << 5);
-            vtx->v.tc[1] = posIndex ? 0 : (32 << 5);
-
-            vtx->v.cn[0] = color->r;
-            vtx->v.cn[1] = color->g;
-            vtx->v.cn[2] = color->b;
-            vtx->v.cn[3] = color->a;
-        }
+        vtx = splashParticleEffectBuildQuad(vtx, particle, position, color, widthScalar);
     }
 }
 
 static void splashParticleEffectBuildVertices(Vtx* vtx, struct SplashParticleEffect* effect, struct Coloru8* color, float widthScalar) {
-    for (short pidx = 0; pidx < effect->def->particleCount; ++pidx) {
+    for (int pidx = 0; pidx < effect->definition->particleCount; ++pidx) {
         struct SplashParticle* particle = &effect->particles[pidx];
 
-        for (short i = 0; i < 4; ++i, ++vtx) {
-            short posIndex = i >> 1;
-            short widthSign = i & 0x1;
-            struct Vector3 finalPos;
-
-            vector3AddScaled(
-                &particle->position[posIndex],
-                &particle->widthOffset,
-                widthSign ? widthScalar : -widthScalar,
-                &finalPos
-            );
-
-            if (effect->parent) {
-                transformPointNoScale(effect->parent, &finalPos, &finalPos);
-            }
-
-            vtx->v.ob[0] = finalPos.x * SCENE_SCALE;
-            vtx->v.ob[1] = finalPos.y * SCENE_SCALE;
-            vtx->v.ob[2] = finalPos.z * SCENE_SCALE;
-
-            vtx->v.flag = 0;
-            vtx->v.tc[0] = widthSign ? 0 : (32 << 5);
-            vtx->v.tc[1] = posIndex ? 0 : (32 << 5);
-
-            vtx->v.cn[0] = color->r;
-            vtx->v.cn[1] = color->g;
-            vtx->v.cn[2] = color->b;
-            vtx->v.cn[3] = color->a;
-        }
+        vtx = splashParticleEffectBuildQuad(vtx, particle, particle->position, color, widthScalar);
     }
 }
 
 static Gfx* splashParticleEffectBuildDisplayList(struct RenderState* renderState, struct SplashParticleEffect* effect, struct Vector3* cameraPosition) {
-    struct Coloru8 color = effect->def->particleColor;
     float width = 1.0f;
-
-    if (effect->time < effect->def->fullWidthTime) {
-        width = (effect->time + 0.5f) / (effect->def->fullWidthTime + 0.5f);
+    if (effect->time < effect->definition->fullWidthTime) {
+        width = (effect->time + 0.5f) / (effect->definition->fullWidthTime + 0.5f);
     }
 
-    if (effect->time > effect->def->fadeStartTime) {
-        int alpha = (int)(255.0f * (effect->def->fadeStartTime - effect->time) / (effect->def->particleLifetime - effect->def->fadeStartTime));
-        
-        if (alpha > 255) {
-            alpha = 255;
-        }
-
-        color.a = alpha;
+    struct Coloru8 color = effect->definition->particleColor;
+    if (effect->time > effect->definition->fadeStartTime) {
+        float opacity = 1.0f - mathfInvLerp(
+            effect->definition->fadeStartTime,
+            effect->definition->particleLifetime,
+            effect->time
+        );
+        color.a = 255.0f * opacity;
     }
 
     // Build quads
-    Vtx* vertices = renderStateRequestVertices(renderState, effect->def->particleCount * 4);
-    if (effect->def->flags & SplashParticleFlagsBillboarded) {
+    Vtx* vertices = renderStateRequestVertices(renderState, effect->definition->particleCount * 4);
+    if (cameraPosition) {
         splashParticleEffectBuildVerticesBillboarded(vertices, effect, &color, width, cameraPosition);
     } else {
         splashParticleEffectBuildVertices(vertices, effect, &color, width);
     }
 
     // Render quads (can load 32 vertices/8 quads at once)
-    Gfx* displayList = renderStateAllocateDLChunk(renderState, effect->def->particleCount + ((effect->def->particleCount + 7) >> 3) + 1);
+    Gfx* displayList = renderStateAllocateDLChunk(
+        renderState,
+        effect->definition->particleCount + ((effect->definition->particleCount + 7) >> 3) + 1
+    );
     Gfx* dl = displayList;
 
-    for (short i = 0; i < effect->def->particleCount; ++i) {
-        short relativeVertex = (i << 2) & 0x1f;
+    for (int i = 0; i < effect->definition->particleCount; ++i) {
+        int relativeVertex = (i << 2) & 0x1f;
 
         if (relativeVertex == 0) {
             // Load next batch of vertices
-            short verticesLeft = (effect->def->particleCount - i) << 2;
-
-            if (verticesLeft > 32) {
-                verticesLeft = 32;
-            }
-
+            int verticesLeft = MIN(32, (effect->definition->particleCount - i) << 2);
             gSPVertex(dl++, &vertices[i << 2], verticesLeft, 0);
         }
 
         gSP2Triangles(
-            dl++, 
-            relativeVertex, 
-            relativeVertex + 1, 
-            relativeVertex + 2, 
-            0, 
+            dl++,
+            relativeVertex,
+            relativeVertex + 1,
+            relativeVertex + 2,
+            0,
             relativeVertex + 2,
             relativeVertex + 1,
             relativeVertex + 3,
@@ -164,26 +145,37 @@ static Gfx* splashParticleEffectBuildDisplayList(struct RenderState* renderState
 static void splashParticleEffectRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct SplashParticleEffect* effect = (struct SplashParticleEffect*)data;
 
+    Mtx* matrix = NULL;
+    if (effect->parent) {
+        matrix = renderStateRequestMatrices(renderState, 1);
+        transformToMatrixL(effect->parent, matrix, SCENE_SCALE);
+    }
+
     dynamicRenderListAddData(
         renderList,
         splashParticleEffectBuildDisplayList(renderState, effect, NULL),
-        NULL,
-        effect->def->materialIndex,
+        matrix,
+        effect->definition->materialIndex,
         effect->position,
         NULL
     );
 }
 
-void splashParticleEffectRenderBillboarded(void* data, struct RenderScene* renderScene, struct Transform* fromView) {
+static void splashParticleEffectRenderBillboarded(void* data, struct RenderScene* renderScene, struct Transform* fromView) {
     struct SplashParticleEffect* effect = (struct SplashParticleEffect*)data;
 
     Gfx* gfx;
+    Mtx* matrix = NULL;
+
     if (effect->parent) {
         // Presence of a parent implies a parent-local particle position,
         // which necessitates a parent-local camera position as well
         struct Vector3 localCamPos;
         transformPointInverseNoScale(effect->parent, &fromView->position, &localCamPos);
         gfx = splashParticleEffectBuildDisplayList(renderScene->renderState, effect, &localCamPos);
+
+        matrix = renderStateRequestMatrices(renderScene->renderState, 1);
+        transformToMatrixL(effect->parent, matrix, SCENE_SCALE);
     } else {
         gfx = splashParticleEffectBuildDisplayList(renderScene->renderState, effect, &fromView->position);
     }
@@ -191,64 +183,71 @@ void splashParticleEffectRenderBillboarded(void* data, struct RenderScene* rende
     renderSceneAdd(
         renderScene,
         gfx,
-        NULL,
-        effect->def->materialIndex,
+        matrix,
+        effect->definition->materialIndex,
         effect->position,
         NULL
     );
 }
 
 void splashParticleEffectInit(struct SplashParticleEffect* effect) {
-    effect->def = NULL;
+    effect->definition = NULL;
     effect->dynamicId = INVALID_DYNAMIC_OBJECT;
 }
 
-void splashParticleEffectPlay(struct SplashParticleEffect* effect, struct SplashParticleDefinition* definiton, struct Vector3* origin, struct Vector3* normal, struct Transform* parent) {
-    if (effect->dynamicId != INVALID_DYNAMIC_OBJECT) {
-        dynamicSceneRemove(effect->dynamicId);
-    }
-
-    effect->def = definiton;
-    effect->time = 0.0f;
-    effect->parent = parent;
-
+void splashParticleEffectPlay(
+    struct SplashParticleEffect* effect,
+    struct SplashParticleDefinition* definition,
+    struct Vector3* origin,
+    struct Vector3* normal,
+    struct Transform* parent
+) {
     struct Vector3 right;
     struct Vector3 up;
-
     vector3Perp(normal, &right);
     vector3Normalize(&right, &right);
     vector3Cross(normal, &right, &up);
 
-    for (short i = 0; i < effect->def->particleCount; ++i) {
+    for (int i = 0; i < definition->particleCount; ++i) {
         struct SplashParticle* particle = &effect->particles[i];
 
+        // Compute initial velocity and position
         struct Vector2 tangentDir;
         vector2RandomUnitCircle(&tangentDir);
-        float tangentMag = randomInRangef(definiton->minTangentVelocity, definiton->maxTangentVelocity);
-        float normalMag = randomInRangef(definiton->minNormalVelocity, definiton->maxNormalVelocity);
+        float tangentMag = randomInRangef(definition->minTangentVelocity, definition->maxTangentVelocity);
+        float normalMag = randomInRangef(definition->minNormalVelocity, definition->maxNormalVelocity);
 
         vector3Scale(normal, &particle->velocity, normalMag);
         vector3AddScaled(&particle->velocity, &right, tangentDir.x * tangentMag, &particle->velocity);
         vector3AddScaled(&particle->velocity, &up, tangentDir.y * tangentMag, &particle->velocity);
 
         particle->position[1] = *origin;
-        vector3AddScaled(origin, &particle->velocity, definiton->particleTailDelay, &particle->position[0]);
+        vector3AddScaled(origin, &particle->velocity, definition->particleTailDelay, &particle->position[0]);
 
-        vector3Cross(&particle->velocity, &gUp, &particle->widthOffset);
+        // Compute width direction (billboarded particles do this every frame)
+        if (!(definition->flags & SplashParticleFlagsBillboarded)) {
+            vector3Cross(&particle->velocity, &gUp, &particle->widthOffset);
 
-        float widthMag = vector3MagSqrd(&particle->widthOffset);
-
-        if (widthMag < 0.00001f) {
-            vector3Scale(&gRight, &particle->widthOffset, definiton->particleHalfWidth);
-        } else {
-            vector3Scale(&particle->widthOffset, &particle->widthOffset, definiton->particleHalfWidth / sqrtf(widthMag));
+            float widthMag = vector3MagSqrd(&particle->widthOffset);
+            if (widthMag < 0.00001f) {
+                vector3Scale(&gRight, &particle->widthOffset, definition->particleHalfWidth);
+            } else {
+                vector3Scale(&particle->widthOffset, &particle->widthOffset, definition->particleHalfWidth / sqrtf(widthMag));
+            }
         }
     }
 
+    effect->definition = definition;
+    effect->time = 0.0f;
+    effect->parent = parent;
     effect->startPosition = *origin;
     effect->position = (effect->parent) ? &effect->parent->position : &effect->startPosition;
 
-    if (effect->def->flags & SplashParticleFlagsBillboarded) {
+    if (effect->dynamicId != INVALID_DYNAMIC_OBJECT) {
+        dynamicSceneRemove(effect->dynamicId);
+    }
+
+    if (effect->definition->flags & SplashParticleFlagsBillboarded) {
         effect->dynamicId = dynamicSceneAddViewDependent(
             effect,
             splashParticleEffectRenderBillboarded,
@@ -266,24 +265,25 @@ void splashParticleEffectPlay(struct SplashParticleEffect* effect, struct Splash
 }
 
 void splashParticleEffectUpdate(struct SplashParticleEffect* effect) {
-    if (!effect->def) {
+    if (!effect->definition) {
         return;
     }
 
-    for (short i = 0; i < effect->def->particleCount; ++i) {
+    for (int i = 0; i < effect->definition->particleCount; ++i) {
         struct SplashParticle* particle = &effect->particles[i];
 
         vector3AddScaled(&particle->position[0], &particle->velocity, FIXED_DELTA_TIME, &particle->position[0]);
         vector3AddScaled(&particle->position[1], &particle->velocity, FIXED_DELTA_TIME, &particle->position[1]);
 
-        if ((effect->def->flags & SplashParticleFlagsNoGravity) == 0) {
-            // this line simulates tracking the yvelocity of the tail separate
-            // without needing to track that velocity separately
-            // tailYVelocity = yVelocity - effect->def->particleTailDelay * GRAVITY_CONSTANT
+        if (!(effect->definition->flags & SplashParticleFlagsNoGravity)) {
+            // This line simulates tracking the y-velocity of the tail
+            // separately without needing to actually do so.
+            //
+            // tailYVelocity = yVelocity - effect->definition->particleTailDelay * GRAVITY_CONSTANT
             // tailPos.y = tailPos.y + tailYVelocity * FIXED_DELTA_TIME
-            // tailPos.y = tailPos.y + (yVelocity - effect->def->particleTailDelay * GRAVITY_CONSTANT) * FIXED_DELTA_TIME
-            // tailPos.y = tailPos.y + yVelocity * FIXED_DELTA_TIME - effect->def->particleTailDelay * GRAVITY_CONSTANT * FIXED_DELTA_TIME
-            particle->position[1].y -= effect->def->particleTailDelay * (GRAVITY_CONSTANT * FIXED_DELTA_TIME);
+            // tailPos.y = tailPos.y + (yVelocity - effect->definition->particleTailDelay * GRAVITY_CONSTANT) * FIXED_DELTA_TIME
+            // tailPos.y = tailPos.y + yVelocity * FIXED_DELTA_TIME - effect->definition->particleTailDelay * GRAVITY_CONSTANT * FIXED_DELTA_TIME
+            particle->position[1].y -= effect->definition->particleTailDelay * (GRAVITY_CONSTANT * FIXED_DELTA_TIME);
 
             particle->velocity.y += FIXED_DELTA_TIME * GRAVITY_CONSTANT;
         }
@@ -291,8 +291,9 @@ void splashParticleEffectUpdate(struct SplashParticleEffect* effect) {
 
     effect->time += FIXED_DELTA_TIME;
 
-    if (effect->time >= effect->def->particleLifetime) {
-        effect->def = NULL;
+    if (effect->time >= effect->definition->particleLifetime) {
+        effect->definition = NULL;
+
         dynamicSceneRemove(effect->dynamicId);
         effect->dynamicId = INVALID_DYNAMIC_OBJECT;
     }
