@@ -110,7 +110,7 @@ void meshColliderCollideObject(struct CollisionObject* meshColliderObject, struc
 
     struct CompoundCollider* collider = (struct CompoundCollider*)other->collider->data;
 
-    for (short i = 0; i < collider->childrenCount; ++i) {
+    for (int i = 0; i < collider->childrenCount; ++i) {
         struct CollisionObject* childObj = &collider->children[i].object;
 
         if (!box3DHasOverlap(&meshColliderObject->boundingBox, &childObj->boundingBox)) {

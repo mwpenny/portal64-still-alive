@@ -16,7 +16,7 @@ void compoundColliderInit(
     assert(definition->childrenCount > 0);
     assert(definition->childrenCount <= COMPOUND_COLLIDER_MAX_CHILD_COUNT);
 
-    for (short i = 0; i < definition->childrenCount; ++i) {
+    for (int i = 0; i < definition->childrenCount; ++i) {
         struct CompoundColliderComponentDefinition* childDefinition = &definition->childDefinitions[i];
         struct CompoundColliderComponent* child = &collider->children[i];
         struct CollisionObject* childObj = &child->object;
@@ -59,7 +59,7 @@ int compoundColliderRaycast(struct CollisionObject* object, struct Ray* ray, sho
 
     int found = 0;
 
-    for (short i = 0; i < collider->childrenCount; ++i) {
+    for (int i = 0; i < collider->childrenCount; ++i) {
         struct CollisionObject* childObj = &collider->children[i].object;
         struct ColliderTypeData* childCollider = childObj->collider;
 
@@ -86,7 +86,7 @@ float compoundColliderSolidMofI(struct ColliderTypeData* typeData, float mass) {
     float childMass = mass / collider->childrenCount;
     float mofi = 0.0f;
 
-    for (short i = 0; i < collider->childrenCount; ++i) {
+    for (int i = 0; i < collider->childrenCount; ++i) {
         struct CollisionObject* childObj = &collider->children[i].object;
         struct ColliderTypeData* childCollider = childObj->collider;
 
@@ -99,7 +99,7 @@ float compoundColliderSolidMofI(struct ColliderTypeData* typeData, float mass) {
 void compoundColliderBoundingBox(struct ColliderTypeData* typeData, struct Transform* transform, struct Box3D* box) {
     struct CompoundCollider* collider = typeData->data;
 
-    for (short i = 0; i < collider->childrenCount; ++i) {
+    for (int i = 0; i < collider->childrenCount; ++i) {
         struct CompoundColliderComponent* child = &collider->children[i];
         struct CollisionObject* childObj = &child->object;
         struct ColliderTypeData* childCollider = childObj->collider;
@@ -131,7 +131,7 @@ void compoundColliderFurthestPoint(
 
     float maxDistance = 0.0f;
 
-    for (short i = 0; i < compoundCollider->childrenCount; ++i) {
+    for (int i = 0; i < compoundCollider->childrenCount; ++i) {
         struct CollisionObject* childObj = &compoundCollider->children[i].object;
 
         struct Vector3 currentPoint;
@@ -153,7 +153,7 @@ int compoundColliderHasOverlap(
 ) {
     struct CompoundCollider* compoundCollider = compoundColliderObject->collider->data;
 
-    for (short i = 0; i < compoundCollider->childrenCount; ++i) {
+    for (int i = 0; i < compoundCollider->childrenCount; ++i) {
         struct CollisionObject* childObj = &compoundCollider->children[i].object;
 
         struct Simplex simplex;
@@ -178,7 +178,7 @@ void compoundColliderCollideMixed(
 ) {
     struct CompoundCollider* compoundCollider = compoundColliderObject->collider->data;
 
-    for (short i = 0; i < compoundCollider->childrenCount; ++i) {
+    for (int i = 0; i < compoundCollider->childrenCount; ++i) {
         struct CollisionObject* childObj = &compoundCollider->children[i].object;
 
         collisionObjectCollideMixed(
@@ -203,7 +203,7 @@ void compoundColliderCollidePairMixed(
         return;
     }
 
-    for (short i = 0; i < compoundCollider->childrenCount; ++i) {
+    for (int i = 0; i < compoundCollider->childrenCount; ++i) {
         struct CollisionObject* childObj = &compoundCollider->children[i].object;
 
         collisionObjectCollidePairMixed(
@@ -217,7 +217,7 @@ void compoundColliderCollidePairMixed(
 void compoundColliderSetCollisionLayers(struct CollisionObject* compoundColliderObject, short collisionLayers) {
     struct CompoundCollider* compoundCollider = compoundColliderObject->collider->data;
 
-    for (short i = 0; i < compoundCollider->childrenCount; ++i) {
+    for (int i = 0; i < compoundCollider->childrenCount; ++i) {
         struct CollisionObject* childObj = &compoundCollider->children[i].object;
 
         childObj->collisionLayers = collisionLayers;
@@ -229,7 +229,7 @@ void compoundColliderSetCollisionLayers(struct CollisionObject* compoundCollider
 void compoundColliderRemoveManifolds(struct CollisionObject* compoundColliderObject, struct ContactSolver* contactSolver) {
     struct CompoundCollider* compoundCollider = compoundColliderObject->collider->data;
 
-    for (short i = 0; i < compoundCollider->childrenCount; ++i) {
+    for (int i = 0; i < compoundCollider->childrenCount; ++i) {
         struct CollisionObject* childObj = &compoundCollider->children[i].object;
         contactSolverRemoveObjectManifolds(contactSolver, childObj);
     }

@@ -680,7 +680,7 @@ static void turretUpdateShots(struct Turret* turret, struct Player* player) {
     struct Vector3 lookDir;
     quatMultVector(currentRotation, &gForward, &lookDir);
 
-    for (short i = 0; i < 2; ++i) {
+    for (int i = 0; i < 2; ++i) {
         struct Vector3 muzzleOffset;
         quatMultVector(currentRotation, &sTurretMuzzleOffsets[i], &muzzleOffset);
 

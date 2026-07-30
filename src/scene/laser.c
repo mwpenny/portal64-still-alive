@@ -23,7 +23,7 @@ static void laserBeamBuildVertices(Vtx* vtx, struct LaserBeam* beam, struct Vect
     vector3Normalize(&laserUp, &laserUp);
 
     // Create vertices for quad
-    for (short i = 0; i < 4; ++i, ++vtx) {
+    for (int i = 0; i < 4; ++i, ++vtx) {
         vector3AddScaled(
             (i >> 1) ? &beam->endPosition : &beam->startPosition.origin,
             &laserUp,
@@ -60,7 +60,7 @@ static void laserRender(void* data, struct RenderScene* renderScene, struct Tran
     // Build quads
     Vtx* vertices = renderStateRequestVertices(renderScene->renderState, laser->beamCount * 4);
     Vtx* curr = vertices;
-    for (short i = 0; i < laser->beamCount; ++i, curr += 4) {
+    for (int i = 0; i < laser->beamCount; ++i, curr += 4) {
         laserBeamBuildVertices(curr, &laser->beams[i], &fromView->position);
     }
 
@@ -71,7 +71,7 @@ static void laserRender(void* data, struct RenderScene* renderScene, struct Tran
     assert(LASER_MAX_BEAMS <= 8);
     gSPVertex(dl++, vertices, 4 * laser->beamCount, 0);
 
-    for (short i = 0; i < laser->beamCount; ++i) {
+    for (int i = 0; i < laser->beamCount; ++i) {
         short relativeVertex = i << 2;
         gSP2Triangles(
             dl++,
@@ -137,7 +137,7 @@ void laserUpdate(struct Laser* laser) {
     uint64_t beamRooms = ROOM_FLAG_FROM_INDEX(currentRoom);
     laser->beamCount = 0;
 
-    for (short i = 0; i < LASER_MAX_BEAMS; ++i) {
+    for (int i = 0; i < LASER_MAX_BEAMS; ++i) {
         struct LaserBeam* beam = &laser->beams[i];
 
         struct RaycastHit hit;
