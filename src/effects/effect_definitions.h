@@ -1,19 +1,19 @@
 #ifndef __EFFECT_DEFINITIONS_H__
 #define __EFFECT_DEFINITIONS_H__
 
-#include "splash_particle_effect.h"
+#include "particle_effect.h"
 
-extern struct SplashParticleDefinition gFailPortalSplash[2];
+extern struct ParticleEffectDefinition gFailPortalSplash[2];
 
-extern struct SplashParticleDefinition gBallBurst;
-extern struct SplashParticleDefinition gBallBounce;
-extern struct SplashParticleDefinition gMuzzleFlash;
-extern struct SplashParticleDefinition gSpark;
+extern struct ParticleEffectDefinition gBallBurst;
+extern struct ParticleEffectDefinition gBallBounce;
+extern struct ParticleEffectDefinition gMuzzleFlash;
+extern struct ParticleEffectDefinition gSpark;
 
 enum ScriptableEffectType {
     ScriptableEffectTypeSpark
 };
 
-extern struct SplashParticleDefinition* gScriptableEffects[1];
+extern struct ParticleEffectDefinition* gScriptableEffects[1];
 
 #endif

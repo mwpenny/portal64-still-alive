@@ -26,8 +26,8 @@ target_sources(engine INTERFACE
     decor/decor_object_list.c
     effects/effect_definitions.c
     effects/effects.c
+    effects/particle_effect.c
     effects/portal_trail.c
-    effects/splash_particle_effect.c
     font/dejavu_sans_images.c
     font/font.c
     font/liberation_mono_images.c

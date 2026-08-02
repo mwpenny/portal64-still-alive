@@ -368,7 +368,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         {
             struct Location* location = &gCurrentLevel->locations[step->playEffect.locationIndex];
 
-            effectsSplashPlay(
+            effectsParticlePlay(
                 &gScene.effects,
                 gScriptableEffects[step->playEffect.effectIndex],
                 &location->transform.position,

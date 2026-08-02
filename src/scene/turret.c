@@ -684,7 +684,7 @@ static void turretUpdateShots(struct Turret* turret, struct Player* player) {
         struct Vector3 muzzleOffset;
         quatMultVector(currentRotation, &sTurretMuzzleOffsets[i], &muzzleOffset);
 
-        effectsSplashPlay(
+        effectsParticlePlay(
             &gScene.effects,
             &gMuzzleFlash,
             &muzzleOffset,

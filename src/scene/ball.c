@@ -162,7 +162,7 @@ void ballCheckBounced(struct Ball* ball) {
         normal = manifold->normal;
     }
 
-    effectsSplashPlay(&gScene.effects, &gBallBounce, &ball->rigidBody.transform.position, &normal, NULL);
+    effectsParticlePlay(&gScene.effects, &gBallBounce, &ball->rigidBody.transform.position, &normal, NULL);
     soundPlayerPlay(soundsBallBounce, 1.5f, 1.0f, &ball->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
     hudShowSubtitle(&gScene.hud, ENERGYBALL_IMPACT, SubtitleTypeCaption);
     ball->flags |= BallJustBounced;
@@ -248,7 +248,7 @@ void ballUpdate(struct Ball* ball) {
             ball->soundLoopId = SOUND_ID_NONE;
             soundPlayerPlay(soundsBallExplode, 2.0f, 1.0f, &ball->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
             hudShowSubtitle(&gScene.hud, ENERGYBALL_EXPLOSION, SubtitleTypeCaption);
-            effectsSplashPlay(&gScene.effects, &gBallBurst, &ball->rigidBody.transform.position, &gUp, NULL);
+            effectsParticlePlay(&gScene.effects, &gBallBurst, &ball->rigidBody.transform.position, &gUp, NULL);
         }
     }
 

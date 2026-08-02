@@ -1,19 +1,19 @@
 #ifndef __EFFECTS_EFFECTS_H__
 #define __EFFECTS_EFFECTS_H__
 
-#include "splash_particle_effect.h"
+#include "particle_effect.h"
 
-#define MAX_ACTIVE_SPLASH_EFFECTS   16
+#define MAX_ACTIVE_PARTICLE_EFFECTS 16
 
 struct Effects {
-    struct SplashParticleEffect splashParticleEffects[MAX_ACTIVE_SPLASH_EFFECTS];
-    short nextSplashEffect;
+    struct ParticleEffect particleEffects[MAX_ACTIVE_PARTICLE_EFFECTS];
+    short nextParticleEffect;
 };
 
 void effectsInit(struct Effects* effects);
-void effectsSplashPlay(
+void effectsParticlePlay(
     struct Effects* effects,
-    struct SplashParticleDefinition* definition,
+    struct ParticleEffectDefinition* definition,
     struct Vector3* origin,
     struct Vector3* normal,
     struct Transform* parent

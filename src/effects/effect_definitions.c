@@ -2,110 +2,110 @@
 
 #include "codegen/assets/materials/static.h"
 
-struct SplashParticleDefinition gFailPortalSplash[2] = {
+struct ParticleEffectDefinition gFailPortalSplash[2] = {
     {
-        .particleLifetime = 0.5f,
+        .lifetime = 0.5f,
         .fullWidthTime = 0.125f,
         .fadeInEndTime = 0.0f,
         .fadeOutStartTime = 0.25f,
-        .particleTailDelay = 0.1f,
+        .tailDelay = 0.1f,
         .minNormalVelocity = 0.5f,
         .maxNormalVelocity = 1.0f,
         .minTangentVelocity = 1.0f,
         .maxTangentVelocity = 2.0f,
-        .particleCount = 16,
+        .count = 16,
         .materialIndex = PORTAL_1_PARTICLE_INDEX,
-        .particleHalfWidth = 0.05f,
-        .particleColor = {200, 100, 50, 255},
+        .halfWidth = 0.05f,
+        .color = {200, 100, 50, 255},
         .flags = 0,
     },
     {
-        .particleLifetime = 0.5f,
+        .lifetime = 0.5f,
         .fullWidthTime = 0.125f,
         .fadeInEndTime = 0.0f,
         .fadeOutStartTime = 0.25f,
-        .particleTailDelay = 0.1f,
+        .tailDelay = 0.1f,
         .minNormalVelocity = 0.5f,
         .maxNormalVelocity = 1.0f,
         .minTangentVelocity = 1.0f,
         .maxTangentVelocity = 2.0f,
-        .particleCount = 16,
+        .count = 16,
         .materialIndex = PORTAL_1_PARTICLE_INDEX,
-        .particleHalfWidth = 0.05f,
-        .particleColor = {50, 70, 200, 255},
+        .halfWidth = 0.05f,
+        .color = {50, 70, 200, 255},
         .flags = 0,
     },
 };
 
-struct SplashParticleDefinition gBallBurst = {
-    .particleLifetime = 2.0f,
+struct ParticleEffectDefinition gBallBurst = {
+    .lifetime = 2.0f,
     .fullWidthTime = 0.125f,
     .fadeInEndTime = 0.0f,
     .fadeOutStartTime = 1.5f,
-    .particleTailDelay = 0.1f,
+    .tailDelay = 0.1f,
     .minNormalVelocity = -1.0f,
     .maxNormalVelocity = 6.0f,
     .minTangentVelocity = 0.5f,
     .maxTangentVelocity = 1.0f,
-    .particleCount = 16,
+    .count = 16,
     .materialIndex = SPARK_INDEX,
-    .particleHalfWidth = 0.02f,
-    .particleColor = {255, 255, 255, 255},
+    .halfWidth = 0.02f,
+    .color = {255, 255, 255, 255},
     .flags = 0,
 };
 
 
-struct SplashParticleDefinition gBallBounce = {
-    .particleLifetime = 0.75f,
+struct ParticleEffectDefinition gBallBounce = {
+    .lifetime = 0.75f,
     .fullWidthTime = 0.125f,
     .fadeInEndTime = 0.0f,
     .fadeOutStartTime = 0.5f,
-    .particleTailDelay = 0.1f,
+    .tailDelay = 0.1f,
     .minNormalVelocity = 0.5f,
     .maxNormalVelocity = 1.5f,
     .minTangentVelocity = 0.5f,
     .maxTangentVelocity = 1.0f,
-    .particleCount = 16,
+    .count = 16,
     .materialIndex = SPARK_INDEX,
-    .particleHalfWidth = 0.02f,
-    .particleColor = {255, 255, 255, 255},
+    .halfWidth = 0.02f,
+    .color = {255, 255, 255, 255},
     .flags = 0,
 };
 
-struct SplashParticleDefinition gMuzzleFlash = {
-    .particleLifetime = 0.1f,
+struct ParticleEffectDefinition gMuzzleFlash = {
+    .lifetime = 0.1f,
     .fullWidthTime = 0.075f,
     .fadeInEndTime = 0.0f,
     .fadeOutStartTime = 0.025f,
-    .particleTailDelay = 0.8f,
+    .tailDelay = 0.8f,
     .minNormalVelocity = 0.45f,
     .maxNormalVelocity = 0.7f,
     .minTangentVelocity = 0.06f,
     .maxTangentVelocity = 0.0725f,
-    .particleCount = 4,
+    .count = 4,
     .materialIndex = MUZZLEFLASH2_INDEX,
-    .particleHalfWidth = 0.15f,
-    .particleColor = {210, 135, 50, 255},
-    .flags = SplashParticleFlagsBillboarded | SplashParticleFlagsNoGravity,
+    .halfWidth = 0.15f,
+    .color = {210, 135, 50, 255},
+    .flags = ParticleFlagsBillboarded | ParticleFlagsNoGravity,
 };
 
-struct SplashParticleDefinition gSpark = {
-    .particleLifetime = 1.0f,
+struct ParticleEffectDefinition gSpark = {
+    .lifetime = 1.0f,
     .fullWidthTime = 0.125f,
     .fadeInEndTime = 0.0f,
     .fadeOutStartTime = 0.5f,
-    .particleTailDelay = 0.05f,
+    .tailDelay = 0.05f,
     .minNormalVelocity = -0.5f,
     .maxNormalVelocity = 1.0f,
     .minTangentVelocity = 0.5f,
     .maxTangentVelocity = 1.25f,
-    .particleCount = 8,
+    .count = 8,
     .materialIndex = SPARK_INDEX,
-    .particleHalfWidth = 0.02f,
-    .particleColor = {255, 255, 255, 255},
+    .halfWidth = 0.02f,
+    .color = {255, 255, 255, 255},
     .flags = 0,
 };
 
-struct SplashParticleDefinition* gScriptableEffects[1] = {
+struct ParticleEffectDefinition* gScriptableEffects[1] = {
     [ScriptableEffectTypeSpark] = &gSpark
 };
