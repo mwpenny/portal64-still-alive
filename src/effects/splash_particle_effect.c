@@ -56,21 +56,20 @@ static void splashParticleEffectBuildVerticesBillboarded(
         struct Vector3 heightOffset;
         struct Vector3 position[2];
 
-        struct Vector3 particleDir;
-        vector3Sub(&particle->position[0], &particle->position[1], &particleDir);
+        vector3Sub(&particle->position[0], &particle->position[1], &position[0]);   // Offset
+        vector3AddScaled(&particle->position[1], &position[0], 0.5f, &position[1]); // Center
 
         // Determine camera-facing basis for billboard
-        vector3Sub(&particle->position[0], cameraPosition, &tmp);
-        vector3Cross(&tmp, &particleDir, &particle->widthOffset);
+        vector3Sub(&position[1], cameraPosition, &tmp);
+        vector3Cross(&tmp, &position[0], &particle->widthOffset);
         vector3Scale(&particle->widthOffset, &particle->widthOffset, effect->definition->particleHalfWidth / sqrtf(vector3MagSqrd(&particle->widthOffset)));
 
         vector3Cross(&tmp, &particle->widthOffset, &heightOffset);
-        vector3Scale(&heightOffset, &heightOffset, 0.5f * sqrtf(vector3MagSqrd(&particleDir)) / sqrtf(vector3MagSqrd(&heightOffset)));
+        vector3Scale(&heightOffset, &heightOffset, 0.5f * sqrtf(vector3MagSqrd(&position[0])) / sqrtf(vector3MagSqrd(&heightOffset)));
 
         // Start/end relative to center
-        vector3AddScaled(&particle->position[1], &particleDir, 0.5f, &tmp);
-        vector3Sub(&tmp, &heightOffset, &position[0]);
-        vector3Add(&tmp, &heightOffset, &position[1]);
+        vector3Sub(&position[1], &heightOffset, &position[0]);
+        vector3Add(&position[1], &heightOffset, &position[1]);
 
         vtx = splashParticleEffectBuildQuad(vtx, particle, position, color, widthScalar);
     }
@@ -91,13 +90,14 @@ static Gfx* splashParticleEffectBuildDisplayList(struct RenderState* renderState
     }
 
     struct Coloru8 color = effect->definition->particleColor;
-    if (effect->time > effect->definition->fadeStartTime) {
-        float opacity = 1.0f - mathfInvLerp(
-            effect->definition->fadeStartTime,
+    if (effect->time < effect->definition->fadeInEndTime) {
+        color.a *= effect->time / effect->definition->fadeInEndTime;
+    } else if (effect->time > effect->definition->fadeOutStartTime) {
+        color.a *= 1.0f - mathfInvLerp(
+            effect->definition->fadeOutStartTime,
             effect->definition->particleLifetime,
             effect->time
         );
-        color.a = 255.0f * opacity;
     }
 
     // Build quads
@@ -222,7 +222,7 @@ void splashParticleEffectPlay(
         vector3AddScaled(&particle->velocity, &up, tangentDir.y * tangentMag, &particle->velocity);
 
         particle->position[1] = *origin;
-        vector3AddScaled(origin, &particle->velocity, definition->particleTailDelay, &particle->position[0]);
+        vector3AddScaled(&particle->position[1], &particle->velocity, definition->particleTailDelay, &particle->position[0]);
 
         // Compute width direction (billboarded particles do this every frame)
         if (!(definition->flags & SplashParticleFlagsBillboarded)) {

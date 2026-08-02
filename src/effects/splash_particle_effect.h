@@ -13,7 +13,8 @@ enum SplashParticleFlags {
 
 struct SplashParticleDefinition {
     float particleLifetime;
-    float fadeStartTime;
+    float fadeInEndTime;
+    float fadeOutStartTime;
     float fullWidthTime;
     float particleTailDelay;
     float minNormalVelocity;
