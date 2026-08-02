@@ -1,1 +1,1 @@
--set colorspace Gray -separate -average -resize 32x32
+-flip -set colorspace Gray -separate -average -resize 32x32

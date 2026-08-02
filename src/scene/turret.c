@@ -116,8 +116,8 @@ static struct CompoundColliderDefinition sTurretCollider = {
 static struct Vector3 sTurretOriginOffset = { 0.0f, 0.554f, 0.0f };
 static struct Vector3 sTurretLaserOffset = { 0.0f, 0.0425f, 0.11f };
 static struct Vector3 sTurretMuzzleOffsets[2] = {
-    { 0.15f, 0.0425f, 0.05f },  // Left
-    { -0.15f, 0.0425f, 0.05f }  // Right
+    {  0.15f, 0.0425f, -0.1f },  // Left
+    { -0.15f, 0.0425f, -0.1f }  // Right
 };
 
 static struct Quaternion sTurretMinYaw = { 0.0f, -0.189f, 0.0f, 0.982f };

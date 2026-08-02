@@ -57,7 +57,7 @@ static void splashParticleEffectBuildVerticesBillboarded(
         struct Vector3 position[2];
 
         struct Vector3 particleDir;
-        vector3Sub(&particle->position[1], &particle->position[0], &particleDir);
+        vector3Sub(&particle->position[0], &particle->position[1], &particleDir);
 
         // Determine camera-facing basis for billboard
         vector3Sub(&particle->position[0], cameraPosition, &tmp);
@@ -65,10 +65,10 @@ static void splashParticleEffectBuildVerticesBillboarded(
         vector3Scale(&particle->widthOffset, &particle->widthOffset, effect->definition->particleHalfWidth / sqrtf(vector3MagSqrd(&particle->widthOffset)));
 
         vector3Cross(&tmp, &particle->widthOffset, &heightOffset);
-        vector3Scale(&heightOffset, &heightOffset, sqrtf(vector3MagSqrd(&particleDir)) / sqrtf(vector3MagSqrd(&heightOffset)));
+        vector3Scale(&heightOffset, &heightOffset, 0.5f * sqrtf(vector3MagSqrd(&particleDir)) / sqrtf(vector3MagSqrd(&heightOffset)));
 
         // Start/end relative to center
-        vector3AddScaled(&particle->position[0], &particleDir, 0.5f, &tmp);
+        vector3AddScaled(&particle->position[1], &particleDir, 0.5f, &tmp);
         vector3Sub(&tmp, &heightOffset, &position[0]);
         vector3Add(&tmp, &heightOffset, &position[1]);
 
