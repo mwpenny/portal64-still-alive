@@ -84,7 +84,7 @@ void findStartValue(const T* keys, unsigned keyCount, double at, unsigned& start
     for (startValue = 0; startValue < keyCount; ++startValue) {
         if (keys[startValue].mTime == at) {
             lerp = 0.0f;
-            break;
+            return;
         } else if (keys[startValue].mTime > at) {
             if (startValue == 0) {
                 lerp = 0.0f;
@@ -99,9 +99,11 @@ void findStartValue(const T* keys, unsigned keyCount, double at, unsigned& start
                 }
             }
 
-            break;
+            return;
         }
     }
+
+    startValue = keyCount - 1;
 }
 
 aiVector3D evaluateVectorAt(const aiVectorKey* keys, unsigned keyCount, double at) {
@@ -114,17 +116,15 @@ aiVector3D evaluateVectorAt(const aiVectorKey* keys, unsigned keyCount, double a
     }
 
     unsigned startValue;
-    double lerp = 0.0f;
-
+    double lerp;
     findStartValue(keys, keyCount, at, startValue, lerp);
- 
-    if (startValue == keyCount) {
-        return keys[keyCount - 1].mValue;
-    }
 
     aiVector3D from = keys[startValue].mValue;
-    aiVector3D to = keys[startValue + 1].mValue;
+    if (startValue == (keyCount - 1)) {
+        return from;
+    }
 
+    aiVector3D to = keys[startValue + 1].mValue;
     return (to - from) * (float)lerp + from;
 }
 
@@ -138,20 +138,17 @@ aiQuaternion evaluateQuaternionAt(const aiQuatKey* keys, unsigned keyCount, doub
     }
 
     unsigned startValue;
-    double lerp = 0.0f;
-    
+    double lerp;
     findStartValue(keys, keyCount, at, startValue, lerp);
- 
-    if (startValue == keyCount) {
-        return keys[keyCount - 1].mValue;
-    }
 
     aiQuaternion from = keys[startValue].mValue;
+    if (startValue == (keyCount - 1)) {
+        return from;
+    }
+
     aiQuaternion to = keys[startValue + 1].mValue;
     aiQuaternion output;
-
     aiQuaternion::Interpolate(output, from, to, lerp);
-    
     return output;
 }
 
@@ -199,7 +196,6 @@ std::string generateanimationV2(const aiAnimation& animation, int index, BoneHie
 
             allFrameData[frame][boneIndex].position = origin * settings.mFixedPointScale;
             allFrameData[frame][boneIndex].rotation = rotation;
-
         }
     }
 
