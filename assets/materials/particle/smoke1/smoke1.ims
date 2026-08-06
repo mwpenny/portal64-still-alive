@@ -1,0 +1,3 @@
+-alpha extract
+-crop 170x170+340+0
+-resize 64x64
