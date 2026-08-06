@@ -2079,6 +2079,25 @@ materials:
       clear: [G_CULL_BACK, G_CULL_FRONT, G_LIGHTING]
       set: [G_SHADE]
 
+  smoke1:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/particle/smoke1/smoke1.png
+      fmt: G_IM_FMT_I
+      siz: G_IM_SIZ_4b
+      s:
+        shift: 15
+      t:
+        shift: 15
+
+    gDPSetRenderMode: G_RM_ZB_XLU_SURF
+
+    gSPGeometryMode:
+      clear: [G_CULL_BACK, G_CULL_FRONT, G_LIGHTING]
+      set: [G_SHADE]
+    gDPSetCombineMode:
+      color: ["SHADE", "0", "TEXEL0", "0"]
+      alpha: ["SHADE", "0", "TEXEL0", "0"]
+
   brightglow_y:
     gDPSetTile:
       filename: ../../portal_pak_modified/materials/effects/brightglow_y.png

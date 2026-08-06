@@ -106,6 +106,40 @@ struct ParticleEffectDefinition gSpark = {
     .flags = 0,
 };
 
+struct ParticleEffectDefinition gSmoke = {
+    .lifetime = 2.0f,
+    .fullWidthTime = 1.5f,
+    .fadeInEndTime = 0.75f,
+    .fadeOutStartTime = 1.25f,
+    .tailDelay = 2.0f,
+    .minNormalVelocity = 0.75f,
+    .maxNormalVelocity = 1.25f,
+    .minTangentVelocity = 0.0625f,
+    .maxTangentVelocity = 0.1875f,
+    .count = 2,
+    .materialIndex = SMOKE1_INDEX,
+    .halfWidth = 2.0f,
+    .color = {165, 165, 165, 112},
+    .flags = ParticleFlagsBillboarded | ParticleFlagsNoGravity,
+};
+
+struct ParticleEffectDefinition gSmokeFast = {
+    .lifetime = 1.0f,
+    .fullWidthTime = 0.75f,
+    .fadeInEndTime = 0.25f,
+    .fadeOutStartTime = 0.25f,
+    .tailDelay = 0.75f,
+    .minNormalVelocity = 2.5f,
+    .maxNormalVelocity = 3.0f,
+    .minTangentVelocity = 0.0625f,
+    .maxTangentVelocity = 0.1875f,
+    .count = 2,
+    .materialIndex = SMOKE1_INDEX,
+    .halfWidth = 2.0f,
+    .color = {165, 165, 165, 112},
+    .flags = ParticleFlagsBillboarded | ParticleFlagsNoGravity,
+};
+
 struct ParticleEffectDefinition* gScriptableEffects[1] = {
     [ScriptableEffectTypeSpark] = &gSpark
 };

@@ -9,6 +9,8 @@ extern struct ParticleEffectDefinition gBallBurst;
 extern struct ParticleEffectDefinition gBallBounce;
 extern struct ParticleEffectDefinition gMuzzleFlash;
 extern struct ParticleEffectDefinition gSpark;
+extern struct ParticleEffectDefinition gSmoke;
+extern struct ParticleEffectDefinition gSmokeFast;
 
 enum ScriptableEffectType {
     ScriptableEffectTypeSpark

@@ -86,6 +86,7 @@ set(TEXTURES
     overlays/overlay_scrawlings006a
     overlays/overlay_scrawlings006b
     overlays/overlay_scrawlings006c
+    particle/smoke1/smoke1
     plastic/plasticwall003a
     plastic/plasticwall004a
     signage/clock/clock_dots

@@ -12,6 +12,7 @@ struct Incinerator {
     struct RigidBody rigidBody;
     struct SKAnimator animator;
     struct SKArmature armature;
+    float smokeTimer;
     short signalIndex;
     short dynamicId;
     uint8_t isOpen;

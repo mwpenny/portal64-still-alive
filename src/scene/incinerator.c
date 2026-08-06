@@ -1,6 +1,8 @@
 #include "incinerator.h"
 
+#include "effects/effect_definitions.h"
 #include "physics/collision_scene.h"
+#include "scene.h"
 #include "scene/dynamic_scene.h"
 #include "util/dynamic_asset_loader.h"
 #include "util/frame_time.h"
@@ -10,8 +12,15 @@
 #include "codegen/assets/models/props_bts/glados_aperturedoor.h"
 #include "codegen/assets/models/props_bts/glados_aperturedoor_collision.h"
 
-#define INCINERATOR_SCALE               1024.0f  // Avoids z-fighting
-#define INCINERATOR_COLLISION_LAYERS    (COLLISION_LAYERS_STATIC | COLLISION_LAYERS_TANGIBLE)
+#define INCINERATOR_SCALE                   1024.0f  // Avoids z-fighting
+#define INCINERATOR_COLLISION_LAYERS        (COLLISION_LAYERS_STATIC | COLLISION_LAYERS_TANGIBLE)
+
+#define INCINERATOR_SMOKE_OFFSET            -0.5f
+#define INCINERATOR_SMOKE_OPEN_DELAY        0.25f
+#define INCINERATOR_SMOKE_RUSH_MIN_DELAY    0.0625f
+#define INCINERATOR_SMOKE_RUSH_MAX_DELAY    0.125f
+#define INCINERATOR_SMOKE_MIN_DELAY         0.25f
+#define INCINERATOR_SMOKE_MAX_DELAY         0.75f
 
 static struct ColliderTypeData sIncineratorColliderType = {
     CollisionShapeTypeMesh,
@@ -55,7 +64,7 @@ static void incineratorUpdateCollision(struct Incinerator* incinerator) {
         .children[PROPS_BTS_GLADOS_APERTUREDOOR_COLLISION_BLADES_COLLISION_INDEX]
         .collisionLayers;
 
-    *faceCollisionLayers = (incinerator->isOpen ? 0 : INCINERATOR_COLLISION_LAYERS);
+    *faceCollisionLayers = incinerator->isOpen ? 0 : INCINERATOR_COLLISION_LAYERS;
 }
 
 void incineratorInit(struct Incinerator* incinerator, struct IncineratorDefinition* definition) {
@@ -87,9 +96,49 @@ void incineratorInit(struct Incinerator* incinerator, struct IncineratorDefiniti
     );
     dynamicSceneSetRoomFlags(incinerator->dynamicId, ROOM_FLAG_FROM_INDEX(definition->roomIndex));
 
+    incinerator->smokeTimer = 0.0f;
     incinerator->signalIndex = definition->signalIndex;
     incinerator->isOpen = 0;
     incineratorUpdateCollision(incinerator);
+}
+
+static void incineratorUpdateSmoke(struct Incinerator* incinerator) {
+    if (incinerator->smokeTimer > 0.0f) {
+        incinerator->smokeTimer -= FIXED_DELTA_TIME;
+        return;
+    }
+
+    struct ParticleEffectDefinition* effectDef;
+    if (skAnimatorIsRunning(&incinerator->animator)) {
+        // Blades are opening
+        effectDef = &gSmokeFast;
+        incinerator->smokeTimer = randomInRangef(
+            INCINERATOR_SMOKE_RUSH_MIN_DELAY,
+            INCINERATOR_SMOKE_RUSH_MAX_DELAY
+        );
+    } else {
+        effectDef = &gSmoke;
+        incinerator->smokeTimer = randomInRangef(
+            INCINERATOR_SMOKE_MIN_DELAY,
+            INCINERATOR_SMOKE_MAX_DELAY
+        );
+    }
+
+    struct Vector3 origin;
+    vector3AddScaled(
+        &incinerator->rigidBody.transform.position,
+        &incinerator->rigidBody.rotationBasis.y,
+        INCINERATOR_SMOKE_OFFSET,
+        &origin
+    );
+
+    effectsParticlePlay(
+        &gScene.effects,
+        effectDef,
+        &origin,
+        &gUp,
+        NULL
+    );
 }
 
 void incineratorUpdate(struct Incinerator* incinerator) {
@@ -110,7 +159,12 @@ void incineratorUpdate(struct Incinerator* incinerator) {
         skAnimatorEnsureClipRunning(&incinerator->animator, clip, startTime, 0);
 
         incinerator->isOpen ^= 1;
+        incinerator->smokeTimer = incinerator->isOpen ? INCINERATOR_SMOKE_OPEN_DELAY : 0.0f;
         incineratorUpdateCollision(incinerator);
+    }
+
+    if (incinerator->isOpen) {
+        incineratorUpdateSmoke(incinerator);
     }
 }
 
@@ -122,6 +176,7 @@ void incineratorOnDeserialize(struct Incinerator* incinerator) {
         );
 
         skAnimatorRunClip(&incinerator->animator, clip, SK_ANIMATION_CLIP_DURATION(clip), 0);
+        incinerator->smokeTimer = 0.01f;  // Don't play smoke rush
 
         incinerator->isOpen = 1;
         incineratorUpdateCollision(incinerator);
