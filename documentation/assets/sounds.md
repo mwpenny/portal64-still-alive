@@ -41,7 +41,7 @@ relative path as the input sound in `portal_pak_dir/`.
 
 For example:
 * Input sound: `portal_pak_dir/sound/buttons/button3.wav`
-* Arguments file: `assets/sound/buttons/button3.{sox,jsox}`.
+* Arguments file: `assets/sound/buttons/button3.{sox,jsox}`
 * Transformed sound: `portal_pak_modified/sound/buttons/button3.wav`
 
 Localized versions of the same sound are handled automatically and the output

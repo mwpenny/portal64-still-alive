@@ -34,7 +34,7 @@ as the input model.
 
 For example:
 * Input model: `assets/models/cube/cube.blend`
-* Arguments file: `assets/models/cube/cube.flags`.
+* Arguments file: `assets/models/cube/cube.flags`
 * Output directory: `<build directory>/codegen/assets/models/cube/`
 
 The arguments file can specify a default material which will be assumed to be

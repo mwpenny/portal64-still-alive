@@ -51,7 +51,7 @@ texture in `portal_pak_dir/`.
 
 For example:
 * Converted texture: `portal_pak_dir/materials/decals/orange_spot.png`
-* Arguments file: `assets/materials/decals/orange_spot.ims`.
+* Arguments file: `assets/materials/decals/orange_spot.ims`
 * Transformed texture: `portal_pak_modified/materials/decals/orange_spot.png`
 
 There are some special cases. Some `.ims` files specify additional input files
