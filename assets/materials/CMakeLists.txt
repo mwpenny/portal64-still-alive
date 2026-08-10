@@ -412,7 +412,7 @@ foreach(TEXTURE_SCRIPT ${TEXTURE_SCRIPTS})
         list(APPEND DEPENDENCY_TEXTURES ${DEP_LIST})
     endif()
 
-    # Do default conversion for textures without special cases
+    # Define default conversion for textures not already handled
     foreach(TEXTURE ${DEPENDENCY_TEXTURES})
         _texture_has_convert_command(${TEXTURE} HAS_COMMAND)
         if (NOT HAS_COMMAND)
@@ -470,7 +470,7 @@ function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
     return(PROPAGATE ${OUTPUT_LIST})
 endfunction()
 
-# Add commands for transforming converted PNG textures (crop, scale, etc.).
+# Add commands for transforming converted PNG textures (crop, scale, etc.)
 
 set(TEXTURES_TRANSFORMED "")
 
