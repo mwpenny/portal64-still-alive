@@ -1,306 +1,121 @@
 set(PAK_MATERIALS_DIR "${PAK_DIR}/materials")
 set(PAK_MODIFIED_MATERIALS_DIR "${PAK_MODIFIED_DIR}/materials")
 
-########################
-## Texture conversion ##
-########################
+#####################
+## Material export ##
+#####################
 
-# All textures used from the original game
-set(TEXTURES
-    concrete/concrete_bts_ceiling002a
-    concrete/concrete_bts_floor002a
-    concrete/concrete_bts_modular_wall001b
-    concrete/concrete_bts_modular_wall001c
-    concrete/concrete_modular_ceiling001a
-    concrete/concrete_modular_floor001a
-    concrete/concrete_modular_wall001b
-    concrete/concrete_modular_wall001d
-    concrete/observationwall_001a
-    decals/orange_spot
-    effects/brightglow_y
-    effects/fleck_ash2
-    effects/light_rail_beam1
-    effects/portal_1_particle
-    effects/portal_2_particle
-    effects/portal_cleanser
-    gamepadui/portal_logo
-    glass/glasswindow_frosted_002
-    glass/refract01_dx8
-    metal/metalbeam_bts_001a
-    metal/metaldoor_white01
-    metal/metalfloor_bts_001b
-    metal/metalgrate018
-    metal/metal_modular_floor001
-    metal/metalvent014a
-    metal/metalwall061f
-    metal/metalwall048b
-    metal/metalwall060a
-    metal/metalwall_bts_005a
-    metal/metalwall_bts_006a
-    models/player/chell_body
-    models/player/chell_face
-    models/props/autoportal_frame/autoportal_frame
-    models/props/ball_catcher_sheet
-    models/props/bed01
-    models/props/button
-    models/props/combine_ball_launcher
-    models/props/door_01
-    models/props/door_02
-    models/props/elevatorshaft_wall/elevatorshaft_wall
-    models/props/elevator_caps/elevator_caps
-    models/props/food_can/food_can
-    models/props/lab_monitor/lab_monitor_screen_text
-    models/props/light_rail_endcap
-    models/props/metal_box
-    models/props/metal_box_skin001
-    models/props/milk_carton/milk_carton
-    models/props/pc_case_open/pc_case_open
-    models/props/portal_cleanser
-    models/props/radio
-    models/props/round_elevator_sheet_1
-    models/props/round_elevator_sheet_2
-    models/props/round_elevator_sheet_3
-    models/props/saucepan/saucepan
-    models/props/security_camera
-    models/props/toilet
-    models/props/water_bottle/water_bottle
-    models/props_animsigns/awe_total
-    models/props_animsigns/newsignage_back02
-    models/props_bts/fan01
-    models/props_bts/glados_aperturedoor
-    models/props_c17/door01a_skin6
-    models/props_c17/substation_transformer01b
-    models/props_junk/cardboard_boxes001a
-    models/props_junk/metalbucket01a
-    models/props_wasteland/fence_alpha
-    models/props_wasteland/prison_yard001
-    models/weapons/v_models/v_portalgun/v_portalgun
-    nature/hazard_liquid
-    overlays/aperture_lrg001
-    overlays/cake_picture
-    overlays/overlay_handprint
-    overlays/overlay_scrawlings002a
-    overlays/overlay_scrawlings003a
-    overlays/overlay_scrawlings004a
-    overlays/overlay_scrawlings005a
-    overlays/overlay_scrawlings006a
-    overlays/overlay_scrawlings006b
-    overlays/overlay_scrawlings006c
-    particle/smoke1/smoke1
-    plastic/plasticwall003a
-    plastic/plasticwall004a
-    signage/clock/clock_dots
-    signage/clock/countdown
-    signage/hazard_orange_03b
-    signage/indicator_lights/indicator_lights_corner_floor
-    signage/indicator_lights/indicator_lights_floor
-    signage/overlay_aperture_logo_worn
-    signage/signage_doorstate
-    signage/signage_exit
-    signage/signage_overlay_arrow
-    signage/signage_overlay_boxdispenser
-    signage/signage_overlay_boxhurt
-    signage/signage_overlay_catcher
-    signage/signage_overlay_companioncube
-    signage/signage_overlay_companioncube_broken
-    signage/signage_overlay_dots1
-    signage/signage_overlay_dots2
-    signage/signage_overlay_dots3
-    signage/signage_overlay_dots4
-    signage/signage_overlay_energyball
-    signage/signage_overlay_fling1
-    signage/signage_overlay_fling2
-    signage/signage_overlay_fountain
-    signage/signage_overlay_incinerator
-    signage/signage_overlay_midair1
-    signage/signage_overlay_midair2
-    signage/signage_overlay_toxic
-    signage/signage_overlay_turret
-    sprites/grav_flare
-    sprites/hud/portal_crosshairs
-    sprites/muzzleflash2
-    tile/observation_tilefloor001a
-    vgui/chapters/chapter1
-    vgui/chapters/chapter2
-    vgui/chapters/chapter3
-    vgui/chapters/chapter4
-    vgui/chapters/chapter5
-    vgui/chapters/chapter6
-    vgui/chapters/chapter7
-    vgui/chapters/chapter8
-    vgui/chapters/chapter9
-    vgui/chapters/chapter10
-    vgui/chapters/chapter11
+set(TEXTURE_SCRIPTS
+    concrete/concrete_bts_ceiling002a.ims
+    concrete/concrete_bts_floor002a.ims
+    concrete/concrete_bts_modular_wall001b.ims
+    concrete/concrete_bts_modular_wall001c.ims
+    concrete/concrete_modular_ceiling001a.ims
+    concrete/concrete_modular_floor001a.ims
+    concrete/concrete_modular_wall001b.ims
+    concrete/concrete_modular_wall001d.ims
+    concrete/observationwall_001a.ims
+    decals/orange_spot.ims
+    effects/brightglow_y.ims
+    effects/fleck_ash2.ims
+    effects/light_rail_beam1.ims
+    effects/portal_1_particle.ims
+    effects/portal_2_particle.ims
+    effects/portal_cleanser.ims
+    gamepadui/portal_logo.ims
+    gamepadui/valve.ims
+    glass/glasswindow_frosted_002.ims
+    glass/refract01_dx8.ims
+    metal/metalbeam_bts_001a.ims
+    metal/metaldoor_white01.ims
+    metal/metalfloor_bts_001b.ims
+    metal/metalgrate018.ims
+    metal/metal_modular_floor001.ims
+    metal/metalvent014a.ims
+    metal/metalwall048b.ims
+    metal/metalwall060a.ims
+    metal/metalwall061f.ims
+    metal/metalwall_bts_005a.ims
+    metal/metalwall_bts_006a.ims
+    models/player/chell_body.ims
+    models/player/chell_face.ims
+    models/props/autoportal_frame/autoportal_frame.ims
+    models/props/ball_catcher_sheet.ims
+    models/props/bed01.ims
+    models/props/button.ims
+    models/props/combine_ball_launcher.ims
+    models/props/door_01.ims
+    models/props/door_02.ims
+    models/props/elevator_caps/elevator_caps.ims
+    models/props/elevatorshaft_wall/elevatorshaft_wall.ims
+    models/props/food_can/food_can.ims
+    models/props/lab_monitor/lab_monitor_screen_text.ims
+    models/props/light_rail_endcap.ims
+    models/props/metal_box.ims
+    models/props/metal_box_skin001.ims
+    models/props/milk_carton/milk_carton.ims
+    models/props/pc_case_open/pc_case_open.ims
+    models/props/portal_cleanser.ims
+    models/props/radio.ims
+    models/props/round_elevator_sheet_1.ims
+    models/props/round_elevator_sheet_2.ims
+    models/props/round_elevator_sheet_3.ims
+    models/props/saucepan/saucepan.ims
+    models/props/security_camera.ims
+    models/props/toilet.ims
+    models/props/water_bottle/water_bottle.ims
+    models/props_animsigns/awe_total.ims
+    models/props_animsigns/newsignage_back02.ims
+    models/props_bts/fan01.ims
+    models/props_bts/glados_aperturedoor.ims
+    models/props_c17/door01a_skin6.ims
+    models/props_c17/substation_transformer01b.ims
+    models/props_junk/cardboard_boxes001a.ims
+    models/props_junk/metalbucket01a.ims
+    models/props_wasteland/fence_alpha.ims
+    models/props_wasteland/prison_yard001.ims
+    models/weapons/v_models/v_portalgun/v_portalgun.ims
+    nature/hazard_liquid.ims
+    overlays/aperture_lrg001.ims
+    overlays/cake_picture.ims
+    overlays/overlay_handprint.ims
+    overlays/overlay_scrawlings002a.ims
+    overlays/overlay_scrawlings003a.ims
+    overlays/overlay_scrawlings004a.ims
+    overlays/overlay_scrawlings005a.ims
+    overlays/overlay_scrawlings006a.ims
+    overlays/overlay_scrawlings006b.ims
+    overlays/overlay_scrawlings006c.ims
+    particle/smoke1/smoke1.ims
+    plastic/plasticwall003a.ims
+    plastic/plasticwall004a.ims
+    signage/clock/countdown.ims
+    signage/hazard_orange_03b.ims
+    signage/indicator_lights/indicator_lights_floor.ims
+    signage/indicator_lights/indicator_lights_floor_on.ims
+    signage/overlay_aperture_logo_worn.ims
+    signage/signage_doorstate.ims
+    signage/signage_doorstate_on.ims
+    signage/signage_exit.ims
+    signage/signage_overlay_fling1.ims
+    signage/signage_overlay_midair1.ims
+    sprites/grav_flare.ims
+    sprites/hud/portal_crosshairs.ims
+    sprites/muzzleflash2.ims
+    tile/observation_tilefloor001a.ims
+    vgui/chapters/chapter1.ims
+    vgui/chapters/chapter2.ims
+    vgui/chapters/chapter3.ims
+    vgui/chapters/chapter4.ims
+    vgui/chapters/chapter5.ims
+    vgui/chapters/chapter6.ims
+    vgui/chapters/chapter7.ims
+    vgui/chapters/chapter8.ims
+    vgui/chapters/chapter9.ims
+    vgui/chapters/chapter10.ims
+    vgui/chapters/chapter11.ims
 )
 
-function(_add_texture_convert_command INPUT_FILE OUTPUT_FILE)
-    set(INPUT_FILE "${PAK_MATERIALS_DIR}/${INPUT_FILE}.vtf")
-    set(OUTPUT_FILE "${PAK_MATERIALS_DIR}/${OUTPUT_FILE}.png")
-    set(ARGS "${ARGN}")
-
-    if (NOT ARGS)
-        get_source_file_property(FILE_ARGS ${INPUT_FILE} ARGS)
-        if (FILE_ARGS)
-            set(ARGS "${FILE_ARGS}")
-        endif()
-    endif()
-
-    add_custom_command(
-        DEPENDS
-            extract_vpks "$<TARGET_PROPERTY:extract_vpks,OUTPUTS>"
-        OUTPUT
-            ${OUTPUT_FILE}
-        COMMAND
-            ${VTF2PNG_EXECUTABLE} ${ARGS} ${INPUT_FILE} ${OUTPUT_FILE}
-        COMMENT
-            "Converting $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
-        VERBATIM
-    )
-endfunction()
-
-# Add commands for converting VTF textures to PNG
-# There are some special cases for VTFs with multiple frames
-
-set_property(SOURCE ${PAK_MATERIALS_DIR}/signage/clock/countdown.vtf
-    PROPERTY ARGS
-        -f 60
-)
-
-foreach(i RANGE 1 9)
-    math(EXPR FRAME "60 - ${i}")
-
-    _add_texture_convert_command(
-        signage/clock/countdown
-        signage/clock/countdown_${i}
-        -f ${FRAME}
-    )
-endforeach()
-
-_add_texture_convert_command(
-    signage/signage_doorstate
-    signage/signage_doorstate_on
-    -f 2
-)
-_add_texture_convert_command(
-    signage/indicator_lights/indicator_lights_corner_floor
-    signage/indicator_lights/indicator_lights_corner_floor_on
-    -f 2
-)
-_add_texture_convert_command(
-    signage/indicator_lights/indicator_lights_floor
-    signage/indicator_lights/indicator_lights_floor_on
-    -f 2
-)
-
-foreach(TEXTURE ${TEXTURES})
-    _add_texture_convert_command(${TEXTURE} ${TEXTURE})
-endforeach()
-
-################
-## Valve logo ##
-################
-
-function(_add_extract_frame_command INPUT_FILE OUTPUT_FILE SECONDS)
-    add_custom_command(
-        DEPENDS
-            ${INPUT_FILE}
-        OUTPUT
-            ${OUTPUT_FILE}
-        COMMAND
-            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
-        COMMAND
-            ${FFmpeg_EXECUTABLE}
-            -ss 00:00:${SECONDS}
-            -i ${INPUT_FILE}
-            -frames:v 1
-            -update true
-            -q:v 2
-            -loglevel error
-            -y ${OUTPUT_FILE}
-        COMMENT
-            "Extracting frame from $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
-        VERBATIM
-    )
-endfunction()
-
-_add_extract_frame_command(
-    ${VALVE_INTRO_VIDEO}
-    ${PAK_MATERIALS_DIR}/gamepadui/valve.png
-    4
-)
-
-_add_extract_frame_command(
-    ${VALVE_INTRO_VIDEO}
-    ${PAK_MATERIALS_DIR}/gamepadui/valve-no-logo.png
-    1
-)
-
-############################
-## Texture transformation ##
-############################
-
-# Adding a new .ims implies a new texture, which necessitates updating the
-# TEXTURES list above, which will retrigger CMake on build and so the typical
-# glob pitfalls do not apply here.
-file(GLOB_RECURSE TEXTURE_SCRIPTS "*.ims")
-
-function(_get_texture_script_file_list TEXTURE_SCRIPT PROPERTY_NAME PARENT_DIR OUTPUT)
-    get_source_file_property(FILE_LIST ${TEXTURE_SCRIPT} ${PROPERTY_NAME})
-
-    if (FILE_LIST)
-        list(TRANSFORM FILE_LIST PREPEND "${PARENT_DIR}/" OUTPUT_VARIABLE FILE_LIST)
-        list(TRANSFORM FILE_LIST APPEND ".png" OUTPUT_VARIABLE FILE_LIST)
-        list(APPEND ${OUTPUT} ${FILE_LIST})
-    endif()
-
-    return(PROPAGATE ${OUTPUT})
-endfunction()
-
-function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
-    cmake_path(
-        RELATIVE_PATH TEXTURE_SCRIPT
-        BASE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        OUTPUT_VARIABLE TEXTURE_NAME
-    )
-    cmake_path(
-        REMOVE_EXTENSION TEXTURE_NAME
-        OUTPUT_VARIABLE TEXTURE_NAME
-    )
-
-    set(INPUT_FILE "${PAK_MATERIALS_DIR}/${TEXTURE_NAME}.png")
-    set(OUTPUT_FILE "${PAK_MODIFIED_MATERIALS_DIR}/${TEXTURE_NAME}.png")
-
-    set(DEPENDENCY_FILES ${INPUT_FILE} ${TEXTURE_SCRIPT})
-    _get_texture_script_file_list(${TEXTURE_SCRIPT} ADDITIONAL_DEPS ${PAK_MATERIALS_DIR} DEPENDENCY_FILES)
-
-    set(OUTPUT_FILES ${OUTPUT_FILE})
-    _get_texture_script_file_list(${TEXTURE_SCRIPT} ADDITIONAL_OUTPUTS ${PAK_MODIFIED_MATERIALS_DIR} OUTPUT_FILES)
-
-    add_custom_command(
-        DEPENDS
-            ${RUN_COMMAND} ${DEPENDENCY_FILES}
-        OUTPUT
-            ${OUTPUT_FILES}
-        COMMAND
-            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
-        COMMAND
-            ${Python3_EXECUTABLE} ${RUN_COMMAND}
-            ${ImageMagickConvert_EXECUTABLE}
-            ${INPUT_FILE}
-            @${TEXTURE_SCRIPT}
-            ${OUTPUT_FILE}
-        WORKING_DIRECTORY
-            ${PROJECT_SOURCE_DIR}
-        COMMENT
-            "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
-        VERBATIM
-    )
-
-    list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILES})
-    return(PROPAGATE ${OUTPUT_LIST})
-endfunction()
-
-# Add commands for transforming converted PNG textures (crop, scale, etc.).
 # There are some special cases due to some conversion scripts reading textures
 # other than those they are named after (combining multiple textures), or
 # producing more than one output (texture splitting).
@@ -462,6 +277,201 @@ set_property(SOURCE signage/signage_overlay_midair1.ims
         signage/signage_overlay_turret
 )
 
+function(_get_property_image_files FILE_PATH PROPERTY_NAME PARENT_DIR OUTPUT)
+    get_source_file_property(FILE_LIST ${FILE_PATH} ${PROPERTY_NAME})
+
+    if (FILE_LIST)
+        list(TRANSFORM FILE_LIST PREPEND "${PARENT_DIR}/" OUTPUT_VARIABLE FILE_LIST)
+        list(TRANSFORM FILE_LIST APPEND ".png" OUTPUT_VARIABLE FILE_LIST)
+        list(APPEND ${OUTPUT} ${FILE_LIST})
+    endif()
+
+    return(PROPAGATE ${OUTPUT})
+endfunction()
+
+################
+## Valve logo ##
+################
+
+function(_add_extract_frame_command INPUT_FILE OUTPUT_FILE SECONDS)
+    add_custom_command(
+        DEPENDS
+            ${INPUT_FILE}
+        OUTPUT
+            ${OUTPUT_FILE}
+        COMMAND
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
+        COMMAND
+            ${FFmpeg_EXECUTABLE}
+            -ss 00:00:${SECONDS}
+            -i ${INPUT_FILE}
+            -frames:v 1
+            -update true
+            -q:v 2
+            -loglevel error
+            -y ${OUTPUT_FILE}
+        COMMENT
+            "Extracting frame from $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
+        VERBATIM
+    )
+endfunction()
+
+_add_extract_frame_command(
+    ${VALVE_INTRO_VIDEO}
+    ${PAK_MATERIALS_DIR}/gamepadui/valve.png
+    4
+)
+
+_add_extract_frame_command(
+    ${VALVE_INTRO_VIDEO}
+    ${PAK_MATERIALS_DIR}/gamepadui/valve-no-logo.png
+    1
+)
+
+########################
+## Texture conversion ##
+########################
+
+function(_add_texture_convert_command INPUT_FILE OUTPUT_FILE OUTPUT_LIST)
+    set(INPUT_FILE "${PAK_MATERIALS_DIR}/${INPUT_FILE}.vtf")
+    set(OUTPUT_FILE "${PAK_MATERIALS_DIR}/${OUTPUT_FILE}.png")
+    set(ARGS "${ARGN}")
+
+    add_custom_command(
+        DEPENDS
+            extract_vpks "$<TARGET_PROPERTY:extract_vpks,OUTPUTS>"
+        OUTPUT
+            ${OUTPUT_FILE}
+        COMMAND
+            ${VTF2PNG_EXECUTABLE} ${ARGS} ${INPUT_FILE} ${OUTPUT_FILE}
+        COMMENT
+            "Converting $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
+        VERBATIM
+    )
+
+    list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILE})
+    return(PROPAGATE ${OUTPUT_LIST})
+endfunction()
+
+function(_texture_has_convert_command TEXTURE_NAME HAS_COMMAND_OUT)
+    set(CONVERTED_FILE "${PAK_MATERIALS_DIR}/${TEXTURE_NAME}.png")
+    get_source_file_property(${HAS_COMMAND_OUT} ${CONVERTED_FILE} GENERATED)
+    return(PROPAGATE ${HAS_COMMAND_OUT})
+endfunction()
+
+# Add commands for converting VTF textures to PNG
+# There are some special cases for VTFs with multiple frames
+
+set(TEXTURES_CONVERTED "")
+
+_add_texture_convert_command(
+    signage/clock/countdown
+    signage/clock/countdown
+    TEXTURES_CONVERTED
+    -f 60
+)
+foreach(i RANGE 1 9)
+    math(EXPR FRAME "60 - ${i}")
+
+    _add_texture_convert_command(
+        signage/clock/countdown
+        signage/clock/countdown_${i}
+        TEXTURES_CONVERTED
+        -f ${FRAME}
+    )
+endforeach()
+
+_add_texture_convert_command(
+    signage/signage_doorstate
+    signage/signage_doorstate_on
+    TEXTURES_CONVERTED
+    -f 2
+)
+_add_texture_convert_command(
+    signage/indicator_lights/indicator_lights_corner_floor
+    signage/indicator_lights/indicator_lights_corner_floor_on
+    TEXTURES_CONVERTED
+    -f 2
+)
+_add_texture_convert_command(
+    signage/indicator_lights/indicator_lights_floor
+    signage/indicator_lights/indicator_lights_floor_on
+    TEXTURES_CONVERTED
+    -f 2
+)
+
+foreach(TEXTURE_SCRIPT ${TEXTURE_SCRIPTS})
+    cmake_path(
+        REMOVE_EXTENSION TEXTURE_SCRIPT
+        OUTPUT_VARIABLE TEXTURE_NAME
+    )
+
+    set(DEPENDENCY_TEXTURES ${TEXTURE_NAME})
+    get_source_file_property(DEP_LIST ${TEXTURE_SCRIPT} ADDITIONAL_DEPS)
+    if (DEP_LIST)
+        list(APPEND DEPENDENCY_TEXTURES ${DEP_LIST})
+    endif()
+
+    # Do default conversion for textures without special cases
+    foreach(TEXTURE ${DEPENDENCY_TEXTURES})
+        _texture_has_convert_command(${TEXTURE} HAS_COMMAND)
+        if (NOT HAS_COMMAND)
+            _add_texture_convert_command(${TEXTURE} ${TEXTURE} TEXTURES_CONVERTED)
+        endif()
+    endforeach()
+endforeach()
+
+add_custom_target(textures_untransformed
+    DEPENDS ${TEXTURES_CONVERTED}
+)
+
+############################
+## Texture transformation ##
+############################
+
+function(_add_texture_transform_command TEXTURE_SCRIPT OUTPUT_LIST)
+    cmake_path(
+        REMOVE_EXTENSION TEXTURE_SCRIPT
+        OUTPUT_VARIABLE TEXTURE_NAME
+    )
+
+    set(TEXTURE_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/${TEXTURE_SCRIPT}")
+    set(INPUT_FILE "${PAK_MATERIALS_DIR}/${TEXTURE_NAME}.png")
+    set(OUTPUT_FILE "${PAK_MODIFIED_MATERIALS_DIR}/${TEXTURE_NAME}.png")
+
+    set(DEPENDENCY_FILES ${INPUT_FILE})
+    _get_property_image_files(${TEXTURE_SCRIPT} ADDITIONAL_DEPS ${PAK_MATERIALS_DIR} DEPENDENCY_FILES)
+
+    set(OUTPUT_FILES ${OUTPUT_FILE})
+    _get_property_image_files(${TEXTURE_SCRIPT} ADDITIONAL_OUTPUTS ${PAK_MODIFIED_MATERIALS_DIR} OUTPUT_FILES)
+
+    add_custom_command(
+        DEPENDS
+            textures_untransformed ${DEPENDENCY_FILES}
+            ${RUN_COMMAND} ${TEXTURE_SCRIPT}
+        OUTPUT
+            ${OUTPUT_FILES}
+        COMMAND
+            ${CMAKE_COMMAND} -E make_directory "$<PATH:GET_PARENT_PATH,${OUTPUT_FILE}>"
+        COMMAND
+            ${Python3_EXECUTABLE} ${RUN_COMMAND}
+            ${ImageMagickConvert_EXECUTABLE}
+            ${INPUT_FILE}
+            @${TEXTURE_SCRIPT}
+            ${OUTPUT_FILE}
+        WORKING_DIRECTORY
+            ${PROJECT_SOURCE_DIR}
+        COMMENT
+            "Transforming $<PATH:RELATIVE_PATH,${INPUT_FILE},${PROJECT_SOURCE_DIR}>"
+        VERBATIM
+    )
+
+    list(APPEND ${OUTPUT_LIST} ${OUTPUT_FILES})
+    return(PROPAGATE ${OUTPUT_LIST})
+endfunction()
+
+# Add commands for transforming converted PNG textures (crop, scale, etc.).
+
 set(TEXTURES_TRANSFORMED "")
 
 foreach(TEXTURE_SCRIPT ${TEXTURE_SCRIPTS})
@@ -508,11 +518,7 @@ function(_add_material_generate_command INPUT_FILE OUTPUT_LIST)
 
     # Depend on all textures for simplicity
     set(DEPENDENCY_FILES ${INPUT_FILE} ${TEXTURES_TRANSFORMED})
-
-    get_source_file_property(DEP_FILE_LIST ${INPUT_FILE} ADDITIONAL_DEPS)
-    if (DEP_FILE_LIST)
-        list(APPEND DEPENDENCY_FILES ${DEP_FILE_LIST})
-    endif()
+    _get_property_image_files(${INPUT_FILE} ADDITIONAL_DEPS ${ASSETS_DIR} DEPENDENCY_FILES)
 
     add_custom_command(
         DEPENDS
@@ -542,26 +548,26 @@ endfunction()
 
 set_property(SOURCE static.skm.yaml
     PROPERTY ADDITIONAL_DEPS
-        ${ASSETS_DIR}/images/turret.png
+        images/turret
 )
 
 set_property(SOURCE hud.skm.yaml
     PROPERTY ADDITIONAL_DEPS
-        ${ASSETS_DIR}/images/center_reticle.png
+        images/center_reticle
 )
 
 set_property(SOURCE ui.skm.yaml
     PROPERTY ADDITIONAL_DEPS
-        ${ASSETS_DIR}/fonts/dejavu_sans/dejavu_sans_0.png
-        ${ASSETS_DIR}/fonts/dejavu_sans/dejavu_sans_1.png
-        ${ASSETS_DIR}/fonts/dejavu_sans/dejavu_sans_2.png
-        ${ASSETS_DIR}/fonts/dejavu_sans/dejavu_sans_3.png
-        ${ASSETS_DIR}/fonts/dejavu_sans/dejavu_sans_4.png
-        ${ASSETS_DIR}/fonts/liberation_mono/liberation_mono_0.png
-        ${ASSETS_DIR}/images/button_icons.png
-        ${ASSETS_DIR}/images/credits_icons.png
-        ${ASSETS_DIR}/images/github_qr.png
-        ${ASSETS_DIR}/images/rounded_corners.png
+        fonts/dejavu_sans/dejavu_sans_0
+        fonts/dejavu_sans/dejavu_sans_1
+        fonts/dejavu_sans/dejavu_sans_2
+        fonts/dejavu_sans/dejavu_sans_3
+        fonts/dejavu_sans/dejavu_sans_4
+        fonts/liberation_mono/liberation_mono_0
+        images/button_icons
+        images/credits_icons
+        images/github_qr
+        images/rounded_corners
 )
 
 set(GENERATED_CORE_MATERIALS "")
