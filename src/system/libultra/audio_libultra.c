@@ -1,13 +1,13 @@
 #include "system/audio.h"
 
 #include "math/mathf.h"
+#include "rsp_scheduler_libultra.h"
 #include "system/cartridge.h"
 #include "threads_libultra.h"
 #include "util/frame_time.h"
 #include "util/memory.h"
 
 #include <assert.h>
-#include <sched.h>
 #include <ultra64.h>
 
 #define AUDIO_HEAP_SIZE_BYTES       300000
@@ -96,14 +96,13 @@ static ALSndPlayer              sSoundPlayer;
 static u8*                      sDmaBuffers[AUDIO_DMA_BUFFER_COUNT];
 static struct DmaBufferMetadata sDmaBufferMetadata[AUDIO_DMA_BUFFER_COUNT];
 
-static OSPiHandle*              sPiHandle;
+static OSPiHandle*              sCartHandle;
 static OSMesgQueue              sAudioDmaMessageQueue;
 static OSMesg                   sAudioDmaMessages[AUDIO_MAX_DMA_TRANSFERS];
 static OSIoMesg                 sAudioDmaMessageReqs[AUDIO_MAX_DMA_TRANSFERS];
 static int                      sNextDmaSlot;
 static int                      sActiveDmaCount;
 
-extern OSSched                  scheduler;
 static OSMesgQueue*             sSchedulerTaskQueue;
 static OSMesgQueue              sSchedulerTaskDoneQueue;
 static OSScMsg                  sSchedulerTaskDoneMsg;
@@ -189,7 +188,7 @@ static s32 audioRequestDma(s32 addr, s32 len, void*) {
     msgReq->size = AUDIO_DMA_SIZE;
 
     // RSP will read memory directly so no need to invalidate data cache
-    osEPiStartDma(sPiHandle, msgReq, OS_READ);
+    osEPiStartDma(sCartHandle, msgReq, OS_READ);
     sNextDmaSlot = (sNextDmaSlot + 1) % AUDIO_MAX_DMA_TRANSFERS;
     ++sActiveDmaCount;
 
@@ -269,12 +268,12 @@ static int audioGenerateSamples(Acmd* commandListBuffer, u8* sampleBuffer, int s
     return 1;
 }
 
-static void audioThread(void* arg) {
+static void audioThreadEntry(void* arg) {
     OSMesgQueue frameQueue;
     OSMesg frameMsgBuf[AUDIO_FRAME_QUEUE_SIZE];
     OSScClient audioClient;
     osCreateMesgQueue(&frameQueue, frameMsgBuf, AUDIO_FRAME_QUEUE_SIZE);
-    osScAddClient(&scheduler, &audioClient, &frameQueue);
+    osScAddClient(rspSchedulerGet(), &audioClient, &frameQueue);
 
     Acmd* commandListBuffer = alHeapAlloc(
         &sAudioHeap,
@@ -363,7 +362,7 @@ void* audioInit(void* heapEnd, int maxVoices) {
     alSndpNew(&sSoundPlayer, &soundPlayerConfig);
 
     // DMA
-    sPiHandle = osCartRomInit();
+    sCartHandle = osCartRomInit();
     osCreateMesgQueue(&sAudioDmaMessageQueue, sAudioDmaMessages, AUDIO_MAX_DMA_TRANSFERS);
     for (int i = 0; i < AUDIO_DMA_BUFFER_COUNT; ++i) {
         sDmaBuffers[i] = alHeapAlloc(&sAudioHeap, 1, AUDIO_DMA_SIZE);
@@ -375,16 +374,16 @@ void* audioInit(void* heapEnd, int maxVoices) {
     sActiveDmaCount = 0;
 
     // Thread
-    sSchedulerTaskQueue = osScGetCmdQ(&scheduler);
+    sSchedulerTaskQueue = osScGetCmdQ(rspSchedulerGet());
     osCreateMesgQueue(&sSchedulerTaskDoneQueue, (OSMesg*)&sSchedulerTaskDoneMsg, 1);
 
     osCreateThread(
         &sAudioThread,
         AUDIO_THREAD_ID,
-        audioThread,
-        0,
+        audioThreadEntry,
+        NULL,
         sAudioThreadStack + (AUDIO_STACK_SIZE_BYTES / sizeof(u64)),
-        (OSPri)AUDIO_PRIORITY
+        (OSPri)AUDIO_THREAD_PRIORITY
     );
     osStartThread(&sAudioThread);
 

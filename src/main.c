@@ -1,28 +1,21 @@
-#include <sched.h>
-#include <ultra64.h>
-
 #include "audio/soundplayer.h"
 #include "controls/controller_actions.h"
 #include "controls/rumble_pak_clip.h"
 #include "graphics/graphics.h"
 #include "graphics/profile_task.h"
-#include "levels/cutscene_runner.h"
 #include "levels/credits.h"
 #include "levels/intro.h"
 #include "levels/levels.h"
 #include "main.h"
 #include "menu/main_menu.h"
-#include "savefile/checkpoint.h"
 #include "savefile/savefile.h"
 #include "scene/dynamic_scene.h"
 #include "scene/portal_surface.h"
 #include "scene/scene.h"
-#include "sk64/skeletool_animator.h"
 #include "strings/translations.h"
 #include "system/cartridge.h"
 #include "system/controller.h"
-#include "system/defs.h"
-#include "system/libultra/threads_libultra.h"
+#include "system/libultra/rsp_scheduler_libultra.h"
 #include "system/screen.h"
 #include "util/dynamic_asset_loader.h"
 #include "util/frame_time.h"
@@ -35,58 +28,9 @@
 
 #define MAX_FRAME_BUFFER_MESGS 8
 
-static OSThread idleThread;
-static OSThread gameThread;
-
-u64    mainStack[STACK_SIZE_BYTES/sizeof(u64)];
-static u64 idleThreadStack[STACK_SIZE_BYTES/sizeof(u64)];
-static u64 gameThreadStack[STACK_SIZE_BYTES/sizeof(u64)];
-
-static void idleProc(void *);
-static void gameProc(void *);
-
-OSMesgQueue      gfxFrameMsgQ;
-static OSMesg           gfxFrameMsgBuf[MAX_FRAME_BUFFER_MESGS];
-static OSScClient       gfxClient;
-
-
-OSSched scheduler;
-u64            scheduleStack[OS_SC_STACKSIZE/8];
-OSMesgQueue	*schedulerCommandQueue;
-u8  schedulerMode;
-
-void boot(void *arg) {
-    osInitialize();
-
-    osCreateThread(
-        &idleThread,
-        IDLE_THREAD_ID,
-        idleProc,
-        NULL,
-        idleThreadStack + (STACK_SIZE_BYTES / sizeof(u64)),
-        (OSPri)INIT_PRIORITY
-    );
-
-    osStartThread(&idleThread);
-}
-
-static void idleProc(void* arg) {
-    cartridgeInit();
-
-    osCreateThread(
-        &gameThread, 
-        GAME_THREAD_ID,
-        gameProc, 
-        0, 
-        gameThreadStack + (STACK_SIZE_BYTES / sizeof(u64)),
-        (OSPri)GAME_PRIORITY
-    );
-
-    osStartThread(&gameThread);
-
-    osSetThreadPri(NULL, 0);
-    for(;;);
-}
+OSMesgQueue         gfxFrameMsgQ;
+static OSMesg       gfxFrameMsgBuf[MAX_FRAME_BUFFER_MESGS];
+static OSScClient   gfxClient;
 
 struct Scene gScene;
 struct GameMenu gGameMenu;
@@ -151,62 +95,13 @@ void levelLoadWithCallbacks(int levelIndex) {
     levelClearQueued();
 }
 
-int updateSchedulerModeAndGetFPS(int interlacedMode) {
-    int fps = 60;
-    
-    schedulerMode = interlacedMode ? OS_VI_NTSC_LPF1 : OS_VI_NTSC_LPN1;
-
-    switch (osTvType) {
-	case OS_TV_PAL:
-		schedulerMode = HIGH_RES ? (interlacedMode ? OS_VI_PAL_HPF1 : OS_VI_PAL_HPN1) : (interlacedMode ? OS_VI_PAL_LPF1 : OS_VI_PAL_LPN1);
-		fps = 50;
-		break;
-	case OS_TV_NTSC:
-		schedulerMode = HIGH_RES ? (interlacedMode ? OS_VI_NTSC_HPF1 : OS_VI_NTSC_HPN1) : (interlacedMode ? OS_VI_NTSC_LPF1 : OS_VI_NTSC_LPN1);
-		break;
-	case OS_TV_MPAL:
-		schedulerMode = HIGH_RES ? (interlacedMode ? OS_VI_MPAL_HPF1 : OS_VI_MPAL_HPN1) : (interlacedMode ? OS_VI_MPAL_LPF1 : OS_VI_MPAL_LPN1);
-		break;
-    }
-
-    return fps;
-}
-
-int setViMode(int interlacedMode) {
-    int fps = updateSchedulerModeAndGetFPS(interlacedMode);
-    
-    osViSetMode(&osViModeTable[schedulerMode]);
-    
-    osViSetSpecialFeatures(OS_VI_GAMMA_OFF |
-		OS_VI_GAMMA_DITHER_OFF |
-		OS_VI_DIVOT_OFF |
-		OS_VI_DITHER_FILTER_OFF);
-
-    return fps;
-}
-
-static void gameProc(void* arg) {
-    int fps = updateSchedulerModeAndGetFPS(1);
-
-    osCreateScheduler(
-        &scheduler,
-        (void *)(scheduleStack + OS_SC_STACKSIZE/8),
-        SCHEDULER_PRIORITY,
-        schedulerMode,
-        1
-    );
-
-    osViSetSpecialFeatures(OS_VI_GAMMA_OFF |
-		OS_VI_GAMMA_DITHER_OFF |
-		OS_VI_DIVOT_OFF |
-		OS_VI_DITHER_FILTER_OFF);
-
-    schedulerCommandQueue = osScGetCmdQ(&scheduler);
+int main() {
+    screenInit(1 /* interlaced*/);
 
     osCreateMesgQueue(&gfxFrameMsgQ, gfxFrameMsgBuf, MAX_FRAME_BUFFER_MESGS);
-    osScAddClient(&scheduler, &gfxClient, &gfxFrameMsgQ);
-    osViBlack(1);
+    osScAddClient(rspSchedulerGet(), &gfxClient, &gfxFrameMsgQ);
 
+    cartridgeInit();
     savefileLoad();
 
     u32 pendingGFX = 0;
@@ -215,7 +110,7 @@ static void gameProc(void* arg) {
     u8 inputIgnore = 5;
     u8 drawingEnabled = 0;
 
-    u16* memoryEnd = graphicsLayoutScreenBuffers((u16*)PHYS_TO_K0(osMemSize));
+    u16* memoryEnd = graphicsInit((u16*)PHYS_TO_K0(osMemSize));
     memoryEnd = soundPlayerInit(memoryEnd);
     heapInit(_heapStart, memoryEnd);
 
@@ -231,7 +126,7 @@ static void gameProc(void* arg) {
     controllersInit();
     controllerActionInit();
     rumblePakClipInit();
-    frameTimeInit(fps);
+    frameTimeInit(screenGetFPS());
     translationsLoad(gSaveData.video.textLanguage);
     gSceneCallbacks->initCallback(gSceneCallbacks->data);
     // this prevents the intro from crashing
@@ -308,7 +203,7 @@ static void gameProc(void* arg) {
 #if PORTAL64_WITH_RSP_PROFILER
                 if (controllerGetButtonsDown(2, ControllerButtonDown)) {
                     struct GraphicsTask* task = &gGraphicsTasks[drawBufferIndex];
-                    profileTask(&scheduler, &gameThread, &task->task.list, task->framebuffer);
+                    profileTask(&task->task.list, task->framebuffer);
                 }
 #endif
 
@@ -336,4 +231,6 @@ static void gameProc(void* arg) {
                 break;
         }
     }
+
+    return 0;
 }

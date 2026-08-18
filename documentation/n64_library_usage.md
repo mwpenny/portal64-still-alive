@@ -30,8 +30,9 @@ Portal 64's high-level usage of proprietary libraries is listed in the following
 |          |                               | Interrupts                                   | ❌                     | ❌                           |
 |          |                               | Task scheduling                              | ❌                     | ❌                           |
 |          |                               | Message passing                              | ❌                     | ❌                           |
+|          |                               | Entry point                                  | ✅                     | ❌                           |
 |          |                               | Peripheral access (controller and rumble)    | ✅                     | ❌                           |
-|          |                               | Video initialization                         | ❌                     | ❌                           |
+|          |                               | Display configuration                        | ✅                     | ❌                           |
 |          |                               | Frame buffer reading                         | ✅                     | ❌                           |
 |          | Math                          | Trig functions                               | ✅                     | ❌                           |
 | libnustd | Math                          | `floor()`                                    | ✅                     | ✅                           |

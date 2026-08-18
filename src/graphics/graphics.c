@@ -1,12 +1,13 @@
 #include "graphics.h"
 #include "initgfx.h"
+#include "system/libultra/rsp_scheduler_libultra.h"
 #include "system/screen.h"
 #include "util/memory.h"
 
 struct GraphicsTask gGraphicsTasks[2];
 
 extern OSMesgQueue  gfxFrameMsgQ;
-extern OSMesgQueue	*schedulerCommandQueue;
+static OSMesgQueue* sSchedulerTaskQueue;
 
 void* gLevelSegment;
 
@@ -33,7 +34,7 @@ u32 firsttime = 1;
 
 u16 __attribute__((aligned(64))) zbuffer[SCREEN_HT * SCREEN_WD];
 
-u16* graphicsLayoutScreenBuffers(u16* memoryEnd) {
+u16* graphicsInit(u16* memoryEnd) {
     gGraphicsTasks[0].framebuffer = memoryEnd - SCREEN_WD * SCREEN_HT;
     gGraphicsTasks[0].taskIndex = 0;
     gGraphicsTasks[0].msg.type = OS_SC_DONE_MSG;
@@ -41,6 +42,8 @@ u16* graphicsLayoutScreenBuffers(u16* memoryEnd) {
     gGraphicsTasks[1].framebuffer = gGraphicsTasks[0].framebuffer - SCREEN_WD * SCREEN_HT;
     gGraphicsTasks[1].taskIndex = 1;
     gGraphicsTasks[1].msg.type = OS_SC_DONE_MSG;
+
+    sSchedulerTaskQueue = osScGetCmdQ(rspSchedulerGet());
 
     rdpOutput = (u64*)(gGraphicsTasks[1].framebuffer - RDP_OUTPUT_SIZE  / sizeof(u16));
     zeroMemory(rdpOutput, RDP_OUTPUT_SIZE);
@@ -130,7 +133,7 @@ void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callba
 #endif // PORTAL64_WITH_DEBUGGER
 #endif // PORTAL64_WITH_GFX_VALIDATOR
 
-    osSendMesg(schedulerCommandQueue, (OSMesg)scTask, OS_MESG_BLOCK);
+    osSendMesg(sSchedulerTaskQueue, (OSMesg)scTask, OS_MESG_BLOCK);
 }
 
 void graphicsTaskClearZBuffer(struct GraphicsTask* task, int minX, int minY, int maxX, int maxY) {

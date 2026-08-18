@@ -23,7 +23,7 @@ extern void* gLevelSegment;
 
 typedef void (*GraphicsCallback)(void* data, struct RenderState* renderState, struct GraphicsTask* task);
 
-u16* graphicsLayoutScreenBuffers(u16* memoryEnd);
+u16* graphicsInit(u16* memoryEnd);
 void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callback, void* data);
 
 void graphicsTaskClearZBuffer(struct GraphicsTask* task, int minX, int minY, int maxX, int maxY);

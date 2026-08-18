@@ -116,7 +116,7 @@ static void controllerUpdateRumble(int index, OSContStatus* prevStatus, OSMesgQu
     }
 }
 
-static void controllerThreadLoop(void* arg) {
+static void controllerThreadEntry(void* arg) {
     OSMesgQueue serialMsgQ;
     OSMesg serialMsg;
 
@@ -173,10 +173,10 @@ void controllersInit() {
     osCreateThread(
         &sControllerThread,
         CONTROLLER_THREAD_ID,
-        controllerThreadLoop,
-        0,
+        controllerThreadEntry,
+        NULL,
         sControllerThreadStack + (CONTROLLER_STACK_SIZE_BYTES / sizeof(u64)),
-        (OSPri)CONTROLLER_PRIORITY
+        (OSPri)CONTROLLER_THREAD_PRIORITY
     );
     osStartThread(&sControllerThread);
 }

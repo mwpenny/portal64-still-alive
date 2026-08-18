@@ -33,9 +33,9 @@ SECTIONS
 
    BEGIN_SEG(code, 0x80000400) SUBALIGN(16)
    {
-      /* code */
+      /* text */
       */entry.*(.text);
-      *code_segment.*:(.text);
+      *code_segment.*:(.text .text.startup);
       *libultra_rom.*:(.text);
       *libgcc.*:(.text);
       RSP_BOOT(.text);
@@ -104,7 +104,7 @@ SECTIONS
    /* Discard standard sections not mentioned above, keep debug info */
    /DISCARD/ :
    {
-      *(.text)
+      *(.text .text.*)
       *(.data*)
       *(.rodata*)
       *(.bss*)

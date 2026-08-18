@@ -7,6 +7,7 @@
 
 #include "graphics/graphics.h"
 #include "util/memory.h"
+#include "system/libultra/rsp_scheduler_libultra.h"
 #include "system/libultra/threads_libultra.h"
 #include "system/screen.h"
 
@@ -71,9 +72,10 @@ void printDisplayList(Gfx* dl, int depth, int* segments) {
     #endif
 }
 
-void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task, u16* framebuffer) {
-    // block scheduler thread
-    osSetThreadPri(currentThread, RSP_PROFILE_PRIORITY);
+void profileTask(OSTask* task, u16* framebuffer) {
+    // Block scheduler thread
+    OSPri origThreadPriority = osGetThreadPri(NULL);
+    osSetThreadPri(NULL, RSP_SCHEDULER_THREAD_PRIORITY + 1);
 
     int segments[16];
 
@@ -173,11 +175,12 @@ void profileTask(OSSched* scheduler, OSThread* currentThread, OSTask* task, u16*
         ++curr;
     }
 
-    
+    // Restore queues to scheduler and unblock its thread
+    OSSched* scheduler = rspSchedulerGet();
     osSetEventMesg(OS_EVENT_SP, &scheduler->interruptQ, (OSMesg)RSP_DONE_MSG);
     osSetEventMesg(OS_EVENT_DP, &scheduler->interruptQ, (OSMesg)RDP_DONE_MSG);   
     osViSetEvent(&scheduler->interruptQ, (OSMesg)VIDEO_MSG, 1);
-    osSetThreadPri(currentThread, GAME_PRIORITY);
+    osSetThreadPri(NULL, origThreadPriority);
 }
 
 void profileMapAddress(void* ramAddress, const char* name) {

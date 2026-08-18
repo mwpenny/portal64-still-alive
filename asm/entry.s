@@ -14,5 +14,5 @@
     addi    $t1, $t1, -8
     bnez    $t1, .bss_clear
 
-    la      $sp, mainStack + STACK_SIZE_BYTES
+    la      $sp, bootStack + BOOT_STACK_SIZE_BYTES
     j       boot

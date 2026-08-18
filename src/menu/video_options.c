@@ -121,7 +121,7 @@ struct MenuElementParams gVideoMenuParams[] = {
 #define LANGUAGE_SLIDER_INDEX 5
 #define LANGUAGE_TEXT_INDEX 7
 
-char gIsInterlacedEnabled = 1;
+static char sIsInterlacedEnabled = 1;
 
 void videoOptionsAction(void* data, int selection, struct MenuAction* action) {
     struct VideoOptions* videoOptions = (struct VideoOptions*)data;
@@ -135,8 +135,8 @@ void videoOptionsAction(void* data, int selection, struct MenuAction* action) {
             }
             break;
         case VideoOptionInterlaced:
-            gIsInterlacedEnabled = action->state.checkbox.isChecked;
-            setViMode(action->state.checkbox.isChecked);
+            sIsInterlacedEnabled = action->state.checkbox.isChecked;
+            screenSetMode(sIsInterlacedEnabled);
             break;
         case VideoOptionSubtitles:
             if (action->state.checkbox.isChecked) {
@@ -181,7 +181,7 @@ void videoOptionsInit(struct VideoOptions* videoOptions) {
     );
 
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[WIDESCREEN_INDEX], (gSaveData.video.flags & VideoSaveFlagsWideScreen) != 0);
-    menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[INTERLACED_INDEX], gIsInterlacedEnabled);
+    menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[INTERLACED_INDEX], sIsInterlacedEnabled);
 
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[CAPTIONS_INDEX], (gSaveData.video.flags & VideoSaveFlagsCaptionsEnabled) != 0);
     menuBuilderSetCheckbox(&videoOptions->menuBuilder.elements[SUBTITLES_INDEX], (gSaveData.video.flags & VideoSaveFlagsSubtitlesEnabled) != 0);
