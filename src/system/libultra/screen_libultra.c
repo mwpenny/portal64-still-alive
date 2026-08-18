@@ -48,7 +48,7 @@ void screenSetMode(int interlaced) {
 }
 
 int screenGetFPS() {
-    return osTvType == OS_TV_PAL ? 60 : 50;
+    return (osTvType == OS_TV_PAL) ? 50 : 60;
 }
 
 uint16_t* screenGetCurrentFramebuffer() {
