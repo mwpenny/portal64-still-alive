@@ -1,10 +1,9 @@
 #include "trigger_listener.h"
 
-#include "../physics/collision_scene.h"
-#include "../decor/decor_object_list.h"
-#include "../levels/cutscene_runner.h"
-
-#include "./scene.h"
+#include "decor/decor_object_list.h"
+#include "levels/cutscene_runner.h"
+#include "physics/collision_scene.h"
+#include "scene.h"
 
 extern struct ColliderTypeData gPlayerColliderData;
 
@@ -17,7 +16,9 @@ enum ObjectTriggerType triggerDetermineType(struct CollisionObject* objectEnteri
 
     int decorType = decorIdForCollisionObject(objectEnteringTrigger);
     if (decorIdIsCube(decorType)) {
-        return gScene.player.grabConstraint.object == objectEnteringTrigger ? TRIGGER_TYPE_TO_MASK(ObjectTriggerTypeCubeHover) | TRIGGER_TYPE_TO_MASK(ObjectTriggerTypeCube) : TRIGGER_TYPE_TO_MASK(ObjectTriggerTypeCube);
+        return playerIsGrabbingObject(&gScene.player, objectEnteringTrigger)
+            ? TRIGGER_TYPE_TO_MASK(ObjectTriggerTypeCube) | TRIGGER_TYPE_TO_MASK(ObjectTriggerTypeCubeHover)
+            : TRIGGER_TYPE_TO_MASK(ObjectTriggerTypeCube);
     }
 
     return ObjectTriggerTypeNone;

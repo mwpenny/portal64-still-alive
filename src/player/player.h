@@ -71,7 +71,7 @@ void playerSetLocation(struct Player* player, struct Location* location);
 void playerDamage(struct Player* player, float amount, struct Coloru8* overlayColor);
 
 int playerIsDead(struct Player* player);
-void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing);
+void playerSetGrabbing(struct Player* player, struct CollisionObject* object);
 void playerSignalPortalChanged(struct Player* player);
 int playerIsGrabbing(struct Player* player);
 int playerIsGrabbingObject(struct Player* player, struct CollisionObject* object);

@@ -358,8 +358,6 @@ void contactSolverPreSolve(struct ContactSolver* contactSolver) {
 	}
 }
 
-#define BREAK_DISTANCE	0.5f
-
 void contactSolverIterateConstraints(struct ContactSolver* contactSolver) {
 	struct PointConstraint* curr = contactSolver->firstPointConstraint;
 

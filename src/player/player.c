@@ -22,10 +22,6 @@
 #include "codegen/assets/models/player/chell.h"
 #include "codegen/assets/models/portal_gun/w_portalgun.h"
 
-#define GRAB_RAYCAST_DISTANCE   2.5f
-#define GRAB_MIN_OFFSET_Y      -1.1f
-#define GRAB_MAX_OFFSET_Y       1.25f
-
 #define STEP_TIME               0.35f
 
 #define STAND_SPEED             1.5f
@@ -78,9 +74,14 @@
 #define JUMP_IMPULSE            2.5f
 #define THROW_IMPULSE           1.25f
 
-#define PLAYER_GRABBING_THROUGH_NOTHING 0
+#define GRAB_RAYCAST_DISTANCE   2.5f
+#define GRAB_DISTANCE           1.5f
+#define GRAB_COLLIDE_PADDING    0.2f
+#define GRAB_DROP_DISTANCE      0.5f
+#define GRAB_MIN_OFFSET_Y      -1.1f
+#define GRAB_MAX_OFFSET_Y       1.25f
 
-struct Vector3 gGrabDistance = {0.0f, 0.0f, -1.5f};
+struct Vector3 gGrabDistance = {0.0f, 0.0f, -GRAB_DISTANCE};
 struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
 
 struct CollisionQuad gPlayerColliderFaces[8];
@@ -183,7 +184,7 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     skAnimatorRunClip(&player->animator.to, &player_chell_Armature_runc_clip, 0.0f, SKAnimatorFlagsLoop);
 
     player->body.velocity = *velocity;
-    player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
+    player->grabbingThroughPortal = 0;
     player->grabConstraint.object = NULL;
     player->pitchVelocity = 0.0f;
     player->yawVelocity = 0.0f;
@@ -217,8 +218,8 @@ void playerHandleCollision(struct Player* player) {
             offset = MIN(offset, contactPoint->penetration);
         }
 
-        if (contact->shapeA == player->grabConstraint.object || contact->shapeB == player->grabConstraint.object) {
-            // objects being grabbed by the player shouldn't push the player
+        if (playerIsGrabbingObject(player, contact->shapeA) || playerIsGrabbingObject(player, contact->shapeB)) {
+            // Objects being grabbed by the player shouldn't push the player
             continue;
         }
 
@@ -257,41 +258,32 @@ void playerHandleCollision(struct Player* player) {
 }
 
 void playerApplyPortalGrab(struct Player* player, int portalIndex) {
-    if (portalIndex){
+    if (portalIndex) {
         player->grabbingThroughPortal -= 1;
-    }else{
+    } else {
         player->grabbingThroughPortal += 1;
     }
 }
 
-void playerSetGrabbing(struct Player* player, struct CollisionObject* grabbing) {
-    if (grabbing && grabbing->flags & COLLISION_OBJECT_PLAYER_STANDING){
-        player->grabConstraint.object = NULL;
-        contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
-        player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
-    } else if (grabbing && !player->grabConstraint.object) {
+void playerSetGrabbing(struct Player* player, struct CollisionObject* object) {
+    if (object && !player->grabConstraint.object) {
         pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 1.0f);
         contactSolverAddPointConstraint(&gContactSolver, &player->grabConstraint);
+        playerInitGrabRotationBase(player);
+
         hudResolvePrompt(&gScene.hud, CutscenePromptTypePickup);
         portalGunPickup(&gScene.portalGun);
-    } else if (!grabbing && player->grabConstraint.object) {
-        player->grabConstraint.object = NULL;
+    } else if (!object && player->grabConstraint.object) {
         contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
+        player->grabConstraint.object = NULL;
+        player->grabbingThroughPortal = 0;
+
         hudResolvePrompt(&gScene.hud, CutscenePromptTypeDrop);
-        player->grabbingThroughPortal = PLAYER_GRABBING_THROUGH_NOTHING;
         portalGunRelease(&gScene.portalGun);
-    } else if (grabbing != player->grabConstraint.object) {
-        pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 1.0f);
     }
-    
-    playerInitGrabRotationBase(player);
 }
 
 void playerInitGrabRotationBase(struct Player* player) {
-    if (!player->grabConstraint.object) {
-        return;
-    }
-
     struct Vector3 forward, tmpVec;
     playerGetMoveBasis(&player->lookTransform.rotation, &forward, &tmpVec);
     vector3Negate(&forward, &forward);
@@ -301,7 +293,12 @@ void playerInitGrabRotationBase(struct Player* player) {
     playerPortalGrabTransform(player, NULL, &forwardRotation);
     
     enum GrabRotationFlags grabRotationFlags = grabRotationFlagsForCollisionObject(player->grabConstraint.object);
-    grabRotationInitBase(grabRotationFlags, &forwardRotation, &player->grabConstraint.object->body->transform.rotation, &player->grabRotationBase);
+    grabRotationInitBase(
+        grabRotationFlags,
+        &forwardRotation,
+        &player->grabConstraint.object->body->transform.rotation,
+        &player->grabRotationBase
+    );
 }
 
 void playerShakeUpdate(struct Player* player) {
@@ -327,7 +324,7 @@ void playerShakeUpdate(struct Player* player) {
 }
 
 void playerSignalPortalChanged(struct Player* player) {
-    if (player->grabbingThroughPortal != PLAYER_GRABBING_THROUGH_NOTHING) {
+    if (player->grabbingThroughPortal) {
         playerSetGrabbing(player, NULL);
     }
 }
@@ -372,13 +369,12 @@ int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPa
     short prevCollisionLayers = player->collisionObject.collisionLayers;
     player->collisionObject.collisionLayers = 0;
 
-    if (checkPastObject){
+    if (checkPastObject) {
         short prevObjectCollisionLayers = player->grabConstraint.object->collisionLayers;
         player->grabConstraint.object->collisionLayers = 0;
         result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit);
         player->grabConstraint.object->collisionLayers = prevObjectCollisionLayers;
-    }
-    else{
+    } else {
         result = collisionSceneRaycast(&gCollisionScene, player->body.currentRoom, &ray, COLLISION_LAYERS_GRABBABLE | COLLISION_LAYERS_TANGIBLE, GRAB_RAYCAST_DISTANCE, 1, hit);
     }
 
@@ -426,15 +422,19 @@ void playerUpdateGrabbedObject(struct Player* player) {
         }
     }
 
-    if (player->grabConstraint.object && (player->grabConstraint.object->body->flags & RigidBodyFlagsGrabbable) == 0) {
+    if (player->grabConstraint.object &&
+        !(player->grabConstraint.object->body->flags & RigidBodyFlagsGrabbable)
+    ) {
         playerSetGrabbing(player, NULL);
     }
 
-    // if the object is being held through a portal and can no longer be seen, drop it.
-    if (player->grabConstraint.object && player->grabbingThroughPortal){
-        struct RaycastHit testhit;
-        if (playerRaycastGrab(player, &testhit, 0)){
-            if ((testhit.numPortalsPassed != player->grabbingThroughPortal) && (testhit.object != player->grabConstraint.object)){
+    // If the object is being held through a portal and can no longer be seen, drop it
+    if (player->grabConstraint.object && player->grabbingThroughPortal) {
+        struct RaycastHit testHit;
+        if (playerRaycastGrab(player, &testHit, 0)) {
+            if ((testHit.numPortalsPassed != player->grabbingThroughPortal) &&
+                (testHit.object != player->grabConstraint.object)
+            ) {
                 playerSetGrabbing(player, NULL);
                 return;
             }
@@ -458,46 +458,50 @@ void playerUpdateGrabbedObject(struct Player* player) {
             playerApplyPortalGrab(player, 1);
         }
 
-        // try to determine how far away to set the grab dist
+        // Try to determine how far away to set the grab distance
         struct RaycastHit hit;
-        struct Vector3 temp_grab_dist = gGrabDistance;
+        struct Vector3 tempGrabDist = gGrabDistance;
 
-        if (playerRaycastGrab(player, &hit, 1)){
-            float dist = hit.distance;
-            temp_grab_dist.z = maxf(((-1.0f*fabsf(dist))+0.2f), gGrabDistance.z);
-            temp_grab_dist.z = minf(temp_grab_dist.z, -0.2f);
+        if (playerRaycastGrab(player, &hit, 1)) {
+            tempGrabDist.z = clampf(
+                gGrabDistance.z,
+                (-1.0f * fabsf(hit.distance)) + GRAB_COLLIDE_PADDING,
+                -GRAB_COLLIDE_PADDING
+            );
         }
-        //drop the object if grab distance becomes too close to player
-        if (fabsf(temp_grab_dist.z) < 0.3){
+
+        // Drop the object if grab distance becomes too close to player
+        if (fabsf(tempGrabDist.z) < GRAB_DROP_DISTANCE) {
             playerSetGrabbing(player, NULL);
             return;
         }
-        vector3Multiply(&player->lookTransform.scale, &temp_grab_dist, &temp_grab_dist);
+
+        vector3Multiply(&player->lookTransform.scale, &tempGrabDist, &tempGrabDist);
         
         struct Vector3 grabPoint;
         
-        // determine object target height
-        quatMultVector(&player->lookTransform.rotation, &temp_grab_dist, &grabPoint);
-        float grabY = maxf(minf(grabPoint.y, GRAB_MAX_OFFSET_Y), GRAB_MIN_OFFSET_Y);
+        // Determine object target height
+        quatMultVector(&player->lookTransform.rotation, &tempGrabDist, &grabPoint);
+        float grabY = clampf(grabPoint.y, GRAB_MIN_OFFSET_Y, GRAB_MAX_OFFSET_Y);
         
-        // keep object at steady XZ-planar distance in front of player
+        // Keep object at steady XZ-planar distance in front of player
         struct Quaternion forwardRotation;
         struct Vector3 forward, forwardNegate, right;
         playerGetMoveBasis(&player->lookTransform.rotation, &forward, &right);
         vector3Negate(&forward, &forwardNegate);
         quatLook(&forwardNegate, &gUp, &forwardRotation);
-        quatMultVector(&forwardRotation, &temp_grab_dist, &grabPoint);
+        quatMultVector(&forwardRotation, &tempGrabDist, &grabPoint);
         vector3Add(&player->lookTransform.position, &grabPoint, &grabPoint);
         grabPoint.y += grabY;
         
-        // remember delta between forwardRotation and lookTransform.rotation
+        // Remember delta between forwardRotation and lookTransform.rotation
         struct Quaternion lookRotationDelta, forwardRotationInv;
         quatConjugate(&forwardRotation, &forwardRotationInv);
         quatMultiply(&forwardRotationInv, &player->lookTransform.rotation, &lookRotationDelta);
         
-        if (player->grabbingThroughPortal != PLAYER_GRABBING_THROUGH_NOTHING) {
+        if (player->grabbingThroughPortal) {
             if (!collisionSceneIsPortalOpen()) {
-                // portal was closed while holding object through it
+                // Portal was closed while holding object through it
                 playerSetGrabbing(player, NULL);
                 return;
             }
@@ -543,7 +547,7 @@ void playerGetMoveBasis(struct Quaternion* rotation, struct Vector3* forward, st
 }
 
 void playerPortalGrabTransform(struct Player* player, struct Vector3* grabPoint, struct Quaternion* grabRotation) {
-    if (player->grabbingThroughPortal == PLAYER_GRABBING_THROUGH_NOTHING) {
+    if (!player->grabbingThroughPortal) {
         return;
     }
 
@@ -795,7 +799,7 @@ void playerUpdateFooting(struct Player* player, float maxStandDistance) {
 
         hit.object->flags |= COLLISION_OBJECT_PLAYER_STANDING;
 
-        if (hit.object == player->grabConstraint.object) {
+        if (playerIsGrabbingObject(player, hit.object)) {
             playerSetGrabbing(player, NULL);
         }
 

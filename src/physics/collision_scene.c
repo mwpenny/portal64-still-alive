@@ -606,7 +606,7 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
 
         roomIndex = nextRoom;
 
-        // even on a miss, the raycast should report which room it ended up in
+        // Even on a miss, the raycast should report which room it ended up in
         if (roomIndex != -1) {
             hit->roomIndex = roomIndex;
             hit->passedRooms |= 1LL << roomIndex;
@@ -619,26 +619,26 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
 
     if (passThroughPortals &&
         hit->distance != maxDistance &&
-        collisionSceneIsPortalOpen()) {
+        collisionSceneIsPortalOpen()
+    ) {
         for (int i = 0; i < 2; ++i) {
             if (collisionSceneIsTouchingSinglePortal(&hit->at, &hit->normal, i)) {
-                short numPortalsPassed;
-                if (i == 0){
-                    numPortalsPassed = 1;
-                }else{
-                    numPortalsPassed = -1;
-                }
-
                 struct Transform* portalTransform = collisionSceneTransformToOtherPortal(i);
-
                 struct Ray newRay;
 
                 transformPoint(portalTransform, &hit->at, &newRay.origin);
                 quatMultVector(&portalTransform->rotation, &ray->dir, &newRay.dir);
 
                 struct RaycastHit newHit;
-
-                int result = collisionSceneRaycast(scene, gCollisionScene.portalRooms[1 - i], &newRay, collisionLayers, maxDistance - hit->distance, passThroughPortals, &newHit);
+                int result = collisionSceneRaycast(
+                    scene,
+                    gCollisionScene.portalRooms[1 - i],
+                    &newRay,
+                    collisionLayers,
+                    maxDistance - hit->distance,
+                    passThroughPortals,
+                    &newHit
+                );
 
                 if (result) {
                     newHit.distance += hit->distance;
@@ -646,7 +646,7 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
                     *hit = newHit;
                 }
 
-                hit->numPortalsPassed += numPortalsPassed;
+                hit->numPortalsPassed += (i == 0) ? 1 : -1;
 
                 return result;
             }
