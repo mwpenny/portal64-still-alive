@@ -1,7 +1,7 @@
 #include "initgfx.h"
 
 #include "graphics.h"
-#include "system/screen.h"
+#include "system/display.h"
 
 Vp fullscreenViewport = {
   .vp = {

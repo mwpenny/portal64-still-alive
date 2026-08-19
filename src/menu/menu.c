@@ -1,6 +1,6 @@
 #include "menu.h"
 
-#include "system/screen.h"
+#include "system/display.h"
 #include "util/memory.h"
 
 struct Coloru8 gSelectionOrange = {255, 156, 0, 255};

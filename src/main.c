@@ -15,8 +15,8 @@
 #include "strings/translations.h"
 #include "system/cartridge.h"
 #include "system/controller.h"
+#include "system/display.h"
 #include "system/libultra/rsp_scheduler_libultra.h"
-#include "system/screen.h"
 #include "util/dynamic_asset_loader.h"
 #include "util/frame_time.h"
 #include "util/memory.h"
@@ -96,7 +96,7 @@ void levelLoadWithCallbacks(int levelIndex) {
 }
 
 int main() {
-    screenInit(1 /* interlaced*/);
+    displayInit(1 /* interlaced */);
 
     osCreateMesgQueue(&gfxFrameMsgQ, gfxFrameMsgBuf, MAX_FRAME_BUFFER_MESGS);
     osScAddClient(rspSchedulerGet(), &gfxClient, &gfxFrameMsgQ);
@@ -126,7 +126,7 @@ int main() {
     controllersInit();
     controllerActionInit();
     rumblePakClipInit();
-    frameTimeInit(screenGetFPS());
+    frameTimeInit(displayGetFPS());
     translationsLoad(gSaveData.video.textLanguage);
     gSceneCallbacks->initCallback(gSceneCallbacks->data);
     // this prevents the intro from crashing

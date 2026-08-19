@@ -6,10 +6,10 @@
 #endif
 
 #include "graphics/graphics.h"
-#include "util/memory.h"
+#include "system/display.h"
 #include "system/libultra/rsp_scheduler_libultra.h"
 #include "system/libultra/threads_libultra.h"
-#include "system/screen.h"
+#include "util/memory.h"
 
 extern u16 __attribute__((aligned(64))) zbuffer[SCREEN_HT * SCREEN_WD];
 

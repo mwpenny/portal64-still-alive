@@ -4,7 +4,7 @@
 #include "math/mathf.h"
 #include "math/matrix.h"
 #include "math/plane.h"
-#include "system/screen.h"
+#include "system/display.h"
 #include "util/memory.h"
 
 #define SHADOW_MAP_WIDTH    64

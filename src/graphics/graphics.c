@@ -1,7 +1,7 @@
 #include "graphics.h"
 #include "initgfx.h"
+#include "system/display.h"
 #include "system/libultra/rsp_scheduler_libultra.h"
-#include "system/screen.h"
 #include "util/memory.h"
 
 struct GraphicsTask gGraphicsTasks[2];

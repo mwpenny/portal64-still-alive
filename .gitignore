@@ -18,6 +18,6 @@ vpk/
 
 tools/vtf2png*
 
-controller_recording*.h
+controller_recording.h
 log.txt
 log_images/

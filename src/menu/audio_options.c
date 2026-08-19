@@ -4,7 +4,7 @@
 #include "font/dejavu_sans.h"
 #include "savefile/savefile.h"
 #include "system/controller.h"
-#include "system/screen.h"
+#include "system/display.h"
 
 #include "codegen/assets/audio/languages.h"
 #include "codegen/assets/strings/strings.h"

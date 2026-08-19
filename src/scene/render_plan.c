@@ -9,7 +9,7 @@
 #include "portal_render.h"
 #include "savefile/savefile.h"
 #include "scene/dynamic_scene.h"
-#include "system/screen.h"
+#include "system/display.h"
 #include "util/memory.h"
 
 #include "codegen/assets/models/portal/portal_blue.h"

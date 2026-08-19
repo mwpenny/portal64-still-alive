@@ -6,7 +6,7 @@
 #include "math/matrix.h"
 #include "math/vector4.h"
 #include "scene/camera.h"
-#include "system/screen.h"
+#include "system/display.h"
 
 void screenClipperInit(struct ScreenClipper* clipper, float transform[4][4]) {
     for (unsigned i = 0; i < 4; ++i) {

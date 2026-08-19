@@ -1,10 +1,10 @@
-#include "system/screen.h"
+#include "system/display.h"
 
 #include "rsp_scheduler_libultra.h"
 
 #include <ultra64.h>
 
-static u8 screenGetTargetMode(int interlaced) {
+static u8 displayGetTargetMode(int interlaced) {
 #if HIGH_RES
     switch (osTvType) {
         case OS_TV_PAL:
@@ -28,7 +28,7 @@ static u8 screenGetTargetMode(int interlaced) {
 #endif
 }
 
-static void screenSetFeatures() {
+static void displaySetFeatures() {
     osViSetSpecialFeatures(
         OS_VI_GAMMA_OFF         |
         OS_VI_GAMMA_DITHER_OFF  |
@@ -37,20 +37,21 @@ static void screenSetFeatures() {
     );
 }
 
-void screenInit(int interlaced) {
-    rspSchedulerInit(screenGetTargetMode(interlaced));
-    screenSetFeatures();
+void displayInit(int interlaced) {
+    rspSchedulerInit(displayGetTargetMode(interlaced));
+    displaySetFeatures();
+    osViBlack(1);
 }
 
-void screenSetMode(int interlaced) {
-    osViSetMode(&osViModeTable[screenGetTargetMode(interlaced)]);
-    screenSetFeatures();
+void displaySetMode(int interlaced) {
+    osViSetMode(&osViModeTable[displayGetTargetMode(interlaced)]);
+    displaySetFeatures();
 }
 
-int screenGetFPS() {
+int displayGetFPS() {
     return (osTvType == OS_TV_PAL) ? 50 : 60;
 }
 
-uint16_t* screenGetCurrentFramebuffer() {
+uint16_t* displayGetCurrentFramebuffer() {
     return osViGetCurrentFramebuffer();
 }

@@ -5,7 +5,7 @@
 #include "main.h"
 #include "savefile/savefile.h"
 #include "system/controller.h"
-#include "system/screen.h"
+#include "system/display.h"
 
 #define MENU_Y      54
 #define MENU_WIDTH  252

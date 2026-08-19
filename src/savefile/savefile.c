@@ -2,7 +2,7 @@
 
 #include "controls/controller_actions.h"
 #include "system/controller.h"
-#include "system/screen.h"
+#include "system/display.h"
 #include "util/memory.h"
 #include "util/sort.h"
 
@@ -227,7 +227,7 @@ int savefileLatestSubjectSlot(int testSubjectNumber, int includeAuto) {
 }
 
 void savefileUpdateSlotImage() {
-    uint16_t* cfb = screenGetCurrentFramebuffer();
+    uint16_t* cfb = displayGetCurrentFramebuffer();
     uint16_t* dst = sSlotImage;
 
     for (int y = 0; y < SAVE_SLOT_IMAGE_H; ++y) {

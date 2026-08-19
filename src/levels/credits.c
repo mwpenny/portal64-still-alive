@@ -6,7 +6,7 @@
 #include "graphics/image.h"
 #include "levels.h"
 #include "system/controller.h"
-#include "system/screen.h"
+#include "system/display.h"
 #include "util/frame_time.h"
 #include "util/memory.h"
 

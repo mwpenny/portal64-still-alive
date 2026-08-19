@@ -4,7 +4,7 @@
 #include "main.h"
 #include "savefile/savefile.h"
 #include "strings/translations.h"
-#include "system/screen.h"
+#include "system/display.h"
 
 #include "codegen/assets/strings/strings.h"
 
@@ -136,7 +136,7 @@ void videoOptionsAction(void* data, int selection, struct MenuAction* action) {
             break;
         case VideoOptionInterlaced:
             sIsInterlacedEnabled = action->state.checkbox.isChecked;
-            screenSetMode(sIsInterlacedEnabled);
+            displaySetMode(sIsInterlacedEnabled);
             break;
         case VideoOptionSubtitles:
             if (action->state.checkbox.isChecked) {

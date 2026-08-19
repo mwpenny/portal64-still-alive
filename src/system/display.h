@@ -1,5 +1,5 @@
-#ifndef __SCREEN_H__
-#define __SCREEN_H__
+#ifndef __DISPLAY_H__
+#define __DISPLAY_H__
 
 #include <stdint.h>
 
@@ -13,9 +13,9 @@
     #define SCREEN_HT   240
 #endif
 
-void screenInit(int interlaced);
-void screenSetMode(int interlaced);
-int screenGetFPS();
-uint16_t* screenGetCurrentFramebuffer();
+void displayInit(int interlaced);
+void displaySetMode(int interlaced);
+int displayGetFPS();
+uint16_t* displayGetCurrentFramebuffer();
 
 #endif

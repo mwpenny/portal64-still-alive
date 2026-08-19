@@ -223,7 +223,7 @@ target_sources(engine INTERFACE
     system/libultra/boot_libultra.c
     system/libultra/cartridge_libultra.c
     system/libultra/controller_libultra.c
+    system/libultra/display_libultra.c
     system/libultra/rsp_scheduler_libultra.c
-    system/libultra/screen_libultra.c
     system/libultra/time_libultra.c
 )

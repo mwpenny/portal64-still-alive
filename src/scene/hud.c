@@ -8,7 +8,7 @@
 #include "savefile/savefile.h"
 #include "scene.h"
 #include "strings/translations.h"
-#include "system/screen.h"
+#include "system/display.h"
 #include "util/frame_time.h"
 #include "util/memory.h"
 
