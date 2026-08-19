@@ -2,64 +2,64 @@
 
 #include "physics/rigid_body.h"
 
-unsigned char gPlayerDamageRumbleData[] = {
+static unsigned char sPlayerDamageRumbleData[] = {
     0xFA, 0x55
 };
 struct RumblePakWave gPlayerDamageRumbleWave = {
-    .samples = gPlayerDamageRumbleData,
+    .samples = sPlayerDamageRumbleData,
     .sampleCount = 8,
     .samplesPerSecond = 15,
 };
 
-unsigned char gPlayerDieRumbleData[] = {
+static unsigned char sPlayerDieRumbleData[] = {
     0xFF, 0xE9, 0x9E, 0xFF, 0xFF, 0xE9
 };
 struct RumblePakWave gPlayerDieRumbleWave = {
-    .samples = gPlayerDieRumbleData,
+    .samples = sPlayerDieRumbleData,
     .sampleCount = 24,
     .samplesPerSecond = 15,
 };
 
-unsigned char gPlayerClosePortalRumbleData[] = {
+static unsigned char sPlayerClosePortalRumbleData[] = {
     0xAA, 0x99,
 };
 struct RumblePakWave gPlayerClosePortalRumble = {
-    .samples = gPlayerClosePortalRumbleData,
+    .samples = sPlayerClosePortalRumbleData,
     .sampleCount = 8,
     .samplesPerSecond = 15,
 };
 
-unsigned char gPlayerLandSoftData[] = {
+static unsigned char sPlayerLandSoftData[] = {
     0xFE, 0x90,
 };
-unsigned char gPlayerLandMediumData[] = {
+static unsigned char sPlayerLandMediumData[] = {
     0xFF, 0xFE, 0x90,
 };
-unsigned char gPlayerLandHardData[] = {
+static unsigned char sPlayerLandHardData[] = {
     0xFF, 0xFF, 0xFF, 0xE9
 };
 
 #define PLAYER_LANDING_CLIP_COUNT   3
 
-struct RumblePakWave gPlayerLandWaves[PLAYER_LANDING_CLIP_COUNT] = {
+static struct RumblePakWave sPlayerLandWaves[PLAYER_LANDING_CLIP_COUNT] = {
     {
-        .samples = gPlayerLandHardData,
+        .samples = sPlayerLandHardData,
         .sampleCount = 16,
         .samplesPerSecond = 15,
     },
     {
-        .samples = gPlayerLandMediumData,
+        .samples = sPlayerLandMediumData,
         .sampleCount = 10,
         .samplesPerSecond = 15,
     },
     {
-        .samples = gPlayerLandSoftData,
+        .samples = sPlayerLandSoftData,
         .sampleCount = 6,
         .samplesPerSecond = 15,
     },
 };
 
-float gLandRumbleThresholds[PLAYER_LANDING_CLIP_COUNT] = {
+static float sLandRumbleThresholds[PLAYER_LANDING_CLIP_COUNT] = {
     0.80f * MAX_PORTAL_SPEED,
     0.60f * MAX_PORTAL_SPEED,
     0.40f * MAX_PORTAL_SPEED,
@@ -67,8 +67,8 @@ float gLandRumbleThresholds[PLAYER_LANDING_CLIP_COUNT] = {
 
 void playerHandleLandingRumble(float velocityChange) {
     for (int i = 0; i < PLAYER_LANDING_CLIP_COUNT; ++i) {
-        if (velocityChange > gLandRumbleThresholds[i]) {
-            rumblePakClipPlay(&gPlayerLandWaves[i]);
+        if (velocityChange > sLandRumbleThresholds[i]) {
+            rumblePakClipPlay(&sPlayerLandWaves[i]);
             break;
         }
     }

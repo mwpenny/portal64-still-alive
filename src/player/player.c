@@ -33,6 +33,7 @@
 #define HEALTH_REGEN_SPEED      60.0f
 #define DEAD_OFFSET             -0.4f
 
+#define PLAYER_CAPSULE_EXTEND   0.45f
 #define PLAYER_COLLISION_LAYERS (         \
     COLLISION_LAYERS_PLAYER             | \
     COLLISION_LAYERS_TANGIBLE           | \
@@ -81,27 +82,112 @@
 #define GRAB_MIN_OFFSET_Y      -1.1f
 #define GRAB_MAX_OFFSET_Y       1.25f
 
-struct Vector3 gGrabDistance = {0.0f, 0.0f, -GRAB_DISTANCE};
-struct Vector3 gCameraOffset = {0.0f, 0.0f, 0.0f};
+struct Vector3 sGrabDistance = {0.0f, 0.0f, -GRAB_DISTANCE};
+struct Vector3 sCameraOffset = {0.0f, 0.0f, 0.0f};
 
-struct CollisionQuad gPlayerColliderFaces[8];
-
-#define TARGET_CAPSULE_EXTEND_HEIGHT   0.45f
-
-struct CollisionCapsule gPlayerCollider = {
+struct CollisionCapsule sPlayerCapsule = {
     0.25f,
-    TARGET_CAPSULE_EXTEND_HEIGHT,
+    PLAYER_CAPSULE_EXTEND,
 };
 
-struct ColliderTypeData gPlayerColliderData = {
+struct ColliderTypeData sPlayerCollider = {
     CollisionShapeTypeCapsule,
-    &gPlayerCollider,
+    &sPlayerCapsule,
     0.0f,
     0.6f,
     &gCollisionCapsuleCallbacks,
 };
 
-void playerRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
+static struct SKAnimationClip* sPlayerIdleClips[] = {
+    &player_chell_Armature_idle_clip,
+    &player_chell_Armature_idle_portalgun_clip,
+};
+
+static struct SKAnimationClip* sPlayerRunSClips[] = {
+    &player_chell_Armature_runs_clip,
+    &player_chell_Armature_runs_portalgun_clip,
+};
+
+static struct SKAnimationClip* sPlayerRunNClips[] = {
+    &player_chell_Armature_runn_clip,
+    &player_chell_Armature_runn_portalgun_clip,
+};
+
+static struct SKAnimationClip* sPlayerRunWClips[] = {
+    &player_chell_Armature_runw_clip,
+    &player_chell_Armature_runw_portalgun_clip,
+};
+
+static struct SKAnimationClip* sPlayerRunEClips[] = {
+    &player_chell_Armature_rune_clip,
+    &player_chell_Armature_rune_portalgun_clip,
+};
+
+static struct SKAnimationClip* sPlayerJumpClips[] = {
+    &player_chell_Armature_standing_jump_clip,
+    &player_chell_Armature_standing_jump_portalgun_clip,
+};
+
+static struct SKAnimationClip* playerDetermineNextClip(
+    struct Player* player,
+    float* blendLerp,
+    float* startTime,
+    struct Vector3* forwardDir,
+    struct Vector3* rightDir
+) {
+    float horzSpeed = player->body.velocity.x * player->body.velocity.x + player->body.velocity.z * player->body.velocity.z;
+
+    int clipOffset = 0;
+
+    if (player->flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
+        clipOffset = 1;
+    }
+
+    if (!(player->flags & PlayerFlagsGrounded)) {
+        *blendLerp = 0.0f;
+        *startTime = 0.0f;
+        return sPlayerJumpClips[clipOffset];
+    }
+
+    if (horzSpeed < 0.0001f) {
+        *blendLerp = 0.0f;
+        *startTime = 0.0f;
+        return sPlayerIdleClips[clipOffset];
+    }
+
+    horzSpeed = sqrtf(horzSpeed);
+
+    *blendLerp = 1.0f - horzSpeed * (1.0f / PLAYER_SPEED);
+
+    if (*blendLerp < 0.0f) {
+        *blendLerp = 0.0f;
+    }
+
+    if (*blendLerp > 1.0f) {
+        *blendLerp = 1.0f;
+    }
+
+    *startTime = player->animator.from.currentTime;
+
+    float forward = forwardDir->x * player->body.velocity.x + forwardDir->z * player->body.velocity.z;
+    float right = rightDir->x * player->body.velocity.x + rightDir->z * player->body.velocity.z;
+
+    if (fabsf(forward) > fabsf(right)) {
+        if (forward > 0.0f) {
+            return sPlayerRunSClips[clipOffset];
+        } else {
+            return sPlayerRunNClips[clipOffset];
+        }
+    } else {
+        if (right > 0.0f) {
+            return sPlayerRunEClips[clipOffset];
+        } else {
+            return sPlayerRunWClips[clipOffset];
+        }
+    }
+}
+
+static void playerRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct Player* player = (struct Player*)data;
 
     Mtx* matrix = renderStateRequestMatrices(renderState, 1);
@@ -116,11 +202,11 @@ void playerRender(void* data, struct DynamicRenderDataList* renderList, struct R
     struct Vector3 unusedRight;
 
     playerGetMoveBasis(&player->lookTransform.rotation, &forwardVector, &unusedRight);
-    
+
     finalPlayerTransform.position = player->body.transform.position;
     quatLook(&forwardVector, &gUp, &finalPlayerTransform.rotation);
     finalPlayerTransform.scale = gOneVec;
-    
+
     finalPlayerTransform.position.y -= PLAYER_HEAD_HEIGHT;
 
     transformToMatrixL(&finalPlayerTransform, matrix, SCENE_SCALE);
@@ -133,8 +219,11 @@ void playerRender(void* data, struct DynamicRenderDataList* renderList, struct R
 
     skCalculateTransforms(&player->armature, armature);
 
-    Gfx* gunAttachment = portal_gun_w_portalgun_model_gfx;
-    Gfx* attachments = skBuildAttachments(&player->armature, (player->flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) ? &gunAttachment : NULL, renderState);
+    Gfx* gunGfx = portal_gun_w_portalgun_model_gfx;
+    Gfx** gunAttachment = (player->flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun))
+        ? &gunGfx
+        : NULL;
+    Gfx* attachments = skBuildAttachments(&player->armature, gunAttachment, renderState);
 
     Gfx* objectRender = renderStateAllocateDLChunk(renderState, 4);
     Gfx* dl = objectRender;
@@ -170,10 +259,9 @@ static void playerHandleCollideStartEnd(struct CollisionObject* object, struct C
 }
 
 void playerInit(struct Player* player, struct Location* startLocation, struct Vector3* velocity) {
-    collisionObjectInit(&player->collisionObject, &gPlayerColliderData, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
+    collisionObjectInit(&player->collisionObject, &sPlayerCollider, &player->body, 1.0f, PLAYER_COLLISION_LAYERS);
     player->collisionObject.collideStartEnd = playerHandleCollideStartEnd;
 
-    // rigidBodyMarkKinematic(&player->body);
     player->body.flags |= RigidBodyIsKinematic | RigidBodyIsPlayer;
     collisionSceneAddDynamicObject(&player->collisionObject);
 
@@ -198,167 +286,117 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     player->jumpImpulse = JUMP_IMPULSE;
     player->flyingSoundLoopId = SOUND_ID_NONE;
 
-    // player->flags |= PlayerHasFirstPortalGun | PlayerHasSecondPortalGun;
-
     player->dynamicId = dynamicSceneAdd(player, playerRender, &player->body.transform.position, 1.5f);
     dynamicSceneSetFlags(player->dynamicId, DYNAMIC_SCENE_OBJECT_SKIP_ROOT);
 
     playerSetLocation(player, startLocation);
 }
 
-void playerHandleCollision(struct Player* player) {
-    for (struct ContactManifold* contact = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);
-        contact;
-        contact = contactSolverNextManifold(&gContactSolver, &player->collisionObject, contact)
-    ) {
-        float offset = 0.0f;
+void playerApplyCameraTransform(struct Player* player, struct Transform* cameraTransform) {
+    cameraTransform->rotation = player->lookTransform.rotation;
+    cameraTransform->position = player->lookTransform.position;
 
-        for (int i = 0; i < contact->contactCount; ++i) {
-            struct ContactPoint* contactPoint = &contact->contacts[i];
-            offset = MIN(offset, contactPoint->penetration);
-        }
-
-        if (playerIsGrabbingObject(player, contact->shapeA) || playerIsGrabbingObject(player, contact->shapeB)) {
-            // Objects being grabbed by the player shouldn't push the player
-            continue;
-        }
-
-        float prevY = player->body.transform.position.y;
-        float prevVelY = player->body.velocity.y;
-        
-        if (offset != 0.0f) {
-            vector3AddScaled(
-                &player->body.transform.position, 
-                &contact->normal, 
-                (contact->shapeA == &player->collisionObject ? offset : -offset) * 0.95f, 
-                &player->body.transform.position
-            );
-        }
-
-        float relativeVelocity = vector3Dot(&contact->normal, &player->body.velocity);
-
-        if ((contact->shapeA == &player->collisionObject) == (relativeVelocity > 0.0f)) {
-            vector3ProjectPlane(&player->body.velocity, &contact->normal, &player->body.velocity);
-            playerHandleLandingRumble(relativeVelocity);
-        }
-
-        if (collisionObjectIsGrabbable(contact->shapeA) || collisionObjectIsGrabbable(contact->shapeB)) {
-            player->body.transform.position.y = MAX(player->body.transform.position.y, prevY);
-            player->body.velocity.y = MAX(player->body.velocity.y, prevVelY);
-        }
-
-        if (!(player->flags & PlayerIsInvincible) &&
-            !playerIsDead(player) &&
-            (isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB))
-        ) {
-            playerDamage(player, PLAYER_MAX_HEALTH, NULL);
-            soundPlayerPlay(soundsBallKill, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
-        }
+    if (playerIsDead(player)) {
+        cameraTransform->position.y += DEAD_OFFSET;
     }
 }
 
-void playerApplyPortalGrab(struct Player* player, int portalIndex) {
-    if (portalIndex) {
-        player->grabbingThroughPortal -= 1;
+void playerGetTargetCenter(struct Player* player, struct Vector3* out) {
+    // Player origin is the head
+    *out = player->body.transform.position;
+
+    // The player collider becomes a sphere for a short time after teleporting
+    // Targeting the center in that window will miss, so only adjust when done
+    if (sPlayerCapsule.extendDownward == PLAYER_CAPSULE_EXTEND) {
+        vector3AddScaled(out, &player->body.rotationBasis.y, PLAYER_CENTER_HEIGHT - PLAYER_HEAD_HEIGHT, out);
+    }
+}
+
+void playerGetMoveBasis(struct Quaternion* rotation, struct Vector3* forward, struct Vector3* right) {
+    quatMultVector(rotation, &gForward, forward);
+    quatMultVector(rotation, &gRight, right);
+
+    if (forward->y > 0.7f) {
+        quatMultVector(rotation, &gUp, forward);
+        vector3Negate(forward, forward);
+    } else if (forward->y < -0.7f) {
+        quatMultVector(rotation, &gUp, forward);
+    }
+
+    forward->y = 0.0f;
+    right->y = 0.0f;
+
+    vector3Normalize(forward, forward);
+    vector3Normalize(right, right);
+}
+
+void playerSetLocation(struct Player* player, struct Location* location) {
+    if (location) {
+        player->lookTransform = location->transform;
+        player->body.currentRoom = location->roomIndex;
     } else {
-        player->grabbingThroughPortal += 1;
+        transformInitIdentity(&player->lookTransform);
+        player->body.currentRoom = 0;
     }
+    player->body.transform = player->lookTransform;
+
+    player->anchoredTo = NULL;
+    player->anchorLastPosition = gZeroVec;
+
+    collisionObjectUpdateBB(&player->collisionObject);
+    dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
 }
 
-void playerSetGrabbing(struct Player* player, struct CollisionObject* object) {
-    if (object && !player->grabConstraint.object) {
-        pointConstraintInit(&player->grabConstraint, grabbing, 8.0f, 5.0f, 1.0f);
-        contactSolverAddPointConstraint(&gContactSolver, &player->grabConstraint);
-        playerInitGrabRotationBase(player);
-
-        hudResolvePrompt(&gScene.hud, CutscenePromptTypePickup);
-        portalGunPickup(&gScene.portalGun);
-    } else if (!object && player->grabConstraint.object) {
-        contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
-        player->grabConstraint.object = NULL;
-        player->grabbingThroughPortal = 0;
-
-        hudResolvePrompt(&gScene.hud, CutscenePromptTypeDrop);
-        portalGunRelease(&gScene.portalGun);
-    }
-}
-
-void playerInitGrabRotationBase(struct Player* player) {
-    struct Vector3 forward, tmpVec;
-    playerGetMoveBasis(&player->lookTransform.rotation, &forward, &tmpVec);
-    vector3Negate(&forward, &forward);
-
-    struct Quaternion forwardRotation;
-    quatLook(&forward, &gUp, &forwardRotation);
-    playerPortalGrabTransform(player, NULL, &forwardRotation);
-    
-    enum GrabRotationFlags grabRotationFlags = grabRotationFlagsForCollisionObject(player->grabConstraint.object);
-    grabRotationInitBase(
-        grabRotationFlags,
-        &forwardRotation,
-        &player->grabConstraint.object->body->transform.rotation,
-        &player->grabRotationBase
-    );
-}
-
-void playerShakeUpdate(struct Player* player) {
-    if (player->shakeTimer > 0.0f){
-        player->shakeTimer -= FIXED_DELTA_TIME;
-
-        float magnitude = 1.0f;
-
-        if (player->shakeTimer < 1.0f) {
-            magnitude = player->shakeTimer;
-        }
-
-        float max = SHAKE_DISTANCE * magnitude;
-        float min = -SHAKE_DISTANCE * magnitude;
-        player->lookTransform.position.x += randomInRangef(min, max);
-        player->lookTransform.position.y += randomInRangef(min, max);
-        player->lookTransform.position.z += randomInRangef(min, max);
-
-        if (player->shakeTimer < 0.0f){
-            player->shakeTimer = 0.0f;
-        }
-    }
-}
-
-void playerSignalPortalChanged(struct Player* player) {
-    if (player->grabbingThroughPortal) {
-        playerSetGrabbing(player, NULL);
-    }
-}
-
-int playerIsGrabbing(struct Player* player) {
-    return player->grabConstraint.object != NULL;
-}
-
-int playerIsGrabbingObject(struct Player* player, struct CollisionObject* object) {
-    return player->grabConstraint.object == object;
-}
-
-void playerThrowObject(struct Player* player) {
-    if (!playerIsGrabbing(player)) {
+static void playerUpdateHealth(struct Player* player) {
+    if (player->health <= 0.0f || player->health >= PLAYER_MAX_HEALTH) {
         return;
     }
 
-    struct Vector3 forward, right;
-    playerGetMoveBasis(&player->lookTransform.rotation, &forward, &right);
+    if (player->healthRegenTimer > 0.0f) {
+        player->healthRegenTimer -= FIXED_DELTA_TIME;
+    }
 
-    struct Quaternion throwRotation;
-    quatLook(&forward, &gUp, &throwRotation);
-    playerPortalGrabTransform(player, NULL, &throwRotation);
-    quatMultVector(&throwRotation, &gForward, &forward);
-
-    struct CollisionObject* object = player->grabConstraint.object;
-    playerSetGrabbing(player, NULL);
-    
-    // Scale impulse with mass to throw each object the same distance
-    vector3Scale(&forward, &forward, THROW_IMPULSE * object->body->mass);
-    rigidBodyApplyImpulse(object->body, &object->body->transform.position, &forward);
+    if (player->healthRegenTimer <= 0.0f) {
+        player->healthRegenTimer = 0.0f;
+        player->health = mathfMoveTowards(player->health, PLAYER_MAX_HEALTH, HEALTH_REGEN_SPEED * FIXED_DELTA_TIME);
+    }
 }
 
-int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPastObject) {
+void playerDamage(struct Player* player, float amount, struct Coloru8* overlayColor) {
+    if ((player->flags & PlayerIsInvincible) || player->health <= 0.0f) {
+        return;
+    }
+
+    if (overlayColor) {
+        hudShowColoredOverlay(
+            &gScene.hud,
+            overlayColor,
+            DAMAGE_OVERLAY_TIME,
+            DAMAGE_OVERLAY_FADE
+        );
+    }
+
+    player->health -= amount;
+    player->healthRegenTimer = HEALTH_REGEN_DELAY;
+
+    if (player->health <= 0.0f) {
+        player->health = 0.0f;
+
+        // Drop the portal gun
+        player->flags &= ~(PlayerHasFirstPortalGun | PlayerHasSecondPortalGun);
+        playerSetGrabbing(player, NULL);
+
+        rumblePakClipPlay(&gPlayerDieRumbleWave);
+    } else {
+        rumblePakClipPlay(&gPlayerDamageRumbleWave);
+    }
+}
+
+int playerIsDead(struct Player* player) {
+    return player->health <= 0.0f;
+}
+
+static int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPastObject) {
     struct Ray ray;
 
     ray.origin = player->lookTransform.position;
@@ -383,7 +421,32 @@ int playerRaycastGrab(struct Player* player, struct RaycastHit* hit, int checkPa
     return result;
 }
 
-void playerUpdateGrabbedObject(struct Player* player) {
+static void playerApplyPortalGrab(struct Player* player, int portalIndex) {
+    if (portalIndex) {
+        player->grabbingThroughPortal -= 1;
+    } else {
+        player->grabbingThroughPortal += 1;
+    }
+}
+
+static void playerPortalGrabTransform(struct Player* player, struct Vector3* grabPoint, struct Quaternion* grabRotation) {
+    if (!player->grabbingThroughPortal) {
+        return;
+    }
+
+    struct Transform* portalTransform = collisionSceneTransformToOtherPortal(player->grabbingThroughPortal > 0 ? 0 : 1);
+
+    for (int i = 0; i < abs(player->grabbingThroughPortal); ++i) {
+        if (grabPoint) {
+            transformPoint(portalTransform, grabPoint, grabPoint);
+        }
+        struct Quaternion finalRotation;
+        quatMultiply(&portalTransform->rotation, grabRotation, &finalRotation);
+        *grabRotation = finalRotation;
+    }
+}
+
+static void playerUpdateGrabbedObject(struct Player* player) {
     if (playerIsDead(player)) {
         return;
     }
@@ -460,11 +523,11 @@ void playerUpdateGrabbedObject(struct Player* player) {
 
         // Try to determine how far away to set the grab distance
         struct RaycastHit hit;
-        struct Vector3 tempGrabDist = gGrabDistance;
+        struct Vector3 tempGrabDist = sGrabDistance;
 
         if (playerRaycastGrab(player, &hit, 1)) {
             tempGrabDist.z = clampf(
-                gGrabDistance.z,
+                sGrabDistance.z,
                 (-1.0f * fabsf(hit.distance)) + GRAB_COLLIDE_PADDING,
                 -GRAB_COLLIDE_PADDING
             );
@@ -477,13 +540,13 @@ void playerUpdateGrabbedObject(struct Player* player) {
         }
 
         vector3Multiply(&player->lookTransform.scale, &tempGrabDist, &tempGrabDist);
-        
+
         struct Vector3 grabPoint;
-        
+
         // Determine object target height
         quatMultVector(&player->lookTransform.rotation, &tempGrabDist, &grabPoint);
         float grabY = clampf(grabPoint.y, GRAB_MIN_OFFSET_Y, GRAB_MAX_OFFSET_Y);
-        
+
         // Keep object at steady XZ-planar distance in front of player
         struct Quaternion forwardRotation;
         struct Vector3 forward, forwardNegate, right;
@@ -493,12 +556,12 @@ void playerUpdateGrabbedObject(struct Player* player) {
         quatMultVector(&forwardRotation, &tempGrabDist, &grabPoint);
         vector3Add(&player->lookTransform.position, &grabPoint, &grabPoint);
         grabPoint.y += grabY;
-        
+
         // Remember delta between forwardRotation and lookTransform.rotation
         struct Quaternion lookRotationDelta, forwardRotationInv;
         quatConjugate(&forwardRotation, &forwardRotationInv);
         quatMultiply(&forwardRotationInv, &player->lookTransform.rotation, &lookRotationDelta);
-        
+
         if (player->grabbingThroughPortal) {
             if (!collisionSceneIsPortalOpen()) {
                 // Portal was closed while holding object through it
@@ -508,355 +571,219 @@ void playerUpdateGrabbedObject(struct Player* player) {
 
             playerPortalGrabTransform(player, &grabPoint, &forwardRotation);
         }
-        
+
         struct Quaternion grabRotation;
         enum GrabRotationFlags grabRotationFlags = grabRotationFlagsForCollisionObject(player->grabConstraint.object);
         grabRotationUpdate(grabRotationFlags, &lookRotationDelta, &forwardRotation, &player->grabRotationBase, &grabRotation);
-        
+
         pointConstraintUpdateTarget(&player->grabConstraint, &grabPoint, &grabRotation);
     }
 }
 
-void playerGetTargetCenter(struct Player* player, struct Vector3* out) {
-    // Player origin is the head
-    *out = player->body.transform.position;
+static void playerInitGrabRotationBase(struct Player* player) {
+    struct Vector3 forward, tmpVec;
+    playerGetMoveBasis(&player->lookTransform.rotation, &forward, &tmpVec);
+    vector3Negate(&forward, &forward);
 
-    // The player collider becomes a sphere for a short time after teleporting
-    // Targeting the center in that window will miss, so only adjust when done
-    if (gPlayerCollider.extendDownward == TARGET_CAPSULE_EXTEND_HEIGHT) {
-        vector3AddScaled(out, &player->body.rotationBasis.y, PLAYER_CENTER_HEIGHT - PLAYER_HEAD_HEIGHT, out);
+    struct Quaternion forwardRotation;
+    quatLook(&forward, &gUp, &forwardRotation);
+    playerPortalGrabTransform(player, NULL, &forwardRotation);
+
+    enum GrabRotationFlags grabRotationFlags = grabRotationFlagsForCollisionObject(player->grabConstraint.object);
+    grabRotationInitBase(
+        grabRotationFlags,
+        &forwardRotation,
+        &player->grabConstraint.object->body->transform.rotation,
+        &player->grabRotationBase
+    );
+}
+
+void playerSetGrabbing(struct Player* player, struct CollisionObject* object) {
+    if (object && !player->grabConstraint.object) {
+        pointConstraintInit(&player->grabConstraint, object, 8.0f, 5.0f, 1.0f);
+        contactSolverAddPointConstraint(&gContactSolver, &player->grabConstraint);
+        playerInitGrabRotationBase(player);
+
+        hudResolvePrompt(&gScene.hud, CutscenePromptTypePickup);
+        portalGunPickup(&gScene.portalGun);
+    } else if (!object && player->grabConstraint.object) {
+        contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
+        player->grabConstraint.object = NULL;
+        player->grabbingThroughPortal = 0;
+
+        hudResolvePrompt(&gScene.hud, CutscenePromptTypeDrop);
+        portalGunRelease(&gScene.portalGun);
     }
 }
 
-void playerGetMoveBasis(struct Quaternion* rotation, struct Vector3* forward, struct Vector3* right) {
-    quatMultVector(rotation, &gForward, forward);
-    quatMultVector(rotation, &gRight, right);
-
-    if (forward->y > 0.7f) {
-        quatMultVector(rotation, &gUp, forward);
-        vector3Negate(forward, forward);
-    } else if (forward->y < -0.7f) {
-        quatMultVector(rotation, &gUp, forward);
-    }
-
-    forward->y = 0.0f;
-    right->y = 0.0f;
-
-    vector3Normalize(forward, forward);
-    vector3Normalize(right, right);
+int playerIsGrabbing(struct Player* player) {
+    return player->grabConstraint.object != NULL;
 }
 
-void playerPortalGrabTransform(struct Player* player, struct Vector3* grabPoint, struct Quaternion* grabRotation) {
-    if (!player->grabbingThroughPortal) {
+int playerIsGrabbingObject(struct Player* player, struct CollisionObject* object) {
+    return player->grabConstraint.object == object;
+}
+
+void playerThrowObject(struct Player* player) {
+    if (!playerIsGrabbing(player)) {
         return;
     }
 
-    struct Transform* portalTransform = collisionSceneTransformToOtherPortal(player->grabbingThroughPortal > 0 ? 0 : 1);
-    
-    for (int i = 0; i < abs(player->grabbingThroughPortal); ++i) {
-        if (grabPoint) {
-            transformPoint(portalTransform, grabPoint, grabPoint);
-        }
-        struct Quaternion finalRotation;
-        quatMultiply(&portalTransform->rotation, grabRotation, &finalRotation);
-        *grabRotation = finalRotation;
+    struct Vector3 forward, right;
+    playerGetMoveBasis(&player->lookTransform.rotation, &forward, &right);
+
+    struct Quaternion throwRotation;
+    quatLook(&forward, &gUp, &throwRotation);
+    playerPortalGrabTransform(player, NULL, &throwRotation);
+    quatMultVector(&throwRotation, &gForward, &forward);
+
+    struct CollisionObject* object = player->grabConstraint.object;
+    playerSetGrabbing(player, NULL);
+
+    // Scale impulse with mass to throw each object the same distance
+    vector3Scale(&forward, &forward, THROW_IMPULSE * object->body->mass);
+    rigidBodyApplyImpulse(object->body, &object->body->transform.position, &forward);
+}
+
+void playerSignalPortalChanged(struct Player* player) {
+    if (player->grabbingThroughPortal) {
+        playerSetGrabbing(player, NULL);
     }
 }
 
-void playerGivePortalGun(struct Player* player, int flags) {
-    player->flags |= flags;
-}
-
-void playerSetLocation(struct Player* player, struct Location* location) {
-    if (location) {
-        player->lookTransform = location->transform;
-        player->body.currentRoom = location->roomIndex;
+void playerToggleJumpImpulse(struct Player* player, float newJumpImpulse) {
+    if (player->jumpImpulse == JUMP_IMPULSE) {
+        player->jumpImpulse = newJumpImpulse;
     } else {
-        transformInitIdentity(&player->lookTransform);
-        player->body.currentRoom = 0;
+        player->jumpImpulse = JUMP_IMPULSE;
     }
-    player->body.transform = player->lookTransform;
-
-    player->anchoredTo = NULL;
-    player->anchorLastPosition = gZeroVec;
-
-    collisionObjectUpdateBB(&player->collisionObject);
-    dynamicSceneSetRoomFlags(player->dynamicId, ROOM_FLAG_FROM_INDEX(player->body.currentRoom));
 }
 
-void playerUpdateSounds(struct Player* player) {
-    enum PlayerFlags flags = player->flags;
+void playerToggleInvincibility(struct Player* player) {
+    player->flags ^= PlayerIsInvincible;
+}
 
-    if ((flags & PlayerFlagsGrounded) && (flags & PlayerIsStepping)) {
-        soundPlayerPlay(soundsConcreteFootstep[player->currentFoot], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
-        player->flags &= ~PlayerIsStepping;
-    }
-    if (flags & PlayerJustJumped) {
-        soundPlayerPlay(soundsConcreteFootstep[3], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
-        player->flags &= ~PlayerJustJumped;
-    }
-    if (flags & PlayerJustLandedFromFall) {
-        // TODO: Dead body sound when landing on ground while dead
-        soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
-        player->flags &= ~PlayerJustLandedFromFall;
-    }
-    if (flags & PlayerJustSelect) {
-        soundPlayerPlay(soundsSelecting[1], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
-        player->flags &= ~PlayerJustSelect;
-    }
-    if (flags & PlayerJustDeniedSelect) {
-        soundPlayerPlay(soundsSelecting[0], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
-        player->flags &= ~PlayerJustDeniedSelect;
-    }
-    if (player->passedThroughPortal) {
-        soundPlayerPlay(soundsPortalEnter[player->passedThroughPortal - 1], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
-        hudShowSubtitle(&gScene.hud, PORTALPLAYER_ENTERPORTAL, SubtitleTypeCaption);
-        soundPlayerPlay(soundsPortalExit[2 - player->passedThroughPortal], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
-        hudShowSubtitle(&gScene.hud, PORTALPLAYER_EXITPORTAL, SubtitleTypeCaption);
+void playerToggleCollisionLayers(struct Player* player, short collisionLayers) {
+    player->collisionObject.collisionLayers ^= collisionLayers;
+}
+
+void playerGivePortalGun(struct Player* player, enum PlayerFlags portalGunFlags) {
+    player->flags |= portalGunFlags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun);
+}
+
+static void playerProcessInput(struct Player* player, struct Vector3* forward, struct Vector3* right, struct Vector2* moveInput, struct Vector2* lookInput) {
+    controllerActionGetDirection(ControllerActionMove, moveInput);
+    controllerActionGetDirection(ControllerActionRotate, lookInput);
+
+    if (gSaveData.controls.flags & ControlSaveFlagsTankControls) {
+        float tmp;
+        tmp = moveInput->y;
+        moveInput->y = lookInput->y;
+        lookInput->y = tmp;
     }
 
-    float flyingSoundVolume = clampf(
-        sqrtf(vector3MagSqrd(&player->body.velocity)) * (0.6f / MAX_PORTAL_SPEED),
-        0.0f, 1.0f
+    vector2Normalize(moveInput, moveInput);
+
+    if (!playerIsDead(player)) {
+        if (controllerActionGet(ControllerActionDuck)) {
+            player->flags ^= PlayerCrouched;
+        }
+
+        if (controllerActionGet(ControllerActionLookForward)) {
+            struct Vector3 forwardNegate;
+            vector3Negate(forward, &forwardNegate);
+            quatLook(&forwardNegate, &gUp, &player->lookTransform.rotation);
+        }
+
+        if (controllerActionGet(ControllerActionLookBackward)) {
+            quatLook(forward, &gUp, &player->lookTransform.rotation);
+        }
+    }
+}
+
+static void playerJump(struct Player* player, struct Vector3* targetVelocity, struct Vector3* forward) {
+    vector3AddScaled(
+        &player->body.velocity,
+        forward,
+        vector3Dot(targetVelocity, forward) * 0.5f,
+        &player->body.velocity
     );
 
-    if (flyingSoundVolume > FLY_SOUND_THRESHOLD_VEL) {
-        // Start the fall sound or adjust the current volume
-        if (player->flyingSoundLoopId == SOUND_ID_NONE) {
-            player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, flyingSoundVolume, 1.0f, NULL, NULL, SoundTypeAll);
-        } else {
-            soundPlayerSetVolume(player->flyingSoundLoopId, flyingSoundVolume);
-        }
-
-        if (flyingSoundVolume >= FLY_CAPTION_THRESHOLD) {
-            hudShowSubtitle(&gScene.hud, PORTALPLAYER_WOOSH, SubtitleTypeCaption);
-        }
-    } else if (player->flyingSoundLoopId != SOUND_ID_NONE) {
-        // Stop the fall sound when the velocity is below the threshold
-        soundPlayerStop(player->flyingSoundLoopId);
-        player->flyingSoundLoopId = SOUND_ID_NONE;
+    float speed = vector3MagSqrd(&player->body.velocity);
+    if (speed > JUMP_BOOST_LIMIT * JUMP_BOOST_LIMIT) {
+        vector3Scale(&player->body.velocity, &player->body.velocity, JUMP_BOOST_LIMIT / sqrtf(speed));
     }
+
+    player->body.velocity.y += player->jumpImpulse;
+
+    player->flags &= ~PlayerFlagsGrounded;
+    player->flags |= PlayerJustJumped;
+
+    hudResolvePrompt(&gScene.hud, CutscenePromptTypeJump);
 }
 
-void playerUpdateHealth(struct Player* player) {
-    if (player->health <= 0.0f || player->health >= PLAYER_MAX_HEALTH) {
+static void playerApplyFriction(struct Player* player) {
+    if (vector3IsZero(&player->body.velocity)) {
         return;
     }
 
-    if (player->healthRegenTimer > 0.0f) {
-        player->healthRegenTimer -= FIXED_DELTA_TIME;
-    }
-
-    if (player->healthRegenTimer <= 0.0f) {
-        player->healthRegenTimer = 0.0f;
-        player->health = mathfMoveTowards(player->health, PLAYER_MAX_HEALTH, HEALTH_REGEN_SPEED * FIXED_DELTA_TIME);
-    }
-}
-
-void playerDamage(struct Player* player, float amount, struct Coloru8* overlayColor) {
-    if ((player->flags & PlayerIsInvincible) || player->health <= 0.0f) {
+    float currentSpeed = sqrtf(vector3MagSqrd(&player->body.velocity));
+    if (currentSpeed < 0.01f) {
+        player->body.velocity = gZeroVec;
         return;
     }
 
-    if (overlayColor) {
-        hudShowColoredOverlay(
-            &gScene.hud,
-            overlayColor,
-            DAMAGE_OVERLAY_TIME,
-            DAMAGE_OVERLAY_FADE
+    float stopAccel;
+    if (currentSpeed < FRICTION_STOP_THRESHOLD) {
+        stopAccel = FRICTION_STOP_THRESHOLD;
+    } else if (currentSpeed < (FRICTION_STOP_THRESHOLD * 2.0f)) {
+        stopAccel = currentSpeed;
+    } else {
+        stopAccel = currentSpeed * 0.5625f;
+    }
+
+    float targetSpeed = MAX(
+        currentSpeed - (stopAccel * PLAYER_FRICTION * FIXED_DELTA_TIME),
+        0.0f
+    );
+
+    vector3Scale(
+        &player->body.velocity,
+        &player->body.velocity,
+        targetSpeed / currentSpeed
+    );
+}
+
+static void playerAccelerate(struct Player* player, struct Vector3* targetVelocity, float acceleration, float maxSpeed) {
+    if (!vector3IsZero(targetVelocity)) {
+        struct Vector3 targetDirection;
+        vector3Normalize(targetVelocity, &targetDirection);
+
+        float targetSpeed = MIN(
+            sqrtf(vector3MagSqrd(targetVelocity)),
+            maxSpeed
         );
+
+        // Accelerate more as the player diverges from the movement direction
+        // Limiting this projection, not velocity, is what enables bunny hopping / air strafing
+        float velocityProj = vector3Dot(&player->body.velocity, &targetDirection);
+        float maxAcceleration = targetSpeed - velocityProj;
+
+        if (maxAcceleration > 0.0f) {
+            vector3AddScaled(
+                &player->body.velocity,
+                &targetDirection,
+                MIN(acceleration * targetSpeed * FIXED_DELTA_TIME, maxAcceleration),
+                &player->body.velocity
+            );
+        }
     }
 
-    player->health -= amount;
-    player->healthRegenTimer = HEALTH_REGEN_DELAY;
-
-    if (player->health <= 0.0f) {
-        player->health = 0.0f;
-
-        // Drop the portal gun
-        player->flags &= ~(PlayerHasFirstPortalGun | PlayerHasSecondPortalGun);
-        playerSetGrabbing(player, NULL);
-
-        rumblePakClipPlay(&gPlayerDieRumbleWave);
-    } else {
-        rumblePakClipPlay(&gPlayerDamageRumbleWave);
-    }
+    player->body.angularVelocity = gZeroVec;
+    player->body.velocity.y += GRAVITY_CONSTANT * FIXED_DELTA_TIME;
 }
 
-int playerIsDead(struct Player* player) {
-    return player->health <= 0.0f;
-}
-
-struct SKAnimationClip* gPlayerIdleClips[] = {
-    &player_chell_Armature_idle_clip,
-    &player_chell_Armature_idle_portalgun_clip,
-};
-
-struct SKAnimationClip* gPlayerRunSClips[] = {
-    &player_chell_Armature_runs_clip,
-    &player_chell_Armature_runs_portalgun_clip,
-};
-
-struct SKAnimationClip* gPlayerRunNClips[] = {
-    &player_chell_Armature_runn_clip,
-    &player_chell_Armature_runn_portalgun_clip,
-};
-
-struct SKAnimationClip* gPlayerRunWClips[] = {
-    &player_chell_Armature_runw_clip,
-    &player_chell_Armature_runw_portalgun_clip,
-};
-
-struct SKAnimationClip* gPlayerRunEClips[] = {
-    &player_chell_Armature_rune_clip,
-    &player_chell_Armature_rune_portalgun_clip,
-};
-
-struct SKAnimationClip* gPlayerJumpClips[] = {
-    &player_chell_Armature_standing_jump_clip,
-    &player_chell_Armature_standing_jump_portalgun_clip,
-};
-
-struct SKAnimationClip* playerDetermineNextClip(struct Player* player, float* blendLerp, float* startTime, struct Vector3* forwardDir, struct Vector3* rightDir) {
-    float horzSpeed = player->body.velocity.x * player->body.velocity.x + player->body.velocity.z * player->body.velocity.z;
-
-    int clipOffset = 0;
-
-    if (player->flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
-        clipOffset = 1;
-    }
-
-    if (!(player->flags & PlayerFlagsGrounded)) {
-        *blendLerp = 0.0f;
-        *startTime = 0.0f;
-        return gPlayerJumpClips[clipOffset];
-    }
-
-    if (horzSpeed < 0.0001f) {
-        *blendLerp = 0.0f;
-        *startTime = 0.0f;
-        return gPlayerIdleClips[clipOffset];
-    }
-
-    horzSpeed = sqrtf(horzSpeed);
-
-    *blendLerp = 1.0f - horzSpeed * (1.0f / PLAYER_SPEED);
-
-    if (*blendLerp < 0.0f) {
-        *blendLerp = 0.0f;
-    }
-
-    if (*blendLerp > 1.0f) {
-        *blendLerp = 1.0f;
-    }
-
-    *startTime = player->animator.from.currentTime;
-
-    float forward = forwardDir->x * player->body.velocity.x + forwardDir->z * player->body.velocity.z;
-    float right = rightDir->x * player->body.velocity.x + rightDir->z * player->body.velocity.z;
-
-    if (fabsf(forward) > fabsf(right)) {
-        if (forward > 0.0f) {
-            return gPlayerRunSClips[clipOffset];
-        } else {
-            return gPlayerRunNClips[clipOffset];
-        }
-    } else {
-        if (right > 0.0f) {
-            return gPlayerRunEClips[clipOffset];
-        } else {
-            return gPlayerRunWClips[clipOffset];
-        }
-    }
-}
-
-#define FOOTING_CAST_DISTANCE   (PLAYER_HEAD_HEIGHT + 0.2f)
-
-void playerUpdateFooting(struct Player* player, float maxStandDistance) {
-    // Clamp hit distance to nearest static collider (if any)
-    struct Vector3 castOffset;
-    struct Vector3 hitLocation;
-    float hitDistance = FOOTING_CAST_DISTANCE;
-    vector3Scale(&gUp, &castOffset, -(hitDistance - gPlayerCollider.radius - gPlayerCollider.extendDownward));
-    if (collisionObjectCollideShapeCast(&player->collisionObject, &castOffset, &gCollisionScene, &hitLocation)) {
-        hitDistance = gPlayerCollider.radius + gPlayerCollider.extendDownward + player->collisionObject.body->transform.position.y - hitLocation.y;
-    }
-
-    // Find dynamic object below feet
-    struct RaycastHit hit;
-    struct Ray ray;
-    hit.roomIndex = player->body.currentRoom;
-    ray.origin = player->body.transform.position;
-    vector3Scale(&gUp, &ray.dir, -1.0f);
-
-    struct RigidBody* anchor = NULL;
-
-    short prevCollisionLayers = player->collisionObject.collisionLayers;
-    player->collisionObject.collisionLayers = 0;
-
-    if (collisionSceneRaycastOnlyDynamic(&gCollisionScene, &ray, COLLISION_LAYERS_TANGIBLE, hitDistance, &hit)) {
-        hitDistance = hit.distance;
-
-        hit.object->flags |= COLLISION_OBJECT_PLAYER_STANDING;
-
-        if (playerIsGrabbingObject(player, hit.object)) {
-            playerSetGrabbing(player, NULL);
-        }
-
-        if (hit.object->body && (hit.object->body->flags & RigidBodyIsKinematic)) {
-            anchor = hit.object->body;
-        }
-    }
-
-    player->collisionObject.collisionLayers = prevCollisionLayers;
-    
-    // Stand on collision
-    float penetration = hitDistance - PLAYER_HEAD_HEIGHT;
-    if (penetration < 0.00001f) {
-        vector3AddScaled(&player->body.transform.position, &gUp, MIN(-penetration, maxStandDistance), &player->body.transform.position);
-        if (player->body.velocity.y < 0.0f) {
-            playerHandleLandingRumble(-player->body.velocity.y);
-
-            // Only consider it a fall moving downward with enough velocity
-            if (player->body.velocity.y < -LAND_FALL_THRESHOLD_VEL) {
-                player->flags |= PlayerJustLandedFromFall;
-            }
-
-            player->body.velocity.y = 0.0f;
-        }
-
-        player->flags |= PlayerFlagsGrounded;
-
-        player->anchoredTo = anchor;
-    } else {
-        player->flags &= ~PlayerFlagsGrounded;
-
-        // Stay anchored so we can follow it in the air
-    }
-
-    if (player->anchoredTo) {
-        // Save last position so the anchor can be followed
-        player->anchorLastPosition = player->anchoredTo->transform.position;
-    } else {
-        player->anchorLastPosition = gZeroVec;
-    }
-
-    // Update state for footstep sounds
-    if ((player->flags & PlayerFlagsGrounded) && (player->body.velocity.x == 0) && (player->body.velocity.z == 0)) {
-        player->stepTimer = STEP_TIME;
-        player->flags &= ~PlayerIsStepping;
-    } else {
-        player->stepTimer -= FIXED_DELTA_TIME;
-
-        if (player->stepTimer < 0.0f) {
-            player->flags |= PlayerIsStepping;
-            player->stepTimer = STEP_TIME;
-            player->currentFoot = !player->currentFoot;
-        }
-    }
-}
-
-void playerPortalFunnel(struct Player* player, struct Vector3* targetVelocity) {
+static void playerPortalFunnel(struct Player* player, struct Vector3* targetVelocity) {
     if (gCollisionScene.portalTransforms[0] == NULL || gCollisionScene.portalTransforms[1] == NULL) {
         return;
     }
@@ -919,119 +846,7 @@ void playerPortalFunnel(struct Player* player, struct Vector3* targetVelocity) {
     }
 }
 
-void playerProcessInput(struct Player* player, struct Vector3* forward, struct Vector3* right, struct Vector2* moveInput, struct Vector2* lookInput) {
-    controllerActionGetDirection(ControllerActionMove, moveInput);
-    controllerActionGetDirection(ControllerActionRotate, lookInput);
-
-    if (gSaveData.controls.flags & ControlSaveFlagsTankControls) {
-        float tmp;
-        tmp = moveInput->y;
-        moveInput->y = lookInput->y;
-        lookInput->y = tmp;
-    }
-
-    vector2Normalize(moveInput, moveInput);
-
-    if (!playerIsDead(player)) {
-        if (controllerActionGet(ControllerActionDuck)) {
-            player->flags ^= PlayerCrouched;
-        }
-
-        if (controllerActionGet(ControllerActionLookForward)) {
-            struct Vector3 forwardNegate;
-            vector3Negate(forward, &forwardNegate);
-            quatLook(&forwardNegate, &gUp, &player->lookTransform.rotation);
-        }
-
-        if (controllerActionGet(ControllerActionLookBackward)) {
-            quatLook(forward, &gUp, &player->lookTransform.rotation);
-        }
-    }
-}
-
-void playerJump(struct Player* player, struct Vector3* targetVelocity, struct Vector3* forward) {
-    vector3AddScaled(
-        &player->body.velocity,
-        forward,
-        vector3Dot(targetVelocity, forward) * 0.5f,
-        &player->body.velocity
-    );
-
-    float speed = vector3MagSqrd(&player->body.velocity);
-    if (speed > JUMP_BOOST_LIMIT * JUMP_BOOST_LIMIT) {
-        vector3Scale(&player->body.velocity, &player->body.velocity, JUMP_BOOST_LIMIT / sqrtf(speed));
-    }
-
-    player->body.velocity.y += player->jumpImpulse;
-
-    player->flags &= ~PlayerFlagsGrounded;
-    player->flags |= PlayerJustJumped;
-
-    hudResolvePrompt(&gScene.hud, CutscenePromptTypeJump);
-}
-
-void playerApplyFriction(struct Player* player) {
-    if (vector3IsZero(&player->body.velocity)) {
-        return;
-    }
-
-    float currentSpeed = sqrtf(vector3MagSqrd(&player->body.velocity));
-    if (currentSpeed < 0.01f) {
-        player->body.velocity = gZeroVec;
-        return;
-    }
-
-    float stopAccel;
-    if (currentSpeed < FRICTION_STOP_THRESHOLD) {
-        stopAccel = FRICTION_STOP_THRESHOLD;
-    } else if (currentSpeed < (FRICTION_STOP_THRESHOLD * 2.0f)) {
-        stopAccel = currentSpeed;
-    } else {
-        stopAccel = currentSpeed * 0.5625f;
-    }
-
-    float targetSpeed = MAX(
-        currentSpeed - (stopAccel * PLAYER_FRICTION * FIXED_DELTA_TIME),
-        0.0f
-    );
-
-    vector3Scale(
-        &player->body.velocity,
-        &player->body.velocity,
-        targetSpeed / currentSpeed
-    );
-}
-
-void playerAccelerate(struct Player* player, struct Vector3* targetVelocity, float acceleration, float maxSpeed) {
-    if (!vector3IsZero(targetVelocity)) {
-        struct Vector3 targetDirection;
-        vector3Normalize(targetVelocity, &targetDirection);
-
-        float targetSpeed = MIN(
-            sqrtf(vector3MagSqrd(targetVelocity)),
-            maxSpeed
-        );
-
-        // Accelerate more as the player diverges from the movement direction
-        // Limiting this projection, not velocity, is what enables bunny hopping / air strafing
-        float velocityProj = vector3Dot(&player->body.velocity, &targetDirection);
-        float maxAcceleration = targetSpeed - velocityProj;
-
-        if (maxAcceleration > 0.0f) {
-            vector3AddScaled(
-                &player->body.velocity,
-                &targetDirection,
-                MIN(acceleration * targetSpeed * FIXED_DELTA_TIME, maxAcceleration),
-                &player->body.velocity
-            );
-        }
-    }
-
-    player->body.angularVelocity = gZeroVec;
-    player->body.velocity.y += GRAVITY_CONSTANT * FIXED_DELTA_TIME;
-}
-
-void playerMove(struct Player* player, struct Vector2* moveInput, struct Vector3* forward, struct Vector3* right) {
+static void playerMove(struct Player* player, struct Vector2* moveInput, struct Vector3* forward, struct Vector3* right) {
     int hasMoveInput = !vector2IsZero(moveInput);
     struct Vector3 targetVelocity = gZeroVec;
 
@@ -1079,7 +894,166 @@ void playerMove(struct Player* player, struct Vector2* moveInput, struct Vector3
     vector3AddScaled(&player->body.transform.position, &player->body.velocity, FIXED_DELTA_TIME, &player->body.transform.position);
 }
 
-void playerUpdateCamera(struct Player* player, struct Vector2* lookInput, int didPassThroughPortal) {
+#define FOOTING_CAST_DISTANCE   (PLAYER_HEAD_HEIGHT + 0.2f)
+
+void playerUpdateFooting(struct Player* player, float maxStandDistance) {
+    // Clamp hit distance to nearest static collider (if any)
+    struct Vector3 castOffset;
+    struct Vector3 hitLocation;
+    float hitDistance = FOOTING_CAST_DISTANCE;
+    vector3Scale(&gUp, &castOffset, -(hitDistance - sPlayerCapsule.radius - sPlayerCapsule.extendDownward));
+    if (collisionObjectCollideShapeCast(&player->collisionObject, &castOffset, &gCollisionScene, &hitLocation)) {
+        hitDistance = sPlayerCapsule.radius + sPlayerCapsule.extendDownward + player->collisionObject.body->transform.position.y - hitLocation.y;
+    }
+
+    // Find dynamic object below feet
+    struct RaycastHit hit;
+    struct Ray ray;
+    hit.roomIndex = player->body.currentRoom;
+    ray.origin = player->body.transform.position;
+    vector3Scale(&gUp, &ray.dir, -1.0f);
+
+    struct RigidBody* anchor = NULL;
+
+    short prevCollisionLayers = player->collisionObject.collisionLayers;
+    player->collisionObject.collisionLayers = 0;
+
+    if (collisionSceneRaycastOnlyDynamic(&gCollisionScene, &ray, COLLISION_LAYERS_TANGIBLE, hitDistance, &hit)) {
+        hitDistance = hit.distance;
+
+        hit.object->flags |= COLLISION_OBJECT_PLAYER_STANDING;
+
+        if (playerIsGrabbingObject(player, hit.object)) {
+            playerSetGrabbing(player, NULL);
+        }
+
+        if (hit.object->body && (hit.object->body->flags & RigidBodyIsKinematic)) {
+            anchor = hit.object->body;
+        }
+    }
+
+    player->collisionObject.collisionLayers = prevCollisionLayers;
+
+    // Stand on collision
+    float penetration = hitDistance - PLAYER_HEAD_HEIGHT;
+    if (penetration < 0.00001f) {
+        vector3AddScaled(&player->body.transform.position, &gUp, MIN(-penetration, maxStandDistance), &player->body.transform.position);
+        if (player->body.velocity.y < 0.0f) {
+            playerHandleLandingRumble(-player->body.velocity.y);
+
+            // Only consider it a fall moving downward with enough velocity
+            if (player->body.velocity.y < -LAND_FALL_THRESHOLD_VEL) {
+                player->flags |= PlayerJustLandedFromFall;
+            }
+
+            player->body.velocity.y = 0.0f;
+        }
+
+        player->flags |= PlayerFlagsGrounded;
+
+        player->anchoredTo = anchor;
+    } else {
+        player->flags &= ~PlayerFlagsGrounded;
+
+        // Stay anchored so we can follow it in the air
+    }
+
+    if (player->anchoredTo) {
+        // Save last position so the anchor can be followed
+        player->anchorLastPosition = player->anchoredTo->transform.position;
+    } else {
+        player->anchorLastPosition = gZeroVec;
+    }
+
+    // Update state for footstep sounds
+    if ((player->flags & PlayerFlagsGrounded) && (player->body.velocity.x == 0) && (player->body.velocity.z == 0)) {
+        player->stepTimer = STEP_TIME;
+        player->flags &= ~PlayerIsStepping;
+    } else {
+        player->stepTimer -= FIXED_DELTA_TIME;
+
+        if (player->stepTimer < 0.0f) {
+            player->flags |= PlayerIsStepping;
+            player->stepTimer = STEP_TIME;
+            player->currentFoot = !player->currentFoot;
+        }
+    }
+}
+
+static void playerHandleCollision(struct Player* player) {
+    for (struct ContactManifold* contact = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);
+        contact;
+        contact = contactSolverNextManifold(&gContactSolver, &player->collisionObject, contact)
+    ) {
+        float offset = 0.0f;
+
+        for (int i = 0; i < contact->contactCount; ++i) {
+            struct ContactPoint* contactPoint = &contact->contacts[i];
+            offset = MIN(offset, contactPoint->penetration);
+        }
+
+        if (playerIsGrabbingObject(player, contact->shapeA) || playerIsGrabbingObject(player, contact->shapeB)) {
+            // Objects being grabbed by the player shouldn't push the player
+            continue;
+        }
+
+        float prevY = player->body.transform.position.y;
+        float prevVelY = player->body.velocity.y;
+
+        if (offset != 0.0f) {
+            vector3AddScaled(
+                &player->body.transform.position,
+                &contact->normal,
+                (contact->shapeA == &player->collisionObject ? offset : -offset) * 0.95f,
+                &player->body.transform.position
+            );
+        }
+
+        float relativeVelocity = vector3Dot(&contact->normal, &player->body.velocity);
+
+        if ((contact->shapeA == &player->collisionObject) == (relativeVelocity > 0.0f)) {
+            vector3ProjectPlane(&player->body.velocity, &contact->normal, &player->body.velocity);
+            playerHandleLandingRumble(relativeVelocity);
+        }
+
+        if (collisionObjectIsGrabbable(contact->shapeA) || collisionObjectIsGrabbable(contact->shapeB)) {
+            player->body.transform.position.y = MAX(player->body.transform.position.y, prevY);
+            player->body.velocity.y = MAX(player->body.velocity.y, prevVelY);
+        }
+
+        if (!(player->flags & PlayerIsInvincible) &&
+            !playerIsDead(player) &&
+            (isColliderForBall(contact->shapeA) || isColliderForBall(contact->shapeB))
+        ) {
+            playerDamage(player, PLAYER_MAX_HEALTH, NULL);
+            soundPlayerPlay(soundsBallKill, 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        }
+    }
+}
+
+static void playerShakeUpdate(struct Player* player) {
+    if (player->shakeTimer > 0.0f){
+        player->shakeTimer -= FIXED_DELTA_TIME;
+
+        float magnitude = 1.0f;
+
+        if (player->shakeTimer < 1.0f) {
+            magnitude = player->shakeTimer;
+        }
+
+        float max = SHAKE_DISTANCE * magnitude;
+        float min = -SHAKE_DISTANCE * magnitude;
+        player->lookTransform.position.x += randomInRangef(min, max);
+        player->lookTransform.position.y += randomInRangef(min, max);
+        player->lookTransform.position.z += randomInRangef(min, max);
+
+        if (player->shakeTimer < 0.0f){
+            player->shakeTimer = 0.0f;
+        }
+    }
+}
+
+static void playerUpdateCamera(struct Player* player, struct Vector2* lookInput, int didPassThroughPortal) {
     float camera_y_modifier = (player->flags & PlayerCrouched) ? -0.25f : 0.0f;
 
     player->lookTransform.position = player->body.transform.position;
@@ -1157,6 +1131,60 @@ void playerUpdateCamera(struct Player* player, struct Vector2* lookInput, int di
     }
 }
 
+void playerUpdateSounds(struct Player* player) {
+    enum PlayerFlags flags = player->flags;
+
+    if ((flags & PlayerFlagsGrounded) && (flags & PlayerIsStepping)) {
+        soundPlayerPlay(soundsConcreteFootstep[player->currentFoot], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        player->flags &= ~PlayerIsStepping;
+    }
+    if (flags & PlayerJustJumped) {
+        soundPlayerPlay(soundsConcreteFootstep[3], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        player->flags &= ~PlayerJustJumped;
+    }
+    if (flags & PlayerJustLandedFromFall) {
+        // TODO: Dead body sound when landing on ground while dead
+        soundPlayerPlay(soundsConcreteFootstep[2], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        player->flags &= ~PlayerJustLandedFromFall;
+    }
+    if (flags & PlayerJustSelect) {
+        soundPlayerPlay(soundsSelecting[1], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        player->flags &= ~PlayerJustSelect;
+    }
+    if (flags & PlayerJustDeniedSelect) {
+        soundPlayerPlay(soundsSelecting[0], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
+        player->flags &= ~PlayerJustDeniedSelect;
+    }
+    if (player->passedThroughPortal) {
+        soundPlayerPlay(soundsPortalEnter[player->passedThroughPortal - 1], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
+        hudShowSubtitle(&gScene.hud, PORTALPLAYER_ENTERPORTAL, SubtitleTypeCaption);
+        soundPlayerPlay(soundsPortalExit[2 - player->passedThroughPortal], 0.75f, 1.0f, NULL, NULL, SoundTypeAll);
+        hudShowSubtitle(&gScene.hud, PORTALPLAYER_EXITPORTAL, SubtitleTypeCaption);
+    }
+
+    float flyingSoundVolume = clampf(
+        sqrtf(vector3MagSqrd(&player->body.velocity)) * (0.6f / MAX_PORTAL_SPEED),
+        0.0f, 1.0f
+    );
+
+    if (flyingSoundVolume > FLY_SOUND_THRESHOLD_VEL) {
+        // Start the fall sound or adjust the current volume
+        if (player->flyingSoundLoopId == SOUND_ID_NONE) {
+            player->flyingSoundLoopId = soundPlayerPlay(soundsFastFalling, flyingSoundVolume, 1.0f, NULL, NULL, SoundTypeAll);
+        } else {
+            soundPlayerSetVolume(player->flyingSoundLoopId, flyingSoundVolume);
+        }
+
+        if (flyingSoundVolume >= FLY_CAPTION_THRESHOLD) {
+            hudShowSubtitle(&gScene.hud, PORTALPLAYER_WOOSH, SubtitleTypeCaption);
+        }
+    } else if (player->flyingSoundLoopId != SOUND_ID_NONE) {
+        // Stop the fall sound when the velocity is below the threshold
+        soundPlayerStop(player->flyingSoundLoopId);
+        player->flyingSoundLoopId = SOUND_ID_NONE;
+    }
+}
+
 void playerUpdate(struct Player* player) {
     if (player->flags & PlayerInCutscene) {
         return;
@@ -1181,7 +1209,7 @@ void playerUpdate(struct Player* player) {
     collisionObjectCollideMixed(&player->collisionObject, &prevPos, &sweptBB, &gCollisionScene, &gContactSolver);
 
     playerUpdateFooting(player, STAND_SPEED * FIXED_DELTA_TIME);
-    
+
     struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &player->collisionObject, NULL);
 
     while (manifold) {
@@ -1192,14 +1220,18 @@ void playerUpdate(struct Player* player) {
     collisionObjectUpdateBB(&player->collisionObject);
     playerHandleCollision(player);
 
-    player->body.transform.rotation = player->lookTransform.rotation;    
+    player->body.transform.rotation = player->lookTransform.rotation;
 
     int didPassThroughPortal = rigidBodyCheckPortals(&player->body);
     player->passedThroughPortal = didPassThroughPortal;
     if (didPassThroughPortal) {
-        gPlayerCollider.extendDownward = 0.0f;
+        sPlayerCapsule.extendDownward = 0.0f;
     } else {
-        gPlayerCollider.extendDownward = mathfMoveTowards(gPlayerCollider.extendDownward, TARGET_CAPSULE_EXTEND_HEIGHT, STAND_SPEED * FIXED_DELTA_TIME);
+        sPlayerCapsule.extendDownward = mathfMoveTowards(
+            sPlayerCapsule.extendDownward,
+            PLAYER_CAPSULE_EXTEND,
+            STAND_SPEED * FIXED_DELTA_TIME
+        );
     }
 
     playerUpdateCamera(player, &lookInput, didPassThroughPortal);
@@ -1223,32 +1255,7 @@ void playerUpdate(struct Player* player) {
     if (clip != player->animator.from.currentClip) {
         skAnimatorRunClip(&player->animator.from, clip, startTime, SKAnimatorFlagsLoop);
     }
-    
+
     playerUpdateHealth(player);
     playerUpdateSounds(player);
-}
-
-void playerApplyCameraTransform(struct Player* player, struct Transform* cameraTransform) {
-    cameraTransform->rotation = player->lookTransform.rotation;
-    cameraTransform->position = player->lookTransform.position;
-
-    if (playerIsDead(player)) {
-        cameraTransform->position.y += DEAD_OFFSET;
-    }
-}
-
-void playerToggleJumpImpulse(struct Player* player, float newJumpImpulse) {
-    if (player->jumpImpulse == JUMP_IMPULSE) {
-        player->jumpImpulse = newJumpImpulse;
-    } else {
-        player->jumpImpulse = JUMP_IMPULSE;
-    }
-}
-
-void playerToggleInvincibility(struct Player* player) {
-    player->flags ^= PlayerIsInvincible;
-}
-
-void playerToggleCollisionLayers(struct Player* player, short collisionLayers) {
-    player->collisionObject.collisionLayers ^= collisionLayers;
 }

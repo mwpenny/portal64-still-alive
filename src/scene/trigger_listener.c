@@ -5,12 +5,10 @@
 #include "physics/collision_scene.h"
 #include "scene.h"
 
-extern struct ColliderTypeData gPlayerColliderData;
-
 #define TRIGGER_TYPE_TO_MASK(type)      (1 << (type))
 
 enum ObjectTriggerType triggerDetermineType(struct CollisionObject* objectEnteringTrigger) {
-    if (objectEnteringTrigger->collider == &gPlayerColliderData) {
+    if (objectEnteringTrigger->body->flags & RigidBodyIsPlayer) {
         return TRIGGER_TYPE_TO_MASK(ObjectTriggerTypePlayer);
     }
 
