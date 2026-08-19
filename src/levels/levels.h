@@ -18,8 +18,8 @@ int levelGetQueued();
 void levelClearQueued();
 
 void levelLoad(int index);
-struct Transform* levelRelativeTransform();
-struct Vector3* levelRelativeVelocity();
+void levelGetStartLocationAndVelocity(struct Location* location, struct Vector3* velocity);
+int levelLoadedFromTransition();
 
 int levelCount();
 int getChamberIndexFromLevelIndex(int levelIndex, int roomIndex);

@@ -22,6 +22,7 @@ static struct Transform sRelativeTransform = {
     {1.0f, 1.0f, 1.0f},
 };
 static struct Vector3 sRelativeVelocity = { 0 };
+static int sLoadedFromTransition = 0;
 
 static struct LevelDefinition* levelFixPointers(struct LevelDefinition* from, int pointerOffset) {
     struct LevelDefinition* result = ADJUST_POINTER_POS(from, pointerOffset);
@@ -58,7 +59,7 @@ static struct LevelDefinition* levelFixPointers(struct LevelDefinition* from, in
     for (int i = 0; i < result->triggerCount; ++i) {
         result->triggers[i].triggers = ADJUST_POINTER_POS(result->triggers[i].triggers, pointerOffset);
     }
-    
+
     result->cutscenes = ADJUST_POINTER_POS(result->cutscenes, pointerOffset);
 
     for (int i = 0; i < result->cutsceneCount; ++i) {
@@ -120,8 +121,11 @@ void levelQueueLoad(int index, struct Transform* relativeTransform, struct Vecto
         sQueuedLevel = index;
     }
 
+    sLoadedFromTransition = 0;
+
     if (relativeTransform) {
         sRelativeTransform = *relativeTransform;
+        sLoadedFromTransition = 1;
     } else {
         transformInitIdentity(&sRelativeTransform);
         sRelativeTransform.position.y = PLAYER_HEAD_HEIGHT;
@@ -129,6 +133,7 @@ void levelQueueLoad(int index, struct Transform* relativeTransform, struct Vecto
 
     if (relativeVelocity) {
         sRelativeVelocity = *relativeVelocity;
+        sLoadedFromTransition = 1;
     } else {
         sRelativeVelocity = gZeroVec;
     }
@@ -169,12 +174,16 @@ void levelLoad(int index) {
     cutsceneRunnerReset();
 }
 
-struct Transform* levelRelativeTransform() {
-    return &sRelativeTransform;
+void levelGetStartLocationAndVelocity(struct Location* location, struct Vector3* velocity) {
+    struct Location* startLocation = levelGetLocation(gCurrentLevel->startLocation);
+
+    location->roomIndex = startLocation->roomIndex;
+    transformConcat(&startLocation->transform, &sRelativeTransform, &location->transform);
+    quatMultVector(&startLocation->transform.rotation, &sRelativeVelocity, velocity);
 }
 
-struct Vector3* levelRelativeVelocity() {
-    return &sRelativeVelocity;
+int levelLoadedFromTransition() {
+    return sLoadedFromTransition;
 }
 
 int levelCount() {

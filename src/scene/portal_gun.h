@@ -14,11 +14,8 @@
 
 struct PortalGunProjectile {
     struct Ray positionDirection;
-    // used to orient portals that land on the floor or ceiling
-    struct Vector3 playerUp;
-
+    struct Vector3 playerUp;  // Used to orient floor and ceiling portals
     struct Vector3 effectOffset;
-
     struct PortalTrail trail;
 
     float distance;
@@ -40,7 +37,6 @@ struct PortalGun {
 };
 
 void portalGunInit(struct PortalGun* portalGun, struct Transform* at, int isFreshStart);
-// void portalGunDummyRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState);
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player);
 void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera, int lastFiredIndex);
 

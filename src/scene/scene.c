@@ -124,14 +124,10 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     cameraInit(&scene->camera, DEFAULT_CAMERA_FOV, DEFAULT_NEAR_PLANE * SCENE_SCALE, DEFAULT_FAR_PLANE * SCENE_SCALE);
 
-    struct Location* startLocation = levelGetLocation(gCurrentLevel->startLocation);
-    struct Location combinedLocation;
+    struct Location startLocation;
     struct Vector3 startVelocity;
-    combinedLocation.roomIndex = startLocation->roomIndex;
-    transformConcat(&startLocation->transform, levelRelativeTransform(), &combinedLocation.transform);
-    quatMultVector(&startLocation->transform.rotation, levelRelativeVelocity(), &startVelocity);
-
-    playerInit(&scene->player, &combinedLocation, &startVelocity);
+    levelGetStartLocationAndVelocity(&startLocation, &startVelocity);
+    playerInit(&scene->player, &startLocation, &startVelocity);
 
     if (gCurrentLevelIndex >= LEVEL_INDEX_WITH_GUN_0) {
         playerGivePortalGun(&scene->player, PlayerHasFirstPortalGun);
@@ -143,9 +139,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     hudInit(&scene->hud);
 
-    struct Vector3* startPosition = &levelRelativeTransform()->position;
-
-    portalGunInit(&scene->portalGun, &scene->player.lookTransform, startPosition->x == 0.0f && startPosition->y == 1.0f && startPosition->z == 0.0f);
+    portalGunInit(&scene->portalGun, &scene->player.lookTransform, !levelLoadedFromTransition());
 
     // A frame will be rendered in between initialization and the first update.
     // Update the portal gun to prevent inaccuracies (visibility flicker, wrong

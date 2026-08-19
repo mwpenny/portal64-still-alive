@@ -204,7 +204,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         case CutsceneStepTypeStartSound:
         {
             struct Vector3* location = step->playSound.locationIndex >= 0 ?
-                &gCurrentLevel->locations[step->playSound.locationIndex].transform.position :
+                &levelGetLocation(step->playSound.locationIndex)->transform.position :
                 NULL;
 
             runner->state.playSound.soundId = soundPlayerPlay(
@@ -237,7 +237,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             break;
         case CutsceneStepTypeOpenPortal:
         {
-            struct Location* location = &gCurrentLevel->locations[step->openPortal.locationIndex];
+            struct Location* location = levelGetLocation(step->openPortal.locationIndex);
 
             if (step->openPortal.fromPedestal && gCurrentLevel->pedestalCount) {
                 struct Vector3 fireFrom = gScene.pedestals[0].transform.position;
@@ -276,18 +276,18 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
         case CutsceneStepTypeTeleportPlayer:
             rigidBodyTeleport(
                 &gScene.player.body, 
-                &gCurrentLevel->locations[step->teleportPlayer.fromLocation].transform, 
-                &gCurrentLevel->locations[step->teleportPlayer.toLocation].transform,
+                &levelGetLocation(step->teleportPlayer.fromLocation)->transform,
+                &levelGetLocation(step->teleportPlayer.toLocation)->transform,
                 &gZeroVec,
                 &gZeroVec,
-                gCurrentLevel->locations[step->teleportPlayer.toLocation].roomIndex
+                levelGetLocation(step->teleportPlayer.toLocation)->roomIndex
             );
             sceneQueueCheckpoint(&gScene);
             break;
         case CutsceneStepTypeLoadLevel:
         {
             struct Transform exitInverse;
-            transformInvert(&gCurrentLevel->locations[step->loadLevel.fromLocation].transform, &exitInverse);
+            transformInvert(&levelGetLocation(step->loadLevel.fromLocation)->transform, &exitInverse);
             struct Transform relativeExit;
             struct Vector3 relativeVelocity;
 
@@ -324,7 +324,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             for (unsigned i = 0; i < gScene.pedestalCount; ++i) {
                 pedestalPointAt(
                     &gScene.pedestals[i],
-                    &gCurrentLevel->locations[step->pointPedestal.atLocation].transform.position,
+                    &levelGetLocation(step->pointPedestal.atLocation)->transform.position,
                     step->pointPedestal.playShootingSound
                 );
             }
@@ -366,7 +366,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
             break;
         case CutsceneStepPlayEffect:
         {
-            struct Location* location = &gCurrentLevel->locations[step->playEffect.locationIndex];
+            struct Location* location = levelGetLocation(step->playEffect.locationIndex);
 
             effectsParticlePlay(
                 &gScene.effects,

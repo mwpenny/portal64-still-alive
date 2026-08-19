@@ -20,8 +20,8 @@ The start/end of level elevator that takes the player between test chambers.
 Departure elevators open when the player is near and lock once they step inside.
 Then, after some time, the screen shake animation and movement sound are played.
 Finally, the player's portals are closed and they are teleported to the
-destination elevator at the same relative position and rotation as in the
-starting elevator to create the illusion that it is the same. It does not
+destination elevator at the same relative position, rotation, and velocity as in
+the starting elevator to create the illusion that it is the same. It does not
 actually move.
 
 If a GLaDOS voice line is playing or queued, departure elevators into the next
