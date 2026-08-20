@@ -26,7 +26,7 @@
 struct Sound {
     SoundId soundId;
     VoiceId voiceId;
-    u8 flags;
+    uint8_t flags;
     struct Vector3 pos3D;
     struct Vector3 velocity3D;
     float originalVolume;
@@ -49,6 +49,7 @@ static int sActiveListenerCount = 0;
 
 static float sGameVolumePercent = 1.0f;
 static float sMusicVolumePercent = 0.5f;
+static float sSoundDamping = 0.0f;
 
 static SoundId sNextSoundId = 0;
 
@@ -150,38 +151,33 @@ void* soundPlayerInit(void* memoryEnd) {
 
     sActiveSoundCount = 0;
     sActiveListenerCount = 0;
+    sSoundDamping = 0.0f;
     soundPlayerUpdateVolumeLevels();
 
     return audioInit(memoryEnd, MAX_ACTIVE_SOUNDS);
 }
 
 void soundPlayerUpdate() {
-    static float soundDamping = 1.0f;
+    audioUpdate();
 
-    int index = 0;
     int writeIndex = 0;
     int isVoiceActive = 0;
 
-    audioUpdate();
-
-    while (index < sActiveSoundCount) {
-        struct Sound* sound = &sSounds[index];
-
-        if (audioIsSoundPaused(sound->voiceId)) {
-            ++writeIndex;
-            ++index;
-            continue;
-        }
-
-        if (sound->type == SoundTypeVoice) {
-            isVoiceActive = 1;
-        }
+    for (int i = 0; i < sActiveSoundCount; ++i) {
+        struct Sound* sound = &sSounds[i];
 
         if (!audioIsSoundPlaying(sound->voiceId)) {
             audioReleaseVoice(sound->voiceId);
             sound->voiceId = VOICE_ID_NONE;
             sound->soundId = SOUND_ID_NONE;
-        } else {
+            continue;
+        }
+
+        if (!audioIsSoundPaused(sound->voiceId)) {
+            if (sound->type == SoundTypeVoice) {
+                isVoiceActive = 1;
+            }
+
             if (sound->flags & SOUND_FLAGS_3D) {
                 float volume;
                 float pitch;
@@ -190,24 +186,22 @@ void soundPlayerUpdate() {
                 soundPlayerCalc3DSoundParams(sound, &volume, &pitch, &pan, &echo);
 
                 if (sound->type != SoundTypeVoice) {
-                    volume *= soundDamping;
+                    volume *= sSoundDamping;
                 }
 
                 audioSetSoundParams(sound->voiceId, volume * sound->volumePercent, sound->basePitch * pitch, pan, echo);
             }
-
-            ++writeIndex;
         }
-        
-        ++index;
 
-        if (writeIndex != index) {
-            sSounds[writeIndex] = sSounds[index];
+        if (writeIndex != i) {
+            sSounds[writeIndex] = sSounds[i];
         }
+
+        ++writeIndex;
     }
 
-    soundDamping = mathfMoveTowards(
-        soundDamping,
+    sSoundDamping = mathfMoveTowards(
+        sSoundDamping,
         isVoiceActive ? VOLUME_VOICE_DAMPING : 1.0f,
         FIXED_DELTA_TIME
     );
@@ -364,10 +358,11 @@ void soundPlayerFadeOutsideRadius(float volumePercent, struct Vector3* origin, f
         }
 
         soundPlayerSetVolumePercent(sound);
-        sound->volumePercent *= volumePercent;
 
         if (persistent) {
             sound->originalVolume *= volumePercent;
+        } else {
+            sound->volumePercent *= volumePercent;
         }
     }
 }
