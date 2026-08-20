@@ -27,6 +27,8 @@ enum RumblePakState {
 static OSThread                     sControllerThread;
 static u64                          sControllerThreadStack[CONTROLLER_STACK_SIZE_BYTES / sizeof(u64)];
 
+static OSMesgQueue                  sSerialMsgQ;
+static OSMesg                       sSerialMsg;
 static OSMesgQueue                  sControllerDataQueue;
 static OSMesg                       sControllerDataMesg;
 
@@ -70,38 +72,39 @@ void controllerUpdateLogging() {
 }
 #endif
 
-static void controllerUpdateRumble(int index, OSContStatus* prevStatus, OSMesgQueue* serialMsgQ) {
+static void controllerUpdateRumble(int index, OSContStatus* prevStatus) {
     if (sControllerStatus[index].status != CONT_CARD_ON) {
         // Nothing in controller slot
         sRumblePakState[index] = RumblePakStateDisconnected;
-        return;
+    } else if (prevStatus[index].status != CONT_CARD_ON || sRumblePakState[index] == RumblePakStateUninitialized) {
+        // Device just inserted, or forcing re-initialization
+        if (osMotorInit(&sSerialMsgQ, &sRumblePakFs[index], index) != 0) {
+            sRumblePakState[index] = RumblePakStateDisconnected;
+        } else {
+            sRumblePakState[index] = RumblePakStateInitialized;
+            sRumbleFailureCount[index] = 0;
+        }
     }
 
-    if ((prevStatus[index].status != CONT_CARD_ON && sRumblePakState[index] == RumblePakStateDisconnected) ||
-        sRumblePakState[index] == RumblePakStateUninitialized
-    ) {
-        // Device just inserted, or forcing re-initialization
-        if (osMotorInit(serialMsgQ, &sRumblePakFs[index], index) != 0) {
-            sRumblePakState[index] = RumblePakStateDisconnected;
-            return;
-        }
-
-        sRumblePakState[index] = RumblePakStateInitialized;
-        sRumbleFailureCount[index] = 0;
+    if (sRumblePakState[index] != RumblePakStateInitialized) {
+        return;
     }
 
     if (sTargetRumbleValue[index] != sCurrentRumbleValue[index]) {
         for (int i = 0; i < RUMBLE_RETRY_COUNT; ++i) {
-            s32 rumbleError = sTargetRumbleValue[index] ? osMotorStart(&sRumblePakFs[index]) : osMotorStop(&sRumblePakFs[index]);
+            s32 rumbleError = sTargetRumbleValue[index]
+                ? osMotorStart(&sRumblePakFs[index])
+                : osMotorStop(&sRumblePakFs[index]);
 
             if (rumbleError == PFS_ERR_CONTRFAIL) {
-                if (i == (RUMBLE_RETRY_COUNT - 1)) {
-                    ++sRumbleFailureCount[index];
-                }
-                if (sRumbleFailureCount[index] >= RUMBLE_MAX_FAILURES) {
+                // Communication failure. Try a few times, then re-initialize.
+                if (i == (RUMBLE_RETRY_COUNT - 1) &&
+                    ++sRumbleFailureCount[index] >= RUMBLE_MAX_FAILURES
+                ) {
                     sRumblePakState[index] = RumblePakStateUninitialized;
                 }
             } else if (rumbleError != 0) {
+                // Other error. Give up until reinserted.
                 sRumblePakState[index] = RumblePakStateDisconnected;
                 break;
             } else {
@@ -111,31 +114,25 @@ static void controllerUpdateRumble(int index, OSContStatus* prevStatus, OSMesgQu
             }
         }
     } else if (!sTargetRumbleValue[index]) {
-        // Always send stop in case the message is lost while on
+        // Always send stop in case the message is lost while rumbling
         osMotorStop(&sRumblePakFs[index]);
     }
 }
 
 static void controllerThreadEntry(void* arg) {
-    OSMesgQueue serialMsgQ;
-    OSMesg serialMsg;
-
-    osCreateMesgQueue(&serialMsgQ, &serialMsg, 1);
-    osSetEventMesg(OS_EVENT_SI, &serialMsgQ, NULL);
-
     OSContStatus prevStatus[MAXCONTROLLERS];
     OSContPad controllerData[MAXCONTROLLERS];
 
     while (1) {
         // Check the controller status
         memCopy(&prevStatus, &sControllerStatus, sizeof(sControllerStatus));
-        osContStartQuery(&serialMsgQ);
-        osRecvMesg(&serialMsgQ, NULL, OS_MESG_BLOCK);
+        osContStartQuery(&sSerialMsgQ);
+        osRecvMesg(&sSerialMsgQ, NULL, OS_MESG_BLOCK);
         osContGetQuery(sControllerStatus);
 
         // Read the controller
-        osContStartReadData(&serialMsgQ);
-        osRecvMesg(&serialMsgQ, NULL, OS_MESG_BLOCK);
+        osContStartReadData(&sSerialMsgQ);
+        osRecvMesg(&sSerialMsgQ, NULL, OS_MESG_BLOCK);
         osContGetReadData(controllerData);
 
         for (int i = 0; i < MAXCONTROLLERS; ++i) {
@@ -143,24 +140,23 @@ static void controllerThreadEntry(void* arg) {
                 // Ignore controllers that aren't connected
                 zeroMemory(&controllerData[i], sizeof(OSContPad));
             } else if (i < RUMBLE_MAX_PAK_COUNT) {
-                controllerUpdateRumble(i, prevStatus, &serialMsgQ);
+                controllerUpdateRumble(i, prevStatus);
             }
         }
 
-        // Add controller data to queue and block until it is recieved
+        // Add controller data to queue. Block if previous data is still there.
         // I.e., wait until application calls controllersPoll()
         osSendMesg(&sControllerDataQueue, &controllerData, OS_MESG_BLOCK);
     }
 }
 
 void controllersInit() {
-    OSMesgQueue serialMsgQ;
-    OSMesg serialMsg;
-    u8 validControllers;  // Ignored, we check plugged/unplugged dynamically
+    // Ignored, we check plugged/unplugged dynamically
+    u8 validControllers;
 
-    osCreateMesgQueue(&serialMsgQ, &serialMsg, 1);
-    osSetEventMesg(OS_EVENT_SI, &serialMsgQ, NULL);
-    if (osContInit(&serialMsgQ, &validControllers, sControllerStatus) != 0) {
+    osCreateMesgQueue(&sSerialMsgQ, &sSerialMsg, 1);
+    osSetEventMesg(OS_EVENT_SI, &sSerialMsgQ, NULL);
+    if (osContInit(&sSerialMsgQ, &validControllers, sControllerStatus) != 0) {
         return;
     }
 
@@ -219,7 +215,7 @@ enum ControllerButtons controllerGetButtonsUp(int index, enum ControllerButtons 
 }
 
 enum ControllerButtons controllerGetButtonsHeld(int index, enum ControllerButtons buttons) {
-    return sControllerLastButtons[index] & buttons;
+    return sControllerData[index].button & sControllerLastButtons[index] & buttons;
 }
 
 void controllerGetStick(int index, struct ControllerStick* stick) {
@@ -230,19 +226,27 @@ void controllerGetStick(int index, struct ControllerStick* stick) {
 enum ControllerDirection controllerGetDirection(int index) {
     enum ControllerDirection result = ControllerDirectionNone;
 
-    if (sControllerData[index].stick_y > STICK_DIRECTION_THRESHOLD || (sControllerData[index].button & ControllerButtonUp) != 0) {
+    if (sControllerData[index].stick_y > STICK_DIRECTION_THRESHOLD ||
+        (sControllerData[index].button & ControllerButtonUp)
+    ) {
         result |= ControllerDirectionUp;
     }
 
-    if (sControllerData[index].stick_y < -STICK_DIRECTION_THRESHOLD || (sControllerData[index].button & ControllerButtonDown) != 0) {
+    if (sControllerData[index].stick_y < -STICK_DIRECTION_THRESHOLD ||
+        (sControllerData[index].button & ControllerButtonDown)
+    ) {
         result |= ControllerDirectionDown;
     }
 
-    if (sControllerData[index].stick_x > STICK_DIRECTION_THRESHOLD || (sControllerData[index].button & ControllerButtonRight) != 0) {
+    if (sControllerData[index].stick_x > STICK_DIRECTION_THRESHOLD ||
+        (sControllerData[index].button & ControllerButtonRight)
+    ) {
         result |= ControllerDirectionRight;
     }
 
-    if (sControllerData[index].stick_x < -STICK_DIRECTION_THRESHOLD || (sControllerData[index].button & ControllerButtonLeft) != 0) {
+    if (sControllerData[index].stick_x < -STICK_DIRECTION_THRESHOLD ||
+        (sControllerData[index].button & ControllerButtonLeft)
+    ) {
         result |= ControllerDirectionLeft;
     }
 
