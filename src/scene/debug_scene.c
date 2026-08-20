@@ -11,6 +11,7 @@
 #include "system/controller.h"
 #include "system/display.h"
 #include "util/frame_time.h"
+#include "util/memory.h"
 
 #include "codegen/assets/materials/ui.h"
 
@@ -168,7 +169,7 @@ static void debugSceneRenderMetrics(struct Scene* scene, struct RenderState* ren
     );
     gDPPipeSync(renderState->dl++);
 
-    struct FontRenderer fontRenderer;
+    struct FontRenderer* fontRenderer = stackMalloc(sizeof(struct FontRenderer));
     char metricText[20];
     int textY = SCREEN_HT - PERF_METRICS_MARGIN;
 
@@ -178,46 +179,48 @@ static void debugSceneRenderMetrics(struct Scene* scene, struct RenderState* ren
     int roomCount = debugSceneVisibleRoomCount(visibleRooms);
 
     sprintf(metricText, "SND: %d/%d", soundPlayerSoundCount(), MAX_ACTIVE_SOUNDS);
-    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+    debugSceneRenderTextMetric(fontRenderer, metricText, textY, renderState);
 
-    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    textY -= fontRenderer->height - PERF_METRIC_ROW_PADDING;
     sprintf(metricText, "COL: %d/%d %d/%d",
         collisionSceneDynamicObjectCount(), MAX_DYNAMIC_COLLISION,
         contactSolverActiveManifoldCount(&gContactSolver), MAX_CONTACT_COUNT
     );
-    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+    debugSceneRenderTextMetric(fontRenderer, metricText, textY, renderState);
 
-    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    textY -= fontRenderer->height - PERF_METRIC_ROW_PADDING;
     sprintf(metricText, "VDO: %d/%d", dynamicSceneViewDependentObjectCount(), MAX_VIEW_DEPENDENT_OBJECTS);
-    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+    debugSceneRenderTextMetric(fontRenderer, metricText, textY, renderState);
 
-    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    textY -= fontRenderer->height - PERF_METRIC_ROW_PADDING;
     sprintf(metricText, "OBJ: %d/%d", dynamicSceneObjectCount(), MAX_DYNAMIC_SCENE_OBJECTS);
-    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+    debugSceneRenderTextMetric(fontRenderer, metricText, textY, renderState);
 
-    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    textY -= fontRenderer->height - PERF_METRIC_ROW_PADDING;
     sprintf(metricText, "GEO: %d/%d", debugSceneMaxRenderPartCount(renderPlan), MAX_RENDER_PART_COUNT);
-    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+    debugSceneRenderTextMetric(fontRenderer, metricText, textY, renderState);
 
-    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    textY -= fontRenderer->height - PERF_METRIC_ROW_PADDING;
     sprintf(metricText, "RMS: %d %llx", roomCount, visibleRooms);
-    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+    debugSceneRenderTextMetric(fontRenderer, metricText, textY, renderState);
 
-    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    textY -= fontRenderer->height - PERF_METRIC_ROW_PADDING;
     sprintf(metricText, "UPD: %2.2f", debugSceneAveragedTimeMs(scene->updateTime, &lastUpdateTimeMs));
-    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+    debugSceneRenderTextMetric(fontRenderer, metricText, textY, renderState);
 
-    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    textY -= fontRenderer->height - PERF_METRIC_ROW_PADDING;
     sprintf(metricText, "CPU: %2.2f", debugSceneAveragedTimeMs(scene->cpuTime, &lastCpuTimeMs));
-    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+    debugSceneRenderTextMetric(fontRenderer, metricText, textY, renderState);
 
-    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    textY -= fontRenderer->height - PERF_METRIC_ROW_PADDING;
     sprintf(metricText, " DT: %2.2f", dt);
-    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+    debugSceneRenderTextMetric(fontRenderer, metricText, textY, renderState);
 
-    textY -= fontRenderer.height - PERF_METRIC_ROW_PADDING;
+    textY -= fontRenderer->height - PERF_METRIC_ROW_PADDING;
     sprintf(metricText, "FPS: %2.2f", 1000.0f / dt);
-    debugSceneRenderTextMetric(&fontRenderer, metricText, textY, renderState);
+    debugSceneRenderTextMetric(fontRenderer, metricText, textY, renderState);
+
+    stackMallocFree(fontRenderer);
 }
 
 void debugSceneInit(struct Scene* scene) {

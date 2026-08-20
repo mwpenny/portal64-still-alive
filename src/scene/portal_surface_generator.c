@@ -1,10 +1,10 @@
 #include "portal_surface_generator.h"
 
+#include "math/mathf.h"
+#include "math/vector2.h"
 #include "portal.h"
-#include "../util/memory.h"
-#include "../math/mathf.h"
-#include "../math/vector2.h"
 #include "portal_surface_gfx.h"
+#include "util/memory.h"
 
 #define IS_ORIGINAL_VERTEX_INDEX(surfaceBuilder, vertexIndex) ((vertexIndex) < (surfaceBuilder)->original->vertexCount)
 
@@ -1094,6 +1094,8 @@ int portalSurfacePokeHole(struct PortalSurface* surface, struct Vector2s16* loop
     result->gfxVertices = displayList.vtx;
     result->triangles = displayList.gfx;
 
+    stackMallocFree(surfaceBuilder.gfxVertices);
+    stackMallocFree(surfaceBuilder.originalEdgeIndex);
     stackMallocFree(surfaceBuilder.edgeFlags);
     stackMallocFree(surfaceBuilder.isLoopEdge);
     stackMallocFree(surfaceBuilder.edges);
@@ -1102,6 +1104,8 @@ int portalSurfacePokeHole(struct PortalSurface* surface, struct Vector2s16* loop
     return 1;
 
 error:
+    stackMallocFree(surfaceBuilder.gfxVertices);
+    stackMallocFree(surfaceBuilder.originalEdgeIndex);
     stackMallocFree(surfaceBuilder.edgeFlags);
     stackMallocFree(surfaceBuilder.isLoopEdge);
     stackMallocFree(surfaceBuilder.edges);

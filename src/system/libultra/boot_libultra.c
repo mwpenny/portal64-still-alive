@@ -4,8 +4,8 @@
 
 #include <ultra64.h>
 
-#define IDLE_STACK_SIZE_BYTES 2048
-#define GAME_STACK_SIZE_BYTES 8192
+#define IDLE_STACK_SIZE_BYTES 128
+#define GAME_STACK_SIZE_BYTES 4096
 
 static OSThread sIdleThread;
 static OSThread sGameThread;
