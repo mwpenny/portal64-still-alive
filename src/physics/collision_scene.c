@@ -302,11 +302,40 @@ int collisionSceneIsPortalOpen() {
     return gCollisionScene.portalTransforms[0] != NULL && gCollisionScene.portalTransforms[1] != NULL;
 }
 
+static void collisionSceneCheckUnwokenObjectsNearPortal(int portalIndex) {
+    struct Transform* portalTransform = gCollisionScene.portalTransforms[portalIndex];
+    short portalRoom = gCollisionScene.portalRooms[portalIndex];
+
+    // For performance, some bodies start asleep to avoid many collisions
+    // on level load. They will have no collision contacts initially.
+    //
+    // They will wake up when collided with, but a portal could be placed
+    // underneath (no collision takes place). So wake when near a portal.
+    // This is not necessary after the first wake since contact removal
+    // from the portal placement will wake the body.
+    for (int i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
+        struct CollisionObject* object = gCollisionScene.dynamicObjects[i];
+
+        if (object->body->flags & (RigidBodyIsKinematic | RigidBodyHasWoken)) {
+            continue;
+        }
+
+        if (object->body->currentRoom != portalRoom) {
+            continue;
+        }
+
+        float distance = vector3DistSqrd(&portalTransform->position, &object->body->transform.position);
+        if (distance < (NEAR_PORTAL_WAKE_DISTANCE * NEAR_PORTAL_WAKE_DISTANCE)) {
+            object->body->flags &= ~RigidBodyIsSleeping;
+        }
+    }
+}
+
 static void collisionSceneUpdatePortalSides(int portalIndex) {
     struct Transform* portalTransform = gCollisionScene.portalTransforms[portalIndex];
     struct Plane* portalPlane = &gCollisionScene.portalPlanes[portalIndex];
 
-    for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
+    for (int i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
         struct CollisionObject* object = gCollisionScene.dynamicObjects[i];
 
         if (object->body->flags & RigidBodyIsKinematic) {
@@ -340,6 +369,8 @@ void collisionSceneSetPortal(int portalIndex, struct Transform* transform, int r
             transformConcat(gCollisionScene.portalTransforms[1 - portalIndex], &inverseTransform, &gCollisionScene.toOtherPortalTransform[portalIndex]);
             transformInvert(&gCollisionScene.toOtherPortalTransform[portalIndex], &gCollisionScene.toOtherPortalTransform[1 - portalIndex]);
         }
+
+        collisionSceneCheckUnwokenObjectsNearPortal(portalIndex);
     }
 
     collisionSceneUpdatePortalSides(portalIndex);
@@ -367,10 +398,9 @@ void collisionScenePushObjectsOutOfPortal(int portalIndex) {
     }
 
     struct Transform* portalTransform = gCollisionScene.portalTransforms[portalIndex];
-
     struct Vector3* reversePortalNormal = collisionSceneGetPortalNormal(1 - portalIndex);
 
-    for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
+    for (int i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
         struct CollisionObject* object = gCollisionScene.dynamicObjects[i];
 
         if (!(object->body->flags & ((RigidBodyIsTouchingPortal0 | RigidBodyWasTouchingPortal0) << portalIndex))) {
@@ -388,7 +418,6 @@ void collisionScenePushObjectsOutOfPortal(int portalIndex) {
         vector3Sub(&portalTransform->position, &colliderPoint, &offset);
 
         float depth = vector3Dot(&offset, reversePortalNormal);
-
         if (depth > 0.0f) {
             continue;
         }
@@ -397,39 +426,6 @@ void collisionScenePushObjectsOutOfPortal(int portalIndex) {
         depth += 0.5f * signf(depth);
 
         vector3AddScaled(&object->body->transform.position, reversePortalNormal, depth, &object->body->transform.position);
-    }
-}
-
-void collisionSceneCheckUnwokenObjectsNearPortal(int portalIndex) {
-    struct Transform* portalTransform = gCollisionScene.portalTransforms[portalIndex];
-    if (!portalTransform) {
-        return;
-    }
-
-    short portalRoom = gCollisionScene.portalRooms[portalIndex];
-
-    // For performance, some bodies start asleep to avoid many collisions
-    // on level load. They will have no collision contacts initially.
-    //
-    // They will wake up when collided with, but a portal could be placed
-    // underneath (no collision takes place). So wake when near a portal.
-    // This is not necessary after the first wake since contact removal
-    // from the portal placement will wake the body.
-    for (unsigned i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
-        struct CollisionObject* object = gCollisionScene.dynamicObjects[i];
-
-        if (object->body->flags & (RigidBodyIsKinematic | RigidBodyHasWoken)) {
-            continue;
-        }
-
-        if (object->body->currentRoom != portalRoom) {
-            continue;
-        }
-
-        float distance = vector3DistSqrd(&portalTransform->position, &object->body->transform.position);
-        if (distance < (NEAR_PORTAL_WAKE_DISTANCE * NEAR_PORTAL_WAKE_DISTANCE)) {
-            object->body->flags &= ~RigidBodyIsSleeping;
-        }
     }
 }
 

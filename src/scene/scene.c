@@ -947,8 +947,6 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
                 portal->flags &= ~PortalFlagsZOffset;
             }
 
-            collisionSceneCheckUnwokenObjectsNearPortal(portalIndex);
-
             if (collisionSceneIsPortalOpen()) {
                 // the second portal is fully transparent right away
                 portal->opacity = 0.0f;
@@ -1075,6 +1073,7 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
 int sceneClosePortal(struct Scene* scene, int portalIndex, int playSound) {
     if (gCollisionScene.portalTransforms[portalIndex]) {
         collisionScenePushObjectsOutOfPortal(portalIndex);
+        collisionScenePushObjectsOutOfPortal(1 - portalIndex);
 
         if (playSound) {
             soundPlayerPlay(soundsPortalFizzle, 1.0f, 1.0f, &gCollisionScene.portalTransforms[portalIndex]->position, &gZeroVec, SoundTypeAll);
