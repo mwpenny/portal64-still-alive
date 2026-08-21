@@ -227,8 +227,9 @@ int main() {
                 frameTimeUpdate();
                 break;
             case (OS_SC_PRE_NMI_MSG):
-                pendingGFX += 2;
-                break;
+                soundPlayerDestroy();
+                displayClearScreen();
+                return 1;
         }
     }
 

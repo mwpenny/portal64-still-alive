@@ -20,7 +20,7 @@ typedef int16_t SoundId;
 
 void* soundPlayerInit(void* memoryEnd);
 void soundPlayerUpdate();
-int soundPlayerSoundCount();
+void soundPlayerDestroy();
 
 SoundId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* position, struct Vector3* velocity, enum SoundType type);
 int soundPlayerIsPlaying(SoundId soundId);
@@ -35,6 +35,7 @@ void soundPlayerPause();
 void soundPlayerResume();
 void soundPlayerFadeOutsideRadius(float volumePercent, struct Vector3* origin, float radius, int persistent);
 void soundPlayerUpdateVolumeLevels();
+int soundPlayerSoundCount();
 
 void soundListenerUpdate(int listenerIndex, struct Vector3* position, struct Vector3* right, struct Vector3* velocity);
 void soundListenerSetCount(int count);

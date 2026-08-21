@@ -157,6 +157,11 @@ void* soundPlayerInit(void* memoryEnd) {
     return audioInit(memoryEnd, MAX_ACTIVE_SOUNDS);
 }
 
+void soundPlayerDestroy() {
+    soundPlayerStopAll();
+    audioDestroy();
+}
+
 void soundPlayerUpdate() {
     audioUpdate();
 
@@ -206,10 +211,6 @@ void soundPlayerUpdate() {
         FIXED_DELTA_TIME
     );
     sActiveSoundCount = writeIndex;
-}
-
-int soundPlayerSoundCount() {
-    return sActiveSoundCount;
 }
 
 SoundId soundPlayerPlay(int soundClipId, float volume, float pitch, struct Vector3* position, struct Vector3* velocity, enum SoundType type) {
@@ -391,6 +392,10 @@ void soundPlayerUpdateVolumeLevels() {
 
         audioSetSoundParams(sound->voiceId, volume * sound->volumePercent, -1.0f, -1.0f, -1.0f);
     }
+}
+
+int soundPlayerSoundCount() {
+    return sActiveSoundCount;
 }
 
 void soundListenerUpdate(int listenerIndex, struct Vector3* position, struct Vector3* right, struct Vector3* velocity) {

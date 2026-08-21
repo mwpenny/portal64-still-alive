@@ -8,6 +8,9 @@ void* audioInit(void* memoryEnd, int maxVoices) {
 void audioUpdate() {
 }
 
+void audioDestroy() {
+}
+
 VoiceId audioPlaySound(int soundClipId, float volume, float pitch, float pan, float echo) {
     return VOICE_ID_NONE;
 }

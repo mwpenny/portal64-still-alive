@@ -421,6 +421,10 @@ void audioUpdate() {
     }
 }
 
+void audioDestroy() {
+    osDestroyThread(&sAudioThread);
+}
+
 static int audioIsSoundClipLooped(int soundClipId) {
     if (soundClipId < 0 || soundClipId >= sSoundClipArray->soundCount) {
         return 0;

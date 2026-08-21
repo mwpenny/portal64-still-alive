@@ -10,6 +10,7 @@ typedef int16_t VoiceId;
 
 void* audioInit(void* memoryEnd, int maxVoices);
 void audioUpdate();
+void audioDestroy();
 
 VoiceId audioPlaySound(int soundClipId, float volume, float pitch, float pan, float echo);
 void audioSetSoundParams(VoiceId voiceId, float volume, float pitch, float pan, float echo);

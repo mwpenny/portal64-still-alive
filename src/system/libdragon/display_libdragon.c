@@ -8,6 +8,9 @@ void displayInit(int interlaced) {
 void displaySetMode(int interlaced) {
 }
 
+void displayClearScreen() {
+}
+
 int displayGetFPS() {
     return 60;
 }

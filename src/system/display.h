@@ -15,6 +15,8 @@
 
 void displayInit(int interlaced);
 void displaySetMode(int interlaced);
+void displayClearScreen();
+
 int displayGetFPS();
 uint16_t* displayGetCurrentFramebuffer();
 

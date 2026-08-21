@@ -48,6 +48,10 @@ void displaySetMode(int interlaced) {
     displaySetFeatures();
 }
 
+void displayClearScreen() {
+    osViBlack(1);
+}
+
 int displayGetFPS() {
     return (osTvType == OS_TV_PAL) ? 50 : 60;
 }

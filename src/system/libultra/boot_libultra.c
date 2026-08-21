@@ -18,6 +18,7 @@ extern int main();
 
 static void gameThreadEntry(void* arg) {
     main();
+    osDestroyThread(NULL);
 }
 
 static void idleThreadEntry(void* arg) {
