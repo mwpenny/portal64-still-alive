@@ -7,6 +7,10 @@
 #include "codegen/assets/models/dynamic_model_list.h"
 #include "codegen/assets/models/dynamic_animated_model_list.h"
 
+#if PORTAL64_WITH_DEBUGGER
+#include "debugger/debug.h"
+#endif
+
 Gfx* gLoadedModels[DYNAMIC_MODEL_COUNT];
 u32 gModelPointerOffset[DYNAMIC_MODEL_COUNT];
 
@@ -40,6 +44,12 @@ struct SKAnimationClip gBlankClip = {
 void dynamicAssetsReset() {
     zeroMemory(gLoadedModels, sizeof(gLoadedModels));
     zeroMemory(gLoadedAnimatedModels, sizeof(gLoadedAnimatedModels));
+
+#if PORTAL64_WITH_DEBUGGER
+    debug_printf(
+        "Reset dynamic assets\n"
+    );
+#endif
 }
 
 #define ADJUST_POINTER_POS(ptr, offset) (void*)((ptr) ? (char*)(ptr) + (offset) : 0)
@@ -92,7 +102,13 @@ Gfx* dynamicAssetLoadModel(struct DynamicAssetModel* model, u32* pointerOffset) 
         *pointerOffset = 0;
     }
 
-    profileMapAddress(result, model->name);
+#if PORTAL64_WITH_DEBUGGER
+    debug_printf(
+        "Loaded dynamic asset at 0x%08x: %s\n",
+        result,
+        model->name
+    );
+#endif
 
     return result;
 }
@@ -117,7 +133,13 @@ void dynamicAssetLoadAnimatedModel(struct DynamicAnimatedAssetModel* model, stru
 
     result->clipCount = model->clipCount;
 
-    profileMapAddress(result->armature->displayList, model->name);
+#if PORTAL64_WITH_DEBUGGER
+    debug_printf(
+        "Loaded dynamic asset at 0x%08x: %s\n",
+        result->armature->displayList,
+        model->name
+    );
+#endif
 }
 
 void dynamicAssetModelPreload(int index) {

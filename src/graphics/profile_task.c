@@ -1,75 +1,66 @@
 #include "profile_task.h"
 
-#ifdef PORTAL64_WITH_DEBUGGER
 #include "debugger/debug.h"
-#include "system/time.h"
-#endif
-
-#include "graphics/graphics.h"
 #include "system/display.h"
 #include "system/libultra/rsp_scheduler_libultra.h"
 #include "system/libultra/threads_libultra.h"
+#include "system/time.h"
 #include "util/memory.h"
 
-extern u16 __attribute__((aligned(64))) zbuffer[SCREEN_HT * SCREEN_WD];
+#define PRINT_DL_DEPTH_MAX  20
+#define PRINT_DL_LENGTH_MAX 1000
 
-#define VIDEO_MSG       666
-#define RSP_DONE_MSG    667
-#define RDP_DONE_MSG    668
+#define VI_EVENT_MSG        666
+#define SP_EVENT_MSG        667
+#define DP_EVENT_MSG        668
 
+#define MESSAGE_QUEUE_SIZE  4
 #define SAMPLES_PER_STEP    10
 
-void copyGfx(Gfx* from, Gfx* to, int count) {
-    Gfx* max = from + count;
+// extern u16 __attribute__((aligned(64))) zbuffer[SCREEN_HT * SCREEN_WD];
 
-    while (from < max) {
-        *to++ = *from++;
-    }
-}
-
-#define MOVE_WORD_IDX(gfx)  _SHIFTR((gfx)->words.w0, 16, 8)
-#define MOVE_WORD_OFS(gfx)  _SHIFTR((gfx)->words.w0, 0, 16)
-#define MOVE_WORD_DATA(gfx) ((gfx)->words.w1)
-
-void printDisplayList(Gfx* dl, int depth, int* segments) {
-    #ifdef PORTAL64_WITH_DEBUGGER
-    if (depth > 20) {
+static void printChildDisplayLists(Gfx* dl, int depth, int* segments) {
+    if (depth == PRINT_DL_DEPTH_MAX) {
+        debug_printf("dl <depth limit>\n", depth);
         return;
     }
 
-    for (int i = 0; i < 1000; ++i) {
-        debug_printf(
-            "dl d %d 0x%08x%08x\n",
-            depth,
-            dl->words.w0,
-            dl->words.w1
-        );
+    for (int i = 0; i < PRINT_DL_LENGTH_MAX; ++i) {
+        int commandType = _SHIFTR(dl->words.w0, 24, 8);
 
-        int command = _SHIFTR(dl->words.w0, 24, 8);
-
-        if (command == G_DL) {
-            int address = dl->words.w1;
-            int segment = _SHIFTR(address, 24, 4);
-            printDisplayList((Gfx*)PHYS_TO_K0((segments[segment] + (address & 0xFFFFFF))), depth + 1, segments);
-        }
-
-        if (command == G_MOVEWORD) {
-            int index = MOVE_WORD_IDX(dl);
-            int offset = MOVE_WORD_OFS(dl);
-            int data = MOVE_WORD_DATA(dl);
-
-            if (index == G_MW_SEGMENT) {
-                segments[(offset >> 2) & 0xF] = data;
+        switch (commandType) {
+            case G_MOVEWORD:
+            {
+                if (dl->dma.par == G_MW_SEGMENT) {
+                    int segmentNum = (dl->dma.len >> 2) % NUM_SEGMENTS;
+                    segments[segmentNum] = dl->dma.addr;
+                }
+                break;
             }
-        }
+            case G_DL:
+            {
+                debug_printf("dl 0x%08x%08x\n", dl->words.w0, dl->words.w1);
 
-        if (command == G_ENDDL) {
-            return;
+                int address = dl->dma.addr;
+                int segmentNum = SEGMENT_NUMBER(address);
+                int segmentedAddress = segments[segmentNum] + (address & 0xffffff);
+
+                printChildDisplayLists((Gfx*)PHYS_TO_K0(segmentedAddress), depth + 1, segments);
+                break;
+            }
+            case G_ENDDL:
+                debug_printf("dl 0x%08x%08x\n", dl->words.w0, dl->words.w1);
+                return;
         }
 
         ++dl;
     }
-    #endif
+
+    debug_printf("dl <length limit>\n");
+}
+
+static void waitForDPAvailable() {
+    while (osDpGetStatus() & (DPC_STATUS_DMA_BUSY | DPC_STATUS_END_VALID | DPC_STATUS_START_VALID));
 }
 
 void profileTask(OSTask* task, u16* framebuffer) {
@@ -77,92 +68,73 @@ void profileTask(OSTask* task, u16* framebuffer) {
     OSPri origThreadPriority = osGetThreadPri(NULL);
     osSetThreadPri(NULL, RSP_SCHEDULER_THREAD_PRIORITY + 1);
 
-    int segments[16];
-
-    for (int i = 0; i < 16; ++i) {
-        segments[i] = 0;
-    }
-    
-    printDisplayList((Gfx*)task->t.data_ptr, 0, segments);
-
-    // wait for DP to be available
-    while (IO_READ(DPC_STATUS_REG) & (DPC_STATUS_DMA_BUSY | DPC_STATUS_END_VALID | DPC_STATUS_START_VALID));
-
+    waitForDPAvailable();
     zeroMemory(framebuffer, sizeof(u16) * SCREEN_WD * SCREEN_HT);
 
+    // Take over event queues
     OSMesgQueue messageQueue;
-    OSMesg messages[4];
+    OSMesg messages[MESSAGE_QUEUE_SIZE];
+    osCreateMesgQueue(&messageQueue, messages, MESSAGE_QUEUE_SIZE);
 
-    osCreateMesgQueue(&messageQueue, messages, 4);
+    osSetEventMesg(OS_EVENT_SP, &messageQueue, (OSMesg)SP_EVENT_MSG);
+    osSetEventMesg(OS_EVENT_DP, &messageQueue, (OSMesg)DP_EVENT_MSG);
+    osViSetEvent(&messageQueue, (OSMesg)VI_EVENT_MSG, 1);
 
-    // take over event queues
-    osSetEventMesg(OS_EVENT_SP, &messageQueue, (OSMesg)RSP_DONE_MSG);
-    osSetEventMesg(OS_EVENT_DP, &messageQueue, (OSMesg)RDP_DONE_MSG);   
-    osViSetEvent(&messageQueue, (OSMesg)VIDEO_MSG, 1);
+    debug_printf("Begin RSP profile\n");
+
+    int segments[NUM_SEGMENTS];
+    zeroMemory(segments, sizeof(segments));
+    printChildDisplayLists((Gfx*)task->t.data_ptr, 0, segments);
 
     Gfx* curr = (Gfx*)task->t.data_ptr;
-
     Gfx* end = curr;
-
-    while (_SHIFTR(end[1].words.w0, 24, 8) != G_RDPFULLSYNC) {
+    while (_SHIFTR(end->words.w0, 24, 8) != G_RDPFULLSYNC) {
         ++end;
     }
 
-#ifdef PORTAL64_WITH_DEBUGGER
-    int total = end - curr;
-#endif
-
+    int length = end - curr;
     Gfx tmp[3];
 
-    while (curr <= end) {
+    while (curr < end) {
         for (int sample = 0; sample < SAMPLES_PER_STEP; ++sample) {
-            // wait for DP to be available
-            while (IO_READ(DPC_STATUS_REG) & (DPC_STATUS_DMA_BUSY | DPC_STATUS_END_VALID | DPC_STATUS_START_VALID));
-
-            copyGfx(curr, tmp, 3);
+            // End display list at current step
+            waitForDPAvailable();
+            memCopy(tmp, curr, 3 * sizeof(Gfx));
 
             Gfx* dl = curr;
             gDPPipeSync(dl++);
             gDPFullSync(dl++);
             gSPEndDisplayList(dl++);
 
-            // not very precise, but it seems to work
+            // Ensure RSP can see changes. Not very precise, but seems to work.
             osWritebackDCacheAll();
 
-#ifdef PORTAL64_WITH_DEBUGGER
-            Time start = timeGetTime();
-#endif
+            // Render
+            Time taskStart = timeGetTime();
             osSpTaskStart(task);
-            OSMesg recv;
 
+            OSMesg msg;
             do {
-                (void)osRecvMesg(&messageQueue, &recv, OS_MESG_BLOCK);
-            } while ((int)recv != RDP_DONE_MSG);
+                osRecvMesg(&messageQueue, &msg, OS_MESG_BLOCK);
+            } while ((int)msg != DP_EVENT_MSG);
 
-#ifdef PORTAL64_WITH_DEBUGGER
-            Time result = timeGetTime() - start;
+            // Display list run time up to but not including dummied-out command
+            uint64_t taskNs = timeNanoseconds(timeGetTime() - taskStart);
 
-            uint64_t ns = timeNanoseconds(result);
-#endif
-
-            // wait for DP to be available
-            while (IO_READ(DPC_STATUS_REG) & (DPC_STATUS_DMA_BUSY | DPC_STATUS_END_VALID | DPC_STATUS_START_VALID));
-
-            copyGfx(tmp, curr, 3);
-
+            // Restore original display list
+            waitForDPAvailable();
+            memCopy(curr, tmp, 3 * sizeof(Gfx));
             osWritebackDCacheAll();
-            
-#ifdef PORTAL64_WITH_DEBUGGER
+
             debug_printf(
-                "%d/%d 0x%08x%08x ms %d.%d\n",
-                curr - (Gfx*)task->t.data_ptr,
-                total,
+                "%d/%d 0x%08x%08x %d.%d ms\n",
+                (curr - (Gfx*)task->t.data_ptr),
+                length,
                 curr->words.w0,
                 curr->words.w1,
-                (int)(ns / 1000000),
-                (int)(ns % 1000000)
+                (int)(taskNs / 1000000),
+                (int)(taskNs % 1000000)
             );
-#endif
         }
 
         // char message[32];
@@ -175,28 +147,12 @@ void profileTask(OSTask* task, u16* framebuffer) {
         ++curr;
     }
 
+    debug_printf("End RSP profile\n");
+
     // Restore queues to scheduler and unblock its thread
     OSSched* scheduler = rspSchedulerGet();
-    osSetEventMesg(OS_EVENT_SP, &scheduler->interruptQ, (OSMesg)RSP_DONE_MSG);
-    osSetEventMesg(OS_EVENT_DP, &scheduler->interruptQ, (OSMesg)RDP_DONE_MSG);   
-    osViSetEvent(&scheduler->interruptQ, (OSMesg)VIDEO_MSG, 1);
+    osSetEventMesg(OS_EVENT_SP, &scheduler->interruptQ, (OSMesg)SP_EVENT_MSG);
+    osSetEventMesg(OS_EVENT_DP, &scheduler->interruptQ, (OSMesg)DP_EVENT_MSG);
+    osViSetEvent(&scheduler->interruptQ, (OSMesg)VI_EVENT_MSG, 1);
     osSetThreadPri(NULL, origThreadPriority);
-}
-
-void profileMapAddress(void* ramAddress, const char* name) {
-#ifdef PORTAL64_WITH_DEBUGGER
-    debug_printf(
-        "addr 0x%08x -> %s\n",
-        (int)ramAddress, 
-        name
-    );
-#endif
-}
-
-void profileClearAddressMap() {
-#ifdef PORTAL64_WITH_DEBUGGER
-    debug_printf(
-        "addr clearall\n"
-    );
-#endif
 }

@@ -36,7 +36,6 @@ target_sources(engine INTERFACE
     graphics/graphics.c
     graphics/image.c
     graphics/initgfx.c
-    graphics/profile_task.c
     graphics/render_scene.c
     graphics/renderstate.c
     graphics/screen_clipper.c
@@ -184,6 +183,13 @@ if (GFX_VALIDATOR)
 endif()
 
 if (RSP_PROFILER)
+    if (NOT DEBUGGER)
+        message(FATAL_ERROR "Hardware debugging must be enabled to use the RSP profiler")
+    endif()
+
+    target_sources(engine INTERFACE
+        graphics/profile_task.c
+    )
     target_compile_definitions(engine INTERFACE
         PORTAL64_WITH_RSP_PROFILER
     )

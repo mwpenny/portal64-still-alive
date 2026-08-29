@@ -2,7 +2,6 @@
 #include "controls/controller_actions.h"
 #include "controls/rumble_pak_clip.h"
 #include "graphics/graphics.h"
-#include "graphics/profile_task.h"
 #include "levels/credits.h"
 #include "levels/intro.h"
 #include "levels/levels.h"
@@ -22,8 +21,12 @@
 #include "util/memory.h"
 #include "util/profile.h"
 
-#ifdef PORTAL64_WITH_DEBUGGER
+#if PORTAL64_WITH_DEBUGGER
 #include "debugger/debug.h"
+#endif
+
+#if PORTAL64_WITH_RSP_PROFILER
+#include "graphics/profile_task.h"
 #endif
 
 #define MAX_FRAME_BUFFER_MESGS 8
@@ -114,7 +117,7 @@ int main() {
     memoryEnd = soundPlayerInit(memoryEnd);
     heapInit(_heapStart, memoryEnd);
 
-#ifdef PORTAL64_WITH_DEBUGGER
+#if PORTAL64_WITH_DEBUGGER
     debug_initialize();
 #endif
 
@@ -153,7 +156,6 @@ int main() {
                         portalSurfaceRevert(0);
                         portalSurfaceCleanupQueueInit();
                         heapInit(_heapStart, memoryEnd);
-                        profileClearAddressMap();
                         translationsLoad(gSaveData.video.textLanguage);
                         levelLoadWithCallbacks(levelGetQueued());
                         rumblePakClipInit();
@@ -179,9 +181,7 @@ int main() {
                 Time startTime = timeGetTime();
 
                 if (pendingGFX < 2 && drawingEnabled) {
-                    Time renderStart = profileStart();
                     graphicsCreateTask(&gGraphicsTasks[drawBufferIndex], gSceneCallbacks->graphicsCallback, gSceneCallbacks->data);
-                    profileEnd(renderStart, 1);
                     drawBufferIndex = drawBufferIndex ^ 1;
                     ++pendingGFX;
                 }
@@ -194,9 +194,7 @@ int main() {
                 if (inputIgnore) {
                     --inputIgnore;
                 } else {
-                    Time updateStart = profileStart();
                     gSceneCallbacks->updateCallback(gSceneCallbacks->data);
-                    profileEnd(updateStart, 0);
                     drawingEnabled = 1;
                 }
     

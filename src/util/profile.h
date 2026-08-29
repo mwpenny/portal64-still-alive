@@ -8,6 +8,4 @@ void profileEnd(Time startTime, int bin);
 
 void profileReport();
 
-#define MAX_PROFILE_BINS    8
-
 #endif

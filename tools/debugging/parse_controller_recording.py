@@ -5,6 +5,7 @@ This script converts controller inputs captured while debugging into a header
 file that can be included in the game to play them back.
 
 Usage:
+
 1. Build the game with hardware debugging support and CONTROLLER_LOGGING set to
    CONTROLLER_LOGGING_RECORD in controller_<library>.c.
 
