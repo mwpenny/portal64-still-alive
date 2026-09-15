@@ -321,8 +321,6 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
 
     *prevSiblingPtr = next;
 
-    renderPlanFinishView(renderPlan, scene, next, renderState);
-
     return flags | PORTAL_RENDER_TYPE_ENABLED(portalIndex);
 }
 
@@ -437,8 +435,12 @@ void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, st
 
             properties->portalRenderType |= planResult;
 
-            if (planResult && prevSibling && !prevSibling->shouldClearZBuffer) {
-                childrenNeedZBuffer = 1;
+            if (planResult & PORTAL_RENDER_TYPE_ENABLED(closerPortal)) {
+                renderPlanFinishView(renderPlan, scene, prevSibling, renderState);
+
+                if (!prevSibling->shouldClearZBuffer) {
+                    childrenNeedZBuffer = 1;
+                }
             }
         }
 
