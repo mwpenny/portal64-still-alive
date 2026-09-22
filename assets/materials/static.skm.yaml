@@ -220,6 +220,40 @@ materials:
       set: [G_SHADE]
       clear: [G_LIGHTING, G_CULL_BACK]
 
+  wall_pipes_horiz:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/wall_pipes_horiz/wall_pipes_horiz.png
+      siz: G_IM_SIZ_16b
+      s:
+        mirror: true
+      t:
+        mirror: true
+
+    gDPSetRenderMode: G_RM_RA_ZB_OPA_DECAL
+
+    gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
+    gSPGeometryMode:
+      set: [G_SHADE, G_CULL_BACK]
+      clear: [G_LIGHTING]
+
+  wall_pipes_horiz_frame:
+    gDPSetTile:
+      filename: ../../portal_pak_modified/materials/models/props/wall_pipes_horiz/wall_pipes_horiz_frame.png
+      siz: G_IM_SIZ_16b
+      s:
+        mirror: true
+      t:
+        mirror: false
+
+    gDPSetRenderMode: G_RM_ZB_OPA_SURF
+
+    gDPSetCombineMode: G_CC_MODULATERGB
+    gDPSetCycleType: G_CYC_1CYCLE
+    gSPGeometryMode:
+      set: [G_SHADE, G_CULL_BACK]
+      clear: [G_LIGHTING]
+
   concrete/observationwall_001a:
     gDPSetTile: 
       filename: ../../portal_pak_modified/materials/concrete/observationwall_001a.png

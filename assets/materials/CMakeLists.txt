@@ -63,6 +63,7 @@ set(TEXTURE_SCRIPTS
     models/props/saucepan/saucepan.ims
     models/props/security_camera.ims
     models/props/toilet.ims
+    models/props/wall_pipes_horiz/wall_pipes_horiz.ims
     models/props/water_bottle/water_bottle.ims
     models/props_animsigns/awe_total.ims
     models/props_animsigns/newsignage_back02.ims
@@ -175,6 +176,10 @@ set_property(SOURCE models/props/round_elevator_sheet_1.ims
 set_property(SOURCE models/props/round_elevator_sheet_3.ims
     PROPERTY ADDITIONAL_OUTPUTS
         models/props/elevator_sign
+)
+set_property(SOURCE models/props/wall_pipes_horiz/wall_pipes_horiz.ims
+    PROPERTY ADDITIONAL_OUTPUTS
+        models/props/wall_pipes_horiz/wall_pipes_horiz_frame
 )
 set_property(SOURCE models/props/water_bottle/water_bottle.ims
     PROPERTY ADDITIONAL_OUTPUTS

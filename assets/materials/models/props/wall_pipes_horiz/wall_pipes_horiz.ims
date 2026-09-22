@@ -1,0 +1,44 @@
+\(
+    +clone
+
+    \( -clone 0 -brightness-contrast -2x10 -crop 10x32+219+29 -rotate 90 -repage +0+0 \)
+    \( -clone 0 -brightness-contrast -2x10 -crop 10x32+219+50 -rotate 90 -repage +0+8 \)
+
+    -layers merge
+    -crop 32x16+0+0
+    -write portal_pak_modified/materials/models/props/wall_pipes_horiz/wall_pipes_horiz_frame.png
+
+    +delete
+\)
+
+\(
+    -clone 0
+    -crop 10x5+295+40 -rotate 90
+    -duplicate 6,-1
+    +append
+    -repage +0+0
+\)
+
+\( -clone 0 -crop 5x5+295+40 -rotate 90 -repage +0+10 \)
+\( -clone 0 -crop 5x26+295+19 -rotate 90 -repage +5+10 \)
+
+-layers merge
+
+-fill '#a9a6a9'
+-draw 'point 31,10'
+-stroke '#393939'
+-draw 'line 31,11 31,14'
+
+-fill transparent
+-stroke 'rgba(0, 0, 0, 0.25)'
+-draw 'line 0,0 31,0'
+-draw 'line 0,9 31,9'
+-draw 'line 0,10 31,10'
+-stroke 'rgba(0, 0, 0, 0.125)'
+-draw 'line 0,1 31,1'
+-draw 'line 0,8 31,8'
+-draw 'line 0,11 31,11'
+
+-crop 32x15+0+0
+\( +clone -crop 32x1+0+0 \) -insert 0
+-append
