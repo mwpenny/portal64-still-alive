@@ -214,7 +214,7 @@ local function generate_cutscene_step(cutscene_name, step, step_index, label_loc
         if flags then
             local flag_list = {}
             for _, flag in pairs(util.string_split(flags, ",")) do
-                table.insert(flag_list, "SKAnimatorFlags" .. flag)
+                table.insert(flag_list, "SKAnimatorStartFlags" .. flag)
             end
             flag_mask = table.concat(flag_list, " | ")
         else

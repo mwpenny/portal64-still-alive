@@ -244,9 +244,15 @@ void skAnimatorUpdate(struct SKAnimator* animator, struct Transform* transforms,
     skAnimatorStep(animator, deltaTime);
 }
 
-void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip, float startTime, int flags) {
-    animator->currentClip = clip;
+void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip, float startTime, enum SKAnimatorStartFlags flags) {
+    if ((flags & SKAnimatorStartFlagsContinue) && clip && clip == animator->currentClip) {
+        // Make sure the clip doesn't end this frame, so callers can reverse it
+        animator->flags &= ~SKAnimatorFlagsDone;
 
+        return;
+    }
+
+    animator->currentClip = clip;
     if (!clip) {
         return;
     }
@@ -257,21 +263,19 @@ void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip
     
     animator->boneStateFrames[0] = -1;
     animator->boneStateFrames[1] = -1;
-
     animator->blendLerp = 1.0f;
 
     animator->currentTime = startTime;
-    animator->flags = flags;
+    animator->flags = 0;
+
+    if (flags & SKAnimatorStartFlagsLoop) {
+        animator->flags |= SKAnimatorFlagsLoop;
+    }
 
     skAnimatorStep(animator, 0.0f);
-}
 
-void skAnimatorEnsureClipRunning(struct SKAnimator* animator, struct SKAnimationClip* clip, float startTime, int flags) {
-    if (animator->currentClip == clip) {
-        // Make sure the clip doesn't end this frame, so callers can reverse it
-        animator->flags &= ~SKAnimatorFlagsDone;
-    } else {
-        skAnimatorRunClip(animator, clip, startTime, flags);
+    if (flags & SKAnimatorStartFlagsLoadSync) {
+        romCopyAsyncDrain();
     }
 }
 

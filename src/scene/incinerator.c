@@ -156,7 +156,7 @@ void incineratorUpdate(struct Incinerator* incinerator) {
         );
 
         float startTime = SK_ANIMATION_CLIP_START(clip, incinerator->isOpen);
-        skAnimatorEnsureClipRunning(&incinerator->animator, clip, startTime, 0);
+        skAnimatorRunClip(&incinerator->animator, clip, startTime, SKAnimatorStartFlagsContinue);
 
         incinerator->isOpen ^= 1;
         incinerator->smokeTimer = incinerator->isOpen ? INCINERATOR_SMOKE_OPEN_DELAY : 0.0f;

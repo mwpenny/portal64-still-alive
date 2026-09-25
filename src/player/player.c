@@ -268,8 +268,8 @@ void playerInit(struct Player* player, struct Location* startLocation, struct Ve
     skArmatureInit(&player->armature, &player_chell_armature);
     skBlenderInit(&player->animator, player_chell_armature.numberOfBones);
 
-    skAnimatorRunClip(&player->animator.from, &player_chell_Armature_runn_clip, 0.0f, SKAnimatorFlagsLoop);
-    skAnimatorRunClip(&player->animator.to, &player_chell_Armature_runc_clip, 0.0f, SKAnimatorFlagsLoop);
+    skAnimatorRunClip(&player->animator.from, &player_chell_Armature_runn_clip, 0.0f, SKAnimatorStartFlagsLoop);
+    skAnimatorRunClip(&player->animator.to, &player_chell_Armature_runc_clip, 0.0f, SKAnimatorStartFlagsLoop);
 
     player->body.velocity = *velocity;
     player->grabbingThroughPortal = 0;
@@ -1253,7 +1253,7 @@ void playerUpdate(struct Player* player) {
     float startTime = 0.0f;
     struct SKAnimationClip* clip = playerDetermineNextClip(player, &player->animator.blendLerp, &startTime, &forward, &right);
     if (clip != player->animator.from.currentClip) {
-        skAnimatorRunClip(&player->animator.from, clip, startTime, SKAnimatorFlagsLoop);
+        skAnimatorRunClip(&player->animator.from, clip, startTime, SKAnimatorStartFlagsLoop);
     }
 
     playerUpdateHealth(player);

@@ -43,22 +43,20 @@ void mainMenuInit(struct GameMenu* gameMenu) {
 
     mainMenuPlayAmbientSound();
 
+    sceneAnimatorPlay(
+        &gScene.animator,
+        TEST_CHAMBER_00_TEST_CHAMBER_00_ARMATURE_CAMERA,
+        TEST_CHAMBER_00_TEST_CHAMBER_00_CAMERA_ANIMATION__ANIM_CAMERA_MAIN_MENU_CAMERA,
+        1.0f,
+        SKAnimatorStartFlagsLoop
+    );
+
     for (int i = 0; i < gScene.clockCount; ++i) {
         clockShowMainMenuTime(&gScene.clocks[i]);
     }
 }
 
 void mainMenuUpdate(struct GameMenu* gameMenu) {
-    if (!skAnimatorIsRunning(&gScene.animator.animators[TEST_CHAMBER_00_TEST_CHAMBER_00_ARMATURE_CAMERA])) {
-        sceneAnimatorPlay(
-            &gScene.animator, 
-            TEST_CHAMBER_00_TEST_CHAMBER_00_ARMATURE_CAMERA, 
-            TEST_CHAMBER_00_TEST_CHAMBER_00_CAMERA_ANIMATION__ANIM_CAMERA_MAIN_MENU_CAMERA, 
-            1.0f,
-            SKAnimatorFlagsLoop
-        );
-    }
-
     mainMenuReadCamera(gameMenu);
     sceneAnimatorUpdate(&gScene.animator);
 

@@ -130,7 +130,7 @@ void doorUpdate(struct Door* door) {
         );
 
         float startTime = SK_ANIMATION_CLIP_START(clip, door->isOpen);
-        skAnimatorEnsureClipRunning(&door->animator, clip, startTime, 0);
+        skAnimatorRunClip(&door->animator, clip, startTime, SKAnimatorStartFlagsContinue);
 
         soundPlayerPlay(soundsDoor, 3.0f, 1.0f, &door->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, PORTAL_DOORCLOSE, SubtitleTypeCaption);
@@ -171,8 +171,8 @@ void doorOnDeserialize(struct Door* door) {
             typeDefinition->openClipIndex
         );
 
-        skAnimatorRunClip(&door->animator, clip, SK_ANIMATION_CLIP_DURATION(clip), 0);
-        skAnimatorUpdate(&door->animator, door->armature.pose, FIXED_DELTA_TIME);
+        skAnimatorRunClip(&door->animator, clip, SK_ANIMATION_CLIP_DURATION(clip), SKAnimatorStartFlagsLoadSync);
+        skAnimatorUpdate(&door->animator, door->armature.pose, 0.0f);
 
         door->isOpen = 1;
     }

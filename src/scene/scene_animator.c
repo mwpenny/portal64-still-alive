@@ -148,7 +148,7 @@ void sceneAnimatorPlay(struct SceneAnimator* sceneAnimator, int animatorIndex, i
     sceneAnimator->state[animatorIndex].playbackSpeed = speed;
     
     float startTime = SK_ANIMATION_CLIP_START(clip, speed < 0.0f);
-    skAnimatorEnsureClipRunning(animator, clip, startTime, flags);
+    skAnimatorRunClip(animator, clip, startTime, flags | SKAnimatorStartFlagsContinue);
 }
 
 void sceneAnimatorSetSpeed(struct SceneAnimator* sceneAnimator, int animatorIndex, float speed) {

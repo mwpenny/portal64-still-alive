@@ -45,9 +45,9 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at, int isFres
     portalGun->rotation = at->rotation;
 
     if (isFreshStart) {
-        skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_draw_clip, 0.0f, 0);
+        skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_draw_clip, 0.0f, SKAnimatorStartFlagsLoadSync);
     } else {
-        skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_idle_clip, 0.0f, 0);
+        skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_idle_clip, 0.0f, SKAnimatorStartFlagsLoadSync);
     }
 }
 

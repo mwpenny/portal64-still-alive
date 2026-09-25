@@ -4,6 +4,12 @@
 #include "math/transform.h"
 #include "skeletool_clip.h"
 
+enum SKAnimatorStartFlags {
+    SKAnimatorStartFlagsLoop     = (1 << 0),  // Automatically repeat clip
+    SKAnimatorStartFlagsLoadSync = (1 << 1),  // Wait for DMAs to complete
+    SKAnimatorStartFlagsContinue = (1 << 2),  // Do nothing if already playing
+};
+
 enum SKAnimatorFlags {
     SKAnimatorFlagsLoop = (1 << 0),
     SKAnimatorFlagsDone = (1 << 1),
@@ -24,8 +30,7 @@ void skAnimatorInit(struct SKAnimator* animator, int nBones);
 void skAnimatorCleanup(struct SKAnimator* animator);
 void skAnimatorUpdate(struct SKAnimator* animator, struct Transform* transforms, float deltaTime);
 
-void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip, float startTime, int flags);
-void skAnimatorEnsureClipRunning(struct SKAnimator* animator, struct SKAnimationClip* clip, float startTime, int flags);
+void skAnimatorRunClip(struct SKAnimator* animator, struct SKAnimationClip* clip, float startTime, enum SKAnimatorStartFlags flags);
 int skAnimatorIsRunning(struct SKAnimator* animator);
 
 struct SKAnimatorBlender {
