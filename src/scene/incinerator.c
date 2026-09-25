@@ -176,7 +176,7 @@ void incineratorOnDeserialize(struct Incinerator* incinerator) {
         );
 
         skAnimatorRunClip(&incinerator->animator, clip, SK_ANIMATION_CLIP_DURATION(clip), SKAnimatorStartFlagsLoadSync);
-        skAnimatorUpdate(&incinerator->animator, incinerator->armature.pose, 0.0f);
+        skAnimatorUpdate(&incinerator->animator, incinerator->armature.pose, FIXED_DELTA_TIME);
         incinerator->smokeTimer = 0.01f;  // Don't play smoke rush
 
         incinerator->isOpen = 1;

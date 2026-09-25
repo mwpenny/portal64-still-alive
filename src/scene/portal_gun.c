@@ -50,7 +50,7 @@ void portalGunInit(struct PortalGun* portalGun, struct Player* player, int isFre
         skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_idle_clip, 0.0f, SKAnimatorStartFlagsLoadSync);
     }
 
-    skAnimatorUpdate(&portalGun->animator, portalGun->armature.pose, 0.0f);
+    skAnimatorUpdate(&portalGun->animator, portalGun->armature.pose, FIXED_DELTA_TIME);
 }
 
 #define PORTAL_PROJECTILE_RADIUS    0.15f

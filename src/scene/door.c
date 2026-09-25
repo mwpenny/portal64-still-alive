@@ -176,7 +176,7 @@ void doorOnDeserialize(struct Door* door) {
         );
 
         skAnimatorRunClip(&door->animator, clip, SK_ANIMATION_CLIP_DURATION(clip), SKAnimatorStartFlagsLoadSync);
-        skAnimatorUpdate(&door->animator, door->armature.pose, 0.0f);
+        skAnimatorUpdate(&door->animator, door->armature.pose, FIXED_DELTA_TIME);
 
         door->isOpen = 1;
         doorApplyOpenState(door, typeDefinition);

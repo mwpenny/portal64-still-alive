@@ -154,7 +154,7 @@ void ballCatcherHandBall(struct BallCatcher* catcher, struct Ball* caughtBall) {
         0.0f,
         SKAnimatorStartFlagsLoadSync
     );
-    skAnimatorUpdate(&catcher->animator, catcher->armature.pose, 0.0f);
+    skAnimatorUpdate(&catcher->animator, catcher->armature.pose, FIXED_DELTA_TIME);
 
     collisionSceneRemoveDynamicObject(&catcher->collisionObject);
 }

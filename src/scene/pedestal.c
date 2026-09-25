@@ -141,5 +141,5 @@ void pedestalSetDown(struct Pedestal* pedestal) {
         0.0f,
         SKAnimatorStartFlagsLoadSync
     );
-    skAnimatorUpdate(&pedestal->animator, pedestal->armature.pose, 0.0f);
+    skAnimatorUpdate(&pedestal->animator, pedestal->armature.pose, FIXED_DELTA_TIME);
 }
