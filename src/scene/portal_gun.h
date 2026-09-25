@@ -36,7 +36,7 @@ struct PortalGun {
     struct PortalGunProjectile projectiles[2];
 };
 
-void portalGunInit(struct PortalGun* portalGun, struct Transform* at, int isFreshStart);
+void portalGunInit(struct PortalGun* portalGun, struct Player* player, int isFreshStart);
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player);
 void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera, int lastFiredIndex);
 

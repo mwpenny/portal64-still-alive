@@ -135,5 +135,11 @@ void pedestalPointAt(struct Pedestal* pedestal, struct Vector3* target, int play
 }
 
 void pedestalSetDown(struct Pedestal* pedestal) {
-    skAnimatorRunClip(&pedestal->animator, dynamicAssetClip(PEDESTAL_DYNAMIC_ANIMATED_MODEL, PEDESTAL_ARMATURE_HIDDEN_CLIP_INDEX), 0.0f, 0);
+    skAnimatorRunClip(
+        &pedestal->animator,
+        dynamicAssetClip(PEDESTAL_DYNAMIC_ANIMATED_MODEL, PEDESTAL_ARMATURE_HIDDEN_CLIP_INDEX),
+        0.0f,
+        SKAnimatorStartFlagsLoadSync
+    );
+    skAnimatorUpdate(&pedestal->animator, pedestal->armature.pose, 0.0f);
 }

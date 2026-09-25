@@ -175,7 +175,8 @@ void incineratorOnDeserialize(struct Incinerator* incinerator) {
             PROPS_BTS_GLADOS_APERTUREDOOR_ARMATURE_OPEN_CLIP_INDEX
         );
 
-        skAnimatorRunClip(&incinerator->animator, clip, SK_ANIMATION_CLIP_DURATION(clip), 0);
+        skAnimatorRunClip(&incinerator->animator, clip, SK_ANIMATION_CLIP_DURATION(clip), SKAnimatorStartFlagsLoadSync);
+        skAnimatorUpdate(&incinerator->animator, incinerator->armature.pose, 0.0f);
         incinerator->smokeTimer = 0.01f;  // Don't play smoke rush
 
         incinerator->isOpen = 1;

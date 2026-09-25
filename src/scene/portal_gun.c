@@ -28,10 +28,10 @@ struct Transform gGunTransform = {
     {1.0f, 1.0f, 1.0f},
 };
 
-void portalGunInit(struct PortalGun* portalGun, struct Transform* at, int isFreshStart) {
+void portalGunInit(struct PortalGun* portalGun, struct Player* player, int isFreshStart) {
     skArmatureInit(&portalGun->armature, &portal_gun_v_portalgun_armature);
     skAnimatorInit(&portalGun->animator, portal_gun_v_portalgun_armature.numberOfBones);
-    portalGun->portalGunVisible = 0;
+    portalGun->portalGunVisible = (player->flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun));
     portalGun->shootAnimationTimer = 0.0;
     portalGun->shootTotalAnimationTimer = 0.0;
     portalGun->fov = DEFAULT_PORTALGUN_FOV;
@@ -42,13 +42,15 @@ void portalGunInit(struct PortalGun* portalGun, struct Transform* at, int isFres
     portalTrailInit(&portalGun->projectiles[0].trail);
     portalTrailInit(&portalGun->projectiles[1].trail);
 
-    portalGun->rotation = at->rotation;
+    portalGun->rotation = player->lookTransform.rotation;
 
     if (isFreshStart) {
         skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_draw_clip, 0.0f, SKAnimatorStartFlagsLoadSync);
     } else {
         skAnimatorRunClip(&portalGun->animator, &portal_gun_v_portalgun_Armature_idle_clip, 0.0f, SKAnimatorStartFlagsLoadSync);
     }
+
+    skAnimatorUpdate(&portalGun->animator, portalGun->armature.pose, 0.0f);
 }
 
 #define PORTAL_PROJECTILE_RADIUS    0.15f
@@ -194,12 +196,7 @@ void portalGunUpdatePosition(struct PortalGun* portalGun, struct Player* player)
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
     skAnimatorUpdate(&portalGun->animator, portalGun->armature.pose, FIXED_DELTA_TIME);
     portalGunUpdatePosition(portalGun, player);
-
-    if (player->flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
-        portalGun->portalGunVisible = 1;
-    } else {
-        portalGun->portalGunVisible = 0;
-    }
+    portalGun->portalGunVisible = (player->flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun));
 
     if (player->flags & PlayerJustShotPortalGun && portalGun->shootAnimationTimer <= 0.0f) {
         portalGun->shootAnimationTimer = PORTAL_GUN_RECOIL_TIME;

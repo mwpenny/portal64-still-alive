@@ -139,12 +139,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     hudInit(&scene->hud);
 
-    portalGunInit(&scene->portalGun, &scene->player.lookTransform, !levelLoadedFromTransition());
-
-    // A frame will be rendered in between initialization and the first update.
-    // Update the portal gun to prevent inaccuracies (visibility flicker, wrong
-    // armature position, etc.)
-    portalGunUpdate(&scene->portalGun, &scene->player);
+    portalGunInit(&scene->portalGun, &scene->player, !levelLoadedFromTransition());
 
     scene->camera.transform.rotation = scene->player.lookTransform.rotation;
     scene->camera.transform.position = scene->player.lookTransform.position;

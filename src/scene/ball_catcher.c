@@ -152,7 +152,9 @@ void ballCatcherHandBall(struct BallCatcher* catcher, struct Ball* caughtBall) {
         &catcher->animator,
         dynamicAssetClip(PROPS_COMBINE_BALL_CATCHER_DYNAMIC_ANIMATED_MODEL, PROPS_COMBINE_BALL_CATCHER_ARMATURE_CAUGHT_CLIP_INDEX),
         0.0f,
-        0
+        SKAnimatorStartFlagsLoadSync
     );
+    skAnimatorUpdate(&catcher->animator, catcher->armature.pose, 0.0f);
+
     collisionSceneRemoveDynamicObject(&catcher->collisionObject);
 }
