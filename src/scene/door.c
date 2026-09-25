@@ -113,6 +113,31 @@ void doorInit(struct Door* door, struct DoorDefinition* doorDefinition, struct W
     door->isOpen = 0;
 }
 
+static void doorApplyOpenState(struct Door* door, struct DoorTypeDefinition* typeDefinition) {
+    int isDoorwayOpen = skAnimatorIsRunning(&door->animator) || door->isOpen;
+
+    if (door->forDoorway) {
+        if (isDoorwayOpen) {
+            door->forDoorway->flags |= DoorwayFlagsOpen;
+        } else {
+            door->forDoorway->flags &= ~DoorwayFlagsOpen;
+        }
+    }
+
+    if (typeDefinition->colliderBoneIndex == -1) {
+        door->collisionObject.collisionLayers = isDoorwayOpen ? 0 : DOOR_COLLISION_LAYERS;
+    } else {
+        struct Vector3 finalPos;
+        skCalculateBonePosition(&door->armature, typeDefinition->colliderBoneIndex, &gZeroVec, &finalPos);
+        finalPos.x = 0.0f;
+        finalPos.y = DOOR_COLLISION_Y_OFFSET + (finalPos.z * (1.0f / SCENE_SCALE));
+        finalPos.z = 0.0f;
+
+        quatMultVector(&door->rigidBody.transform.rotation, &finalPos, &finalPos);
+        vector3Add(&door->doorDefinition->transform.position, &finalPos, &door->rigidBody.transform.position);
+    }
+}
+
 void doorUpdate(struct Door* door) {
     struct DoorTypeDefinition* typeDefinition = &sDoorTypeDefinitions[door->doorDefinition->doorType];
 
@@ -138,28 +163,7 @@ void doorUpdate(struct Door* door) {
         door->isOpen ^= 1;
     }
 
-    int isDoorwayOpen = skAnimatorIsRunning(&door->animator) || door->isOpen;
-
-    if (door->forDoorway) {
-        if (isDoorwayOpen) {
-            door->forDoorway->flags |= DoorwayFlagsOpen;
-        } else {
-            door->forDoorway->flags &= ~DoorwayFlagsOpen;
-        }
-    }
-
-    if (typeDefinition->colliderBoneIndex == -1) {
-        door->collisionObject.collisionLayers = isDoorwayOpen ? 0 : DOOR_COLLISION_LAYERS;
-    } else {
-        struct Vector3 finalPos;
-        skCalculateBonePosition(&door->armature, typeDefinition->colliderBoneIndex, &gZeroVec, &finalPos);
-        finalPos.x = 0.0f;
-        finalPos.y = DOOR_COLLISION_Y_OFFSET + (finalPos.z * (1.0f / SCENE_SCALE));
-        finalPos.z = 0.0f;
-
-        quatMultVector(&door->rigidBody.transform.rotation, &finalPos, &finalPos);
-        vector3Add(&door->doorDefinition->transform.position, &finalPos, &door->rigidBody.transform.position);
-    }
+    doorApplyOpenState(door, typeDefinition);
 }
 
 void doorOnDeserialize(struct Door* door) {
@@ -175,5 +179,6 @@ void doorOnDeserialize(struct Door* door) {
         skAnimatorUpdate(&door->animator, door->armature.pose, 0.0f);
 
         door->isOpen = 1;
+        doorApplyOpenState(door, typeDefinition);
     }
 }
