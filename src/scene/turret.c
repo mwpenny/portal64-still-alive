@@ -497,7 +497,7 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     }
 }
 
-static uint8_t turretUpdateFizzled(struct Turret* turret) {
+static int turretUpdateFizzled(struct Turret* turret) {
     enum FizzleCheckResult fizzleStatus = decorObjectUpdateFizzler(&turret->collisionObject, &turret->fizzleTime);
     if (fizzleStatus == FizzleCheckResultStart) {
         laserRemove(&turret->laser);
@@ -745,7 +745,7 @@ static void turretUpdateShots(struct Turret* turret, struct Player* player) {
     turret->shootTimer = TURRET_SHOT_PERIOD;
 }
 
-static uint8_t turretRaycastTarget(struct Turret* turret, struct CollisionObject* targetCollider, struct Vector3* target, int checkPortals) {
+static int turretRaycastTarget(struct Turret* turret, struct CollisionObject* targetCollider, struct Vector3* target, int checkPortals) {
     struct Vector3 turretToTarget;
     vector3Sub(target, &turret->rigidBody.transform.position, &turretToTarget);
 
@@ -781,7 +781,7 @@ static uint8_t turretRaycastTarget(struct Turret* turret, struct CollisionObject
     return 1;
 }
 
-static uint8_t turretFindPlayerLineOfSight(struct Turret* turret, struct Player* player, struct Vector3* targetPosition) {
+static int turretFindPlayerLineOfSight(struct Turret* turret, struct Player* player, struct Vector3* targetPosition) {
     if (playerIsDead(player)) {
         return 0;
     }
@@ -1251,7 +1251,10 @@ void turretOnDeserialize(struct Turret* turret) {
     }
 
     if ((turret->rigidBody.flags & RigidBodyFizzled) ||
-        turret->state == TurretStateDead) {
+        turret->state == TurretStateDead
+    ) {
         laserRemove(&turret->laser);
     }
+
+    dynamicSceneSetRoomFlags(turret->dynamicId, ROOM_FLAG_FROM_INDEX(turret->rigidBody.currentRoom));
 }

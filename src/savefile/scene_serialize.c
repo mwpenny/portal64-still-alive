@@ -168,7 +168,7 @@ void decorSerialize(struct Serializer* serializer, SerializeAction action, struc
     for (int i = 0; i < scene->decorCount; ++i) {
         struct DecorObject* entry = scene->decor[i];
         if (entry->definition->colliderType.type == CollisionShapeTypeNone) {
-            // non moving objects can be loaded from the level definition
+            // Non-moving objects are loaded from the level definition
             continue;
         }
 
@@ -185,7 +185,7 @@ void decorSerialize(struct Serializer* serializer, SerializeAction action, struc
     for (int i = 0; i < scene->decorCount; ++i) {
         struct DecorObject* entry = scene->decor[i];
         if (entry->definition->colliderType.type == CollisionShapeTypeNone) {
-            // non moving objects can be loaded from the level definition
+            // Non-moving objects are loaded from the level definition
             continue;
         }
 
@@ -216,14 +216,25 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
     assert(scene->decorCount == 0);
     assert(scene->decor == NULL);
 
-    short countAsShort;
-    serializeRead(serializer, &countAsShort, sizeof(short));
+    short unserializedCount = 0;
+    for (int i = 0; i < gCurrentLevel->decorCount; ++i) {
+        struct DecorDefinition* decorDef = &gCurrentLevel->decor[i];
+        struct DecorObjectDefinition* def = decorObjectDefinitionForId(decorDef->decorId);
+
+        if (def->colliderType.type == CollisionShapeTypeNone) {
+            ++unserializedCount;
+        }
+    }
+
+    short serializedCount;
+    serializeRead(serializer, &serializedCount, sizeof(short));
     short heldObject;
     serializeRead(serializer, &heldObject, sizeof(short));
 
-    scene->decor = malloc(sizeof(struct DecorObject*) * (countAsShort + gCurrentLevel->decorCount));
+    scene->decor = malloc(sizeof(struct DecorObject*) * (unserializedCount + serializedCount));
+    scene->decorCount = 0;
 
-    for (int i = 0; i < countAsShort; ++i) {
+    for (int i = 0; i < serializedCount; ++i) {
         short id;
         serializeRead(serializer, &id, sizeof(short));
 
@@ -262,11 +273,13 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
 
         collisionObjectUpdateBB(&entry->collisionObject);
 
-        scene->decor[i] = entry;
+        scene->decor[scene->decorCount++] = entry;
 
         if (heldObject == i) {
             playerSetGrabbing(&scene->player, &entry->collisionObject);
         }
+
+        decorObjectOnDeserialize(entry);
     }
 
     for (int i = 0; i < gCurrentLevel->decorCount; ++i) {
@@ -274,7 +287,7 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
         struct DecorObjectDefinition* def = decorObjectDefinitionForId(decorDef->decorId);
 
         if (def->colliderType.type != CollisionShapeTypeNone) {
-            // dynamic objects are serialized
+            // Dynamic objects are serialized
             continue;
         }
 
@@ -282,11 +295,10 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
         decorTransform.position = decorDef->position;
         decorTransform.rotation = decorDef->rotation;
         decorTransform.scale = gOneVec;
-        scene->decor[countAsShort] = decorObjectNew(def, &decorTransform, decorDef->roomIndex);
-        ++countAsShort;
+        scene->decor[scene->decorCount++] = decorObjectNew(def, &decorTransform, decorDef->roomIndex);
     }
 
-    scene->decorCount = countAsShort;
+    assert(scene->decorCount == (unserializedCount + serializedCount));
 }
 
 void boxDropperSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
@@ -350,6 +362,8 @@ void boxDropperDeserialize(struct Serializer* serializer, struct Scene* scene) {
         if (heldCube == i) {
             playerSetGrabbing(&scene->player, &dropper->activeCube.collisionObject);
         }
+
+        decorObjectOnDeserialize(&dropper->activeCube);
     }
 }
 
@@ -392,7 +406,7 @@ void launcherSerialize(struct Serializer* serializer, SerializeAction action, st
     
         action(serializer, &launcher->currentBall.rigidBody.transform.position, sizeof (struct Vector3));
         action(serializer, &launcher->currentBall.rigidBody.velocity, sizeof (struct Vector3));
-        action(serializer, &launcher->rigidBody.currentRoom, sizeof(short));
+        action(serializer, &launcher->currentBall.rigidBody.currentRoom, sizeof(short));
         action(serializer, &launcher->ballLifetime, sizeof(float));
     }
 }
@@ -585,6 +599,8 @@ void securityCameraDeserialize(struct Serializer* serializer, struct Scene* scen
         if (heldCam == i) {
             playerSetGrabbing(&scene->player, &cam->collisionObject);
         }
+
+        securityCameraOnDeserialize(cam);
     }
 }
 
@@ -640,6 +656,7 @@ void turretDeserialize(struct Serializer* serializer, struct Scene* scene) {
     serializeRead(serializer, &heldObject, sizeof(short));
 
     scene->turrets = malloc(sizeof(struct Turret*) * count);
+    scene->turretCount = count;
 
     for (int i = 0; i < count; ++i) {
         struct Turret* turret = turretNew(NULL);
@@ -677,8 +694,6 @@ void turretDeserialize(struct Serializer* serializer, struct Scene* scene) {
         turretOnDeserialize(turret);
         scene->turrets[i] = turret;
     }
-
-    scene->turretCount = count;
 }
 
 void namedCollisionSerialize(struct Serializer* serializer, SerializeAction action, struct LevelDefinition* level) {
@@ -779,4 +794,6 @@ void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
     for (int i = 0; i < scene->incineratorCount; ++i) {
         incineratorOnDeserialize(&scene->incinerators[i]);
     }
+
+    portalGunOnDeserialize(&scene->portalGun, &scene->player);
 }

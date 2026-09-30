@@ -38,6 +38,7 @@ struct PortalGun {
 
 void portalGunInit(struct PortalGun* portalGun, struct Player* player, int isFreshStart);
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player);
+void portalGunOnDeserialize(struct PortalGun* portalGun, struct Player* player);
 void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera, int lastFiredIndex);
 
 void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray, struct Transform* lookTransform, struct Vector3* playerUp, int roomIndex);

@@ -16,7 +16,12 @@
 
 #define SECURITY_CAMERA_RANGE            10.0f
 #define SECURITY_CAMERA_RIGID_BODY_MASS  1.0f
-#define SECURITY_CAMERA_COLLISION_LAYERS (COLLISION_LAYERS_TANGIBLE | COLLISION_LAYERS_FIZZLER | COLLISION_LAYERS_BLOCK_TURRET_SHOTS | COLLISION_LAYERS_BLOCK_BALL)
+#define SECURITY_CAMERA_COLLISION_LAYERS ( \
+    COLLISION_LAYERS_TANGIBLE           |  \
+    COLLISION_LAYERS_FIZZLER            |  \
+    COLLISION_LAYERS_BLOCK_TURRET_SHOTS |  \
+    COLLISION_LAYERS_BLOCK_BALL            \
+)
 
 static struct CollisionBox sSecurityCameraCollisionBox = {
     {0.15f, 0.3f, 0.35f}
@@ -31,6 +36,14 @@ static struct ColliderTypeData sSecurityCameraCollider = {
 };
 
 static struct Quaternion sBarBoneRelative = {1.0f, 0.0f, 0.0f, 0.0f};
+
+static short sCameraDestroyClips[] = {
+    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_1,
+    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_2,
+    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_3,
+    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_4,
+    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_5,
+};
 
 static void securityCameraLookAt(struct SecurityCamera* securityCamera, struct Vector3* target) {
     if (securityCameraIsDetached(securityCamera)) {
@@ -170,13 +183,9 @@ void securityCameraUpdate(struct SecurityCamera* securityCamera) {
     dynamicSceneSetRoomFlags(securityCamera->dynamicId, ROOM_FLAG_FROM_INDEX(securityCamera->rigidBody.currentRoom));
 }
 
-short gCameraDestroyClips[] = {
-    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_1,
-    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_2,
-    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_3,
-    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_4,
-    SOUNDS_GENERIC_SECURITY_CAMERA_DESTROYED_5,
-};
+void securityCameraOnDeserialize(struct SecurityCamera* securityCamera) {
+    dynamicSceneSetRoomFlags(securityCamera->dynamicId, ROOM_FLAG_FROM_INDEX(securityCamera->rigidBody.currentRoom));
+}
 
 void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int cameraCount, struct Box3D* portalBox) {
     for (int i = 0; i < cameraCount; ++i) {
@@ -189,8 +198,8 @@ void securityCamerasCheckPortal(struct SecurityCamera* securityCameras, int came
             securityCameraDetach(camera);
 
             if (!cutsceneRunnerIsChannelPlaying(CH_GLADOS)) {
-                short clipIndex = randomInRange(0, sizeof(gCameraDestroyClips) / sizeof(*gCameraDestroyClips));
-                cutsceneQueueSoundInChannel(gCameraDestroyClips[clipIndex], 1.0f, CH_GLADOS, StringIdNone);
+                short clipIndex = randomInRange(0, sizeof(sCameraDestroyClips) / sizeof(*sCameraDestroyClips));
+                cutsceneQueueSoundInChannel(sCameraDestroyClips[clipIndex], 1.0f, CH_GLADOS, StringIdNone);
             }
         }
     }

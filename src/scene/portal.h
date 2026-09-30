@@ -22,7 +22,6 @@ enum PortalFlags {
 struct Portal {
     struct CollisionObject collisionObject;
     struct RigidBody rigidBody;
-    short dynamicId;
     enum PortalFlags flags;
     float opacity;
     float scale;

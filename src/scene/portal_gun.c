@@ -256,6 +256,12 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
     }
 }
 
+void portalGunOnDeserialize(struct PortalGun* portalGun, struct Player* player) {
+    if (player->flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun)) {
+        portalGun->rotation = player->lookTransform.rotation;
+    }
+}
+
 struct Vector3 gPortalGunExit = {0.0f, 97.0f, 0.0f};
 
 void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray, struct Transform* lookTransform, struct Vector3* playerUp, int roomIndex) {
