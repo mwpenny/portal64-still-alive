@@ -149,7 +149,7 @@ void boxDropperUpdate(struct BoxDropper* dropper) {
 
     if (signalIsSet && !(dropper->flags & BoxDropperFlagsSignalWasSet)) {
         if (dropper->flags & BoxDropperFlagsCubeIsActive) {
-            dropper->activeCube.rigidBody.flags |= RigidBodyFizzled;
+            rigidBodyMarkFizzled(&dropper->activeCube.rigidBody);
         }
         dropper->flags |= BoxDropperFlagsCubeRequested;
     }

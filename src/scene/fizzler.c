@@ -23,7 +23,7 @@ void fizzlerTrigger(struct CollisionObject* collisionObject, struct CollisionObj
     struct Fizzler* fizzler = collisionObject->data;
 	
     if (objectEnteringTrigger->body) {
-        objectEnteringTrigger->body->flags |= RigidBodyFizzled;
+        rigidBodyMarkFizzled(objectEnteringTrigger->body);
     }
 
     if (fizzler->cubeSignalIndex != -1) {

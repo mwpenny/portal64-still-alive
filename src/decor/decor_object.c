@@ -190,7 +190,6 @@ enum FizzleCheckResult decorObjectUpdateFizzler(struct CollisionObject* collisio
 
             result = FizzleCheckResultStart;
 
-            collisionObject->body->flags &= ~RigidBodyFlagsGrabbable;
             collisionObject->body->flags |= RigidBodyDisableGravity;
         }
 

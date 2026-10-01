@@ -45,6 +45,11 @@ void rigidBodyUnmarkKinematic(struct RigidBody* rigidBody, float mass, float mom
     rigidBody->momentOfInertiaInv = 1.0f / rigidBody->momentOfInertia;
 }
 
+void rigidBodyMarkFizzled(struct RigidBody* rigidBody) {
+    rigidBody->flags |= RigidBodyFizzled;
+    rigidBody->flags &= ~RigidBodyFlagsGrabbable;
+}
+
 void rigidBodyApplyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* impulse) {
     struct Vector3 offset;
     vector3Sub(worldPoint, &rigidBody->transform.position, &offset);
@@ -88,7 +93,7 @@ void rigidBodyUpdate(struct RigidBody* rigidBody) {
         rigidBody->transform.position.y = KILL_PLANE_Y;
         rigidBody->velocity.y = 0.0f;
 
-        rigidBody->flags |= RigidBodyFizzled;
+        rigidBodyMarkFizzled(rigidBody);
     }
 
     rigidBody->flags |= RigidBodyHasWoken;

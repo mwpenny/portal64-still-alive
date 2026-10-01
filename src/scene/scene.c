@@ -737,7 +737,6 @@ void sceneUpdate(struct Scene* scene) {
         scene->player.flags &= ~PlayerInCutscene;
     }
 
-    // Objects that can fizzle need to update before the player so they become ungrabbable instantly
     sceneUpdateDeletableList(scene, (void**)scene->decor,           &scene->decorCount,          sceneUpdateDecorObject);
     sceneUpdateDeletableList(scene, (void**)scene->securityCameras, &scene->securityCameraCount, sceneUpdateSecurityCamera);
     sceneUpdateDeletableList(scene, (void**)scene->turrets,         &scene->turretCount,         sceneUpdateTurret);
