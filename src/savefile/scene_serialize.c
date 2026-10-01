@@ -12,7 +12,7 @@ struct PartialTransform {
     struct Quaternion rotation;
 };
 
-void playerSerialize(struct Serializer* serializer, SerializeAction action, struct Player* player) {
+static void playerSerialize(struct Serializer* serializer, SerializeAction action, struct Player* player) {
     action(serializer, &player->lookTransform, sizeof(struct PartialTransform));
     action(serializer, &player->body.velocity, sizeof(player->body.velocity));
     action(serializer, &player->body.currentRoom, sizeof(player->body.currentRoom));
@@ -21,7 +21,7 @@ void playerSerialize(struct Serializer* serializer, SerializeAction action, stru
     action(serializer, &player->grabbingThroughPortal, sizeof(player->grabbingThroughPortal));
 }
 
-void playerDeserialize(struct Serializer* serializer, struct Player* player) {
+static void playerDeserialize(struct Serializer* serializer, struct Player* player) {
     struct Location location;
     transformInitIdentity(&location.transform);
 
@@ -37,7 +37,7 @@ void playerDeserialize(struct Serializer* serializer, struct Player* player) {
 
 #define PORTAL_FLAGS_NO_PORTAL  -1
 
-void sceneSerializePortals(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+static void sceneSerializePortals(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     for (int portalIndex = 0; portalIndex < 2; ++portalIndex) {
         if (!gCollisionScene.portalTransforms[portalIndex]) {
             char flags = PORTAL_FLAGS_NO_PORTAL;
@@ -64,7 +64,7 @@ void sceneSerializePortals(struct Serializer* serializer, SerializeAction action
 
 #define PORTAL_FLAGS_TO_DESERIALIZE    (PortalFlagsPlayerPortal | PortalFlagsZOffset)
 
-void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene) {
+static void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene) {
     for (int portalIndex = 0; portalIndex < 2; ++portalIndex) {
         char flags;
         serializeRead(serializer, &flags, sizeof(flags));
@@ -118,14 +118,14 @@ void sceneDeserializePortals(struct Serializer* serializer, struct Scene* scene)
     }
 }   
 
-void buttonsSerializeRW(struct Serializer* serializer, SerializeAction action, struct Button* buttons, int count) {
+static void buttonsSerializeRW(struct Serializer* serializer, SerializeAction action, struct Button* buttons, int count) {
     for (int i = 0; i < count; ++i) {
         action(serializer, &buttons[i].rigidBody.transform.position.y, sizeof(float));
         action(serializer, &buttons[i].state, sizeof(enum ButtonState));
     }
 }
 
-void rigidBodyDeserializeFlags(enum RigidBodyFlags* flags) {
+static void rigidBodyDeserializeFlags(enum RigidBodyFlags* flags) {
     if (*flags & RigidBodyForceWakeOnLoad) {
         *flags &= ~(RigidBodyIsSleeping | RigidBodyForceWakeOnLoad);
     } else {
@@ -133,7 +133,7 @@ void rigidBodyDeserializeFlags(enum RigidBodyFlags* flags) {
     }
 }
 
-void rigidBodySerialize(struct Serializer* serializer, SerializeAction action, struct RigidBody* rigidBody) {
+static void rigidBodySerialize(struct Serializer* serializer, SerializeAction action, struct RigidBody* rigidBody) {
     action(serializer, &rigidBody->transform, sizeof(struct PartialTransform));
     action(serializer, &rigidBody->currentRoom, sizeof(short));
     action(serializer, &rigidBody->flags, sizeof(enum RigidBodyFlags));
@@ -144,7 +144,7 @@ void rigidBodySerialize(struct Serializer* serializer, SerializeAction action, s
     }
 }
 
-void rigidBodyDeserialize(struct Serializer* serializer, struct RigidBody* rigidBody) {
+static void rigidBodyDeserialize(struct Serializer* serializer, struct RigidBody* rigidBody) {
     serializeRead(serializer, &rigidBody->transform, sizeof(struct PartialTransform));
     serializeRead(serializer, &rigidBody->currentRoom, sizeof(short));
     serializeRead(serializer, &rigidBody->flags, sizeof(enum RigidBodyFlags));
@@ -161,7 +161,7 @@ void rigidBodyDeserialize(struct Serializer* serializer, struct RigidBody* rigid
     }
 }
 
-void decorSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+static void decorSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     short countAsShort = 0;
     short heldObject = -1;
 
@@ -212,13 +212,13 @@ void decorSerialize(struct Serializer* serializer, SerializeAction action, struc
     }
 }
 
-void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
+static void decorDeserialize(struct Serializer* serializer, struct Scene* scene, struct LevelDefinition* level) {
     assert(scene->decorCount == 0);
     assert(scene->decor == NULL);
 
     short unserializedCount = 0;
-    for (int i = 0; i < gCurrentLevel->decorCount; ++i) {
-        struct DecorDefinition* decorDef = &gCurrentLevel->decor[i];
+    for (int i = 0; i < level->decorCount; ++i) {
+        struct DecorDefinition* decorDef = &level->decor[i];
         struct DecorObjectDefinition* def = decorObjectDefinitionForId(decorDef->decorId);
 
         if (def->colliderType.type == CollisionShapeTypeNone) {
@@ -282,8 +282,8 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
         decorObjectOnDeserialize(entry);
     }
 
-    for (int i = 0; i < gCurrentLevel->decorCount; ++i) {
-        struct DecorDefinition* decorDef = &gCurrentLevel->decor[i];
+    for (int i = 0; i < level->decorCount; ++i) {
+        struct DecorDefinition* decorDef = &level->decor[i];
         struct DecorObjectDefinition* def = decorObjectDefinitionForId(decorDef->decorId);
 
         if (def->colliderType.type != CollisionShapeTypeNone) {
@@ -301,7 +301,7 @@ void decorDeserialize(struct Serializer* serializer, struct Scene* scene) {
     assert(scene->decorCount == (unserializedCount + serializedCount));
 }
 
-void boxDropperSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+static void boxDropperSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     short heldCube = -1;
     for (int i = 0; i < scene->boxDropperCount; ++i) {
         if (playerIsGrabbingObject(&scene->player, &scene->boxDroppers[i].activeCube.collisionObject)) {
@@ -328,7 +328,7 @@ void boxDropperSerialize(struct Serializer* serializer, SerializeAction action, 
     }
 }
 
-void boxDropperDeserialize(struct Serializer* serializer, struct Scene* scene) {
+static void boxDropperDeserialize(struct Serializer* serializer, struct Scene* scene) {
     short heldCube;
     serializeRead(serializer, &heldCube, sizeof(short));
 
@@ -367,14 +367,14 @@ void boxDropperDeserialize(struct Serializer* serializer, struct Scene* scene) {
     }
 }
 
-void elevatorSerializeRW(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+static void elevatorSerializeRW(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     for (int i = 0; i < scene->elevatorCount; ++i) {
         action(serializer, &scene->elevators[i].flags, sizeof(short));
         action(serializer, &scene->elevators[i].timer, sizeof(float));
     }
 }
 
-void pedestalSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+static void pedestalSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     for (int i = 0; i < scene->pedestalCount; ++i) {
         action(serializer, &scene->pedestals[i].flags, sizeof(short));
         action(serializer, &scene->pedestals[i].targetRotation, sizeof(struct Vector2));
@@ -382,7 +382,7 @@ void pedestalSerialize(struct Serializer* serializer, SerializeAction action, st
     }
 }
 
-void pedestalDeserialize(struct Serializer* serializer, struct Scene* scene) {
+static void pedestalDeserialize(struct Serializer* serializer, struct Scene* scene) {
     for (int i = 0; i < scene->pedestalCount; ++i) {
         serializeRead(serializer, &scene->pedestals[i].flags, sizeof(short));
         serializeRead(serializer, &scene->pedestals[i].targetRotation, sizeof(struct Vector2));
@@ -394,7 +394,7 @@ void pedestalDeserialize(struct Serializer* serializer, struct Scene* scene) {
     }
 }
 
-void launcherSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+static void launcherSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     for (int i = 0; i < scene->ballLauncherCount; ++i) {
         struct BallLauncher* launcher = &scene->ballLaunchers[i];
         action(serializer, &launcher->currentBall.targetSpeed, sizeof(float));
@@ -411,7 +411,7 @@ void launcherSerialize(struct Serializer* serializer, SerializeAction action, st
     }
 }
 
-void launcherDeserialize(struct Serializer* serializer, struct Scene* scene) {
+static void launcherDeserialize(struct Serializer* serializer, struct Scene* scene) {
     for (int i = 0; i < scene->ballLauncherCount; ++i) {
         struct BallLauncher* launcher = &scene->ballLaunchers[i];
         serializeRead(serializer, &launcher->currentBall.targetSpeed, sizeof(float));
@@ -434,7 +434,7 @@ void launcherDeserialize(struct Serializer* serializer, struct Scene* scene) {
     }
 }
 
-void catcherSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+static void catcherSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     for (int i = 0; i < scene->ballCatcherCount; ++i) {
         struct BallCatcher* catcher = &scene->ballCatchers[i];
 
@@ -451,7 +451,7 @@ void catcherSerialize(struct Serializer* serializer, SerializeAction action, str
     }
 }
 
-void catcherDeserialize(struct Serializer* serializer, struct Scene* scene) {
+static void catcherDeserialize(struct Serializer* serializer, struct Scene* scene) {
     for (int i = 0; i < scene->ballCatcherCount; ++i) {
         short caughtIndex;
         serializeRead(serializer, &caughtIndex, sizeof(short));
@@ -474,7 +474,7 @@ void catcherDeserialize(struct Serializer* serializer, struct Scene* scene) {
     }
 }
 
-void sceneAnimatorSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+static void sceneAnimatorSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     for (int i = 0; i < scene->animator.animatorCount; ++i) {
         action(serializer, &scene->animator.state[i].playbackSpeed, sizeof(float));
 
@@ -500,7 +500,7 @@ void sceneAnimatorSerialize(struct Serializer* serializer, SerializeAction actio
     }
 }
 
-void switchSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+static void switchSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     for (int i = 0; i < scene->switchCount; ++i) {
         struct Switch* switchObj = &scene->switches[i];
 
@@ -508,14 +508,14 @@ void switchSerialize(struct Serializer* serializer, SerializeAction action, stru
     }
 }
 
-void signageSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+static void signageSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     for (int i = 0; i < scene->signageCount; ++i) {
         struct Signage* signage = &scene->signage[i];
         action(serializer, &signage->currentFrame, sizeof(signage->currentFrame));
     }
 }
 
-void sceneAnimatorDeserialize(struct Serializer* serializer, struct Scene* scene) {
+static void sceneAnimatorDeserialize(struct Serializer* serializer, struct Scene* scene) {
     for (int i = 0; i < scene->animator.animatorCount; ++i) {
         serializeRead(serializer, &scene->animator.state[i].playbackSpeed, sizeof(float));
 
@@ -540,50 +540,76 @@ void sceneAnimatorDeserialize(struct Serializer* serializer, struct Scene* scene
     }
 }
 
-void securityCameraSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
-    u8 serializedCount = 0;
-    short heldCam = -1;
+static void securityCameraSerializeSingle(struct Serializer* serializer, SerializeAction action, struct SecurityCamera* securityCamera) {
+    action(serializer, &securityCamera->index, sizeof(uint8_t));
+
+    rigidBodySerialize(serializer, action, &securityCamera->rigidBody);
+    if (securityCamera->rigidBody.flags & RigidBodyFizzled) {
+        action(serializer, &securityCamera->fizzleTime, sizeof(float));
+    }
+}
+
+static void securityCameraSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene, struct LevelDefinition* level) {
+    uint8_t serializedCount = (level->securityCameraCount - scene->securityCameraCount);
+    int16_t heldCam = -1;
     for (int i = 0; i < scene->securityCameraCount; ++i) {
-        struct SecurityCamera* cam = &scene->securityCameras[i];
+        struct SecurityCamera* cam = scene->securityCameras[i];
         if (securityCameraIsDetached(cam)) {
             if (playerIsGrabbingObject(&scene->player, &cam->collisionObject)) {
-                heldCam = serializedCount;
+                heldCam = cam->index;
             }
             ++serializedCount;
         }
     }
-    action(serializer, &serializedCount, sizeof(u8));
-    action(serializer, &heldCam, sizeof(short));
-    
+    action(serializer, &serializedCount, sizeof(uint8_t));
+    action(serializer, &heldCam, sizeof(int16_t));
+
+    // For serializing cameras that have already been removed from the scene
+    struct SecurityCamera deadCam;
+    transformInitIdentity(&deadCam.rigidBody.transform);
+    deadCam.rigidBody.currentRoom = RIGID_BODY_NO_ROOM;
+    deadCam.rigidBody.flags = RigidBodyFizzled | RigidBodyIsSleeping;
+    deadCam.fizzleTime = 1.0f;
+
+    int lastCamIndex = -1;
     for (int i = 0; i < scene->securityCameraCount; ++i) {
-        struct SecurityCamera* cam = &scene->securityCameras[i];
-        if (securityCameraIsDetached(cam)) {
-            u8 index = i;
-            action(serializer, &index, sizeof(u8));
-            
-            rigidBodySerialize(serializer, action, &cam->rigidBody);
-            if (cam->rigidBody.flags & RigidBodyFizzled) {
-                action(serializer, &cam->fizzleTime, sizeof(float));
-            }
+        struct SecurityCamera* cam = scene->securityCameras[i];
+
+        // Serialize already-fizzled cameras
+        for (int gapIdx = lastCamIndex + 1; gapIdx < cam->index; ++gapIdx) {
+            deadCam.index = gapIdx;
+            securityCameraSerializeSingle(serializer, action, &deadCam);
         }
+
+        if (securityCameraIsDetached(cam)) {
+            securityCameraSerializeSingle(serializer, action, cam);
+        }
+
+        lastCamIndex = cam->index;
+    }
+
+    // Serialize already-fizzled cameras
+    for (int i = lastCamIndex + 1; i < level->securityCameraCount; ++i) {
+        deadCam.index = i;
+        securityCameraSerializeSingle(serializer, action, &deadCam);
     }
 }
 
-void securityCameraDeserialize(struct Serializer* serializer, struct Scene* scene) {
-    u8 serializedCount;
-    serializeRead(serializer, &serializedCount, sizeof(u8));
-    
-    short heldCam;
-    serializeRead(serializer, &heldCam, sizeof(short));
+static void securityCameraDeserialize(struct Serializer* serializer, struct Scene* scene) {
+    uint8_t serializedCount;
+    serializeRead(serializer, &serializedCount, sizeof(uint8_t));
+
+    int16_t heldCam;
+    serializeRead(serializer, &heldCam, sizeof(int16_t));
     
     for (int i = 0; i < serializedCount; ++i) {
-        u8 index;
-        serializeRead(serializer, &index, sizeof(u8));
+        uint8_t index;
+        serializeRead(serializer, &index, sizeof(uint8_t));
         if (index >= scene->securityCameraCount) {
             continue;
         }
         
-        struct SecurityCamera* cam = &scene->securityCameras[index];
+        struct SecurityCamera* cam = scene->securityCameras[index];
         
         securityCameraDetach(cam);
 
@@ -596,7 +622,7 @@ void securityCameraDeserialize(struct Serializer* serializer, struct Scene* scen
 
         collisionObjectUpdateBB(&cam->collisionObject);
 
-        if (heldCam == i) {
+        if (cam->index == heldCam) {
             playerSetGrabbing(&scene->player, &cam->collisionObject);
         }
 
@@ -604,7 +630,7 @@ void securityCameraDeserialize(struct Serializer* serializer, struct Scene* scen
     }
 }
 
-void turretSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
+static void turretSerialize(struct Serializer* serializer, SerializeAction action, struct Scene* scene) {
     short heldObject = -1;
 
     for (int i = 0; i < scene->turretCount; ++i) {
@@ -646,7 +672,7 @@ void turretSerialize(struct Serializer* serializer, SerializeAction action, stru
     }
 }
 
-void turretDeserialize(struct Serializer* serializer, struct Scene* scene) {
+static void turretDeserialize(struct Serializer* serializer, struct Scene* scene) {
     assert(scene->turretCount == 0);
     assert(scene->turrets == NULL);
 
@@ -696,7 +722,7 @@ void turretDeserialize(struct Serializer* serializer, struct Scene* scene) {
     }
 }
 
-void namedCollisionSerialize(struct Serializer* serializer, SerializeAction action, struct LevelDefinition* level) {
+static void namedCollisionSerialize(struct Serializer* serializer, SerializeAction action, struct LevelDefinition* level) {
     for (int i = 0; i < level->namedColliderCount; ++i) {
         short quadIndex = level->namedColliderIndices[i];
         struct CollisionObject* quad = &level->collisionQuads[quadIndex];
@@ -743,7 +769,7 @@ void sceneSerialize(struct Serializer* serializer, SerializeAction action, struc
     WRITE_ALIGN_CHECK;
     switchSerialize(serializer, action, scene);
     WRITE_ALIGN_CHECK;
-    securityCameraSerialize(serializer, action, scene);
+    securityCameraSerialize(serializer, action, scene, gCurrentLevel);
     WRITE_ALIGN_CHECK;
     turretSerialize(serializer, action, scene);
     WRITE_ALIGN_CHECK;
@@ -762,7 +788,7 @@ void sceneDeserialize(struct Serializer* serializer, struct Scene* scene) {
     READ_ALIGN_CHECK;
     buttonsSerializeRW(serializer, serializeRead, scene->buttons, scene->buttonCount);
     READ_ALIGN_CHECK;
-    decorDeserialize(serializer, scene);
+    decorDeserialize(serializer, scene, gCurrentLevel);
     READ_ALIGN_CHECK;
     boxDropperDeserialize(serializer, scene);
     READ_ALIGN_CHECK;

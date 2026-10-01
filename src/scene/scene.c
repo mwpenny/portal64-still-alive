@@ -282,9 +282,9 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
     }
 
     scene->securityCameraCount = gCurrentLevel->securityCameraCount;
-    scene->securityCameras = malloc(sizeof(struct SecurityCamera) * scene->securityCameraCount);
+    scene->securityCameras = malloc(sizeof(struct SecurityCamera*) * scene->securityCameraCount);
     for (int i = 0 ; i < scene->securityCameraCount; ++i) {
-        securityCameraInit(&scene->securityCameras[i], &gCurrentLevel->securityCameras[i]);
+        scene->securityCameras[i] = securityCameraNew(&gCurrentLevel->securityCameras[i], i);
     }
 
     scene->incineratorCount = gCurrentLevel->incineratorCount;
@@ -599,9 +599,9 @@ void sceneUpdateAnimatedObjects(struct Scene* scene) {
     }
 }
 
-typedef int (*FizzlableObjectUpdater)(struct Scene* scene, void* object);
+typedef int (*DeletableObjectUpdater)(struct Scene* scene, void* object);
 
-static void sceneUpdateFizzlableList(struct Scene* scene, void** list, uint8_t* count, FizzlableObjectUpdater updater) {
+static void sceneUpdateDeletableList(struct Scene* scene, void** list, uint8_t* count, DeletableObjectUpdater updater) {
     int writeIndex = 0;
 
     for (int i = 0; i < *count; ++i) {
@@ -635,6 +635,17 @@ static int sceneUpdateTurret(struct Scene* scene, void* object) {
 
     if (!turretUpdate(turret, &scene->player)) {
         turretDelete(turret);
+        return 0;
+    }
+
+    return 1;
+}
+
+static int sceneUpdateSecurityCamera(struct Scene* scene, void* object) {
+    struct SecurityCamera* securityCamera = (struct SecurityCamera*)object;
+
+    if (!securityCameraUpdate(securityCamera)) {
+        securityCameraDelete(securityCamera);
         return 0;
     }
 
@@ -727,15 +738,12 @@ void sceneUpdate(struct Scene* scene) {
     }
 
     // Objects that can fizzle need to update before the player so they become ungrabbable instantly
-    sceneUpdateFizzlableList(scene, (void**)scene->decor,   &scene->decorCount,  sceneUpdateDecorObject);
-    sceneUpdateFizzlableList(scene, (void**)scene->turrets, &scene->turretCount, sceneUpdateTurret);
+    sceneUpdateDeletableList(scene, (void**)scene->decor,           &scene->decorCount,          sceneUpdateDecorObject);
+    sceneUpdateDeletableList(scene, (void**)scene->securityCameras, &scene->securityCameraCount, sceneUpdateSecurityCamera);
+    sceneUpdateDeletableList(scene, (void**)scene->turrets,         &scene->turretCount,         sceneUpdateTurret);
 
     for (int i = 0; i < scene->clockCount; ++i) {
         clockUpdate(&scene->clocks[i]);
-    }
-
-    for (int i = 0; i < scene->securityCameraCount; ++i) {
-        securityCameraUpdate(&scene->securityCameras[i]);
     }
 
     playerUpdate(&scene->player);
@@ -856,7 +864,9 @@ void sceneQueueCheckpoint(struct Scene* scene) {
 
 
 void sceneCheckSecurityCamera(struct Scene* scene, struct Portal* portal) {
-    securityCamerasCheckPortal(scene->securityCameras, scene->securityCameraCount, &portal->collisionObject.boundingBox);
+    for (int i = 0; i < scene->securityCameraCount; ++i) {
+        securityCameraCheckPortal(scene->securityCameras[i], &portal->collisionObject.boundingBox);
+    }
 }
 
 int sceneCheckIsTouchingPortal(struct Scene* scene, int portalIndex, struct Transform* at, int surfaceIndex) {

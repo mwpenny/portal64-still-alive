@@ -66,7 +66,7 @@ struct Scene {
     struct BallLauncher* ballLaunchers;
     struct BallCatcher* ballCatchers;
     struct Clock* clocks;
-    struct SecurityCamera* securityCameras;
+    struct SecurityCamera** securityCameras;
     struct Turret** turrets;
     struct Incinerator* incinerators;
     struct SavedPortal savedPortal;
