@@ -9,6 +9,7 @@ static unsigned int sBinCount;
 static unsigned long long* sDefaultSignals;
 static unsigned long long* sPrevSignals;
 static unsigned long long* sSignals;
+static unsigned long long* sQueuedSignals;
 
 void signalsInit(unsigned int signalCount) {
     if (!signalCount) {
@@ -16,21 +17,24 @@ void signalsInit(unsigned int signalCount) {
     }
 
     sBinCount = SIGNAL_BIN_COUNT(signalCount);
-    sSignals = malloc(sizeof(unsigned long long) * sBinCount);
-    sPrevSignals = malloc(sizeof(unsigned long long) * sBinCount);
     sDefaultSignals = malloc(sizeof(unsigned long long) * sBinCount);
+    sPrevSignals = malloc(sizeof(unsigned long long) * sBinCount);
+    sSignals = malloc(sizeof(unsigned long long) * sBinCount);
+    sQueuedSignals = malloc(sizeof(unsigned long long) * sBinCount);
 
     for (int i = 0; i < sBinCount; ++i) {
         sDefaultSignals[i] = 0;
         sPrevSignals[i] = 0;
         sSignals[i] = 0;
+        sQueuedSignals[i] = 0;
     }
 }
 
 void signalsReset() {
     for (unsigned int i = 0; i < sBinCount; ++i) {
         sPrevSignals[i] = sSignals[i];
-        sSignals[i] = sDefaultSignals[i];
+        sSignals[i] = sDefaultSignals[i] ^ sQueuedSignals[i];
+        sQueuedSignals[i] = 0;
     }
 }
 
@@ -71,6 +75,19 @@ void signalsSend(unsigned int signalIndex) {
     }
 
     sSignals[bin] = (sSignals[bin] & ~mask) | ((sDefaultSignals[bin] ^ mask) & mask);
+}
+
+void signalsQueue(unsigned int signalIndex) {
+    unsigned int bin;
+    unsigned long long mask;
+
+    SIGNAL_BIN_AND_MASK(bin, mask, signalIndex);
+
+    if (bin >= sBinCount) {
+        return;
+    }
+
+    sQueuedSignals[bin] |= mask;
 }
 
 void signalsSetDefault(unsigned int signalIndex, int value) {
@@ -115,4 +132,5 @@ void signalsEvaluateOperators(struct SignalOperator* operator, unsigned int coun
 void signalsSerializeRW(struct Serializer* serializer, SerializeAction action) {
     action(serializer, sSignals, sizeof(unsigned long long) * sBinCount);
     action(serializer, sDefaultSignals, sizeof(unsigned long long) * sBinCount);
+    action(serializer, sQueuedSignals, sizeof(unsigned long long) * sBinCount);
 }

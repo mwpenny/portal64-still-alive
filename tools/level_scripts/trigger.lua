@@ -384,11 +384,15 @@ local function generate_triggers(cutscenes)
         for i = arg_idx, #trigger.arguments, 2 do
             local cutscene_name = trigger.arguments[i]
             local cutscene = cutscene_index(cutscenes, cutscene_name)
-            table.insert(triggers, {
-                signal_type_index(i, string.sub(cutscene_name, 1, 6) == "HOVER_"),
-                cutscene,
-                signals.optional_signal_index_for_name(trigger.arguments[i + 1]),
-            })
+            local signal = signals.optional_signal_index_for_name(trigger.arguments[i + 1])
+
+            if cutscene ~= -1 or signal ~= -1 then
+                table.insert(triggers, {
+                    signal_type_index(i, string.sub(cutscene_name, 1, 6) == "HOVER_"),
+                    cutscene,
+                    signal,
+                })
+            end
         end
     
         if first_mesh then

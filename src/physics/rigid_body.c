@@ -46,8 +46,7 @@ void rigidBodyUnmarkKinematic(struct RigidBody* rigidBody, float mass, float mom
 }
 
 void rigidBodyMarkFizzled(struct RigidBody* rigidBody) {
-    rigidBody->flags |= RigidBodyFizzled;
-    rigidBody->flags &= ~RigidBodyFlagsGrabbable;
+    rigidBody->flags = (rigidBody->flags & ~RigidBodyFlagsGrabbable) | RigidBodyFizzled;
 }
 
 void rigidBodyApplyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* impulse) {
