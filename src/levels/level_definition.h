@@ -444,6 +444,7 @@ struct LevelDefinition {
     short doorCount;
     short doorwayCoverCount;
     short buttonCount;
+    short signalCount;
     short signalOperatorCount;
     short decorCount;
     short fizzlerCount;

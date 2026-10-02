@@ -56,6 +56,7 @@ sk_definition_writer.add_definition("level", "struct LevelDefinition", "_geo", {
     pedestalCount = #entities.entities.pedestals,
     signage = sk_definition_writer.reference_to(entities.entities.signage, 1),
     signageCount = #entities.entities.signage,
+    signalCount = signals.get_signal_count(),
     signalOperators = sk_definition_writer.reference_to(signals.operators, 1),
     signalOperatorCount = #signals.operators,
     animations = sk_definition_writer.reference_to(animation.animated_nodes, 1),

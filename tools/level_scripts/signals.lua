@@ -46,12 +46,6 @@ local function generate_operator_data(operator)
             signal_index_for_name(operator.input[1]),
             operator.input[2] and signal_index_for_name(operator.input[2]) or -1,
         },
-        {
-            additionalInputs = {
-                operator.input[3] and signal_index_for_name(operator.input[3]) or -1,
-                operator.input[4] and signal_index_for_name(operator.input[4]) or -1,
-            }
-        },
     }
 end
 

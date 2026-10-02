@@ -1,99 +1,92 @@
-
 #include "signals.h"
 
-#include "../util/memory.h"
+#include "util/memory.h"
 
-unsigned long long* gSignals;
-unsigned long long* gPrevSignals;
-unsigned long long* gDefaultSignals;
-unsigned gSignalCount;
+#define SIGNAL_BIN_COUNT(signalCount) (((signalCount) + 63) >> 6)
+#define SIGNAL_BIN_AND_MASK(bin, mask, signalIndex) do { bin = (signalIndex) >> 6; mask = 1LL << ((signalIndex) & 63); } while (0)
 
-#define DETERMINE_BIN_AND_MASK(bin, mask, signalIndex) do { bin = (signalIndex) >> 6; mask = 1LL << ((signalIndex) & 63); } while (0)
+static unsigned int sBinCount;
+static unsigned long long* sDefaultSignals;
+static unsigned long long* sPrevSignals;
+static unsigned long long* sSignals;
 
-void signalsInit(unsigned signalCount) {
+void signalsInit(unsigned int signalCount) {
     if (!signalCount) {
-        return;
+        signalCount = 1;
     }
 
-    int binCount = SIGNAL_BIN_COUNT(signalCount);
-    gSignals = malloc(sizeof(unsigned long long) * binCount);
-    gPrevSignals = malloc(sizeof(unsigned long long) * binCount);
-    gDefaultSignals = malloc(sizeof(unsigned long long) * binCount);
-    gSignalCount = signalCount;
+    sBinCount = SIGNAL_BIN_COUNT(signalCount);
+    sSignals = malloc(sizeof(unsigned long long) * sBinCount);
+    sPrevSignals = malloc(sizeof(unsigned long long) * sBinCount);
+    sDefaultSignals = malloc(sizeof(unsigned long long) * sBinCount);
 
-    for (int i = 0; i < binCount; ++i) {
-        gDefaultSignals[i] = 0;
-        gPrevSignals[i] = 0;
-        gSignals[i] = 0;
+    for (int i = 0; i < sBinCount; ++i) {
+        sDefaultSignals[i] = 0;
+        sPrevSignals[i] = 0;
+        sSignals[i] = 0;
     }
 }
 
 void signalsReset() {
-    int binCount = SIGNAL_BIN_COUNT(gSignalCount);
-
-    for (int i = 0; i < binCount; ++i) {
-        gPrevSignals[i] = gSignals[i];
-        gSignals[i] = gDefaultSignals[i];
+    for (unsigned int i = 0; i < sBinCount; ++i) {
+        sPrevSignals[i] = sSignals[i];
+        sSignals[i] = sDefaultSignals[i];
     }
 }
 
-int signalsRead(unsigned signalIndex) {
-    unsigned bin;
+int signalsRead(unsigned int signalIndex) {
+    unsigned int bin;
     unsigned long long mask;
 
-    DETERMINE_BIN_AND_MASK(bin, mask, signalIndex);
+    SIGNAL_BIN_AND_MASK(bin, mask, signalIndex);
 
-    if (bin >= gSignalCount) {
+    if (bin >= sBinCount) {
         return 0;
     }
 
-    return (gSignals[bin] & mask) != 0;
+    return (sSignals[bin] & mask) != 0;
 }
 
-int signalsReadPrevious(unsigned signalIndex) {
-    unsigned bin;
+int signalsReadPrevious(unsigned int signalIndex) {
+    unsigned int bin;
     unsigned long long mask;
 
-    DETERMINE_BIN_AND_MASK(bin, mask, signalIndex);
+    SIGNAL_BIN_AND_MASK(bin, mask, signalIndex);
 
-    if (bin >= gSignalCount) {
+    if (bin >= sBinCount) {
         return 0;
     }
 
-    return (gPrevSignals[bin] & mask) != 0;
+    return (sPrevSignals[bin] & mask) != 0;
 }
 
-int signalCount() {
-    return gSignalCount;
-}
-
-void signalsSend(unsigned signalIndex) {
-    unsigned bin;
+void signalsSend(unsigned int signalIndex) {
+    unsigned int bin;
     unsigned long long mask;
 
-    DETERMINE_BIN_AND_MASK(bin, mask, signalIndex);
+    SIGNAL_BIN_AND_MASK(bin, mask, signalIndex);
 
-    if (bin >= gSignalCount) {
+    if (bin >= sBinCount) {
         return;
     }
 
-    gSignals[bin] = (gSignals[bin] & ~mask) | ((gDefaultSignals[bin] ^ mask) & mask);
+    sSignals[bin] = (sSignals[bin] & ~mask) | ((sDefaultSignals[bin] ^ mask) & mask);
 }
 
-void signalsSetDefault(unsigned signalIndex, int value) {
-    unsigned bin;
+void signalsSetDefault(unsigned int signalIndex, int value) {
+    unsigned int bin;
     unsigned long long mask;
 
-    DETERMINE_BIN_AND_MASK(bin, mask, signalIndex);
+    SIGNAL_BIN_AND_MASK(bin, mask, signalIndex);
 
-    if (bin >= gSignalCount) {
+    if (bin >= sBinCount) {
         return;
     }
 
-    gDefaultSignals[bin] = (gDefaultSignals[bin] & ~mask) | (value ? mask : 0);
+    sDefaultSignals[bin] = (sDefaultSignals[bin] & ~mask) | (value ? mask : 0);
 }
 
-void signalsEvaluateSignal(struct SignalOperator* operator) {
+static void evaluateOperator(struct SignalOperator* operator) {
     switch (operator->type) {
         case SignalOperatorTypeAnd:
             if (signalsRead(operator->inputSignals[0]) && signalsRead(operator->inputSignals[1])) {
@@ -110,19 +103,16 @@ void signalsEvaluateSignal(struct SignalOperator* operator) {
                 signalsSend(operator->outputSignal);
             }
             break;
-        case SignalOperatorTypeTimer:
-            break;
     }
 }
 
-void signalsEvaluateSignals(struct SignalOperator* operator, unsigned count) {
-    for (unsigned i = 0; i < count; ++i) {
-        signalsEvaluateSignal(&operator[i]);
+void signalsEvaluateOperators(struct SignalOperator* operator, unsigned int count) {
+    for (unsigned int i = 0; i < count; ++i) {
+        evaluateOperator(&operator[i]);
     }
 }
 
 void signalsSerializeRW(struct Serializer* serializer, SerializeAction action) {
-    int binCount = SIGNAL_BIN_COUNT(gSignalCount);
-    action(serializer, gSignals, sizeof(unsigned long long) * binCount);
-    action(serializer, gDefaultSignals, sizeof(unsigned long long) * binCount);
+    action(serializer, sSignals, sizeof(unsigned long long) * sBinCount);
+    action(serializer, sDefaultSignals, sizeof(unsigned long long) * sBinCount);
 }
