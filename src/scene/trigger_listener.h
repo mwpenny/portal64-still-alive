@@ -15,6 +15,7 @@ struct TriggerListener {
     short triggerIndex;
     short lastTriggerMask;
     short usedTriggerMask;
+    short usedTriggerSignalMask;
 };
 
 void triggerInit(struct TriggerListener* listener, struct Trigger* trigger, int triggerIndex);

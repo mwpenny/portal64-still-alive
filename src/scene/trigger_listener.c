@@ -43,7 +43,7 @@ static void triggerTrigger(struct CollisionObject* collisionObject, struct Colli
     }
 
     int triggerMask = triggerDetermineMask(objectEnteringTrigger);
-    if (triggerMask & listener->usedTriggerMask) {
+    if (triggerMask & listener->usedTriggerSignalMask) {
         // An object activating a signal should not sleep
         objectEnteringTrigger->body->sleepFrames = IDLE_SLEEP_FRAMES;
     }
@@ -77,10 +77,15 @@ void triggerInit(struct TriggerListener* listener, struct Trigger* trigger, int 
 
     listener->lastTriggerMask = 0;
     listener->usedTriggerMask = 0;
+    listener->usedTriggerSignalMask = 0;
 
     for (int i = 0; i < trigger->triggerCount; ++i) {
         struct ObjectTriggerInfo* triggerInfo = &trigger->triggers[i];
         int mask = TRIGGER_TYPE_TO_MASK(triggerInfo->objectType);
+
+        if (triggerInfo->signalIndex != -1) {
+            listener->usedTriggerSignalMask |= mask;
+        }
         listener->usedTriggerMask |= mask;
     }
 }
