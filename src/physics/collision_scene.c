@@ -338,7 +338,7 @@ static void collisionSceneUpdatePortalSides(int portalIndex) {
     for (int i = 0; i < gCollisionScene.dynamicObjectCount; ++i) {
         struct CollisionObject* object = gCollisionScene.dynamicObjects[i];
 
-        if (object->body->flags & RigidBodyIsKinematic) {
+        if ((object->body->flags & (RigidBodyIsKinematic | RigidBodyIsPlayer)) == RigidBodyIsKinematic) {
             continue;
         }
 
