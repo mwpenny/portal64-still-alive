@@ -20,17 +20,17 @@
     #define MAX_COMMANDS      25  // The max amount of user defined commands possible
 
     // USB thread definitions (libultra only)
-    #define USB_THREAD_ID    14
+    #define USB_THREAD_ID    99
     #define USB_THREAD_PRI   126
     #define USB_THREAD_STACK 0x2000
 
     // Fault thread definitions (libultra only)
-    #define FAULT_THREAD_ID    13
+    #define FAULT_THREAD_ID    98
     #define FAULT_THREAD_PRI   125
     #define FAULT_THREAD_STACK 0x2000
 
     // Remote debugger thread definitions (libultra only)
-    #define RDB_THREAD_ID    15
+    #define RDB_THREAD_ID    97
     #define RDB_THREAD_PRI   124
     #define RDB_THREAD_STACK 0x2000
 
