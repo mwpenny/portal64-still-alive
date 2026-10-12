@@ -16,6 +16,12 @@ struct DynamicRenderDataList* dynamicRenderListNew(struct RenderState* renderSta
     result->currentRenderStateCullingMask = 0;
     result->renderStageCount = renderStageCount;
     result->renderStages = renderStages;
+    result->visibleRooms = 0;
+
+    for (int stageIndex = 0; stageIndex < result->renderStageCount; ++stageIndex) {
+        struct RenderProps* stage = &result->renderStages[stageIndex];
+        result->visibleRooms |= stage->visiblerooms;
+    }
 
     if (collisionSceneIsPortalOpen()) {
         transformToMatrix(collisionSceneTransformToOtherPortal(0), result->portalTransforms[0], SCENE_SCALE);

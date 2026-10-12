@@ -559,7 +559,7 @@ static void collisionSceneRaycastDynamic(struct CollisionScene* scene, struct Ra
 
         struct CollisionObject* object = scene->dynamicObjects[i];
 
-        if (object->body->currentRoom != RIGID_BODY_NO_ROOM && ((1LL << object->body->currentRoom) & hit->passedRooms) == 0) {
+        if (object->body->currentRoom != ROOM_NONE && (ROOM_FLAG_FROM_INDEX(object->body->currentRoom) & hit->passedRooms) == 0) {
             continue;
         }
 
@@ -584,7 +584,7 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
     hit->distance = maxDistance;
     hit->throughPortal = NULL;
     hit->roomIndex = roomIndex;
-    hit->passedRooms = 1LL << roomIndex;
+    hit->passedRooms = ROOM_FLAG_FROM_INDEX(roomIndex);
     hit->numPortalsPassed = 0;
 
     int roomsToCheck = 5;
@@ -605,7 +605,7 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
         // Even on a miss, the raycast should report which room it ended up in
         if (roomIndex != -1) {
             hit->roomIndex = roomIndex;
-            hit->passedRooms |= 1LL << roomIndex;
+            hit->passedRooms |= ROOM_FLAG_FROM_INDEX(roomIndex);
         }
 
         --roomsToCheck;
@@ -655,7 +655,7 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
 int collisionSceneRaycastOnlyDynamic(struct CollisionScene* scene, struct Ray* ray, short collisionLayers, float maxDistance, struct RaycastHit* hit) {
     hit->distance = maxDistance;
     hit->throughPortal = NULL;
-    hit->passedRooms = 1LL << hit->roomIndex;
+    hit->passedRooms = ROOM_FLAG_FROM_INDEX(hit->roomIndex);
     hit->numPortalsPassed = 0;
 
     collisionSceneRaycastDynamic(scene, ray, collisionLayers, hit);

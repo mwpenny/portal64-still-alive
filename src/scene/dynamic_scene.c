@@ -121,7 +121,7 @@ void dynamicSceneClearFlags(int id, int flags) {
     object->flags &= ~flags;
 }
 
-void dynamicSceneSetRoomFlags(int id, u64 roomFlags) {
+void dynamicSceneSetRoomFlags(int id, uint64_t roomFlags) {
     struct DynamicSceneObject* object = dynamicSceneGetObject(id);
     if (object == NULL) {
         return;

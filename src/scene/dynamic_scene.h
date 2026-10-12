@@ -1,6 +1,8 @@
 #ifndef __DYNAMIC_SCENE_H__
 #define __DYNAMIC_SCENE_H__
 
+#include <stdint.h>
+
 #include "graphics/render_scene.h"
 #include "graphics/renderstate.h"
 #include "math/transform.h"
@@ -12,15 +14,13 @@ typedef int  (*DynamicCull)(void* data, struct FrustumCullingInformation* frustu
 typedef void (*DynamicRender)(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState);
 typedef void (*DynamicViewRender)(void* data, struct RenderScene* renderScene, struct Transform* fromView);
 
-#define MAX_DYNAMIC_SCENE_OBJECTS  64
-#define MAX_VIEW_DEPENDENT_OBJECTS 24
+#define MAX_DYNAMIC_SCENE_OBJECTS       64
+#define MAX_VIEW_DEPENDENT_OBJECTS      24
 
-#define DYNAMIC_SCENE_OBJECT_FLAGS_USED                 (1 << 0)
-#define DYNAMIC_SCENE_OBJECT_SKIP_ROOT                  (1 << 1)
+#define DYNAMIC_SCENE_OBJECT_FLAGS_USED (1 << 0)
+#define DYNAMIC_SCENE_OBJECT_SKIP_ROOT  (1 << 1)
 
-#define INVALID_DYNAMIC_OBJECT  -1
-
-#define ROOM_FLAG_FROM_INDEX(flag) (1 << (flag))
+#define INVALID_DYNAMIC_OBJECT          -1
 
 struct DynamicSceneObject {
     void* data;
@@ -31,8 +31,8 @@ struct DynamicSceneObject {
         DynamicRender renderCallback;           // For objects
         DynamicViewRender viewRenderCallback;   // For viewDependentObjects
     };
-    u16 flags;
-    u64 roomFlags;
+    uint16_t flags;
+    uint64_t roomFlags;
 };
 
 struct DynamicScene {
@@ -51,7 +51,7 @@ void dynamicSceneRemove(int id);
 void dynamicSceneSetFlags(int id, int flags);
 void dynamicSceneClearFlags(int id, int flags);
 
-void dynamicSceneSetRoomFlags(int id, u64 roomFlags);
+void dynamicSceneSetRoomFlags(int id, uint64_t roomFlags);
 void dynamicSceneSetPreciseCullingCallback(int id, DynamicCull callback);
 
 void dynamicRenderListAddData(

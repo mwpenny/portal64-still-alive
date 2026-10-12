@@ -1,8 +1,8 @@
 #include "world.h"
 
 int worldCheckDoorwayCrossings(struct World* world, struct Vector3* prevPosition, struct Vector3* position, int currentRoom) {
-    if (currentRoom == RIGID_BODY_NO_ROOM) {
-        return RIGID_BODY_NO_ROOM;
+    if (currentRoom == ROOM_NONE) {
+        return ROOM_NONE;
     }
 
     struct Room* room = &world->rooms[currentRoom];
@@ -38,8 +38,7 @@ int worldCheckDoorwayCrossings(struct World* world, struct Vector3* prevPosition
 
     return currentRoom;
 }
-
-float worldMaxDistanceInDirection(struct World* world, struct Ray* ray, u64 roomMask) {
+float worldMaxDistanceInDirection(struct World* world, struct Ray* ray, uint64_t roomMask) {
     struct Vector3 maxInDir = ray->origin;
 
     for (int i = 0; i < world->roomCount; ++i) {

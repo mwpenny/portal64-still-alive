@@ -567,7 +567,7 @@ static void securityCameraSerialize(struct Serializer* serializer, SerializeActi
     // For serializing cameras that have already been removed from the scene
     struct SecurityCamera deadCam;
     transformInitIdentity(&deadCam.rigidBody.transform);
-    deadCam.rigidBody.currentRoom = RIGID_BODY_NO_ROOM;
+    deadCam.rigidBody.currentRoom = ROOM_NONE;
     deadCam.rigidBody.flags = RigidBodyFizzled | RigidBodyIsSleeping;
     deadCam.fizzleTime = 1.0f;
 

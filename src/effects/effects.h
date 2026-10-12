@@ -16,7 +16,9 @@ void effectsParticlePlay(
     struct ParticleEffectDefinition* definition,
     struct Vector3* origin,
     struct Vector3* normal,
-    struct Transform* parent
+    struct Transform* parent,
+    int roomIndex,
+    enum ParticleCullingType cullingType
 );
 void effectsUpdate(struct Effects* effects);
 

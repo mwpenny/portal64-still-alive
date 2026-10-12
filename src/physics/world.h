@@ -1,10 +1,15 @@
 #ifndef __WORLD_H___
 #define __WORLD_H___
 
+#include <stdint.h>
+
 #include "collision_object.h"
 #include "math/box3d.h"
 #include "math/range.h"
 #include "math/ray.h"
+
+#define ROOM_FLAG_FROM_INDEX(index) (1LL << (index))
+#define ROOM_NONE                   0xffff
 
 enum DoorwayFlags {
     DoorwayFlagsOpen = (1 << 0),
@@ -30,7 +35,7 @@ struct Room {
     short* doorwayIndices;
     short doorwayCount;
 
-    u64 nonVisibleRooms;
+    uint64_t nonVisibleRooms;
 };
 
 struct World {
@@ -42,6 +47,6 @@ struct World {
 
 int worldCheckDoorwayCrossings(struct World* world, struct Vector3* prevPosition, struct Vector3* position, int currentRoom);
 
-float worldMaxDistanceInDirection(struct World* world, struct Ray* ray, u64 roomMask);
+float worldMaxDistanceInDirection(struct World* world, struct Ray* ray, uint64_t roomMask);
 
 #endif

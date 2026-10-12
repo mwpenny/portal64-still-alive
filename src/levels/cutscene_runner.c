@@ -373,7 +373,9 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 gScriptableEffects[step->playEffect.effectIndex],
                 &location->transform.position,
                 &gUp,
-                NULL
+                NULL,
+                location->roomIndex,
+                0
             );
 
             break;

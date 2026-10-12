@@ -1,6 +1,7 @@
 #ifndef __SCENE_DYNAMIC_RENDER_LIST_H__
 #define __SCENE_DYNAMIC_RENDER_LIST_H__
 
+#include <stdint.h>
 #include <ultra64.h>
 
 #include "graphics/render_scene.h"
@@ -25,6 +26,7 @@ struct DynamicRenderDataList {
     short renderStageCount;
     struct RenderProps* renderStages;
     float portalTransforms[2][4][4];
+    uint64_t visibleRooms;
 };
 
 struct DynamicRenderDataList* dynamicRenderListNew(struct RenderState* renderState, struct RenderProps* renderStages, int renderStageCount, int maxLength);

@@ -689,7 +689,9 @@ static void turretUpdateShots(struct Turret* turret, struct Player* player) {
             &gMuzzleFlash,
             &muzzleOffset,
             &lookDir,
-            &turret->rigidBody.transform
+            &turret->rigidBody.transform,
+            ROOM_NONE,
+            0
         );
     }
 

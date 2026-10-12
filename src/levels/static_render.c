@@ -117,11 +117,11 @@ void staticRenderPopulateRooms(struct FrustumCullingInformation* cullingInfo, Mt
 #define FORCE_RENDER_DOORWAY_DISTANCE   0.125f
 
 void staticRenderDetermineVisibleRooms(struct RenderProps* renderStage, struct FrustumCullingInformation* cullingInfo, u16 currentRoom, u64 nonVisibleRooms, u64* coveredDoorways) {
-    if (currentRoom == RIGID_BODY_NO_ROOM) {
+    if (currentRoom == ROOM_NONE) {
         return;
     }
 
-    u64 roomMask = 1LL << currentRoom;
+    u64 roomMask = ROOM_FLAG_FROM_INDEX(currentRoom);
     renderStage->visiblerooms |= roomMask;
 
     nonVisibleRooms |= gCurrentLevel->world.rooms[currentRoom].nonVisibleRooms | roomMask;
@@ -135,7 +135,7 @@ void staticRenderDetermineVisibleRooms(struct RenderProps* renderStage, struct F
         }
 
         int newRoom = currentRoom == doorway->roomA ? doorway->roomB : doorway->roomA;
-        u64 newRoomMask = 1LL << newRoom;
+        u64 newRoomMask = ROOM_FLAG_FROM_INDEX(newRoom);
         if (nonVisibleRooms & newRoomMask) {
             continue;
         }
@@ -172,7 +172,7 @@ void staticRenderDetermineVisibleRooms(struct RenderProps* renderStage, struct F
 }
 
 int staticRenderIsRoomVisible(u64 visibleRooms, u16 roomIndex) {
-    return (visibleRooms & (1LL << roomIndex)) != 0;
+    return (visibleRooms & ROOM_FLAG_FROM_INDEX(roomIndex)) != 0;
 }
 
 void staticRender(struct RenderProps* renderStage, struct DynamicRenderDataList* dynamicList, int stageIndex, Mtx* staticMatrices, struct Transform* staticTransforms, struct RenderState* renderState) {

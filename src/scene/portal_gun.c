@@ -239,7 +239,7 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
                 1,
                 0
             )) {
-                effectsParticlePlay(&gScene.effects, &gFailPortalSplash[i], &hit.at, &hit.normal, NULL);
+                effectsParticlePlay(&gScene.effects, &gFailPortalSplash[i], &hit.at, &hit.normal, NULL, ROOM_NONE, 0);
             }
             projectile->roomIndex = -1;
         } else {

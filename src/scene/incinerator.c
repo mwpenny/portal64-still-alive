@@ -81,6 +81,7 @@ void incineratorInit(struct Incinerator* incinerator, struct IncineratorDefiniti
     incinerator->rigidBody.transform.position = definition->position;
     incinerator->rigidBody.transform.rotation = definition->rotation;
     incinerator->rigidBody.transform.scale = gOneVec;
+    incinerator->rigidBody.currentRoom = definition->roomIndex;
 
     collisionObjectUpdateBB(&incinerator->collisionObject);
 
@@ -137,7 +138,9 @@ static void incineratorUpdateSmoke(struct Incinerator* incinerator) {
         effectDef,
         &origin,
         &gUp,
-        NULL
+        NULL,
+        incinerator->rigidBody.currentRoom,
+        0
     );
 }
 

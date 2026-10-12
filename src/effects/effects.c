@@ -13,14 +13,18 @@ void effectsParticlePlay(
     struct ParticleEffectDefinition* definition,
     struct Vector3* origin,
     struct Vector3* normal,
-    struct Transform* parent
+    struct Transform* parent,
+    int roomIndex,
+    enum ParticleCullingType cullingType
 ) {
     particleEffectPlay(
         &effects->particleEffects[effects->nextParticleEffect],
         definition,
         origin,
         normal,
-        parent
+        parent,
+        roomIndex,
+        cullingType
     );
 
     effects->nextParticleEffect = (effects->nextParticleEffect + 1) % MAX_ACTIVE_PARTICLE_EFFECTS;

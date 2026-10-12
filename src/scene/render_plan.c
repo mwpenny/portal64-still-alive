@@ -395,7 +395,7 @@ void renderPlanFinishView(struct RenderPlan* renderPlan, struct Scene* scene, st
     staticRenderDetermineVisibleRooms(properties, cullingInfo, properties->fromRoom, 0, &coveredDoorways);
 
     if (scene->hideCurrentRoom) {
-        properties->visiblerooms &= ~(1LL << properties->fromRoom);
+        properties->visiblerooms &= ~(ROOM_FLAG_FROM_INDEX(properties->fromRoom));
     }
 
     struct Ray cameraRay;
