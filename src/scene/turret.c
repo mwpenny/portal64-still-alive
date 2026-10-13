@@ -1216,6 +1216,7 @@ int turretUpdate(struct Turret* turret, struct Player* player) {
             break;
     }
 
+    laserUpdate(&turret->laser);
     turretUpdateOpenAmount(turret);
 
     if (turret->flags & TurretFlagsRotating) {

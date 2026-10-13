@@ -7,6 +7,10 @@
 
 #define LASER_MAX_BEAMS 4
 
+enum LaserFlags {
+    LaserFlagsBeamsCalculated = (1 << 0),
+};
+
 struct LaserBeam {
     struct Ray startPosition;
     struct Vector3 endPosition;
@@ -20,6 +24,7 @@ struct Laser {
 
     struct LaserBeam beams[LASER_MAX_BEAMS];
     short beamCount;
+    short flags;
 };
 
 void laserInit(struct Laser* laser, struct RigidBody* parent, struct Vector3* offset, struct Quaternion* rotation);
