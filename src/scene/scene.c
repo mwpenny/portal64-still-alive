@@ -845,8 +845,13 @@ void sceneUpdate(struct Scene* scene) {
 
     collisionSceneUpdateDynamics();
 
+    // Update objects dependent on collision
     for (int i = 0; i < scene->triggerListenerCount; ++i) {
         triggerListenerUpdate(&scene->triggerListeners[i]);
+    }
+
+    for (int i = 0; i < scene->turretCount; ++i) {
+        turretUpdateLaser(scene->turrets[i]);
     }
 
     debugSceneUpdate(scene);

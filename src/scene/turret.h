@@ -85,6 +85,7 @@ struct Turret {
 
 void turretInit(struct Turret* turret, struct TurretDefinition* definition);
 int turretUpdate(struct Turret* turret, struct Player* player);
+void turretUpdateLaser(struct Turret* turret);
 
 struct Turret* turretNew(struct TurretDefinition* definition);
 void turretDelete(struct Turret* turret);
