@@ -62,6 +62,19 @@ void rigidBodyApplyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoi
     rigidBody->flags &= ~RigidBodyIsSleeping;
 }
 
+void rigidBodyGetVisibleRooms(struct RigidBody* rigidBody, uint64_t* roomFlags) {
+    *roomFlags |= ROOM_FLAG_FROM_INDEX(rigidBody->currentRoom);
+
+    if (collisionSceneIsPortalOpen()) {
+        // Prevent flickering when going through portals to other rooms
+        if (rigidBody->flags & (RigidBodyIsTouchingPortal0 | RigidBodyWasTouchingPortal0)) {
+            *roomFlags |= ROOM_FLAG_FROM_INDEX(gCollisionScene.portalRooms[1]);
+        } else if (rigidBody->flags & (RigidBodyIsTouchingPortal1 | RigidBodyWasTouchingPortal1)) {
+            *roomFlags |= ROOM_FLAG_FROM_INDEX(gCollisionScene.portalRooms[0]);
+        }
+    }
+}
+
 #define ENERGY_SCALE_PER_STEP   0.99f
 
 void rigidBodyUpdate(struct RigidBody* rigidBody) {
@@ -70,7 +83,7 @@ void rigidBodyUpdate(struct RigidBody* rigidBody) {
     }
 
     // first check if body is ready to sleep
-    if (fabsf(rigidBody->velocity.x) < VELOCITY_SLEEP_THRESHOLD &&  fabsf(rigidBody->velocity.y) < VELOCITY_SLEEP_THRESHOLD &&  fabsf(rigidBody->velocity.z) < VELOCITY_SLEEP_THRESHOLD && 
+    if (fabsf(rigidBody->velocity.x) < VELOCITY_SLEEP_THRESHOLD &&  fabsf(rigidBody->velocity.y) < VELOCITY_SLEEP_THRESHOLD &&  fabsf(rigidBody->velocity.z) < VELOCITY_SLEEP_THRESHOLD &&
         fabsf(rigidBody->angularVelocity.x) < ANGULAR_VELOCITY_SLEEP_THRESHOLD &&  fabsf(rigidBody->angularVelocity.y) < ANGULAR_VELOCITY_SLEEP_THRESHOLD &&  fabsf(rigidBody->angularVelocity.z) < ANGULAR_VELOCITY_SLEEP_THRESHOLD) {
         --rigidBody->sleepFrames;
 
@@ -98,25 +111,7 @@ void rigidBodyUpdate(struct RigidBody* rigidBody) {
     rigidBody->flags |= RigidBodyHasWoken;
 }
 
-void rigidBodyVelocityAtLocalPoint(struct RigidBody* rigidBody, struct Vector3* localPoint, struct Vector3* worldVelocity) {
-    vector3Cross(&rigidBody->angularVelocity, localPoint, worldVelocity);
-    vector3Add(worldVelocity, &rigidBody->velocity, worldVelocity);
-}
-
-void rigidBodyVelocityAtWorldPoint(struct RigidBody* rigidBody, struct Vector3* worldPoint, struct Vector3* worldVelocity) {
-    struct Vector3 relativePos;
-    vector3Sub(worldPoint, &rigidBody->transform.position, &relativePos);
-    vector3Cross(&rigidBody->angularVelocity, &relativePos, worldVelocity);
-    vector3Add(worldVelocity, &rigidBody->velocity, worldVelocity);
-}
-
-float rigidBodyMassInverseAtLocalPoint(struct RigidBody* rigidBody, struct Vector3* localPoint, struct Vector3* normal) {
-    struct Vector3 crossPoint;
-    vector3Cross(localPoint, normal, &crossPoint);
-    return rigidBody->massInv + rigidBody->momentOfInertiaInv * vector3MagSqrd(&crossPoint);
-}
-
-void rigidBodyClampToPortal(struct RigidBody* rigidBody, struct Transform* portal, struct Vector3* localPoint) {
+static void rigidBodyClampToPortal(struct RigidBody* rigidBody, struct Transform* portal, struct Vector3* localPoint) {
     // Clamp the local point to a slightly smaller oval on the output portal
     struct Vector3 clampedLocalPoint;
     clampedLocalPoint.x = localPoint->x;
@@ -231,8 +226,8 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
     }
 
     rigidBody->flags &= ~(
-        RigidBodyFlagsInFrontPortal0 | 
-        RigidBodyFlagsInFrontPortal1 | 
+        RigidBodyFlagsInFrontPortal0 |
+        RigidBodyFlagsInFrontPortal1 |
         RigidBodyFlagsPortalsInactive |
         RigidBodyFlagsCrossedPortal0 |
         RigidBodyFlagsCrossedPortal1 |
@@ -246,7 +241,14 @@ int rigidBodyCheckPortals(struct RigidBody* rigidBody) {
     return crossedPortalNum;
 }
 
-void rigidBodyTeleport(struct RigidBody* rigidBody, struct Transform* from, struct Transform* to, struct Vector3* fromVelocity, struct Vector3* toVelocity, int toRoom) {
+void rigidBodyTeleport(
+    struct RigidBody* rigidBody,
+    struct Transform* from,
+    struct Transform* to,
+    struct Vector3* fromVelocity,
+    struct Vector3* toVelocity,
+    int toRoom
+) {
     struct Vector3 localPoint;
 
     transformPointInverseNoScale(from, &rigidBody->transform.position, &localPoint);

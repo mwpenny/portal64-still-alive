@@ -77,6 +77,12 @@ static void ballRender(void* data, struct RenderScene* renderScene, struct Trans
     renderSceneAdd(renderScene, grav_flare_model_gfx, mtx, GRAV_FLARE_INDEX, &ball->rigidBody.transform.position, NULL);
 }
 
+static void ballUpdateRoomFlags(struct Ball* ball) {
+    uint64_t roomFlags;
+    rigidBodyGetVisibleRooms(&ball->rigidBody, &roomFlags);
+    dynamicSceneSetRoomFlags(ball->dynamicId, roomFlags);
+}
+
 void ballBurnRender(void* data, struct DynamicRenderDataList* renderList, struct RenderState* renderState) {
     struct BallBurnMark* burn = (struct BallBurnMark*)data;
 
@@ -121,7 +127,7 @@ void ballInit(struct Ball* ball, struct Vector3* position, struct Vector3* veloc
         &ball->rigidBody.transform.position,
         BALL_RADIUS
     );
-    dynamicSceneSetRoomFlags(ball->dynamicId, ROOM_FLAG_FROM_INDEX(startingRoom));
+    ballUpdateRoomFlags(ball);
 
     if (ballIsActive(ball)) {
         ball->soundLoopId = soundPlayerPlay(
@@ -239,7 +245,7 @@ void ballUpdate(struct Ball* ball) {
 
     ball->rigidBody.angularVelocity = gOneVec;
 
-    dynamicSceneSetRoomFlags(ball->dynamicId, ROOM_FLAG_FROM_INDEX(ball->rigidBody.currentRoom));
+    ballUpdateRoomFlags(ball);
 
     soundPlayerSetPosition(ball->soundLoopId, &ball->rigidBody.transform.position, &ball->rigidBody.velocity);
 

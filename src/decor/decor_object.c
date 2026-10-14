@@ -39,6 +39,12 @@ static void decorObjectRender(void* data, struct DynamicRenderDataList* renderLi
     );
 }
 
+static void decorObjectUpdateRoomFlags(struct DecorObject* decorObject) {
+    uint64_t roomFlags;
+    rigidBodyGetVisibleRooms(&decorObject->rigidBody, &roomFlags);
+    dynamicSceneSetRoomFlags(decorObject->dynamicId, roomFlags);
+}
+
 static void decorObjectReset(struct DecorObject* object) {
     object->rigidBody.transform.position = object->originalPosition;
     object->rigidBody.transform.rotation = object->originalRotation;
@@ -49,6 +55,8 @@ static void decorObjectReset(struct DecorObject* object) {
     object->rigidBody.currentRoom = object->originalRoom;
     object->fizzleTime = 0.0f;
     object->collisionObject.collisionLayers = DECOR_COLLISION_LAYERS;
+
+    decorObjectUpdateRoomFlags(object);
 }
 
 void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* definition, struct Transform* at, int room) {
@@ -75,7 +83,7 @@ void decorObjectInit(struct DecorObject* object, struct DecorObjectDefinition* d
 
     dynamicAssetModelPreload(definition->dynamicModelIndex);
     object->dynamicId = dynamicSceneAdd(object, decorObjectRender, &object->rigidBody.transform.position, definition->radius);
-    dynamicSceneSetRoomFlags(object->dynamicId, ROOM_FLAG_FROM_INDEX(room));
+    decorObjectUpdateRoomFlags(object);
 
     object->fizzleTime = 0.0f;
     object->playingSound = SOUND_ID_NONE;
@@ -85,7 +93,7 @@ int decorObjectUpdate(struct DecorObject* decorObject) {
     if (decorObject->collisionObject.flags & COLLISION_OBJECT_PLAYER_STANDING) {
         decorObject->collisionObject.flags &= ~COLLISION_OBJECT_PLAYER_STANDING;
     }
-    dynamicSceneSetRoomFlags(decorObject->dynamicId, ROOM_FLAG_FROM_INDEX(decorObject->rigidBody.currentRoom));
+    decorObjectUpdateRoomFlags(decorObject);
 
     if (decorObject->playingSound != SOUND_ID_NONE) {
         soundPlayerSetPosition(
@@ -109,7 +117,6 @@ int decorObjectUpdate(struct DecorObject* decorObject) {
     } else if (fizzleResult == FizzleCheckResultEnd) {
         if (decorObject->definition->flags & DecorObjectFlagsImportant) {
             decorObjectReset(decorObject);
-            dynamicSceneSetRoomFlags(decorObject->dynamicId, ROOM_FLAG_FROM_INDEX(decorObject->rigidBody.currentRoom));
             return 1;
         }
 
@@ -128,7 +135,7 @@ int decorObjectUpdate(struct DecorObject* decorObject) {
 }
 
 void decorObjectOnDeserialize(struct DecorObject* decorObject) {
-    dynamicSceneSetRoomFlags(decorObject->dynamicId, ROOM_FLAG_FROM_INDEX(decorObject->rigidBody.currentRoom));
+    decorObjectUpdateRoomFlags(decorObject);
 }
 
 struct DecorObject* decorObjectNew(struct DecorObjectDefinition* definition, struct Transform* at, int room) {

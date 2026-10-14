@@ -360,6 +360,12 @@ static void turretRender(void* data, struct DynamicRenderDataList* renderList, s
     );
 }
 
+static void turretUpdateRoomFlags(struct Turret* turret) {
+    uint64_t roomFlags;
+    rigidBodyGetVisibleRooms(&turret->rigidBody, &roomFlags);
+    dynamicSceneSetRoomFlags(turret->dynamicId, roomFlags);
+}
+
 static void turretCheckFriendlyCollisionDialogue(struct CollisionObject* object, struct CollisionObject* other) {
     if (other->collider->data != &sTurretBaseTetrahedron &&
         other->collider->data != &sTurretBodyCapsule) {
@@ -477,7 +483,7 @@ void turretInit(struct Turret* turret, struct TurretDefinition* definition) {
     );
 
     turret->dynamicId = dynamicSceneAdd(turret, turretRender, &turret->rigidBody.transform.position, 0.75f);
-    dynamicSceneSetRoomFlags(turret->dynamicId, ROOM_FLAG_FROM_INDEX(turret->rigidBody.currentRoom));
+    turretUpdateRoomFlags(turret);
 
     quatIdent(&turret->targetRotation);
     turret->rotationSpeed = TURRET_ROTATE_SPEED;
@@ -1178,7 +1184,7 @@ int turretUpdate(struct Turret* turret, struct Player* player) {
     if (turret->collisionObject.flags & COLLISION_OBJECT_PLAYER_STANDING) {
         turret->collisionObject.flags &= ~COLLISION_OBJECT_PLAYER_STANDING;
     }
-    dynamicSceneSetRoomFlags(turret->dynamicId, ROOM_FLAG_FROM_INDEX(turret->rigidBody.currentRoom));
+    turretUpdateRoomFlags(turret);
 
     turretUpdateSounds(turret);
 
@@ -1262,5 +1268,5 @@ void turretOnDeserialize(struct Turret* turret) {
         laserRemove(&turret->laser);
     }
 
-    dynamicSceneSetRoomFlags(turret->dynamicId, ROOM_FLAG_FROM_INDEX(turret->rigidBody.currentRoom));
+    turretUpdateRoomFlags(turret);
 }
