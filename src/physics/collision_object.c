@@ -91,7 +91,7 @@ struct ContactManifold* collisionObjectCollideWithQuad(struct CollisionObject* o
         }
     }
 
-    if (collisionSceneObjectIsTouchingBehindPortal(object, &result.contactA)) {
+    if (collisionSceneObjectIsTouchingBehindPortal(object, &result.contactA, &result.normal)) {
         return NULL;
     }
 
@@ -195,7 +195,7 @@ enum SweptCollideResult collisionObjectSweptCollide(
         }
     }
 
-    if (collisionSceneObjectIsTouchingBehindPortal(object, &result->contactA)) {
+    if (collisionSceneObjectIsTouchingBehindPortal(object, &result->contactA, &result->normal)) {
         return SweptCollideResultMiss;
     }
 
@@ -302,10 +302,10 @@ void collisionObjectCollideTwoObjects(struct CollisionObject* a, struct Collisio
         return;
     }
 
-    if (collisionSceneObjectIsTouchingBehindPortal(b, &result.contactA)) {
+    if (collisionSceneObjectIsTouchingBehindPortal(b, &result.contactA, &result.normal)) {
         return;
     }
-    if (collisionSceneObjectIsTouchingBehindPortal(a, &result.contactB)) {
+    if (collisionSceneObjectIsTouchingBehindPortal(a, &result.contactB, &minusNormal)) {
         return;
     }
 
@@ -441,10 +441,10 @@ void collisionObjectCollideTwoObjectsSwept(
         return;
     }
 
-    if (collisionSceneObjectIsTouchingBehindPortal(b, &result.contactA)) {
+    if (collisionSceneObjectIsTouchingBehindPortal(b, &result.contactA, &result.normal)) {
         return;
     }
-    if (collisionSceneObjectIsTouchingBehindPortal(a, &result.contactB)) {
+    if (collisionSceneObjectIsTouchingBehindPortal(a, &result.contactB, &minusNormal)) {
         return;
     }
 

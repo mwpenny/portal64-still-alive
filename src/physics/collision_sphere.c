@@ -79,7 +79,7 @@ void collisionSphereBoundingBox(struct ColliderTypeData* typeData, struct Transf
     box->max.z = transform->position.z + sphere->radius;
 }
 
-#define SQRT_3  0.577350269f
+#define SQRT_3_INV  0.577350269f
 
 int collisionSphereMinkowskiSupport(void* data, struct Basis* basis, struct Vector3* direction, struct Vector3* output) {
     struct CollisionSphere* sphere = (struct CollisionSphere*)data;
@@ -107,10 +107,10 @@ int collisionSphereMinkowskiSupport(void* data, struct Basis* basis, struct Vect
         }
     }
 
-    float distanceCheck = fabsf(direction->x + direction->y + direction->z) * SQRT_3;
+    float distanceCheck = fabsf(direction->x + direction->y + direction->z) * SQRT_3_INV;
 
     if (distanceCheck > distance) {
-        float scaledRadius = sphere->radius * SQRT_3;
+        float scaledRadius = sphere->radius * SQRT_3_INV;
 
         result = 64;
 

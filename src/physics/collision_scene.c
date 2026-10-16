@@ -267,7 +267,7 @@ int collisionSceneObjectIsTouchingPortal(struct CollisionObject* object, int por
     );
 }
 
-int collisionSceneObjectIsTouchingBehindPortal(struct CollisionObject* object, struct Vector3* contactPoint) {
+int collisionSceneObjectIsTouchingBehindPortal(struct CollisionObject* object, struct Vector3* contactPoint, struct Vector3* contactNormal) {
     if (!collisionSceneIsPortalOpen()) {
         return 0;
     }
@@ -279,15 +279,13 @@ int collisionSceneObjectIsTouchingBehindPortal(struct CollisionObject* object, s
             continue;
         }
 
-        struct Vector3 crossing;
-        vector3Sub(&object->body->transform.position, contactPoint, &crossing);
-
         float distance;
-        if (!planeRayIntersection(&gCollisionScene.portalPlanes[i], contactPoint, &crossing, &distance)) {
+        if (!planeRayIntersection(&gCollisionScene.portalPlanes[i], contactPoint, contactNormal, &distance)) {
             continue;
         }
 
-        vector3AddScaled(contactPoint, &crossing, distance, &crossing);
+        struct Vector3 crossing;
+        vector3AddScaled(contactPoint, contactNormal, distance, &crossing);
         transformPointInverseNoScale(gCollisionScene.portalTransforms[i], &crossing, &crossing);
 
         if (collisionSceneIsPortalLocalPointInBounds(&crossing)) {
