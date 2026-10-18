@@ -63,7 +63,7 @@ void rigidBodyApplyImpulse(struct RigidBody* rigidBody, struct Vector3* worldPoi
 }
 
 void rigidBodyGetVisibleRooms(struct RigidBody* rigidBody, uint64_t* roomFlags) {
-    *roomFlags |= ROOM_FLAG_FROM_INDEX(rigidBody->currentRoom);
+    *roomFlags = ROOM_FLAG_FROM_INDEX(rigidBody->currentRoom);
 
     if (collisionSceneIsPortalOpen()) {
         // Prevent flickering when going through portals to other rooms
