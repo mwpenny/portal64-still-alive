@@ -21,7 +21,6 @@ struct BallLauncher {
 };
 
 void ballLauncherInit(struct BallLauncher* launcher, struct BallLauncherDefinition* definition);
-
 void ballLauncherUpdate(struct BallLauncher* launcher);
 
 #endif

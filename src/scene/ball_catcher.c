@@ -11,6 +11,8 @@
 #include "codegen/assets/models/dynamic_animated_model_list.h"
 #include "codegen/assets/models/props/combine_ball_catcher.h"
 
+#define BALL_CATCH_VELOCITY 3.0f
+
 static struct CollisionBox sBallCatcherBox = {
     {0.5f, 0.5f, 0.5f},
 };
@@ -128,7 +130,7 @@ void ballCatcherUpdate(struct BallCatcher* catcher, struct BallLauncher* ballLau
             int reachedTarget = vector3MoveTowards(
                 &catcher->caughtBall->rigidBody.transform.position,
                 &targetPosition,
-                FIXED_DELTA_TIME * BALL_VELOCITY,
+                FIXED_DELTA_TIME * BALL_CATCH_VELOCITY,
                 &catcher->caughtBall->rigidBody.transform.position
             );
 

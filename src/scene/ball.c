@@ -14,7 +14,11 @@
 #include "codegen/assets/models/fleck_ash2.h"
 #include "codegen/assets/materials/static.h"
 
-#define BALL_RADIUS 0.1f
+#define BALL_RADIUS     0.1f
+#define BALL_FADE_TIME  3.0f
+#define BALL_FADE_MIN   0.4f
+
+#define MAX_BURN_MARKS  6
 
 static struct CollisionBox sBallCollisionBox = {
     {BALL_RADIUS, BALL_RADIUS, BALL_RADIUS}
@@ -71,10 +75,23 @@ static void ballRender(void* data, struct RenderScene* renderScene, struct Trans
     vector3Scale(&gOneVec, &transform.scale, BALL_RADIUS);
 
     Mtx* mtx = renderStateRequestMatrices(renderScene->renderState, 1);
-
     transformToMatrixL(&transform, mtx, SCENE_SCALE);
 
-    renderSceneAdd(renderScene, grav_flare_model_gfx, mtx, GRAV_FLARE_INDEX, &ball->rigidBody.transform.position, NULL);
+    float opacity;
+    if (ball->lifetime <= 0.0f || ball->lifetime >= BALL_FADE_TIME) {
+        opacity = 1.0f;
+    } else {
+        opacity = mathfLerp(BALL_FADE_MIN, 1.0f, ball->lifetime * (1.0f / BALL_FADE_TIME));
+    }
+
+    Gfx* dl = renderStateAllocateDLChunk(renderScene->renderState, 3);
+    Gfx* curr = dl;
+
+    gDPSetPrimColor(curr++, 255, 255, 0, 0, 0, opacity * 255.0f);
+    gSPDisplayList(curr++, grav_flare_model_gfx);
+    gSPEndDisplayList(curr++);
+
+    renderSceneAdd(renderScene, dl, mtx, GRAV_FLARE_INDEX, &ball->rigidBody.transform.position, NULL);
 }
 
 static void ballUpdateRoomFlags(struct Ball* ball) {
@@ -101,6 +118,7 @@ void ballInitInactive(struct Ball* ball) {
     ball->lifetime = 0.0f;
     ball->originalLifetime = 0.0f;
     ball->flags = 0;
+    ball->dynamicId = INVALID_DYNAMIC_OBJECT;
     ball->soundLoopId = SOUND_ID_NONE;
 }
 
@@ -150,11 +168,11 @@ void ballTurnOnCollision(struct Ball* ball) {
 void ballCheckBounced(struct Ball* ball) {
     struct ContactManifold* manifold = contactSolverNextManifold(&gContactSolver, &ball->collisionObject, NULL);
     if (!manifold || manifold->contactCount == 0) {
-        ball->flags &= ~BallJustBounced;
+        ball->flags &= ~BallFlagsJustBounced;
         return;
     }
 
-    if (ball->flags & BallJustBounced) {
+    if (ball->flags & BallFlagsJustBounced) {
         return;
     }
 
@@ -179,7 +197,7 @@ void ballCheckBounced(struct Ball* ball) {
     );
     soundPlayerPlay(soundsBallBounce, 1.5f, 1.0f, &ball->rigidBody.transform.position, &gZeroVec, SoundTypeAll);
     hudShowSubtitle(&gScene.hud, ENERGYBALL_IMPACT, SubtitleTypeCaption);
-    ball->flags |= BallJustBounced;
+    ball->flags |= BallFlagsJustBounced;
 
     if (other->body != NULL) {
         if (playerIsGrabbingObject(&gScene.player, other)) {
@@ -228,7 +246,7 @@ void ballCheckBounced(struct Ball* ball) {
 }
 
 void ballUpdate(struct Ball* ball) {
-    if (ball->targetSpeed == 0.0f || ballIsCaught(ball)) {
+    if (!ballIsActive(ball) || ballIsCaught(ball)) {
         return;
     }
 
@@ -292,6 +310,8 @@ int ballIsCaught(struct Ball* ball) {
 void ballMarkCaught(struct Ball* ball) {
     collisionSceneRemoveDynamicObject(&ball->collisionObject);
     rigidBodyMarkKinematic(&ball->rigidBody);
+    ball->rigidBody.velocity = gZeroVec;
+    ball->rigidBody.angularVelocity = gZeroVec;
     ball->flags |= BallFlagsCaught;
 
     soundPlayerStop(ball->soundLoopId);

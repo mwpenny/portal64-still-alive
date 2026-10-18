@@ -1,17 +1,12 @@
 #ifndef __SCENE_BALL_H__
 #define __SCENE_BALL_H__
 
-#include "../physics/collision_object.h"
-
-#define BALL_VELOCITY   3.0f
-#define BALL_FADE_TIME  3.0f
-
-#define MAX_BURN_MARKS  3
+#include "physics/collision_object.h"
 
 enum BallFlags {
-    BallFlagsCaught = (1 << 0),
-    BallFlagsPowering = (1 << 1),
-    BallJustBounced = (1 << 2),
+    BallFlagsCaught      = (1 << 0),
+    BallFlagsPowering    = (1 << 1),
+    BallFlagsJustBounced = (1 << 2),
 };
 
 struct BallBurnMark {
