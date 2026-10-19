@@ -351,6 +351,8 @@ static void collisionSceneUpdatePortalSides(int portalIndex) {
 }
 
 void collisionSceneSetPortal(int portalIndex, struct Transform* transform, int roomIndex, int colliderIndex) {
+    int wasOpen = collisionSceneIsPortalOpen();
+
     gCollisionScene.portalTransforms[portalIndex] = transform;
     gCollisionScene.portalRooms[portalIndex] = roomIndex;
     gCollisionScene.portalColliderIndex[portalIndex] = colliderIndex;
@@ -369,6 +371,9 @@ void collisionSceneSetPortal(int portalIndex, struct Transform* transform, int r
         }
 
         collisionSceneCheckUnwokenObjectsNearPortal(portalIndex);
+        if (!wasOpen) {
+            collisionSceneCheckUnwokenObjectsNearPortal(1 - portalIndex);
+        }
     }
 
     collisionSceneUpdatePortalSides(portalIndex);
