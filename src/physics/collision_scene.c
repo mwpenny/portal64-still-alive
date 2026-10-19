@@ -371,7 +371,7 @@ void collisionSceneSetPortal(int portalIndex, struct Transform* transform, int r
         }
 
         collisionSceneCheckUnwokenObjectsNearPortal(portalIndex);
-        if (!wasOpen) {
+        if (!wasOpen && collisionSceneIsPortalOpen()) {
             collisionSceneCheckUnwokenObjectsNearPortal(1 - portalIndex);
         }
     }
