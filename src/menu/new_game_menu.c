@@ -19,7 +19,7 @@
 #include "codegen/assets/materials/images.h"
 #include "codegen/assets/strings/strings.h"
 
-struct Chapter gChapters[] = {
+struct Chapter sChapters[] = {
     {images_chapter1_rgba_16b, 0, 0},
     {images_chapter2_rgba_16b, 2, 4},
     {images_chapter3_rgba_16b, 4, 8},
@@ -33,7 +33,7 @@ struct Chapter gChapters[] = {
     {images_chapter11_rgba_16b, -1, 19},
 };
 
-#define TOTAL_CHAPTER_COUNT ((sizeof(gChapters) / sizeof(*gChapters)))
+#define TOTAL_CHAPTER_COUNT ((sizeof(sChapters) / sizeof(*sChapters)))
 #define NEW_GAME_X          40
 #define NEW_GAME_Y          45
 
@@ -56,7 +56,7 @@ static void chapterMenuItemInit(struct ChapterMenuItem* chapterMenuItem, int x, 
 }
 
 static void chapterMenuItemSetChapter(struct ChapterMenuItem* chapterMenuItem, int chapterIndex) {
-    struct Chapter* chapter = &gChapters[chapterIndex];
+    struct Chapter* chapter = &sChapters[chapterIndex];
 
     menuFreePrerenderedDeferred(chapterMenuItem->chapterText);
     menuFreePrerenderedDeferred(chapterMenuItem->testChamberText);
@@ -65,7 +65,7 @@ static void chapterMenuItemSetChapter(struct ChapterMenuItem* chapterMenuItem, i
     sprintf(chapterText, "%s %d", translationsGet(GAMEUI_CHAPTER), chapterIndex + 1);
     chapterMenuItem->chapterText = menuBuildPrerenderedText(&gDejaVuSansFont, chapterText, chapterMenuItem->x, chapterMenuItem->y, SCREEN_WD);
 
-    textManipTestChamberMessage(chapterText, gChapters[chapterIndex].testChamberNumber);
+    textManipTestChamberMessage(chapterText, sChapters[chapterIndex].testChamberNumber);
     chapterMenuItem->testChamberText = menuBuildPrerenderedText(&gDejaVuSansFont, chapterText, chapterMenuItem->x, chapterMenuItem->y + 14, 100);
 
     if (chapter->testChamberLevelIndex >= 0) {
@@ -119,7 +119,7 @@ void newGameRebuildText(struct NewGameMenu* newGameMenu) {
 static void newGameStartSelectedChapter(struct NewGameMenu* newGameMenu) {
     gCurrentTestSubject = savefileNextTestSubject();
     levelQueueLoad(
-        gChapters[newGameMenu->selectedChapterIndex].testChamberLevelIndex,
+        sChapters[newGameMenu->selectedChapterIndex].testChamberLevelIndex,
         NULL,
         NULL,
         0 /* useCheckpoint */
@@ -139,8 +139,8 @@ enum InputCapture newGameUpdate(struct NewGameMenu* newGameMenu) {
 
     // This is done on update so if the unlock menu cheat is used it shows up right away
     while (newGameMenu->chapterCount < TOTAL_CHAPTER_COUNT &&
-            gChapters[newGameMenu->chapterCount].testChamberLevelIndex <= gSaveData.header.chapterProgressLevelIndex &&
-            gChapters[newGameMenu->chapterCount].testChamberLevelIndex > 0) {
+            sChapters[newGameMenu->chapterCount].testChamberLevelIndex <= gSaveData.header.chapterProgressLevelIndex &&
+            sChapters[newGameMenu->chapterCount].testChamberLevelIndex > 0) {
         ++newGameMenu->chapterCount;
     }
 

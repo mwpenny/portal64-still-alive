@@ -64,7 +64,7 @@ function writeBitmap(inputFile, outputFile, isDepth) {
 
 if (process.argv.length < 4) {
     console.log("Converts framebuffer data into bitmap images.\n");
-    console.log(`Usage: ${path.basename(process.argv[1])} INPUT_FILE OUTPUT_FILE [--depth]`);
+    console.log(`Usage: ${path.basename(process.argv[1])} INPUT_FILE OUTPUT_FILE [--is-depth]`);
     process.exit(1);
 }
 

@@ -123,7 +123,7 @@ int main() {
     dynamicSceneInit();
     contactSolverInit(&gContactSolver);
     portalSurfaceCleanupQueueInit();
-    
+
     levelLoadWithCallbacks(INTRO_MENU);
     controllersInit();
     controllerActionInit();
@@ -137,7 +137,7 @@ int main() {
     while (1) {
         OSScMsg *msg = NULL;
         osRecvMesg(&gfxFrameMsgQ, (OSMesg*)&msg, OS_MESG_BLOCK);
-        
+
         switch (msg->type) {
             case (OS_SC_RETRACE_MSG):
                 // control the framerate
@@ -189,14 +189,14 @@ int main() {
                 rumblePakClipUpdate();
                 controllerActionUpdate();
                 romCopyAsyncDrain();
-                
+
                 if (inputIgnore) {
                     --inputIgnore;
                 } else {
                     gSceneCallbacks->updateCallback(gSceneCallbacks->data);
                     drawingEnabled = 1;
                 }
-    
+
 #if PORTAL64_WITH_RSP_PROFILER
                 if (controllerGetButtonsDown(2, ControllerButtonDown)) {
                     struct GraphicsTask* task = &gGraphicsTasks[drawBufferIndex];
