@@ -7,17 +7,19 @@ The original repository was taken down by James at Valve's request, due to the
 build requirement on Nintendo's proprietary libultra and its consequent
 inclusion in ROM files.
 
-The [original](https://github.com/mwpenny/portal64/tree/original) branch
-contains the version history of the original repository. Active development
-occurs in the [master](https://github.com/mwpenny/portal64/tree/master) branch.
+The [original](https://github.com/mwpenny/portal64-still-alive/tree/original) branch
+contains the version history of the original repository. Active development occurs
+in the [master](https://github.com/mwpenny/portal64-still-alive/tree/master) branch.
 
 The main goals of this fork are:
-1. Remove proprietary code requirement (see [N64 Libraries](./documentation/n64_library_usage.md))
-2. Finish development of the game (see [Development Progress](./documentation/development_progress.md))
+1. Remove proprietary code requirement
+   (see [N64 Libraries](./documentation/n64_library_usage.md))
+2. Finish development of the game
+   (see [Development Progress](./documentation/development_progress.md))
 
 We do what we must because we can.
 
-![](./assets/images/readme_slideshow.gif)
+![Game screenshots](./assets/images/readme_slideshow.gif)
 
 ## Disclaimer
 
@@ -53,7 +55,7 @@ significant progress in both gameplay systems and fidelity including:
 - Eye candy (reflections, ...)
 - Much more!
 
-This is a community driven project that welcomes any and all game testers and or
+This is a community driven project that welcomes all game testers and
 [contributors](./documentation/contributing.md).
 
 ## How to Build

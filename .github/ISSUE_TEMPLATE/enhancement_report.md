@@ -1,22 +1,20 @@
 ---
-name: Enhancement/New Feature Report
+name: Enhancement Report
 about: Create a report for an enhancement or new feature
 title: ''
-labels: 'general enhancement'
+labels: 'enhancement'
 assignees: ''
 
 ---
 
-#### Version of the game 
- - Version [e.g. v0.13.0]
- - If applicable, commit id
-
-#### What is the enhancement?
-A clear and concise description of what the enhancement is.
+#### Description
+Clearly and concisely describe what the enhancement is.
 
 #### Screenshots
-If applicable, add screenshots to help explain your enhancement. 
-If it is a feature/enhancement that was in the original portal, please include screenshots or video of that as well.
+If applicable, add screenshots or videos to help explain the enhancement.
 
-#### Additional context
-Add any other context about the enhancement here.
+If it is a feature that was in the original Portal, please include screenshots
+or videos of that as well.
+
+#### Additional Context
+Include any other relevant context about the enhancement here.

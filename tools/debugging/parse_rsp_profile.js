@@ -476,11 +476,11 @@ function printHelp(options) {
     for (const [name, arg] of Object.entries(options)) {
         let argUsage = `-${arg.short}${valueName(name, arg)}`;
         if (!arg.required) {
-            argUsage = `[${argUsage.at(-1)}]`;
+            argUsage = `[${argUsage}]`;
         }
         usageLine.push(argUsage);
 
-        argLines.push([`  -${arg.short}, -${name}${valueName(name, arg)}`, arg.description]);
+        argLines.push([`  -${arg.short}, --${name}${valueName(name, arg)}`, arg.description]);
         argLinePad = Math.max(argLinePad, argLines.at(-1)[0].length);
     }
     argLinePad += 4;

@@ -1,30 +1,30 @@
 ---
 name: Bug Report
-about: Create a report for a minor bug.
+about: Create a report for a bug
 title: ''
-labels: 'general bug'
+labels: 'bug'
 assignees: ''
 
 ---
 
-#### Version of the game
- - Version [e.g. v0.13.0]
- - If applicable, commit id
+#### Game Version
+Specify the game version where the bug occurs
+(e.g. v0.13.0; include commit hash if applicable).
 
 #### Original Hardware or Emulator?
-Specify target hardware or emulator where this bug happened.
+Specify the hardware or emulator used to trigger the bug.
 
-#### What is the bug?
-A clear and concise description of what the bug is.
+#### Description
+Clearly and concisely describe what the bug is.
 
-#### Steps to reproduce the behavior:
+#### Reproduction Steps
 1. In test chamber '…'
 2. Pick up '…'
-3. Shoot Portal '…'
+3. Shoot portal '…'
 4. See error
 
 #### Screenshots
-If applicable, add screenshots to help explain your problem.
+If applicable, add screenshots or videos to help explain the bug.
 
-#### Additional context
-Add any other context about the problem here.
+#### Additional Context
+Include any other relevant context about the bug here.

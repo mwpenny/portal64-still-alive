@@ -9,10 +9,12 @@ using YAML files. Both files are located in the
 `assets/test_chambers/<level name>/` directory for each level. Dimentions are
 at 1/64 scale of the original game.
 
-Level mesh vertex colors and UV coordinates are used. Materials are only used
-for their names to look up corresponding material definitions in an `.skm.yaml`
-file (see [materials](./materials.md)). Beyond that, they just provide a visual
-approximation of what the level will look like in the game.
+Level mesh vertex colors and UV coordinates are used (see
+[documentation/levels/level_objects/static.md](../levels/level_objects/static.md)
+for details). Materials are only used for their names to look up corresponding
+material definitions in an `.skm.yaml` file (see [materials](./materials.md)).
+Beyond that, they just provide a visual approximation of what the level will
+look like in the game.
 
 Final level output currently consists of libultra display lists,
 [level object](../levels/level_objects/README.md) metadata,

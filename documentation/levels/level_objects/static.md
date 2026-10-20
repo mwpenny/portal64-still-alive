@@ -5,7 +5,7 @@ Static level geometry. Used to generate level mesh and portal surface data.
 ## Name Structure
 
 ```
-@static [no_portals|accept_portals] [indicator_lights SIGNAL_NAME] [uvtransx TRANS_X] [uvtransy TRANS_Y] [uvtransz TRANS_Z] [uvrotx ROT_X] [uvroty ROT_Y] [uvrotz ROT_Z] [uvscale SCALE] [precise_culling]
+@static [no_portals|accept_portals] [nobake] [indicator_lights SIGNAL_NAME] [uvtransx TRANS_X] [uvtransy TRANS_Y] [uvtransz TRANS_Z] [uvrotx ROT_X] [uvroty ROT_Y] [uvrotz ROT_Z] [uvscale SCALE] [precise_culling]
 ```
 
 ## Arguments
@@ -14,6 +14,7 @@ Static level geometry. Used to generate level mesh and portal surface data.
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `no_portals` (optional)                   | If specified, the surface will not be considered portalable, regardless of its material name. This argument cannot be used at the same time as `accept_portals`.                 |
 | `accept_portals` (optional)               | If specified, the surface will be considered portalable, regardless of its material name. This argument cannot be used at the same time as `no_portals`.                         |
+| `nobake` (optional)                       | If specified, vertex colors will not be updated when running the [tools/blender/bake_lighting.py](../../../tools/blender/bake_lighting.py) script.                               |
 | `indicator_lights SIGNAL_NAME` (optional) | If specified and the indicator light or door state material is used, it will be switched to the corresponding "active" variant when the specified [signal](../signals.md) is set |
 | `uvtransx TRANS_X` (optional)             | If specified and the material has `tileSizeS` and `tileSizeT` properties, translates UV coordinates by `TRANS_X` on the X axis. Defaults to 0.                                   |
 | `uvtransy TRANS_Y` (optional)             | If specified and the material has `tileSizeS` and `tileSizeT` properties, translates UV coordinates by `TRANS_Y` on the Y axis. Defaults to 0.                                   |
@@ -56,6 +57,7 @@ A mesh's UV coordinates are only used if its material does not have the
 `uvtransx`/`uvtransy`/`uvtransz`, `uvrotx`/`uvroty`/`uvrotz`, and `uvscale`
 arguments can be specified to manipulate UV maps. The
 [tools/blender/auto_uv.py](../../../tools/blender/auto_uv.py) Blender script can
-be used to generate matching UV maps to visualize how such materials will look
-in the game. After running once, it can be re-run directly or from
-`View > Generate UVs`.
+be used to generate UV maps in either case as long as the corresponding Blender
+material has `tileSizeS` and `tileSizeT` properties. Even when the UVs will be
+ignored, the script is still useful to visualize how objects will look in-game.
+After running once, it can be re-run directly or from `View > Generate UVs`.
