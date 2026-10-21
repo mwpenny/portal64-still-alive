@@ -25,9 +25,10 @@ light's color, distance, angle to the target, and energy. Vertices are only
 affected by a point light source if they are within range of its closest
 [ambient light source](./ambient.md). Either smooth or flat shading can be used.
 
-In order for an object to receive baked lighting, it must have a mesh whose
-material has the custom property `bakeType` set to `lit` in Blender. The
-materials in `assets/materials/materials.blend` are tagged appropriately.
+In order for geometry to receive baked lighting, it must not have the `nobake`
+argument in its name and its Blender material must have the `bakeType` custom
+property set to `lit`. The materials in `assets/materials/materials.blend` are
+tagged appropriately.
 
 Instead of using this approach, it is also possible to manually assign vertex
 colors to static geometry using the `Col` color attribute layer. Point light
