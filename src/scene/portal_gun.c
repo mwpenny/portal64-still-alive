@@ -28,13 +28,13 @@ struct Transform gGunTransform = {
     {1.0f, 1.0f, 1.0f},
 };
 
-void portalGunInit(struct PortalGun* portalGun, struct Player* player, int isFreshStart) {
+void portalGunInit(struct PortalGun* portalGun, struct Player* player, float fov, int isFreshStart) {
     skArmatureInit(&portalGun->armature, &portal_gun_v_portalgun_armature);
     skAnimatorInit(&portalGun->animator, portal_gun_v_portalgun_armature.numberOfBones);
     portalGun->portalGunVisible = (player->flags & (PlayerHasFirstPortalGun | PlayerHasSecondPortalGun));
     portalGun->shootAnimationTimer = 0.0;
     portalGun->shootTotalAnimationTimer = 0.0;
-    portalGun->fov = DEFAULT_PORTALGUN_FOV;
+    portalGun->fov = fov;
 
     portalGun->projectiles[0].roomIndex = -1;
     portalGun->projectiles[1].roomIndex = -1;

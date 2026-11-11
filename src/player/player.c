@@ -67,7 +67,6 @@
 
 #define MIN_ROTATE_RATE         (M_PI * 0.5f)
 #define MAX_ROTATE_RATE         (M_PI * 3.5f)
-#define ZOOM_ROTATE_SCALE       (0.5f)
 
 #define MIN_ROTATE_RATE_DELTA   (M_PI * 0.06125f)
 #define MAX_ROTATE_RATE_DELTA   MAX_ROTATE_RATE
@@ -1054,10 +1053,10 @@ static void playerShakeUpdate(struct Player* player) {
 }
 
 static void playerUpdateCamera(struct Player* player, struct Vector2* lookInput, int didPassThroughPortal) {
-    float camera_y_modifier = (player->flags & PlayerCrouched) ? -0.25f : 0.0f;
+    float cameraYModifier = (player->flags & PlayerCrouched) ? -0.25f : 0.0f;
 
     player->lookTransform.position = player->body.transform.position;
-    player->lookTransform.position.y += camera_y_modifier;
+    player->lookTransform.position.y += cameraYModifier;
     player->lookTransform.rotation = player->body.transform.rotation;
 
     // If player is shaking, shake screen
@@ -1066,7 +1065,8 @@ static void playerUpdateCamera(struct Player* player, struct Vector2* lookInput,
     // Compute yaw and pitch velocities
     float rotateRate = mathfLerp(MIN_ROTATE_RATE, MAX_ROTATE_RATE, (float)gSaveData.controls.sensitivity / 0xFFFF);
     if (gScene.isZoomedIn) {
-        rotateRate *= ZOOM_ROTATE_SCALE;
+        float zoomScale = gScene.portalGun.fov / DEFAULT_PORTAL_GUN_FOV;
+        rotateRate *= zoomScale;
     }
 
     float targetYaw = -lookInput->x * rotateRate;

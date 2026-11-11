@@ -1,7 +1,6 @@
 #include "game_menu.h"
 
 #include "menu.h"
-#include "scene/render_plan.h"
 #include "strings/translations.h"
 #include "system/controller.h"
 #include "util/memory.h"

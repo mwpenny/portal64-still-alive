@@ -5,7 +5,6 @@
 #include "level_definition.h"
 #include "scene/camera.h"
 #include "scene/dynamic_render_list.h"
-#include "scene/render_plan.h"
 
 void staticRenderDetermineVisibleRooms(
     struct RenderProps* renderStage,

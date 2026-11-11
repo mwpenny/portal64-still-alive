@@ -5,15 +5,9 @@
 #include "graphics/graphics.h"
 #include "scene.h"
 
-#define DEFAULT_FAR_PLANE       50.0f
-#define DEFAULT_NEAR_PLANE      0.125f
-
-#define DEFAULT_CAMERA_FOV      60.0f
-#define DEFAULT_PORTALGUN_FOV   42.45f
-#define ZOOM_CAMERA_SCALE       0.5f
-#define ZOOM_CAMERA_FOV         (DEFAULT_CAMERA_FOV * ZOOM_CAMERA_SCALE)
-#define ZOOM_PORTALGUN_FOV      (DEFAULT_PORTALGUN_FOV * ZOOM_CAMERA_SCALE)
-#define ZOOM_CAMERA_TIME        1.0f
+#define DEFAULT_NEAR_PLANE  0.125f
+#define DEFAULT_FAR_PLANE   50.0f
+#define DEFAULT_CAMERA_FOV  60.0f
 
 #define MAX_PORTAL_STEPS    6
 
@@ -21,7 +15,7 @@ struct RenderProps {
     struct Camera camera;
     float aspectRatio;
 
-    struct CameraMatrixInfo cameraMatrixInfo; 
+    struct CameraMatrixInfo cameraMatrixInfo;
 
     Vp* viewport;
 
@@ -56,7 +50,6 @@ struct RenderPlan {
 };
 
 void renderPlanBuild(struct RenderPlan* renderPlan, struct Scene* scene, struct RenderState* renderState);
-
 void renderPlanExecute(struct RenderPlan* renderPlan, struct Scene* scene, Mtx* staticMatrices, struct Transform* staticTransforms, struct RenderState* renderState, struct GraphicsTask* task);
 
 #endif

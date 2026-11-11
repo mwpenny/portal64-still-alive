@@ -54,6 +54,11 @@ Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 #define INTRO_FADE_TIME         1.0f
 #define INTRO_TOTAL_TIME        (INTRO_BLACK_TIME + INTRO_FADE_TIME)
 
+#define ZOOM_FOV_SCALE          0.5f
+#define ZOOM_CAMERA_FOV         (DEFAULT_CAMERA_FOV * ZOOM_FOV_SCALE)
+#define ZOOM_PORTAL_GUN_FOV     (DEFAULT_PORTAL_GUN_FOV * ZOOM_FOV_SCALE)
+#define ZOOM_TIME               1.0f
+
 void sceneUpdateListeners(struct Scene* scene);
 
 static void dynamicColliderHandleCollideStartEnd(struct CollisionObject* object, struct CollisionObject* other, struct Vector3* normal) {
@@ -139,7 +144,7 @@ void sceneInitNoPauseMenu(struct Scene* scene, int mainMenuMode) {
 
     hudInit(&scene->hud);
 
-    portalGunInit(&scene->portalGun, &scene->player, !levelLoadedFromTransition());
+    portalGunInit(&scene->portalGun, &scene->player, DEFAULT_PORTAL_GUN_FOV, !levelLoadedFromTransition());
 
     scene->camera.transform.rotation = scene->player.lookTransform.rotation;
     scene->camera.transform.position = scene->player.lookTransform.position;
@@ -656,7 +661,7 @@ void sceneUpdateCameraZoom(struct Scene* scene) {
     if (playerIsDead(&scene->player)) {
         if (scene->isZoomedIn) {
             scene->camera.fov = DEFAULT_CAMERA_FOV;
-            scene->portalGun.fov = DEFAULT_PORTALGUN_FOV;
+            scene->portalGun.fov = DEFAULT_PORTAL_GUN_FOV;
             scene->zoomTimer = 0.0f;
             scene->isZoomedIn = 0;
         }
@@ -665,7 +670,7 @@ void sceneUpdateCameraZoom(struct Scene* scene) {
     }
 
     if (controllerActionGet(ControllerActionZoom)) {
-        scene->zoomTimer = ZOOM_CAMERA_TIME;
+        scene->zoomTimer = ZOOM_TIME;
         scene->isZoomedIn ^= 1;
     }
 
@@ -673,7 +678,7 @@ void sceneUpdateCameraZoom(struct Scene* scene) {
         // Do this first to guarantee we hit <= 0 and set the proper final FOV
         scene->zoomTimer -= FIXED_DELTA_TIME;
 
-        float zoomAmount = clampf(1.0f - (scene->zoomTimer / ZOOM_CAMERA_TIME), 0.0f, 1.0f);
+        float zoomAmount = clampf(1.0f - (scene->zoomTimer / ZOOM_TIME), 0.0f, 1.0f);
 
         scene->camera.fov = mathfLerp(
             scene->camera.fov,
@@ -682,7 +687,7 @@ void sceneUpdateCameraZoom(struct Scene* scene) {
         );
         scene->portalGun.fov = mathfLerp(
             scene->portalGun.fov,
-            scene->isZoomedIn ? ZOOM_PORTALGUN_FOV : DEFAULT_PORTALGUN_FOV,
+            scene->isZoomedIn ? ZOOM_PORTAL_GUN_FOV : DEFAULT_PORTAL_GUN_FOV,
             zoomAmount
         );
     }

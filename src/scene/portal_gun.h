@@ -12,6 +12,8 @@
 #include "sk64/skeletool_animator.h"
 #include "sk64/skeletool_armature.h"
 
+#define DEFAULT_PORTAL_GUN_FOV 42.45f
+
 struct PortalGunProjectile {
     struct Ray positionDirection;
     struct Vector3 playerUp;  // Used to orient floor and ceiling portals
@@ -36,7 +38,7 @@ struct PortalGun {
     struct PortalGunProjectile projectiles[2];
 };
 
-void portalGunInit(struct PortalGun* portalGun, struct Player* player, int isFreshStart);
+void portalGunInit(struct PortalGun* portalGun, struct Player* player, float fov, int isFreshStart);
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player);
 void portalGunOnDeserialize(struct PortalGun* portalGun, struct Player* player);
 void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera, int lastFiredIndex);
