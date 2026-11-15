@@ -11,19 +11,6 @@ static OSMesgQueue* sSchedulerTaskQueue;
 
 void* gLevelSegment;
 
-#if PORTAL64_WITH_GFX_VALIDATOR
-#include "gfxvalidator/validator.h"
-#endif
-
-#if PORTAL64_WITH_DEBUGGER
-#include "debugger/debug.h"
-
-void graphicsOutputMessageToDebugger(char* message, unsigned len) {
-    debug_printf(message);
-}
-
-#endif
-
 #define RDP_OUTPUT_SIZE 0x4000
 #define LEVEL_SEGMENT   2
 
@@ -119,19 +106,6 @@ void graphicsCreateTask(struct GraphicsTask* targetTask, GraphicsCallback callba
     scTask->msgQ = &gfxFrameMsgQ;
     scTask->next = 0;
     scTask->state = 0;
-
-#if PORTAL64_WITH_GFX_VALIDATOR
-#if PORTAL64_WITH_DEBUGGER
-    struct GFXValidationResult validationResult;
-    zeroMemory(&validationResult, sizeof(struct GFXValidationResult));
-
-    if (gfxValidate(&scTask->list, renderStateMaxDLCount(renderState), &validationResult) != GFXValidatorErrorNone) {
-        gfxGenerateReadableMessage(&validationResult, graphicsOutputMessageToDebugger);
-        debug_assert(0);
-    }
-
-#endif // PORTAL64_WITH_DEBUGGER
-#endif // PORTAL64_WITH_GFX_VALIDATOR
 
     osSendMesg(sSchedulerTaskQueue, (OSMesg)scTask, OS_MESG_BLOCK);
 }

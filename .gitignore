@@ -8,7 +8,6 @@
 .vscode/
 .vs/
 build/
-gfxvalidator/
 logs/
 portal_pak_dir/
 portal_pak_modified/

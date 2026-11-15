@@ -3,7 +3,6 @@
 ###############
 
 option(DEBUGGER      "Build with support for hardware debugging")
-option(GFX_VALIDATOR "Build with display list validator")
 option(RSP_PROFILER  "Build with RSP performance profiler")
 
 add_library(engine INTERFACE)
@@ -168,17 +167,6 @@ if (DEBUGGER)
     )
     target_compile_definitions(engine INTERFACE
         PORTAL64_WITH_DEBUGGER
-    )
-endif()
-
-if (GFX_VALIDATOR)
-    target_sources(engine INTERFACE
-        gfxvalidator/command_printer.c
-        gfxvalidator/error_printer.c
-        gfxvalidator/validator.c
-    )
-    target_compile_definitions(engine INTERFACE
-        PORTAL64_WITH_GFX_VALIDATOR
     )
 endif()
 

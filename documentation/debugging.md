@@ -53,47 +53,6 @@ between GDB and the flashcart.
 8. When finished debugging (GDB disconnected, console turned off, etc.), the
    UNFLoader GDB server will need to be restarted before debugging again.
 
-### Display List Validator
-
-When hardware debugging is enabled, the game can optionally perform sanity
-checks on display lists. If a display list is deemed to be invalid, the game
-will output an error message to the UNFLoader terminal and intentionally crash.
-
-1. Clone the repository at https://github.com/lambertjamesd/gfxvalidator
-2. Copy the `gfxvalidator/gfxvalidator/` directory to `<portal64>/src/`. If done
-   correctly, the directory structure should look like:
-   ```
-   portal64/
-   └── src/
-       └── gfxvalidator/
-           ├── command_printer.c
-           ├── command_printer.h
-           ├── error_printer.c
-           ├── error_printer.h
-           ├── gfx_macros.h
-           ├── validator.c
-           └── validator.h
-   ```
-3. Configure CMake with `GFX_VALIDATOR=ON` to include the display list validator
-   code:
-    ```sh
-    cd portal64
-
-    # Replace <build_directory> with build directory name
-    cmake -DGFX_VALIDATOR=ON <build_directory>
-    ```
-4. Build the game. See [Building the Game](./building/building.md).
-    - There will be compile errors when building for the first time since there
-      is no C standard library and the validator includes `string.h`.
-    - Remove `#include <string.h>` from all gfxvalidator C files and add the
-      following to the top of `error_printer.c`:
-      ```c
-      #include "util/string.h"
-
-      #define strlen strLength
-      ```
-5. Debug as described above.
-
 ### RSP Profiler
 
 When hardware debugging is enabled, the game can optionally output display list
