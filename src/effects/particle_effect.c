@@ -124,7 +124,7 @@ static Gfx* particleEffectBuildDisplayList(struct RenderState* renderState, stru
 
         if (relativeVertex == 0) {
             // Load next batch of vertices
-            int verticesLeft = MIN(32, (effect->definition->count - i) << 2);
+            int verticesLeft = min(32, (effect->definition->count - i) << 2);
             gSPVertex(dl++, &vertices[i << 2], verticesLeft, 0);
         }
 

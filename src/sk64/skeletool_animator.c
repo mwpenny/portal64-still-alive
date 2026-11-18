@@ -177,7 +177,7 @@ void skAnimatorStep(struct SKAnimator* animator, float deltaTime) {
         if (animator->flags & SKAnimatorFlagsLoop) {
             animator->currentTime = mathfMod(animator->currentTime, duration);
         } else {
-            animator->currentTime = minf(duration, maxf(0.0f, animator->currentTime));
+            animator->currentTime = clampf(animator->currentTime, 0.0f, duration);
             animator->flags |= SKAnimatorFlagsDone;
         }
     }

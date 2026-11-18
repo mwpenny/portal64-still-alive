@@ -1,29 +1,24 @@
-
 #include "mathf.h"
 
-unsigned int gRandomSeed = 1;
+static unsigned int sRandomSeed = 1;
 
 #define MAX_INT_VALUE   0x7fff
 
 int randomInt() {
-    gRandomSeed = gRandomSeed * 22695477 + 1;
-    return (gRandomSeed >> 16) & MAX_INT_VALUE;
+    sRandomSeed = sRandomSeed * 22695477 + 1;
+    return (sRandomSeed >> 16) & MAX_INT_VALUE;
 }
 
 int randomInRange(int min, int maxPlusOne) {
     return randomInt() * (maxPlusOne - min) / (MAX_INT_VALUE + 1) + min;
 }
 
-float randomInRangef(float min, float max) {
-    return mathfRandomFloat() * (max - min) + min;
+float mathfRandomFloat() {
+    return (float)randomInt() / (float)MAX_INT_VALUE;
 }
 
-float fabsf(float input) {
-    if (input < 0) {
-        return -input;
-    } else {
-        return input;
-    }
+float randomInRangef(float min, float max) {
+    return mathfRandomFloat() * (max - min) + min;
 }
 
 float mathfLerp(float from, float to, float t) {
@@ -43,14 +38,28 @@ float mathfMoveTowards(float from, float to, float maxMove) {
     }
 }
 
-float mathfMod(float input, float divisor) {
-    float floorDivide = floorf(input / divisor);
-    return input - floorDivide * divisor;
+float mathfBounceBackLerp(float t) {
+    return -t + t * t;
+}
+
+int abs(int input) {
+    if (input < 0) {
+        return -input;
+    }
+    return input;
+}
+
+float fabsf(float input) {
+    if (input < 0.0f) {
+        return -input;
+    } else {
+        return input;
+    }
 }
 
 float floorf(float input) {
     int asint = (int)input;
-    if (input >= 0 || input == asint) {
+    if (input >= 0.0f || input == asint) {
         return asint;
     } else {
         return asint - 1;
@@ -59,19 +68,36 @@ float floorf(float input) {
 
 float ceilf(float input) {
     int asint = (int)input;
-    if (input <= 0 || input == asint) {
+    if (input <= 0.0f || input == asint) {
         return asint;
     } else {
         return asint + 1;
     }
 }
 
-float mathfBounceBackLerp(float t) {
-    return -t + t * t;
+int sign(int input) {
+    if (input > 0) {
+        return 1;
+    } else if (input < 0) {
+        return -1;
+    } else {
+        return 0;
+    }
 }
 
-float mathfRandomFloat() {
-    return (float)randomInt() / (float)MAX_INT_VALUE;
+float signf(float input) {
+    if (input > 0.0f) {
+        return 1.0f;
+    } else if (input < 0.0f) {
+        return -1.0f;
+    } else {
+        return 0.0f;
+    }
+}
+
+float mathfMod(float input, float divisor) {
+    float floorDivide = floorf(input / divisor);
+    return input - floorDivide * divisor;
 }
 
 float clampf(float input, float min, float max) {
@@ -86,32 +112,12 @@ float clampf(float input, float min, float max) {
     return input;
 }
 
-float signf(float input) {
-    if (input > 0.0f) {
-        return 1.0f;
-    } else if (input < 0.0f) {
-        return -1.0f;
-    } else {
-        return 0.0f;
-    }
+int min(int a, int b) {
+    return a < b ? a : b;
 }
 
-
-int sign(int input) {
-    if (input > 0) {
-        return 1;
-    } else if (input < 0) {
-        return -1;
-    } else {
-        return 0;
-    }
-}
-
-int abs(int input) {
-    if (input < 0) {
-        return -input;
-    }
-    return input;
+int max(int a, int b) {
+    return a > b ? a : b;
 }
 
 float minf(float a, float b) {
@@ -120,6 +126,14 @@ float minf(float a, float b) {
 
 float maxf(float a, float b) {
     return a > b ? a : b;
+}
+
+float safeInvert(float input) {
+    if (input == 0.0f) {
+        return 0.0f;
+    }
+
+    return 1.0f / input;
 }
 
 char floatTos8norm(float input) {
@@ -132,12 +146,4 @@ char floatTos8norm(float input) {
     } else {
         return (char)result;
     }
-}
-
-float safeInvert(float input) {
-    if (input == 0.0f) {
-        return 0.0f;
-    }
-
-    return 1.0f / input;
 }

@@ -499,7 +499,7 @@ void contactSolverIterate(struct ContactSolver* contactSolver) {
 
 				// Clamp impulse
 				float tempPN = c->normalImpulse;
-				c->normalImpulse = maxf( tempPN + lambda, 0.0f );
+				c->normalImpulse = maxf(tempPN + lambda, 0.0f);
 				lambda = c->normalImpulse - tempPN;
 
 				// Apply impulse

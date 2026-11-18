@@ -48,7 +48,7 @@ void graphicsCopyImage(
 
     for (int tileX = 0; tileX < tileXCount; ++tileX) {
         int currX = tileX * MAX_TILE_X;
-        int tileWidth = MIN(srcWidth - currX, MAX_TILE_X);
+        int tileWidth = min(srcWidth - currX, MAX_TILE_X);
 
         int currSrcX = srcX + currX;
         int currScreenX = screenX + currX;
@@ -61,7 +61,7 @@ void graphicsCopyImage(
 
         for (int tileY = 0; tileY < tileYCount; ++tileY) {
             int currY = tileY * MAX_TILE_Y;
-            int tileHeight = MIN(srcHeight - currY, MAX_TILE_Y);
+            int tileHeight = min(srcHeight - currY, MAX_TILE_Y);
 
             int currSrcY = srcY + currY;
             int currScreenY = screenY + currY;

@@ -186,26 +186,26 @@ int renderPlanPortal(struct RenderPlan* renderPlan, struct Scene* scene, struct 
 
         // if top left overlapping
         if ((next->minX > prevSibling->minX) && (next->minX < prevSibling->maxX) && (next->minY > prevSibling->minY) && (next->minY < prevSibling->maxY)){
-            topDiff = MAX(abs(prevSibling->maxY-next->minY), topDiff);
-            leftDiff = MAX(abs(prevSibling->maxX-next->minX), leftDiff);
+            topDiff = max(abs(prevSibling->maxY-next->minY), topDiff);
+            leftDiff = max(abs(prevSibling->maxX-next->minX), leftDiff);
         }
 
         // if top right overlapping
         if ((next->maxX > prevSibling->minX) && (next->maxX < prevSibling->maxX) && (next->minY > prevSibling->minY) && (next->minY < prevSibling->maxY)){
-            topDiff = MAX(abs(prevSibling->maxY-next->minY), topDiff);
-            rightDiff = MAX(abs(next->maxX -prevSibling->minX), rightDiff);
+            topDiff = max(abs(prevSibling->maxY-next->minY), topDiff);
+            rightDiff = max(abs(next->maxX -prevSibling->minX), rightDiff);
         }
 
         // if bottom left overlapping
         if ((next->minX > prevSibling->minX) && (next->minX < prevSibling->maxX) && (next->maxY > prevSibling->minY) && (next->maxY < prevSibling->maxY)){
-            bottomDiff = MAX(abs(next->maxY-prevSibling->minY), bottomDiff);
-            leftDiff = MAX(abs(prevSibling->maxX-next->minX), leftDiff);
+            bottomDiff = max(abs(next->maxY-prevSibling->minY), bottomDiff);
+            leftDiff = max(abs(prevSibling->maxX-next->minX), leftDiff);
         }
 
         // if bottom right overlapping
         if ((next->maxX > prevSibling->minX) && (next->maxX < prevSibling->maxX) && (next->maxY > prevSibling->minY) && (next->maxY < prevSibling->maxY)){
-            bottomDiff = MAX(abs(next->maxY-prevSibling->minY), bottomDiff);
-            rightDiff = MAX(abs(next->maxX -prevSibling->minX), rightDiff);
+            bottomDiff = max(abs(next->maxY-prevSibling->minY), bottomDiff);
+            rightDiff = max(abs(next->maxX -prevSibling->minX), rightDiff);
         }
 
         //shouldnt draw at all if fully overlapped

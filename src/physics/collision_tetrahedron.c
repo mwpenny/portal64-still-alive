@@ -11,8 +11,8 @@ int collisionTetrahedronRaycast(struct CollisionObject* object, struct Ray* ray,
         return 0;
     }
 
-    float coarseRadius = MAX(
-        MAX(tetrahedron->dimensions.x, tetrahedron->dimensions.y),
+    float coarseRadius = maxf(
+        maxf(tetrahedron->dimensions.x, tetrahedron->dimensions.y),
         tetrahedron->dimensions.z
     );
     if ((distance - coarseRadius) > maxDistance) {
@@ -55,7 +55,7 @@ float collisionTetrahedronSolidMofI(struct ColliderTypeData* typeData, float mas
     float halfWidth = tetrahedron->dimensions.x;
     float halfDepth = tetrahedron->dimensions.z;
 
-    float sideLenSqrd = (height * height) + MAX(halfWidth * halfWidth, halfDepth * halfDepth);
+    float sideLenSqrd = (height * height) + maxf(halfWidth * halfWidth, halfDepth * halfDepth);
     return mass * sideLenSqrd * (1.0f / 20.0f);
 }
 

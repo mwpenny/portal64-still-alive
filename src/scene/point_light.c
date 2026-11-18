@@ -10,15 +10,15 @@ void pointLightRecalcMaxFactor(struct PointLight* pointLight) {
     float result = 10000000.0f;
     
     if (pointLight->color.r) {
-        result = MIN(result, 255.0f / pointLight->color.r);
+        result = minf(result, 255.0f / pointLight->color.r);
     }
 
     if (pointLight->color.g) {
-        result = MIN(result, 255.0f / pointLight->color.g);
+        result = minf(result, 255.0f / pointLight->color.g);
     }
 
     if (pointLight->color.b) {
-        result = MIN(result, 255.0f / pointLight->color.b);
+        result = minf(result, 255.0f / pointLight->color.b);
     }
 
     pointLight->maxFactor = result;

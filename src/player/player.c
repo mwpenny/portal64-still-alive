@@ -741,7 +741,7 @@ static void playerApplyFriction(struct Player* player) {
         stopAccel = currentSpeed * 0.5625f;
     }
 
-    float targetSpeed = MAX(
+    float targetSpeed = maxf(
         currentSpeed - (stopAccel * PLAYER_FRICTION * FIXED_DELTA_TIME),
         0.0f
     );
@@ -758,7 +758,7 @@ static void playerAccelerate(struct Player* player, struct Vector3* targetVeloci
         struct Vector3 targetDirection;
         vector3Normalize(targetVelocity, &targetDirection);
 
-        float targetSpeed = MIN(
+        float targetSpeed = minf(
             sqrtf(vector3MagSqrd(targetVelocity)),
             maxSpeed
         );
@@ -772,7 +772,7 @@ static void playerAccelerate(struct Player* player, struct Vector3* targetVeloci
             vector3AddScaled(
                 &player->body.velocity,
                 &targetDirection,
-                MIN(acceleration * targetSpeed * FIXED_DELTA_TIME, maxAcceleration),
+                minf(acceleration * targetSpeed * FIXED_DELTA_TIME, maxAcceleration),
                 &player->body.velocity
             );
         }
