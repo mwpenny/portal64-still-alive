@@ -2,7 +2,6 @@
 
 #include "collision_box.h"
 #include "line.h"
-#include "math/mathf.h"
 
 #define EDGE_ZERO_BIAS  0.001f
 

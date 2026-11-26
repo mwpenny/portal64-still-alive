@@ -2,7 +2,7 @@
 
 #include "graphics/render_scene.h"
 #include "levels.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "math/rotated_box.h"
 #include "scene/signals.h"
 #include "util/memory.h"

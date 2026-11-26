@@ -1,7 +1,7 @@
 #include "soundplayer.h"
 
 #include "clips.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "savefile/savefile.h"
 #include "util/frame_time.h"
 

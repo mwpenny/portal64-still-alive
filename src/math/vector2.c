@@ -1,6 +1,6 @@
 #include "vector2.h"
 
-#include "mathf.h"
+#include "math.h"
 
 struct Vector2 gRight2 = {1.0f, 0.0f};
 struct Vector2 gUp2 = {0.0f, 1.0f};

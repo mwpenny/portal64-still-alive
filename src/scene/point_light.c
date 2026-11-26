@@ -1,6 +1,6 @@
 
 #include "graphics/graphics.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "point_light.h"
 #include "util/memory.h"
 

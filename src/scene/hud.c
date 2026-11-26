@@ -4,6 +4,7 @@
 #include "font/font.h"
 #include "graphics/graphics.h"
 #include "levels/levels.h"
+#include "math/math.h"
 #include "menu/controls.h"
 #include "savefile/savefile.h"
 #include "scene.h"

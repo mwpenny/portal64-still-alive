@@ -1,6 +1,7 @@
 #include "collision_tetrahedron.h"
 
 #include "collision_object.h"
+#include "math/math.h"
 #include "raycasting.h"
 
 int collisionTetrahedronRaycast(struct CollisionObject* object, struct Ray* ray, short collisionLayers, float maxDistance, struct RaycastHit* contact) {

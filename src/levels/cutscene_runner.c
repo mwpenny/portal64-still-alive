@@ -4,6 +4,7 @@
 #include "effects/effect_definitions.h"
 #include "levels/levels.h"
 #include "locales/locales.h"
+#include "math/math.h"
 #include "savefile/checkpoint.h"
 #include "scene/scene.h"
 #include "scene/signals.h"

@@ -1,6 +1,6 @@
 #include "epa.h"
 
-#include "math/mathf.h"
+#include "math/math.h"
 #include "math/plane.h"
 #include "util/assert.h"
 #include "util/memory.h"

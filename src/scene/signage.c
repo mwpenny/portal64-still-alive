@@ -3,6 +3,7 @@
 #include "audio/clips.h"
 #include "graphics/color.h"
 #include "levels/levels.h"
+#include "math/math.h"
 #include "scene/dynamic_scene.h"
 #include "scene/scene.h"
 #include "util/frame_time.h"

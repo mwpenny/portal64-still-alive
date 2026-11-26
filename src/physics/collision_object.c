@@ -1,14 +1,13 @@
 #include "collision_object.h"
 
-#include <assert.h>
-
 #include "collision_scene.h"
 #include "compound_collider.h"
 #include "contact_insertion.h"
 #include "epa.h"
 #include "gjk.h"
-#include "math/mathf.h"
 #include "mesh_collider.h"
+
+#include <assert.h>
 
 void collisionObjectInit(struct CollisionObject* object, struct ColliderTypeData *collider, struct RigidBody* body, float mass, short collisionLayers) {
     object->collider = collider;

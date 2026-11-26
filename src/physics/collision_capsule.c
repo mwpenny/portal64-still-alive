@@ -2,7 +2,7 @@
 
 #include "collision_object.h"
 #include "line.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "raycasting.h"
 
 float collisionCapsuleSolidMofI(struct ColliderTypeData* typeData, float mass) {

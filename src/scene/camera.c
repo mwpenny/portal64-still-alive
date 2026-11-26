@@ -1,7 +1,7 @@
-
 #include "camera.h"
+
 #include "graphics/graphics.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "math/transform.h"
 #include "system/display.h"
 

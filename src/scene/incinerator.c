@@ -1,6 +1,7 @@
 #include "incinerator.h"
 
 #include "effects/effect_definitions.h"
+#include "math/math.h"
 #include "physics/collision_scene.h"
 #include "scene.h"
 #include "scene/dynamic_scene.h"

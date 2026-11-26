@@ -2,7 +2,6 @@
 
 #include "graphics/render_scene.h"
 #include "hud.h"
-#include "math/mathf.h"
 #include "physics/collision_box.h"
 #include "physics/collision_scene.h"
 #include "scene.h"

@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "math/mathf.h"
+#include "math/math.h"
 #include "skeletool_animator.h"
 #include "system/cartridge.h"
 #include "util/memory.h"

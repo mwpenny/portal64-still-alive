@@ -1,6 +1,6 @@
 #include "particle_effect.h"
 
-#include "math/mathf.h"
+#include "math/math.h"
 #include "math/vector2.h"
 #include "physics/collision_scene.h"
 #include "physics/config.h"

@@ -1,5 +1,6 @@
 #include "doorway_cover.h"
 
+#include "math/math.h"
 #include "math/matrix.h"
 #include "physics/collision_scene.h"
 #include "scene/dynamic_scene.h"

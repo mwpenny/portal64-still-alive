@@ -5,7 +5,7 @@
 #include "epa.h"
 #include "gjk.h"
 #include "levels/levels.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "scene/portal.h"
 #include "util/memory.h"
 

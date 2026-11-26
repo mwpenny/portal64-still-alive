@@ -3,7 +3,7 @@
 #include "graphics/screen_clipper.h"
 #include "levels/static_render.h"
 #include "levels/levels.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "math/matrix.h"
 #include "physics/collision_scene.h"
 #include "portal_render.h"

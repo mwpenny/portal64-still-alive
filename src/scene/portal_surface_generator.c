@@ -1,6 +1,6 @@
 #include "portal_surface_generator.h"
 
-#include "math/mathf.h"
+#include "math/math.h"
 #include "math/vector2.h"
 #include "portal.h"
 #include "portal_surface_gfx.h"

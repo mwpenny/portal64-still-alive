@@ -17,7 +17,7 @@
 #include "materials/subject.h"
 #include "materials/light.h"
 #include "materials/point_light_rendered.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "menu/game_menu.h"
 #include "physics/collision_scene.h"
 #include "physics/debug_renderer.h"

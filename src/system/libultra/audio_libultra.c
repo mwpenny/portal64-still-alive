@@ -1,6 +1,6 @@
 #include "system/audio.h"
 
-#include "math/mathf.h"
+#include "math/math.h"
 #include "rsp_scheduler_libultra.h"
 #include "system/cartridge.h"
 #include "threads_libultra.h"

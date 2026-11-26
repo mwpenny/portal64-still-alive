@@ -1,8 +1,9 @@
-
 #include "quaternion.h"
-#include <ultra64.h>
+
+#include "math.h"
+
 #include <assert.h>
-#include "mathf.h"
+#include <ultra64.h>
 
 struct Quaternion gQuaternionZero = {0.0f, 0.0f, 0.0f, 0.0f};
 

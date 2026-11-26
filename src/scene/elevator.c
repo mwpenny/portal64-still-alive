@@ -4,7 +4,7 @@
 #include "audio/soundplayer.h"
 #include "controls/rumble_pak_clip.h"
 #include "levels/cutscene_runner.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "physics/collision_scene.h"
 #include "physics/mesh_collider.h"
 #include "savefile/checkpoint.h"

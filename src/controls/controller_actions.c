@@ -1,6 +1,6 @@
 #include "controller_actions.h"
 
-#include "math/mathf.h"
+#include "math/math.h"
 #include "savefile/savefile.h"
 #include "system/controller.h"
 #include "util/memory.h"

@@ -54,7 +54,7 @@ target_sources(engine INTERFACE
     math/box2d.c
     math/box3d.c
     math/boxs16.c
-    math/mathf.c
+    math/math.c
     math/matrix.c
     math/plane.c
     math/quaternion.c

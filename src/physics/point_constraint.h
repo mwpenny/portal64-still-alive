@@ -2,7 +2,6 @@
 #define __POINT_CONSTRAINT_H__
 
 #include "collision_object.h"
-#include "math/mathf.h"
 #include "rigid_body.h"
 
 struct PointConstraint {

@@ -2,7 +2,7 @@
 
 #include "decor/decor_object_list.h"
 #include "graphics/render_scene.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "physics/collision_scene.h"
 #include "scene/dynamic_scene.h"
 #include "signals.h"
@@ -15,7 +15,7 @@
 #define IMAGE_WIDTH         16
 #define IMAGE_HEIGHT        64
 
-#define FRAME_HALF_HEIGHT   1
+#define FRAME_HALF_HEIGHT   1.0f
 
 #define GFX_PER_PARTICLE(particleCount) ((particleCount) + (((particleCount) + 7) >> 3) + 1)
 

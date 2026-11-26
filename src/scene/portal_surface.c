@@ -1,12 +1,11 @@
 #include "portal_surface.h"
 
-#include "portal.h"
-#include "math/mathf.h"
+#include "levels/levels.h"
+#include "levels/level_definition.h"
 #include "math/vector2.h"
+#include "portal.h"
 #include "portal_surface_generator.h"
-#include "../levels/level_definition.h"
-#include "../levels/levels.h"
-#include "../util/memory.h"
+#include "util/memory.h"
 
 #define MAX_PENDING_PORTAL_CLEANUP  4
 

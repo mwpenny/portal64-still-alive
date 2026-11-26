@@ -1,6 +1,7 @@
 #include "image.h"
 
 #include "graphics.h"
+#include "math/math.h"
 #include "system/display.h"
 
 #define MAX_TILE_X  64

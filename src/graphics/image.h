@@ -1,8 +1,8 @@
 #ifndef _GRAPHICS_IMAGE_H
 #define _GRAPHICS_IMAGE_H
 
+#include "graphics/color.h"
 #include "renderstate.h"
-#include "../graphics/color.h"
 
 void graphicsCopyImage(
     struct RenderState* state,

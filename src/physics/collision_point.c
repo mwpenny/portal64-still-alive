@@ -2,7 +2,7 @@
 
 #include "collision_box.h"
 #include "contact_solver.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "math/transform.h"
 
 int collisionBoxCollidePoint(void* data, struct Transform* boxTransform, struct Vector3* point, struct ContactManifold* output) {

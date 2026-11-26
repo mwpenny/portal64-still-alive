@@ -1,9 +1,8 @@
+#ifndef _QUATERNION_H_
+#define _QUATERNION_H_
 
-#ifndef _QUATERNION_H
-#define _QUATERNION_H
-
-#include "vector3.h"
 #include "vector2.h"
+#include "vector3.h"
 
 struct Quaternion {
     float x, y, z, w;

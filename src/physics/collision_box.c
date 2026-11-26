@@ -1,6 +1,5 @@
 #include "collision_box.h"
 
-#include "math/mathf.h"
 #include "raycasting.h"
 
 float collisionBoxSolidMofI(struct ColliderTypeData* typeData, float mass) {

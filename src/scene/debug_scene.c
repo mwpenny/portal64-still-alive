@@ -6,6 +6,7 @@
 #include "font/font.h"
 #include "font/liberation_mono.h"
 #include "levels/levels.h"
+#include "math/math.h"
 #include "physics/collision_scene.h"
 #include "player/player.h"
 #include "system/controller.h"

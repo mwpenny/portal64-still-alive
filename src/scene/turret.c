@@ -3,6 +3,7 @@
 #include "decor/decor_object.h"
 #include "effects/effect_definitions.h"
 #include "locales/locales.h"
+#include "math/math.h"
 #include "physics/collision_scene.h"
 #include "physics/collision_capsule.h"
 #include "physics/collision_tetrahedron.h"

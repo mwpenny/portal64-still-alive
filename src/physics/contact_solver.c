@@ -2,7 +2,7 @@
 
 #include "collision_object.h"
 #include "collision_scene.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "rigid_body.h"
 #include "util/frame_time.h"
 #include "util/memory.h"

@@ -1,5 +1,5 @@
 #include "plane.h"
-#include "mathf.h"
+#include "math.h"
 
 void planeInitWithNormalAndPoint(struct Plane* plane, struct Vector3* normal, struct Vector3* point) {
     plane->normal = *normal;

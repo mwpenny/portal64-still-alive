@@ -2,7 +2,7 @@
 
 #include "levels/cutscene_runner.h"
 #include "levels/levels.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "scene/dynamic_scene.h"
 #include "util/dynamic_asset_loader.h"
 #include "util/frame_time.h"

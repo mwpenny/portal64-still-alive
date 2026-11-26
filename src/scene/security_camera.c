@@ -3,6 +3,7 @@
 #include "decor/decor_object.h"
 #include "dynamic_scene.h"
 #include "levels/cutscene_runner.h"
+#include "math/math.h"
 #include "physics/collision_box.h"
 #include "physics/collision_scene.h"
 #include "scene.h"

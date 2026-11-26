@@ -2,6 +2,7 @@
 
 #include "decor/decor_object_list.h"
 #include "levels/cutscene_runner.h"
+#include "math/math.h"
 #include "physics/collision_scene.h"
 #include "scene.h"
 

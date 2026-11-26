@@ -1,7 +1,6 @@
 #include "shadow_map.h"
 
 #include "graphics/graphics.h"
-#include "math/mathf.h"
 #include "math/matrix.h"
 #include "math/plane.h"
 #include "system/display.h"

@@ -4,7 +4,6 @@
 #include "graphics/graphics.h"
 #include "graphics/screen_clipper.h"
 #include "levels/levels.h"
-#include "math/mathf.h"
 #include "math/vector2s16.h"
 #include "physics/collision_scene.h"
 #include "portal_surface_generator.h"

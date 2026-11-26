@@ -2,7 +2,7 @@
 
 #include "audio/soundplayer.h"
 #include "font/dejavu_sans.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "strings/translations.h"
 #include "system/controller.h"
 #include "system/display.h"

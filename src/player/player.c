@@ -7,7 +7,7 @@
 #include "audio/soundplayer.h"
 #include "controls/controller_actions.h"
 #include "levels/levels.h"
-#include "math/mathf.h"
+#include "math/math.h"
 #include "physics/collision_capsule.h"
 #include "physics/collision_scene.h"
 #include "physics/collision.h"

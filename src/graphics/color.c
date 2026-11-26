@@ -1,5 +1,5 @@
 #include "color.h"
-#include "math/mathf.h"
+#include "math/math.h"
 
 struct Coloru8 gColorBlack = {0, 0, 0, 255};
 struct Coloru8 gColorWhite = {255, 255, 255, 255};

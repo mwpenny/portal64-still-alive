@@ -5,6 +5,7 @@
 #include "controls/rumble_pak_clip.h"
 #include "dynamic_scene.h"
 #include "effects/effect_definitions.h"
+#include "math/math.h"
 #include "physics/collision_scene.h"
 #include "physics/collision_box.h"
 #include "scene.h"
