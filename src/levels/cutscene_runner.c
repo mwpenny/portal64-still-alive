@@ -318,7 +318,7 @@ void cutsceneRunnerStartStep(struct CutsceneRunner* runner) {
                 playerGivePortalGun(&gScene.player, PlayerHasSecondPortalGun);
             }
 
-            portalGunDraw(&gScene.portalGun);
+            portalGunPlayDraw(&gScene.portalGun);
 
             break;
         case CutsceneStepTypePointPedestal:

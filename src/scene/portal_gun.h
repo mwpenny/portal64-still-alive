@@ -15,42 +15,56 @@
 #define DEFAULT_PORTAL_GUN_FOV 42.45f
 
 struct PortalGunProjectile {
-    struct Ray positionDirection;
-    struct Vector3 playerUp;  // Used to orient floor and ceiling portals
-    struct Vector3 effectOffset;
     struct PortalTrail trail;
+    struct Ray positionDirection;
+    struct Vector3 upDir;  // Used to orient floor and ceiling portals
+    struct Vector3 effectOffset;
 
     float distance;
     float maxDistance;
-
     short roomIndex;
 };
 
 struct PortalGun {
+    struct PortalGunProjectile projectiles[2];
     struct SKArmature armature;
     struct SKAnimator animator;
     struct Quaternion rotation;
     int portalGunVisible;
-    float shootAnimationTimer;
-    float shootTotalAnimationTimer;
+    float shootTimer;
     float fov;
-
-    struct PortalGunProjectile projectiles[2];
 };
 
 void portalGunInit(struct PortalGun* portalGun, struct Player* player, float fov, int isFreshStart);
 void portalGunUpdate(struct PortalGun* portalGun, struct Player* player);
 void portalGunOnDeserialize(struct PortalGun* portalGun, struct Player* player);
-void portalGunRenderReal(struct PortalGun* portalGun, struct RenderState* renderState, struct Camera* fromCamera, int lastFiredIndex);
+void portalGunRender(
+    struct PortalGun* portalGun,
+    struct RenderState* renderState,
+    struct Camera* fromCamera,
+    int lastFiredIndex
+);
 
-void portalGunFire(struct PortalGun* portalGun, int portalIndex, struct Ray* ray, struct Transform* lookTransform, struct Vector3* playerUp, int roomIndex);
-void portalGunFireWorld(struct PortalGun* portalGun, int portalIndex, struct Vector3* from, struct Vector3* to, int roomIndex);
+void portalGunFire(
+    struct PortalGun* portalGun,
+    int portalIndex,
+    struct Ray* ray,
+    struct Transform* lookTransform,
+    struct Vector3* upDir,
+    int roomIndex
+);
+void portalGunFireWorld(
+    struct PortalGun* portalGun,
+    int portalIndex,
+    struct Vector3* from,
+    struct Vector3* to,
+    int roomIndex
+);
 int portalGunIsFiring(struct PortalGun* portalGun);
 
-void portalGunDraw(struct PortalGun* portalGun);
-void portalGunFizzle(struct PortalGun* portalGun);
-
-void portalGunPickup(struct PortalGun* portalGun);
-void portalGunRelease(struct PortalGun* portalGun);
+void portalGunPlayDraw(struct PortalGun* portalGun);
+void portalGunPlayFizzle(struct PortalGun* portalGun);
+void portalGunPlayPickup(struct PortalGun* portalGun);
+void portalGunPlayRelease(struct PortalGun* portalGun);
 
 #endif

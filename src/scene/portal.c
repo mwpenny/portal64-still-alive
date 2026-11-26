@@ -108,12 +108,19 @@ void portalCalculateBB(struct Transform* portalTransform, struct Box3D* bb) {
     box3DExtendDirection(bb, &nextDir, bb);
 }
 
-int portalAttachToSurface(struct Portal* portal, struct PortalSurface* surface, int surfaceIndex, struct Transform* portalAt, int just_checking, int portalIndex) {
+int portalAttachToSurface(
+    struct Portal* portal,
+    struct PortalSurface* surface,
+    int surfaceIndex,
+    struct Transform* portalAt,
+    int validateOnly,
+    int portalIndex
+) {
     // determine if portal is on surface
     if (!portalSurfaceIsInside(surface, portalAt, portalIndex)) {
         return 0;
     }
-    if (just_checking){
+    if (validateOnly) {
         return 1;
     }
     // find all portal edge intersections

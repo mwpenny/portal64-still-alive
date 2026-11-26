@@ -42,7 +42,7 @@ void cheatCodeApply(enum CheatCode cheat) {
     switch (cheat) {
         case CheatCodeUnlockGun:
             playerGivePortalGun(&gScene.player, PlayerHasFirstPortalGun | PlayerHasSecondPortalGun);
-            portalGunDraw(&gScene.portalGun);
+            portalGunPlayDraw(&gScene.portalGun);
             break;
         case CheatCodeHighJump:
             playerToggleJumpImpulse(&gScene.player, 6.5f);

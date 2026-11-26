@@ -59,7 +59,64 @@ Lights1 gSceneLights = gdSPDefLights1(128, 128, 128, 128, 128, 128, 0, 127, 0);
 #define ZOOM_PORTAL_GUN_FOV     (DEFAULT_PORTAL_GUN_FOV * ZOOM_FOV_SCALE)
 #define ZOOM_TIME               1.0f
 
-void sceneUpdateListeners(struct Scene* scene);
+#define PORTAL_MAX_LISTEN_DIST  3.0f
+
+static int sceneUpdatePortalListener(struct Scene* scene, int listenerIndex, int portalIndex) {
+    struct Vector3 portalToPlayer;
+    vector3Sub(&scene->player.lookTransform.position, &scene->portals[portalIndex].rigidBody.transform.position, &portalToPlayer);
+    if (vector3MagSqrd(&portalToPlayer) > (PORTAL_MAX_LISTEN_DIST * PORTAL_MAX_LISTEN_DIST)) {
+        return 0;
+    }
+
+    // Get effective ear transform and velocity through portal
+    struct Transform* portalTransform = collisionSceneTransformToOtherPortal(portalIndex);
+
+    struct Transform listenTransform;
+    struct Vector3 listenVelocity;
+    struct Vector3 listenRight;
+    transformConcat(portalTransform, &scene->player.lookTransform, &listenTransform);
+    quatMultVector(&portalTransform->rotation, &scene->player.body.velocity, &listenVelocity);
+    quatMultVector(&listenTransform.rotation, &gRight, &listenRight);
+
+    // Effective position depends on side of portal
+    struct Vector3* portalNormal = collisionSceneGetPortalNormal(portalIndex);
+
+    float portalNormalDist = vector3Dot(&portalToPlayer, portalNormal);
+    if (portalNormalDist < 0.0f) {
+        // Mirror across portal so standing behind doesn't put the
+        // player closer to sounds. Noticeable at chamber 0 start.
+
+        struct Vector3 rotatedPortalNormal;
+        quatMultVector(&portalTransform->rotation, portalNormal, &rotatedPortalNormal);
+
+        vector3AddScaled(&listenTransform.position, &rotatedPortalNormal, -2.0f * portalNormalDist, &listenTransform.position);
+        vector3AddScaled(&listenVelocity, &rotatedPortalNormal, -2.0f * vector3Dot(&listenVelocity, &rotatedPortalNormal), &listenVelocity);
+        vector3AddScaled(&listenRight, &rotatedPortalNormal, -2.0f * vector3Dot(&listenRight, &rotatedPortalNormal), &listenRight);
+    }
+
+    soundListenerUpdate(listenerIndex, &listenTransform.position, &listenRight, &listenVelocity);
+    return 1;
+}
+
+static void sceneUpdateListeners(struct Scene* scene) {
+    struct Vector3 playerListenRight;
+    quatMultVector(&scene->player.lookTransform.rotation, &gRight, &playerListenRight);
+    soundListenerUpdate(0, &scene->player.lookTransform.position, &playerListenRight, &scene->player.body.velocity);
+
+    int listenerCount = 1;
+
+    if (collisionSceneIsPortalOpen()) {
+        if (sceneUpdatePortalListener(scene, listenerCount, 0)) {
+            ++listenerCount;
+        }
+
+        if (sceneUpdatePortalListener(scene, listenerCount, 1)) {
+            ++listenerCount;
+        }
+    }
+
+    soundListenerSetCount(listenerCount);
+}
 
 static void dynamicColliderHandleCollideStartEnd(struct CollisionObject* object, struct CollisionObject* other, struct Vector3* normal) {
     if (other->body == NULL || (other->body->flags & RigidBodyIsKinematic)) {
@@ -74,7 +131,7 @@ static void dynamicColliderHandleCollideStartEnd(struct CollisionObject* object,
     }
 }
 
-void sceneInitDynamicColliders(struct Scene* scene) {
+static void sceneInitDynamicColliders(struct Scene* scene) {
     int boxCount = gCurrentLevel->dynamicBoxCount;
 
     struct CollisionObject* colliders = malloc(sizeof(struct CollisionObject) * boxCount);
@@ -350,7 +407,7 @@ void sceneRender(struct Scene* scene, struct RenderState* renderState, struct Gr
     }
 
     if (!scene->hideHud) {
-        portalGunRenderReal(
+        portalGunRender(
             &scene->portalGun,
             renderState,
             &scene->camera,
@@ -377,7 +434,7 @@ struct RumblePakWave gFireGunRumbleWave = {
     .samplesPerSecond = 30,
 };
 
-void sceneCheckPortals(struct Scene* scene) {
+static void sceneCheckPortals(struct Scene* scene) {
     if (playerIsDead(&scene->player)) {
         sceneClosePortal(scene, 0, 0 /* playSound */);
         sceneClosePortal(scene, 1, 0 /* playSound */);
@@ -403,7 +460,6 @@ void sceneCheckPortals(struct Scene* scene) {
 
     if (fireOrange && !fireBlue && hasOrange && !playerIsGrabbing(&scene->player) && !portalGunIsFiring(&scene->portalGun)) {
         portalGunFire(&scene->portalGun, 0, &raycastRay, &scene->player.lookTransform, &playerUp, scene->player.body.currentRoom);
-        scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 0);
         soundPlayerPlay(soundsPortalgunShoot[0], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, WEAPON_PORTALGUN_FIRE_RED, SubtitleTypeCaption);
@@ -412,7 +468,6 @@ void sceneCheckPortals(struct Scene* scene) {
 
     if (((fireBlue && !fireOrange) || (!hasOrange && fireOrange)) && hasBlue && !playerIsGrabbing(&scene->player) && !portalGunIsFiring(&scene->portalGun)) {
         portalGunFire(&scene->portalGun, 1, &raycastRay, &scene->player.lookTransform, &playerUp, scene->player.body.currentRoom);
-        scene->player.flags |= PlayerJustShotPortalGun;
         hudPortalFired(&scene->hud, 1);
         soundPlayerPlay(soundsPortalgunShoot[1], 1.0f, 1.0f, NULL, NULL, SoundTypeAll);
         hudShowSubtitle(&gScene.hud, WEAPON_PORTALGUN_FIRE_BLUE, SubtitleTypeCaption);
@@ -444,7 +499,7 @@ void sceneCheckPortals(struct Scene* scene) {
 
         if (didClose) {
             rumblePakClipPlay(&gPlayerClosePortalRumble);
-            portalGunFizzle(&scene->portalGun);
+            portalGunPlayFizzle(&scene->portalGun);
             soundPlayerPlay(soundsPortalFizzle, 0.6f, 1.0f, NULL, NULL, SoundTypeAll);
             hudShowSubtitle(&gScene.hud, PORTAL_FIZZLE_MOVED, SubtitleTypeCaption);
         }
@@ -458,72 +513,13 @@ void sceneCheckPortals(struct Scene* scene) {
     portalCheckForHoles(scene->portals);
 }
 
-#define MAX_LISTEN_THROUGH_PORTAL_DISTANCE 3.0f
-
-int sceneUpdatePortalListener(struct Scene* scene, int listenerIndex, int portalIndex) {
-    struct Vector3 portalToPlayer;
-    vector3Sub(&scene->player.lookTransform.position, &scene->portals[portalIndex].rigidBody.transform.position, &portalToPlayer);
-    if (vector3MagSqrd(&portalToPlayer) > (MAX_LISTEN_THROUGH_PORTAL_DISTANCE * MAX_LISTEN_THROUGH_PORTAL_DISTANCE)) {
-        return 0;
-    }
-
-    // Get effective ear transform and velocity through portal
-    struct Transform* portalTransform = collisionSceneTransformToOtherPortal(portalIndex);
-
-    struct Transform listenTransform;
-    struct Vector3 listenVelocity;
-    struct Vector3 listenRight;
-    transformConcat(portalTransform, &scene->player.lookTransform, &listenTransform);
-    quatMultVector(&portalTransform->rotation, &scene->player.body.velocity, &listenVelocity);
-    quatMultVector(&listenTransform.rotation, &gRight, &listenRight);
-
-    // Effective position depends on side of portal
-    struct Vector3* portalNormal = collisionSceneGetPortalNormal(portalIndex);
-
-    float portalNormalDist = vector3Dot(&portalToPlayer, portalNormal);
-    if (portalNormalDist < 0.0f) {
-        // Mirror across portal so standing behind doesn't put the
-        // player closer to sounds. Noticeable at chamber 0 start.
-
-        struct Vector3 rotatedPortalNormal;
-        quatMultVector(&portalTransform->rotation, portalNormal, &rotatedPortalNormal);
-
-        vector3AddScaled(&listenTransform.position, &rotatedPortalNormal, -2.0f * portalNormalDist, &listenTransform.position);
-        vector3AddScaled(&listenVelocity, &rotatedPortalNormal, -2.0f * vector3Dot(&listenVelocity, &rotatedPortalNormal), &listenVelocity);
-        vector3AddScaled(&listenRight, &rotatedPortalNormal, -2.0f * vector3Dot(&listenRight, &rotatedPortalNormal), &listenRight);
-    }
-
-    soundListenerUpdate(listenerIndex, &listenTransform.position, &listenRight, &listenVelocity);
-    return 1;
-}
-
-void sceneUpdateListeners(struct Scene* scene) {
-    struct Vector3 playerListenRight;
-    quatMultVector(&scene->player.lookTransform.rotation, &gRight, &playerListenRight);
-    soundListenerUpdate(0, &scene->player.lookTransform.position, &playerListenRight, &scene->player.body.velocity);
-
-    int listenerCount = 1;
-
-    if (collisionSceneIsPortalOpen()) {
-        if (sceneUpdatePortalListener(scene, listenerCount, 0)) {
-            ++listenerCount;
-        }
-
-        if (sceneUpdatePortalListener(scene, listenerCount, 1)) {
-            ++listenerCount;
-        }
-    }
-
-    soundListenerSetCount(listenerCount);
-}
-
 struct Transform gRelativeElevatorTransform = {
     {0.0f, 0.0f, 0.0f},
     {0.5f, -0.5f, -0.5f, 0.5f},
     {1.0f, 1.0f, 1.0f},
 };
 
-void sceneUpdatePortalVelocity(struct Scene* scene) {
+static void sceneUpdatePortalVelocity(struct Scene* scene) {
     for (int i = 0; i < 2; ++i) {
         struct Portal* portal = &scene->portals[i];
 
@@ -556,7 +552,7 @@ void sceneUpdatePortalVelocity(struct Scene* scene) {
     }
 }
 
-int sceneCheckObjectIsTouchingPortal(struct Scene* scene, struct CollisionObject* object, int portalIndex) {
+static int sceneCheckObjectIsTouchingPortal(struct Scene* scene, struct CollisionObject* object, int portalIndex) {
     if (!gCollisionScene.portalTransforms[portalIndex] ||
         !box3DHasOverlap(&scene->portals[portalIndex].collisionObject.boundingBox, &object->boundingBox)) {
 
@@ -566,7 +562,7 @@ int sceneCheckObjectIsTouchingPortal(struct Scene* scene, struct CollisionObject
     return collisionSceneObjectIsTouchingPortal(object, portalIndex);
 }
 
-void sceneUpdateAnimatedObjects(struct Scene* scene) {
+static void sceneUpdateAnimatedObjects(struct Scene* scene) {
     for (int i = 0; i < gCurrentLevel->dynamicBoxCount; ++i) {
         struct DynamicBoxDefinition* boxDef = &gCurrentLevel->dynamicBoxes[i];
 
@@ -657,7 +653,7 @@ static int sceneUpdateSecurityCamera(struct Scene* scene, void* object) {
     return 1;
 }
 
-void sceneUpdateCameraZoom(struct Scene* scene) {
+static void sceneUpdateCameraZoom(struct Scene* scene) {
     if (playerIsDead(&scene->player)) {
         if (scene->isZoomedIn) {
             scene->camera.fov = DEFAULT_CAMERA_FOV;
@@ -871,14 +867,13 @@ void sceneQueueCheckpoint(struct Scene* scene) {
     scene->checkpointState = SceneCheckpointStateReady;
 }
 
-
-void sceneCheckSecurityCamera(struct Scene* scene, struct Portal* portal) {
+static void sceneCheckSecurityCamera(struct Scene* scene, struct Portal* portal) {
     for (int i = 0; i < scene->securityCameraCount; ++i) {
         securityCameraCheckPortal(scene->securityCameras[i], &portal->collisionObject.boundingBox);
     }
 }
 
-int sceneCheckIsTouchingPortal(struct Scene* scene, int portalIndex, struct Transform* at, int surfaceIndex) {
+static int sceneCheckIsTouchingPortal(struct Scene* scene, int portalIndex, struct Transform* at, int surfaceIndex) {
     struct Box3D transformBB;
 
     if (!gCollisionScene.portalTransforms[portalIndex] || surfaceIndex != scene->portals[portalIndex].portalSurfaceIndex) {
@@ -890,7 +885,17 @@ int sceneCheckIsTouchingPortal(struct Scene* scene, int portalIndex, struct Tran
     return box3DHasOverlap(&scene->portals[portalIndex].collisionObject.boundingBox, &transformBB);
 }
 
-int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformIndex, int portalIndex, struct PortalSurfaceMappingRange surfaceMapping, struct CollisionObject* collisionObject, int roomIndex, int fromPlayer, int just_checking) {
+int sceneOpenPortal(
+    struct Scene* scene,
+    struct Transform* at,
+    int transformIndex,
+    int portalIndex,
+    struct PortalSurfaceMappingRange surfaceMapping,
+    struct CollisionObject* collisionObject,
+    int roomIndex,
+    int fromPlayer,
+    int validateOnly
+) {
     struct Transform finalAt;
 
     struct Transform relativeToTransform;
@@ -913,8 +918,10 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
 
         struct Portal* portal = &scene->portals[portalIndex];
 
-        if (!sceneCheckIsTouchingPortal(scene, 1 - portalIndex, at, surfaceIndex) && portalAttachToSurface(portal, existingSurface, surfaceIndex, &finalAt, just_checking, portalIndex)) {
-            if (just_checking){
+        if (!sceneCheckIsTouchingPortal(scene, 1 - portalIndex, at, surfaceIndex) &&
+            portalAttachToSurface(portal, existingSurface, surfaceIndex, &finalAt, validateOnly, portalIndex)
+        ) {
+            if (validateOnly) {
                 return 1;
             }
 
@@ -987,7 +994,7 @@ int sceneOpenPortal(struct Scene* scene, struct Transform* at, int transformInde
     return 0;
 }
 
-int sceneDynamicBoxIndex(struct Scene* scene, struct CollisionObject* hitObject) {
+static int sceneDynamicBoxIndex(struct Scene* scene, struct CollisionObject* hitObject) {
     if (hitObject < scene->dynamicColliders || hitObject >= scene->dynamicColliders + gCurrentLevel->dynamicBoxCount) {
         return -1;
     }
@@ -995,7 +1002,12 @@ int sceneDynamicBoxIndex(struct Scene* scene, struct CollisionObject* hitObject)
     return hitObject - scene->dynamicColliders;
 }
 
-int sceneDetermineSurfaceMapping(struct Scene* scene, struct CollisionObject* hitObject, struct PortalSurfaceMappingRange* mappingRangeOut, int* relativeToOut) {
+static int sceneDetermineSurfaceMapping(
+    struct Scene* scene,
+    struct CollisionObject* hitObject,
+    struct PortalSurfaceMappingRange* mappingRangeOut,
+    int* relativeToOut
+) {
     int quadIndex = levelQuadIndex(hitObject);
 
     if (quadIndex != -1) {
@@ -1015,7 +1027,15 @@ int sceneDetermineSurfaceMapping(struct Scene* scene, struct CollisionObject* hi
     return 0;
 }
 
-int sceneOpenPortalFromHit(struct Scene* scene, struct Ray* ray, struct RaycastHit* hit, struct Vector3* playerUp, int portalIndex, int roomIndex, int fromPlayer, int just_checking) {
+int sceneOpenPortalFromHit(
+    struct Scene* scene,
+    struct Ray* ray,
+    struct RaycastHit* hit,
+    struct Vector3* upDir,
+    int portalIndex,
+    int fromPlayer,
+    int validateOnly
+) {
     struct PortalSurfaceMappingRange mappingRange;
     int relativeIndex = NO_TRANSFORM_INDEX;
 
@@ -1036,25 +1056,25 @@ int sceneOpenPortalFromHit(struct Scene* scene, struct Ray* ray, struct RaycastH
     if (fabsf(hit->normal.y) < 0.8) {
         quatLook(&hitDirection, &gUp, &portalLocation.rotation);
     } else {
-        struct Vector3 upDir;
+        struct Vector3 portalUpDir;
 
         if (ray->dir.y > 0.0f) {
-            vector3Negate(playerUp, &upDir);
+            vector3Negate(upDir, &portalUpDir);
         } else {
-            upDir = *playerUp;
+            portalUpDir = *upDir;
         }
 
-        quatLook(&hitDirection, &upDir, &portalLocation.rotation);
+        quatLook(&hitDirection, &portalUpDir, &portalLocation.rotation);
     }
 
-    if (!sceneOpenPortal(scene, &portalLocation, relativeIndex, portalIndex, mappingRange, hit->object, hit->roomIndex, fromPlayer, just_checking)) {
+    if (!sceneOpenPortal(scene, &portalLocation, relativeIndex, portalIndex, mappingRange, hit->object, hit->roomIndex, fromPlayer, validateOnly)) {
         if (!fromPlayer) {
             sceneClosePortal(scene, 1 - portalIndex, 1 /* playSound */);
             scene->continuouslyAttemptingPortalOpen = 1;
             scene->savedPortal.portalIndex = portalIndex;
             scene->savedPortal.ray = *ray;
-            scene->savedPortal.roomIndex = roomIndex;
-            scene->savedPortal.transformUp = *playerUp;
+            scene->savedPortal.roomIndex = hit->roomIndex;
+            scene->savedPortal.transformUp = *upDir;
         }
 
         return 0;
@@ -1065,7 +1085,15 @@ int sceneOpenPortalFromHit(struct Scene* scene, struct Ray* ray, struct RaycastH
     return 1;
 }
 
-int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* playerUp, int portalIndex, int roomIndex, int fromPlayer, int just_checking) {
+int sceneFirePortal(
+    struct Scene* scene,
+    struct Ray* ray,
+    struct Vector3* upDir,
+    int portalIndex,
+    int roomIndex,
+    int fromPlayer,
+    int validateOnly
+) {
     struct RaycastHit hit;
 
     if (!collisionSceneRaycast(&gCollisionScene, roomIndex, ray, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, 1000000.0f, 0, &hit)) {
@@ -1076,11 +1104,10 @@ int sceneFirePortal(struct Scene* scene, struct Ray* ray, struct Vector3* player
         scene,
         ray,
         &hit,
-        playerUp,
+        upDir,
         portalIndex,
-        roomIndex,
         fromPlayer,
-        just_checking
+        validateOnly
     );
 }
 

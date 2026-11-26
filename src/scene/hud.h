@@ -48,7 +48,7 @@ struct Hud {
 void hudInit(struct Hud* hud);
 
 void hudUpdate(struct Hud* hud);
-void hudUpdatePortalIndicators(struct Hud* hud, struct Ray* raycastRay,  struct Vector3* playerUp);
+void hudUpdatePortalIndicators(struct Hud* hud, struct Ray* raycastRay, struct Vector3* upDir);
 
 void hudPortalFired(struct Hud* hud, int index);
 void hudShowActionPrompt(struct Hud* hud, enum CutscenePromptType promptType);

@@ -144,14 +144,14 @@ void hudUpdate(struct Hud* hud) {
 
 }
 
-void hudUpdatePortalIndicators(struct Hud* hud, struct Ray* raycastRay,  struct Vector3* playerUp) { 
+void hudUpdatePortalIndicators(struct Hud* hud, struct Ray* raycastRay, struct Vector3* upDir) {
     hud->flags &= ~(HudFlagsLookedPortalable0 | HudFlagsLookedPortalable1);
 
     if (gScene.player.flags & PlayerHasFirstPortalGun){
-        if (sceneFirePortal(&gScene, raycastRay, playerUp, 0, gScene.player.body.currentRoom, 1, 1)) {
+        if (sceneFirePortal(&gScene, raycastRay, upDir, 0, gScene.player.body.currentRoom, 1, 1)) {
             hud->flags |= HudFlagsLookedPortalable0;
         }
-        if (sceneFirePortal(&gScene, raycastRay, playerUp, 1, gScene.player.body.currentRoom, 1, 1)) {
+        if (sceneFirePortal(&gScene, raycastRay, upDir, 1, gScene.player.body.currentRoom, 1, 1)) {
             hud->flags |= HudFlagsLookedPortalable1;
         }
     }

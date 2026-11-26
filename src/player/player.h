@@ -16,18 +16,17 @@
 #define PLAYER_MAX_HEALTH               100.0f
 
 enum PlayerFlags {
-    PlayerFlagsGrounded = (1 << 0),
-    PlayerHasFirstPortalGun = (1 << 1),
-    PlayerHasSecondPortalGun = (1 << 2),
-    PlayerCrouched = (1 << 3),
-    PlayerIsStepping = (1 << 4),
-    PlayerJustJumped = (1 << 5),
-    PlayerJustLandedFromFall = (1 << 6),
-    PlayerJustSelect = (1 << 7),
-    PlayerJustDeniedSelect = (1 << 8),
-    PlayerJustShotPortalGun = (1 << 9),
-    PlayerInCutscene = (1 << 10),
-    PlayerIsInvincible = (1 << 11),
+    PlayerFlagsGrounded         = (1 << 0),
+    PlayerHasFirstPortalGun     = (1 << 1),
+    PlayerHasSecondPortalGun    = (1 << 2),
+    PlayerCrouched              = (1 << 3),
+    PlayerIsStepping            = (1 << 4),
+    PlayerJustJumped            = (1 << 5),
+    PlayerJustLandedFromFall    = (1 << 6),
+    PlayerJustSelect            = (1 << 7),
+    PlayerJustDeniedSelect      = (1 << 8),
+    PlayerInCutscene            = (1 << 9),
+    PlayerIsInvincible          = (1 << 10),
 };
 
 struct Player {

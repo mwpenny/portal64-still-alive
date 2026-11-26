@@ -604,14 +604,14 @@ void playerSetGrabbing(struct Player* player, struct CollisionObject* object) {
         playerInitGrabRotationBase(player);
 
         hudResolvePrompt(&gScene.hud, CutscenePromptTypePickup);
-        portalGunPickup(&gScene.portalGun);
+        portalGunPlayPickup(&gScene.portalGun);
     } else if (!object && player->grabConstraint.object) {
         contactSolverRemovePointConstraint(&gContactSolver, &player->grabConstraint);
         player->grabConstraint.object = NULL;
         player->grabbingThroughPortal = 0;
 
         hudResolvePrompt(&gScene.hud, CutscenePromptTypeDrop);
-        portalGunRelease(&gScene.portalGun);
+        portalGunPlayRelease(&gScene.portalGun);
     }
 }
 
