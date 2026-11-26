@@ -2,6 +2,8 @@
 
 #include "collision_object.h"
 
+#include "codegen/assets/materials/static.h"
+
 #define SOLID_SHADE_COLOR   0, 0, 0, SHADE, 0, 0, 0, SHADE
 
 Vtx vtx_contact_solver_debug[] = {
@@ -94,4 +96,6 @@ void contactSolverDebugDraw(struct ContactSolver* contactSolver, struct RenderSt
         contactConstraintStateDebugDraw(contact, renderState);
         contact = contact->next;
     }
+
+    gSPDisplayList(renderState->dl++, static_default);
 }

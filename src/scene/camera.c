@@ -269,15 +269,16 @@ float cameraClipDistance(struct Camera* camera, float distance) {
         return 0.0f;
     }
 
+    // Inverse lerp of distance between near and far plane, using projection matrix
     return -((camera->nearPlane + camera->farPlane) * modifiedDistance + 2.0f * camera->nearPlane * camera->farPlane) / denom;
 }
 
 int fogIntValue(float floatValue) {
-    if (floatValue < -1.0) {
+    if (floatValue < -1.0f) {
         return 0;
     }
 
-    if (floatValue > 1.0) {
+    if (floatValue > 1.0f) {
         return 1000;
     }
 

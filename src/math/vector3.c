@@ -146,6 +146,12 @@ void vector3Max(struct Vector3* a, struct Vector3* b, struct Vector3* out) {
     out->z = MAX(a->z, b->z);
 }
 
+void vector3Random(struct Vector3* vector) {
+    vector->x = randomInRangef(-1.0f, 1.0f);
+    vector->y = randomInRangef(-1.0f, 1.0f);
+    vector->z = randomInRangef(-1.0f, 1.0f);
+}
+
 int vector3IsZero(struct Vector3* vector) {
     return vector->x == 0.0f && vector->y == 0.0f && vector->z == 0.0f;
 }

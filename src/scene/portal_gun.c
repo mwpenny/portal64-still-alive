@@ -228,7 +228,7 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
 
         struct RaycastHit hit;
 
-        if (collisionSceneRaycast(&gCollisionScene, projectile->roomIndex, &projectile->positionDirection, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, PORTAL_PROJECTILE_SPEED * FIXED_DELTA_TIME + 0.1f, 0, &hit)) {
+        if (collisionSceneRaycast(&gCollisionScene, projectile->roomIndex, &projectile->positionDirection, COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL, PORTAL_TRAIL_SPEED * FIXED_DELTA_TIME + 0.1f, 0, &hit)) {
             if (!sceneOpenPortalFromHit(
                 &gScene,
                 &projectile->positionDirection,
@@ -249,10 +249,10 @@ void portalGunUpdate(struct PortalGun* portalGun, struct Player* player) {
         vector3AddScaled(
             &projectile->positionDirection.origin,
             &projectile->positionDirection.dir,
-            PORTAL_PROJECTILE_SPEED * FIXED_DELTA_TIME,
+            PORTAL_TRAIL_SPEED * FIXED_DELTA_TIME,
             &projectile->positionDirection.origin
         );
-        projectile->distance += PORTAL_PROJECTILE_SPEED * FIXED_DELTA_TIME;
+        projectile->distance += PORTAL_TRAIL_SPEED * FIXED_DELTA_TIME;
     }
 }
 

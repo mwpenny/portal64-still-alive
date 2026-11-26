@@ -341,7 +341,7 @@ materials:
       b: 13
 
     gSPGeometryMode:
-      set: [G_FOG]
+      set: [G_FOG, G_SHADE]
 
     properties:
       tileSizeS: 0.5
@@ -608,9 +608,12 @@ materials:
       filename: ../../portal_pak_modified/materials/metal/metalwall_bts_006a.png
       siz: G_IM_SIZ_16b
       s:
-        wrap: false
+        wrap: true
       t:
-        wrap: false
+        wrap: true
+
+    gSPGeometryMode:
+      set: [G_FOG, G_LIGHTING, G_TEXTURE_GEN, G_TEXTURE_GEN_LINEAR, G_SHADE]
     gDPSetCombineMode: 
       - G_CC_DECALRGB
       - G_CC_PASS2
@@ -618,12 +621,15 @@ materials:
       - G_RM_FOG_SHADE_A
       - G_RM_ZB_OPA_SURF
     gDPSetCycleType: G_CYC_2CYCLE
+
+    gSPTexture:
+      sc: 1984
+      tc: 1984
+
     gDPSetFogColor:
       r: 238
       g: 52
       b: 13
-    gSPGeometryMode:
-      set: [G_FOG, G_LIGHTING, G_TEXTURE_GEN, G_TEXTURE_GEN_LINEAR, G_SHADE]
 
   light_orange001:
     gDPSetCombineMode:
@@ -1719,7 +1725,7 @@ materials:
       b: 13
 
     gSPGeometryMode:
-      set: [G_FOG]
+      set: [G_FOG, G_SHADE]
 
     properties:
       tileSizeS: 2
@@ -2159,26 +2165,15 @@ materials:
         shift: 1
       t:
         shift: 1
-      
-    gDPSetRenderMode: 
-      flags:
-        - Z_CMP
-        - IM_RD
-        - CVG_DST_FULL
-        - FORCE_BL
-        - ZMODE_XLU
-      blend:
-        - G_BL_CLR_IN
-        - G_BL_A_IN
-        - G_BL_CLR_MEM
-        - G_BL_1MA
+
+    gDPSetRenderMode: G_RM_ZB_XLU_SURF
 
     gDPSetCombineMode:
       color: ["1", "PRIMITIVE", "TEXEL0", "PRIMITIVE"]
       alpha: ["TEXEL0", "PRIMITIVE", "SHADE", "0"]
     gSPGeometryMode:
       clear: [G_CULL_BACK, G_CULL_FRONT]
-      set: [G_FOG, G_ZBUFFER]
+      set: [G_FOG, G_SHADE]
 
   lab_monitor_screen_text:
     gDPSetTile: 
