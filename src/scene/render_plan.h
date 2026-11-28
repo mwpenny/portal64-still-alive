@@ -27,7 +27,7 @@ struct RenderProps {
     s8 parentStageIndex;
     s8 shouldClearZBuffer;
 
-    u16 fromRoom;
+    s16 fromRoom;
 
     short minX;
     short minY;

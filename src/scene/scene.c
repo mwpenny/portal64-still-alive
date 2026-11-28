@@ -1137,7 +1137,7 @@ void sceneGetCoveredDoorways(struct Scene* scene, struct Vector3* viewPosition, 
         struct DoorwayCover* doorwayCover = &scene->doorwayCovers[i];
 
         if (doorwayCoverIsOpaqueFromView(doorwayCover, viewPosition)) {
-            *coveredDoorways |= (1 << doorwayCover->definition->doorwayIndex);
+            *coveredDoorways |= (1LL << doorwayCover->definition->doorwayIndex);
         }
     }
 }

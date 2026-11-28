@@ -528,7 +528,7 @@ static void collisionSceneRaycastRoom(struct CollisionScene* scene, struct Room*
 }
 
 static int collisionSceneRaycastDoorways(struct CollisionScene* scene, struct Room* room, struct Ray* ray, float maxDistance, int currentRoom) {
-    int nextRoom = -1;
+    int nextRoom = ROOM_NONE;
 
     float roomDistance = maxDistance;
 
@@ -590,28 +590,22 @@ int collisionSceneRaycast(struct CollisionScene* scene, int roomIndex, struct Ra
     hit->passedRooms = ROOM_FLAG_FROM_INDEX(roomIndex);
     hit->numPortalsPassed = 0;
 
-    int roomsToCheck = 5;
-
-    while (roomsToCheck && roomIndex != -1) {
-        struct Room* room = &scene->world->rooms[roomIndex];
+    for (int roomsToCheck = 5; roomsToCheck; --roomsToCheck) {
+        struct Room* room = &scene->world->rooms[hit->roomIndex];
         collisionSceneRaycastRoom(scene, room, ray, collisionLayers, hit);
 
         if (hit->distance != maxDistance) {
-            hit->roomIndex = roomIndex;
             break;
         }
 
-        int nextRoom = collisionSceneRaycastDoorways(scene, room, ray, hit->distance, roomIndex);
-
-        roomIndex = nextRoom;
-
-        // Even on a miss, the raycast should report which room it ended up in
-        if (roomIndex != -1) {
-            hit->roomIndex = roomIndex;
-            hit->passedRooms |= ROOM_FLAG_FROM_INDEX(roomIndex);
+        int nextRoom = collisionSceneRaycastDoorways(scene, room, ray, hit->distance, hit->roomIndex);
+        if (nextRoom == ROOM_NONE) {
+            break;
         }
 
-        --roomsToCheck;
+        // Even on a miss, the raycast should report which room it ended up in
+        hit->roomIndex = nextRoom;
+        hit->passedRooms |= ROOM_FLAG_FROM_INDEX(nextRoom);
     }
 
     collisionSceneRaycastDynamic(scene, ray, collisionLayers, hit);

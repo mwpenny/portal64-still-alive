@@ -116,7 +116,7 @@ void staticRenderPopulateRooms(struct FrustumCullingInformation* cullingInfo, Mt
 
 #define FORCE_RENDER_DOORWAY_DISTANCE   0.125f
 
-void staticRenderDetermineVisibleRooms(struct RenderProps* renderStage, struct FrustumCullingInformation* cullingInfo, u16 currentRoom, u64 nonVisibleRooms, u64* coveredDoorways) {
+void staticRenderDetermineVisibleRooms(struct RenderProps* renderStage, struct FrustumCullingInformation* cullingInfo, s16 currentRoom, u64 nonVisibleRooms, u64* coveredDoorways) {
     if (currentRoom == ROOM_NONE) {
         return;
     }
@@ -171,7 +171,7 @@ void staticRenderDetermineVisibleRooms(struct RenderProps* renderStage, struct F
     };
 }
 
-int staticRenderIsRoomVisible(u64 visibleRooms, u16 roomIndex) {
+int staticRenderIsRoomVisible(u64 visibleRooms, s16 roomIndex) {
     return (visibleRooms & ROOM_FLAG_FROM_INDEX(roomIndex)) != 0;
 }
 

@@ -38,11 +38,12 @@ int worldCheckDoorwayCrossings(struct World* world, struct Vector3* prevPosition
 
     return currentRoom;
 }
+
 float worldMaxDistanceInDirection(struct World* world, struct Ray* ray, uint64_t roomMask) {
     struct Vector3 maxInDir = ray->origin;
 
     for (int i = 0; i < world->roomCount; ++i) {
-        if (!((1 << i) & roomMask)) {
+        if (!(ROOM_FLAG_FROM_INDEX(i) & roomMask)) {
             continue;
         }
 

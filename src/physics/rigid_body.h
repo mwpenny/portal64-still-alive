@@ -56,7 +56,7 @@ struct RigidBody {
     float momentOfInertiaInv;
 
     enum RigidBodyFlags flags;
-    unsigned short currentRoom;
+    short currentRoom;
     unsigned short sleepFrames;
 };
 

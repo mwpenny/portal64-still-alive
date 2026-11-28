@@ -9,7 +9,7 @@
 #include "math/ray.h"
 
 #define ROOM_FLAG_FROM_INDEX(index) (1LL << (index))
-#define ROOM_NONE                   0xffff
+#define ROOM_NONE                   -1
 
 enum DoorwayFlags {
     DoorwayFlagsOpen = (1 << 0),

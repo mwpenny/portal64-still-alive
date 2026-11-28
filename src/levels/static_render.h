@@ -9,11 +9,11 @@
 void staticRenderDetermineVisibleRooms(
     struct RenderProps* renderStage,
     struct FrustumCullingInformation* cullingInfo,
-    u16 currentRoom,
+    s16 currentRoom,
     u64 nonVisibleRooms,
     u64* coveredDoorways
 );
-int staticRenderIsRoomVisible(u64 visibleRooms, u16 roomIndex);
+int staticRenderIsRoomVisible(u64 visibleRooms, s16 roomIndex);
 void staticRender(
     struct RenderProps* renderStage,
     struct DynamicRenderDataList* dynamicList,

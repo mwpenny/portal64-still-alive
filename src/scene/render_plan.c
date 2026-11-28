@@ -84,7 +84,7 @@ Vp* renderPropsBuildViewport(struct RenderProps* props, struct RenderState* rend
     return viewport;
 }
 
-void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, u16 roomIndex) {
+void renderPropsInit(struct RenderProps* props, struct Camera* camera, float aspectRatio, struct RenderState* renderState, s16 roomIndex) {
     props->camera = *camera;
     props->aspectRatio = aspectRatio;
 

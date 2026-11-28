@@ -22,6 +22,7 @@
 #define PORTAL_PROJECTILE_RADIUS            0.15f
 #define PORTAL_PROJECTILE_FADE_IN_DISTANCE  5.0f
 #define PORTAL_PROJECTILE_COLLISION_LAYERS  (COLLISION_LAYERS_STATIC | COLLISION_LAYERS_BLOCK_PORTAL)
+#define PORTAL_PROJECTILE_HIT_BIAS          0.1f  // Avoids false negatives at end of path
 #define PORTAL_PROJECTILE_MAX_DISTANCE      50.0f
 
 static struct Quaternion sFlipAroundY = {0.0f, 1.0f, 0.0f, 0.0f};
@@ -41,10 +42,10 @@ static struct Coloru8 sProjectileColors[] = {
 
 void portalGunInit(struct PortalGun* portalGun, struct Player* player, float fov, int isFreshStart) {
     portalTrailInit(&portalGun->projectiles[0].trail);
-    portalGun->projectiles[0].roomIndex = -1;
+    portalGun->projectiles[0].roomIndex = ROOM_NONE;
 
     portalTrailInit(&portalGun->projectiles[1].trail);
-    portalGun->projectiles[1].roomIndex = -1;
+    portalGun->projectiles[1].roomIndex = ROOM_NONE;
 
     skArmatureInit(&portalGun->armature, &portal_gun_v_portalgun_armature);
     skAnimatorInit(&portalGun->animator, portal_gun_v_portalgun_armature.numberOfBones);
@@ -88,10 +89,10 @@ static void portalGunProjectileUpdate(struct PortalGun* portalGun, int portalInd
 
     portalTrailUpdate(&projectile->trail);
 
-    if (projectile->roomIndex == -1) {
+    if (projectile->roomIndex == ROOM_NONE) {
         return;
     } else if (projectile->distance >= projectile->maxDistance) {
-        projectile->roomIndex = -1;
+        projectile->roomIndex = ROOM_NONE;
         return;
     }
 
@@ -101,11 +102,11 @@ static void portalGunProjectileUpdate(struct PortalGun* portalGun, int portalInd
         projectile->roomIndex,
         &projectile->positionDirection,
         PORTAL_PROJECTILE_COLLISION_LAYERS,
-        PORTAL_TRAIL_SPEED * FIXED_DELTA_TIME + 0.1f,
+        (PORTAL_TRAIL_SPEED * FIXED_DELTA_TIME) + PORTAL_PROJECTILE_HIT_BIAS,
         0, // passThroughPortals
         &hit
     )) {
-        projectile->roomIndex = -1;
+        projectile->roomIndex = ROOM_NONE;
 
         if (!sceneOpenPortalFromHit(
             &gScene,
@@ -228,7 +229,7 @@ void portalGunRender(
 
         portalTrailRender(&projectile->trail, renderState, &materialState, fromCamera, i);
 
-        if (projectile->roomIndex != -1) {
+        if (projectile->roomIndex != ROOM_NONE) {
             portalGunProjectileRender(projectile, i, renderState, &materialState, &fromCamera->transform);
         }
     }
